@@ -1,8 +1,6 @@
 import * as React from "react";
 
-interface LogoGradientProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-const LogoGradient: React.FC<LogoGradientProps> = ({
+const LogoGradient: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className = "",
   ...props
 }) => {
