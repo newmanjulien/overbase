@@ -10,6 +10,7 @@ import Handlers from "./Handlers";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Logo from "@/components/ui/Logo";
+import LogoSmall from "@/components/ui/LogoSmall";
 
 // Dummy data for the cards
 export const emailsData = [
@@ -172,6 +173,10 @@ export default function Dashboard() {
                 height={20}
                 className="h-6 w-auto"
               />
+              {/* NEED TO SWITCH OUT THE PNG AND USE THE COMPONENT */}
+              {/* <div className="h-9 w-16">
+                <LogoSmall />
+              </div> */}
             </div>
 
             {/* Navigation Links */}
