@@ -9,6 +9,7 @@ import { Templates } from "./Templates";
 import Handlers from "./Handlers";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 // Dummy data for the cards
 export const emailsData = [
@@ -123,13 +124,9 @@ export default function Dashboard() {
           <div className="flex items-center justify-between h-16">
             {/* Left-aligned: Logo and Navigation */}
             <div className="flex items-center space-x-8">
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={40}
-                height={40}
-                className="h-10 w-auto"
-              />
+              <div className="h-9 w-16">
+                <Logo />
+              </div>
               <nav className="flex space-x-4">
                 {navigationItems.map((item) => (
                   <button
