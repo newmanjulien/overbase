@@ -10,7 +10,7 @@ import Handlers from "./Handlers";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Logo from "@/components/ui/Logo";
-import LogoSmall from "@/components/ui/LogoSmall";
+// import LogoSmall from "@/components/ui/LogoSmall";
 
 // Dummy data for the cards
 export const emailsData = [
@@ -174,6 +174,7 @@ export default function Dashboard() {
                 className="h-6 w-auto"
               />
               {/* NEED TO SWITCH OUT THE PNG AND USE THE COMPONENT */}
+              {/* IMPORT AT TOP IS ALSO COMMENTED OUT */}
               {/* <div className="h-9 w-16">
                 <LogoSmall />
               </div> */}
