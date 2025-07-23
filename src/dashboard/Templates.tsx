@@ -1,14 +1,22 @@
-import { ExternalLink } from "lucide-react"
+import { ExternalLink } from "lucide-react";
 
 export function Templates() {
   return (
     <div>
       {/* Header Section with subtle bottom border */}
-      <div className="border-b border-gray-200/60" style={{ backgroundColor: "#FAFAFA" }}>
+      <div
+        className="border-b border-gray-200/60"
+        style={{ backgroundColor: "#FAFAFA" }}
+      >
         <div className="max-w-5xl mx-auto px-6 py-10">
-          <h1 className="text-[2rem] font-medium text-gray-800 mb-4 tracking-tight">Templates</h1>
+          <h1 className="text-[2rem] font-medium text-gray-800 mb-4 tracking-tight">
+            Templates
+          </h1>
           <div className="flex items-center text-gray-800 text-sm">
-            <span>Copy templates other execs created then edit and customize them. </span>
+            <span>
+              Copy templates other execs created then easily edit and customize
+              them.{" "}
+            </span>
             <a
               href="#"
               className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
@@ -30,5 +38,5 @@ export function Templates() {
         </div>
       </div>
     </div>
-  )
+  );
 }

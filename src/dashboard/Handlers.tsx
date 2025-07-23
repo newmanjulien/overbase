@@ -1,14 +1,22 @@
-import { ExternalLink } from "lucide-react"
+import { ExternalLink } from "lucide-react";
 
 export function Handlers() {
   return (
     <div>
       {/* Header Section with subtle bottom border */}
-      <div className="border-b border-gray-200/60" style={{ backgroundColor: "#FAFAFA" }}>
+      <div
+        className="border-b border-gray-200/60"
+        style={{ backgroundColor: "#FAFAFA" }}
+      >
         <div className="max-w-5xl mx-auto px-6 py-10">
-          <h1 className="text-[2rem] font-medium text-gray-800 mb-4 tracking-tight">Handlers</h1>
+          <h1 className="text-[2rem] font-medium text-gray-800 mb-4 tracking-tight">
+            Handlers
+          </h1>
           <div className="flex items-center text-gray-800 text-sm">
-            <span>Pick and assign a trained handler who will do the last mile for each of your workflows. </span>
+            <span>
+              Assign a trained handler to do the last mile for each of your
+              workflows.{" "}
+            </span>
             <a
               href="#"
               className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
@@ -30,7 +38,7 @@ export function Handlers() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Handlers
+export default Handlers;
