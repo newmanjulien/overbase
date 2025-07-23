@@ -6,8 +6,8 @@ export function InfoCard() {
       <div className="flex items-center space-x-2">
         <Info className="h-4 w-4" />
         <span>
-          Launch your workflows from inside your inbox using the hndl Gmail
-          add-on
+          Launch or schedule your workflows from inside your inbox using the
+          hndl Gmail add-on
         </span>
       </div>
       <a
