@@ -1,6 +1,6 @@
 import * as React from "react";
 
-const LogoGradient: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+const Logo: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className = "",
   ...props
 }) => {
@@ -54,4 +54,4 @@ const LogoGradient: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   );
 };
 
-export default LogoGradient;
+export default Logo;

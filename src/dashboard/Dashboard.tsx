@@ -7,10 +7,10 @@ import { Decks } from "./Decks";
 import { Data } from "./Data";
 import { Templates } from "./Templates";
 import Handlers from "./Handlers";
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import Logo from "@/components/ui/Logo";
-// import LogoSmall from "@/components/ui/LogoSmall";
+import { Button } from "../components/button";
+import Logo from "../components/ui/Logo";
+// import LogoSmall from "../components/ui/LogoSmall";
 
 // Dummy data for the cards
 export const emailsData = [
