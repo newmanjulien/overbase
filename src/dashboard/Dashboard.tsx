@@ -10,7 +10,7 @@ import Handlers from "./Handlers";
 import { Plus } from "lucide-react";
 import { Button } from "../components/button";
 import Logo from "../components/ui/Logo";
-// import LogoSmall from "../components/ui/LogoSmall";
+import LogoSmall from "../components/ui/LogoSmall";
 
 // Dummy data for the cards
 export const emailsData = [
@@ -166,18 +166,9 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <Image
-                src="/logo_small.png"
-                alt="Logo"
-                width={20}
-                height={20}
-                className="h-6 w-auto"
-              />
-              {/* NEED TO SWITCH OUT THE PNG AND USE THE COMPONENT */}
-              {/* IMPORT AT TOP IS ALSO COMMENTED OUT */}
-              {/* <div className="h-9 w-16">
+              <div className="h-6 w-4">
                 <LogoSmall />
-              </div> */}
+              </div>
             </div>
 
             {/* Navigation Links */}
