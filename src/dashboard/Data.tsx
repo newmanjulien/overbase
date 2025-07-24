@@ -1,23 +1,31 @@
-import { Button } from "@/components/ui/button"
-import { ExternalLink } from "lucide-react"
-import { InfoCard } from "@/components/info-card"
-import Image from "next/image"
-import { dataData } from "./Dashboard"
+import { Button } from "../components/button";
+import { ExternalLink } from "lucide-react";
+import { InfoCard } from "../components/info-card";
+import Image from "next/image";
+import { dataData } from "./Dashboard";
 
 export function Data() {
   return (
     <div>
       {/* Header Section with subtle bottom border */}
-      <div className="border-b border-gray-200/60" style={{ backgroundColor: "#FAFAFA" }}>
+      <div
+        className="border-b border-gray-200/60"
+        style={{ backgroundColor: "#FAFAFA" }}
+      >
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between mb-4">
             {" "}
             {/* Added flex container */}
-            <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">Gather internal data</h1>
+            <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
+              Gather internal data
+            </h1>
             {/* Removed Create Workflow Button */}
           </div>
           <div className="flex items-center text-gray-600 text-sm font-normal">
-            <span>Edit, customize and manage workflows so we can help you gather internal data. </span>
+            <span>
+              Edit, customize and manage workflows so we can help you gather
+              internal data.{" "}
+            </span>
             <a
               href="#"
               className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
@@ -50,8 +58,12 @@ export function Data() {
                       />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-700 text-sm tracking-tight leading-tight">{item.title}</h3>
-                      <p className="text-gray-400 text-sm font-light leading-relaxed">{item.subtitle}</p>
+                      <h3 className="font-semibold text-gray-700 text-sm tracking-tight leading-tight">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-400 text-sm font-light leading-relaxed">
+                        {item.subtitle}
+                      </p>
                     </div>
                   </div>
                   <Button
@@ -61,7 +73,7 @@ export function Data() {
                     Edit
                   </Button>
                 </div>
-              )
+              );
             })}
           </div>
           {/* Info Card */}
@@ -71,5 +83,5 @@ export function Data() {
         </div>
       </div>
     </div>
-  )
+  );
 }
