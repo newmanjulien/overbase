@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import Image from "next/image";
 
 interface StepBranch {
   id: string;
@@ -164,8 +165,6 @@ export default function WorkflowBuilder() {
     });
   };
 
-  const selectedHandlerData = handlers.find((h) => h.id === selectedHandler);
-
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FAFAFA" }}>
       {/* Main Content */}
@@ -210,11 +209,7 @@ export default function WorkflowBuilder() {
         <div className="mb-4 bg-white border border-gray-200/60 rounded-lg p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img
-                src="/images/profile-2.png"
-                alt="Tracy"
-                className="w-12 h-12 rounded-full object-cover"
-              />
+              <Image src="/your-img.png" alt="Tracy" width={300} height={200} />
               <div>
                 <h3 className="text-sm font-medium text-gray-700">
                   Tracy is assigned

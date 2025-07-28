@@ -301,7 +301,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
-                How should the AI quality check the handler's work?
+                How should the AI quality check the handler&apos;s work?
               </label>
               <Textarea
                 value={localHandlerInstructions.qaInstructions}
