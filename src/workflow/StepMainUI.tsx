@@ -98,7 +98,7 @@ export function StepMainUI({
 
   return (
     <Collapsible open={step.isOpen} onOpenChange={() => onToggle(step.id)}>
-      <div className="bg-white border border-gray-200/60 rounded-t-lg">
+      <div className="bg-white border border-gray-200/60 rounded-lg">
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between p-3 hover:bg-gray-50/50 transition-colors cursor-pointer">
             <div className="flex items-center space-x-3">
@@ -168,7 +168,8 @@ export function StepMainUI({
 
         {/* Main step body and StepAddOns (only visible when open) */}
         <CollapsibleContent>
-          <div className="px-3 pb-3">
+          <hr className="border-t border-gray-100" />
+          <div className="px-3">
             <div className="pt-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

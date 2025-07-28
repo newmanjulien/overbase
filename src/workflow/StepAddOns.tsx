@@ -35,9 +35,6 @@ interface ColleagueInstructions {
 interface Colleague {
   id: string;
   name: string;
-  email: string;
-  department: string;
-  role: string;
 }
 
 interface StepAddOnsProps {
@@ -172,37 +169,22 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
     {
       id: "1",
       name: "Sarah Chen",
-      email: "sarah@company.com",
-      department: "Engineering",
-      role: "Senior Developer",
     },
     {
       id: "2",
       name: "Mike Johnson",
-      email: "mike@company.com",
-      department: "Legal",
-      role: "Legal Counsel",
     },
     {
       id: "3",
       name: "Emily Rodriguez",
-      email: "emily@company.com",
-      department: "Product",
-      role: "Product Manager",
     },
     {
       id: "4",
       name: "David Kim",
-      email: "david@company.com",
-      department: "Sales",
-      role: "Sales Director",
     },
     {
       id: "5",
       name: "Lisa Wang",
-      email: "lisa@company.com",
-      department: "Marketing",
-      role: "Marketing Lead",
     },
   ]);
 
@@ -212,7 +194,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
   const hasColleagueInstructions = step.colleagueInstructions !== undefined;
 
   return (
-    <div className="px-3 pb-3 space-y-6">
+    <div className="py-3 space-y-6">
       {/* Branches Section */}
       {hasBranches && (
         <div>
@@ -449,9 +431,6 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
                         </div>
                         <div>
                           <div className="font-medium">{c.name}</div>
-                          <div className="text-xs text-gray-500">
-                            {c.role} • {c.department}
-                          </div>
                         </div>
                       </div>
                     </SelectItem>
@@ -477,7 +456,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
       )}
 
       {/* Action Buttons */}
-      <div className="pt-2">
+      <div className="py-3">
         <div className="grid grid-cols-2 gap-2">
           {!hasBranches && (
             <Button

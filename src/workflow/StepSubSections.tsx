@@ -17,7 +17,7 @@ export function StepSubSections() {
   return (
     <>
       {/* Integrations Section */}
-      <div className="border-t border-gray-100 px-3 pb-3">
+      <div className="border-t border-gray-100 py-3">
         <Collapsible
           open={isIntegrationsOpen}
           onOpenChange={setIntegrationsOpen}
@@ -117,7 +117,7 @@ export function StepSubSections() {
       </div>
 
       {/* Test Section */}
-      <div className="border-t border-gray-100 px-3 pb-3">
+      <div className="border-t border-gray-100 py-3">
         <Collapsible open={isTestOpen} onOpenChange={setTestOpen}>
           <CollapsibleTrigger asChild>
             <div className="flex items-center justify-between mb-4 cursor-pointer hover:bg-gray-50/50 -mx-2 px-2 py-2 rounded transition-colors">
