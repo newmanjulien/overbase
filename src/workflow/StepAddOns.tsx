@@ -264,7 +264,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
                         )
                       }
                       placeholder="e.g., When email is urgent..."
-                      className="text-sm"
+                      className="text-sm bg-white"
                     />
                   </div>
                   <div>
@@ -277,7 +277,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
                         handleBranchUpdate(branch.id, "prompt", e.target.value)
                       }
                       placeholder="Describe what the AI should do..."
-                      className="min-h-[80px] resize-none text-sm"
+                      className="min-h-[80px] resize-none text-sm bg-white"
                     />
                   </div>
                 </div>

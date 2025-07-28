@@ -1,8 +1,6 @@
 "use client";
 
 import { StepMainUI } from "./StepMainUI";
-import { StepAddOns } from "./StepAddOns";
-import { StepSubSections } from "./StepSubSections";
 
 export interface WorkflowStepProps {
   step: {
@@ -37,10 +35,7 @@ export interface WorkflowStepProps {
 export function WorkflowStep(props: WorkflowStepProps) {
   return (
     <div className="bg-white">
-      {" "}
       <StepMainUI {...props} />
-      <StepAddOns step={props.step} onUpdate={props.onUpdate} />
-      <StepSubSections />
     </div>
   );
 }

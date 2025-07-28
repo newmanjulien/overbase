@@ -11,13 +11,36 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
-import { Collapsible, CollapsibleTrigger } from "../components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "../components/ui/collapsible";
 import { Badge } from "../components/ui/badge";
+import { StepAddOns } from "./StepAddOns";
+import { StepSubSections } from "./StepSubSections";
 
 interface StepBranch {
   id: string;
   condition: string;
   prompt: string;
+}
+
+interface HandlerInstructions {
+  whenToCall: string;
+  qaInstructions: string;
+}
+
+interface UserInputInstructions {
+  whenToAsk: string;
+  inputDescription: string;
+  approvalConditions: string;
+}
+
+interface ColleagueInstructions {
+  whenToLoop: string;
+  selectedColleague: string;
+  whatToRequest: string;
 }
 
 export interface StepMainUIProps {
@@ -26,9 +49,22 @@ export interface StepMainUIProps {
     title: string;
     prompt: string;
     branches: StepBranch[];
+    handlerInstructions?: HandlerInstructions;
+    userInputInstructions?: UserInputInstructions;
+    colleagueInstructions?: ColleagueInstructions;
     isOpen?: boolean;
   };
-  onUpdate: (id: string, updates: { title?: string; prompt?: string }) => void;
+  onUpdate: (
+    id: string,
+    updates: {
+      title?: string;
+      prompt?: string;
+      branches?: StepBranch[];
+      handlerInstructions?: HandlerInstructions;
+      userInputInstructions?: UserInputInstructions;
+      colleagueInstructions?: ColleagueInstructions;
+    }
+  ) => void;
   onDelete: (id: string) => void;
   onToggle: (id: string) => void;
   onMoveUp: (id: string) => void;
@@ -130,42 +166,48 @@ export function StepMainUI({
           </div>
         </CollapsibleTrigger>
 
-        {/* Main step body (only visible when open) */}
-        <div className="px-3 pb-3 space-y-4">
-          <div className="pt-4 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Step Name
-              </label>
-              <Input
-                value={localTitle}
-                onChange={(e) => setLocalTitle(e.target.value)}
-                onBlur={handleTitleBlur}
-                placeholder="Enter step name..."
-                className="w-full border"
-              />
-            </div>
-
-            {!hasBranches && (
+        {/* Main step body and StepAddOns (only visible when open) */}
+        <CollapsibleContent>
+          <div className="px-3 pb-3">
+            <div className="pt-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  AI Prompt
+                  Step Name
                 </label>
-                <Textarea
-                  value={localPrompt}
-                  onChange={(e) => setLocalPrompt(e.target.value)}
-                  onBlur={handlePromptBlur}
-                  placeholder="Describe what you want the AI to do in this step..."
-                  className="w-full min-h-[100px] resize-none"
+                <Input
+                  value={localTitle}
+                  onChange={(e) => setLocalTitle(e.target.value)}
+                  onBlur={handleTitleBlur}
+                  placeholder="Enter step name..."
+                  className="w-full border"
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  Be specific about what you want the AI to accomplish in this
-                  step.
-                </p>
               </div>
-            )}
+
+              {!hasBranches && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    AI Prompt
+                  </label>
+                  <Textarea
+                    value={localPrompt}
+                    onChange={(e) => setLocalPrompt(e.target.value)}
+                    onBlur={handlePromptBlur}
+                    placeholder="Describe what you want the AI to do in this step..."
+                    className="w-full min-h-[100px] resize-none"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Be specific about what you want the AI to accomplish in this
+                    step.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* StepAddOns moved inside collapsible content */}
+            <StepAddOns step={step} onUpdate={onUpdate} />
+            <StepSubSections />
           </div>
-        </div>
+        </CollapsibleContent>
       </div>
     </Collapsible>
   );
