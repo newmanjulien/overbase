@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, ArrowLeft, Save, ExternalLink } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { WorkflowStep } from "../components/workflow-step";
+import { WorkflowStep } from "./WorkflowStep";
 import { InfoCard } from "../components/info-card";
 import {
   Select,

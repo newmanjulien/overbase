@@ -1,2 +1,2 @@
-import WorkflowBuilder from "../../dashboard/Workflow";
+import WorkflowBuilder from "../../workflow/Workflow";
 export default WorkflowBuilder;
