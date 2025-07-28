@@ -1,4 +1,4 @@
-import { Button } from "../components/button";
+import { Button } from "../components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { InfoCard } from "../components/info-card";
 import Image from "next/image";

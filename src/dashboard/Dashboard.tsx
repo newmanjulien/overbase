@@ -7,7 +7,7 @@ import { Data } from "./Data";
 import { Templates } from "./Templates";
 import Handlers from "./Handlers";
 import { Plus } from "lucide-react";
-import { Button } from "../components/button";
+import { Button } from "../components/ui/button";
 import Logo from "../components/ui/Logo";
 import LogoSmall from "../components/ui/LogoSmall";
 import Link from "next/link";
@@ -146,13 +146,6 @@ export default function Dashboard() {
             </div>
 
             {/* Right-aligned: Create Workflow Button */}
-            {/* <Button
-              variant="ghost"
-              className="text-gray-900 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
-            >
-              <Plus className="mr-1 h-4 w-4" />
-              Create workflow
-            </Button> */}
             <Link href="/workflow">
               <Button
                 variant="ghost"
