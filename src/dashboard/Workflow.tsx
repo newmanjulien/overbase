@@ -1,61 +1,69 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Plus, ArrowLeft, Save, ExternalLink } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { WorkflowStep } from "./components/workflow-step"
-import { InfoCard } from "./components/info-card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import { Plus, ArrowLeft, Save, ExternalLink } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { WorkflowStep } from "../components/workflow-step";
+import { InfoCard } from "../components/info-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 
 interface StepBranch {
-  id: string
-  condition: string
-  prompt: string
+  id: string;
+  condition: string;
+  prompt: string;
 }
 
 interface HandlerInstructions {
-  whenToCall: string
-  qaInstructions: string
+  whenToCall: string;
+  qaInstructions: string;
 }
 
 interface UserInputInstructions {
-  whenToAsk: string
-  inputDescription: string
+  whenToAsk: string;
+  inputDescription: string;
+  approvalConditions: string;
 }
 
 interface UserApprovalInstructions {
-  whenToAsk: string
-  approvalDescription: string
+  whenToAsk: string;
+  approvalDescription: string;
 }
 
 interface Step {
-  id: string
-  title: string
-  prompt: string
-  branches: StepBranch[]
-  handlerInstructions?: HandlerInstructions
-  userInputInstructions?: UserInputInstructions
-  userApprovalInstructions?: UserApprovalInstructions
-  isOpen: boolean
+  id: string;
+  title: string;
+  prompt: string;
+  branches: StepBranch[];
+  handlerInstructions?: HandlerInstructions;
+  userInputInstructions?: UserInputInstructions;
+  userApprovalInstructions?: UserApprovalInstructions;
+  isOpen: boolean;
 }
 
 interface Handler {
-  id: string
-  name: string
-  email: string
-  avatar?: string
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
 }
 
 export default function WorkflowBuilder() {
-  const [workflowName, setWorkflowName] = useState("Untitled Workflow")
+  const [workflowName, setWorkflowName] = useState("Untitled Workflow");
   // Set Tracy as the default assigned handler
-  const [selectedHandler, setSelectedHandler] = useState<string>("5")
+  const [selectedHandler, setSelectedHandler] = useState<string>("5");
   const [steps, setSteps] = useState<Step[]>([
     {
       id: "1",
       title: "Analyze Email Content",
-      prompt: "Read the email and identify the main topic, sender information, and urgency level.",
+      prompt:
+        "Read the email and identify the main topic, sender information, and urgency level.",
       branches: [],
       isOpen: false,
     },
@@ -67,7 +75,7 @@ export default function WorkflowBuilder() {
       branches: [],
       isOpen: false,
     },
-  ])
+  ]);
 
   // Mock handlers data - this would come from your API
   const handlers: Handler[] = [
@@ -75,8 +83,13 @@ export default function WorkflowBuilder() {
     { id: "2", name: "Mike Johnson", email: "mike@company.com" },
     { id: "3", name: "Emily Rodriguez", email: "emily@company.com" },
     { id: "4", name: "David Kim", email: "david@company.com" },
-    { id: "5", name: "Tracy Zhao", email: "tracy@company.com", avatar: "/images/tracy-profile.png" },
-  ]
+    {
+      id: "5",
+      name: "Tracy Zhao",
+      email: "tracy@company.com",
+      avatar: "/images/tracy-profile.png",
+    },
+  ];
 
   const addStep = () => {
     const newStep: Step = {
@@ -85,61 +98,73 @@ export default function WorkflowBuilder() {
       prompt: "",
       branches: [],
       isOpen: true,
-    }
+    };
     // Close all existing steps and add the new one
-    setSteps([...steps.map((step) => ({ ...step, isOpen: false })), newStep])
-  }
+    setSteps([...steps.map((step) => ({ ...step, isOpen: false })), newStep]);
+  };
 
   const updateStep = (
     id: string,
     updates: {
-      title?: string
-      prompt?: string
-      branches?: StepBranch[]
-      handlerInstructions?: HandlerInstructions
-      userInputInstructions?: UserInputInstructions
-      userApprovalInstructions?: UserApprovalInstructions
-    },
+      title?: string;
+      prompt?: string;
+      branches?: StepBranch[];
+      handlerInstructions?: HandlerInstructions;
+      userInputInstructions?: UserInputInstructions;
+      userApprovalInstructions?: UserApprovalInstructions;
+    }
   ) => {
-    setSteps(steps.map((step) => (step.id === id ? { ...step, ...updates } : step)))
-  }
+    setSteps(
+      steps.map((step) => (step.id === id ? { ...step, ...updates } : step))
+    );
+  };
 
   const deleteStep = (id: string) => {
-    setSteps(steps.filter((step) => step.id !== id))
-  }
+    setSteps(steps.filter((step) => step.id !== id));
+  };
 
   const toggleStep = (id: string) => {
-    setSteps(steps.map((step) => (step.id === id ? { ...step, isOpen: !step.isOpen } : { ...step, isOpen: false })))
-  }
+    setSteps(
+      steps.map((step) =>
+        step.id === id
+          ? { ...step, isOpen: !step.isOpen }
+          : { ...step, isOpen: false }
+      )
+    );
+  };
 
   const moveStepUp = (id: string) => {
-    const currentIndex = steps.findIndex((step) => step.id === id)
+    const currentIndex = steps.findIndex((step) => step.id === id);
     if (currentIndex > 0) {
-      const newSteps = [...steps]
-      const temp = newSteps[currentIndex]
-      newSteps[currentIndex] = newSteps[currentIndex - 1]
-      newSteps[currentIndex - 1] = temp
-      setSteps(newSteps)
+      const newSteps = [...steps];
+      const temp = newSteps[currentIndex];
+      newSteps[currentIndex] = newSteps[currentIndex - 1];
+      newSteps[currentIndex - 1] = temp;
+      setSteps(newSteps);
     }
-  }
+  };
 
   const moveStepDown = (id: string) => {
-    const currentIndex = steps.findIndex((step) => step.id === id)
+    const currentIndex = steps.findIndex((step) => step.id === id);
     if (currentIndex < steps.length - 1) {
-      const newSteps = [...steps]
-      const temp = newSteps[currentIndex]
-      newSteps[currentIndex] = newSteps[currentIndex + 1]
-      newSteps[currentIndex + 1] = temp
-      setSteps(newSteps)
+      const newSteps = [...steps];
+      const temp = newSteps[currentIndex];
+      newSteps[currentIndex] = newSteps[currentIndex + 1];
+      newSteps[currentIndex + 1] = temp;
+      setSteps(newSteps);
     }
-  }
+  };
 
   const handleSave = () => {
     // Handle save logic here
-    console.log("Saving workflow:", { name: workflowName, handler: selectedHandler, steps })
-  }
+    console.log("Saving workflow:", {
+      name: workflowName,
+      handler: selectedHandler,
+      steps,
+    });
+  };
 
-  const selectedHandlerData = handlers.find((h) => h.id === selectedHandler)
+  const selectedHandlerData = handlers.find((h) => h.id === selectedHandler);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FAFAFA" }}>
@@ -147,7 +172,10 @@ export default function WorkflowBuilder() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Back Button and Title Section */}
         <div className="mb-8">
-          <Button variant="ghost" className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal">
+          <Button
+            variant="ghost"
+            className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
@@ -164,7 +192,8 @@ export default function WorkflowBuilder() {
 
             <div className="flex items-center space-x-2">
               <p className="text-gray-600 text-sm">
-                Create a step-by-step workflow by adding prompts that describe what you want the AI to do at each stage.
+                Create a step-by-step workflow by adding prompts that describe
+                what you want the AI to do at each stage.
               </p>
               <a
                 href="#"
@@ -181,14 +210,25 @@ export default function WorkflowBuilder() {
         <div className="mb-4 bg-white border border-gray-200/60 rounded-lg p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src="/images/tracy-profile.png" alt="Tracy" className="w-12 h-12 rounded-full object-cover" />
+              <img
+                src="/images/tracy-profile.png"
+                alt="Tracy"
+                className="w-12 h-12 rounded-full object-cover"
+              />
               <div>
-                <h3 className="text-sm font-medium text-gray-700">Tracy is assigned</h3>
-                <p className="text-xs text-gray-500">Tracy is assigned but select a different handler if you prefer</p>
+                <h3 className="text-sm font-medium text-gray-700">
+                  Tracy is assigned
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Tracy is assigned but select a different handler if you prefer
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Select value={selectedHandler} onValueChange={setSelectedHandler}>
+              <Select
+                value={selectedHandler}
+                onValueChange={setSelectedHandler}
+              >
                 <SelectTrigger className="w-48 text-sm">
                   <SelectValue placeholder="Select handler..." />
                 </SelectTrigger>
@@ -274,5 +314,5 @@ export default function WorkflowBuilder() {
         </div>
       </div>
     </div>
-  )
+  );
 }
