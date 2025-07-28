@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, CheckCircle, AlertCircle, Play } from "lucide-react";
+import {
+  ChevronRight,
+  CheckCircle,
+  AlertCircle,
+  Play,
+  Plug,
+} from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
   Collapsible,
@@ -47,9 +53,9 @@ export function StepSubSections() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs bg-transparent"
+                  className="text-xs bg-transparent border-gray-200 hover:bg-gray-100"
                 >
-                  <Play className="mr-1 h-3 w-3" />
+                  <Plug className="mr-1 h-3 w-3" />
                   Add Integration
                 </Button>
               </div>
@@ -147,7 +153,7 @@ export function StepSubSections() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs bg-transparent"
+                  className="text-xs bg-transparent border-gray-200 hover:bg-gray-100"
                 >
                   <Play className="mr-1 h-3 w-3" /> Run Test
                 </Button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Split, UserCheck, Share2, FileEdit } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
@@ -463,9 +463,9 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               variant="outline"
               size="sm"
               onClick={addBranch}
-              className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
+              className="text-xs bg-transparent text-gray-800 border-gray-200 hover:bg-gray-50"
             >
-              <Plus className="mr-1 h-3 w-3" /> Split into options
+              <Split className="mr-1 h-3 w-3" /> Split into options
             </Button>
           )}
           {!hasHandlerInstructions && (
@@ -473,9 +473,9 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               variant="outline"
               size="sm"
               onClick={addHandlerInstructions}
-              className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
+              className="text-xs bg-transparent text-gray-800 border-gray-200 hover:bg-gray-50"
             >
-              <Plus className="mr-1 h-3 w-3" /> Add handler instructions
+              <FileEdit className="mr-1 h-3 w-3" /> Add handler instructions
             </Button>
           )}
           {!hasUserInputInstructions && (
@@ -483,9 +483,9 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               variant="outline"
               size="sm"
               onClick={addUserInputInstructions}
-              className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
+              className="text-xs bg-transparent text-gray-800 border-gray-200 hover:bg-gray-50"
             >
-              <Plus className="mr-1 h-3 w-3" /> Ask for input or approval
+              <UserCheck className="mr-1 h-3 w-3" /> Ask for input or approval
             </Button>
           )}
           {!hasColleagueInstructions && (
@@ -493,9 +493,9 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               variant="outline"
               size="sm"
               onClick={addColleagueInstructions}
-              className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
+              className="text-xs bg-transparent text-gray-800 border-gray-200 hover:bg-gray-50"
             >
-              <Plus className="mr-1 h-3 w-3" /> Loop in a colleague
+              <Share2 className="mr-1 h-3 w-3" /> Loop in a colleague
             </Button>
           )}
         </div>

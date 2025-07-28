@@ -304,10 +304,17 @@ export default function WorkflowBuilder() {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-          <Button variant="outline" className="text-gray-600 bg-transparent">
+          <Button
+            variant="outline"
+            className="text-gray-600 border-gray-200 hover:bg-gray-100"
+          >
             Cancel
           </Button>
-          <Button variant="outline" onClick={handleSave}>
+          <Button
+            variant="outline"
+            onClick={handleSave}
+            className="bg-white border-gray-200"
+          >
             <Save className="mr-2 h-4 w-4" />
             Save Workflow
           </Button>
