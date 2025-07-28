@@ -87,7 +87,7 @@ export default function WorkflowBuilder() {
       id: "5",
       name: "Tracy Zhao",
       email: "tracy@company.com",
-      avatar: "/images/tracy-profile.png",
+      avatar: "/images/profile-2.png",
     },
   ];
 
@@ -183,10 +183,10 @@ export default function WorkflowBuilder() {
           <div className="space-y-4">
             <div>
               <Input
+                data-title
                 value={workflowName}
                 onChange={(e) => setWorkflowName(e.target.value)}
-                className="text-2xl font-medium border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0"
-                placeholder="Enter workflow name..."
+                className="font-medium border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0"
               />
             </div>
 
@@ -211,7 +211,7 @@ export default function WorkflowBuilder() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img
-                src="/images/tracy-profile.png"
+                src="/images/profile-2.png"
                 alt="Tracy"
                 className="w-12 h-12 rounded-full object-cover"
               />

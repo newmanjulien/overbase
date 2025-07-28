@@ -142,7 +142,7 @@ export function StepMainUI({
                 onChange={(e) => setLocalTitle(e.target.value)}
                 onBlur={handleTitleBlur}
                 placeholder="Enter step name..."
-                className="w-full"
+                className="w-full border"
               />
             </div>
 

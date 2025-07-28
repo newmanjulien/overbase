@@ -36,10 +36,11 @@ export interface WorkflowStepProps {
 
 export function WorkflowStep(props: WorkflowStepProps) {
   return (
-    <>
+    <div className="bg-white">
+      {" "}
       <StepMainUI {...props} />
       <StepAddOns step={props.step} onUpdate={props.onUpdate} />
       <StepSubSections />
-    </>
+    </div>
   );
 }
