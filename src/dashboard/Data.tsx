@@ -1,6 +1,6 @@
 import { Button } from "../components/ui/button";
 import { ExternalLink } from "lucide-react";
-import { InfoCard } from "../components/info-card";
+import { InfoCard } from "../components/InfoCard";
 import Image from "next/image";
 import { dataData } from "./Dashboard";
 
