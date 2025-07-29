@@ -8,7 +8,7 @@ export interface WorkflowStepProps {
     title: string;
     prompt: string;
     branches: any[];
-    handlerInstructions?: string;
+    handlerInstructions?: any;
     userInputInstructions?: any;
     colleagueInstructions?: any;
     isOpen?: boolean;
