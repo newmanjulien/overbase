@@ -5,15 +5,6 @@ import { Plus, ArrowLeft, Save, ExternalLink } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
-import { InfoCard } from "../components/InfoCard";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
-import Image from "next/image";
 
 interface StepBranch {
   id: string;
@@ -48,17 +39,8 @@ interface Step {
   isOpen: boolean;
 }
 
-interface Handler {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
-
 export default function WorkflowBuilder() {
   const [workflowName, setWorkflowName] = useState("Untitled Workflow");
-  // Set Tracy as the default assigned handler
-  const [selectedHandler, setSelectedHandler] = useState<string>("5");
   const [steps, setSteps] = useState<Step[]>([
     {
       id: "1",
@@ -77,20 +59,6 @@ export default function WorkflowBuilder() {
       isOpen: false,
     },
   ]);
-
-  // Mock handlers data - this would come from your API
-  const handlers: Handler[] = [
-    { id: "1", name: "Sarah Chen", email: "sarah@company.com" },
-    { id: "2", name: "Mike Johnson", email: "mike@company.com" },
-    { id: "3", name: "Emily Rodriguez", email: "emily@company.com" },
-    { id: "4", name: "David Kim", email: "david@company.com" },
-    {
-      id: "5",
-      name: "Tracy Zhao",
-      email: "tracy@company.com",
-      avatar: "/images/profile-2.png",
-    },
-  ];
 
   const addStep = () => {
     const newStep: Step = {
@@ -160,7 +128,6 @@ export default function WorkflowBuilder() {
     // Handle save logic here
     console.log("Saving workflow:", {
       name: workflowName,
-      handler: selectedHandler,
       steps,
     });
   };
@@ -203,63 +170,6 @@ export default function WorkflowBuilder() {
               </a>
             </div>
           </div>
-        </div>
-
-        {/* Handler Assignment Section */}
-        <div className="mb-4 bg-white border border-gray-200/60 rounded-lg p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Image src="/your-img.png" alt="Tracy" width={300} height={200} />
-              <div>
-                <h3 className="text-sm font-medium text-gray-700">
-                  Tracy is assigned
-                </h3>
-                <p className="text-xs text-gray-500">
-                  Tracy is assigned but select a different handler if you prefer
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Select
-                value={selectedHandler}
-                onValueChange={setSelectedHandler}
-              >
-                <SelectTrigger className="w-48 text-sm">
-                  <SelectValue placeholder="Select handler..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {handlers.map((handler) => (
-                    <SelectItem key={handler.id} value={handler.id}>
-                      <div className="flex items-center space-x-2">
-                        {handler.avatar ? (
-                          <img
-                            src={handler.avatar || "/placeholder.svg"}
-                            alt={handler.name}
-                            className="w-6 h-6 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                            <span className="text-xs font-medium text-gray-700">
-                              {handler.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </span>
-                          </div>
-                        )}
-                        <div className="font-medium">{handler.name}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        {/* Info Card */}
-        <div className="mb-8">
-          <InfoCard />
         </div>
 
         {/* Steps Section */}
