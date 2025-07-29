@@ -71,13 +71,13 @@ export function Emails() {
                   <div className="flex items-center space-x-3">
                     <Button
                       variant="ghost"
-                      className="text-gray-900 hover:bg-[#f7fef7] font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+                      className="text-gray-700 hover:bg-[#f7fef7] font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
                     >
                       Launch
                     </Button>
                     <Button
                       variant="ghost"
-                      className="text-gray-900 hover:bg-gray-50/80 font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+                      className="text-gray-700 hover:bg-gray-50/80 font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
                     >
                       Edit
                     </Button>

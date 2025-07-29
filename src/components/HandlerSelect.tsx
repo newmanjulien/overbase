@@ -21,7 +21,7 @@ interface HandlerSelectProps {
 export function HandlerSelect({ value, onChange }: HandlerSelectProps) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-40 text-sm h-[34px] border border-gray-200/60 hover:border-gray-200">
+      <SelectTrigger className="text-gray-700 w-40 text-sm h-[34px] border border-gray-200/60 hover:border-gray-200">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
