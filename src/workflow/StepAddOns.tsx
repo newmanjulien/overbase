@@ -463,7 +463,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               variant="outline"
               size="sm"
               onClick={addBranch}
-              className="text-xs bg-transparent text-gray-800 border-gray-200 hover:bg-gray-50"
+              className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
             >
               <Split className="mr-1 h-3 w-3" /> Split into options
             </Button>
@@ -473,7 +473,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               variant="outline"
               size="sm"
               onClick={addHandlerInstructions}
-              className="text-xs bg-transparent text-gray-800 border-gray-200 hover:bg-gray-50"
+              className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
             >
               <FileEdit className="mr-1 h-3 w-3" /> Add handler instructions
             </Button>
@@ -483,7 +483,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               variant="outline"
               size="sm"
               onClick={addUserInputInstructions}
-              className="text-xs bg-transparent text-gray-800 border-gray-200 hover:bg-gray-50"
+              className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
             >
               <UserCheck className="mr-1 h-3 w-3" /> Ask for input or approval
             </Button>
@@ -493,7 +493,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               variant="outline"
               size="sm"
               onClick={addColleagueInstructions}
-              className="text-xs bg-transparent text-gray-800 border-gray-200 hover:bg-gray-50"
+              className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
             >
               <Share2 className="mr-1 h-3 w-3" /> Loop in a colleague
             </Button>
