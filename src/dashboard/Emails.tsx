@@ -1,8 +1,10 @@
 import { Button } from "../components/ui/button";
 import { ExternalLink } from "lucide-react";
-import { InfoCard } from "../components/info-card";
+import { InfoCard } from "../components/InfoCard";
 import Image from "next/image";
 import { emailsData } from "./Dashboard";
+import { HandlerSelect } from "../components/HandlerSelect";
+import { useState } from "react";
 
 export function Emails() {
   return (
@@ -19,7 +21,6 @@ export function Emails() {
             <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
               Triage emails
             </h1>
-            {/* Removed Create Workflow Button */}
           </div>
           <div className="flex items-center text-gray-600 text-sm font-normal">
             <span>
@@ -43,6 +44,7 @@ export function Emails() {
           {/* Table-like Options List */}
           <div className="w-full flex flex-col gap-4">
             {emailsData.map((item) => {
+              const [handlerId, setHandlerId] = useState(item.assignedHandler);
               return (
                 <div
                   key={item.id}
@@ -66,12 +68,21 @@ export function Emails() {
                       </p>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    className="text-gray-900 hover:bg-gray-50/80 font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
-                  >
-                    Edit
-                  </Button>
+                  <div className="flex items-center space-x-3">
+                    <Button
+                      variant="ghost"
+                      className="text-gray-900 hover:bg-[#f7fef7] font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+                    >
+                      Launch
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-gray-900 hover:bg-gray-50/80 font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+                    >
+                      Edit
+                    </Button>
+                    <HandlerSelect value={handlerId} onChange={setHandlerId} />
+                  </div>
                 </div>
               );
             })}

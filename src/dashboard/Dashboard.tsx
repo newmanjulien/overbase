@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Emails } from "./Emails";
 import { Decks } from "./Decks";
 import { Data } from "./Data";
 import { Templates } from "./Templates";
 import Handlers from "./Handlers";
 import { Plus } from "lucide-react";
-import { Button } from "../components/button";
-import Logo from "../components/ui/Logo";
-import LogoSmall from "../components/ui/LogoSmall";
+import { Button } from "../components/ui/button";
+import Logo from "../components/Logo";
+import LogoSmall from "../components/LogoSmall";
+import Link from "next/link";
 
 // Dummy data for the cards
 export const emailsData = [
@@ -19,6 +19,7 @@ export const emailsData = [
     image: "/images/profile-1.png",
     title: "Emails from customers",
     subtitle: "Highlight emails you need to answer from customers",
+    assignedHandler: "5",
   },
   {
     id: 2,
@@ -26,12 +27,14 @@ export const emailsData = [
     title: "Celebrate success",
     subtitle:
       "Highlight emails where there's an opportunity to celebrate your team's success",
+    assignedHandler: "5",
   },
   {
     id: 3,
     image: "/images/profile-4.png",
     title: "Needs to be routed",
     subtitle: "Highlight emails you need to route to one of your colleagues",
+    assignedHandler: "5",
   },
 ];
 
@@ -41,12 +44,14 @@ export const decksData = [
     image: "/images/profile-3.png",
     title: "Board presentation",
     subtitle: "Create a presentation for Board meetings",
+    assignedHandler: "5",
   },
   {
     id: 2,
     image: "/images/profile-4.png",
     title: "Style Jason prefers",
     subtitle: "Create a presentation for meetings Jason participates in",
+    assignedHandler: "5",
   },
   {
     id: 3,
@@ -54,6 +59,7 @@ export const decksData = [
     title: "Conferences about AI",
     subtitle:
       "Create a presentation for conferences where you do thought leadership about AI",
+    assignedHandler: "5",
   },
 ];
 
@@ -63,24 +69,41 @@ export const dataData = [
     image: "/images/profile-2.png",
     title: "Customer sentiment",
     subtitle: "Listen in on sales calls and customer service calls",
+    assignedHandler: "1",
   },
   {
     id: 2,
     image: "/images/profile-1.png",
     title: "With Jon Bonato",
     subtitle: "Collaborate with Jon to gather data from team members",
+    assignedHandler: "1",
   },
   {
     id: 3,
     image: "/images/profile-2.png",
     title: "Survey customers",
     subtitle: "Ask customers simple questions",
+    assignedHandler: "1",
   },
   {
     id: 4,
     image: "/images/profile-2.png",
     title: "Salesforce and Marketo",
     subtitle: "Create a custom dashboard of data from Salesforce and Marketo",
+    assignedHandler: "1",
+  },
+];
+
+const handlers = [
+  { id: "1", name: "Sarah Chen", email: "sarah@company.com" },
+  { id: "2", name: "Mike Johnson", email: "mike@company.com" },
+  { id: "3", name: "Emily Rodriguez", email: "emily@company.com" },
+  { id: "4", name: "David Kim", email: "david@company.com" },
+  {
+    id: "5",
+    name: "Tracy Zhao",
+    email: "tracy@company.com",
+    avatar: "/images/profile-2.png",
   },
 ];
 
@@ -146,13 +169,15 @@ export default function Dashboard() {
             </div>
 
             {/* Right-aligned: Create Workflow Button */}
-            <Button
-              variant="ghost"
-              className="text-gray-900 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
-            >
-              <Plus className="mr-1 h-4 w-4" />
-              Create workflow
-            </Button>
+            <Link href="/workflow">
+              <Button
+                variant="ghost"
+                className="text-gray-900 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                Create workflow
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
