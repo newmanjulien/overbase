@@ -26,7 +26,7 @@ export const emailsData = [
     image: "/images/profile-2.png",
     title: "Celebrate success",
     subtitle:
-      "Highlight emails where there's an opportunity to celebrate your team's success",
+      "Emails where there's an opportunity to celebrate your team's success",
     assignedHandler: "5",
   },
   {
@@ -171,8 +171,9 @@ export default function Dashboard() {
             {/* Right-aligned: Create Workflow Button */}
             <Link href="/workflow">
               <Button
-                variant="ghost"
-                className="text-gray-900 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+                variant="outline"
+                // className="text-gray-900 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+                className="bg-white border-gray-200 hover:bg-gray-50/80"
               >
                 <Plus className="mr-1 h-4 w-4" />
                 Create workflow
