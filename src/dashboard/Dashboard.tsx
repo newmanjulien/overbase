@@ -16,14 +16,14 @@ import Link from "next/link";
 export const emailsData = [
   {
     id: 1,
-    image: "/images/profile-1.png",
+    image: "/images/slack.png",
     title: "Emails from customers",
     subtitle: "Highlight emails you need to answer from customers",
     assignedHandler: "5",
   },
   {
     id: 2,
-    image: "/images/profile-2.png",
+    image: "/images/gmail.png",
     title: "Celebrate success",
     subtitle:
       "Emails where there's an opportunity to celebrate your team's success",
@@ -31,7 +31,7 @@ export const emailsData = [
   },
   {
     id: 3,
-    image: "/images/profile-4.png",
+    image: "/images/slack.png",
     title: "Needs to be routed",
     subtitle: "Highlight emails you need to route to one of your colleagues",
     assignedHandler: "5",
@@ -148,7 +148,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between h-16">
             {/* Left-aligned: Logo and Navigation */}
             <div className="flex items-center space-x-8">
-              <div className="h-9 w-16">
+              <div className="h-9 w-[3.75rem]">
                 <Logo />
               </div>
               <nav className="flex space-x-4">
