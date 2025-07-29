@@ -5,6 +5,7 @@ import { Plus, ArrowLeft, Save, ExternalLink } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
+import Link from "next/link";
 
 interface StepBranch {
   id: string;
@@ -138,13 +139,15 @@ export default function WorkflowBuilder() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Back Button and Title Section */}
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <Link href="/">
+            <Button
+              variant="ghost"
+              className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to dashboard
+            </Button>
+          </Link>
 
           <div className="space-y-4">
             <div>
@@ -209,20 +212,24 @@ export default function WorkflowBuilder() {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-          <Button
-            variant="outline"
-            className="text-gray-600 border-gray-200 hover:bg-gray-100"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleSave}
-            className="bg-white border-gray-200"
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save Workflow
-          </Button>
+          <Link href="/">
+            <Button
+              variant="outline"
+              className="text-gray-600 border-gray-200 hover:bg-gray-100"
+            >
+              Cancel
+            </Button>
+          </Link>
+          <Link href="/">
+            <Button
+              variant="outline"
+              onClick={handleSave}
+              className="bg-white border-gray-200"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Save Workflow
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

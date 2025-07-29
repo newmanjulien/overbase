@@ -18,7 +18,6 @@ import {
 } from "../components/ui/collapsible";
 import { Badge } from "../components/ui/badge";
 import { StepAddOns } from "./StepAddOns";
-import { StepSubSections } from "./StepSubSections";
 
 interface StepBranch {
   id: string;
@@ -206,7 +205,6 @@ export function StepMainUI({
 
             {/* StepAddOns moved inside collapsible content */}
             <StepAddOns step={step} onUpdate={onUpdate} />
-            <StepSubSections />
           </div>
         </CollapsibleContent>
       </div>
