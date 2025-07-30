@@ -22,10 +22,13 @@ interface HandlerInstructions {
   whenToCall: string;
   qaInstructions: string;
 }
+interface UserApprovalInstructions {
+  whenToAsk: string;
+  approvalConditions: string;
+}
 interface UserInputInstructions {
   whenToAsk: string;
   inputDescription: string;
-  approvalConditions: string;
 }
 interface ColleagueInstructions {
   whenToLoop: string;
@@ -42,6 +45,7 @@ interface StepAddOnsProps {
     id: string;
     branches: StepBranch[];
     handlerInstructions?: HandlerInstructions;
+    userApprovalInstructions?: UserApprovalInstructions;
     userInputInstructions?: UserInputInstructions;
     colleagueInstructions?: ColleagueInstructions;
   };
@@ -50,6 +54,7 @@ interface StepAddOnsProps {
     updates: {
       branches?: StepBranch[];
       handlerInstructions?: HandlerInstructions | undefined;
+      userApprovalInstructions?: UserApprovalInstructions | undefined;
       userInputInstructions?: UserInputInstructions | undefined;
       colleagueInstructions?: ColleagueInstructions | undefined;
     }
@@ -108,17 +113,42 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
   const removeHandlerInstructions = () =>
     onUpdate(step.id, { handlerInstructions: undefined });
 
+  /* ---------- User Approval Instructions ---------- */
+  const [localUserApprovalInstructions, setLocalUserApprovalInstructions] =
+    useState<UserApprovalInstructions>(
+      step.userApprovalInstructions || {
+        whenToAsk: "",
+        approvalConditions: "",
+      }
+    );
+  const handleUserApprovalUpdate = (
+    field: "whenToAsk" | "approvalConditions",
+    value: string
+  ) => {
+    const updated = { ...localUserApprovalInstructions, [field]: value };
+    setLocalUserApprovalInstructions(updated);
+    onUpdate(step.id, { userApprovalInstructions: updated });
+  };
+  const addUserApprovalInstructions = () =>
+    onUpdate(step.id, {
+      userApprovalInstructions: {
+        whenToAsk: "",
+        approvalConditions: "",
+      },
+    });
+  const removeUserApprovalInstructions = () =>
+    onUpdate(step.id, { userApprovalInstructions: undefined });
+
   /* ---------- User Input Instructions ---------- */
   const [localUserInputInstructions, setLocalUserInputInstructions] =
     useState<UserInputInstructions>(
       step.userInputInstructions || {
         whenToAsk: "",
         inputDescription: "",
-        approvalConditions: "",
       }
     );
   const handleUserInputUpdate = (
-    field: "whenToAsk" | "inputDescription" | "approvalConditions",
+    field: "whenToAsk" | "inputDescription",
     value: string
   ) => {
     const updated = { ...localUserInputInstructions, [field]: value };
@@ -130,7 +160,6 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
       userInputInstructions: {
         whenToAsk: "",
         inputDescription: "",
-        approvalConditions: "",
       },
     });
   const removeUserInputInstructions = () =>
@@ -190,6 +219,8 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
 
   const hasBranches = step.branches.length > 0;
   const hasHandlerInstructions = step.handlerInstructions !== undefined;
+  const hasUserApprovalInstructions =
+    step.userApprovalInstructions !== undefined;
   const hasUserInputInstructions = step.userInputInstructions !== undefined;
   const hasColleagueInstructions = step.colleagueInstructions !== undefined;
 
@@ -316,12 +347,59 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
         </div>
       )}
 
+      {/* User Approval Instructions */}
+      {hasUserApprovalInstructions && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Approval Instructions
+            </label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={removeUserApprovalInstructions}
+              className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50/50 space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                When should the AI ask for your approval?
+              </label>
+              <Textarea
+                value={localUserApprovalInstructions.whenToAsk}
+                onChange={(e) =>
+                  handleUserApprovalUpdate("whenToAsk", e.target.value)
+                }
+                placeholder="e.g., Before sending responses to VIP customers..."
+                className="min-h-[80px] resize-none text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                What conditions require approval?
+              </label>
+              <Textarea
+                value={localUserApprovalInstructions.approvalConditions}
+                onChange={(e) =>
+                  handleUserApprovalUpdate("approvalConditions", e.target.value)
+                }
+                placeholder="e.g., Responses involving refunds over $100..."
+                className="min-h-[80px] resize-none text-sm"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* User Input Instructions */}
       {hasUserInputInstructions && (
         <div>
           <div className="flex items-center justify-between mb-4">
             <label className="block text-sm font-medium text-gray-700">
-              Input or Approval Instructions
+              Input Instructions
             </label>
             <Button
               variant="ghost"
@@ -356,19 +434,6 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
                   handleUserInputUpdate("inputDescription", e.target.value)
                 }
                 placeholder="e.g., Ask for latest pricing sheet..."
-                className="min-h-[80px] resize-none text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                When should the AI ask for your approval before proceeding?
-              </label>
-              <Textarea
-                value={localUserInputInstructions.approvalConditions}
-                onChange={(e) =>
-                  handleUserInputUpdate("approvalConditions", e.target.value)
-                }
-                placeholder="e.g., Before sending responses to VIP customers..."
                 className="min-h-[80px] resize-none text-sm"
               />
             </div>
@@ -468,14 +533,14 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               <Split className="mr-1 h-3 w-3" /> Split into options
             </Button>
           )}
-          {!hasHandlerInstructions && (
+          {!hasUserApprovalInstructions && (
             <Button
               variant="outline"
               size="sm"
-              onClick={addHandlerInstructions}
+              onClick={addUserApprovalInstructions}
               className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
             >
-              <FileEdit className="mr-1 h-3 w-3" /> Add handler instructions
+              <UserCheck className="mr-1 h-3 w-3" /> Ask for approval
             </Button>
           )}
           {!hasUserInputInstructions && (
@@ -485,7 +550,7 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
               onClick={addUserInputInstructions}
               className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
             >
-              <UserCheck className="mr-1 h-3 w-3" /> Ask for input or approval
+              <FileEdit className="mr-1 h-3 w-3" /> Ask for input
             </Button>
           )}
           {!hasColleagueInstructions && (

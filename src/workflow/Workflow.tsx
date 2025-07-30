@@ -6,6 +6,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
 import Link from "next/link";
+import { Step, initialSteps, defaultWorkflowName } from "./DummyData";
 
 interface StepBranch {
   id: string;
@@ -29,37 +30,9 @@ interface UserApprovalInstructions {
   approvalDescription: string;
 }
 
-interface Step {
-  id: string;
-  title: string;
-  prompt: string;
-  branches: StepBranch[];
-  handlerInstructions?: HandlerInstructions;
-  userInputInstructions?: UserInputInstructions;
-  userApprovalInstructions?: UserApprovalInstructions;
-  isOpen: boolean;
-}
-
 export default function WorkflowBuilder() {
-  const [workflowName, setWorkflowName] = useState("Untitled Workflow");
-  const [steps, setSteps] = useState<Step[]>([
-    {
-      id: "1",
-      title: "Analyze Email Content",
-      prompt:
-        "Read the email and identify the main topic, sender information, and urgency level.",
-      branches: [],
-      isOpen: false,
-    },
-    {
-      id: "2",
-      title: "Categorize Email",
-      prompt:
-        "Based on the content analysis, categorize this email as: customer inquiry, internal communication, or requires routing.",
-      branches: [],
-      isOpen: false,
-    },
-  ]);
+  const [workflowName, setWorkflowName] = useState(defaultWorkflowName);
+  const [steps, setSteps] = useState<Step[]>(initialSteps);
 
   const addStep = () => {
     const newStep: Step = {
@@ -224,7 +197,7 @@ export default function WorkflowBuilder() {
             <Button
               variant="outline"
               onClick={handleSave}
-              className="bg-white border-gray-200"
+              className="font-normal bg-white border-gray-200"
             >
               <Save className="mr-2 h-4 w-4" />
               Save Workflow
