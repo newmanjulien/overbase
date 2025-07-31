@@ -78,7 +78,6 @@ export default function Dashboard() {
             <Link href="/workflow">
               <Button
                 variant="outline"
-                // className="text-gray-900 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
                 className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
               >
                 <Plus className="mr-1 h-4 w-4" />
