@@ -1,6 +1,7 @@
-// import { Button } from "./ui/button";
 // import Image from "next/image";
-// import { ReactNode } from "react";
+// import { ReactNode, useState } from "react";
+// import { ChevronDown } from "lucide-react";
+// import { LaunchMenu } from "./LaunchMenu";
 
 // interface WorkflowCardProps {
 //   id: number;
@@ -8,6 +9,7 @@
 //   subtitle: string;
 //   image?: string;
 //   actions?: ReactNode;
+//   onLaunch?: (id: number, type: "one-time" | "schedule") => void;
 // }
 
 // export function WorkflowCard({
@@ -16,7 +18,17 @@
 //   subtitle,
 //   image,
 //   actions,
+//   onLaunch,
 // }: WorkflowCardProps) {
+//   const [launchMenuOpen, setLaunchMenuOpen] = useState(false);
+
+//   const handleLaunchSelect = (type: "one-time" | "schedule") => {
+//     setLaunchMenuOpen(false);
+//     if (onLaunch) {
+//       onLaunch(id, type);
+//     }
+//   };
+
 //   return (
 //     <div
 //       key={id}
@@ -40,7 +52,26 @@
 //           </p>
 //         </div>
 //       </div>
-//       {actions && <div className="flex items-center space-x-3">{actions}</div>}
+//       <div className="flex items-center space-x-3">
+//         <div className="relative">
+//           <button
+//             onClick={() => setLaunchMenuOpen(!launchMenuOpen)}
+//             className="text-gray-700 hover:bg-green-50 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60 rounded-md transition-colors flex items-center gap-1"
+//           >
+//             Launch
+//             <ChevronDown className="w-3 h-3" />
+//           </button>
+//           {/* <LaunchMenu isOpen={launchMenuOpen} onSelect={handleLaunchSelect} /> */}
+//           <LaunchMenu
+//             isOpen={launchMenuOpen}
+//             onSelect={handleLaunchSelect}
+//             onClose={() => setLaunchMenuOpen(false)}
+//           />
+//         </div>
+//         {actions && (
+//           <div className="flex items-center space-x-3">{actions}</div>
+//         )}
+//       </div>
 //     </div>
 //   );
 // }
@@ -49,6 +80,7 @@ import Image from "next/image";
 import { ReactNode, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { LaunchMenu } from "./LaunchMenu";
+import { Button } from "./ui/button";
 
 interface WorkflowCardProps {
   id: number;
@@ -57,6 +89,7 @@ interface WorkflowCardProps {
   image?: string;
   actions?: ReactNode;
   onLaunch?: (id: number, type: "one-time" | "schedule") => void;
+  onEdit?: () => void;
 }
 
 export function WorkflowCard({
@@ -66,6 +99,7 @@ export function WorkflowCard({
   image,
   actions,
   onLaunch,
+  onEdit,
 }: WorkflowCardProps) {
   const [launchMenuOpen, setLaunchMenuOpen] = useState(false);
 
@@ -108,13 +142,23 @@ export function WorkflowCard({
             Launch
             <ChevronDown className="w-3 h-3" />
           </button>
-          {/* <LaunchMenu isOpen={launchMenuOpen} onSelect={handleLaunchSelect} /> */}
           <LaunchMenu
             isOpen={launchMenuOpen}
             onSelect={handleLaunchSelect}
             onClose={() => setLaunchMenuOpen(false)}
           />
         </div>
+
+        {onEdit && (
+          <Button
+            variant="ghost"
+            className="text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+            onClick={onEdit}
+          >
+            Edit
+          </Button>
+        )}
+
         {actions && (
           <div className="flex items-center space-x-3">{actions}</div>
         )}
