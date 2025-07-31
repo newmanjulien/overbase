@@ -134,7 +134,7 @@ export default function WorkflowBuilder() {
                 data-title
                 value={workflowName}
                 onChange={(e) => setWorkflowName(e.target.value)}
-                className="font-medium border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
+                className="font-medium border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
               />
             </div>
 

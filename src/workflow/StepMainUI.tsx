@@ -30,10 +30,14 @@ interface HandlerInstructions {
   qaInstructions: string;
 }
 
+interface UserApprovalInstructions {
+  whenToAsk: string;
+  approvalConditions: string;
+}
+
 interface UserInputInstructions {
   whenToAsk: string;
   inputDescription: string;
-  approvalConditions: string;
 }
 
 interface ColleagueInstructions {
@@ -49,6 +53,8 @@ export interface StepMainUIProps {
     prompt: string;
     branches: StepBranch[];
     handlerInstructions?: HandlerInstructions;
+    userApprovalInstructions?: UserApprovalInstructions;
+
     userInputInstructions?: UserInputInstructions;
     colleagueInstructions?: ColleagueInstructions;
     isOpen?: boolean;
@@ -60,6 +66,8 @@ export interface StepMainUIProps {
       prompt?: string;
       branches?: StepBranch[];
       handlerInstructions?: HandlerInstructions;
+      userApprovalInstructions?: UserApprovalInstructions;
+
       userInputInstructions?: UserInputInstructions;
       colleagueInstructions?: ColleagueInstructions;
     }
