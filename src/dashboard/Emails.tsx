@@ -1,10 +1,10 @@
 import { Button } from "../components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { InfoCard } from "../components/InfoCard";
-import Image from "next/image";
 import { emailsData } from "./Dashboard";
 import { HandlerSelect } from "../components/HandlerSelect";
 import { useState } from "react";
+import { WorkflowCard } from "../components/WorkflowCard";
 
 export function Emails() {
   return (
@@ -16,8 +16,6 @@ export function Emails() {
       >
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between mb-4">
-            {" "}
-            {/* Added flex container */}
             <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
               Triage emails
             </h1>
@@ -46,50 +44,42 @@ export function Emails() {
             {emailsData.map((item) => {
               const [handlerId, setHandlerId] = useState(item.assignedHandler);
               return (
-                <div
+                <WorkflowCard
                   key={item.id}
-                  className="flex items-center justify-between py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-lg"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center relative overflow-hidden">
-                      <Image
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.title}
-                        fill
-                        style={{ objectFit: "cover" }}
+                  id={item.id}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  image={item.image}
+                  actions={
+                    <>
+                      <Button
+                        variant="ghost"
+                        className="text-gray-700 hover:bg-[#f7fef7] font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+                      >
+                        Launch
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+                      >
+                        Edit
+                      </Button>
+                      <HandlerSelect
+                        value={handlerId}
+                        onChange={setHandlerId}
                       />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-700 text-sm tracking-tight leading-tight">
-                        {item.title}
-                      </h3>
-                      <p className="text-gray-400 text-sm font-light leading-relaxed">
-                        {item.subtitle}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Button
-                      variant="ghost"
-                      className="text-gray-900 hover:bg-[#f7fef7] font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
-                    >
-                      Launch
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="text-gray-900 hover:bg-gray-50/80 font-medium text-sm px-3 py-1.5 h-auto border border-gray-200/60"
-                    >
-                      Edit
-                    </Button>
-                    <HandlerSelect value={handlerId} onChange={setHandlerId} />
-                  </div>
-                </div>
+                    </>
+                  }
+                />
               );
             })}
           </div>
           {/* Info Card */}
           <div className="mt-8 w-full">
-            <InfoCard />
+            <InfoCard
+              text="Build custom workflows to automate your email processing and responses"
+              href="#workflow-help"
+            />
           </div>
         </div>
       </div>

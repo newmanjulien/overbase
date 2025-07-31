@@ -5,6 +5,9 @@ import { Plus, ArrowLeft, Save, ExternalLink } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
+import Link from "next/link";
+import { Step, initialSteps, defaultWorkflowName } from "./DummyData";
+import { InfoCard } from "../components/InfoCard";
 
 interface StepBranch {
   id: string;
@@ -28,37 +31,12 @@ interface UserApprovalInstructions {
   approvalDescription: string;
 }
 
-interface Step {
-  id: string;
-  title: string;
-  prompt: string;
-  branches: StepBranch[];
-  handlerInstructions?: HandlerInstructions;
-  userInputInstructions?: UserInputInstructions;
-  userApprovalInstructions?: UserApprovalInstructions;
-  isOpen: boolean;
-}
-
 export default function WorkflowBuilder() {
-  const [workflowName, setWorkflowName] = useState("Untitled Workflow");
-  const [steps, setSteps] = useState<Step[]>([
-    {
-      id: "1",
-      title: "Analyze Email Content",
-      prompt:
-        "Read the email and identify the main topic, sender information, and urgency level.",
-      branches: [],
-      isOpen: false,
-    },
-    {
-      id: "2",
-      title: "Categorize Email",
-      prompt:
-        "Based on the content analysis, categorize this email as: customer inquiry, internal communication, or requires routing.",
-      branches: [],
-      isOpen: false,
-    },
-  ]);
+  const [workflowName, setWorkflowName] = useState(defaultWorkflowName);
+  const [workflowDescription, setWorkflowDescription] = useState(
+    "Create a step-by-step workflow by adding prompts that describe what you want the AI to do at each stage."
+  );
+  const [steps, setSteps] = useState<Step[]>(initialSteps);
 
   const addStep = () => {
     const newStep: Step = {
@@ -128,6 +106,7 @@ export default function WorkflowBuilder() {
     // Handle save logic here
     console.log("Saving workflow:", {
       name: workflowName,
+      description: workflowDescription,
       steps,
     });
   };
@@ -138,37 +117,41 @@ export default function WorkflowBuilder() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Back Button and Title Section */}
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <Link href="/">
+            <Button
+              variant="ghost"
+              className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to dashboard
+            </Button>
+          </Link>
 
+          {/* Editable title and subtitle */}
           <div className="space-y-4">
             <div>
               <Input
                 data-title
                 value={workflowName}
                 onChange={(e) => setWorkflowName(e.target.value)}
-                className="font-medium border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0"
+                className="font-medium border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
               />
             </div>
 
             <div className="flex items-center space-x-2">
-              <p className="text-gray-600 text-sm">
-                Create a step-by-step workflow by adding prompts that describe
-                what you want the AI to do at each stage.
-              </p>
-              <a
-                href="#"
-                className="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm transition-colors"
-              >
-                Learn more
-                <ExternalLink className="ml-1 h-4 w-4" />
-              </a>
+              <Input
+                value={workflowDescription}
+                onChange={(e) => setWorkflowDescription(e.target.value)}
+                className="text-gray-600 text-sm border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
+              />
             </div>
+          </div>
+          {/* Info Card */}
+          <div className="mt-6">
+            <InfoCard
+              text="Build custom workflows to automate your email processing and responses"
+              href="#workflow-help"
+            />
           </div>
         </div>
 
@@ -209,20 +192,24 @@ export default function WorkflowBuilder() {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-          <Button
-            variant="outline"
-            className="text-gray-600 border-gray-200 hover:bg-gray-100"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleSave}
-            className="bg-white border-gray-200"
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save Workflow
-          </Button>
+          <Link href="/">
+            <Button
+              variant="outline"
+              className="text-gray-600 border-gray-200 hover:bg-gray-100"
+            >
+              Cancel
+            </Button>
+          </Link>
+          <Link href="/">
+            <Button
+              variant="outline"
+              onClick={handleSave}
+              className="font-normal bg-white border-gray-200"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Save Workflow
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
