@@ -32,6 +32,9 @@ interface UserApprovalInstructions {
 
 export default function WorkflowBuilder() {
   const [workflowName, setWorkflowName] = useState(defaultWorkflowName);
+  const [workflowDescription, setWorkflowDescription] = useState(
+    "Create a step-by-step workflow by adding prompts that describe what you want the AI to do at each stage."
+  );
   const [steps, setSteps] = useState<Step[]>(initialSteps);
 
   const addStep = () => {
@@ -102,6 +105,7 @@ export default function WorkflowBuilder() {
     // Handle save logic here
     console.log("Saving workflow:", {
       name: workflowName,
+      description: workflowDescription,
       steps,
     });
   };
@@ -133,17 +137,11 @@ export default function WorkflowBuilder() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <p className="text-gray-600 text-sm">
-                Create a step-by-step workflow by adding prompts that describe
-                what you want the AI to do at each stage.
-              </p>
-              <a
-                href="#"
-                className="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm transition-colors"
-              >
-                Learn more
-                <ExternalLink className="ml-1 h-4 w-4" />
-              </a>
+              <Input
+                value={workflowDescription}
+                onChange={(e) => setWorkflowDescription(e.target.value)}
+                className="text-gray-600 text-sm border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0"
+              />
             </div>
           </div>
         </div>
