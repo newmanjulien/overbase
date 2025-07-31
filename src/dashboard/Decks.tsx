@@ -76,7 +76,10 @@ export function Decks() {
           </div>
           {/* Info Card */}
           <div className="mt-8 w-full">
-            <InfoCard />
+            <InfoCard
+              text="Build custom workflows to automate your email processing and responses"
+              href="#workflow-help"
+            />
           </div>
         </div>
       </div>

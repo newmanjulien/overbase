@@ -7,6 +7,7 @@ import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
 import Link from "next/link";
 import { Step, initialSteps, defaultWorkflowName } from "./DummyData";
+import { InfoCard } from "../components/InfoCard";
 
 interface StepBranch {
   id: string;
@@ -126,13 +127,14 @@ export default function WorkflowBuilder() {
             </Button>
           </Link>
 
+          {/* Editable title and subtitle */}
           <div className="space-y-4">
             <div>
               <Input
                 data-title
                 value={workflowName}
                 onChange={(e) => setWorkflowName(e.target.value)}
-                className="font-medium border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0"
+                className="font-medium border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
               />
             </div>
 
@@ -140,9 +142,16 @@ export default function WorkflowBuilder() {
               <Input
                 value={workflowDescription}
                 onChange={(e) => setWorkflowDescription(e.target.value)}
-                className="text-gray-600 text-sm border-none shadow-none p-0 h-auto bg-transparent focus-visible:ring-0"
+                className="text-gray-600 text-sm border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
               />
             </div>
+          </div>
+          {/* Info Card */}
+          <div className="mt-6">
+            <InfoCard
+              text="Build custom workflows to automate your email processing and responses"
+              href="#workflow-help"
+            />
           </div>
         </div>
 
