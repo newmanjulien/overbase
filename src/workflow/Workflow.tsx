@@ -23,12 +23,17 @@ interface HandlerInstructions {
 interface UserInputInstructions {
   whenToAsk: string;
   inputDescription: string;
-  approvalConditions: string;
 }
 
 interface UserApprovalInstructions {
   whenToAsk: string;
-  approvalDescription: string;
+  approvalConditions: string;
+}
+
+interface ColleagueInstructions {
+  whenToLoop: string;
+  selectedColleague: string;
+  whatToRequest: string;
 }
 
 export default function WorkflowBuilder() {
@@ -56,9 +61,10 @@ export default function WorkflowBuilder() {
       title?: string;
       prompt?: string;
       branches?: StepBranch[];
-      handlerInstructions?: HandlerInstructions;
-      userInputInstructions?: UserInputInstructions;
-      userApprovalInstructions?: UserApprovalInstructions;
+      handlerInstructions?: HandlerInstructions | undefined;
+      userInputInstructions?: UserInputInstructions | undefined;
+      userApprovalInstructions?: UserApprovalInstructions | undefined;
+      colleagueInstructions?: ColleagueInstructions | undefined;
     }
   ) => {
     setSteps(

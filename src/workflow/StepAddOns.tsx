@@ -12,6 +12,7 @@ import {
   SelectContent,
   SelectItem,
 } from "../components/ui/select";
+import { colleagues } from "./DummyData";
 
 interface StepBranch {
   id: string;
@@ -34,10 +35,6 @@ interface ColleagueInstructions {
   whenToLoop: string;
   selectedColleague: string;
   whatToRequest: string;
-}
-interface Colleague {
-  id: string;
-  name: string;
 }
 
 interface StepAddOnsProps {
@@ -192,30 +189,6 @@ export function StepAddOns({ step, onUpdate }: StepAddOnsProps) {
     });
   const removeColleagueInstructions = () =>
     onUpdate(step.id, { colleagueInstructions: undefined });
-
-  /* Mock colleagues */
-  const [colleagues] = useState<Colleague[]>([
-    {
-      id: "1",
-      name: "Sarah Chen",
-    },
-    {
-      id: "2",
-      name: "Mike Johnson",
-    },
-    {
-      id: "3",
-      name: "Emily Rodriguez",
-    },
-    {
-      id: "4",
-      name: "David Kim",
-    },
-    {
-      id: "5",
-      name: "Lisa Wang",
-    },
-  ]);
 
   const hasBranches = step.branches.length > 0;
   const hasHandlerInstructions = step.handlerInstructions !== undefined;
