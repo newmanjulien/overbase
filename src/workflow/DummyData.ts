@@ -36,25 +36,6 @@ export interface Step {
   isOpen: boolean;
 }
 
-export const initialSteps: Step[] = [
-  {
-    id: "1",
-    title: "Analyze Email Content",
-    prompt:
-      "Read the email and identify the main topic, sender information, and urgency level.",
-    branches: [],
-    isOpen: false,
-  },
-  {
-    id: "2",
-    title: "Categorize Email",
-    prompt:
-      "Based on the content analysis, categorize this email as: customer inquiry, internal communication, or requires routing.",
-    branches: [],
-    isOpen: false,
-  },
-];
-
 export const colleagues: Colleague[] = [
   {
     id: "1",

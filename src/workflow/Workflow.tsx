@@ -6,7 +6,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
 import Link from "next/link";
-import { Step, initialSteps, defaultWorkflowName } from "./DummyData";
+import { Step, defaultWorkflowName } from "./DummyData";
 import { InfoCard } from "../components/InfoCard";
 
 import { collection, addDoc, Timestamp } from "firebase/firestore";
@@ -39,7 +39,7 @@ export default function WorkflowBuilder() {
   const [workflowDescription, setWorkflowDescription] = useState(
     "Create a step-by-step workflow by adding prompts that describe what you want the AI to do at each stage."
   );
-  const [steps, setSteps] = useState<Step[]>(initialSteps);
+  const [steps, setSteps] = useState<Step[]>([]);
 
   const addStep = () => {
     const newStep: Step = {
