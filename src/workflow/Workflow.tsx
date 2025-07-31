@@ -18,11 +18,6 @@ interface StepBranch {
   prompt: string;
 }
 
-interface HandlerInstructions {
-  whenToCall: string;
-  qaInstructions: string;
-}
-
 interface UserInputInstructions {
   whenToAsk: string;
   inputDescription: string;
@@ -64,7 +59,6 @@ export default function WorkflowBuilder() {
       title?: string;
       prompt?: string;
       branches?: StepBranch[];
-      handlerInstructions?: HandlerInstructions | undefined;
       userInputInstructions?: UserInputInstructions | undefined;
       userApprovalInstructions?: UserApprovalInstructions | undefined;
       colleagueInstructions?: ColleagueInstructions | undefined;

@@ -4,11 +4,6 @@ interface StepBranch {
   prompt: string;
 }
 
-interface HandlerInstructions {
-  whenToCall: string;
-  qaInstructions: string;
-}
-
 interface UserInputInstructions {
   whenToAsk: string;
   inputDescription: string;
@@ -35,7 +30,6 @@ export interface Step {
   title: string;
   prompt: string;
   branches: StepBranch[];
-  handlerInstructions?: HandlerInstructions;
   userInputInstructions?: UserInputInstructions;
   userApprovalInstructions?: UserApprovalInstructions;
   colleagueInstructions?: ColleagueInstructions;

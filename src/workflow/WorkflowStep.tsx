@@ -8,7 +8,6 @@ export interface WorkflowStepProps {
     title: string;
     prompt: string;
     branches: any[];
-    handlerInstructions?: any;
     userInputInstructions?: any;
     colleagueInstructions?: any;
     isOpen?: boolean;
@@ -19,7 +18,6 @@ export interface WorkflowStepProps {
       title?: string;
       prompt?: string;
       branches?: any[];
-      handlerInstructions?: any;
       userInputInstructions?: any;
       colleagueInstructions?: any;
     }
