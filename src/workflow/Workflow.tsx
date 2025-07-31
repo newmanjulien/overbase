@@ -50,9 +50,23 @@
 //     name?: string;
 //     description?: string;
 //     type?: WorkflowType;
+//     assignedHandler?: string;
 //     steps?: any[];
 //   };
 // }
+
+// const getDefaultHandlerForType = (type: WorkflowType): string => {
+//   switch (type) {
+//     case "triage-emails":
+//       return "1"; // Email handler
+//     case "create-decks":
+//       return "2"; // Deck creation handler
+//     case "gather-data":
+//       return "3"; // Data gathering handler
+//     default:
+//       return "1"; // Fallback
+//   }
+// };
 
 // export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
 //   const [workflowName, setWorkflowName] = useState(
@@ -64,6 +78,10 @@
 //   );
 //   const [workflowType, setWorkflowType] = useState<WorkflowType>(
 //     initialData?.type || "triage-emails"
+//   );
+//   const [assignedHandler, setAssignedHandler] = useState<string>(
+//     initialData?.assignedHandler ||
+//       getDefaultHandlerForType(initialData?.type || "triage-emails")
 //   );
 //   const [steps, setSteps] = useState<Step[]>(
 //     (initialData?.steps || []).map((s) => ({ ...s, isOpen: false })) || []
@@ -134,6 +152,13 @@
 //     }
 //   };
 
+//   const handleTypeChange = (newType: WorkflowType) => {
+//     setWorkflowType(newType);
+//     // Automatically update the assigned handler based on the new type
+//     const newHandler = getDefaultHandlerForType(newType);
+//     setAssignedHandler(newHandler);
+//   };
+
 //   const [isSaving, setIsSaving] = useState(false);
 //   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -151,6 +176,7 @@
 //         name: workflowName,
 //         description: workflowDescription,
 //         type: workflowType,
+//         assignedHandler: assignedHandler,
 //         steps,
 //         updatedAt: Timestamp.now(),
 //       };
@@ -216,7 +242,7 @@
 //           {/* Type Selector: */}
 //           <WorkflowTypeSelector
 //             selectedType={workflowType}
-//             onTypeChange={setWorkflowType}
+//             onTypeChange={handleTypeChange}
 //           />
 //         </div>
 
@@ -490,8 +516,29 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleSave = async () => {
-    if (!steps.length || !steps[0].title.trim()) {
-      alert("Please complete at least one step before saving.");
+    // Enhanced validation - check all required fields
+    if (!workflowName.trim() || workflowName === defaultWorkflowName) {
+      alert("Please enter a workflow title before saving.");
+      return;
+    }
+
+    if (!workflowDescription.trim()) {
+      alert("Please enter a workflow description before saving.");
+      return;
+    }
+
+    if (!steps.length) {
+      alert("Please add at least one step before saving.");
+      return;
+    }
+
+    if (!steps[0].title.trim()) {
+      alert("Please enter a title for your first step before saving.");
+      return;
+    }
+
+    if (!steps[0].prompt.trim()) {
+      alert("Please enter an AI prompt for your first step before saving.");
       return;
     }
 
@@ -620,7 +667,15 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
           </Link>
           <Button
             onClick={handleSave}
-            disabled={isSaving || !steps.length}
+            disabled={
+              isSaving ||
+              !workflowName.trim() ||
+              workflowName === defaultWorkflowName ||
+              !workflowDescription.trim() ||
+              !steps.length ||
+              !steps[0]?.title.trim() ||
+              !steps[0]?.prompt.trim()
+            }
             className="font-normal bg-white border border-gray-200 relative"
           >
             {isSaving ? (
