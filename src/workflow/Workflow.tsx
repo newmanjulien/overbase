@@ -9,6 +9,9 @@ import Link from "next/link";
 import { Step, initialSteps, defaultWorkflowName } from "./DummyData";
 import { InfoCard } from "../components/InfoCard";
 
+import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { db } from "../lib/firebase";
+
 interface StepBranch {
   id: string;
   condition: string;
@@ -108,13 +111,34 @@ export default function WorkflowBuilder() {
     }
   };
 
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving workflow:", {
-      name: workflowName,
-      description: workflowDescription,
-      steps,
-    });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const handleSave = async () => {
+    if (!steps.length || !steps[0].title.trim()) {
+      alert("Please complete at least one step before saving.");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      await addDoc(collection(db, "workflows"), {
+        name: workflowName,
+        description: workflowDescription,
+        steps,
+        createdAt: Timestamp.now(),
+      });
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000); // optional: clear success state
+    } catch (error) {
+      console.error("Error saving workflow:", error);
+      alert("An error occurred while saving your workflow.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -206,16 +230,60 @@ export default function WorkflowBuilder() {
               Cancel
             </Button>
           </Link>
-          <Link href="/">
-            <Button
-              variant="outline"
-              onClick={handleSave}
-              className="font-normal bg-white border-gray-200"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Workflow
-            </Button>
-          </Link>
+          <Button
+            onClick={handleSave}
+            disabled={isSaving || !steps.length}
+            className="font-normal bg-white border border-gray-200 relative"
+          >
+            {isSaving ? (
+              <span className="flex items-center">
+                <svg
+                  className="animate-spin mr-2 h-4 w-4 text-gray-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+                Saving...
+              </span>
+            ) : saveSuccess ? (
+              <span className="flex items-center text-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mr-2 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                Saved
+              </span>
+            ) : (
+              <span className="flex items-center">
+                <Save className="mr-2 h-4 w-4" />
+                Save Workflow
+              </span>
+            )}
+          </Button>
         </div>
       </div>
     </div>
