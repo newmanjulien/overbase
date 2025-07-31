@@ -31,11 +31,11 @@ export function WorkflowCard({
             style={{ objectFit: "cover" }}
           />
         </div>
-        <div>
+        <div className="min-w-0 max-w-lg">
           <h3 className="font-semibold text-gray-700 text-sm tracking-tight leading-tight">
             {title}
           </h3>
-          <p className="text-gray-500 text-sm font-light leading-relaxed">
+          <p className="text-gray-500 text-sm font-light leading-relaxed truncate">
             {subtitle}
           </p>
         </div>
