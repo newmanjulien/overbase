@@ -17,7 +17,8 @@ import {
   CollapsibleContent,
 } from "../components/ui/collapsible";
 import { Badge } from "../components/ui/badge";
-import { StepAddOns } from "./StepAddOns";
+// Import the new modular StepAddOns
+import { StepAddOns } from "./addons";
 
 interface StepBranch {
   id: string;
@@ -54,7 +55,6 @@ export interface StepMainUIProps {
     branches: StepBranch[];
     handlerInstructions?: HandlerInstructions;
     userApprovalInstructions?: UserApprovalInstructions;
-
     userInputInstructions?: UserInputInstructions;
     colleagueInstructions?: ColleagueInstructions;
     isOpen?: boolean;
@@ -67,7 +67,6 @@ export interface StepMainUIProps {
       branches?: StepBranch[];
       handlerInstructions?: HandlerInstructions;
       userApprovalInstructions?: UserApprovalInstructions;
-
       userInputInstructions?: UserInputInstructions;
       colleagueInstructions?: ColleagueInstructions;
     }
@@ -211,7 +210,7 @@ export function StepMainUI({
               )}
             </div>
 
-            {/* StepAddOns moved inside collapsible content */}
+            {/* Use the new modular StepAddOns */}
             <StepAddOns step={step} onUpdate={onUpdate} />
           </div>
         </CollapsibleContent>
