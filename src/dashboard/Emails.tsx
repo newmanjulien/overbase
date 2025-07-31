@@ -1,7 +1,6 @@
 // "use client";
 
 // import { useEffect, useState } from "react";
-// import { Button } from "../components/ui/button";
 // import { ExternalLink } from "lucide-react";
 // import { InfoCard } from "../components/InfoCard";
 // import { HandlerSelect } from "../components/HandlerSelect";
@@ -81,6 +80,10 @@
 //     }
 //   };
 
+//   const handleEdit = (workflowId: string) => {
+//     router.push(`/workflow/${workflowId}`);
+//   };
+
 //   return (
 //     <div>
 //       {/* Header */}
@@ -121,20 +124,12 @@
 //                 title={wf.name || "Untitled Workflow"}
 //                 subtitle={wf.description || ""}
 //                 image="/images/gmail.png"
+//                 onEdit={() => handleEdit(wf.id)}
 //                 actions={
-//                   <>
-//                     <Button
-//                       variant="ghost"
-//                       className="text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
-//                       onClick={() => router.push(`/workflow/${wf.id}`)}
-//                     >
-//                       Edit
-//                     </Button>
-//                     <HandlerSelect
-//                       value={handlers[wf.id] || wf.assignedHandler || ""}
-//                       onChange={(val) => handleHandlerChange(wf.id, val)}
-//                     />
-//                   </>
+//                   <HandlerSelect
+//                     value={handlers[wf.id] || wf.assignedHandler || ""}
+//                     onChange={(val) => handleHandlerChange(wf.id, val)}
+//                   />
 //                 }
 //               />
 //             ))}
@@ -163,8 +158,6 @@ import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useRouter } from "next/navigation";
 
-const DEFAULT_HANDLER_ID = "3";
-
 interface Workflow {
   id: string;
   name?: string;
@@ -179,30 +172,11 @@ export function Emails() {
   const router = useRouter();
 
   useEffect(() => {
-    return onSnapshot(collection(db, "workflows"), async (snap) => {
+    return onSnapshot(collection(db, "workflows"), (snap) => {
       const workflowsData: Workflow[] = snap.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-
-      // Check for workflows without assigned handlers and assign default
-      for (const workflow of workflowsData) {
-        if (!workflow.assignedHandler) {
-          try {
-            await updateDoc(doc(db, "workflows", workflow.id), {
-              assignedHandler: DEFAULT_HANDLER_ID,
-            });
-            console.log(
-              `Assigned default handler ${DEFAULT_HANDLER_ID} to workflow ${workflow.id}`
-            );
-          } catch (error) {
-            console.error(
-              `Failed to assign handler to workflow ${workflow.id}:`,
-              error
-            );
-          }
-        }
-      }
 
       setWorkflows(workflowsData);
 
