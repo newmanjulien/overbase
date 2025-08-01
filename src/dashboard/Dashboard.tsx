@@ -1,42 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { Emails } from "./Emails";
-import { Decks } from "./Decks";
-import { Data } from "./Data";
+import { Emails } from "./Email";
 import { Templates } from "./Templates";
 import Handlers from "./Handlers";
 import { Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
-import Link from "next/link";
-import { emailsData, decksData, dataData, handlers } from "./DummyData";
+import { handlers } from "./DummyData";
 import { useRouter } from "next/navigation";
+import { Updates } from "./Updates";
+import { Research } from "./Research";
 
-type Section = "emails" | "decks" | "data" | "templates" | "handlers";
+type Section = "email" | "updates" | "research" | "templates" | "handlers";
 
 export default function Dashboard() {
-  const [activeSection, setActiveSection] = useState<Section>("emails");
+  const [activeSection, setActiveSection] = useState<Section>("email");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const navigationItems = [
-    { id: "emails" as Section, label: "Triage emails" },
-    { id: "decks" as Section, label: "Create decks" },
-    { id: "data" as Section, label: "Gather internal data" },
+    { id: "email" as Section, label: "Email & Slack" },
+    { id: "updates" as Section, label: "Investor updates" },
+    { id: "research" as Section, label: "Internal research" },
     { id: "templates" as Section, label: "Templates" },
     { id: "handlers" as Section, label: "Handlers" },
   ];
 
   const renderContent = () => {
     switch (activeSection) {
-      case "emails":
+      case "email":
         return <Emails />;
-      case "decks":
-        return <Decks />;
-      case "data":
-        return <Data />;
+      case "updates":
+        return <Updates />;
+      case "research":
+        return <Research />;
       case "templates":
         return <Templates />;
       case "handlers":
@@ -162,4 +161,4 @@ export default function Dashboard() {
 }
 
 // Export the data arrays for use in other components if needed
-export { emailsData, decksData, dataData, handlers };
+export { handlers };

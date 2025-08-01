@@ -103,13 +103,13 @@ export function Emails() {
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
-              Triage emails
+              Email & Slack
             </h1>
           </div>
           <div className="flex items-center text-gray-600 text-sm font-normal">
             <span>
               Edit, customize and manage workflows so we can help you triage
-              emails.{" "}
+              your emails and your Slack.{" "}
             </span>
             <a
               href="#"
