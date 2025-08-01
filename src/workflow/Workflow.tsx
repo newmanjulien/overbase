@@ -68,12 +68,16 @@ const getDefaultHandlerForType = (type: WorkflowType): string => {
 };
 
 export default function Workflow({ initialData }: WorkflowProps) {
-  const [workflowName, setWorkflowName] = useState(
-    initialData?.name || defaultWorkflowName
-  );
+  // const [workflowName, setWorkflowName] = useState(
+  //   initialData?.name || defaultWorkflowName
+  // );
+  // const [workflowDescription, setWorkflowDescription] = useState(
+  //   initialData?.description ||
+  //     "Create a step-by-step workflow by adding prompts that describe what you want the AI to do at each stage."
+  // );
+  const [workflowName, setWorkflowName] = useState(initialData?.name || "");
   const [workflowDescription, setWorkflowDescription] = useState(
-    initialData?.description ||
-      "Create a step-by-step workflow by adding prompts that describe what you want the AI to do at each stage."
+    initialData?.description || ""
   );
   const [workflowType, setWorkflowType] = useState<WorkflowType>(
     initialData?.type || "triage-emails"
@@ -246,7 +250,8 @@ export default function Workflow({ initialData }: WorkflowProps) {
                 data-title
                 value={workflowName}
                 onChange={(e) => setWorkflowName(e.target.value)}
-                className="font-medium border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
+                placeholder="Enter workflow title..."
+                className="placeholder-gray-800 font-medium border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
               />
             </div>
 
@@ -254,7 +259,8 @@ export default function Workflow({ initialData }: WorkflowProps) {
               <Input
                 value={workflowDescription}
                 onChange={(e) => setWorkflowDescription(e.target.value)}
-                className="text-gray-600 text-sm border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
+                placeholder="Enter workflow description..."
+                className="placeholder-gray-500 text-gray-600 text-sm border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
               />
             </div>
           </div>

@@ -21,7 +21,7 @@ interface Workflow {
   name?: string;
   description?: string;
   assignedHandler?: string;
-  [key: string]: any; // Allow for additional properties
+  [key: string]: any;
 }
 
 export function Emails() {
