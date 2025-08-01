@@ -5,7 +5,14 @@ import { ExternalLink } from "lucide-react";
 import { InfoCard } from "../components/InfoCard";
 import { HandlerSelect } from "../components/HandlerSelect";
 import { WorkflowCard } from "../components/WorkflowCard";
-import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  doc,
+  updateDoc,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useRouter } from "next/navigation";
 
@@ -23,7 +30,12 @@ export function Emails() {
   const router = useRouter();
 
   useEffect(() => {
-    return onSnapshot(collection(db, "workflows"), (snap) => {
+    const q = query(
+      collection(db, "workflows"),
+      where("type", "==", "triage-emails")
+    );
+
+    return onSnapshot(q, (snap) => {
       const workflowsData: Workflow[] = snap.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),

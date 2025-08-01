@@ -49,7 +49,7 @@ export default function Dashboard() {
       style={{ backgroundColor: "#FAFAFA" }}
     >
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left-aligned: Logo and Navigation */}
@@ -89,7 +89,7 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">{renderContent()}</main>
+      <main className="flex-1  pt-16">{renderContent()}</main>
 
       {/* Footer */}
       <footer className="bg-white">
