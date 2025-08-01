@@ -89,7 +89,7 @@ export default function Dashboard() {
                     className={`px-2.5 py-1.5 text-sm font-normal rounded-md transition-colors ${
                       activeSection === item.id
                         ? "bg-gray-100 text-gray-900"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
                     }`}
                   >
                     {item.label}
