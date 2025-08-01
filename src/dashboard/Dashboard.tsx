@@ -12,11 +12,14 @@ import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
 import Link from "next/link";
 import { emailsData, decksData, dataData, handlers } from "./DummyData";
+import { useRouter } from "next/navigation";
 
 type Section = "emails" | "decks" | "data" | "templates" | "handlers";
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<Section>("emails");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const navigationItems = [
     { id: "emails" as Section, label: "Triage emails" },
@@ -75,15 +78,17 @@ export default function Dashboard() {
             </div>
 
             {/* Right-aligned: Create Workflow Button */}
-            <Link href="/workflow">
-              <Button
-                variant="outline"
-                className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                Create workflow
-              </Button>
-            </Link>
+            <Button
+              onClick={() => {
+                setLoading(true);
+                router.push("/workflow");
+              }}
+              variant="outline"
+              className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              Create workflow
+            </Button>
           </div>
         </div>
       </header>
@@ -146,6 +151,12 @@ export default function Dashboard() {
           {/* Copyright */}
         </div>
       </footer>
+
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+          <div className="loader"></div>
+        </div>
+      )}
     </div>
   );
 }

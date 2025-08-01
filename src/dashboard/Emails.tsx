@@ -27,6 +27,7 @@ interface Workflow {
 export function Emails() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [handlers, setHandlers] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -82,11 +83,18 @@ export function Emails() {
   };
 
   const handleEdit = (workflowId: string) => {
+    setLoading(true);
     router.push(`/workflow/${workflowId}`);
   };
 
   return (
     <div>
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+          <div className="loader"></div>
+        </div>
+      )}
+
       {/* Header */}
       <div
         className="border-b border-gray-200/60"
