@@ -43,7 +43,7 @@ interface ColleagueInstructions {
   whatToRequest: string;
 }
 
-interface WorkflowBuilderProps {
+interface WorkflowProps {
   initialData?: {
     id?: string;
     name?: string;
@@ -67,7 +67,7 @@ const getDefaultHandlerForType = (type: WorkflowType): string => {
   }
 };
 
-export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
+export default function Workflow({ initialData }: WorkflowProps) {
   const [workflowName, setWorkflowName] = useState(
     initialData?.name || defaultWorkflowName
   );

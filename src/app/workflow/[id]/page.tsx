@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
-import WorkflowBuilder from "../../../workflow/Workflow";
+import Workflow from "../../../workflow/Workflow";
 
 export default function EditWorkflowPage() {
   const { id } = useParams();
@@ -51,5 +51,5 @@ export default function EditWorkflowPage() {
     );
   }
 
-  return <WorkflowBuilder initialData={workflowData} />;
+  return <Workflow initialData={workflowData} />;
 }
