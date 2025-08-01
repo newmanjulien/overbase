@@ -63,7 +63,7 @@ export function Research() {
     workflows.forEach((wf) => {
       router.prefetch(`/workflow/${wf.id}`);
     });
-  }, [workflows]);
+  }, [workflows, router]);
 
   const handleHandlerChange = async (workflowId: string, handlerId: string) => {
     try {
@@ -109,7 +109,7 @@ export function Research() {
           <div className="flex items-center text-gray-600 text-sm font-normal">
             <span>
               Edit, customize and manage workflows so we can help you gather
-              data about what's happening in your business.{" "}
+              data about what&apos;s happening in your business.{" "}
             </span>
             <a
               href="#"

@@ -63,7 +63,7 @@ export function Emails() {
     workflows.forEach((wf) => {
       router.prefetch(`/workflow/${wf.id}`);
     });
-  }, [workflows]);
+  }, [workflows, router]);
 
   const handleHandlerChange = async (workflowId: string, handlerId: string) => {
     try {

@@ -14,6 +14,8 @@ export const handlerOptions = [
   { id: "4", name: "Henri Feiteshans", avatar: "/images/profile-4.png" },
 ];
 
+import Image from "next/image";
+
 interface HandlerSelectProps {
   value: string;
   onChange: (id: string) => void;
@@ -30,9 +32,11 @@ export function HandlerSelect({ value, onChange }: HandlerSelectProps) {
           <SelectItem key={h.id} value={h.id}>
             <div className="flex items-center gap-2 min-w-0">
               {h.avatar ? (
-                <img
+                <Image
                   src={h.avatar}
                   alt={h.name}
+                  width={20}
+                  height={20}
                   className="w-5 h-5 rounded-full object-cover flex-shrink-0"
                 />
               ) : (
