@@ -84,22 +84,11 @@ export default function Dashboard() {
             </div>
 
             {/* Right-aligned: Create Workflow Button */}
-            {/* <Button
-              onClick={() => {
-                setLoading(true);
-                router.push("/workflow");
-              }}
-              variant="outline"
-              className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
-            >
-              <Plus className="mr-1 h-4 w-4" />
-              Create workflow
-            </Button> */}
 
             <Button
               onClick={() => {
                 setLoading(true);
-                router.push(`/workflow?from=${activeSection}`);
+                router.push(`/workflow/new?from=${activeSection}`);
               }}
               variant="outline"
               className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
