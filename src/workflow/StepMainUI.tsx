@@ -17,8 +17,17 @@ import {
   CollapsibleContent,
 } from "../components/ui/collapsible";
 import { Badge } from "../components/ui/badge";
-// Import the new modular StepAddOns
-import { StepAddOns } from "./addons";
+import dynamic from "next/dynamic";
+
+const StepAddOns = dynamic(
+  () => import("./addons").then((mod) => mod.StepAddOns),
+  {
+    loading: () => (
+      <div className="text-sm text-gray-400 mt-4">Loading options...</div>
+    ),
+    ssr: false,
+  }
+);
 
 interface StepBranch {
   id: string;
