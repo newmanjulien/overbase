@@ -1,39 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { Emails } from "./Emails";
-import { Decks } from "./Decks";
-import { Data } from "./Data";
+import { Emails } from "./Email";
 import { Templates } from "./Templates";
 import Handlers from "./Handlers";
 import { Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
-import Link from "next/link";
-import { emailsData, decksData, dataData, handlers } from "./DummyData";
+import { handlers } from "./DummyData";
+import { useRouter } from "next/navigation";
+import { Updates } from "./Updates";
+import { Research } from "./Research";
+import { useSearchParams } from "next/navigation";
 
-type Section = "emails" | "decks" | "data" | "templates" | "handlers";
+type Section = "email" | "updates" | "research" | "templates" | "handlers";
 
 export default function Dashboard() {
-  const [activeSection, setActiveSection] = useState<Section>("emails");
+  const searchParams = useSearchParams();
+  const initialSection = searchParams.get("section") as Section;
+
+  const [activeSection, setActiveSection] = useState<Section>(
+    initialSection || "email"
+  );
+
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const navigationItems = [
-    { id: "emails" as Section, label: "Triage emails" },
-    { id: "decks" as Section, label: "Create decks" },
-    { id: "data" as Section, label: "Gather internal data" },
+    { id: "email" as Section, label: "Email & Slack" },
+    { id: "updates" as Section, label: "Investor updates" },
+    { id: "research" as Section, label: "Internal research" },
     { id: "templates" as Section, label: "Templates" },
     { id: "handlers" as Section, label: "Handlers" },
   ];
 
   const renderContent = () => {
     switch (activeSection) {
-      case "emails":
+      case "email":
         return <Emails />;
-      case "decks":
-        return <Decks />;
-      case "data":
-        return <Data />;
+      case "updates":
+        return <Updates />;
+      case "research":
+        return <Research />;
       case "templates":
         return <Templates />;
       case "handlers":
@@ -49,7 +58,7 @@ export default function Dashboard() {
       style={{ backgroundColor: "#FAFAFA" }}
     >
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left-aligned: Logo and Navigation */}
@@ -75,22 +84,24 @@ export default function Dashboard() {
             </div>
 
             {/* Right-aligned: Create Workflow Button */}
-            <Link href="/workflow">
-              <Button
-                variant="outline"
-                // className="text-gray-900 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
-                className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                Create workflow
-              </Button>
-            </Link>
+
+            <Button
+              onClick={() => {
+                setLoading(true);
+                router.push(`/workflow/new?from=${activeSection}`);
+              }}
+              variant="outline"
+              className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              Create workflow
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">{renderContent()}</main>
+      <main className="flex-1  pt-16">{renderContent()}</main>
 
       {/* Footer */}
       <footer className="bg-white">
@@ -147,9 +158,15 @@ export default function Dashboard() {
           {/* Copyright */}
         </div>
       </footer>
+
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+          <div className="loader"></div>
+        </div>
+      )}
     </div>
   );
 }
 
 // Export the data arrays for use in other components if needed
-export { emailsData, decksData, dataData, handlers };
+export { handlers };

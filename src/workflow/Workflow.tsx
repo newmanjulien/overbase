@@ -1,13 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, ArrowLeft, Save, ExternalLink } from "lucide-react";
+import { Plus, ArrowLeft, Save } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
 import Link from "next/link";
-import { Step, initialSteps, defaultWorkflowName } from "./DummyData";
-import { InfoCard } from "../components/InfoCard";
+import { Step, defaultWorkflowName } from "./DummyData";
+import {
+  WorkflowTypeSelector,
+  WorkflowType,
+} from "../components/WorkflowTypeSelector";
+
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { useSearchParams } from "next/navigation";
 
 interface StepBranch {
   id: string;
@@ -15,28 +28,71 @@ interface StepBranch {
   prompt: string;
 }
 
-interface HandlerInstructions {
-  whenToCall: string;
-  qaInstructions: string;
-}
-
 interface UserInputInstructions {
   whenToAsk: string;
   inputDescription: string;
-  approvalConditions: string;
 }
 
 interface UserApprovalInstructions {
   whenToAsk: string;
-  approvalDescription: string;
+  approvalConditions: string;
 }
 
-export default function WorkflowBuilder() {
-  const [workflowName, setWorkflowName] = useState(defaultWorkflowName);
+interface ColleagueInstructions {
+  whenToLoop: string;
+  selectedColleague: string;
+  whatToRequest: string;
+}
+
+interface WorkflowBuilderProps {
+  initialData?: {
+    id?: string;
+    name?: string;
+    description?: string;
+    type?: WorkflowType;
+    assignedHandler?: string;
+    steps?: any[];
+  };
+}
+
+const getDefaultHandlerForType = (type: WorkflowType): string => {
+  switch (type) {
+    case "email-slack":
+      return "1"; // Email handler
+    case "updates":
+      return "2"; // Deck creation handler
+    case "research":
+      return "3"; // Data gathering handler
+    default:
+      return "1"; // Fallback
+  }
+};
+
+export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
+  const [workflowName, setWorkflowName] = useState(initialData?.name || "");
   const [workflowDescription, setWorkflowDescription] = useState(
-    "Create a step-by-step workflow by adding prompts that describe what you want the AI to do at each stage."
+    initialData?.description || ""
   );
-  const [steps, setSteps] = useState<Step[]>(initialSteps);
+  const [workflowType, setWorkflowType] = useState<WorkflowType>(
+    initialData?.type || "email-slack"
+  );
+  const [assignedHandler, setAssignedHandler] = useState<string>(
+    initialData?.assignedHandler ||
+      getDefaultHandlerForType(initialData?.type || "email-slack")
+  );
+  const [steps, setSteps] = useState<Step[]>(
+    (initialData?.steps || []).map((s) => ({ ...s, isOpen: false })) || []
+  );
+  const [workflowId, setWorkflowId] = useState(initialData?.id || null);
+
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
+
+  const workflowTypes: { id: WorkflowType; label: string }[] = [
+    { id: "email-slack", label: "Email & Slack" },
+    { id: "updates", label: "Investor updates" },
+    { id: "research", label: "Internal research" },
+  ];
 
   const addStep = () => {
     const newStep: Step = {
@@ -56,9 +112,9 @@ export default function WorkflowBuilder() {
       title?: string;
       prompt?: string;
       branches?: StepBranch[];
-      handlerInstructions?: HandlerInstructions;
-      userInputInstructions?: UserInputInstructions;
-      userApprovalInstructions?: UserApprovalInstructions;
+      userInputInstructions?: UserInputInstructions | undefined;
+      userApprovalInstructions?: UserApprovalInstructions | undefined;
+      colleagueInstructions?: ColleagueInstructions | undefined;
     }
   ) => {
     setSteps(
@@ -102,13 +158,76 @@ export default function WorkflowBuilder() {
     }
   };
 
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving workflow:", {
-      name: workflowName,
-      description: workflowDescription,
-      steps,
-    });
+  const handleTypeChange = (newType: WorkflowType) => {
+    setWorkflowType(newType);
+    // Automatically update the assigned handler based on the new type
+    const newHandler = getDefaultHandlerForType(newType);
+    setAssignedHandler(newHandler);
+  };
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const handleSave = async () => {
+    // Enhanced validation - check all required fields
+    if (!workflowName.trim() || workflowName === defaultWorkflowName) {
+      alert("Please enter a workflow title before saving.");
+      return;
+    }
+
+    if (!workflowDescription.trim()) {
+      alert("Please enter a workflow description before saving.");
+      return;
+    }
+
+    if (!steps.length) {
+      alert("Please add at least one step before saving.");
+      return;
+    }
+
+    if (!steps[0].title.trim()) {
+      alert("Please enter a title for your first step before saving.");
+      return;
+    }
+
+    if (!steps[0].prompt.trim()) {
+      alert("Please enter an AI prompt for your first step before saving.");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      const workflowData = {
+        name: workflowName,
+        description: workflowDescription,
+        type: workflowType,
+        assignedHandler: assignedHandler,
+        steps,
+        updatedAt: Timestamp.now(),
+      };
+
+      if (workflowId) {
+        // Update existing workflow
+        await updateDoc(doc(db, "workflows", workflowId), workflowData);
+      } else {
+        // Create new workflow
+        const docRef = await addDoc(collection(db, "workflows"), {
+          ...workflowData,
+          createdAt: Timestamp.now(),
+        });
+        setWorkflowId(docRef.id);
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      console.error("Error saving workflow:", error);
+      alert("An error occurred while saving your workflow.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -117,7 +236,7 @@ export default function WorkflowBuilder() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Back Button and Title Section */}
         <div className="mb-8">
-          <Link href="/">
+          <Link href={`/?section=${from || ""}`}>
             <Button
               variant="ghost"
               className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
@@ -134,7 +253,8 @@ export default function WorkflowBuilder() {
                 data-title
                 value={workflowName}
                 onChange={(e) => setWorkflowName(e.target.value)}
-                className="font-medium border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
+                placeholder="Enter workflow title..."
+                className="placeholder-gray-800 font-medium border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
               />
             </div>
 
@@ -142,17 +262,18 @@ export default function WorkflowBuilder() {
               <Input
                 value={workflowDescription}
                 onChange={(e) => setWorkflowDescription(e.target.value)}
-                className="text-gray-600 text-sm border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
+                placeholder="Enter workflow description..."
+                className="placeholder-gray-500 text-gray-600 text-sm border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
               />
             </div>
           </div>
-          {/* Info Card */}
-          <div className="mt-6">
-            <InfoCard
-              text="Build custom workflows to automate your email processing and responses"
-              href="#workflow-help"
-            />
-          </div>
+
+          {/* Type Selector: */}
+          <WorkflowTypeSelector
+            selectedType={workflowType}
+            onTypeChange={handleTypeChange}
+            types={workflowTypes}
+          />
         </div>
 
         {/* Steps Section */}
@@ -200,16 +321,68 @@ export default function WorkflowBuilder() {
               Cancel
             </Button>
           </Link>
-          <Link href="/">
-            <Button
-              variant="outline"
-              onClick={handleSave}
-              className="font-normal bg-white border-gray-200"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Workflow
-            </Button>
-          </Link>
+          <Button
+            onClick={handleSave}
+            disabled={
+              isSaving ||
+              !workflowName.trim() ||
+              workflowName === defaultWorkflowName ||
+              !workflowDescription.trim() ||
+              !steps.length ||
+              !steps[0]?.title.trim() ||
+              !steps[0]?.prompt.trim()
+            }
+            className="font-normal bg-white border border-gray-200 relative"
+          >
+            {isSaving ? (
+              <span className="flex items-center">
+                <svg
+                  className="animate-spin mr-2 h-4 w-4 text-gray-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+                Saving...
+              </span>
+            ) : saveSuccess ? (
+              <span className="flex items-center text-gray-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mr-2 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                Saved
+              </span>
+            ) : (
+              <span className="flex items-center">
+                <Save className="mr-2 h-4 w-4" />
+                {workflowId ? "Update Workflow" : "Save Workflow"}
+              </span>
+            )}
+          </Button>
         </div>
       </div>
     </div>

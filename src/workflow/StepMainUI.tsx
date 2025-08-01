@@ -17,17 +17,22 @@ import {
   CollapsibleContent,
 } from "../components/ui/collapsible";
 import { Badge } from "../components/ui/badge";
-import { StepAddOns } from "./StepAddOns";
+import dynamic from "next/dynamic";
+
+const StepAddOns = dynamic(
+  () => import("./addons").then((mod) => mod.StepAddOns),
+  {
+    loading: () => (
+      <div className="text-sm text-gray-400 mt-4">Loading options...</div>
+    ),
+    ssr: false,
+  }
+);
 
 interface StepBranch {
   id: string;
   condition: string;
   prompt: string;
-}
-
-interface HandlerInstructions {
-  whenToCall: string;
-  qaInstructions: string;
 }
 
 interface UserApprovalInstructions {
@@ -52,9 +57,7 @@ export interface StepMainUIProps {
     title: string;
     prompt: string;
     branches: StepBranch[];
-    handlerInstructions?: HandlerInstructions;
     userApprovalInstructions?: UserApprovalInstructions;
-
     userInputInstructions?: UserInputInstructions;
     colleagueInstructions?: ColleagueInstructions;
     isOpen?: boolean;
@@ -65,9 +68,7 @@ export interface StepMainUIProps {
       title?: string;
       prompt?: string;
       branches?: StepBranch[];
-      handlerInstructions?: HandlerInstructions;
       userApprovalInstructions?: UserApprovalInstructions;
-
       userInputInstructions?: UserInputInstructions;
       colleagueInstructions?: ColleagueInstructions;
     }
@@ -211,7 +212,7 @@ export function StepMainUI({
               )}
             </div>
 
-            {/* StepAddOns moved inside collapsible content */}
+            {/* Use the new modular StepAddOns */}
             <StepAddOns step={step} onUpdate={onUpdate} />
           </div>
         </CollapsibleContent>
