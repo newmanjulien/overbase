@@ -56,11 +56,11 @@ interface WorkflowProps {
 
 const getDefaultHandlerForType = (type: WorkflowType): string => {
   switch (type) {
-    case "triage-emails":
+    case "email-slack":
       return "1"; // Email handler
-    case "create-decks":
+    case "updates":
       return "2"; // Deck creation handler
-    case "gather-data":
+    case "research":
       return "3"; // Data gathering handler
     default:
       return "1"; // Fallback
@@ -68,28 +68,27 @@ const getDefaultHandlerForType = (type: WorkflowType): string => {
 };
 
 export default function Workflow({ initialData }: WorkflowProps) {
-  // const [workflowName, setWorkflowName] = useState(
-  //   initialData?.name || defaultWorkflowName
-  // );
-  // const [workflowDescription, setWorkflowDescription] = useState(
-  //   initialData?.description ||
-  //     "Create a step-by-step workflow by adding prompts that describe what you want the AI to do at each stage."
-  // );
   const [workflowName, setWorkflowName] = useState(initialData?.name || "");
   const [workflowDescription, setWorkflowDescription] = useState(
     initialData?.description || ""
   );
   const [workflowType, setWorkflowType] = useState<WorkflowType>(
-    initialData?.type || "triage-emails"
+    initialData?.type || "email-slack"
   );
   const [assignedHandler, setAssignedHandler] = useState<string>(
     initialData?.assignedHandler ||
-      getDefaultHandlerForType(initialData?.type || "triage-emails")
+      getDefaultHandlerForType(initialData?.type || "email-slack")
   );
   const [steps, setSteps] = useState<Step[]>(
     (initialData?.steps || []).map((s) => ({ ...s, isOpen: false })) || []
   );
   const [workflowId, setWorkflowId] = useState(initialData?.id || null);
+
+  const workflowTypes: { id: WorkflowType; label: string }[] = [
+    { id: "email-slack", label: "Email & Slack" },
+    { id: "updates", label: "Investor updates" },
+    { id: "research", label: "Internal research" },
+  ];
 
   const addStep = () => {
     const newStep: Step = {
@@ -269,6 +268,7 @@ export default function Workflow({ initialData }: WorkflowProps) {
           <WorkflowTypeSelector
             selectedType={workflowType}
             onTypeChange={handleTypeChange}
+            types={workflowTypes}
           />
         </div>
 
