@@ -13,8 +13,17 @@ import { useRouter } from "next/navigation";
 import { Updates } from "./Updates";
 import { Research } from "./Research";
 import { useSearchParams } from "next/navigation";
+import { Colleagues } from "./Colleagues";
+import { Integrations } from "./Integrations";
 
-type Section = "email" | "updates" | "research" | "templates" | "handlers";
+type Section =
+  | "email"
+  | "updates"
+  | "research"
+  | "templates"
+  | "handlers"
+  | "colleagues"
+  | "integrations";
 
 export default function Dashboard() {
   const searchParams = useSearchParams();
@@ -32,6 +41,8 @@ export default function Dashboard() {
     { id: "updates" as Section, label: "Investor updates" },
     { id: "research" as Section, label: "Internal research" },
     { id: "templates" as Section, label: "Templates" },
+    { id: "colleagues" as Section, label: "Colleagues" },
+    { id: "integrations" as Section, label: "Integrations" },
     { id: "handlers" as Section, label: "Handlers" },
   ];
 
@@ -45,6 +56,10 @@ export default function Dashboard() {
         return <Research />;
       case "templates":
         return <Templates />;
+      case "colleagues":
+        return <Colleagues />;
+      case "integrations":
+        return <Integrations />;
       case "handlers":
         return <Handlers />;
       default:
@@ -84,7 +99,6 @@ export default function Dashboard() {
             </div>
 
             {/* Right-aligned: Create Workflow Button */}
-
             <Button
               onClick={() => {
                 setLoading(true);
@@ -101,7 +115,7 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1  pt-16">{renderContent()}</main>
+      <main className="flex-1 pt-16">{renderContent()}</main>
 
       {/* Footer */}
       <footer className="bg-white">
@@ -154,11 +168,10 @@ export default function Dashboard() {
               </a>
             </nav>
           </div>
-
-          {/* Copyright */}
         </div>
       </footer>
 
+      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
           <div className="loader"></div>
