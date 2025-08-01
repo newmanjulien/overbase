@@ -12,11 +12,18 @@ import { handlers } from "./DummyData";
 import { useRouter } from "next/navigation";
 import { Updates } from "./Updates";
 import { Research } from "./Research";
+import { useSearchParams } from "next/navigation";
 
 type Section = "email" | "updates" | "research" | "templates" | "handlers";
 
 export default function Dashboard() {
-  const [activeSection, setActiveSection] = useState<Section>("email");
+  const searchParams = useSearchParams();
+  const initialSection = searchParams.get("section") as Section;
+
+  const [activeSection, setActiveSection] = useState<Section>(
+    initialSection || "email"
+  );
+
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -77,10 +84,22 @@ export default function Dashboard() {
             </div>
 
             {/* Right-aligned: Create Workflow Button */}
-            <Button
+            {/* <Button
               onClick={() => {
                 setLoading(true);
                 router.push("/workflow");
+              }}
+              variant="outline"
+              className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              Create workflow
+            </Button> */}
+
+            <Button
+              onClick={() => {
+                setLoading(true);
+                router.push(`/workflow?from=${activeSection}`);
               }}
               variant="outline"
               className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"

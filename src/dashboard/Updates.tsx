@@ -33,7 +33,7 @@ export function Updates() {
   useEffect(() => {
     const q = query(
       collection(db, "workflows"),
-      where("type", "==", "triage-emails")
+      where("type", "==", "updates")
     );
 
     return onSnapshot(q, (snap) => {
@@ -84,7 +84,7 @@ export function Updates() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    router.push(`/workflow/${workflowId}`);
+    router.push(`/workflow/${workflowId}?from=updates`);
   };
 
   return (

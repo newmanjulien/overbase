@@ -20,6 +20,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { useSearchParams } from "next/navigation";
 
 interface StepBranch {
   id: string;
@@ -83,6 +84,9 @@ export default function Workflow({ initialData }: WorkflowProps) {
     (initialData?.steps || []).map((s) => ({ ...s, isOpen: false })) || []
   );
   const [workflowId, setWorkflowId] = useState(initialData?.id || null);
+
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
 
   const workflowTypes: { id: WorkflowType; label: string }[] = [
     { id: "email-slack", label: "Email & Slack" },
@@ -232,7 +236,7 @@ export default function Workflow({ initialData }: WorkflowProps) {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Back Button and Title Section */}
         <div className="mb-8">
-          <Link href="/">
+          <Link href={`/?section=${from || ""}`}>
             <Button
               variant="ghost"
               className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"

@@ -33,7 +33,7 @@ export function Emails() {
   useEffect(() => {
     const q = query(
       collection(db, "workflows"),
-      where("type", "==", "triage-emails")
+      where("type", "==", "email-slack")
     );
 
     return onSnapshot(q, (snap) => {
