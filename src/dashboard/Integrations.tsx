@@ -14,8 +14,8 @@ export function Integrations() {
           </h1>
           <div className="flex items-center text-gray-800 text-sm">
             <span>
-              Copy templates other execs created then easily edit and customize
-              them.{" "}
+              Add and manage integrations with your existing tools then connect
+              them to your workflows.{" "}
             </span>
             <a
               href="#"
