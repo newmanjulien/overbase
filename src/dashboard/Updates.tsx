@@ -108,8 +108,8 @@ export function Updates() {
           </div>
           <div className="flex items-center text-gray-600 text-sm font-normal">
             <span>
-              Edit, customize and manage workflows so we can help you create
-              investor updates & board decks.{" "}
+              Manage and customize workflows that let you easily create investor
+              updates and board decks.{" "}
             </span>
             <a
               href="#"
@@ -146,8 +146,9 @@ export function Updates() {
 
           <div className="mt-8 w-full">
             <InfoCard
-              text="Build custom workflows to automate your email processing and responses"
+              text="Copy investor update workflows other founders created so you can easily customize them"
               href="#workflow-help"
+              linkText="Templates"
             />
           </div>
         </div>

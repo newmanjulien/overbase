@@ -108,8 +108,8 @@ export function Research() {
           </div>
           <div className="flex items-center text-gray-600 text-sm font-normal">
             <span>
-              Edit, customize and manage workflows so we can help you gather
-              data about what&apos;s happening in your business.{" "}
+              Manage and customize workflows that let you easily know
+              what&apos;s going on in your business.{" "}
             </span>
             <a
               href="#"
@@ -146,8 +146,9 @@ export function Research() {
 
           <div className="mt-8 w-full">
             <InfoCard
-              text="Build custom workflows to automate your email processing and responses"
+              text="Copy internal research workflows other founders created so you can easily customize them"
               href="#workflow-help"
+              linkText="Templates"
             />
           </div>
         </div>
