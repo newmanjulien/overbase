@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useRouter } from "next/navigation";
+import { useSection } from "./Dashboard";
 
 interface Workflow {
   id: string;
@@ -29,6 +30,7 @@ export function Emails() {
   const [handlers, setHandlers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { setActiveSection } = useSection();
 
   useEffect(() => {
     const q = query(
@@ -108,8 +110,8 @@ export function Emails() {
           </div>
           <div className="flex items-center text-gray-600 text-sm font-normal">
             <span>
-              Edit, customize and manage workflows so we can help you triage
-              your emails and your Slack.{" "}
+              Manage and customize workflows that let you can easily triage your
+              emails and your Slack.{" "}
             </span>
             <a
               href="#"
@@ -146,8 +148,9 @@ export function Emails() {
 
           <div className="mt-8 w-full">
             <InfoCard
-              text="Build custom workflows to automate your email processing and responses"
-              href="#workflow-help"
+              text="Copy email & Slack workflows other founders created then easily customize them"
+              linkText="Templates"
+              onClick={() => setActiveSection("templates")}
             />
           </div>
         </div>
