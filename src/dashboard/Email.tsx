@@ -102,7 +102,7 @@ export function Emails() {
         className="border-b border-gray-200/60"
         style={{ backgroundColor: "#FAFAFA" }}
       >
-        <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="max-w-6xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
               Email & Slack
