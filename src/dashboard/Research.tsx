@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useRouter } from "next/navigation";
+import { useSection } from "./Dashboard";
 
 interface Workflow {
   id: string;
@@ -29,6 +30,7 @@ export function Research() {
   const [handlers, setHandlers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { setActiveSection } = useSection();
 
   useEffect(() => {
     const q = query(
@@ -147,8 +149,8 @@ export function Research() {
           <div className="mt-8 w-full">
             <InfoCard
               text="Copy internal research workflows other founders created so you can easily customize them"
-              href="#workflow-help"
               linkText="Templates"
+              onClick={() => setActiveSection("templates")}
             />
           </div>
         </div>
