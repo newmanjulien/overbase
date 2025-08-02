@@ -35,7 +35,7 @@ export function WorkflowCard({
   return (
     <div
       key={id}
-      className="flex items-center justify-between py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-lg"
+      className="w-full flex items-center justify-between py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-lg"
     >
       <div className="flex items-center space-x-4">
         <div className="w-10 h-10 rounded-xl flex items-center justify-center relative overflow-hidden border border-gray-200/60">
