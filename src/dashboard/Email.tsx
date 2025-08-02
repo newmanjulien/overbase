@@ -126,7 +126,7 @@ export function Emails() {
 
       {/* Main Content */}
       <div style={{ backgroundColor: "#FAFAFA" }}>
-        <div className="max-w-5xl mx-auto px-6 py-16">
+        <div className="max-w-6xl mx-auto px-6 py-16">
           <div className="w-full flex flex-col gap-4">
             {workflows.map((wf, index) => (
               <WorkflowCard
