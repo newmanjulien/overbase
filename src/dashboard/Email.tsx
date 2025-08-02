@@ -108,8 +108,8 @@ export function Emails() {
           </div>
           <div className="flex items-center text-gray-600 text-sm font-normal">
             <span>
-              Edit, customize and manage workflows so we can help you triage
-              your emails and your Slack.{" "}
+              Edit and customize workflows so we can help you triage your emails
+              and your Slack.{" "}
             </span>
             <a
               href="#"
@@ -146,8 +146,9 @@ export function Emails() {
 
           <div className="mt-8 w-full">
             <InfoCard
-              text="Build custom workflows to automate your email processing and responses"
+              text="Easily copy workflows other founders use in the Templates section then edit and customize them"
               href="#workflow-help"
+              linkText="Templates"
             />
           </div>
         </div>
