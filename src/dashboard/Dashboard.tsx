@@ -110,7 +110,7 @@ export default function Dashboard() {
         {/* Header */}
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
           <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+            <div className="flex items-center justify-between h-14">
               {/* Left: Logo + Nav */}
               <div className="flex items-center space-x-8">
                 <div className="h-9 w-[3.75rem]">
