@@ -49,7 +49,7 @@ export function WorkflowHeader({
       <Link href={`/?section=${from || ""}`} onClick={handleBackClick}>
         <Button
           variant="ghost"
-          className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
+          className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal bg-transparent hover:bg-transparent focus:bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to dashboard
