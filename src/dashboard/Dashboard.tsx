@@ -1,8 +1,6 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "../components/ui/button";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
 import { Emails } from "./Email";
@@ -13,7 +11,7 @@ import { Colleagues } from "./Colleagues";
 import { External } from "./External";
 import { Integrations } from "./Integrations";
 import Handlers from "./Handlers";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { HeaderDropdown } from "../components/HeaderDropdown";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 
@@ -57,8 +55,7 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<Section>(
     initialSection || "email"
   );
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [loading] = useState(false);
 
   // Dropdown items for Workflows
   const workflowSections = ["email", "updates", "research"] as const;
@@ -110,7 +107,7 @@ export default function Dashboard() {
         {/* Header */}
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
           <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+            <div className="flex items-center justify-between h-14">
               {/* Left: Logo + Nav */}
               <div className="flex items-center space-x-8">
                 <div className="h-9 w-[3.75rem]">
@@ -144,20 +141,6 @@ export default function Dashboard() {
                   ))}
                 </nav>
               </div>
-
-              {/* Right: Create Workflow */}
-              <Button
-                onClick={() => {
-                  setLoading(true);
-                  router.push(`/workflow/new?from=${activeSection}`);
-                }}
-                variant="outline"
-                className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
-                disabled={loading}
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                Create workflow
-              </Button>
             </div>
           </div>
         </header>
@@ -167,7 +150,7 @@ export default function Dashboard() {
 
         {/* Footer */}
         <footer className="bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="h-6 w-4">

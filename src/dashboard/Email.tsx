@@ -17,6 +17,7 @@ import { db } from "../lib/firebase";
 import { useRouter } from "next/navigation";
 import { useSection } from "./Dashboard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
+import { Button } from "../components/ui/button";
 
 interface Workflow {
   id: string;
@@ -101,22 +102,36 @@ export function Emails() {
       >
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
-              Email & Slack
-            </h1>
-          </div>
-          <div className="flex items-center text-gray-600 text-sm font-normal">
-            <span>
-              Manage and customize workflows that let you can easily triage your
-              emails and your Slack.{" "}
-            </span>
-            <a
-              href="#"
-              className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
+            {/* Left: stacked h1 and subtitle with link */}
+            <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
+              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
+                Email & Slack
+              </h1>
+              <h2 className="text-gray-600 text-sm font-normal mt-1">
+                Manage and customize workflows that let you can easily triage
+                your emails and your Slack.{" "}
+                <a
+                  href="#"
+                  className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
+                >
+                  <span>Learn more</span>
+                  <ExternalLink className="ml-1 h-4 w-4" />
+                </a>
+              </h2>
+            </div>
+
+            {/* Right: create workflow button */}
+            <Button
+              onClick={() => {
+                setLoading(true);
+                router.push(`/workflow/new?from=email`);
+              }}
+              variant="outline"
+              className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
+              disabled={loading}
             >
-              <span>Learn more</span>
-              <ExternalLink className="ml-1 h-4 w-4" />
-            </a>
+              Create workflow
+            </Button>
           </div>
         </div>
       </div>
