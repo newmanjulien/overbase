@@ -144,20 +144,6 @@ export default function Dashboard() {
                   ))}
                 </nav>
               </div>
-
-              {/* Right: Create Workflow */}
-              <Button
-                onClick={() => {
-                  setLoading(true);
-                  router.push(`/workflow/new?from=${activeSection}`);
-                }}
-                variant="outline"
-                className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
-                disabled={loading}
-              >
-                <Plus className="mr-1 h-4 w-4" />
-                Create workflow
-              </Button>
             </div>
           </div>
         </header>
