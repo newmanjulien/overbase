@@ -16,6 +16,7 @@ import {
 import { db } from "../lib/firebase";
 import { useRouter } from "next/navigation";
 import { useSection } from "./Dashboard";
+import { LoadingOverlay } from "../components/LoadingOverlay";
 
 interface Workflow {
   id: string;
@@ -91,11 +92,7 @@ export function Updates() {
 
   return (
     <div>
-      {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
-          <div className="loader"></div>
-        </div>
-      )}
+      {loading && <LoadingOverlay />}
 
       {/* Header */}
       <div

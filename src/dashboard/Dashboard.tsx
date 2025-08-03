@@ -1,11 +1,10 @@
 // "use client";
 
-// import { createContext, useContext, useState } from "react";
-// import { Plus } from "lucide-react";
+// import { createContext, useContext, useState, useEffect, useRef } from "react";
+// import { Plus, ChevronDown } from "lucide-react";
 // import { Button } from "../components/ui/button";
 // import Logo from "../components/Logo";
 // import LogoSmall from "../components/LogoSmall";
-
 // import { Emails } from "./Email";
 // import { Updates } from "./Updates";
 // import { Research } from "./Research";
@@ -14,8 +13,8 @@
 // import { External } from "./External";
 // import { Integrations } from "./Integrations";
 // import Handlers from "./Handlers";
-
 // import { useSearchParams, useRouter } from "next/navigation";
+// import { LoadingOverlay } from "../components/LoadingOverlay";
 
 // // -----------------------------
 // // Section Context
@@ -47,6 +46,84 @@
 // }
 
 // // -----------------------------
+// // Inline WorkflowsDropdown Component
+// // -----------------------------
+
+// function WorkflowsDropdown() {
+//   const { activeSection, setActiveSection } = useSection();
+//   const [open, setOpen] = useState(false);
+//   const dropdownRef = useRef<HTMLDivElement>(null);
+
+//   useEffect(() => {
+//     function handleClickOutside(event: MouseEvent) {
+//       if (
+//         dropdownRef.current &&
+//         !dropdownRef.current.contains(event.target as Node)
+//       ) {
+//         setOpen(false);
+//       }
+//     }
+
+//     if (open) {
+//       document.addEventListener("mousedown", handleClickOutside);
+//     }
+//     return () => {
+//       document.removeEventListener("mousedown", handleClickOutside);
+//     };
+//   }, [open]);
+
+//   const handleSelect = (section: "email" | "updates" | "research") => {
+//     setActiveSection(section);
+//     setOpen(false);
+//   };
+
+//   const labelMap: Record<string, string> = {
+//     email: "Email & Slack",
+//     updates: "Investor updates",
+//     research: "Internal research",
+//   };
+
+//   // Highlight Workflows button active if one of these is selected
+//   const isActive = ["email", "updates", "research"].includes(activeSection);
+
+//   return (
+//     <div className="relative" ref={dropdownRef}>
+//       <button
+//         onClick={() => setOpen((prev) => !prev)}
+//         className={`px-2.5 py-1.5 text-sm font-normal rounded-md transition-colors flex items-center gap-1 ${
+//           isActive
+//             ? "bg-gray-100 text-gray-900"
+//             : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+//         }`}
+//       >
+//         Workflows
+//         <ChevronDown className="ml-1 h-4 w-4 text-gray-400" />
+//       </button>
+
+//       {open && (
+//         <div className="absolute top-full left-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+//           <div className="py-1">
+//             {(["email", "updates", "research"] as const).map((section) => (
+//               <button
+//                 key={section}
+//                 onClick={() => handleSelect(section)}
+//                 className={`w-full px-3 py-2 text-left text-sm ${
+//                   activeSection === section
+//                     ? "bg-gray-100 text-gray-900"
+//                     : "text-gray-700 hover:bg-gray-50"
+//                 }`}
+//               >
+//                 {labelMap[section]}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+// // -----------------------------
 // // Dashboard Component
 // // -----------------------------
 
@@ -61,9 +138,7 @@
 //   const router = useRouter();
 
 //   const navigationItems = [
-//     { id: "email" as Section, label: "Email & Slack" },
-//     { id: "updates" as Section, label: "Investor updates" },
-//     { id: "research" as Section, label: "Internal research" },
+//     // Removed email, updates, research here since they're in dropdown now
 //     { id: "templates" as Section, label: "Templates" },
 //     { id: "colleagues" as Section, label: "Colleagues" },
 //     { id: "external" as Section, label: "External" },
@@ -109,7 +184,8 @@
 //                 <div className="h-9 w-[3.75rem]">
 //                   <Logo />
 //                 </div>
-//                 <nav className="flex space-x-2">
+//                 <nav className="flex space-x-3 items-center">
+//                   <WorkflowsDropdown />
 //                   {navigationItems.map((item) => (
 //                     <button
 //                       key={item.id}
@@ -171,12 +247,8 @@
 //           </div>
 //         </footer>
 
-//         {/* Loading Overlay */}
-//         {loading && (
-//           <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
-//             <div className="loader"></div>
-//           </div>
-//         )}
+//         {/* Loading Overlay for Workflow*/}
+//         {loading && <LoadingOverlay />}
 //       </div>
 //     </SectionContext.Provider>
 //   );
@@ -184,8 +256,8 @@
 
 "use client";
 
-import { createContext, useContext, useState, useEffect, useRef } from "react";
-import { Plus, ChevronDown } from "lucide-react";
+import { createContext, useContext, useState } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
@@ -198,12 +270,14 @@ import { External } from "./External";
 import { Integrations } from "./Integrations";
 import Handlers from "./Handlers";
 import { useSearchParams, useRouter } from "next/navigation";
+import { HeaderDropdown } from "../components/HeaderDropdown";
+import { LoadingOverlay } from "../components/LoadingOverlay";
 
 // -----------------------------
 // Section Context
 // -----------------------------
 
-type Section =
+export type Section =
   | "email"
   | "updates"
   | "research"
@@ -229,84 +303,6 @@ export function useSection() {
 }
 
 // -----------------------------
-// Inline WorkflowsDropdown Component
-// -----------------------------
-
-function WorkflowsDropdown() {
-  const { activeSection, setActiveSection } = useSection();
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    }
-
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [open]);
-
-  const handleSelect = (section: "email" | "updates" | "research") => {
-    setActiveSection(section);
-    setOpen(false);
-  };
-
-  const labelMap: Record<string, string> = {
-    email: "Email & Slack",
-    updates: "Investor updates",
-    research: "Internal research",
-  };
-
-  // Highlight Workflows button active if one of these is selected
-  const isActive = ["email", "updates", "research"].includes(activeSection);
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setOpen((prev) => !prev)}
-        className={`px-2.5 py-1.5 text-sm font-normal rounded-md transition-colors flex items-center gap-1 ${
-          isActive
-            ? "bg-gray-100 text-gray-900"
-            : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-        }`}
-      >
-        Workflows
-        <ChevronDown className="ml-1 h-4 w-4 text-gray-400" />
-      </button>
-
-      {open && (
-        <div className="absolute top-full left-0 mt-1 w-44 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-          <div className="py-1">
-            {(["email", "updates", "research"] as const).map((section) => (
-              <button
-                key={section}
-                onClick={() => handleSelect(section)}
-                className={`w-full px-3 py-2 text-left text-sm ${
-                  activeSection === section
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {labelMap[section]}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// -----------------------------
 // Dashboard Component
 // -----------------------------
 
@@ -320,8 +316,17 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Dropdown items for Workflows
+  const workflowSections = ["email", "updates", "research"] as const;
+
+  const workflowLabels: Record<(typeof workflowSections)[number], string> = {
+    email: "Email & Slack",
+    updates: "Investor updates",
+    research: "Internal research",
+  };
+
+  // Nav items besides workflows dropdown
   const navigationItems = [
-    // Removed email, updates, research here since they're in dropdown now
     { id: "templates" as Section, label: "Templates" },
     { id: "colleagues" as Section, label: "Colleagues" },
     { id: "external" as Section, label: "External" },
@@ -368,7 +373,18 @@ export default function Dashboard() {
                   <Logo />
                 </div>
                 <nav className="flex space-x-3 items-center">
-                  <WorkflowsDropdown />
+                  <HeaderDropdown
+                    sections={workflowSections}
+                    labelMap={workflowLabels}
+                    activeSection={
+                      activeSection as "email" | "updates" | "research"
+                    }
+                    setActiveSection={(section) =>
+                      setActiveSection(section as Section)
+                    }
+                    buttonLabel="Workflows"
+                  />
+
                   {navigationItems.map((item) => (
                     <button
                       key={item.id}
@@ -393,6 +409,7 @@ export default function Dashboard() {
                 }}
                 variant="outline"
                 className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
+                disabled={loading}
               >
                 <Plus className="mr-1 h-4 w-4" />
                 Create workflow
@@ -431,11 +448,7 @@ export default function Dashboard() {
         </footer>
 
         {/* Loading Overlay */}
-        {loading && (
-          <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
-            <div className="loader"></div>
-          </div>
-        )}
+        {loading && <LoadingOverlay />}
       </div>
     </SectionContext.Provider>
   );
