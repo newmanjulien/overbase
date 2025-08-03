@@ -7,12 +7,13 @@ import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
 
 import { Emails } from "./Email";
-import { Templates } from "./Templates";
-import Handlers from "./Handlers";
 import { Updates } from "./Updates";
 import { Research } from "./Research";
+import { Templates } from "./Templates";
 import { Colleagues } from "./Colleagues";
+import { External } from "./External";
 import { Integrations } from "./Integrations";
+import Handlers from "./Handlers";
 
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -25,9 +26,10 @@ type Section =
   | "updates"
   | "research"
   | "templates"
-  | "handlers"
   | "colleagues"
-  | "integrations";
+  | "external"
+  | "integrations"
+  | "handlers";
 
 interface SectionContextType {
   activeSection: Section;
@@ -64,6 +66,7 @@ export default function Dashboard() {
     { id: "research" as Section, label: "Internal research" },
     { id: "templates" as Section, label: "Templates" },
     { id: "colleagues" as Section, label: "Colleagues" },
+    { id: "external" as Section, label: "External" },
     { id: "integrations" as Section, label: "Integrations" },
     { id: "handlers" as Section, label: "Handlers" },
   ];
@@ -80,6 +83,8 @@ export default function Dashboard() {
         return <Templates />;
       case "colleagues":
         return <Colleagues />;
+      case "external":
+        return <External />;
       case "integrations":
         return <Integrations />;
       case "handlers":
@@ -104,7 +109,7 @@ export default function Dashboard() {
                 <div className="h-9 w-[3.75rem]">
                   <Logo />
                 </div>
-                <nav className="flex space-x-4">
+                <nav className="flex space-x-3">
                   {navigationItems.map((item) => (
                     <button
                       key={item.id}
