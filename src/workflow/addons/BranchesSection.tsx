@@ -20,7 +20,7 @@ interface Props {
 
 export function BranchesSection({ step, onUpdate }: Props) {
   const [localBranches, setLocalBranches] = useState(step.branches || []);
-  const maxBranches = 4;
+  const maxBranches = 3;
 
   const handleUpdate = (id: string, field: keyof StepBranch, value: string) => {
     const updated = localBranches.map((b) =>
@@ -72,7 +72,9 @@ export function BranchesSection({ step, onUpdate }: Props) {
           className="mb-4 border border-gray-200 p-4 rounded bg-gray-50/50"
         >
           <div className="flex justify-between mb-2">
-            <span className="text-sm font-normal">Option {idx + 1}</span>
+            <span className="text-sm font-normal text-gray-700">
+              Option {idx + 1}
+            </span>
             <Button
               variant="ghost"
               size="sm"
@@ -97,6 +99,9 @@ export function BranchesSection({ step, onUpdate }: Props) {
               }
               placeholder="Prompt..."
             />
+            <p className="text-xs text-gray-500 mt-2">
+              Use @ to link integrations, colleagues or external partners
+            </p>
           </div>
         </div>
       ))}
