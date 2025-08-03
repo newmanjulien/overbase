@@ -2,7 +2,7 @@ import { BranchesSection } from "./BranchesSection";
 import { ApprovalSection } from "./ApprovalSection";
 import { InputSection } from "./InputSection";
 import { Button } from "../../components/ui/button";
-import { Split, UserCheck, FileEdit, Share2 } from "lucide-react";
+import { Split, UserCheck, FileEdit } from "lucide-react";
 
 interface Step {
   id: string;

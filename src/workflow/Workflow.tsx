@@ -86,12 +86,6 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
 
-  const workflowTypes: { id: WorkflowType; label: string }[] = [
-    { id: "email-slack", label: "Email & Slack" },
-    { id: "updates", label: "Investor updates" },
-    { id: "research", label: "Internal research" },
-  ];
-
   const addStep = () => {
     const newStep: Step = {
       id: Date.now().toString(),
