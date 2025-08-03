@@ -32,7 +32,7 @@ export function SaveControls({
       <Button
         onClick={onSave}
         disabled={disabled}
-        className="font-normal bg-white border border-gray-200 relative"
+        className="text-gray-700  bg-white border border-gray-200 relative"
       >
         {isSaving ? (
           <span className="flex items-center">

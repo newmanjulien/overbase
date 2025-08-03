@@ -20,6 +20,7 @@ interface Props {
 
 export function BranchesSection({ step, onUpdate }: Props) {
   const [localBranches, setLocalBranches] = useState(step.branches || []);
+  const maxBranches = 4;
 
   const handleUpdate = (id: string, field: keyof StepBranch, value: string) => {
     const updated = localBranches.map((b) =>
@@ -30,6 +31,7 @@ export function BranchesSection({ step, onUpdate }: Props) {
   };
 
   const addBranch = () => {
+    if (localBranches.length >= maxBranches) return;
     const newBranch: StepBranch = {
       id: Date.now().toString(),
       condition: "",
@@ -56,7 +58,8 @@ export function BranchesSection({ step, onUpdate }: Props) {
           size="sm"
           variant="outline"
           onClick={addBranch}
-          className="border-gray-200 text-gray-700 hover:bg-gray-100"
+          disabled={localBranches.length >= maxBranches}
+          className="border-gray-200 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="h-4 w-4 mr-1" />
           Add Option
@@ -69,7 +72,7 @@ export function BranchesSection({ step, onUpdate }: Props) {
           className="mb-4 border border-gray-200 p-4 rounded bg-gray-50/50"
         >
           <div className="flex justify-between mb-2">
-            <span className="text-sm font-small">Option {idx + 1}</span>
+            <span className="text-sm font-normal">Option {idx + 1}</span>
             <Button
               variant="ghost"
               size="sm"

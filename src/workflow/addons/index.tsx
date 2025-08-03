@@ -21,7 +21,6 @@ export function StepAddOns({ step, onUpdate }: Props) {
 
   return (
     <div className="pt-5 pb-3 space-y-6">
-      {/* Remove the duplicate BranchesSection - you had it twice */}
       {hasBranches && (
         <BranchesSection
           step={{ id: step.id, branches: step.branches }}
