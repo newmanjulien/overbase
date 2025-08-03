@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, ArrowLeft, Save } from "lucide-react";
+import { Plus, ArrowLeft, Save, FileText, CheckCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
@@ -313,14 +313,16 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-          <Link href="/">
-            <Button
-              variant="outline"
-              className="text-gray-600 border-gray-200 hover:bg-gray-100"
-            >
-              Cancel
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            className="text-gray-600 border-gray-200 hover:bg-gray-100"
+            onClick={() => {
+              // Add any test logic here if needed in the future
+            }}
+          >
+            <CheckCircle className="mr-2 h-4 w-4" />
+            Test workflow
+          </Button>
           <Button
             onClick={handleSave}
             disabled={
