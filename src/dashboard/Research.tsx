@@ -17,6 +17,7 @@ import { db } from "../lib/firebase";
 import { useRouter } from "next/navigation";
 import { useSection } from "./Dashboard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
+import { Button } from "../components/ui/button";
 
 interface Workflow {
   id: string;
@@ -95,7 +96,7 @@ export function Research() {
       {loading && <LoadingOverlay />}
 
       {/* Header */}
-      <div
+      {/* <div
         className="border-b border-gray-200/60"
         style={{ backgroundColor: "#FAFAFA" }}
       >
@@ -117,6 +118,47 @@ export function Research() {
               <span>Learn more</span>
               <ExternalLink className="ml-1 h-4 w-4" />
             </a>
+          </div>
+        </div>
+      </div> */}
+
+      {/* Header */}
+      <div
+        className="border-b border-gray-200/60"
+        style={{ backgroundColor: "#FAFAFA" }}
+      >
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="flex items-center justify-between mb-4">
+            {/* Left: stacked h1 and subtitle with link */}
+            <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
+              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
+                Internal research
+              </h1>
+              <h2 className="text-gray-600 text-sm font-normal mt-1">
+                Manage and customize workflows that let you easily know
+                what&apos;s going on in your business.{" "}
+                <a
+                  href="#"
+                  className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
+                >
+                  <span>Learn more</span>
+                  <ExternalLink className="ml-1 h-4 w-4" />
+                </a>
+              </h2>
+            </div>
+
+            {/* Right: create workflow button */}
+            <Button
+              onClick={() => {
+                setLoading(true);
+                router.push(`/workflow/new?from=research`);
+              }}
+              variant="outline"
+              className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
+              disabled={loading}
+            >
+              Create workflow
+            </Button>
           </div>
         </div>
       </div>
