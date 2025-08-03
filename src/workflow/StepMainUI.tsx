@@ -205,8 +205,7 @@ export function StepMainUI({
                     className="w-full min-h-[100px] resize-none"
                   />
                   <p className="text-xs text-gray-500 mt-2">
-                    Be specific about what you want the AI to accomplish in this
-                    step.
+                    Use @ to link integrations, colleagues or external partners
                   </p>
                 </div>
               )}
