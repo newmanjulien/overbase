@@ -12,6 +12,41 @@ interface SaveControlsProps {
   onTest?: () => void;
 }
 
+type ButtonVariant =
+  | "default"
+  | "destructive"
+  | "outline"
+  | "secondary"
+  | "ghost"
+  | "link";
+
+function ActionButton({
+  children,
+  onClick,
+  disabled,
+  variant = "default",
+  className = "",
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled: boolean;
+  variant?: ButtonVariant;
+  className?: string;
+}) {
+  return (
+    <Button
+      variant={variant}
+      onClick={onClick}
+      disabled={disabled}
+      className={`border border-gray-200 hover:bg-gray-100 ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      } ${className}`}
+    >
+      {children}
+    </Button>
+  );
+}
+
 export function SaveControls({
   isSaving,
   saveSuccess,
@@ -21,18 +56,23 @@ export function SaveControls({
 }: SaveControlsProps) {
   return (
     <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-      <Button
-        variant="outline"
-        className="text-gray-600 border-gray-200 hover:bg-gray-100"
+      <ActionButton
         onClick={onTest}
+        disabled={disabled}
+        className="text-gray-700 bg-white"
+        variant="default"
       >
-        <CheckCircle className="mr-2 h-4 w-4" />
-        Test workflow
-      </Button>
-      <Button
+        <span className="flex items-center">
+          <CheckCircle className="mr-2 h-4 w-4" />
+          Test workflow
+        </span>
+      </ActionButton>
+
+      <ActionButton
         onClick={onSave}
         disabled={disabled}
-        className="text-gray-700  bg-white border border-gray-200 relative"
+        className="text-gray-700 bg-white"
+        variant="default"
       >
         {isSaving ? (
           <span className="flex items-center">
@@ -82,7 +122,7 @@ export function SaveControls({
             Save Workflow
           </span>
         )}
-      </Button>
+      </ActionButton>
     </div>
   );
 }
