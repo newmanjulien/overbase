@@ -1,16 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, ArrowLeft, Save, FileText, CheckCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
 import { WorkflowStep } from "./WorkflowStep";
-import Link from "next/link";
 import { Step, defaultWorkflowName } from "./DummyData";
-import {
-  WorkflowTypeSelector,
-  WorkflowType,
-} from "../components/WorkflowTypeSelector";
+import { WorkflowType } from "../components/WorkflowTypeSelector";
 
 import {
   collection,
@@ -21,6 +16,9 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useSearchParams } from "next/navigation";
+
+import { SaveControls } from "../components/SaveControls";
+import { WorkflowHeader } from "./WorkflowHeader";
 
 interface StepBranch {
   id: string;
@@ -160,7 +158,6 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
 
   const handleTypeChange = (newType: WorkflowType) => {
     setWorkflowType(newType);
-    // Automatically update the assigned handler based on the new type
     const newHandler = getDefaultHandlerForType(newType);
     setAssignedHandler(newHandler);
   };
@@ -169,7 +166,6 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleSave = async () => {
-    // Enhanced validation - check all required fields
     if (!workflowName.trim() || workflowName === defaultWorkflowName) {
       alert("Please enter a workflow title before saving.");
       return;
@@ -209,10 +205,8 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
       };
 
       if (workflowId) {
-        // Update existing workflow
         await updateDoc(doc(db, "workflows", workflowId), workflowData);
       } else {
-        // Create new workflow
         const docRef = await addDoc(collection(db, "workflows"), {
           ...workflowData,
           createdAt: Timestamp.now(),
@@ -230,51 +224,25 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
     }
   };
 
+  const handleTest = () => {
+    // Placeholder for test workflow logic
+    alert("Test workflow clicked!");
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FAFAFA" }}>
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Back Button and Title Section */}
-        <div className="mb-8">
-          <Link href={`/?section=${from || ""}`}>
-            <Button
-              variant="ghost"
-              className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to dashboard
-            </Button>
-          </Link>
-
-          {/* Editable title and subtitle */}
-          <div className="space-y-4">
-            <div>
-              <Input
-                data-title
-                value={workflowName}
-                onChange={(e) => setWorkflowName(e.target.value)}
-                placeholder="Enter workflow title..."
-                className="placeholder-gray-800 font-medium border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Input
-                value={workflowDescription}
-                onChange={(e) => setWorkflowDescription(e.target.value)}
-                placeholder="Enter workflow description..."
-                className="placeholder-gray-500 text-gray-600 text-sm border-none shadow-none p-1 h-auto bg-transparent focus-visible:ring-0 hover:bg-gray-100 cursor-text"
-              />
-            </div>
-          </div>
-
-          {/* Type Selector: */}
-          <WorkflowTypeSelector
-            selectedType={workflowType}
-            onTypeChange={handleTypeChange}
-            types={workflowTypes}
-          />
-        </div>
+        {/* Header Section */}
+        <WorkflowHeader
+          from={from}
+          workflowName={workflowName}
+          setWorkflowName={setWorkflowName}
+          workflowDescription={workflowDescription}
+          setWorkflowDescription={setWorkflowDescription}
+          workflowType={workflowType}
+          handleTypeChange={handleTypeChange}
+        />
 
         {/* Steps Section */}
         <div className="space-y-4 mb-8">
@@ -311,81 +279,22 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
           </Button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-          <Button
-            variant="outline"
-            className="text-gray-600 border-gray-200 hover:bg-gray-100"
-            onClick={() => {
-              // Add any test logic here if needed in the future
-            }}
-          >
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Test workflow
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={
-              isSaving ||
-              !workflowName.trim() ||
-              workflowName === defaultWorkflowName ||
-              !workflowDescription.trim() ||
-              !steps.length ||
-              !steps[0]?.title.trim() ||
-              !steps[0]?.prompt.trim()
-            }
-            className="font-normal bg-white border border-gray-200 relative"
-          >
-            {isSaving ? (
-              <span className="flex items-center">
-                <svg
-                  className="animate-spin mr-2 h-4 w-4 text-gray-500"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  ></path>
-                </svg>
-                Saving...
-              </span>
-            ) : saveSuccess ? (
-              <span className="flex items-center text-gray-700">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mr-2 h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                Saved
-              </span>
-            ) : (
-              <span className="flex items-center">
-                <Save className="mr-2 h-4 w-4" />
-                {workflowId ? "Update Workflow" : "Save Workflow"}
-              </span>
-            )}
-          </Button>
-        </div>
+        {/* Use SaveControls component here */}
+        <SaveControls
+          isSaving={isSaving}
+          saveSuccess={saveSuccess}
+          disabled={
+            isSaving ||
+            !workflowName.trim() ||
+            workflowName === defaultWorkflowName ||
+            !workflowDescription.trim() ||
+            !steps.length ||
+            !steps[0]?.title.trim() ||
+            !steps[0]?.prompt.trim()
+          }
+          onSave={handleSave}
+          onTest={handleTest}
+        />
       </div>
     </div>
   );
