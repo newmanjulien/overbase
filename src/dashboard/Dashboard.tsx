@@ -1,8 +1,6 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "../components/ui/button";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
 import { Emails } from "./Email";
@@ -13,7 +11,7 @@ import { Colleagues } from "./Colleagues";
 import { External } from "./External";
 import { Integrations } from "./Integrations";
 import Handlers from "./Handlers";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { HeaderDropdown } from "../components/HeaderDropdown";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 
@@ -57,8 +55,7 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<Section>(
     initialSection || "email"
   );
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [loading] = useState(false);
 
   // Dropdown items for Workflows
   const workflowSections = ["email", "updates", "research"] as const;

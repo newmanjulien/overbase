@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink, Plus } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { InfoCard } from "../components/InfoCard";
 import { HandlerSelect } from "../components/HandlerSelect";
 import { WorkflowCard } from "../components/WorkflowCard";
