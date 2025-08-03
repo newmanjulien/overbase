@@ -60,7 +60,7 @@ export function ColleagueSection({ step, onUpdate }: Props) {
           <X className="h-3 w-3" />
         </Button>
       </div>
-      <div className="space-y-4 border rounded-lg p-4 bg-gray-50/50">
+      <div className="space-y-4 border border-gray-200 rounded-lg p-4 bg-gray-50/50">
         <div>
           <label className="text-xs font-medium text-gray-600 mb-1 block">
             When should the AI loop in a colleague?

@@ -52,14 +52,22 @@ export function BranchesSection({ step, onUpdate }: Props) {
         <label className="text-sm font-medium text-gray-700">
           Step Options
         </label>
-        <Button size="sm" variant="outline" onClick={addBranch}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={addBranch}
+          className="border-gray-200 text-gray-700 hover:bg-gray-100"
+        >
           <Plus className="h-4 w-4 mr-1" />
           Add Option
         </Button>
       </div>
 
       {localBranches.map((branch, idx) => (
-        <div key={branch.id} className="mb-4 border p-4 rounded bg-gray-50/50">
+        <div
+          key={branch.id}
+          className="mb-4 border border-gray-200 p-4 rounded bg-gray-50/50"
+        >
           <div className="flex justify-between mb-2">
             <span className="text-sm font-medium">Option {idx + 1}</span>
             <Button
