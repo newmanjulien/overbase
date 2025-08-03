@@ -1,7 +1,6 @@
 import { BranchesSection } from "./BranchesSection";
 import { ApprovalSection } from "./ApprovalSection";
 import { InputSection } from "./InputSection";
-import { ColleagueSection } from "./ColleagueSection";
 import { Button } from "../../components/ui/button";
 import { Split, UserCheck, FileEdit, Share2 } from "lucide-react";
 
@@ -10,7 +9,6 @@ interface Step {
   branches: any[];
   userApprovalInstructions?: any;
   userInputInstructions?: any;
-  colleagueInstructions?: any;
 }
 
 interface Props {
@@ -22,7 +20,7 @@ export function StepAddOns({ step, onUpdate }: Props) {
   const hasBranches = step.branches.length > 0;
 
   return (
-    <div className="py-4 space-y-6">
+    <div className="pt-5 pb-3 space-y-6">
       {/* Remove the duplicate BranchesSection - you had it twice */}
       {hasBranches && (
         <BranchesSection
@@ -51,18 +49,8 @@ export function StepAddOns({ step, onUpdate }: Props) {
         />
       )}
 
-      {step.colleagueInstructions && (
-        <ColleagueSection
-          step={{
-            id: step.id,
-            colleagueInstructions: step.colleagueInstructions,
-          }}
-          onUpdate={onUpdate}
-        />
-      )}
-
       {/* Action buttons to add new sections */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex space-x-2">
         {!hasBranches && (
           <Button
             variant="outline"
@@ -74,7 +62,7 @@ export function StepAddOns({ step, onUpdate }: Props) {
                 ],
               })
             }
-            className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
+            className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50 min-w-[110px] px-3"
           >
             <Split className="mr-1 h-3 w-3" /> Split into options
           </Button>
@@ -91,7 +79,7 @@ export function StepAddOns({ step, onUpdate }: Props) {
                 },
               })
             }
-            className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
+            className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50 min-w-[110px] px-3"
           >
             <UserCheck className="mr-1 h-3 w-3" /> Ask for approval
           </Button>
@@ -108,27 +96,9 @@ export function StepAddOns({ step, onUpdate }: Props) {
                 },
               })
             }
-            className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
+            className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50 min-w-[110px] px-3"
           >
             <FileEdit className="mr-1 h-3 w-3" /> Ask for input
-          </Button>
-        )}
-        {!step.colleagueInstructions && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onUpdate(step.id, {
-                colleagueInstructions: {
-                  whenToLoop: "",
-                  selectedColleague: "",
-                  whatToRequest: "",
-                },
-              })
-            }
-            className="text-xs bg-transparent text-gray-600 border-gray-200 hover:bg-gray-50"
-          >
-            <Share2 className="mr-1 h-3 w-3" /> Loop in a colleague
           </Button>
         )}
       </div>

@@ -69,7 +69,7 @@ export function BranchesSection({ step, onUpdate }: Props) {
           className="mb-4 border border-gray-200 p-4 rounded bg-gray-50/50"
         >
           <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium">Option {idx + 1}</span>
+            <span className="text-sm font-small">Option {idx + 1}</span>
             <Button
               variant="ghost"
               size="sm"

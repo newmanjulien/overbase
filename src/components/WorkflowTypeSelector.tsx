@@ -18,7 +18,7 @@ export const WorkflowTypeSelector = ({
           <button
             key={type.id}
             onClick={() => onTypeChange(type.id)}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+            className={`px-4 py-2 text-sm font-normal rounded-md transition-all duration-200 ${
               selectedType === type.id
                 ? "bg-gray-100 text-gray-900"
                 : "text-gray-600 hover:text-gray-900"
