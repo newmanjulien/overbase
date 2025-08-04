@@ -153,11 +153,10 @@ export function Updates() {
                 setLoading(true);
                 router.push(`/workflow/new?from=updates`);
               }}
-              variant="outline"
-              className="font-normal bg-white border-gray-200 hover:bg-gray-50/80"
+              className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}
             >
-              Create workflow
+              New workflow
             </Button>
           </div>
         </div>
