@@ -108,7 +108,7 @@ export function Emails() {
                 Email & Slack
               </h1>
               <h2 className="text-gray-600 text-sm font-normal mt-1">
-                Manage and customize workflows that let you can easily triage
+                Manage and customize workflows that let you easily triage
                 your emails and your Slack.{" "}
                 <a
                   href="#"
