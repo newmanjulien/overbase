@@ -62,8 +62,8 @@ export default function Dashboard() {
 
   const workflowLabels: Record<(typeof workflowSections)[number], string> = {
     email: "Email & Slack",
-    updates: "Investor updates",
-    research: "Internal research",
+    updates: "After sales calls",
+    research: "Customer success",
   };
 
   // Nav items besides workflows dropdown

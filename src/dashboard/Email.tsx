@@ -159,7 +159,7 @@ export function Emails() {
 
           <div className="mt-8 w-full">
             <InfoCard
-              text="Copy email & Slack workflows other CEOs created then easily customize them"
+              text="Copy email & Slack workflows which other CEOs created then easily customize them"
               linkText="Templates"
               onClick={() => setActiveSection("templates")}
             />
