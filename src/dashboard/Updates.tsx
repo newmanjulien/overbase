@@ -96,33 +96,6 @@ export function Updates() {
       {loading && <LoadingOverlay />}
 
       {/* Header */}
-      {/* <div
-        className="border-b border-gray-200/60"
-        style={{ backgroundColor: "#FAFAFA" }}
-      >
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
-              Investor updates
-            </h1>
-          </div>
-          <div className="flex items-center text-gray-600 text-sm font-normal">
-            <span>
-              Manage and customize workflows that let you easily create investor
-              updates and board decks.{" "}
-            </span>
-            <a
-              href="#"
-              className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
-            >
-              <span>Learn more</span>
-              <ExternalLink className="ml-1 h-4 w-4" />
-            </a>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Header */}
       <div
         className="border-b border-gray-200/60"
         style={{ backgroundColor: "#FAFAFA" }}
@@ -132,11 +105,11 @@ export function Updates() {
             {/* Left: stacked h1 and subtitle with link */}
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
               <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
-                Investor updates
+                After sales calls
               </h1>
               <h2 className="text-gray-600 text-sm font-normal mt-1">
-                Manage and customize workflows that let you easily create
-                investor updates and board decks.{" "}
+                Manage and customize workflows that let you easily do everything
+                you need to do after sales calls.{" "}
                 <a
                   href="#"
                   className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
@@ -186,7 +159,7 @@ export function Updates() {
 
           <div className="mt-8 w-full">
             <InfoCard
-              text="Copy investor update workflows other founders created so you can easily customize them"
+              text="Copy workflows for after sales calls which other CEOs created so you can easily customize them"
               linkText="Templates"
               onClick={() => setActiveSection("templates")}
             />

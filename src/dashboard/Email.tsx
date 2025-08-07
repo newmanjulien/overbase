@@ -108,8 +108,8 @@ export function Emails() {
                 Email & Slack
               </h1>
               <h2 className="text-gray-600 text-sm font-normal mt-1">
-                Manage and customize workflows that let you easily triage
-                your emails and your Slack.{" "}
+                Manage and customize workflows that let you easily triage your
+                emails and your Slack.{" "}
                 <a
                   href="#"
                   className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
@@ -159,7 +159,7 @@ export function Emails() {
 
           <div className="mt-8 w-full">
             <InfoCard
-              text="Copy email & Slack workflows other founders created then easily customize them"
+              text="Copy email & Slack workflows other CEOs created then easily customize them"
               linkText="Templates"
               onClick={() => setActiveSection("templates")}
             />
