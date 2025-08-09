@@ -85,7 +85,7 @@ export function Sales() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    router.push(`/workflow/${workflowId}?from=sales`);
+    router.push(`/workflow/${workflowId}?section=sales`);
   };
 
   return (
@@ -121,7 +121,7 @@ export function Sales() {
             <Button
               onClick={() => {
                 setLoading(true);
-                router.push(`/workflow/new?from=sales`);
+                router.push(`/workflow/new?section=sales`);
               }}
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}
