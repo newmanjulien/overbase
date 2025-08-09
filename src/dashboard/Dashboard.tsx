@@ -4,8 +4,8 @@ import { createContext, useContext, useState } from "react";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
 import { Emails } from "./Email";
-import { Updates } from "./Updates";
-import { Research } from "./Research";
+import { Sales } from "./Sales";
+import { Customer } from "./Customer";
 import { Templates } from "./Templates";
 import { Colleagues } from "./Colleagues";
 import { External } from "./External";
@@ -21,8 +21,8 @@ import { LoadingOverlay } from "../components/LoadingOverlay";
 
 export type Section =
   | "email"
-  | "updates"
-  | "research"
+  | "sales"
+  | "customer"
   | "templates"
   | "colleagues"
   | "external"
@@ -55,15 +55,16 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<Section>(
     initialSection || "email"
   );
+
   const [loading] = useState(false);
 
   // Dropdown items for Workflows
-  const workflowSections = ["email", "updates", "research"] as const;
+  const workflowSections = ["email", "sales", "customer"] as const;
 
   const workflowLabels: Record<(typeof workflowSections)[number], string> = {
     email: "Email & Slack",
-    updates: "After sales calls",
-    research: "Customer success",
+    sales: "After sales calls",
+    customer: "Customer success",
   };
 
   // Nav items besides workflows dropdown
@@ -79,10 +80,10 @@ export default function Dashboard() {
     switch (activeSection) {
       case "email":
         return <Emails />;
-      case "updates":
-        return <Updates />;
-      case "research":
-        return <Research />;
+      case "sales":
+        return <Sales />;
+      case "customer":
+        return <Customer />;
       case "templates":
         return <Templates />;
       case "colleagues":
@@ -118,7 +119,7 @@ export default function Dashboard() {
                     sections={workflowSections}
                     labelMap={workflowLabels}
                     activeSection={
-                      activeSection as "email" | "updates" | "research"
+                      activeSection as "email" | "sales" | "customer"
                     }
                     setActiveSection={(section) =>
                       setActiveSection(section as Section)

@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useSection } from "./Dashboard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { Button } from "../components/ui/button";
+import { buildWorkflowUrl } from "../lib/urlHelpers";
 
 interface Workflow {
   id: string;
@@ -27,7 +28,7 @@ interface Workflow {
   [key: string]: any;
 }
 
-export function Research() {
+export function Customer() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [handlers, setHandlers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,7 @@ export function Research() {
   useEffect(() => {
     const q = query(
       collection(db, "workflows"),
-      where("type", "==", "research")
+      where("type", "==", "customer")
     );
 
     return onSnapshot(q, (snap) => {
@@ -88,7 +89,8 @@ export function Research() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    router.push(`/workflow/${workflowId}?from=research`);
+    // router.push(`/workflow/${workflowId}?section=customer`);
+    router.push(buildWorkflowUrl(workflowId, { section: "customer" }));
   };
 
   return (
@@ -124,7 +126,10 @@ export function Research() {
             <Button
               onClick={() => {
                 setLoading(true);
-                router.push(`/workflow/new?from=research`);
+                // router.push(`/workflow/new?section=customer`);
+                router.push(
+                  buildWorkflowUrl(undefined, { section: "customer" })
+                );
               }}
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}

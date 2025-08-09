@@ -12,7 +12,7 @@ import {
 import { LoadingOverlay } from "../components/LoadingOverlay";
 
 interface WorkflowHeaderProps {
-  from: string | null;
+  section: string | null;
   workflowName: string;
   setWorkflowName: (value: string) => void;
   workflowDescription: string;
@@ -22,7 +22,7 @@ interface WorkflowHeaderProps {
 }
 
 export function WorkflowHeader({
-  from,
+  section,
   workflowName,
   setWorkflowName,
   workflowDescription,
@@ -37,18 +37,19 @@ export function WorkflowHeader({
   };
 
   const workflowTypes: { id: WorkflowType; label: string }[] = [
-    { id: "email-slack", label: "Email & Slack" },
-    { id: "updates", label: "Investor updates" },
-    { id: "research", label: "Internal research" },
+    { id: "email", label: "Email & Slack" },
+    { id: "sales", label: "After sales calls" },
+    { id: "customer", label: "Customer success" },
   ];
 
   return (
     <div className="mb-8 relative">
       {loading && <LoadingOverlay />}
 
-      <Link href={`/?section=${from || ""}`} onClick={handleBackClick}>
+      <Link href={`/?section=${section || ""}`} onClick={handleBackClick}>
         <Button
           variant="ghost"
+          disabled={loading}
           className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal bg-transparent hover:bg-transparent focus:bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

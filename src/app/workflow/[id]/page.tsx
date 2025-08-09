@@ -68,7 +68,7 @@ export default function EditWorkflowPage() {
         id: workflowData.id,
         name: workflowData.name ?? "",
         description: workflowData.description ?? "",
-        type: workflowData.type ?? "email-slack",
+        type: workflowData.type ?? "email",
         assignedHandler: workflowData.assignedHandler ?? "1",
         steps: workflowData.steps ?? [],
       }}
