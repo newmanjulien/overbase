@@ -27,7 +27,7 @@ interface Workflow {
   [key: string]: any;
 }
 
-export function Updates() {
+export function Sales() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [handlers, setHandlers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -35,10 +35,7 @@ export function Updates() {
   const { setActiveSection } = useSection();
 
   useEffect(() => {
-    const q = query(
-      collection(db, "workflows"),
-      where("type", "==", "updates")
-    );
+    const q = query(collection(db, "workflows"), where("type", "==", "sales"));
 
     return onSnapshot(q, (snap) => {
       const workflowsData: Workflow[] = snap.docs.map((doc) => ({
@@ -88,7 +85,7 @@ export function Updates() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    router.push(`/workflow/${workflowId}?from=updates`);
+    router.push(`/workflow/${workflowId}?from=sales`);
   };
 
   return (
@@ -124,7 +121,7 @@ export function Updates() {
             <Button
               onClick={() => {
                 setLoading(true);
-                router.push(`/workflow/new?from=updates`);
+                router.push(`/workflow/new?from=sales`);
               }}
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}

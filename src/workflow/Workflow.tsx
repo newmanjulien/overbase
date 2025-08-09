@@ -56,7 +56,7 @@ const getDefaultHandlerForType = (type: WorkflowType): string => {
   switch (type) {
     case "email-slack":
       return "1"; // Email handler
-    case "updates":
+    case "sales":
       return "2"; // Deck creation handler
     case "customer":
       return "3"; // Data gathering handler

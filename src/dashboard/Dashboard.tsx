@@ -4,8 +4,8 @@ import { createContext, useContext, useState } from "react";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
 import { Emails } from "./Email";
-import { Updates } from "./Updates";
-import { Customer } from "./Research";
+import { Sales } from "./Updates";
+import { Customer } from "./Customer";
 import { Templates } from "./Templates";
 import { Colleagues } from "./Colleagues";
 import { External } from "./External";
@@ -21,7 +21,7 @@ import { LoadingOverlay } from "../components/LoadingOverlay";
 
 export type Section =
   | "email"
-  | "updates"
+  | "sales"
   | "customer"
   | "templates"
   | "colleagues"
@@ -58,11 +58,11 @@ export default function Dashboard() {
   const [loading] = useState(false);
 
   // Dropdown items for Workflows
-  const workflowSections = ["email", "updates", "customer"] as const;
+  const workflowSections = ["email", "sales", "customer"] as const;
 
   const workflowLabels: Record<(typeof workflowSections)[number], string> = {
     email: "Email & Slack",
-    updates: "After sales calls",
+    sales: "After sales calls",
     customer: "Customer success",
   };
 
@@ -79,8 +79,8 @@ export default function Dashboard() {
     switch (activeSection) {
       case "email":
         return <Emails />;
-      case "updates":
-        return <Updates />;
+      case "sales":
+        return <Sales />;
       case "customer":
         return <Customer />;
       case "templates":
@@ -118,7 +118,7 @@ export default function Dashboard() {
                     sections={workflowSections}
                     labelMap={workflowLabels}
                     activeSection={
-                      activeSection as "email" | "updates" | "customer"
+                      activeSection as "email" | "sales" | "customer"
                     }
                     setActiveSection={(section) =>
                       setActiveSection(section as Section)

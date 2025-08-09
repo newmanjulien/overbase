@@ -7,7 +7,7 @@ import { WorkflowType } from "../../../components/WorkflowTypeSelector";
 
 const fromToTypeMap: Record<string, WorkflowType> = {
   email: "email-slack",
-  updates: "updates",
+  sales: "sales",
   customer: "customer",
 };
 
@@ -15,7 +15,7 @@ const getDefaultHandlerForType = (type: WorkflowType): string => {
   switch (type) {
     case "email-slack":
       return "1";
-    case "updates":
+    case "sales":
       return "2";
     case "customer":
       return "3";
