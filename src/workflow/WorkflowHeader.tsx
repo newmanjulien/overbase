@@ -37,7 +37,7 @@ export function WorkflowHeader({
   };
 
   const workflowTypes: { id: WorkflowType; label: string }[] = [
-    { id: "email-slack", label: "Email & Slack" },
+    { id: "email", label: "Email & Slack" },
     { id: "sales", label: "After sales calls" },
     { id: "customer", label: "Customer success" },
   ];
@@ -49,6 +49,7 @@ export function WorkflowHeader({
       <Link href={`/?section=${section || ""}`} onClick={handleBackClick}>
         <Button
           variant="ghost"
+          disabled={loading}
           className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal bg-transparent hover:bg-transparent focus:bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

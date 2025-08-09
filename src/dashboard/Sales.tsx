@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useSection } from "./Dashboard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { Button } from "../components/ui/button";
+import { buildWorkflowUrl } from "../lib/urlHelpers";
 
 interface Workflow {
   id: string;
@@ -85,7 +86,8 @@ export function Sales() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    router.push(`/workflow/${workflowId}?section=sales`);
+    // router.push(`/workflow/${workflowId}?section=sales`);
+    router.push(buildWorkflowUrl(workflowId, { section: "sales" }));
   };
 
   return (
@@ -121,7 +123,8 @@ export function Sales() {
             <Button
               onClick={() => {
                 setLoading(true);
-                router.push(`/workflow/new?section=sales`);
+                // router.push(`/workflow/new?section=sales`);
+                router.push(buildWorkflowUrl(undefined, { section: "sales" }));
               }}
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}

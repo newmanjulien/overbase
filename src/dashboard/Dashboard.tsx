@@ -55,6 +55,7 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<Section>(
     initialSection || "email"
   );
+
   const [loading] = useState(false);
 
   // Dropdown items for Workflows

@@ -6,14 +6,14 @@ import WorkflowBuilder from "../../../workflow/Workflow";
 import { WorkflowType } from "../../../components/WorkflowTypeSelector";
 
 const fromToTypeMap: Record<string, WorkflowType> = {
-  email: "email-slack",
+  email: "email",
   sales: "sales",
   customer: "customer",
 };
 
 const getDefaultHandlerForType = (type: WorkflowType): string => {
   switch (type) {
-    case "email-slack":
+    case "email":
       return "1";
     case "sales":
       return "2";
@@ -41,7 +41,7 @@ export default function NewWorkflowPageInner() {
     const workflowType =
       fromParam && fromToTypeMap[fromParam]
         ? fromToTypeMap[fromParam]
-        : "email-slack";
+        : "email";
 
     setInitialData({
       id: undefined,

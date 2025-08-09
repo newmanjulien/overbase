@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useSection } from "./Dashboard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { Button } from "../components/ui/button";
+import { buildWorkflowUrl } from "../lib/urlHelpers";
 
 interface Workflow {
   id: string;
@@ -35,10 +36,7 @@ export function Emails() {
   const { setActiveSection } = useSection();
 
   useEffect(() => {
-    const q = query(
-      collection(db, "workflows"),
-      where("type", "==", "email-slack")
-    );
+    const q = query(collection(db, "workflows"), where("type", "==", "email"));
 
     return onSnapshot(q, (snap) => {
       const workflowsData: Workflow[] = snap.docs.map((doc) => ({
@@ -88,7 +86,8 @@ export function Emails() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    router.push(`/workflow/${workflowId}`);
+    // router.push(`/workflow/${workflowId}?section=emails`);
+    router.push(buildWorkflowUrl(workflowId, { section: "email" }));
   };
 
   return (
@@ -124,7 +123,8 @@ export function Emails() {
             <Button
               onClick={() => {
                 setLoading(true);
-                router.push(`/workflow/new?from=email`);
+                // router.push(`/workflow/new?section=email`);
+                router.push(buildWorkflowUrl(undefined, { section: "email" }));
               }}
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}

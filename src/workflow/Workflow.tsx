@@ -55,7 +55,7 @@ interface WorkflowBuilderProps {
 
 const getDefaultHandlerForType = (type: WorkflowType): string => {
   switch (type) {
-    case "email-slack":
+    case "email":
       return "1"; // Email handler
     case "sales":
       return "2"; // Deck creation handler
