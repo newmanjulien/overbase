@@ -4,7 +4,7 @@ import { createContext, useContext, useState } from "react";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
 import { Emails } from "./Email";
-import { Sales } from "./Updates";
+import { Sales } from "./Sales";
 import { Customer } from "./Customer";
 import { Templates } from "./Templates";
 import { Colleagues } from "./Colleagues";

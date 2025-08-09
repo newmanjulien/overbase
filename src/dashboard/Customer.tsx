@@ -88,7 +88,7 @@ export function Customer() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    router.push(`/workflow/${workflowId}?from=customer`);
+    router.push(`/workflow/${workflowId}?section=customer`);
   };
 
   return (
@@ -124,7 +124,7 @@ export function Customer() {
             <Button
               onClick={() => {
                 setLoading(true);
-                router.push(`/workflow/new?from=customer`);
+                router.push(`/workflow/new?section=customer`);
               }}
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}

@@ -6,6 +6,7 @@ import { Button } from "../components/ui/button";
 import { WorkflowStep } from "./WorkflowStep";
 import { Step, defaultWorkflowName } from "./DummyData";
 import { WorkflowType } from "../components/WorkflowTypeSelector";
+import { useSearchParams } from "next/navigation";
 
 import {
   collection,
@@ -80,6 +81,9 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
     (initialData.steps || []).map((s) => ({ ...s, isOpen: false })) || []
   );
   const [workflowId, setWorkflowId] = useState(initialData.id || null);
+
+  const searchParams = useSearchParams();
+  const section = searchParams.get("section");
 
   const addStep = () => {
     const newStep: Step = {
@@ -224,7 +228,7 @@ export default function WorkflowBuilder({ initialData }: WorkflowBuilderProps) {
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Header Section */}
         <WorkflowHeader
-          from={null} // from is unused here since initialData controls type
+          section={section}
           workflowName={workflowName}
           setWorkflowName={setWorkflowName}
           workflowDescription={workflowDescription}

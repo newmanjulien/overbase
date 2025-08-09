@@ -12,7 +12,7 @@ import {
 import { LoadingOverlay } from "../components/LoadingOverlay";
 
 interface WorkflowHeaderProps {
-  from: string | null;
+  section: string | null;
   workflowName: string;
   setWorkflowName: (value: string) => void;
   workflowDescription: string;
@@ -22,7 +22,7 @@ interface WorkflowHeaderProps {
 }
 
 export function WorkflowHeader({
-  from,
+  section,
   workflowName,
   setWorkflowName,
   workflowDescription,
@@ -46,7 +46,7 @@ export function WorkflowHeader({
     <div className="mb-8 relative">
       {loading && <LoadingOverlay />}
 
-      <Link href={`/?section=${from || ""}`} onClick={handleBackClick}>
+      <Link href={`/?section=${section || ""}`} onClick={handleBackClick}>
         <Button
           variant="ghost"
           className="mb-4 text-gray-600 hover:text-gray-900 p-0 h-auto font-normal bg-transparent hover:bg-transparent focus:bg-transparent"
