@@ -38,8 +38,8 @@ export function WorkflowHeader({
 
   const workflowTypes: { id: WorkflowType; label: string }[] = [
     { id: "email-slack", label: "Email & Slack" },
-    { id: "updates", label: "Investor updates" },
-    { id: "research", label: "Internal research" },
+    { id: "updates", label: "After sales calls" },
+    { id: "customer", label: "Customer success" },
   ];
 
   return (

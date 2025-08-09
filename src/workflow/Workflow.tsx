@@ -58,7 +58,7 @@ const getDefaultHandlerForType = (type: WorkflowType): string => {
       return "1"; // Email handler
     case "updates":
       return "2"; // Deck creation handler
-    case "research":
+    case "customer":
       return "3"; // Data gathering handler
     default:
       return "1"; // Fallback

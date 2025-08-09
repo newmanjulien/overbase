@@ -27,7 +27,7 @@ interface Workflow {
   [key: string]: any;
 }
 
-export function Research() {
+export function Customer() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [handlers, setHandlers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ export function Research() {
   useEffect(() => {
     const q = query(
       collection(db, "workflows"),
-      where("type", "==", "research")
+      where("type", "==", "customer")
     );
 
     return onSnapshot(q, (snap) => {
@@ -88,7 +88,7 @@ export function Research() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    router.push(`/workflow/${workflowId}?from=research`);
+    router.push(`/workflow/${workflowId}?from=customer`);
   };
 
   return (
@@ -124,7 +124,7 @@ export function Research() {
             <Button
               onClick={() => {
                 setLoading(true);
-                router.push(`/workflow/new?from=research`);
+                router.push(`/workflow/new?from=customer`);
               }}
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}
