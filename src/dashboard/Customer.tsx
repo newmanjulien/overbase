@@ -106,7 +106,7 @@ export function Customer() {
           <div className="flex items-center justify-between mb-4">
             {/* Left: stacked h1 and subtitle with link */}
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
-              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
+              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
                 Customer success
               </h1>
               <h2 className="text-gray-600 text-sm font-normal mt-1">

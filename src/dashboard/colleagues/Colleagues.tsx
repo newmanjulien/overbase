@@ -62,7 +62,6 @@ export function Colleagues() {
   return (
     <div>
       {/* Header Section */}
-
       <div
         className="border-b border-gray-200/60"
         style={{ backgroundColor: "#FAFAFA" }}
@@ -71,7 +70,7 @@ export function Colleagues() {
           <div className="flex items-center justify-between mb-4">
             {/* Left: stacked h1 and subtitle with link */}
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
-              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
+              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
                 Colleagues
               </h1>
               <h2 className="text-gray-600 text-sm font-normal mt-1">

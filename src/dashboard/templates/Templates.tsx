@@ -85,7 +85,7 @@ export function Templates() {
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between mb-4">
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
-              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
+              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
                 Templates
               </h1>
               <div className="flex items-center text-gray-800 text-sm mt-1">
