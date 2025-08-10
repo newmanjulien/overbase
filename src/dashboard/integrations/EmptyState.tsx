@@ -18,7 +18,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`border border-gray-200 rounded-lg bg-gray-50/30 py-32 px-20 flex flex-col items-center justify-center text-center min-h-[600px] ${className}`}
+      className={`border border-gray-200/60 rounded-lg bg-gray-50/30 py-32 px-20 flex flex-col items-center justify-center text-center min-h-[600px] ${className}`}
     >
       <div className="w-10 h-10 rounded-full bg-gray-200/60 flex items-center justify-center mb-6">
         <Info className="w-5 h-5 text-gray-500" />
