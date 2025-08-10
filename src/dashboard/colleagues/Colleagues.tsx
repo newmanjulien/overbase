@@ -102,7 +102,7 @@ export function Colleagues() {
       {/* Main Content Section */}
       <div style={{ backgroundColor: "#FAFAFA" }}>
         <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex flex-col gap-3">
             {/* Select All card */}
             <WorkflowCard
               title="Select all"

@@ -20,19 +20,19 @@ interface ExternalPartner {
 
 const mockExternalPartners: ExternalPartner[] = [
   {
-    id: "1",
-    name: "John Smith",
-    company: "Developer",
+    id: "101",
+    name: "Emily Carter",
+    company: "Acme Corp",
   },
   {
-    id: "2",
-    name: "Sarah Wilson",
-    company: "Designer",
+    id: "102",
+    name: "David Lee",
+    company: "Globex Inc",
   },
   {
-    id: "3",
-    name: "Mike Johnson",
-    company: "Product Manager",
+    id: "103",
+    name: "Olivia Martinez",
+    company: "Initech",
   },
 ];
 
@@ -102,7 +102,7 @@ export function External() {
       {/* Main Content Section */}
       <div style={{ backgroundColor: "#FAFAFA" }}>
         <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="w-full flex flex-col gap-4">
+          <div className="w-full flex flex-col gap-3">
             {/* Select All card */}
             <WorkflowCard
               title="Select all"

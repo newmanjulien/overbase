@@ -81,11 +81,47 @@ export function Integrations() {
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
       {/* Header Section with subtle bottom border */}
-      <div className="border-b border-gray-200/60">
+      {/* <div className="border-b border-gray-200/60">
         <div className="max-w-7xl mx-auto px-6 py-10">
           <h1 className="text-[2rem] font-medium text-gray-800 mb-4 tracking-tight">
             Integrations
           </h1>
+        </div>
+      </div> */}
+      <div
+        className="border-b border-gray-200/60"
+        style={{ backgroundColor: "#FAFAFA" }}
+      >
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
+              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
+                Integrations
+              </h1>
+              <div className="flex items-center text-gray-800 text-sm mt-1">
+                <span>
+                  Set up integrations so you can use them in your workflows and
+                  so your AI can more easily help with tasks.
+                </span>
+                <a
+                  href="#"
+                  className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
+                >
+                  <span>Learn more</span>
+                  <ExternalLink className="ml-1 h-4 w-4" />
+                </a>
+              </div>
+            </div>
+
+            <Button
+              onClick={() => {
+                /* does nothing */
+              }}
+              className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100"
+            >
+              Browse integrations
+            </Button>
+          </div>
         </div>
       </div>
 
