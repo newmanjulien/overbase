@@ -6,8 +6,9 @@ import { Button } from "../../components/ui/button";
 import { WorkflowCard } from "../../components/WorkflowCard";
 import { EmptyState } from "./EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
+import Overview from "./Overview";
 
-interface Integration {
+export interface Integration {
   id: number;
   title: string;
   subtitle: string;
@@ -15,9 +16,10 @@ interface Integration {
   status?: string;
   badge?: string;
   lastUpdated?: string;
+  previewImages?: { id: number; src: string; alt: string }[];
 }
 
-const initialInstalledIntegrations: Integration[] = []; // start empty
+const initialInstalledIntegrations: Integration[] = [];
 
 const initialPopularIntegrations: Integration[] = [
   {
@@ -25,6 +27,12 @@ const initialPopularIntegrations: Integration[] = [
     title: "GrowthBook",
     subtitle: "Open source feature flags and A/B tests",
     logo: "/images/gmail.png",
+    previewImages: [
+      { id: 1, src: "/analytics-dashboard.png", alt: "Dashboard Overview" },
+      { id: 2, src: "/placeholder-uhyqz.png", alt: "Experiment Results" },
+      { id: 3, src: "/feature-flags-interface.png", alt: "Feature Flags" },
+      { id: 4, src: "/analytics-dashboard.png", alt: "Analytics Dashboard" },
+    ],
   },
   {
     id: 2,
@@ -71,8 +79,18 @@ export function Integrations() {
   const [popularIntegrations, setPopularIntegrations] = useState<Integration[]>(
     initialPopularIntegrations
   );
+  const [selectedIntegration, setSelectedIntegration] =
+    useState<Integration | null>(null);
 
-  const handleAddIntegration = (integration: Integration) => {
+  const handleSelectIntegration = (integration: Integration) => {
+    setSelectedIntegration(integration);
+  };
+
+  const handleBack = () => {
+    setSelectedIntegration(null);
+  };
+
+  const handleInstall = (integration: Integration) => {
     setInstalledIntegrations((prev) => [
       ...prev,
       {
@@ -83,10 +101,12 @@ export function Integrations() {
       },
     ]);
     setPopularIntegrations((prev) =>
-      prev.filter((item) => item.id !== integration.id)
+      prev.filter((i) => i.id !== integration.id)
     );
+    setSelectedIntegration(null);
   };
 
+  // Optional: Scroll to popular integrations when browsing
   const handleBrowseClick = () => {
     const popularSection = document.getElementById("popular-integrations");
     if (popularSection) {
@@ -95,23 +115,35 @@ export function Integrations() {
     }
   };
 
+  if (selectedIntegration) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        <Overview
+          integration={selectedIntegration}
+          onBack={handleBack}
+          onInstall={handleInstall}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
+      {/* === Header Section === */}
       <div
         className="border-b border-gray-200/60"
         style={{ backgroundColor: "#FAFAFA" }}
       >
         <div className="max-w-7xl mx-auto px-6 py-10">
           <div className="flex items-center justify-between mb-4">
+            {/* Left: stacked h1 and subtitle with link */}
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
               <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
                 Integrations
               </h1>
-              <div className="flex items-center text-gray-800 text-sm mt-1">
-                <span>
-                  Set up integrations so you can use them in your workflows and
-                  so your AI can more easily help with tasks.
-                </span>
+              <h2 className="text-gray-600 text-sm font-normal mt-1">
+                Set up integrations so you can use them in your workflows and so
+                your AI can more easily help with tasks.{" "}
                 <a
                   href="#"
                   className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
@@ -119,9 +151,10 @@ export function Integrations() {
                   <span>Learn more</span>
                   <ExternalLink className="ml-1 h-4 w-4" />
                 </a>
-              </div>
+              </h2>
             </div>
 
+            {/* Right: browse integrations button */}
             <Button
               onClick={handleBrowseClick}
               className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100"
@@ -132,7 +165,7 @@ export function Integrations() {
         </div>
       </div>
 
-      {/* Main Content Section */}
+      {/* === Main Content Section === */}
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex gap-8">
           {/* Left Section - Installed Integrations */}
@@ -160,7 +193,7 @@ export function Integrations() {
           {/* Right Section - Popular Integrations */}
           <PopularIntegrations
             popularIntegrations={popularIntegrations}
-            onAddIntegration={handleAddIntegration}
+            onAddIntegration={handleSelectIntegration}
             onBrowseClick={handleBrowseClick}
           />
         </div>

@@ -1,5 +1,3 @@
-// src/dashboard/integrations/DummyData.ts
-
 export interface PreviewImage {
   id: number;
   src: string;
@@ -9,12 +7,12 @@ export interface PreviewImage {
 export interface Integration {
   id: number;
   title: string;
-  subtitle: string;
+  subtitle: string; // required
   logo: string;
   status?: string;
   badge?: string;
   lastUpdated?: string;
-  previewImages: PreviewImage[];
+  previewImages?: PreviewImage[]; // optional now
 }
 
 export const integrations: Integration[] = [
@@ -67,34 +65,29 @@ export const integrations: Integration[] = [
     title: "Inngest",
     subtitle: "Reliable & powerful background functions",
     logo: "/images/gmail.png",
-    previewImages: [],
   },
   {
     id: 4,
     title: "Upstash",
     subtitle: "Serverless DB (Redis, Vector, Queue)",
     logo: "/images/gmail.png",
-    previewImages: [],
   },
   {
     id: 5,
     title: "Turso Cloud",
     subtitle: "SQLite for the age of AI",
     logo: "/images/gmail.png",
-    previewImages: [],
   },
   {
     id: 6,
     title: "PlanetScale",
     subtitle: "The world's most advanced serverless MySQL platform",
     logo: "/images/gmail.png",
-    previewImages: [],
   },
   {
     id: 7,
     title: "Stripe",
     subtitle: "Online payment processing for internet businesses",
     logo: "/images/gmail.png",
-    previewImages: [],
   },
 ];
