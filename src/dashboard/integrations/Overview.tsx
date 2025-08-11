@@ -154,34 +154,47 @@ export default function Overview({
                 <h2 className="text-xl font-semibold text-gray-900 mb-12">
                   Preview
                 </h2>
-                <div className="flex gap-8 items-start">
-                  <div className="flex-1 max-w-5xl">
-                    <div className="relative aspect-[16/10] bg-gray-100 rounded-lg overflow-hidden shadow-sm border border-gray-200">
-                      <Image
-                        src={previewImages[currentPreviewIndex].src}
-                        alt={previewImages[currentPreviewIndex].alt}
-                        fill
-                        className="object-cover"
-                        priority
-                      />
-                    </div>
+
+                <div className="flex gap-4 items-start">
+                  {/* Main preview image */}
+                  <div
+                    className="relative bg-gray-100 rounded-lg overflow-hidden shadow-sm border border-gray-200"
+                    style={{
+                      height: "calc(4 * 6rem + 3 * 1rem)", // same height as thumbnails
+                      aspectRatio: "16 / 10",
+                    }}
+                  >
+                    <Image
+                      src={previewImages[currentPreviewIndex].src}
+                      alt={previewImages[currentPreviewIndex].alt}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
                   </div>
 
+                  {/* Thumbnails container */}
                   <div
-                    className="w-48 flex flex-col justify-between"
-                    style={{ aspectRatio: "16/10" }}
+                    className="flex flex-col justify-between"
+                    style={{
+                      width: "12rem", // fixed width for each thumbnail
+                      height: "calc(4 * 6rem + 3 * 1rem)", // total height including gaps
+                    }}
                   >
                     {previewImages.map((image, index) => (
                       <div
                         key={image.id}
                         className={`relative bg-gray-100 rounded-md overflow-hidden cursor-pointer transition-all border-2 ${
                           index === currentPreviewIndex
-                            ? "border-red-600 shadow-md"
+                            ? "border-gray-800 shadow-md"
                             : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
                         }`}
                         style={{
-                          height: "calc(25% - 9px)",
-                          aspectRatio: "16/10",
+                          width: "12rem",
+                          height: "6rem",
+                          aspectRatio: "16 / 10",
+                          marginBottom:
+                            index < previewImages.length - 1 ? "0.5rem" : 0,
                         }}
                         onClick={() => setCurrentPreviewIndex(index)}
                         role="button"

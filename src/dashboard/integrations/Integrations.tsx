@@ -117,13 +117,11 @@ export function Integrations() {
 
   if (selectedIntegration) {
     return (
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <Overview
-          integration={selectedIntegration}
-          onBack={handleBack}
-          onInstall={handleInstall}
-        />
-      </div>
+      <Overview
+        integration={selectedIntegration}
+        onBack={handleBack}
+        onInstall={handleInstall}
+      />
     );
   }
 
