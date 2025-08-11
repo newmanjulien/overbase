@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Layers } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import Image from "next/image";
 
 interface Integration {
   id: number;
@@ -63,7 +63,7 @@ export function PopularIntegrations({
                 }}
               >
                 <div className="w-10 h-10 rounded-md flex items-center justify-center relative overflow-hidden border border-gray-200 bg-white flex-shrink-0">
-                  <img
+                  <Image
                     src={integration.logo}
                     alt={integration.title}
                     width={30}
