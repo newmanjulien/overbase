@@ -21,30 +21,34 @@ export const integrations: Integration[] = [
     title: "GrowthBook",
     subtitle: "Open source feature flags and A/B tests",
     logo: "/images/gmail.png",
-    status: "active",
     badge: "Billed Via Vercel",
     lastUpdated: "just now",
     previewImages: [
       {
         id: 1,
-        src: "/analytics-dashboard.png",
+        src: "/images/slack.png",
         alt: "Dashboard Overview",
       },
       {
         id: 2,
-        src: "/placeholder-uhyqz.png",
+        src: "/images/slack.png",
         alt: "Experiment Results",
       },
       {
         id: 3,
-        src: "/feature-flags-interface.png",
+        src: "/images/slack.png",
         alt: "Feature Flags",
       },
       {
         id: 4,
-        src: "/analytics-dashboard.png",
+        src: "/images/slack.png",
         alt: "Analytics Dashboard",
       },
+      // {
+      //   id: 5,
+      //   src: "/images/slack.png",
+      //   alt: "Analytics Dashboard",
+      // },
     ],
   },
   {

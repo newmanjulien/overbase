@@ -158,9 +158,9 @@ export default function Overview({
                 <div className="flex gap-4 items-start">
                   {/* Main preview image */}
                   <div
-                    className="relative bg-gray-100 rounded-lg overflow-hidden shadow-sm border border-gray-200"
+                    className="relative bg-gray-100 rounded-lg overflow-hidden"
                     style={{
-                      height: "calc(4 * 6rem + 3 * 1rem)", // same height as thumbnails
+                      height: "25rem", // same height as thumbnails
                       aspectRatio: "16 / 10",
                     }}
                   >
@@ -173,46 +173,49 @@ export default function Overview({
                     />
                   </div>
 
-                  {/* Thumbnails container */}
+                  {/* Thumbnails container with fixed height and scrolling */}
                   <div
-                    className="flex flex-col justify-between"
+                    className="relative"
                     style={{
-                      width: "12rem", // fixed width for each thumbnail
-                      height: "calc(4 * 6rem + 3 * 1rem)", // total height including gaps
+                      width: "12rem",
+                      height: "25rem", // height for 4 thumbnails + gaps
                     }}
                   >
-                    {previewImages.map((image, index) => (
-                      <div
-                        key={image.id}
-                        className={`relative bg-gray-100 rounded-md overflow-hidden cursor-pointer transition-all border-2 ${
-                          index === currentPreviewIndex
-                            ? "border-gray-800 shadow-md"
-                            : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                        }`}
-                        style={{
-                          width: "12rem",
-                          height: "6rem",
-                          aspectRatio: "16 / 10",
-                          marginBottom:
-                            index < previewImages.length - 1 ? "0.5rem" : 0,
-                        }}
-                        onClick={() => setCurrentPreviewIndex(index)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ")
-                            setCurrentPreviewIndex(index);
-                        }}
-                        aria-label={`Preview image ${index + 1}: ${image.alt}`}
-                      >
-                        <Image
-                          src={image.src}
-                          alt={image.alt}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ))}
+                    {/* Scrollable thumbnails */}
+                    <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar h-full">
+                      {previewImages.map((image, index) => (
+                        <div
+                          key={image.id}
+                          className={`relative bg-gray-100 rounded-md overflow-hidden cursor-pointer transition-all border-2 ${
+                            index === currentPreviewIndex
+                              ? "border-gray-800"
+                              : "border-transparent"
+                          }`}
+                          style={{
+                            width: "12rem",
+                            height: "7rem",
+                            flexShrink: 0,
+                          }}
+                          onClick={() => setCurrentPreviewIndex(index)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ")
+                              setCurrentPreviewIndex(index);
+                          }}
+                          aria-label={`Preview image ${index + 1}: ${
+                            image.alt
+                          }`}
+                        >
+                          <Image
+                            src={image.src}
+                            alt={image.alt}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </section>
