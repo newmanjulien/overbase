@@ -194,9 +194,9 @@ export function External() {
           {/* InfoCard at the bottom */}
           <div className="mt-8 w-full">
             <InfoCard
-              text="Copy email & Slack workflows which other CEOs created then easily customize them"
-              linkText="Templates"
-              onClick={() => setActiveSection("templates")}
+              text="Your AI can collaborate with both external partners and internal colleagues"
+              linkText="Colleagues"
+              onClick={() => setActiveSection("colleagues")}
             />
           </div>
         </div>

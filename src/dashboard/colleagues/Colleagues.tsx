@@ -194,9 +194,9 @@ export function Colleagues() {
           {/* InfoCard at the bottom, same as in Emails */}
           <div className="mt-8 w-full">
             <InfoCard
-              text="Copy email & Slack workflows which other CEOs created then easily customize them"
-              linkText="Templates"
-              onClick={() => setActiveSection("templates")}
+              text="Your AI can collaborate with both internal colleagues and external partners"
+              linkText="External partners"
+              onClick={() => setActiveSection("external")}
             />
           </div>
         </div>
