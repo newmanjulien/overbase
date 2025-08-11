@@ -8,7 +8,7 @@ export function Handlers() {
         className="border-b border-gray-200/60"
         style={{ backgroundColor: "#FAFAFA" }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto p-6">
           <h1 className="text-[2rem] font-medium text-gray-800 mb-4 tracking-tight">
             Handlers
           </h1>
