@@ -134,7 +134,7 @@ export function Integrations() {
         className="border-b border-gray-200/60"
         style={{ backgroundColor: "#FAFAFA" }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-between mb-4">
             {/* Left: stacked h1 and subtitle with link */}
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
