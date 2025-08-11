@@ -10,7 +10,6 @@ import { Templates } from "./templates/Templates";
 import { Colleagues } from "./colleagues/Colleagues";
 import { External } from "./external/External";
 import { Integrations } from "./integrations/Integrations";
-import Handlers from "./handlers/Handlers";
 import { useSearchParams } from "next/navigation";
 import { HeaderDropdown } from "./HeaderDropdown";
 import { LoadingOverlay } from "../components/LoadingOverlay";
@@ -26,8 +25,7 @@ export type Section =
   | "templates"
   | "colleagues"
   | "external"
-  | "integrations"
-  | "handlers";
+  | "integrations";
 
 interface SectionContextType {
   activeSection: Section;
@@ -73,7 +71,6 @@ export default function Dashboard() {
     { id: "colleagues" as Section, label: "Colleagues" },
     { id: "external" as Section, label: "External" },
     { id: "integrations" as Section, label: "Integrations" },
-    { id: "handlers" as Section, label: "Handlers" },
   ];
 
   const renderContent = () => {
@@ -92,8 +89,6 @@ export default function Dashboard() {
         return <External />;
       case "integrations":
         return <Integrations />;
-      case "handlers":
-        return <Handlers />;
       default:
         return <Emails />;
     }
