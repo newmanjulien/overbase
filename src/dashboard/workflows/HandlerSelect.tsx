@@ -5,7 +5,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "./ui/select";
+} from "../../components/ui/select";
 
 export const handlerOptions = [
   { id: "1", name: "Henry Brown", avatar: "/images/profile-1.png" },

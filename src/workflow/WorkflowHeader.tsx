@@ -5,10 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
-import {
-  WorkflowTypeSelector,
-  WorkflowType,
-} from "../components/WorkflowTypeSelector";
+import { WorkflowTypeSelector, WorkflowType } from "./WorkflowTypeSelector";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 
 interface WorkflowHeaderProps {

@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { WorkflowStep } from "./WorkflowStep";
 import { Step, defaultWorkflowName } from "./DummyData";
-import { WorkflowType } from "../components/WorkflowTypeSelector";
+import { WorkflowType } from "./WorkflowTypeSelector";
 import { useSearchParams } from "next/navigation";
 
 import {
@@ -17,7 +17,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
-import { SaveControls } from "../components/SaveControls";
+import { SaveControls } from "./SaveControls";
 import { WorkflowHeader } from "./WorkflowHeader";
 
 interface StepBranch {

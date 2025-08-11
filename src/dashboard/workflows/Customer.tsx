@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
-import { InfoCard } from "../components/InfoCard";
-import { HandlerSelect } from "../components/HandlerSelect";
-import { WorkflowCard } from "../components/WorkflowCard";
+import { InfoCard } from "../../components/InfoCard";
+import { HandlerSelect } from "./HandlerSelect";
+import { WorkflowCard } from "../../components/WorkflowCard";
 import {
   collection,
   onSnapshot,
@@ -13,12 +13,12 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
-import { useSection } from "./Dashboard";
-import { LoadingOverlay } from "../components/LoadingOverlay";
-import { Button } from "../components/ui/button";
-import { buildWorkflowUrl } from "../lib/urlHelpers";
+import { useSection } from "../Dashboard";
+import { LoadingOverlay } from "../../components/LoadingOverlay";
+import { Button } from "../../components/ui/button";
+import { buildWorkflowUrl } from "../../lib/urlHelpers";
 
 interface Workflow {
   id: string;
@@ -28,7 +28,7 @@ interface Workflow {
   [key: string]: any;
 }
 
-export function Emails() {
+export function Customer() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [handlers, setHandlers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,10 @@ export function Emails() {
   const { setActiveSection } = useSection();
 
   useEffect(() => {
-    const q = query(collection(db, "workflows"), where("type", "==", "email"));
+    const q = query(
+      collection(db, "workflows"),
+      where("type", "==", "customer")
+    );
 
     return onSnapshot(q, (snap) => {
       const workflowsData: Workflow[] = snap.docs.map((doc) => ({
@@ -86,8 +89,8 @@ export function Emails() {
 
   const handleEdit = (workflowId: string) => {
     setLoading(true);
-    // router.push(`/workflow/${workflowId}?section=emails`);
-    router.push(buildWorkflowUrl(workflowId, { section: "email" }));
+    // router.push(`/workflow/${workflowId}?section=customer`);
+    router.push(buildWorkflowUrl(workflowId, { section: "customer" }));
   };
 
   return (
@@ -104,11 +107,11 @@ export function Emails() {
             {/* Left: stacked h1 and subtitle with link */}
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
               <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
-                Email & Slack
+                Customer success
               </h1>
               <h2 className="text-gray-600 text-sm font-normal mt-1">
-                Manage and customize workflows that let you easily triage your
-                emails and your Slack.{" "}
+                Manage and customize workflows that let you easily complete your
+                customer success and customer support responsibilities.{" "}
                 <a
                   href="#"
                   className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
@@ -123,8 +126,10 @@ export function Emails() {
             <Button
               onClick={() => {
                 setLoading(true);
-                // router.push(`/workflow/new?section=email`);
-                router.push(buildWorkflowUrl(undefined, { section: "email" }));
+                // router.push(`/workflow/new?section=customer`);
+                router.push(
+                  buildWorkflowUrl(undefined, { section: "customer" })
+                );
               }}
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
               disabled={loading}
@@ -159,7 +164,7 @@ export function Emails() {
 
           <div className="mt-8 w-full">
             <InfoCard
-              text="Copy email & Slack workflows which other CEOs created then easily customize them"
+              text="Copy customer succcess workflows other CEOs created so you can easily customize them"
               linkText="Templates"
               onClick={() => setActiveSection("templates")}
             />

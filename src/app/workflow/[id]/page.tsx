@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import WorkflowBuilder from "../../../workflow/Workflow";
-import { WorkflowType } from "../../../components/WorkflowTypeSelector";
+import { WorkflowType } from "../../../workflow/WorkflowTypeSelector";
 
 interface WorkflowData {
   id: string;

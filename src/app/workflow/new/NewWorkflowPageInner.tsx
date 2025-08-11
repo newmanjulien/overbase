@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import WorkflowBuilder from "../../../workflow/Workflow";
-import { WorkflowType } from "../../../components/WorkflowTypeSelector";
+import { WorkflowType } from "../../../workflow/WorkflowTypeSelector";
 
 const fromToTypeMap: Record<string, WorkflowType> = {
   email: "email",

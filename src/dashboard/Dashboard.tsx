@@ -3,16 +3,16 @@
 import { createContext, useContext, useState } from "react";
 import Logo from "../components/Logo";
 import LogoSmall from "../components/LogoSmall";
-import { Emails } from "./Email";
-import { Sales } from "./Sales";
-import { Customer } from "./Customer";
+import { Emails } from "./workflows/Email";
+import { Sales } from "./workflows/Sales";
+import { Customer } from "./workflows/Customer";
 import { Templates } from "./templates/Templates";
 import { Colleagues } from "./colleagues/Colleagues";
 import { External } from "./external/External";
 import { Integrations } from "./integrations/Integrations";
 import Handlers from "./handlers/Handlers";
 import { useSearchParams } from "next/navigation";
-import { HeaderDropdown } from "../components/HeaderDropdown";
+import { HeaderDropdown } from "./HeaderDropdown";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 
 // -----------------------------
