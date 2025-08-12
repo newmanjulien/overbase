@@ -11,6 +11,7 @@ import { PreviewImages } from "./PreviewImages";
 interface OverviewProps {
   integration: Integration;
   onBack?: () => void; // optional, fallback to router.back()
+  onInstall: () => void; // add this
 }
 
 export default function Overview({ integration, onBack }: OverviewProps) {
