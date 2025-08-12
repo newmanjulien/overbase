@@ -31,7 +31,7 @@ export default function Setup({ integration }: SetupProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-[#FAFAFA]">
       {/* Left Sidebar */}
       <aside className="w-56 bg-gray-50 border-r border-gray-200 p-6 flex flex-col">
         <button
