@@ -13,7 +13,7 @@ import { useIntegrationContext } from "../../../lib/integrationContext";
 export function Integrations() {
   const router = useRouter();
 
-  const { installedIntegrations, addIntegration } = useIntegrationContext();
+  const { installedIntegrations } = useIntegrationContext();
 
   // Compute popular integrations dynamically based on installed ones
   const popularIntegrations = integrations.filter(
@@ -26,16 +26,6 @@ export function Integrations() {
   // Navigate to integration detail page
   const handleSelectIntegration = (integration: Integration) => {
     router.push(`/dashboard/integrations/${integration.id}`);
-  };
-
-  // Install integration by adding it to context
-  const handleInstall = (integration: Integration) => {
-    addIntegration({
-      ...integration,
-      status: "active",
-      badge: "Billed Via Vercel",
-      lastUpdated: "just now",
-    });
   };
 
   const handleBrowseClick = () => {

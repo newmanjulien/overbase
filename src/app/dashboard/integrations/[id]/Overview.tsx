@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
@@ -15,18 +14,9 @@ interface OverviewProps {
 }
 
 export default function Overview({ integration, onBack }: OverviewProps) {
-  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
   const router = useRouter();
 
   const previewImages = integration.previewImages ?? [];
-
-  useEffect(() => {
-    if (previewImages.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentPreviewIndex((prev) => (prev + 1) % previewImages.length);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [previewImages.length]);
 
   const handleBack = () => {
     if (onBack) {
