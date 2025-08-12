@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import type { Integration } from "./DummyData";
+import { Button } from "../../../../components/ui/button";
+import type { Integration } from "../DummyData";
 
 interface OverviewProps {
   integration: Integration;

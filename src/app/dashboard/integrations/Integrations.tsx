@@ -1,40 +1,33 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { WorkflowCard } from "../../../components/WorkflowCard";
 import { EmptyState } from "./EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
-import Overview from "./Overview";
-
-// Import Integration type and integrations data from dummydata.ts
 import type { Integration } from "./DummyData";
 import { integrations } from "./DummyData";
 
 const initialInstalledIntegrations: Integration[] = [];
 
-// Use integrations from dummydata excluding ones already active
 const initialPopularIntegrations: Integration[] = integrations.filter(
   (integration) => integration.status !== "active"
 );
 
 export function Integrations() {
+  const router = useRouter();
+
   const [installedIntegrations, setInstalledIntegrations] = useState<
     Integration[]
   >(initialInstalledIntegrations);
   const [popularIntegrations, setPopularIntegrations] = useState<Integration[]>(
     initialPopularIntegrations
   );
-  const [selectedIntegration, setSelectedIntegration] =
-    useState<Integration | null>(null);
 
   const handleSelectIntegration = (integration: Integration) => {
-    setSelectedIntegration(integration);
-  };
-
-  const handleBack = () => {
-    setSelectedIntegration(null);
+    router.push(`/dashboard/integrations/${integration.id}`);
   };
 
   const handleInstall = (integration: Integration) => {
@@ -50,10 +43,8 @@ export function Integrations() {
     setPopularIntegrations((prev) =>
       prev.filter((i) => i.id !== integration.id)
     );
-    setSelectedIntegration(null);
   };
 
-  // Optional: Scroll to popular integrations when browsing
   const handleBrowseClick = () => {
     const popularSection = document.getElementById("popular-integrations");
     if (popularSection) {
@@ -61,16 +52,6 @@ export function Integrations() {
       popularSection.focus();
     }
   };
-
-  if (selectedIntegration) {
-    return (
-      <Overview
-        integration={selectedIntegration}
-        onBack={handleBack}
-        onInstall={handleInstall}
-      />
-    );
-  }
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen">

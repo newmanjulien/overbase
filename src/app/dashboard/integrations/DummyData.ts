@@ -1,11 +1,11 @@
 export interface PreviewImage {
-  id: number;
+  id: string;
   src: string;
   alt: string;
 }
 
 export interface Integration {
-  id: number;
+  id: string;
   title: string;
   subtitle: string; // required
   logo: string;
@@ -17,7 +17,7 @@ export interface Integration {
 
 export const integrations: Integration[] = [
   {
-    id: 1,
+    id: "growthbook",
     title: "GrowthBook",
     subtitle: "Open source feature flags and A/B tests",
     logo: "/images/gmail.png",
@@ -25,71 +25,66 @@ export const integrations: Integration[] = [
     lastUpdated: "just now",
     previewImages: [
       {
-        id: 1,
+        id: "first",
         src: "/images/slack.png",
         alt: "Dashboard Overview",
       },
       {
-        id: 2,
+        id: "second",
         src: "/images/slack.png",
         alt: "Experiment Results",
       },
       {
-        id: 3,
+        id: "third",
         src: "/images/slack.png",
         alt: "Feature Flags",
       },
       {
-        id: 4,
+        id: "fourth",
         src: "/images/slack.png",
         alt: "Analytics Dashboard",
       },
-      // {
-      //   id: 5,
-      //   src: "/images/slack.png",
-      //   alt: "Analytics Dashboard",
-      // },
     ],
   },
   {
-    id: 2,
+    id: "clerk",
     title: "Clerk",
     subtitle: "Drop-in authentication for React",
     logo: "/images/gmail.png",
     previewImages: [
       {
-        id: 1,
+        id: "first",
         src: "/placeholder-uhyqz.png",
         alt: "Authentication UI",
       },
     ],
   },
   {
-    id: 3,
+    id: "inngest",
     title: "Inngest",
     subtitle: "Reliable & powerful background functions",
     logo: "/images/gmail.png",
   },
   {
-    id: 4,
+    id: "upstash",
     title: "Upstash",
     subtitle: "Serverless DB (Redis, Vector, Queue)",
     logo: "/images/gmail.png",
   },
   {
-    id: 5,
+    id: "turso",
     title: "Turso Cloud",
     subtitle: "SQLite for the age of AI",
     logo: "/images/gmail.png",
   },
   {
-    id: 6,
+    id: "planetscale",
     title: "PlanetScale",
     subtitle: "The world's most advanced serverless MySQL platform",
     logo: "/images/gmail.png",
   },
   {
-    id: 7,
+    id: "stripe",
     title: "Stripe",
     subtitle: "Online payment processing for internet businesses",
     logo: "/images/gmail.png",
