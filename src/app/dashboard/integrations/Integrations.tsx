@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { Button } from "../../../components/ui/button";
@@ -9,37 +9,43 @@ import { EmptyState } from "./EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
 import type { Integration } from "./DummyData";
 import { integrations } from "./DummyData";
-
-const initialInstalledIntegrations: Integration[] = [];
-
-const initialPopularIntegrations: Integration[] = integrations.filter(
-  (integration) => integration.status !== "active"
-);
+import { useIntegrationContext } from "../../../lib/integrationContext";
 
 export function Integrations() {
   const router = useRouter();
 
-  const [installedIntegrations, setInstalledIntegrations] = useState<
-    Integration[]
-  >(initialInstalledIntegrations);
+  // Get installed integrations and addIntegration from context
+  const { installedIntegrations, addIntegration } = useIntegrationContext();
+
+  // Popular integrations are those not installed
   const [popularIntegrations, setPopularIntegrations] = useState<Integration[]>(
-    initialPopularIntegrations
+    []
   );
 
+  useEffect(() => {
+    setPopularIntegrations(
+      integrations.filter(
+        (integration) =>
+          !installedIntegrations.some(
+            (installed) => installed.id === integration.id
+          )
+      )
+    );
+  }, [installedIntegrations]);
+
+  // Navigate to integration detail page
   const handleSelectIntegration = (integration: Integration) => {
     router.push(`/dashboard/integrations/${integration.id}`);
   };
 
+  // Install integration by adding it to context
   const handleInstall = (integration: Integration) => {
-    setInstalledIntegrations((prev) => [
-      ...prev,
-      {
-        ...integration,
-        status: "active",
-        badge: "Billed Via Vercel",
-        lastUpdated: "just now",
-      },
-    ]);
+    addIntegration({
+      ...integration,
+      status: "active",
+      badge: "Billed Via Vercel",
+      lastUpdated: "just now",
+    });
     setPopularIntegrations((prev) =>
       prev.filter((i) => i.id !== integration.id)
     );
