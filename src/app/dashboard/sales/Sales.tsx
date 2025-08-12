@@ -159,6 +159,7 @@ export function Sales() {
             <InfoCard
               text="Copy workflows for after sales calls which other CEOs created so you can easily customize them"
               linkText="Templates"
+              onClick={() => router.push("/dashboard/templates")}
             />
           </div>
         </div>

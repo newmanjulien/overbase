@@ -159,6 +159,7 @@ export function Emails() {
             <InfoCard
               text="Copy email & Slack workflows which other CEOs created then easily customize them"
               linkText="Templates"
+              onClick={() => router.push("/dashboard/templates")}
             />
           </div>
         </div>

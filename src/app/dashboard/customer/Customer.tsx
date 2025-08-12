@@ -164,6 +164,7 @@ export function Customer() {
             <InfoCard
               text="Copy customer succcess workflows other CEOs created so you can easily customize them"
               linkText="Templates"
+              onClick={() => router.push("/dashboard/templates")}
             />
           </div>
         </div>

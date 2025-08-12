@@ -196,6 +196,7 @@ export function External() {
             <InfoCard
               text="Your AI can collaborate with both external partners and internal colleagues"
               linkText="Colleagues"
+              onClick={() => router.push("/dashboard/colleagues")}
             />
           </div>
         </div>
