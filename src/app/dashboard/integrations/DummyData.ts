@@ -44,6 +44,11 @@ export const integrations: Integration[] = [
         src: "/images/slack.png",
         alt: "Analytics Dashboard",
       },
+      {
+        id: "fifth",
+        src: "/images/slack.png",
+        alt: "Analytics Dashboard",
+      },
     ],
   },
   {
