@@ -62,7 +62,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Main content */}
-        <main className="flex-1 pt-16">{children}</main>
+        <main className="flex-1 pt-14">{children}</main>
 
         {/* Footer */}
         <footer className="bg-white">
