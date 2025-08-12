@@ -1,18 +1,28 @@
-// /app/dashboard/layout.tsx
+"use client";
+
 import React from "react";
 import Logo from "../../components/Logo";
 import LogoSmall from "../../components/LogoSmall";
 import Link from "next/link";
-
-export const metadata = {
-  title: "Dashboard",
-};
+import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: "/dashboard/email", label: "Email & Slack" },
+    { href: "/dashboard/sales", label: "After Sales Calls" },
+    { href: "/dashboard/customer", label: "Customer Success" },
+    { href: "/dashboard/templates", label: "Templates" },
+    { href: "/dashboard/colleagues", label: "Colleagues" },
+    { href: "/dashboard/external", label: "External" },
+    { href: "/dashboard/integrations", label: "Integrations" },
+  ];
+
   return (
     <div
       className="min-h-screen flex flex-col"
@@ -27,51 +37,20 @@ export default function DashboardLayout({
                 <Logo />
               </div>
               <nav className="flex space-x-3 items-center">
-                {/* Workflow dropdown can be replaced with simple links for now */}
-                <Link
-                  href="/dashboard/email"
-                  className="px-2.5 py-1.5 text-sm font-normal rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Email & Slack
-                </Link>
-                <Link
-                  href="/dashboard/sales"
-                  className="px-2.5 py-1.5 text-sm font-normal rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  After Sales Calls
-                </Link>
-                <Link
-                  href="/dashboard/customer"
-                  className="px-2.5 py-1.5 text-sm font-normal rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Customer Success
-                </Link>
-
-                {/* Other nav items */}
-                <Link
-                  href="/dashboard/templates"
-                  className="px-2.5 py-1.5 text-sm font-normal rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Templates
-                </Link>
-                <Link
-                  href="/dashboard/colleagues"
-                  className="px-2.5 py-1.5 text-sm font-normal rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Colleagues
-                </Link>
-                <Link
-                  href="/dashboard/external"
-                  className="px-2.5 py-1.5 text-sm font-normal rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  External
-                </Link>
-                <Link
-                  href="/dashboard/integrations"
-                  className="px-2.5 py-1.5 text-sm font-normal rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Integrations
-                </Link>
+                {navItems.map((item) => {
+                  const isActive = pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`px-2.5 py-1.5 text-sm font-normal rounded-md hover:text-gray-900 hover:bg-gray-100 ${
+                        isActive ? "text-gray-900 bg-gray-100" : "text-gray-500"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
           </div>
