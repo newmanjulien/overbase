@@ -1,12 +1,14 @@
-import Setup from "./Setup";
 import { integrations } from "../../DummyData";
+import Setup from "./Setup";
 
 interface SetupPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function SetupPage({ params }: SetupPageProps) {
-  const integration = integrations.find((i) => i.id === params.id);
+export default async function SetupPage({ params }: SetupPageProps) {
+  const { id } = await params;
+
+  const integration = integrations.find((i) => i.id === id);
 
   if (!integration) {
     return (

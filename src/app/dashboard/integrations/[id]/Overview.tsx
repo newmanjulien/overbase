@@ -6,18 +6,14 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import type { Integration } from "../DummyData";
 import { useRouter } from "next/navigation";
+import { PreviewImages } from "./PreviewImages";
 
 interface OverviewProps {
   integration: Integration;
-  onBack: () => void;
-  onInstall: (integration: Integration) => void;
+  onBack?: () => void; // optional, fallback to router.back()
 }
 
-export default function Overview({
-  integration,
-  onBack,
-  onInstall,
-}: OverviewProps) {
+export default function Overview({ integration, onBack }: OverviewProps) {
   const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
   const router = useRouter();
 
@@ -31,6 +27,22 @@ export default function Overview({
     return () => clearInterval(interval);
   }, [previewImages.length]);
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.back();
+    }
+  };
+
+  const resourceLinks = [
+    "Support",
+    "Documentation",
+    "EULA",
+    "Privacy Policy",
+    "Website",
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       {/* Header */}
@@ -38,7 +50,7 @@ export default function Overview({
         <div className="max-w-7xl mx-auto px-6 py-10 flex items-center justify-between">
           <div className="flex flex-col gap-2 max-w-[calc(100%-180px)]">
             <button
-              onClick={onBack}
+              onClick={handleBack}
               className="flex items-center gap-2 text-gray-500 hover:text-gray-600 text-sm font-base"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -61,13 +73,6 @@ export default function Overview({
           </div>
 
           <div>
-            {/* <Button
-              onClick={() => onInstall(integration)}
-              variant="default"
-              className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
-            >
-              Install
-            </Button> */}
             <Button
               onClick={() =>
                 router.push(`/dashboard/integrations/${integration.id}/setup`)
@@ -120,13 +125,7 @@ export default function Overview({
                 Resources
               </h3>
               <div className="space-y-4">
-                {[
-                  "Support",
-                  "Documentation",
-                  "EULA",
-                  "Privacy Policy",
-                  "Website",
-                ].map((label) => (
+                {resourceLinks.map((label) => (
                   <a
                     key={label}
                     href="#"
@@ -161,17 +160,20 @@ export default function Overview({
             </section>
 
             {previewImages.length > 0 && (
+              <PreviewImages images={previewImages} />
+            )}
+
+            {/* {previewImages.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold text-gray-900 mb-12">
                   Preview
                 </h2>
 
                 <div className="flex gap-4 items-start">
-                  {/* Main preview image */}
                   <div
                     className="relative bg-gray-100 rounded-lg overflow-hidden"
                     style={{
-                      height: "25rem", // same height as thumbnails
+                      height: "25rem",
                       aspectRatio: "16 / 10",
                     }}
                   >
@@ -184,7 +186,6 @@ export default function Overview({
                     />
                   </div>
 
-                  {/* Thumbnails container with fixed height and scrolling */}
                   <div
                     className="relative"
                     style={{
@@ -192,7 +193,6 @@ export default function Overview({
                       height: "25rem", // height for 4 thumbnails + gaps
                     }}
                   >
-                    {/* Scrollable thumbnails */}
                     <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar h-full">
                       {previewImages.map((image, index) => (
                         <div
@@ -230,7 +230,7 @@ export default function Overview({
                   </div>
                 </div>
               </section>
-            )}
+            )} */}
           </div>
         </main>
       </div>

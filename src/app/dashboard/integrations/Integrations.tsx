@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { Button } from "../../../components/ui/button";
@@ -14,24 +13,15 @@ import { useIntegrationContext } from "../../../lib/integrationContext";
 export function Integrations() {
   const router = useRouter();
 
-  // Get installed integrations and addIntegration from context
   const { installedIntegrations, addIntegration } = useIntegrationContext();
 
-  // Popular integrations are those not installed
-  const [popularIntegrations, setPopularIntegrations] = useState<Integration[]>(
-    []
-  );
-
-  useEffect(() => {
-    setPopularIntegrations(
-      integrations.filter(
-        (integration) =>
-          !installedIntegrations.some(
-            (installed) => installed.id === integration.id
-          )
+  // Compute popular integrations dynamically based on installed ones
+  const popularIntegrations = integrations.filter(
+    (integration) =>
+      !installedIntegrations.some(
+        (installed) => installed.id === integration.id
       )
-    );
-  }, [installedIntegrations]);
+  );
 
   // Navigate to integration detail page
   const handleSelectIntegration = (integration: Integration) => {
@@ -46,9 +36,6 @@ export function Integrations() {
       badge: "Billed Via Vercel",
       lastUpdated: "just now",
     });
-    setPopularIntegrations((prev) =>
-      prev.filter((i) => i.id !== integration.id)
-    );
   };
 
   const handleBrowseClick = () => {
@@ -125,7 +112,7 @@ export function Integrations() {
           {/* Right Section - Popular Integrations */}
           <PopularIntegrations
             popularIntegrations={popularIntegrations}
-            onAddIntegration={handleSelectIntegration}
+            onAddIntegration={handleSelectIntegration} // rename for clarity if you want
             onBrowseClick={handleBrowseClick}
           />
         </div>

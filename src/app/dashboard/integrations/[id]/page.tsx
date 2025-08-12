@@ -1,15 +1,16 @@
-import Overview from "./Overview";
 import { integrations } from "../DummyData";
 import ClientWrapper from "./ClientWrapper";
 
 interface IntegrationOverviewPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function IntegrationOverviewPage({
+export default async function IntegrationOverviewPage({
   params,
 }: IntegrationOverviewPageProps) {
-  const integration = integrations.find((i) => i.id === params.id);
+  const { id } = await params;
+
+  const integration = integrations.find((i) => i.id === id);
 
   if (!integration) {
     return (
