@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import type { Integration } from "../DummyData";
+import { useRouter } from "next/navigation";
 
 interface OverviewProps {
   integration: Integration;
@@ -18,6 +19,7 @@ export default function Overview({
   onInstall,
 }: OverviewProps) {
   const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
+  const router = useRouter();
 
   const previewImages = integration.previewImages ?? [];
 
@@ -59,8 +61,17 @@ export default function Overview({
           </div>
 
           <div>
-            <Button
+            {/* <Button
               onClick={() => onInstall(integration)}
+              variant="default"
+              className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
+            >
+              Install
+            </Button> */}
+            <Button
+              onClick={() =>
+                router.push(`/dashboard/integrations/${integration.id}/setup`)
+              }
               variant="default"
               className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
             >
