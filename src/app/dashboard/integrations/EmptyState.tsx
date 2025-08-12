@@ -1,5 +1,5 @@
 import { Info } from "lucide-react";
-import { Button } from "../../components/ui/button";
+import { Button } from "../../../components/ui/button";
 
 interface EmptyStateProps {
   title?: string;

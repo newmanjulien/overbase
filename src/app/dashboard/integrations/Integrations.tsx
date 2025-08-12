@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { ExternalLink } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { WorkflowCard } from "../../components/WorkflowCard";
+import { Button } from "../../../components/ui/button";
+import { WorkflowCard } from "../../../components/WorkflowCard";
 import { EmptyState } from "./EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
 import Overview from "./Overview";

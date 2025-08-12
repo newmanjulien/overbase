@@ -3,7 +3,7 @@
 import { Layers } from "lucide-react";
 import Image from "next/image";
 import type { Integration } from "./DummyData";
-import { Button } from "../../components/ui/button";
+import { Button } from "../../../components/ui/button";
 
 interface PopularIntegrationsProps {
   popularIntegrations: Integration[];

@@ -1,9 +1,9 @@
-import { Button } from "../../components/ui/button";
+import { Button } from "../../../components/ui/button";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "../../components/ui/avatar";
+} from "../../../components/ui/avatar";
 
 interface TemplateCardProps {
   title: string;
