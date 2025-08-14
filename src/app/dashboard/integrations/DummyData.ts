@@ -18,7 +18,7 @@ export interface Integration {
 export const integrations: Integration[] = [
   {
     id: "growthbook",
-    title: "GrowthBook",
+    title: "Google Docs",
     subtitle: "Open source feature flags and A/B tests",
     logo: "/images/gmail.png",
     badge: "Billed Via Vercel",
@@ -53,7 +53,7 @@ export const integrations: Integration[] = [
   },
   {
     id: "clerk",
-    title: "Clerk",
+    title: "Gmail",
     subtitle: "Drop-in authentication for React",
     logo: "/images/gmail.png",
     previewImages: [
@@ -66,31 +66,31 @@ export const integrations: Integration[] = [
   },
   {
     id: "inngest",
-    title: "Inngest",
+    title: "Slack",
     subtitle: "Reliable & powerful background functions",
     logo: "/images/gmail.png",
   },
   {
     id: "upstash",
-    title: "Upstash",
+    title: "Gong",
     subtitle: "Serverless DB (Redis, Vector, Queue)",
     logo: "/images/gmail.png",
   },
   {
     id: "turso",
-    title: "Turso Cloud",
+    title: "Pipedrive",
     subtitle: "SQLite for the age of AI",
     logo: "/images/gmail.png",
   },
   {
     id: "planetscale",
-    title: "PlanetScale",
+    title: "Notion",
     subtitle: "The world's most advanced serverless MySQL platform",
     logo: "/images/gmail.png",
   },
   {
     id: "stripe",
-    title: "Stripe",
+    title: "Salesforce",
     subtitle: "Online payment processing for internet businesses",
     logo: "/images/gmail.png",
   },

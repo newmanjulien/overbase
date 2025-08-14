@@ -15,10 +15,10 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/dashboard/email", label: "Email & Slack" },
-    { href: "/dashboard/sales", label: "After Sales Calls" },
-    { href: "/dashboard/customer", label: "Customer Success" },
-    { href: "/dashboard/templates", label: "Templates" },
+    // { href: "/dashboard/email", label: "Email & Slack" },
+    // { href: "/dashboard/sales", label: "After Sales Calls" },
+    // { href: "/dashboard/customer", label: "Customer Success" },
+    { href: "/dashboard/templates", label: "Agents" },
     { href: "/dashboard/colleagues", label: "Colleagues" },
     { href: "/dashboard/external", label: "External" },
     { href: "/dashboard/integrations", label: "Integrations" },

@@ -2,75 +2,66 @@
 
 import { useState } from "react";
 import { ExternalLink } from "lucide-react";
-import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
 import { TemplateCard } from "./TemplateCard";
 
 const categories = [
-  "Browse All",
-  "AI",
-  "Analytics",
-  "Authentication",
-  "CMS",
-  "Commerce",
-  "DevTools",
-  "Experimentation",
-  "Flags",
-  "Logging",
-  "Messaging",
-  "Monitoring",
-  "Observability",
-  "Productivity",
+  "Installed",
+  "Email & Slack",
+  "After sales calls",
+  "Customer success",
 ];
 
 const templateData = [
   {
     id: 1,
-    title: "Neon",
-    description: "Ship faster with Serverless Postgres",
+    title: "Highlight success",
+    description:
+      "Find emails and Slacks where you can highlight your team's success",
     category: "Analytics",
-    createdBy: "Sarah Chen",
-    creatorPhoto: "/images/sarah-chen.png",
     gradientFrom: "from-pink-400",
     gradientTo: "to-purple-500",
   },
   {
     id: 2,
-    title: "Upstash",
-    description: "Serverless DB (Redis, Vector, Queue)",
+    title: "Call to CRM",
+    description: "Update your CRM after your call with a prospect",
     category: "Analytics",
-    createdBy: "Marcus Johnson",
-    creatorPhoto: "/images/marcus-johnson.png",
     gradientFrom: "from-green-400",
     gradientTo: "to-teal-500",
   },
   {
     id: 3,
-    title: "Supabase",
-    description: "Open source Firebase alternative",
+    title: "Action CRM to-dos",
+    description: "Take the to-dos assigned to you in your CRM and action them",
     category: "Authentication",
-    createdBy: "Elena Rodriguez",
-    creatorPhoto: "/images/elena-rodriguez.png",
     gradientFrom: "from-yellow-400",
     gradientTo: "to-orange-500",
   },
   {
     id: 4,
-    title: "Notion",
-    description: "All-in-one workspace for notes",
+    title: "Prep quarterly call",
+    description: "Prepare the data for your quarterly calls with customers",
     category: "Productivity",
-    createdBy: "Amanda Foster",
-    creatorPhoto: "/images/amanda-foster.png",
     gradientFrom: "from-blue-400",
     gradientTo: "to-indigo-500",
   },
 ];
 
 export function Templates() {
-  const [selectedCategory, setSelectedCategory] = useState("Browse All");
+  const [selectedCategory, setSelectedCategory] = useState("Installed");
+
+  // Track selected handler for each template
+  const [handlers, setHandlers] = useState<Record<number, string>>(
+    Object.fromEntries(templateData.map((t) => [t.id, "1"]))
+  );
+
+  const handleHandlerChange = (templateId: number, handlerId: string) => {
+    setHandlers((prev) => ({ ...prev, [templateId]: handlerId }));
+  };
 
   const filteredTemplates =
-    selectedCategory === "Browse All"
+    selectedCategory === "Installed"
       ? templateData
       : templateData.filter(
           (template) => template.category === selectedCategory
@@ -86,12 +77,12 @@ export function Templates() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
               <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
-                Templates
+                Agents
               </h1>
               <div className="flex items-center text-gray-800 text-sm mt-1">
                 <span>
-                  Copy templates other startup CEOs created then easily edit and
-                  customize them.
+                  Install, customize and launch agents built for helping startup
+                  CEOs.
                 </span>
                 <a
                   href="#"
@@ -102,15 +93,6 @@ export function Templates() {
                 </a>
               </div>
             </div>
-
-            <Button
-              onClick={() => {
-                /* does nothing */
-              }}
-              className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100"
-            >
-              Publish a template
-            </Button>
           </div>
         </div>
       </div>
@@ -152,10 +134,10 @@ export function Templates() {
                   key={template.id}
                   title={template.title}
                   description={template.description}
-                  createdBy={template.createdBy}
-                  creatorPhoto={template.creatorPhoto}
                   gradientFrom={template.gradientFrom}
                   gradientTo={template.gradientTo}
+                  handlerId={handlers[template.id]}
+                  onHandlerChange={(id) => handleHandlerChange(template.id, id)}
                 />
               ))}
             </div>

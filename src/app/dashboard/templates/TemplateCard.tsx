@@ -1,15 +1,14 @@
+"use client";
+
 import { Button } from "../../../components/ui/button";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../../../components/ui/avatar";
+import { HandlerSelect } from "../../../components/HandlerSelect";
+import { useRouter } from "next/navigation"; // 1️⃣
 
 interface TemplateCardProps {
   title: string;
   description: string;
-  createdBy: string;
-  creatorPhoto: string;
+  handlerId: string;
+  onHandlerChange: (id: string) => void;
   gradientFrom?: string;
   gradientTo?: string;
 }
@@ -17,13 +16,18 @@ interface TemplateCardProps {
 export function TemplateCard({
   title,
   description,
-  createdBy,
-  creatorPhoto,
+  handlerId,
+  onHandlerChange,
   gradientFrom = "from-emerald-400",
   gradientTo = "to-teal-500",
 }: TemplateCardProps) {
+  const router = useRouter(); // 2️⃣
+
   return (
-    <div className="rounded-lg border border-gray-200 overflow-hidden">
+    <div
+      className="rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={() => router.push("/agent")} // 3️⃣
+    >
       <div
         className={`relative h-56 flex items-center justify-center bg-gradient-to-r ${gradientFrom} ${gradientTo}`}
       >
@@ -34,38 +38,23 @@ export function TemplateCard({
           variant="secondary"
           size="sm"
           className="absolute top-3 right-3 bg-white text-gray-800 hover:bg-gray-50 font-normal"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation(); // 4️⃣ prevent card navigation
             navigator.clipboard
               .writeText(title)
-              .then(() => {
-                alert(`Copied template: ${title}`);
-              })
-              .catch(() => {
-                alert("Failed to copy template.");
-              });
+              .then(() => alert(`Copied template: ${title}`))
+              .catch(() => alert("Failed to copy template."));
           }}
           aria-label={`Copy template ${title}`}
         >
-          Copy
+          Launch
         </Button>
       </div>
 
       <div className="bg-white p-4">
         <h3 className="text-base font-semibold text-gray-900">{title}</h3>
         <p className="text-sm text-gray-500 mb-3">{description}</p>
-
-        <div className="flex items-center space-x-2">
-          <Avatar className="w-5 h-5">
-            <AvatarImage src={creatorPhoto} alt={createdBy} />
-            <AvatarFallback>
-              {createdBy
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-sm text-gray-500">Created by {createdBy}</span>
-        </div>
+        <HandlerSelect value={handlerId} onChange={onHandlerChange} />
       </div>
     </div>
   );

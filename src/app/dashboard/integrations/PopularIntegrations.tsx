@@ -30,8 +30,7 @@ export function PopularIntegrations({
             Popular Integrations
           </h2>
           <p className="text-sm text-gray-500 font-light leading-relaxed mt-1 max-w-xs mb-2">
-            Explore more integrations to expand your Vercel development
-            experience.
+            Easily set up integrations with the most popular platforms.
           </p>
         </div>
 
