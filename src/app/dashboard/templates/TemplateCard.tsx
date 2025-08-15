@@ -26,7 +26,7 @@ export function TemplateCard({
   return (
     <div
       className="rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-      onClick={() => router.push("/agent")} // 3️⃣
+      onClick={() => router.push("/dashboard/agent")} // 3️⃣
     >
       <div
         className={`relative h-56 flex items-center justify-center bg-gradient-to-r ${gradientFrom} ${gradientTo}`}
