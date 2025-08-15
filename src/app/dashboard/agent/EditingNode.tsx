@@ -72,11 +72,11 @@ export default function EditingNodeComponent({
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <Card className="h-full flex flex-col bg-white border border-gray-100 hover:border-gray-200 overflow-hidden p-0 hover:shadow-md transition-shadow rounded-md">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 bg-gray-50">
+      <div className="p-3 bg-gray-50">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">
+          <h2 className="text-sm font-medium text-gray-900">
             Edit Step {node.data.stepNumber}
           </h2>
           <Button
@@ -92,12 +92,12 @@ export default function EditingNodeComponent({
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-4">
+        <div className="p-3 pt-0 space-y-4">
           {/* Title Field */}
           <div className="space-y-2">
             <Label
               htmlFor="title"
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-normal text-gray-700"
             >
               Title *
             </Label>
@@ -106,7 +106,7 @@ export default function EditingNodeComponent({
               value={formData.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
               placeholder="Enter step title"
-              className={`text-sm ${
+              className={`text-sm rounded-sm border-gray-100 ${
                 errors.title
                   ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                   : ""
@@ -121,7 +121,7 @@ export default function EditingNodeComponent({
           <div className="space-y-2">
             <Label
               htmlFor="prompt"
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-normal text-gray-700"
             >
               Prompt *
             </Label>
@@ -131,7 +131,7 @@ export default function EditingNodeComponent({
               onChange={(e) => handleInputChange("prompt", e.target.value)}
               placeholder="Enter your prompt"
               rows={3}
-              className={`resize-none text-sm ${
+              className={`resize-none text-xs rounded-sm border-gray-100 ${
                 errors.prompt
                   ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                   : ""
@@ -146,7 +146,7 @@ export default function EditingNodeComponent({
           <div className="space-y-2">
             <Label
               htmlFor="context"
-              className="text-sm font-medium text-gray-700"
+              className="text-sm font-normal text-gray-700"
             >
               Context
             </Label>
@@ -156,9 +156,9 @@ export default function EditingNodeComponent({
               onChange={(e) => handleInputChange("context", e.target.value)}
               placeholder="Add additional context (optional)"
               rows={2}
-              className="resize-none text-sm"
+              className="resize-none text-xs rounded-sm border-gray-100"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-400">
               Optional additional information for this step
             </p>
           </div>
@@ -166,20 +166,24 @@ export default function EditingNodeComponent({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
+      <div className="p-3 bg-white">
         <div className="flex justify-end space-x-2">
-          <Button variant="outline" size="sm" onClick={onClose}>
+          <Button 
+            variant="ghost" 
+            className="bg-white text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+            onClick={onClose}
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             size="sm"
-            className="bg-black text-white hover:bg-gray-800"
+            className="bg-black text-white hover:bg-gray-900 font-normal text-sm px-3 py-1.5 h-auto"
           >
-            Save Changes
+            Save changes
           </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

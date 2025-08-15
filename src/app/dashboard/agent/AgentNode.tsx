@@ -43,11 +43,11 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       <Handle type="target" position={Position.Top} className="opacity-0" />
 
       <Card 
-        className="bg-white border border-gray-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+        className="bg-white border border-gray-100 hover:border-gray-200 rounded-md overflow-hidden cursor-pointer hover:shadow-md transition-shadow p-0"
         onClick={handleCardClick}
       >
         {/* Header */}
-        <div className="pt-0 p-4 border-b border-gray-100">
+        <div className="p-3 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">
@@ -84,14 +84,14 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
         </div>
 
         {/* Add Button */}
-        <div className="px-4">
+        <div className="px-3 pb-3 pt-0 -mt-1">
           <Button
             onClick={handleButtonClick}
             variant="outline"
             size="sm"
-            className="w-full border-dashed border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-700 hover:bg-gray-50"
+            className="w-full border-0 bg-gray-50 text-gray-800 hover:bg-gray-100 hover:text-gray-700"
           >
-            + Add Step
+            Add Step
           </Button>
         </div>
       </Card>

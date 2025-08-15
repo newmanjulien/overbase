@@ -25,7 +25,7 @@ export function TemplateCard({
 
   return (
     <div
-      className="rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      className="rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
       onClick={() => router.push("/dashboard/agent")} // 3️⃣
     >
       <div

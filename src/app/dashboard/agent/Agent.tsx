@@ -13,17 +13,14 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { ExternalLink } from "lucide-react";
 import AgentNodeComponent from "./AgentNode";
 import EditingNodeComponent from "./EditingNode";
 import TitleNode from "./TitleNode";
 
 // Constants
 const CARD_WIDTH_FALLBACK = 320;
-const VERTICAL_SPACING = 200;
-const PADDING_BELOW = 300; // extra space below last node
+const VERTICAL_SPACING = 150;
+const PADDING_BELOW = 350; // extra space below last node
 const MIN_CANVAS_HEIGHT = 800; // minimum height of canvas
 
 // NodeData interface
@@ -244,35 +241,6 @@ export default function AgentBuilder() {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Templates Header */}
-      <div
-        className="border-b border-gray-200/60"
-        style={{ backgroundColor: "#FAFAFA" }}
-      >
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
-              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
-                Agents
-              </h1>
-              <div className="flex items-center text-gray-800 text-sm mt-1">
-                <span>
-                  Install, customize and launch agents built for helping startup
-                  CEOs.
-                </span>
-                <a
-                  href="#"
-                  className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
-                >
-                  <span>Learn more</span>
-                  <ExternalLink className="ml-1 h-4 w-4" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div ref={flowWrapperRef} className="flex-1 relative">
         <ReactFlow
@@ -309,7 +277,7 @@ export default function AgentBuilder() {
 
         {/* Editing Panel */}
         {editingNode && (
-          <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)] bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)] bg-white">
             <EditingNodeComponent
               node={editingNode}
               onSave={(data) => handleSaveNode(editingNode.id, data)}
