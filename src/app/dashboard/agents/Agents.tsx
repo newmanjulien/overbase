@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "../../../components/ui/badge";
-import { TemplateCard } from "./TemplateCard";
+import { AgentCard } from "./AgentCard";
 
 const categories = [
   "Installed",
@@ -12,7 +12,7 @@ const categories = [
   "Customer success",
 ];
 
-const templateData = [
+const agentData = [
   {
     id: 1,
     title: "Highlight success",
@@ -48,23 +48,23 @@ const templateData = [
   },
 ];
 
-export function Templates() {
+export function Agents() {
   const [selectedCategory, setSelectedCategory] = useState("Installed");
 
-  // Track selected handler for each template
+  // Track selected handler for each agent
   const [handlers, setHandlers] = useState<Record<number, string>>(
-    Object.fromEntries(templateData.map((t) => [t.id, "1"]))
+    Object.fromEntries(agentData.map((t) => [t.id, "1"]))
   );
 
-  const handleHandlerChange = (templateId: number, handlerId: string) => {
-    setHandlers((prev) => ({ ...prev, [templateId]: handlerId }));
+  const handleHandlerChange = (agentId: number, handlerId: string) => {
+    setHandlers((prev) => ({ ...prev, [agentId]: handlerId }));
   };
 
-  const filteredTemplates =
+  const filteredAgents =
     selectedCategory === "Installed"
-      ? templateData
-      : templateData.filter(
-          (template) => template.category === selectedCategory
+      ? agentData
+      : agentData.filter(
+          (agent) => agent.category === selectedCategory
         );
 
   return (
@@ -126,18 +126,18 @@ export function Templates() {
             </nav>
           </div>
 
-          {/* Template Grid */}
+          {/* Agent Grid */}
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTemplates.map((template) => (
-                <TemplateCard
-                  key={template.id}
-                  title={template.title}
-                  description={template.description}
-                  gradientFrom={template.gradientFrom}
-                  gradientTo={template.gradientTo}
-                  handlerId={handlers[template.id]}
-                  onHandlerChange={(id) => handleHandlerChange(template.id, id)}
+              {filteredAgents.map((agent) => (
+                <AgentCard
+                  key={agent.id}
+                  title={agent.title}
+                  description={agent.description}
+                  gradientFrom={agent.gradientFrom}
+                  gradientTo={agent.gradientTo}
+                  handlerId={handlers[agent.id]}
+                  onHandlerChange={(id) => handleHandlerChange(agent.id, id)}
                 />
               ))}
             </div>

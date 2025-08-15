@@ -4,7 +4,7 @@ import { Button } from "../../../components/ui/button";
 import { HandlerSelect } from "../../../components/HandlerSelect";
 import { useRouter } from "next/navigation"; // 1️⃣
 
-interface TemplateCardProps {
+interface AgentCardProps {
   title: string;
   description: string;
   handlerId: string;
@@ -13,20 +13,20 @@ interface TemplateCardProps {
   gradientTo?: string;
 }
 
-export function TemplateCard({
+export function AgentCard({
   title,
   description,
   handlerId,
   onHandlerChange,
   gradientFrom = "from-emerald-400",
   gradientTo = "to-teal-500",
-}: TemplateCardProps) {
+}: AgentCardProps) {
   const router = useRouter(); // 2️⃣
 
   return (
     <div
       className="rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-      onClick={() => router.push("/dashboard/agent")} // 3️⃣
+      onClick={() => router.push("/dashboard/agentbuilder")} // 3️⃣
     >
       <div
         className={`relative h-56 flex items-center justify-center bg-gradient-to-r ${gradientFrom} ${gradientTo}`}
@@ -42,10 +42,10 @@ export function TemplateCard({
             e.stopPropagation(); // 4️⃣ prevent card navigation
             navigator.clipboard
               .writeText(title)
-              .then(() => alert(`Copied template: ${title}`))
-              .catch(() => alert("Failed to copy template."));
+              .then(() => alert(`Copied agent: ${title}`))
+              .catch(() => alert("Failed to copy agent."));
           }}
-          aria-label={`Copy template ${title}`}
+          aria-label={`Copy agent ${title}`}
         >
           Launch
         </Button>

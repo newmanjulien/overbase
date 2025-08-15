@@ -52,7 +52,7 @@ export default function TitleNode({ title, onTitleChange, onBack }: TitleNodePro
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="h-14 w-12 p-0 border-0 shadow-none rounded-l-md hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
+          className="h-13 w-12 p-0 border-0 shadow-none rounded-l-md hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
         >
           <ArrowLeft className="h-4 w-4 text-gray-600" />
         </Button>
@@ -64,7 +64,7 @@ export default function TitleNode({ title, onTitleChange, onBack }: TitleNodePro
             onChange={(e) => onTitleChange(e.target.value)}
             onFocus={() => setIsEditing(true)}
             onBlur={() => setIsEditing(false)}
-            className="border-0 shadow-none w-full text-lg font-semibold focus:ring-0 focus:outline-none bg-transparent"
+            className="border-0 shadow-none w-full text-lg font-medium focus:ring-0 focus:outline-none bg-transparent"
             placeholder="Agent Title"
           />
         </div>
@@ -72,13 +72,13 @@ export default function TitleNode({ title, onTitleChange, onBack }: TitleNodePro
         {/* Divider & Settings */}
         {!isEditing && (
           <>
-            <div className="w-px h-14 bg-gray-100" />
+            <div className="w-px h-13 bg-gray-100" />
             <div className="relative" ref={settingsRef}>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleSettingsClick}
-                className="h-14 w-12 p-0 border-0 shadow-none rounded-r-md hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
+                className="h-13 w-12 p-0 border-0 shadow-none rounded-r-md hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
               >
                 <Settings className="h-4 w-4 text-gray-600" />
               </Button>

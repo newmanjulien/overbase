@@ -15,8 +15,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   const navItems = [
-   
-    { href: "/dashboard/templates", label: "Agents" },
+    { href: "/dashboard/agents", label: "Agents" },
     { href: "/dashboard/colleagues", label: "Colleagues" },
     { href: "/dashboard/external", label: "External" },
     { href: "/dashboard/integrations", label: "Integrations" },

@@ -6,7 +6,7 @@ import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
 import { Card } from "../../../components/ui/card";
-import type { NodeData } from "./Agent";
+import type { NodeData } from "./AgentBuilder";
 
 interface EditingNodeProps {
   node: {
@@ -106,7 +106,7 @@ export default function EditingNodeComponent({
               value={formData.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
               placeholder="Enter step title"
-              className={`text-sm rounded-sm border-gray-100 ${
+              className={`text-xs rounded-sm border-gray-100 ${
                 errors.title
                   ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                   : ""
