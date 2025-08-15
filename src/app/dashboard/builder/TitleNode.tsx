@@ -61,7 +61,7 @@ export default function TitleNode({
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="h-13 w-12 p-0 border-0 shadow-none rounded-l-md hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
+          className="h-13 w-12 p-0 border-0 shadow-none rounded-l-md rounded-r-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
         >
           <ArrowLeft className="h-4 w-4 text-gray-600" />
         </Button>
@@ -87,7 +87,7 @@ export default function TitleNode({
                 variant="ghost"
                 size="sm"
                 onClick={handleSettingsClick}
-                className="h-13 w-12 p-0 border-0 shadow-none rounded-r-md hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
+                className="h-13 w-12 p-0 border-0 shadow-none rounded-r-md rounded-l-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
               >
                 <Settings className="h-4 w-4 text-gray-600" />
               </Button>
@@ -113,25 +113,6 @@ export default function TitleNode({
                   </div>
                 </div>
               )}
-
-              {/* {showSettingsMenu && (
-                <div className="absolute top-14 left-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                  <div className="py-1">
-                    <button
-                      onClick={() => handleSettingsOption("define-success")}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      Define Success
-                    </button>
-                    <button
-                      onClick={() => handleSettingsOption("context")}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      Context
-                    </button>
-                  </div>
-                </div>
-              )} */}
             </div>
           </>
         )}
