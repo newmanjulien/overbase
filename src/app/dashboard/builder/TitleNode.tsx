@@ -1,48 +1,57 @@
-"use client"
+"use client";
 
-import { useState, useCallback, useRef, useEffect } from "react"
-import { Button } from "../../../components/ui/button"
-import { Input } from "../../../components/ui/input"
-import { Settings, ArrowLeft } from "lucide-react"
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Settings, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface TitleNodeProps {
-  title: string
-  onTitleChange: (newTitle: string) => void
-  onBack?: () => void
+  title: string;
+  onTitleChange: (newTitle: string) => void;
+  onBack?: () => void;
 }
 
-export default function TitleNode({ title, onTitleChange, onBack }: TitleNodeProps) {
-  const [showSettingsMenu, setShowSettingsMenu] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const settingsRef = useRef<HTMLDivElement>(null)
+export default function TitleNode({
+  title,
+  onTitleChange,
+  onBack,
+}: TitleNodeProps) {
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const handleSettingsClick = useCallback(() => {
-    setShowSettingsMenu((prev) => !prev)
-  }, [])
+    setShowSettingsMenu((prev) => !prev);
+  }, []);
 
   const handleSettingsOption = useCallback((option: string) => {
-    console.log("Settings option selected:", option)
-    setShowSettingsMenu(false)
-  }, [])
+    console.log("Settings option selected:", option);
+    setShowSettingsMenu(false);
+  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
-        setShowSettingsMenu(false)
+      if (
+        settingsRef.current &&
+        !settingsRef.current.contains(event.target as Node)
+      ) {
+        setShowSettingsMenu(false);
       }
-    }
+    };
 
     if (showSettingsMenu) {
-      document.addEventListener("mousedown", handleClickOutside)
+      document.addEventListener("mousedown", handleClickOutside);
     } else {
-      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [showSettingsMenu])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showSettingsMenu]);
 
   return (
     <div className="absolute top-4 left-4 z-10">
@@ -87,7 +96,10 @@ export default function TitleNode({ title, onTitleChange, onBack }: TitleNodePro
                 <div className="absolute top-14 left-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                   <div className="py-1">
                     <button
-                      onClick={() => handleSettingsOption("define-success")}
+                      onClick={() => {
+                        router.push("/dashboard/builder/success");
+                        setShowSettingsMenu(false);
+                      }}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       Define Success
@@ -101,10 +113,29 @@ export default function TitleNode({ title, onTitleChange, onBack }: TitleNodePro
                   </div>
                 </div>
               )}
+
+              {/* {showSettingsMenu && (
+                <div className="absolute top-14 left-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                  <div className="py-1">
+                    <button
+                      onClick={() => handleSettingsOption("define-success")}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Define Success
+                    </button>
+                    <button
+                      onClick={() => handleSettingsOption("context")}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Context
+                    </button>
+                  </div>
+                </div>
+              )} */}
             </div>
           </>
         )}
       </div>
     </div>
-  )
+  );
 }
