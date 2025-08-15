@@ -73,7 +73,7 @@ export function Templates() {
         className="border-b border-gray-200/60"
         style={{ backgroundColor: "#FAFAFA" }}
       >
-        <div className="max-w-7xl mx-auto p-6">
+        <div className="max-w-7xl mx-auto p-6 py-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
               <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
