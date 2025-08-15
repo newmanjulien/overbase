@@ -50,11 +50,11 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
         <div className="p-3 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600">
-                {stepNumber}
-              </div>
-              <h3 className="font-medium text-gray-900">
-                {title}
+              <h3 className="font-semibold text-gray-900">
+               Step {stepNumber} -{" "}
+               <span className="font-normal">
+               {title}
+               </span>
               </h3>
             </div>
 
