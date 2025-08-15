@@ -56,11 +56,11 @@ export default function AgentBuilder() {
     (): AgentNodeType => ({
       id: generateNodeId(),
       type: "agentNode",
-      position: { x: 0, y: 100 },
+      position: { x: 0, y: 450 },
       data: {
         stepNumber: 1,
-        title: "Add title",
-        prompt: "Write prompt",
+        title: "",
+        prompt: "",
         context: "",
         onEdit: () => {},
         onDelete: () => {},
@@ -255,6 +255,7 @@ export default function AgentBuilder() {
           nodesDraggable={false}
           nodesConnectable={false}
           panOnScroll
+          panOnDrag={false}   
           zoomOnScroll={false}
           className="bg-gray-50"
           fitView={false}

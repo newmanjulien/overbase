@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { Button } from "../../../components/ui/button"
 import { Input } from "../../../components/ui/input"
 import { Settings, ArrowLeft } from "lucide-react"
@@ -14,15 +14,35 @@ interface TitleNodeProps {
 export default function TitleNode({ title, onTitleChange, onBack }: TitleNodeProps) {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const settingsRef = useRef<HTMLDivElement>(null)
 
   const handleSettingsClick = useCallback(() => {
-    setShowSettingsMenu(!showSettingsMenu)
-  }, [showSettingsMenu])
+    setShowSettingsMenu((prev) => !prev)
+  }, [])
 
   const handleSettingsOption = useCallback((option: string) => {
     console.log("Settings option selected:", option)
     setShowSettingsMenu(false)
   }, [])
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setShowSettingsMenu(false)
+      }
+    }
+
+    if (showSettingsMenu) {
+      document.addEventListener("mousedown", handleClickOutside)
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [showSettingsMenu])
 
   return (
     <div className="absolute top-4 left-4 z-10">
@@ -32,17 +52,13 @@ export default function TitleNode({ title, onTitleChange, onBack }: TitleNodePro
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="h-14 w-12 p-0 border-0 shadow-none rounded-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
+          className="h-14 w-12 p-0 border-0 shadow-none rounded-l-md hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
         >
           <ArrowLeft className="h-4 w-4 text-gray-600" />
         </Button>
 
-        {/* Editable Title wrapped in padding div */}
-        <div
-          className={`flex-1 transition-all duration-200 ${
-            isEditing ? "px-2 py-2" : "px-2 py-2"
-          }`}
-        >
+        {/* Editable Title */}
+        <div className={`flex-1 px-2 py-2`}>
           <Input
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
@@ -57,12 +73,12 @@ export default function TitleNode({ title, onTitleChange, onBack }: TitleNodePro
         {!isEditing && (
           <>
             <div className="w-px h-14 bg-gray-100" />
-            <div className="relative">
+            <div className="relative" ref={settingsRef}>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleSettingsClick}
-                className="h-14 w-12 p-0 border-0 shadow-none rounded-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
+                className="h-14 w-12 p-0 border-0 shadow-none rounded-r-md hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
               >
                 <Settings className="h-4 w-4 text-gray-600" />
               </Button>

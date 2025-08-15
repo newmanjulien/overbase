@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import type { NodeData } from "./Agent"; // <- only import
+import type { NodeData } from "./Agent"; 
 
 interface AgentNodeProps extends NodeProps {
   data: NodeData;
@@ -53,7 +53,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
               <h3 className="font-semibold text-gray-900">
                Step {stepNumber} -{" "}
                <span className="font-normal">
-               {title}
+               {title || "Enter step title"}
                </span>
               </h3>
             </div>

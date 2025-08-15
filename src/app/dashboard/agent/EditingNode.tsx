@@ -74,9 +74,9 @@ export default function EditingNodeComponent({
   return (
     <Card className="h-full flex flex-col bg-white border border-gray-100 hover:border-gray-200 overflow-hidden p-0 hover:shadow-md transition-shadow rounded-md">
       {/* Header */}
-      <div className="p-3 bg-gray-50">
+      <div className="p-3 bg-gray-100 border-b border-gray-100">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium text-gray-900">
+          <h2 className="text-sm font-semibold text-gray-900">
             Edit Step {node.data.stepNumber}
           </h2>
           <Button
@@ -97,7 +97,7 @@ export default function EditingNodeComponent({
           <div className="space-y-2">
             <Label
               htmlFor="title"
-              className="text-sm font-normal text-gray-700"
+              className="text-sm font-normal text-gray-600"
             >
               Title *
             </Label>
@@ -121,7 +121,7 @@ export default function EditingNodeComponent({
           <div className="space-y-2">
             <Label
               htmlFor="prompt"
-              className="text-sm font-normal text-gray-700"
+              className="text-sm font-normal text-gray-600"
             >
               Prompt *
             </Label>
@@ -130,7 +130,7 @@ export default function EditingNodeComponent({
               value={formData.prompt}
               onChange={(e) => handleInputChange("prompt", e.target.value)}
               placeholder="Enter your prompt"
-              rows={3}
+              rows={5}
               className={`resize-none text-xs rounded-sm border-gray-100 ${
                 errors.prompt
                   ? "border-red-500 focus:border-red-500 focus:ring-red-500"
@@ -146,7 +146,7 @@ export default function EditingNodeComponent({
           <div className="space-y-2">
             <Label
               htmlFor="context"
-              className="text-sm font-normal text-gray-700"
+              className="text-sm font-normal text-gray-600"
             >
               Context
             </Label>
@@ -155,7 +155,7 @@ export default function EditingNodeComponent({
               value={formData.context}
               onChange={(e) => handleInputChange("context", e.target.value)}
               placeholder="Add additional context (optional)"
-              rows={2}
+              rows={8}
               className="resize-none text-xs rounded-sm border-gray-100"
             />
             <p className="text-xs text-gray-400">
