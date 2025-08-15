@@ -33,8 +33,12 @@ export default function DashboardLayout({
             <div className="flex items-center justify-between h-14">
               <div className="flex items-center space-x-8">
                 <div className="h-9 w-[3.75rem]">
-                  <Logo />
+                  <Link href="/dashboard/agents">
+                    <Logo />
+                  </Link>
                 </div>
+
+                
                 <nav className="flex space-x-3 items-center">
                   {navItems.map((item) => {
                     const isActive = pathname.startsWith(item.href);

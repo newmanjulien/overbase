@@ -26,7 +26,7 @@ export function AgentCard({
   return (
     <div
       className="rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-      onClick={() => router.push("/dashboard/agentbuilder")} // 3️⃣
+      onClick={() => router.push("/dashboard/builder")} // 3️⃣
     >
       <div
         className={`relative h-56 flex items-center justify-center bg-gradient-to-r ${gradientFrom} ${gradientTo}`}
