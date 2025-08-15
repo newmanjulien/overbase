@@ -1,12 +1,12 @@
 "use client";
 
 import { ReactFlowProvider } from "@xyflow/react";
-import Agent from "./Agent";
+import AgentBuilder from "./Agent";
 
 export default function Page() {
   return (
     <ReactFlowProvider>
-      <Agent />
+      <AgentBuilder />
     </ReactFlowProvider>
   );
 }

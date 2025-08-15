@@ -1,309 +1,630 @@
+// "use client";
+
+// import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+// import {
+//   ReactFlow,
+//   type Node,
+//   Background,
+//   useNodesState,
+//   useEdgesState,
+//   type NodeTypes,
+//   type ReactFlowInstance,
+// } from "@xyflow/react";
+// import "@xyflow/react/dist/style.css";
+
+// import { Button } from "../../components/ui/button";
+// import { Input } from "../../components/ui/input";
+// import AgentNodeComponent from "./AgentNode";
+// import EditingNodeComponent from "./EditingNode";
+
+// // Constants
+// const CARD_WIDTH_FALLBACK = 320;   // used if we can't measure the node width
+// const VERTICAL_SPACING = 200;
+
+// // NodeData interface
+// export interface NodeData {
+//   [key: string]: unknown;
+//   stepNumber: number;
+//   title: string;
+//   prompt: string;
+//   context?: string;
+//   onEdit: (nodeId: string) => void;
+//   onDelete: (nodeId: string) => void;
+//   onAddBelow: (nodeId: string) => void;
+//   onSave: (nodeId: string, data: Partial<NodeData>) => void;
+// }
+
+// // Node types
+// export type AgentNodeType = Node<NodeData, "agentNode">;
+
+// const generateNodeId = () =>
+//   `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+// export default function AgentBuilder() {
+//   const flowWrapperRef = useRef<HTMLDivElement | null>(null);
+//   const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
+
+//   const [agentTitle, setAgentTitle] = useState("AI Agents");
+//   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+//   const [isSaving, setIsSaving] = useState(false);
+//   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+//   // Initial node (x will be re-centered after mount)
+//   const createInitialNode = useCallback(
+//     (): AgentNodeType => ({
+//       id: generateNodeId(),
+//       type: "agentNode",
+//       position: { x: 0, y: 100 }, // centered later once RF instance is ready
+//       data: {
+//         stepNumber: 1,
+//         title: "Add title",
+//         prompt: "Write prompt",
+//         context: "",
+//         onEdit: () => {},
+//         onDelete: () => {},
+//         onAddBelow: () => {},
+//         onSave: () => {},
+//       },
+//       draggable: false,
+//     }),
+//     []
+//   );
+
+//   const initialNodes = useMemo(() => [createInitialNode()], [createInitialNode]);
+//   const [nodes, setNodes, onNodesChange] = useNodesState<AgentNodeType>(initialNodes);
+//   const [edges, , onEdgesChange] = useEdgesState([]);
+
+//   /**
+//    * Compute the flow-space X coordinate that corresponds to the visual center
+//    * of the React Flow container, taking current viewport translate & zoom into account.
+//    */
+//   const getFlowCenterX = useCallback(() => {
+//     const rf = rfInstanceRef.current;
+//     const wrapper = flowWrapperRef.current;
+//     if (!rf || !wrapper) return 0;
+
+//     const { x: tx, zoom } = rf.getViewport(); // translate X (screen px) & zoom
+//     const containerWidth = wrapper.clientWidth || 1200;
+
+//     // Convert the visible center (containerWidth/2 in screen px) to flow coords.
+//     // screen->flow: flowX = (screenX - tx) / zoom
+//     return (containerWidth / 2 - tx) / zoom;
+//   }, []);
+
+//   /**
+//    * Try to measure the actual rendered width of a node by its DOM element.
+//    * Falls back to CARD_WIDTH_FALLBACK if not yet measured/rendered.
+//    */
+//   const getNodeWidth = useCallback((nodeId: string) => {
+//     const wrapper = flowWrapperRef.current;
+//     if (!wrapper) return CARD_WIDTH_FALLBACK;
+//     const el = wrapper.querySelector(`.react-flow__node[data-id="${nodeId}"]`) as HTMLDivElement | null;
+//     return el?.clientWidth ?? CARD_WIDTH_FALLBACK;
+//   }, []);
+
+//   /** ---------- Recompute positions & step numbers (always horizontally centered) ---------- */
+//   const updateNodesPositions = useCallback((nodeList: AgentNodeType[]) => {
+//     const flowCenterX = getFlowCenterX();
+//     return nodeList
+//       .slice() // avoid mutating original
+//       .sort((a, b) => a.position.y - b.position.y)
+//       .map((node, index) => {
+//         const width = getNodeWidth(node.id);
+//         const centeredLeftX = flowCenterX - width / 2;
+//         return {
+//           ...node,
+//           position: { x: centeredLeftX, y: 100 + index * VERTICAL_SPACING },
+//           data: { ...node.data, stepNumber: index + 1 },
+//         };
+//       });
+//   }, [getFlowCenterX, getNodeWidth]);
+
+//   /** ---------- Node Handlers ---------- */
+//   const handleEditNode = useCallback((nodeId: string) => setEditingNodeId(nodeId), []);
+
+//   const handleDeleteNode = useCallback(
+//     (nodeId: string) => {
+//       setNodes((nds) => updateNodesPositions(nds.filter((node) => node.id !== nodeId)));
+//       if (editingNodeId === nodeId) setEditingNodeId(null);
+//     },
+//     [setNodes, editingNodeId, updateNodesPositions]
+//   );
+
+//   const handleAddNodeBelow = useCallback(
+//     (nodeId: string) => {
+//       setNodes((nds) => {
+//         const currentNodeIndex = nds.findIndex((node) => node.id === nodeId);
+//         if (currentNodeIndex === -1) return nds;
+
+//         const newNode: AgentNodeType = {
+//           id: generateNodeId(),
+//           type: "agentNode",
+//           position: { x: 0, y: 0 }, // will be recalculated
+//           data: {
+//             stepNumber: 0,
+//             title: "Add title",
+//             prompt: "Write prompt",
+//             context: "",
+//             onEdit: () => {},
+//             onDelete: () => {},
+//             onAddBelow: () => {},
+//             onSave: () => {},
+//           },
+//           draggable: false,
+//         };
+
+//         const updatedNodes = [...nds];
+//         updatedNodes.splice(currentNodeIndex + 1, 0, newNode);
+
+//         return updateNodesPositions(updatedNodes);
+//       });
+//     },
+//     [setNodes, updateNodesPositions]
+//   );
+
+//   const handleSaveNode = useCallback(
+//     (nodeId: string, data: Partial<NodeData>) => {
+//       setNodes((nds) =>
+//         updateNodesPositions(
+//           nds.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node))
+//         )
+//       );
+//       setEditingNodeId(null);
+//     },
+//     [setNodes, updateNodesPositions]
+//   );
+
+//   // Add callbacks to nodes
+//   const nodesWithCallbacks = useMemo(
+//     () =>
+//       nodes.map((node) => ({
+//         ...node,
+//         data: {
+//           ...node.data,
+//           onEdit: handleEditNode,
+//           onDelete: handleDeleteNode,
+//           onAddBelow: handleAddNodeBelow,
+//           onSave: handleSaveNode,
+//         },
+//       })),
+//     [nodes, handleEditNode, handleDeleteNode, handleAddNodeBelow, handleSaveNode]
+//   );
+
+//   const nodeTypes: NodeTypes = useMemo(() => ({ agentNode: AgentNodeComponent }), []);
+
+//   /** ---------- Save Agent ---------- */
+//   const handleSaveAgent = async () => {
+//     setIsSaving(true);
+//     setSaveMessage(null);
+//     try {
+//       const agentData = {
+//         title: agentTitle.trim() || "Untitled Agent",
+//         nodes: nodes.map(({ data }) => ({
+//           stepNumber: data.stepNumber,
+//           title: data.title,
+//           prompt: data.prompt,
+//           context: data.context || "",
+//         })),
+//         createdAt: new Date().toISOString(),
+//       };
+//       console.log("Agent Data:", agentData);
+//       await new Promise((r) => setTimeout(r, 500));
+//       setSaveMessage("Agent saved successfully!");
+//       setTimeout(() => setSaveMessage(null), 3000);
+//     } catch (error) {
+//       console.error(error);
+//       setSaveMessage("Failed to save agent");
+//       setTimeout(() => setSaveMessage(null), 3000);
+//     } finally {
+//       setIsSaving(false);
+//     }
+//   };
+
+//   const editingNode = editingNodeId ? nodes.find((n) => n.id === editingNodeId) : null;
+
+//   /** ---------- Init + resize recentering ---------- */
+//   useEffect(() => {
+//     const onResize = () => {
+//       setNodes((nds) => updateNodesPositions(nds));
+//     };
+//     window.addEventListener("resize", onResize);
+//     return () => window.removeEventListener("resize", onResize);
+//   }, [setNodes, updateNodesPositions]);
+
+//   return (
+//     <div className="h-screen flex flex-col">
+//       {/* Header */}
+//       <header className="bg-black text-white p-4 flex items-center justify-between">
+//         <div className="flex items-center gap-4">
+//           <h1 className="text-lg font-semibold">Agent Builder</h1>
+//           <div className="w-px h-6 bg-gray-600"></div>
+//           <Input
+//             value={agentTitle}
+//             onChange={(e) => setAgentTitle(e.target.value)}
+//             className="bg-transparent border-gray-600 text-white max-w-md focus:border-gray-400 focus:ring-gray-400 placeholder:text-gray-400"
+//             placeholder="Enter agent title"
+//           />
+//         </div>
+//         <div className="flex items-center gap-3">
+//           {saveMessage && (
+//             <span
+//               className={`text-sm ${
+//                 saveMessage.includes("success") ? "text-green-400" : "text-red-400"
+//               }`}
+//             >
+//               {saveMessage}
+//             </span>
+//           )}
+//           <Button
+//             onClick={handleSaveAgent}
+//             disabled={isSaving}
+//             variant="secondary"
+//             className="bg-white text-black hover:bg-gray-100 disabled:opacity-50"
+//           >
+//             {isSaving ? "Saving..." : "Save"}
+//           </Button>
+//         </div>
+//       </header>
+
+//       {/* Main Content */}
+//       <div ref={flowWrapperRef} className="flex-1 relative">
+//         <ReactFlow
+//           nodes={nodesWithCallbacks}
+//           edges={edges}
+//           onNodesChange={onNodesChange}
+//           onEdgesChange={onEdgesChange}
+//           nodeTypes={nodeTypes}
+//           minZoom={0.9}
+//           maxZoom={0.9}
+//           translateExtent={[
+//             [-200, -100],
+//             [1200, 2000],
+//           ]}
+//           nodesDraggable={false}
+//           nodesConnectable={false}
+//           panOnScroll
+//           zoomOnScroll={false}
+//           className="bg-gray-50"
+//           fitView={false}
+//           defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
+//           onInit={(instance) => {
+//             rfInstanceRef.current = instance;
+//             // center once the instance knows its viewport
+//             setNodes((nds) => updateNodesPositions(nds));
+//           }}
+//         >
+//           <Background color="#fafafa" gap={20} size={1} />
+//         </ReactFlow>
+
+//         {/* Editing Panel */}
+//         {editingNode && (
+//           <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)] bg-white rounded-lg border border-gray-200 overflow-hidden">
+//             <EditingNodeComponent
+//               node={editingNode}
+//               onSave={(data) => handleSaveNode(editingNode.id, data)}
+//               onClose={() => setEditingNodeId(null)}
+//             />
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   ReactFlow,
   type Node,
-  type Edge,
+  Background,
   useNodesState,
   useEdgesState,
-  Controls,
-  Background,
-  BackgroundVariant,
+  type NodeTypes,
+  type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
+import AgentNodeComponent from "./AgentNode";
+import EditingNodeComponent from "./EditingNode";
 
-import { Save } from "lucide-react";
-
-import CustomEdge from "./CustomEdge";
-import AgentCard, { CARD_TYPES } from "./AgentCard";
-import EditAgentModal from "../agent/EditAgentModal";
-
-const CARD_WIDTH = 320;
+// Constants
+const CARD_WIDTH_FALLBACK = 320;
 const VERTICAL_SPACING = 200;
-const CANVAS_CENTER_X = 400;
+const PADDING_BELOW = 300; // extra space below last node
+const MIN_CANVAS_HEIGHT = 800; // minimum height of canvas
 
-const nodeTypes = { agentCard: AgentCard };
+// NodeData interface
+export interface NodeData {
+  [key: string]: unknown;
+  stepNumber: number;
+  title: string;
+  prompt: string;
+  context?: string;
+  onEdit: (nodeId: string) => void;
+  onDelete: (nodeId: string) => void;
+  onAddBelow: (nodeId: string) => void;
+  onSave: (nodeId: string, data: Partial<NodeData>) => void;
+}
 
-const edgeTypes = { custom: CustomEdge };
+// Node types
+export type AgentNodeType = Node<NodeData, "agentNode">;
 
-function AgentBuilder() {
+const generateNodeId = () =>
+  `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+export default function AgentBuilder() {
+  const flowWrapperRef = useRef<HTMLDivElement | null>(null);
+  const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
+
   const [agentTitle, setAgentTitle] = useState("AI Agents");
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [nodeIdCounter, setNodeIdCounter] = useState(1);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingNode, setEditingNode] = useState<Node | null>(null);
-  const [editForm, setEditForm] = useState({
-    title: "",
-    description: "",
-    type: "webhook" as keyof typeof CARD_TYPES,
-  });
-
-  const updateNodesOrder = useCallback((nodesList: Node[]) => {
-    const sorted = [...nodesList].sort((a, b) => a.position.y - b.position.y);
-    return sorted.map((node, i) => ({
-      ...node,
-      position: {
-        x: CANVAS_CENTER_X - CARD_WIDTH / 2,
-        y: 100 + i * VERTICAL_SPACING,
+  // Initial node
+  const createInitialNode = useCallback(
+    (): AgentNodeType => ({
+      id: generateNodeId(),
+      type: "agentNode",
+      position: { x: 0, y: 100 },
+      data: {
+        stepNumber: 1,
+        title: "Add title",
+        prompt: "Write prompt",
+        context: "",
+        onEdit: () => {},
+        onDelete: () => {},
+        onAddBelow: () => {},
+        onSave: () => {},
       },
-      data: { ...node.data, stepNumber: i + 1 },
-    }));
+      draggable: false,
+    }),
+    []
+  );
+
+  const initialNodes = useMemo(() => [createInitialNode()], [createInitialNode]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<AgentNodeType>(initialNodes);
+  const [edges, , onEdgesChange] = useEdgesState([]);
+
+  const getFlowCenterX = useCallback(() => {
+    const rf = rfInstanceRef.current;
+    const wrapper = flowWrapperRef.current;
+    if (!rf || !wrapper) return 0;
+
+    const { x: tx, zoom } = rf.getViewport();
+    const containerWidth = wrapper.clientWidth || 1200;
+    return (containerWidth / 2 - tx) / zoom;
   }, []);
 
-  const handleEditCard = useCallback(
+  const getNodeWidth = useCallback((nodeId: string) => {
+    const wrapper = flowWrapperRef.current;
+    if (!wrapper) return CARD_WIDTH_FALLBACK;
+    const el = wrapper.querySelector(`.react-flow__node[data-id="${nodeId}"]`) as HTMLDivElement | null;
+    return el?.clientWidth ?? CARD_WIDTH_FALLBACK;
+  }, []);
+
+  const updateNodesPositions = useCallback((nodeList: AgentNodeType[]) => {
+    const flowCenterX = getFlowCenterX();
+    
+    // Sort nodes by their current Y position to maintain order
+    const sortedNodes = nodeList
+      .slice()
+      .sort((a, b) => a.position.y - b.position.y);
+    
+    // Assign new positions based on the sorted order
+    return sortedNodes.map((node, index) => {
+      const width = getNodeWidth(node.id);
+      const centeredLeftX = flowCenterX - width / 2;
+      return {
+        ...node,
+        position: { x: centeredLeftX, y: 100 + index * VERTICAL_SPACING },
+        data: { ...node.data, stepNumber: index + 1 },
+      };
+    });
+  }, [getFlowCenterX, getNodeWidth]);
+
+  const handleEditNode = useCallback((nodeId: string) => setEditingNodeId(nodeId), []);
+
+  const handleDeleteNode = useCallback(
     (nodeId: string) => {
-      const node = nodes.find((n) => n.id === nodeId);
-      if (node) {
-        setEditingNode(node);
-        setEditForm({
-          title: node.data.title || "",
-          description: node.data.description || "",
-          type: node.data.type || "webhook",
-        });
-        setIsEditModalOpen(true);
-      }
+      setNodes((nds) => updateNodesPositions(nds.filter((node) => node.id !== nodeId)));
+      if (editingNodeId === nodeId) setEditingNodeId(null);
     },
-    [nodes]
+    [setNodes, editingNodeId, updateNodesPositions]
   );
 
-  const handleDeleteCard = useCallback(
+  const handleAddNodeBelow = useCallback(
     (nodeId: string) => {
       setNodes((nds) => {
-        if (nds.length <= 1) return nds;
-        return updateNodesOrder(nds.filter((n) => n.id !== nodeId));
-      });
-    },
-    [setNodes, updateNodesOrder]
-  );
+        const currentNodeIndex = nds.findIndex((node) => node.id === nodeId);
+        if (currentNodeIndex === -1) return nds;
 
-  const handleAddCardBelow = useCallback(
-    (nodeId: string) => {
-      const newId = nodeIdCounter.toString();
-      setNodes((nds) => {
-        const idx = nds.findIndex((n) => n.id === nodeId);
-        if (idx === -1) return nds;
+        // Get the current node's Y position to place the new node below it
+        const currentNode = nds[currentNodeIndex];
+        const newYPosition = currentNode.position.y + VERTICAL_SPACING;
 
-        const newNode: Node = {
-          id: newId,
-          type: "agentCard",
-          position: { x: 0, y: 0 },
+        const newNode: AgentNodeType = {
+          id: generateNodeId(),
+          type: "agentNode",
+          position: { x: currentNode.position.x, y: newYPosition },
           data: {
-            id: newId,
-            stepNumber: 1,
-            title: "New Step",
-            description: "Click to configure...",
-            type: "webhook",
-            onEdit: handleEditCard,
-            onDelete: handleDeleteCard,
-            onAddBelow: handleAddCardBelow,
+            stepNumber: 0,
+            title: "Add title",
+            prompt: "Write prompt",
+            context: "",
+            onEdit: () => {},
+            onDelete: () => {},
+            onAddBelow: () => {},
+            onSave: () => {},
           },
+          draggable: false,
         };
 
-        const next = [...nds];
-        next.splice(idx + 1, 0, newNode);
-        return updateNodesOrder(next);
+        // Insert the new node after the current node
+        const updatedNodes = [...nds];
+        updatedNodes.splice(currentNodeIndex + 1, 0, newNode);
+        
+        // Update positions to ensure proper vertical ordering
+        return updateNodesPositions(updatedNodes);
       });
-      setNodeIdCounter((c) => c + 1);
     },
-    [
-      nodeIdCounter,
-      setNodes,
-      updateNodesOrder,
-      handleEditCard,
-      handleDeleteCard,
-    ]
+    [setNodes, updateNodesPositions]
   );
 
-  const handleAddCardBetween = useCallback(
-    (edgeId: string) => {
-      const newId = nodeIdCounter.toString();
-      setNodes((nds) => {
-        const newNode: Node = {
-          id: newId,
-          type: "agentCard",
-          position: { x: 0, y: 0 },
-          data: {
-            id: newId,
-            stepNumber: 1,
-            title: "New Step",
-            description: "Click to configure...",
-            type: "webhook",
-            onEdit: handleEditCard,
-            onDelete: handleDeleteCard,
-            onAddBelow: handleAddCardBelow,
-          },
-        };
-        const next = [...nds, newNode];
-        return updateNodesOrder(next);
-      });
-      setNodeIdCounter((c) => c + 1);
+  const handleSaveNode = useCallback(
+    (nodeId: string, data: Partial<NodeData>) => {
+      setNodes((nds) =>
+        updateNodesPositions(
+          nds.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node))
+        )
+      );
+      setEditingNodeId(null);
     },
-    [
-      nodeIdCounter,
-      setNodes,
-      updateNodesOrder,
-      handleEditCard,
-      handleDeleteCard,
-    ]
+    [setNodes, updateNodesPositions]
   );
 
-  const handleSave = useCallback(() => {
-    console.log("Save agent:", { title: agentTitle, nodes, edges });
-  }, [agentTitle, nodes, edges]);
-
-  useEffect(() => {
-    if (isInitialized || nodes.length) return;
-
-    const initial = [
-      {
-        id: "1",
-        type: "agentCard",
-        position: { x: 0, y: 0 },
+  const nodesWithCallbacks = useMemo(
+    () =>
+      nodes.map((node) => ({
+        ...node,
         data: {
-          id: "1",
-          stepNumber: 1,
-          title: "Catch Hook",
-          description: "",
-          type: "webhook",
-          onEdit: handleEditCard,
-          onDelete: handleDeleteCard,
-          onAddBelow: handleAddCardBelow,
+          ...node.data,
+          onEdit: handleEditNode,
+          onDelete: handleDeleteNode,
+          onAddBelow: handleAddNodeBelow,
+          onSave: handleSaveNode,
         },
-      },
-      {
-        id: "2",
-        type: "agentCard",
-        position: { x: 0, y: 0 },
-        data: {
-          id: "2",
-          stepNumber: 2,
-          title: "Find Person",
-          description: "",
-          type: "clearbit",
-          onEdit: handleEditCard,
-          onDelete: handleDeleteCard,
-          onAddBelow: handleAddCardBelow,
-        },
-      },
-      {
-        id: "3",
-        type: "agentCard",
-        position: { x: 0, y: 0 },
-        data: {
-          id: "3",
-          stepNumber: 3,
-          title: "Split into paths",
-          description: "",
-          type: "paths",
-          onEdit: handleEditCard,
-          onDelete: handleDeleteCard,
-          onAddBelow: handleAddCardBelow,
-        },
-      },
-    ];
+      })),
+    [nodes, handleEditNode, handleDeleteNode, handleAddNodeBelow, handleSaveNode]
+  );
 
-    setNodes(updateNodesOrder(initial));
-    setNodeIdCounter(4);
-    setIsInitialized(true);
-  }, [
-    isInitialized,
-    nodes,
-    handleEditCard,
-    handleDeleteCard,
-    handleAddCardBelow,
-    updateNodesOrder,
-    setNodes,
-  ]);
+  const nodeTypes: NodeTypes = useMemo(() => ({ agentNode: AgentNodeComponent }), []);
 
-  useEffect(() => {
-    if (!nodes.length) return;
-
-    const sorted = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    const newEdges: Edge[] = [];
-
-    for (let i = 0; i < sorted.length - 1; i++) {
-      const source = sorted[i].id;
-      const target = sorted[i + 1].id;
-      newEdges.push({
-        id: `${source}-${target}`,
-        source,
-        target,
-        type: "custom",
-        data: { onAddBetween: handleAddCardBetween },
-      });
+  const handleSaveAgent = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+    try {
+      const agentData = {
+        title: agentTitle.trim() || "Untitled Agent",
+        nodes: nodes.map(({ data }) => ({
+          stepNumber: data.stepNumber,
+          title: data.title,
+          prompt: data.prompt,
+          context: data.context || "",
+        })),
+        createdAt: new Date().toISOString(),
+      };
+      console.log("Agent Data:", agentData);
+      await new Promise((r) => setTimeout(r, 500));
+      setSaveMessage("Agent saved successfully!");
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error) {
+      console.error(error);
+      setSaveMessage("Failed to save agent");
+      setTimeout(() => setSaveMessage(null), 3000);
+    } finally {
+      setIsSaving(false);
     }
-    setEdges(newEdges);
-  }, [nodes, handleAddCardBetween, setEdges]);
+  };
+
+  const editingNode = editingNodeId ? nodes.find((n) => n.id === editingNodeId) : null;
+
+  // Compute dynamic canvas bounds
+  const computeTranslateExtent = useCallback(() => {
+    const maxY =
+      nodes.length > 0
+        ? Math.max(...nodes.map((n) => n.position.y)) + PADDING_BELOW
+        : MIN_CANVAS_HEIGHT;
+    return [
+      [-200, -100],
+      [1200, Math.max(maxY, MIN_CANVAS_HEIGHT)],
+    ] as [[number, number], [number, number]];
+  }, [nodes]);
+
+  useEffect(() => {
+    const onResize = () => {
+      setNodes((nds) => updateNodesPositions(nds));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [setNodes, updateNodesPositions]);
 
   return (
-    <div className="h-screen w-full flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
-        <Input
-          value={agentTitle}
-          onChange={(e) => setAgentTitle(e.target.value)}
-          className="text-xl font-semibold border-none shadow-none p-0 h-auto focus-visible:ring-0 bg-transparent"
-          placeholder="Agent Title"
-        />
-        <Button
-          onClick={handleSave}
-          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
-        >
-          <Save className="w-4 h-4" />
-          <span>Save</span>
-        </Button>
-      </div>
+      <header className="bg-black text-white p-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg font-semibold">Agent Builder</h1>
+          <div className="w-px h-6 bg-gray-600"></div>
+          <Input
+            value={agentTitle}
+            onChange={(e) => setAgentTitle(e.target.value)}
+            className="bg-transparent border-gray-600 text-white max-w-md focus:border-gray-400 focus:ring-gray-400 placeholder:text-gray-400"
+            placeholder="Enter agent title"
+          />
+        </div>
+        <div className="flex items-center gap-3">
+          {saveMessage && (
+            <span
+              className={`text-sm ${
+                saveMessage.includes("success") ? "text-green-400" : "text-red-400"
+              }`}
+            >
+              {saveMessage}
+            </span>
+          )}
+          <Button
+            onClick={handleSaveAgent}
+            disabled={isSaving}
+            variant="secondary"
+            className="bg-white text-black hover:bg-gray-100 disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
+        </div>
+      </header>
 
-      <div className="flex-1">
+      {/* Main Content */}
+      <div ref={flowWrapperRef} className="flex-1 relative">
         <ReactFlow
-          nodes={nodes}
+          nodes={nodesWithCallbacks}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          onNodeClick={(event, node) => {
-            console.log("Card clicked:", node.id); // debug
-            handleEditCard(node.id); // open modal
-          }}
           nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.3, minZoom: 0.5, maxZoom: 1.5 }}
-          minZoom={0.3}
-          maxZoom={2}
-          defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
+          minZoom={0.9}
+          maxZoom={0.9}
+          translateExtent={computeTranslateExtent()}
           nodesDraggable={false}
           nodesConnectable={false}
-          elementsSelectable={true}
-          translateExtent={[
-            [-200, -100],
-            [1000, 2000],
-          ]}
+          panOnScroll
+          zoomOnScroll={false}
+          className="bg-gray-50"
+          fitView={false}
+          defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
+          onInit={(instance) => {
+            rfInstanceRef.current = instance;
+            setNodes((nds) => updateNodesPositions(nds));
+          }}
         >
-          <Background
-            variant={BackgroundVariant.Dots}
-            gap={20}
-            size={1}
-            color="#e5e7eb"
-          />
-          <Controls showInteractive={false} />
+          <Background color="#fafafa" gap={20} size={1} />
         </ReactFlow>
-      </div>
 
-      <EditAgentModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        formData={editForm}
-        setFormData={setEditForm}
-      />
+        {/* Editing Panel */}
+        {editingNode && (
+          <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)] bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <EditingNodeComponent
+              node={editingNode}
+              onSave={(data) => handleSaveNode(editingNode.id, data)}
+              onClose={() => setEditingNodeId(null)}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-export default AgentBuilder;
