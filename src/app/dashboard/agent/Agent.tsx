@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
@@ -20,20 +21,24 @@ import TitleNode from "./TitleNode";
 // Constants
 const CARD_WIDTH_FALLBACK = 320;
 const VERTICAL_SPACING = 150;
-const PADDING_BELOW = 350; // extra space below last node
-const MIN_CANVAS_HEIGHT = 800; // minimum height of canvas
+const PADDING_BELOW = 350;
+const MIN_CANVAS_HEIGHT = 800;
 
 // NodeData interface
 export interface NodeData {
   [key: string]: unknown;
   stepNumber: number;
-  title: string;
-  prompt: string;
+  title?: string;
+  prompt?: string;
   context?: string;
   onEdit: (nodeId: string) => void;
   onDelete: (nodeId: string) => void;
   onAddBelow: (nodeId: string) => void;
   onSave: (nodeId: string, data: Partial<NodeData>) => void;
+  nodeIndex?: number;
+  totalNodes?: number;
+  onMoveUp?: (id: string) => void;
+  onMoveDown?: (id: string) => void;
 }
 
 // Node types
@@ -59,9 +64,6 @@ export default function AgentBuilder() {
       position: { x: 0, y: 450 },
       data: {
         stepNumber: 1,
-        title: "",
-        prompt: "",
-        context: "",
         onEdit: () => {},
         onDelete: () => {},
         onAddBelow: () => {},
@@ -96,12 +98,10 @@ export default function AgentBuilder() {
   const updateNodesPositions = useCallback((nodeList: AgentNodeType[]) => {
     const flowCenterX = getFlowCenterX();
     
-    // Sort nodes by their current Y position to maintain order
-    const sortedNodes = nodeList
-      .slice()
-      .sort((a, b) => a.position.y - b.position.y);
+    // Sort nodes by current Y to maintain order
+    const sortedNodes = nodeList.slice().sort((a, b) => a.position.y - b.position.y);
     
-    // Assign new positions based on the sorted order
+    // Assign positions and step numbers
     return sortedNodes.map((node, index) => {
       const width = getNodeWidth(node.id);
       const centeredLeftX = flowCenterX - width / 2;
@@ -113,11 +113,12 @@ export default function AgentBuilder() {
     });
   }, [getFlowCenterX, getNodeWidth]);
 
+  // Node callbacks
   const handleEditNode = useCallback((nodeId: string) => setEditingNodeId(nodeId), []);
 
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
-      setNodes((nds) => updateNodesPositions(nds.filter((node) => node.id !== nodeId)));
+      setNodes((nds) => updateNodesPositions(nds.filter((n) => n.id !== nodeId)));
       if (editingNodeId === nodeId) setEditingNodeId(null);
     },
     [setNodes, editingNodeId, updateNodesPositions]
@@ -126,22 +127,15 @@ export default function AgentBuilder() {
   const handleAddNodeBelow = useCallback(
     (nodeId: string) => {
       setNodes((nds) => {
-        const currentNodeIndex = nds.findIndex((node) => node.id === nodeId);
-        if (currentNodeIndex === -1) return nds;
-
-        // Get the current node's Y position to place the new node below it
-        const currentNode = nds[currentNodeIndex];
-        const newYPosition = currentNode.position.y + VERTICAL_SPACING;
+        const idx = nds.findIndex((n) => n.id === nodeId);
+        if (idx === -1) return nds;
 
         const newNode: AgentNodeType = {
           id: generateNodeId(),
           type: "agentNode",
-          position: { x: currentNode.position.x, y: newYPosition },
+          position: { x: 0, y: 0 },
           data: {
             stepNumber: 0,
-            title: "Add title",
-            prompt: "Write prompt",
-            context: "",
             onEdit: () => {},
             onDelete: () => {},
             onAddBelow: () => {},
@@ -150,11 +144,8 @@ export default function AgentBuilder() {
           draggable: false,
         };
 
-        // Insert the new node after the current node
         const updatedNodes = [...nds];
-        updatedNodes.splice(currentNodeIndex + 1, 0, newNode);
-        
-        // Update positions to ensure proper vertical ordering
+        updatedNodes.splice(idx + 1, 0, newNode);
         return updateNodesPositions(updatedNodes);
       });
     },
@@ -165,61 +156,72 @@ export default function AgentBuilder() {
     (nodeId: string, data: Partial<NodeData>) => {
       setNodes((nds) =>
         updateNodesPositions(
-          nds.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node))
+          nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n))
         )
       );
       setEditingNodeId(null);
     },
-    [setNodes, updateNodesPositions]
+    [updateNodesPositions]
   );
 
+  const handleMoveNodeUp = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => {
+        const idx = nds.findIndex((n) => n.id === nodeId);
+        if (idx <= 0) return nds;
+        const newNodes = [...nds];
+        [newNodes[idx - 1], newNodes[idx]] = [newNodes[idx], newNodes[idx - 1]];
+        return updateNodesPositions(newNodes);
+      });
+    },
+    [updateNodesPositions]
+  );
+
+  const handleMoveNodeDown = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => {
+        const idx = nds.findIndex((n) => n.id === nodeId);
+        if (idx === -1 || idx >= nds.length - 1) return nds;
+        const newNodes = [...nds];
+        [newNodes[idx + 1], newNodes[idx]] = [newNodes[idx], newNodes[idx + 1]];
+        return updateNodesPositions(newNodes);
+      });
+    },
+    [updateNodesPositions]
+  );
+
+  // Prepare nodes with callbacks and extra info
   const nodesWithCallbacks = useMemo(
     () =>
-      nodes.map((node) => ({
+      nodes.map((node, index) => ({
         ...node,
         data: {
           ...node.data,
+          nodeIndex: index,
+          totalNodes: nodes.length,
           onEdit: handleEditNode,
           onDelete: handleDeleteNode,
           onAddBelow: handleAddNodeBelow,
+          onMoveUp: handleMoveNodeUp,
+          onMoveDown: handleMoveNodeDown,
           onSave: handleSaveNode,
         },
       })),
-    [nodes, handleEditNode, handleDeleteNode, handleAddNodeBelow, handleSaveNode]
+    [
+      nodes,
+      handleEditNode,
+      handleDeleteNode,
+      handleAddNodeBelow,
+      handleSaveNode,
+      handleMoveNodeUp,
+      handleMoveNodeDown,
+    ]
   );
 
   const nodeTypes: NodeTypes = useMemo(() => ({ agentNode: AgentNodeComponent }), []);
 
-  const handleSaveAgent = async () => {
-    setIsSaving(true);
-    setSaveMessage(null);
-    try {
-      const agentData = {
-        title: agentTitle.trim() || "Untitled Agent",
-        nodes: nodes.map(({ data }) => ({
-          stepNumber: data.stepNumber,
-          title: data.title,
-          prompt: data.prompt,
-          context: data.context || "",
-        })),
-        createdAt: new Date().toISOString(),
-      };
-      console.log("Agent Data:", agentData);
-      await new Promise((r) => setTimeout(r, 500));
-      setSaveMessage("Agent saved successfully!");
-      setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
-      console.error(error);
-      setSaveMessage("Failed to save agent");
-      setTimeout(() => setSaveMessage(null), 3000);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const editingNode = editingNodeId ? nodes.find((n) => n.id === editingNodeId) : null;
 
-  // Compute dynamic canvas bounds
   const computeTranslateExtent = useCallback(() => {
     const maxY =
       nodes.length > 0
@@ -232,16 +234,13 @@ export default function AgentBuilder() {
   }, [nodes]);
 
   useEffect(() => {
-    const onResize = () => {
-      setNodes((nds) => updateNodesPositions(nds));
-    };
+    const onResize = () => setNodes((nds) => updateNodesPositions(nds));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [setNodes, updateNodesPositions]);
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Main Content */}
       <div ref={flowWrapperRef} className="flex-1 relative">
         <ReactFlow
           nodes={nodesWithCallbacks}
@@ -255,7 +254,7 @@ export default function AgentBuilder() {
           nodesDraggable={false}
           nodesConnectable={false}
           panOnScroll
-          panOnDrag={false}   
+          panOnDrag={false}
           zoomOnScroll={false}
           className="bg-gray-50"
           fitView={false}
@@ -268,12 +267,9 @@ export default function AgentBuilder() {
           <Background color="#fafafa" gap={20} size={1} />
         </ReactFlow>
 
-        {/* Title Node - Floating in top-left corner */}
+        {/* Title */}
         <div className="absolute top-4 left-4 z-10">
-          <TitleNode
-            title={agentTitle}
-            onTitleChange={setAgentTitle}
-          />
+          <TitleNode title={agentTitle} onTitleChange={setAgentTitle} />
         </div>
 
         {/* Editing Panel */}
