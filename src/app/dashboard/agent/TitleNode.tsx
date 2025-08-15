@@ -1,71 +1,78 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import { Input } from "../../../components/ui/input"
+import { useState, useCallback } from "react"
 import { Button } from "../../../components/ui/button"
-import { ArrowLeft, Settings } from "lucide-react"
-import { type NodeProps } from "@xyflow/react"
+import { Input } from "../../../components/ui/input"
+import { Settings, ArrowLeft } from "lucide-react"
 
-interface TitleNodeData {
+interface TitleNodeProps {
   title: string
-  onTitleChange: (title: string) => void
-  onBack: () => void
-  onSettings: () => void
+  onTitleChange: (newTitle: string) => void
+  onBack?: () => void
 }
 
-export default function TitleNode({ data }: NodeProps<TitleNodeData>) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [tempTitle, setTempTitle] = useState(data.title)
+export default function TitleNode({ title, onTitleChange, onBack }: TitleNodeProps) {
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false)
 
-  const handleSave = () => {
-    data.onTitleChange(tempTitle)
-    setIsEditing(false)
-  }
+  const handleSettingsClick = useCallback(() => {
+    setShowSettingsMenu(!showSettingsMenu)
+  }, [showSettingsMenu])
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSave()
-    } else if (e.key === "Escape") {
-      setTempTitle(data.title)
-      setIsEditing(false)
-    }
-  }
+  const handleSettingsOption = useCallback((option: string) => {
+    console.log("Settings option selected:", option)
+    setShowSettingsMenu(false)
+  }, [])
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm min-w-[300px]">
-      <div className="flex items-center justify-between gap-2">
-        {/* Back button */}
-        <Button variant="ghost" size="icon" onClick={data.onBack}>
-          <ArrowLeft className="h-5 w-5" />
+    <div className="absolute top-4 left-4 z-10">
+      <div className="flex items-center bg-white border border-gray-200 rounded-lg shadow-md focus-within:shadow-lg transition-all duration-200 settings-menu-container">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-14 w-12 p-0 border-0 shadow-none rounded-none hover:bg-gray-50"
+          onClick={onBack}
+        >
+          <ArrowLeft className="h-4 w-4 text-gray-600" />
         </Button>
 
-        {/* Title */}
-        <div className="flex-1 text-center">
-          {isEditing ? (
-            <Input
-              value={tempTitle}
-              onChange={(e) => setTempTitle(e.target.value)}
-              onBlur={handleSave}
-              onKeyDown={handleKeyDown}
-              className="text-lg font-semibold border-none p-0 focus:ring-0 focus:border-none text-center"
-              placeholder="Enter agent title"
-              autoFocus
-            />
-          ) : (
-            <h2
-              className="text-lg font-semibold cursor-pointer hover:text-gray-600 transition-colors"
-              onClick={() => setIsEditing(true)}
-            >
-              {data.title || "Untitled Agent"}
-            </h2>
+        <Input
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          className="border-0 shadow-none px-4 py-4 text-lg font-semibold min-w-[200px] focus:ring-0 focus:outline-none bg-transparent"
+          placeholder="Agent Title"
+        />
+
+        <div className="w-px h-8 bg-gray-200"></div>
+
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-14 w-12 p-0 border-0 shadow-none rounded-none hover:bg-gray-50"
+            onClick={handleSettingsClick}
+          >
+            <Settings className="h-4 w-4 text-gray-600" />
+          </Button>
+
+          {showSettingsMenu && (
+            <div className="absolute top-14 left-0 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+              <div className="py-1">
+                <button
+                  onClick={() => handleSettingsOption("define-success")}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Define Success
+                </button>
+                <button
+                  onClick={() => handleSettingsOption("context")}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Context
+                </button>
+              </div>
+            </div>
           )}
         </div>
-
-        {/* Settings button */}
-        <Button variant="ghost" size="icon" onClick={data.onSettings}>
-          <Settings className="h-5 w-5" />
-        </Button>
       </div>
     </div>
   )

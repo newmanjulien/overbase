@@ -18,6 +18,7 @@ import { Input } from "../../../components/ui/input";
 import { ExternalLink } from "lucide-react";
 import AgentNodeComponent from "./AgentNode";
 import EditingNodeComponent from "./EditingNode";
+import TitleNode from "./TitleNode";
 
 // Constants
 const CARD_WIDTH_FALLBACK = 320;
@@ -272,39 +273,6 @@ export default function AgentBuilder() {
         </div>
       </div>
 
-      {/* Header */}
-      <header className="bg-black text-white p-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold">Agent Builder</h1>
-          <div className="w-px h-6 bg-gray-600"></div>
-          <Input
-            value={agentTitle}
-            onChange={(e) => setAgentTitle(e.target.value)}
-            className="bg-transparent border-gray-600 text-white max-w-md focus:border-gray-400 focus:ring-gray-400 placeholder:text-gray-400"
-            placeholder="Enter agent title"
-          />
-        </div>
-        <div className="flex items-center gap-3">
-          {saveMessage && (
-            <span
-              className={`text-sm ${
-                saveMessage.includes("success") ? "text-green-400" : "text-red-400"
-              }`}
-            >
-              {saveMessage}
-            </span>
-          )}
-          <Button
-            onClick={handleSaveAgent}
-            disabled={isSaving}
-            variant="secondary"
-            className="bg-white text-black hover:bg-gray-100 disabled:opacity-50"
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-        </div>
-      </header>
-
       {/* Main Content */}
       <div ref={flowWrapperRef} className="flex-1 relative">
         <ReactFlow
@@ -330,6 +298,14 @@ export default function AgentBuilder() {
         >
           <Background color="#fafafa" gap={20} size={1} />
         </ReactFlow>
+
+        {/* Title Node - Floating in top-left corner */}
+        <div className="absolute top-4 left-4 z-10">
+          <TitleNode
+            title={agentTitle}
+            onTitleChange={setAgentTitle}
+          />
+        </div>
 
         {/* Editing Panel */}
         {editingNode && (
