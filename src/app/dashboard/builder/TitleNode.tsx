@@ -63,7 +63,7 @@ export default function TitleNode({
           onClick={onBack}
           className="h-13 w-12 p-0 border-0 shadow-none rounded-l-md rounded-r-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
         >
-          <ArrowLeft className="h-4 w-4 text-gray-600" />
+          <ArrowLeft className="h-6 w-6 text-gray-600" />
         </Button>
 
         {/* Editable Title */}
@@ -89,7 +89,7 @@ export default function TitleNode({
                 onClick={handleSettingsClick}
                 className="h-13 w-12 p-0 border-0 shadow-none rounded-r-md rounded-l-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
               >
-                <Settings className="h-4 w-4 text-gray-600" />
+                <Settings className="h-5 w-5 text-gray-600" />
               </Button>
 
               {showSettingsMenu && (
@@ -105,7 +105,10 @@ export default function TitleNode({
                       Define Success
                     </button>
                     <button
-                      onClick={() => handleSettingsOption("context")}
+                      onClick={() => {
+                        router.push("/dashboard/builder/context");
+                        setShowSettingsMenu(false);
+                      }}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       Context
