@@ -50,7 +50,7 @@ const CustomEdge = memo(
             <Button
               size="sm"
               variant="outline"
-              className="rounded-full px-2 h-6 w-6 flex items-center justify-center"
+              className="rounded-full h-8 w-8 flex items-center justify-center bg-white border-gray-200 hover:bg-gray-50 shadow-sm text-gray-600 hover:text-gray-800 font-normal text-sm"
               onClick={() => {
                 if (onAddBetween) {
                   onAddBetween(id);
