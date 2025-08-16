@@ -323,7 +323,7 @@ export default function Builder() {
               setNodes((currentNodes) => updateNodesPositions(currentNodes));
             }}
           >
-            <Background color="#FC7236" gap={20} size={1} />
+            <Background color="#Fafafafa" gap={20} size={1} />
           </ReactFlow>
         </FlowContext.Provider>
 

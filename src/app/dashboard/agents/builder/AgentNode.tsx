@@ -57,7 +57,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
     };
 
   return (
-    <div className="w-80">
+    <div className="w-88">
       <Handle type="target" position={Position.Top} className="opacity-0" />
 
       <Card
@@ -66,11 +66,11 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           isEditing
             ? {
                 background: `
-                  linear-gradient(135deg, 
-                    rgba(252, 114, 54, 0.08) 30%, 
-                    rgba(252, 73, 54, 0.06) 55%, 
-                    rgba(252, 54, 54, 0.04) 70%, 
-                    rgba(252, 73, 54, 0.06) 85%, 
+                  linear-gradient(135deg,
+                    rgba(252, 114, 54, 0.08) 30%,
+                    rgba(252, 73, 54, 0.06) 55%,
+                    rgba(252, 54, 54, 0.04) 70%,
+                    rgba(252, 73, 54, 0.06) 85%,
                     rgba(252, 114, 54, 0.08) 100%
                   ),
                   linear-gradient(to bottom, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95))
@@ -183,7 +183,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
               x1="50%"
               y1="0"
               x2="50%"
-              y2="calc(50% + 12px)"
+              y2="calc(50% + 18px)"
               stroke="#E5E7EB"
               strokeWidth="2"
             />

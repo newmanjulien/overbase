@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useContext } from "react";
+import { memo } from "react";
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -8,7 +8,6 @@ import {
   getBezierPath,
 } from "@xyflow/react";
 import { Button } from "../../../../components/ui/button";
-import { FlowContext } from "./FlowContext";
 
 const CustomEdge = memo(
   ({
@@ -21,6 +20,7 @@ const CustomEdge = memo(
     targetPosition,
     style = {},
     markerEnd,
+    data,
   }: EdgeProps) => {
     const [edgePath, labelX, labelY] = getBezierPath({
       sourceX,
@@ -31,7 +31,9 @@ const CustomEdge = memo(
       targetPosition,
     });
 
-    const { onAddBetween } = useContext(FlowContext);
+    const onAddBetween = data?.onAddBetween as
+      | ((edgeId: string) => void)
+      | undefined;
 
     return (
       <>
@@ -50,8 +52,9 @@ const CustomEdge = memo(
               variant="outline"
               className="rounded-full px-2 h-6 w-6 flex items-center justify-center"
               onClick={() => {
-                if (onAddBetween) onAddBetween(id);
-                else console.log("Plus button clicked on edge", id);
+                if (onAddBetween) {
+                  onAddBetween(id);
+                }
               }}
             >
               +
