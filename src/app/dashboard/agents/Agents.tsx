@@ -50,7 +50,7 @@ const initialAgents: Agent[] = [
     id: 4,
     title: "Prep quarterly call",
     description: "Prepare the data for your quarterly calls with customers",
-    categories: ["After sales calls"],
+    categories: ["After sales calls", "Installed"],
     gradientFrom: "from-blue-400",
     gradientTo: "to-indigo-500",
   },
