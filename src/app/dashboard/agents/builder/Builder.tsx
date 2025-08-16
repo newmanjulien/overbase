@@ -16,16 +16,19 @@ import AgentNode from "./AgentNode";
 import EditNode from "./EditNode";
 import TitleNode from "./TitleNode";
 import CustomEdge from "./CustomEdge";
+import { FlowContext } from "./FlowContext";
 
 import { dummySteps } from "./DummyData";
 
 const CARD_WIDTH_FALLBACK = 320;
-const VERTICAL_SPACING = 180;
+const VERTICAL_SPACING = 200;
 const PADDING_BELOW = 350;
 const MIN_CANVAS_HEIGHT = 800;
 
 const nodeTypes: NodeTypes = { agentNode: AgentNode };
-const edgeTypes = { custom: CustomEdge };
+const edgeTypes = {
+  custom: CustomEdge,
+};
 
 export interface NodeData {
   [key: string]: unknown;
@@ -81,7 +84,6 @@ export default function Builder() {
   const [nodes, setNodes, onNodesChange] =
     useNodesState<AgentNodeType>(initialNodes);
 
-  // --- NEW: edges are derived from nodes --------------------------------------
   const buildSequentialEdges = useCallback(
     (nodeList: AgentNodeType[]): Edge[] => {
       if (nodeList.length < 2) return [];
@@ -105,7 +107,6 @@ export default function Builder() {
     () => buildSequentialEdges(nodes),
     [nodes, buildSequentialEdges]
   );
-  // ----------------------------------------------------------------------------
 
   const getFlowCenterX = useCallback(() => {
     const rf = rfInstanceRef.current;
@@ -187,6 +188,16 @@ export default function Builder() {
     [setNodes, updateNodesPositions]
   );
 
+  const onAddBetween = useCallback(
+    (edgeId: string) => {
+      const match = edgeId.match(/^e-(.+)-(.+)$/);
+      if (!match) return;
+      const [, sourceId] = match;
+      handleAddNodeBelow(sourceId);
+    },
+    [handleAddNodeBelow]
+  );
+
   const handleSaveNode = useCallback(
     (nodeId: string, data: Partial<NodeData>) => {
       setNodes((currentNodes) =>
@@ -256,15 +267,14 @@ export default function Builder() {
     ]
   );
 
-  const nodeTypes: NodeTypes = useMemo(() => ({ agentNode: AgentNode }), []);
-
   const editingNode = nodes.find((n) => n.id === editingNodeId) ?? null;
 
   const computeTranslateExtent = useCallback(() => {
     const maxY =
       nodes.length > 0
         ? Math.max(...nodes.map((_, index) => 100 + index * VERTICAL_SPACING)) +
-          PADDING_BELOW
+          PADDING_BELOW +
+          (nodes.length > 0 ? 60 : 0)
         : MIN_CANVAS_HEIGHT;
     return [
       [-200, -100],
@@ -279,12 +289,10 @@ export default function Builder() {
     return () => window.removeEventListener("resize", handleResize);
   }, [setNodes, updateNodesPositions]);
 
-  // Optional: normalize edge look in one place
   const defaultEdgeOptions = useMemo(
     () => ({
       type: "smoothstep" as const,
-      // animated: false,
-      // style: { stroke: "#E5E7EB" }, // light gray; comment out if you prefer default
+      style: { stroke: "#E5E7EB" },
     }),
     []
   );
@@ -292,30 +300,32 @@ export default function Builder() {
   return (
     <div className="h-screen flex flex-col">
       <div ref={flowWrapperRef} className="flex-1 relative">
-        <ReactFlow
-          nodes={nodesWithCallbacks}
-          edges={edges.map((e) => ({ ...e, type: "custom" }))} // use custom edge
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          minZoom={0.9}
-          maxZoom={0.9}
-          translateExtent={computeTranslateExtent()}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          panOnScroll
-          panOnDrag={false}
-          zoomOnScroll={false}
-          className="bg-gray-50"
-          fitView={false}
-          defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
-          defaultEdgeOptions={defaultEdgeOptions}
-          onInit={(instance) => {
-            rfInstanceRef.current = instance as unknown as ReactFlowInstance;
-            setNodes((currentNodes) => updateNodesPositions(currentNodes));
-          }}
-        >
-          <Background color="#FC7236" gap={20} size={1} />
-        </ReactFlow>
+        <FlowContext.Provider value={{ onAddBetween }}>
+          <ReactFlow
+            nodes={nodesWithCallbacks}
+            edges={edges.map((e) => ({ ...e, type: "custom" }))}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            minZoom={0.9}
+            maxZoom={0.9}
+            translateExtent={computeTranslateExtent()}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            panOnScroll
+            panOnDrag={false}
+            zoomOnScroll={false}
+            className="bg-gray-50"
+            fitView={false}
+            defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
+            defaultEdgeOptions={defaultEdgeOptions}
+            onInit={(instance) => {
+              rfInstanceRef.current = instance as unknown as ReactFlowInstance;
+              setNodes((currentNodes) => updateNodesPositions(currentNodes));
+            }}
+          >
+            <Background color="#FC7236" gap={20} size={1} />
+          </ReactFlow>
+        </FlowContext.Provider>
 
         <div className="absolute top-4 left-4 z-10">
           <TitleNode title={agentTitle} onTitleChange={setAgentTitle} />

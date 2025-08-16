@@ -37,6 +37,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
   } = data;
 
   const isEditing = editingNodeId === id;
+  const isLast = nodeIndex === totalNodes - 1;
 
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -163,6 +164,53 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           </Button>
         </div>
       </Card>
+
+      {isLast && (
+        <div
+          className="nodrag nopan"
+          style={{ position: "relative", height: 60 }}
+        >
+          <svg
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <line
+              x1="50%"
+              y1="0"
+              x2="50%"
+              y2="calc(50% + 12px)"
+              stroke="#E5E7EB"
+              strokeWidth="2"
+            />
+          </svg>
+          <div
+            style={{
+              position: "absolute",
+              top: "60%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              pointerEvents: "all",
+            }}
+          >
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-full px-2 h-6 w-6 flex items-center justify-center"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddBelow(id);
+              }}
+            >
+              +
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Handle type="source" position={Position.Bottom} className="opacity-0" />
     </div>
