@@ -22,16 +22,15 @@ export default function TitleNode({
   const settingsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const handleSettingsClick = useCallback(() => {
-    setShowSettingsMenu((prev) => !prev);
-  }, []);
+  const handleSettingsClick = useCallback(
+    () => setShowSettingsMenu((prev) => !prev),
+    []
+  );
+  const handleSettingsOption = useCallback(
+    (option: string) => setShowSettingsMenu(false),
+    []
+  );
 
-  const handleSettingsOption = useCallback((option: string) => {
-    console.log("Settings option selected:", option);
-    setShowSettingsMenu(false);
-  }, []);
-
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -41,16 +40,10 @@ export default function TitleNode({
         setShowSettingsMenu(false);
       }
     };
-
-    if (showSettingsMenu) {
+    if (showSettingsMenu)
       document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    else document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSettingsMenu]);
 
   return (
@@ -67,7 +60,7 @@ export default function TitleNode({
         </Button>
 
         {/* Editable Title */}
-        <div className={`flex-1 px-2 py-2`}>
+        <div className="flex-1 px-2 py-2">
           <Input
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}

@@ -12,8 +12,8 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-import AgentNodeComponent from "./AgentNode";
-import EditingNodeComponent from "./EditingNode";
+import AgentNode from "./AgentNode";
+import EditNode from "./EditNode";
 import TitleNode from "./TitleNode";
 
 const CARD_WIDTH_FALLBACK = 320;
@@ -86,23 +86,24 @@ export default function Builder() {
   const getNodeWidth = useCallback((nodeId: string) => {
     const wrapper = flowWrapperRef.current;
     if (!wrapper) return CARD_WIDTH_FALLBACK;
-    const el = wrapper.querySelector(
+    const nodeElement = wrapper.querySelector(
       `.react-flow__node[data-id="${nodeId}"]`
     ) as HTMLDivElement | null;
-    return el?.clientWidth ?? CARD_WIDTH_FALLBACK;
+    return nodeElement?.clientWidth ?? CARD_WIDTH_FALLBACK;
   }, []);
 
-  // FIXED: Uses array order, not Y-based sorting
   const updateNodesPositions = useCallback(
     (nodeList: AgentNodeType[]) => {
       const flowCenterX = getFlowCenterX();
 
       return nodeList.map((node, index) => {
         const width = getNodeWidth(node.id);
-        const centeredLeftX = flowCenterX - width / 2;
         return {
           ...node,
-          position: { x: centeredLeftX, y: 100 + index * VERTICAL_SPACING },
+          position: {
+            x: flowCenterX - width / 2,
+            y: 100 + index * VERTICAL_SPACING,
+          },
           data: { ...node.data, stepNumber: index + 1 },
         };
       });
@@ -117,8 +118,8 @@ export default function Builder() {
 
   const handleDeleteNode = useCallback(
     (nodeId: string) => {
-      setNodes((nds) =>
-        updateNodesPositions(nds.filter((n) => n.id !== nodeId))
+      setNodes((currentNodes) =>
+        updateNodesPositions(currentNodes.filter((n) => n.id !== nodeId))
       );
       if (editingNodeId === nodeId) setEditingNodeId(null);
     },
@@ -127,14 +128,14 @@ export default function Builder() {
 
   const handleAddNodeBelow = useCallback(
     (nodeId: string) => {
-      setNodes((nds) => {
-        const idx = nds.findIndex((n) => n.id === nodeId);
-        if (idx === -1) return nds;
+      setNodes((currentNodes) => {
+        const idx = currentNodes.findIndex((n) => n.id === nodeId);
+        if (idx === -1) return currentNodes;
 
         const newNode: AgentNodeType = {
           id: generateNodeId(),
           type: "agentNode",
-          position: { x: 0, y: 0 }, // position will be set by updateNodesPositions
+          position: { x: 0, y: 0 },
           data: {
             stepNumber: 0,
             onEdit: () => {},
@@ -145,8 +146,8 @@ export default function Builder() {
           draggable: false,
         };
 
-        const updatedNodes = [...nds];
-        updatedNodes.splice(idx + 1, 0, newNode); // insert below
+        const updatedNodes = [...currentNodes];
+        updatedNodes.splice(idx + 1, 0, newNode);
         return updateNodesPositions(updatedNodes);
       });
     },
@@ -155,9 +156,9 @@ export default function Builder() {
 
   const handleSaveNode = useCallback(
     (nodeId: string, data: Partial<NodeData>) => {
-      setNodes((nds) =>
+      setNodes((currentNodes) =>
         updateNodesPositions(
-          nds.map((n) =>
+          currentNodes.map((n) =>
             n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n
           )
         )
@@ -169,10 +170,10 @@ export default function Builder() {
 
   const handleMoveNodeUp = useCallback(
     (nodeId: string) => {
-      setNodes((nds) => {
-        const idx = nds.findIndex((n) => n.id === nodeId);
-        if (idx <= 0) return nds;
-        const newNodes = [...nds];
+      setNodes((currentNodes) => {
+        const idx = currentNodes.findIndex((n) => n.id === nodeId);
+        if (idx <= 0) return currentNodes;
+        const newNodes = [...currentNodes];
         [newNodes[idx - 1], newNodes[idx]] = [newNodes[idx], newNodes[idx - 1]];
         return updateNodesPositions(newNodes);
       });
@@ -182,10 +183,10 @@ export default function Builder() {
 
   const handleMoveNodeDown = useCallback(
     (nodeId: string) => {
-      setNodes((nds) => {
-        const idx = nds.findIndex((n) => n.id === nodeId);
-        if (idx === -1 || idx >= nds.length - 1) return nds;
-        const newNodes = [...nds];
+      setNodes((currentNodes) => {
+        const idx = currentNodes.findIndex((n) => n.id === nodeId);
+        if (idx === -1 || idx >= currentNodes.length - 1) return currentNodes;
+        const newNodes = [...currentNodes];
         [newNodes[idx + 1], newNodes[idx]] = [newNodes[idx], newNodes[idx + 1]];
         return updateNodesPositions(newNodes);
       });
@@ -222,14 +223,9 @@ export default function Builder() {
     ]
   );
 
-  const nodeTypes: NodeTypes = useMemo(
-    () => ({ agentNode: AgentNodeComponent }),
-    []
-  );
+  const nodeTypes: NodeTypes = useMemo(() => ({ agentNode: AgentNode }), []);
 
-  const editingNode = editingNodeId
-    ? nodes.find((n) => n.id === editingNodeId)
-    : null;
+  const editingNode = nodes.find((n) => n.id === editingNodeId) ?? null;
 
   const computeTranslateExtent = useCallback(() => {
     const maxY =
@@ -244,9 +240,10 @@ export default function Builder() {
   }, [nodes]);
 
   useEffect(() => {
-    const onResize = () => setNodes((nds) => updateNodesPositions(nds));
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const handleResize = () =>
+      setNodes((currentNodes) => updateNodesPositions(currentNodes));
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [setNodes, updateNodesPositions]);
 
   return (
@@ -271,7 +268,7 @@ export default function Builder() {
           defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
           onInit={(instance) => {
             rfInstanceRef.current = instance as unknown as ReactFlowInstance;
-            setNodes((nds) => updateNodesPositions(nds));
+            setNodes((currentNodes) => updateNodesPositions(currentNodes));
           }}
         >
           <Background color="#FC7236" gap={20} size={1} />
@@ -283,7 +280,7 @@ export default function Builder() {
 
         {editingNode && (
           <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)] bg-white">
-            <EditingNodeComponent
+            <EditNode
               node={editingNode}
               onSave={(data) => handleSaveNode(editingNode.id, data)}
               onClose={() => setEditingNodeId(null)}
