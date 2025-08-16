@@ -6,22 +6,26 @@ import {
   type Node,
   Background,
   useNodesState,
-  useEdgesState,
   type NodeTypes,
   type ReactFlowInstance,
+  type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 import AgentNode from "./AgentNode";
 import EditNode from "./EditNode";
 import TitleNode from "./TitleNode";
+import CustomEdge from "./CustomEdge";
 
 import { dummySteps } from "./DummyData";
 
 const CARD_WIDTH_FALLBACK = 320;
-const VERTICAL_SPACING = 160;
+const VERTICAL_SPACING = 180;
 const PADDING_BELOW = 350;
 const MIN_CANVAS_HEIGHT = 800;
+
+const nodeTypes: NodeTypes = { agentNode: AgentNode };
+const edgeTypes = { custom: CustomEdge };
 
 export interface NodeData {
   [key: string]: unknown;
@@ -76,7 +80,32 @@ export default function Builder() {
   );
   const [nodes, setNodes, onNodesChange] =
     useNodesState<AgentNodeType>(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState([]);
+
+  // --- NEW: edges are derived from nodes --------------------------------------
+  const buildSequentialEdges = useCallback(
+    (nodeList: AgentNodeType[]): Edge[] => {
+      if (nodeList.length < 2) return [];
+      const edges: Edge[] = [];
+      for (let i = 0; i < nodeList.length - 1; i++) {
+        const a = nodeList[i];
+        const b = nodeList[i + 1];
+        edges.push({
+          id: `e-${a.id}-${b.id}`,
+          source: a.id,
+          target: b.id,
+          type: "smoothstep",
+        });
+      }
+      return edges;
+    },
+    []
+  );
+
+  const edges = useMemo(
+    () => buildSequentialEdges(nodes),
+    [nodes, buildSequentialEdges]
+  );
+  // ----------------------------------------------------------------------------
 
   const getFlowCenterX = useCallback(() => {
     const rf = rfInstanceRef.current;
@@ -250,15 +279,24 @@ export default function Builder() {
     return () => window.removeEventListener("resize", handleResize);
   }, [setNodes, updateNodesPositions]);
 
+  // Optional: normalize edge look in one place
+  const defaultEdgeOptions = useMemo(
+    () => ({
+      type: "smoothstep" as const,
+      // animated: false,
+      // style: { stroke: "#E5E7EB" }, // light gray; comment out if you prefer default
+    }),
+    []
+  );
+
   return (
     <div className="h-screen flex flex-col">
       <div ref={flowWrapperRef} className="flex-1 relative">
         <ReactFlow
           nodes={nodesWithCallbacks}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
+          edges={edges.map((e) => ({ ...e, type: "custom" }))} // use custom edge
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           minZoom={0.9}
           maxZoom={0.9}
           translateExtent={computeTranslateExtent()}
@@ -270,6 +308,7 @@ export default function Builder() {
           className="bg-gray-50"
           fitView={false}
           defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
+          defaultEdgeOptions={defaultEdgeOptions}
           onInit={(instance) => {
             rfInstanceRef.current = instance as unknown as ReactFlowInstance;
             setNodes((currentNodes) => updateNodesPositions(currentNodes));
