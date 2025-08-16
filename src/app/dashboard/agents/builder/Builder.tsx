@@ -51,28 +51,6 @@ export default function Builder() {
   const [agentTitle, setAgentTitle] = useState("AI Agents");
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
 
-  // const createInitialNode = useCallback(
-  //   (): AgentNodeType => ({
-  //     id: generateNodeId(),
-  //     type: "agentNode",
-  //     position: { x: 0, y: 450 },
-  //     data: {
-  //       stepNumber: 1,
-  //       onEdit: () => {},
-  //       onDelete: () => {},
-  //       onAddBelow: () => {},
-  //       onSave: () => {},
-  //     },
-  //     draggable: false,
-  //   }),
-  //   []
-  // );
-
-  // const initialNodes = useMemo(
-  //   () => [createInitialNode()],
-  //   [createInitialNode]
-  // );
-
   const createInitialNodes = useCallback((): AgentNodeType[] => {
     return dummySteps.map((step, index) => ({
       id: `${Date.now()}-${index}`,
