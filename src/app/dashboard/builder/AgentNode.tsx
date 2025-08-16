@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import type { NodeData } from "./AgentBuilder";
+import type { NodeData } from "./Builder";
 
 interface AgentNodeProps extends NodeProps {
   data: NodeData & {
@@ -60,7 +60,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       <Handle type="target" position={Position.Top} className="opacity-0" />
 
       <Card
-        className="bg-white border border-gray-100 hover:border-gray-200 rounded-md overflow-hidden cursor-pointer hover:shadow-md transition-shadow p-0"
+        className="bg-white border border-gray-100 hover:border-gray-200 rounded-md overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow p-0"
         style={
           isEditing
             ? {
@@ -74,7 +74,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                   ),
                   linear-gradient(to bottom, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95))
                 `,
-                border: "1.5px solid rgba(255, 110, 100, 0.6)", // <-- selected border color
+                border: "1.5px solid rgba(255, 110, 100, 0.6)",
               }
             : {}
         }
@@ -97,11 +97,15 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-8 w-8 p-0 hover:bg-white`}
+                  className={`h-8 w-8 p-0 ${
+                    isEditing ? "hover:bg-white" : "hover:bg-gray-100"
+                  }`}
                   aria-label="Actions"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="text-gray-400 text-lg leading-none">⋯</span>
+                  <span className="text-gray-700 text-xl leading-none font-bold">
+                    ⋮
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
 
@@ -151,11 +155,11 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
             size="sm"
             className={`w-full border-0 transition-all duration-200 ${
               isEditing
-                ? "bg-white text-gray-800 hover:bg-gray-50"
-                : "bg-gray-50 text-gray-800 hover:bg-gray-100 hover:text-gray-700"
+                ? "bg-white text-gray-700 hover:text-gray-900 hover:bg-white"
+                : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-700"
             }`}
           >
-            Add Step
+            Add step
           </Button>
         </div>
       </Card>

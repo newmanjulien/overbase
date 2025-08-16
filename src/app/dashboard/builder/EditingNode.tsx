@@ -6,7 +6,7 @@ import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
 import { Card } from "../../../components/ui/card";
-import type { NodeData } from "./AgentBuilder";
+import type { NodeData } from "./Builder";
 
 interface EditingNodeProps {
   node: {
@@ -168,8 +168,8 @@ export default function EditingNodeComponent({
       {/* Footer */}
       <div className="p-3 bg-white">
         <div className="flex justify-end space-x-2">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="bg-white text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
             onClick={onClose}
           >
