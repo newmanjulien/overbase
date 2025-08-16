@@ -19,7 +19,7 @@ import TitleNode from "./TitleNode";
 import { dummySteps } from "./DummyData";
 
 const CARD_WIDTH = 352; // fixed width (w-88 in Tailwind)
-const VERTICAL_SPACING = 200;
+const VERTICAL_SPACING = 225;
 const PADDING_BELOW = 350;
 const MIN_CANVAS_HEIGHT = 800;
 

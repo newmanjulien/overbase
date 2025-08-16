@@ -44,11 +44,6 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
     onEdit(id);
   };
 
-  const handleAddClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onAddBelow(id);
-  };
-
   const handleItemClick =
     (callback?: () => void, disabled?: boolean) => (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -89,7 +84,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-gray-900">
               {stepNumber}.{" "}
-              <span className="font-normal">{title || "Enter step title"}</span>
+              <span className="font-normal">{title || "New step"}</span>
             </h3>
 
             <DropdownMenu>
@@ -148,19 +143,46 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           </div>
         </div>
 
-        <div className="px-3 pb-3 pt-0 -mt-1">
-          <Button
-            onClick={handleAddClick}
-            variant="outline"
-            size="sm"
-            className={`w-full border-0 transition-all duration-200 ${
+        {/* <div className="px-3 pb-3 pt-0 -mt-1">
+          <div
+            className={`rounded-sm px-3 py-2 border ${
               isEditing
-                ? "bg-white text-gray-700 hover:text-gray-900 hover:bg-white"
-                : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-700"
+                ? "bg-white border-gray-100"
+                : "bg-gray-50 border-gray-100"
             }`}
           >
-            Add step
-          </Button>
+            <p
+              className={`text-sm line-clamp-2 leading-relaxed font-regular ${
+                data.prompt ? "text-gray-900" : "text-gray-400"
+              }`}
+            >
+              {data.prompt ||
+                "Click on this step to tell the AI what you want it to do"}
+            </p>
+          </div>
+        </div> */}
+        <div className="px-3 pb-3 pt-0 -mt-1">
+          <div
+            className={`rounded-md px-3 py-2 border ${
+              isEditing
+                ? "bg-white border-gray-100"
+                : "bg-gray-50 border-gray-100"
+            }`}
+            style={{ height: "4rem" }} // fixed height, ~2 lines for text-sm + leading-relaxed
+          >
+            <p
+              className={`text-sm font-regular leading-relaxed text-gray-900 line-clamp-2`}
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {data.prompt ||
+                "Click on this step to tell the AI what you want it to do"}
+            </p>
+          </div>
         </div>
       </Card>
 
@@ -184,7 +206,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
             x2="50%"
             y2="calc(50% + 18px)"
             stroke="#E5E7EB"
-            strokeWidth="2"
+            strokeWidth="1"
           />
         </svg>
         <div
