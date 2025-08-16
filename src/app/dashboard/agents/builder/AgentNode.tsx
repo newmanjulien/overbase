@@ -37,7 +37,6 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
   } = data;
 
   const isEditing = editingNodeId === id;
-  const isLast = nodeIndex === totalNodes - 1;
 
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -165,52 +164,51 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
         </div>
       </Card>
 
-      {isLast && (
-        <div
-          className="nodrag nopan"
-          style={{ position: "relative", height: 60 }}
+      {/* Add-step button under every node */}
+      <div
+        className="nodrag nopan"
+        style={{ position: "relative", height: 60 }}
+      >
+        <svg
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
         >
-          <svg
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
+          <line
+            x1="50%"
+            y1="0"
+            x2="50%"
+            y2="calc(50% + 18px)"
+            stroke="#E5E7EB"
+            strokeWidth="2"
+          />
+        </svg>
+        <div
+          style={{
+            position: "absolute",
+            top: "60%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            pointerEvents: "all",
+          }}
+        >
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-full h-8 w-8 flex items-center justify-center bg-white border-gray-200 hover:bg-gray-50 shadow-sm text-gray-600 hover:text-gray-800 font-normal text-sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddBelow(id);
             }}
           >
-            <line
-              x1="50%"
-              y1="0"
-              x2="50%"
-              y2="calc(50% + 18px)"
-              stroke="#E5E7EB"
-              strokeWidth="2"
-            />
-          </svg>
-          <div
-            style={{
-              position: "absolute",
-              top: "60%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              pointerEvents: "all",
-            }}
-          >
-            <Button
-              size="sm"
-              variant="outline"
-              className="rounded-full h-8 w-8 flex items-center justify-center bg-white border-gray-200 hover:bg-gray-50 shadow-sm text-gray-600 hover:text-gray-800 font-normal text-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddBelow(id);
-              }}
-            >
-              +
-            </Button>
-          </div>
+            +
+          </Button>
         </div>
-      )}
+      </div>
 
       <Handle type="source" position={Position.Bottom} className="opacity-0" />
     </div>
