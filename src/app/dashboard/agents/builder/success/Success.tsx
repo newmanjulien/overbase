@@ -13,7 +13,7 @@ export default function Success() {
 
   const handleSave = () => {
     // navigate back to the builder canvas
-    router.push("/dashboard/builder");
+    router.push("/dashboard/agents/builder");
   };
 
   return (
@@ -21,7 +21,7 @@ export default function Success() {
       {/* Left Sidebar */}
       <aside className="w-[28rem] bg-gray-100 border-r border-gray-200 pl-10 pr-15 pt-12 pb-6 flex flex-col">
         <button
-          onClick={() => router.push("/dashboard/builder")}
+          onClick={() => router.push("/dashboard/agents/builder")}
           className="flex items-center gap-2 text-sm text-gray-600 mb-8"
           aria-label="Back to agent"
           type="button"
@@ -133,7 +133,7 @@ export default function Success() {
             <Button
               type="button"
               className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100"
-              onClick={() => router.push("/dashboard/builder")}
+              onClick={() => router.push("/dashboard/agents/builder")}
             >
               Back
             </Button>

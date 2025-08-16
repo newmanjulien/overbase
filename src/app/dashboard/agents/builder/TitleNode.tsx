@@ -53,7 +53,13 @@ export default function TitleNode({
         <Button
           variant="ghost"
           size="sm"
-          onClick={onBack}
+          onClick={() => {
+            if (onBack) {
+              onBack();
+            } else {
+              router.push("/dashboard/agents");
+            }
+          }}
           className="h-13 w-12 p-0 border-0 shadow-none rounded-l-md rounded-r-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
         >
           <ArrowLeft className="h-6 w-6 text-gray-600" />
@@ -90,7 +96,7 @@ export default function TitleNode({
                   <div className="py-1">
                     <button
                       onClick={() => {
-                        router.push("/dashboard/builder/success");
+                        router.push("/dashboard/agents/builder/success");
                         setShowSettingsMenu(false);
                       }}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -99,7 +105,7 @@ export default function TitleNode({
                     </button>
                     <button
                       onClick={() => {
-                        router.push("/dashboard/builder/context");
+                        router.push("/dashboard/agents/builder/context");
                         setShowSettingsMenu(false);
                       }}
                       className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
