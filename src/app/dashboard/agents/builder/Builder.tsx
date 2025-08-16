@@ -16,6 +16,8 @@ import AgentNode from "./AgentNode";
 import EditNode from "./EditNode";
 import TitleNode from "./TitleNode";
 
+import { dummySteps } from "./DummyData";
+
 const CARD_WIDTH_FALLBACK = 320;
 const VERTICAL_SPACING = 160;
 const PADDING_BELOW = 350;
@@ -49,26 +51,50 @@ export default function Builder() {
   const [agentTitle, setAgentTitle] = useState("AI Agents");
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
 
-  const createInitialNode = useCallback(
-    (): AgentNodeType => ({
-      id: generateNodeId(),
+  // const createInitialNode = useCallback(
+  //   (): AgentNodeType => ({
+  //     id: generateNodeId(),
+  //     type: "agentNode",
+  //     position: { x: 0, y: 450 },
+  //     data: {
+  //       stepNumber: 1,
+  //       onEdit: () => {},
+  //       onDelete: () => {},
+  //       onAddBelow: () => {},
+  //       onSave: () => {},
+  //     },
+  //     draggable: false,
+  //   }),
+  //   []
+  // );
+
+  // const initialNodes = useMemo(
+  //   () => [createInitialNode()],
+  //   [createInitialNode]
+  // );
+
+  const createInitialNodes = useCallback((): AgentNodeType[] => {
+    return dummySteps.map((step, index) => ({
+      id: `${Date.now()}-${index}`,
       type: "agentNode",
-      position: { x: 0, y: 450 },
+      position: { x: 0, y: 0 },
       data: {
-        stepNumber: 1,
+        stepNumber: index + 1,
+        title: step.title,
+        prompt: step.prompt,
+        context: step.context,
         onEdit: () => {},
         onDelete: () => {},
         onAddBelow: () => {},
         onSave: () => {},
       },
       draggable: false,
-    }),
-    []
-  );
+    }));
+  }, []);
 
   const initialNodes = useMemo(
-    () => [createInitialNode()],
-    [createInitialNode]
+    () => createInitialNodes(),
+    [createInitialNodes]
   );
   const [nodes, setNodes, onNodesChange] =
     useNodesState<AgentNodeType>(initialNodes);

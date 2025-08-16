@@ -87,8 +87,8 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           }}
         >
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">
-              Step {stepNumber} -{" "}
+            <h3 className="font-medium text-gray-900">
+              {stepNumber}.{" "}
               <span className="font-normal">{title || "Enter step title"}</span>
             </h3>
 
