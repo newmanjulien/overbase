@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AgentCard } from "./AgentCard";
+import { LaunchModal } from "./LaunchModal";
 
 const categories = [
   "Installed",
@@ -58,6 +59,7 @@ const initialAgents: Agent[] = [
 export function Agents() {
   const [selectedCategory, setSelectedCategory] = useState("Installed");
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
+  const [launchingAgent, setLaunchingAgent] = useState<Agent | null>(null);
 
   const handleInstall = (agentId: number) => {
     setAgents((prev) =>
@@ -98,6 +100,7 @@ export function Agents() {
 
       <div style={{ backgroundColor: "#FAFAFA" }}>
         <div className="max-w-7xl mx-auto px-6 py-16 flex gap-8">
+          {/* Sidebar */}
           <div className="w-56 flex-shrink-0">
             <nav className="space-y-0.5">
               {categories.map((category) => (
@@ -116,6 +119,7 @@ export function Agents() {
             </nav>
           </div>
 
+          {/* Agent Grid */}
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAgents.map((agent) => (
@@ -127,12 +131,21 @@ export function Agents() {
                   gradientTo={agent.gradientTo}
                   isInstalled={agent.categories.includes("Installed")}
                   onInstall={() => handleInstall(agent.id)}
+                  onLaunch={() => setLaunchingAgent(agent)} // <-- LaunchModal opens here
                 />
               ))}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Launch Modal */}
+      {launchingAgent && (
+        <LaunchModal
+          isOpen={!!launchingAgent}
+          onClose={() => setLaunchingAgent(null)}
+        />
+      )}
     </div>
   );
 }
