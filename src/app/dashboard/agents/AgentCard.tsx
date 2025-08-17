@@ -145,19 +145,21 @@ export function AgentCard({
       >
         {/* Centered image or first letter */}
         <div className="flex items-center justify-center">
-          {image ? (
-            <Image
-              src={image}
-              alt={`${title} logo`}
-              width={55}
-              height={55}
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center font-medium text-gray-800">
-              {title.charAt(0)}
-            </div>
-          )}
+          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-white p-1">
+            {image ? (
+              <Image
+                src={image}
+                alt={`${title} logo`}
+                width={54}
+                height={54}
+                className="rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center font-medium text-gray-800">
+                {title.charAt(0)}
+              </div>
+            )}
+          </div>
         </div>
 
         <Button
