@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
+import { MoreVertical, Plus } from "lucide-react"; // ✅ icons from lucide
 import type { NodeData } from "./Builder";
 
 interface AgentNodeProps extends NodeProps {
@@ -98,9 +99,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                   aria-label="Actions"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="text-gray-700 text-xl leading-none font-bold">
-                    ⋮
-                  </span>
+                  <MoreVertical className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
 
@@ -143,24 +142,6 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           </div>
         </div>
 
-        {/* <div className="px-3 pb-3 pt-0 -mt-1">
-          <div
-            className={`rounded-sm px-3 py-2 border ${
-              isEditing
-                ? "bg-white border-gray-100"
-                : "bg-gray-50 border-gray-100"
-            }`}
-          >
-            <p
-              className={`text-sm line-clamp-2 leading-relaxed font-regular ${
-                data.prompt ? "text-gray-900" : "text-gray-400"
-              }`}
-            >
-              {data.prompt ||
-                "Click on this step to tell the AI what you want it to do"}
-            </p>
-          </div>
-        </div> */}
         <div className="px-3 pb-3 pt-0 -mt-1">
           <div
             className={`rounded-md px-3 py-2 border ${
@@ -168,10 +149,10 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                 ? "bg-white border-gray-100"
                 : "bg-gray-50 border-gray-100"
             }`}
-            style={{ height: "4rem" }} // fixed height, ~2 lines for text-sm + leading-relaxed
+            style={{ height: "4rem" }}
           >
             <p
-              className={`text-sm font-regular leading-relaxed text-gray-900 line-clamp-2`}
+              className="text-sm font-regular leading-relaxed text-gray-900 line-clamp-2"
               style={{
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
@@ -186,7 +167,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
         </div>
       </Card>
 
-      {/* Add-step button under every node */}
+      {/* Add-step button */}
       <div
         className="nodrag nopan"
         style={{ position: "relative", height: 60 }}
@@ -227,7 +208,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
               onAddBelow(id);
             }}
           >
-            +
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
       </div>
