@@ -312,7 +312,7 @@ export default function Builder() {
             setNodes((currentNodes) => updateNodesPositions(currentNodes));
           }}
         >
-          <Background color="#Fafafafa" gap={20} size={1} />
+          <Background color="#FC7236" gap={25} size={1} />
         </ReactFlow>
 
         <div className="absolute top-4 left-4 z-10">
