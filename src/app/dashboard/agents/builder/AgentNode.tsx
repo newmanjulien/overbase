@@ -144,21 +144,13 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                 ? "bg-white border-gray-100"
                 : "bg-gray-50 border-gray-100"
             }`}
-            style={{ height: "4rem" }}
           >
             <p
-              className={`text-sm font-regular leading-relaxed line-clamp-2 ${
+              className={`text-sm font-regular leading-relaxed ${
                 data.prompt ? "text-gray-900" : "text-gray-400"
-              }`}
-              style={{
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
+              } truncate overflow-hidden whitespace-nowrap`}
             >
-              {data.prompt ||
-                "Click on this step to tell the AI what you want it to do"}
+              {data.prompt || "Click to tell the AI what you want it to do"}
             </p>
           </div>
         </div>
