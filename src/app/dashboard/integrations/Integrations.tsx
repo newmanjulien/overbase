@@ -1,8 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ExternalLink } from "lucide-react";
-import { Button } from "../../../components/ui/button";
 import { WorkflowCard } from "../../../components/WorkflowCard";
 import { EmptyState } from "./EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
@@ -43,7 +41,7 @@ export function Integrations() {
         title="Integrations"
         subtitle="Set up integrations so you can use them in your workflows and so your AI can more easily help with tasks."
         buttonLabel="Browse integrations"
-        onButtonClick={handleBrowseClick}
+        onButtonClick={() => {}}
         variant="white"
       />
 

@@ -8,7 +8,8 @@ interface HeaderProps {
   subtitle: string;
   buttonLabel?: string;
   onButtonClick?: () => void;
-  variant?: "white" | "black"; // switch styles
+  variant?: "white" | "black";
+  learnMoreLink?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,50 +17,37 @@ export const Header: React.FC<HeaderProps> = ({
   subtitle,
   buttonLabel,
   onButtonClick,
-  variant = "white",
+  variant,
+  learnMoreLink = "#",
 }) => {
   const isBlack = variant === "black";
+  const showButton = buttonLabel && onButtonClick;
 
   return (
-    <div
-      className={`border-b ${
-        isBlack ? "border-transparent" : "border-gray-200/60"
-      }`}
-      style={{ backgroundColor: isBlack ? "black" : "#FAFAFA" }}
-    >
+    <div className="border-b border-gray-200/60">
       <div className="max-w-7xl mx-auto p-6 py-8">
         <div className="flex items-center justify-between mb-4">
           {/* Left: stacked h1 and subtitle with link */}
           <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
-            <h1
-              className={`text-[2rem] font-medium tracking-tight mb-4 ${
-                isBlack ? "text-white" : "text-gray-800"
-              }`}
-            >
+            <h1 className="text-[2rem] font-medium tracking-tight mb-4 text-gray-800">
               {title}
             </h1>
-            <h2
-              className={`text-sm font-normal mt-1 ${
-                isBlack ? "text-gray-300" : "text-gray-500"
-              }`}
-            >
+            <h2 className="text-sm font-normal mt-1 text-gray-500">
               {subtitle}{" "}
-              <a
-                href="#"
-                className={`inline-flex items-center ml-1 transition-colors ${
-                  isBlack
-                    ? "text-[#1A69FF] hover:text-[#1A69FF]/80"
-                    : "text-[#1A69FF] hover:text-[#1A69FF]/80"
-                }`}
-              >
-                <span>Learn more</span>
-                <ExternalLink className="ml-1 h-4 w-4" />
-              </a>
+              {learnMoreLink && (
+                <a
+                  href={learnMoreLink}
+                  className="inline-flex items-center ml-1 text-[#1A69FF] hover:text-[#1A69FF]/80 transition-colors"
+                >
+                  <span>Learn more</span>
+                  <ExternalLink className="ml-1 h-4 w-4" />
+                </a>
+              )}
             </h2>
           </div>
 
           {/* Right: button */}
-          {buttonLabel && onButtonClick && (
+          {showButton && (
             <Button
               onClick={onButtonClick}
               className={`font-normal border ${
