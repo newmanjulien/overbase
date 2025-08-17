@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AgentCard } from "./AgentCard";
 import { LaunchModal } from "./LaunchModal";
+import { ExternalLink } from "lucide-react";
 
 const categories = [
   "Installed",
@@ -97,9 +98,22 @@ export function Agents() {
         style={{ backgroundColor: "#FAFAFA" }}
       >
         <div className="max-w-7xl mx-auto p-6 py-8">
-          <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
-            Agents
-          </h1>
+          <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
+            <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
+              Agents
+            </h1>
+            <h2 className="text-gray-600 text-sm font-normal mt-1">
+              Install agents then customize them and assign your preferred
+              handler.{" "}
+              <a
+                href="#"
+                className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
+              >
+                <span>Learn more</span>
+                <ExternalLink className="ml-1 h-4 w-4" />
+              </a>
+            </h2>
+          </div>
         </div>
       </div>
 
