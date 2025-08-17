@@ -102,7 +102,7 @@ export function Agents() {
             <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
               Agents
             </h1>
-            <h2 className="text-gray-600 text-sm font-normal mt-1">
+            <h2 className="text-gray-500 text-sm font-normal mt-1">
               Install agents then customize them and assign your preferred
               handler.{" "}
               <a
@@ -140,6 +140,17 @@ export function Agents() {
 
           {/* Agent Grid */}
           <div className="flex-1">
+            {/* Title & Subtitle */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-medium text-gray-800">
+                Explore Agents
+              </h2>
+              <p className="text-gray-500 text-sm mt-1">
+                Browse and install agents to help you automate tasks.
+              </p>
+            </div>
+
+            {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAgents.map((agent) => (
                 <AgentCard

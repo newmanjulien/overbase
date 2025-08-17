@@ -76,7 +76,7 @@ export function Colleagues() {
               <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
                 Colleagues
               </h1>
-              <h2 className="text-gray-600 text-sm font-normal mt-1">
+              <h2 className="text-gray-500 text-sm font-normal mt-1">
                 Add colleagues so you can reference them in workflows and so
                 your AI can collaborate with them on your tasks.{" "}
                 <a
