@@ -5,13 +5,35 @@ import { AgentCard } from "./AgentCard";
 import { LaunchModal } from "./LaunchModal";
 import { Header } from "../../../components/Header";
 
-const categories = [
-  "Installed",
-  "Email & Slack",
-  "After sales calls",
-  "Customer success",
+// === Category Definitions ===
+const categoriesConfig = [
+  {
+    key: "installed",
+    name: "Installed",
+    header: "Installed Agents",
+    subheader: "These are the agents you've already installed.",
+  },
+  {
+    key: "email",
+    name: "Email & Slack",
+    header: "Email & Slack Agents",
+    subheader: "Automate your email and Slack workflows.",
+  },
+  {
+    key: "sales",
+    name: "After Sales Calls",
+    header: "After Sales Calls",
+    subheader: "Support your post-call workflow and CRM updates.",
+  },
+  {
+    key: "customer",
+    name: "Customer Success",
+    header: "Customer Success Agents",
+    subheader: "Take care of your customers with automated tasks.",
+  },
 ];
 
+// === Agents Data ===
 interface Agent {
   id: number;
   title: string;
@@ -28,7 +50,7 @@ const initialAgents: Agent[] = [
     title: "Highlight success",
     description:
       "Find emails and Slacks where you can highlight your team's success",
-    categories: ["Email & Slack"],
+    categories: ["email"],
     gradientFrom: "from-yellow-300",
     gradientTo: "to-yellow-500",
     image: "/images/slack.png",
@@ -37,7 +59,7 @@ const initialAgents: Agent[] = [
     id: 2,
     title: "Call to CRM",
     description: "Update your CRM after your call with a prospect",
-    categories: ["After sales calls"],
+    categories: ["sales"],
     gradientFrom: "from-purple-700",
     gradientTo: "to-pink-400",
     image: "/images/gong.png",
@@ -46,7 +68,7 @@ const initialAgents: Agent[] = [
     id: 3,
     title: "Action CRM to-dos",
     description: "Take the to-dos assigned to you in your CRM and action them",
-    categories: ["Customer success"],
+    categories: ["customer"],
     gradientFrom: "from-green-900",
     gradientTo: "to-green-500",
     image: "/images/pipedrive.png",
@@ -55,7 +77,7 @@ const initialAgents: Agent[] = [
     id: 4,
     title: "Prep quarterly call",
     description: "Prepare the data for your quarterly calls with customers",
-    categories: ["After sales calls", "Installed"],
+    categories: ["sales", "installed"],
     gradientFrom: "from-blue-400",
     gradientTo: "to-indigo-500",
     image: "/images/notion.png",
@@ -63,57 +85,67 @@ const initialAgents: Agent[] = [
 ];
 
 export function Agents() {
-  const [selectedCategory, setSelectedCategory] = useState("Installed");
+  const [selectedCategory, setSelectedCategory] = useState("installed");
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [launchingAgent, setLaunchingAgent] = useState<Agent | null>(null);
 
   const handleInstall = (agentId: number) => {
-    setAgents((prev) =>
-      prev.map((agent) =>
+    setAgents((previousAgents) =>
+      previousAgents.map((agent) =>
         agent.id === agentId
           ? {
               ...agent,
               categories: Array.from(
-                new Set([...agent.categories, "Installed"])
+                new Set([...agent.categories, "installed"])
               ),
             }
           : agent
       )
     );
-    setSelectedCategory("Installed");
+    setSelectedCategory("installed");
   };
 
+  // Filter agents by selected category
   const filteredAgents = agents.filter((agent) =>
-    selectedCategory === "Installed"
-      ? agent.categories.includes("Installed")
-      : !agent.categories.includes("Installed") &&
+    selectedCategory === "installed"
+      ? agent.categories.includes("installed")
+      : !agent.categories.includes("installed") &&
         agent.categories.includes(selectedCategory)
   );
 
+  // Find selected category data
+  const selectedCategoryData = categoriesConfig.find(
+    (category) => category.key === selectedCategory
+  );
+
+  const gridTitle = selectedCategoryData?.header ?? "Explore Agents";
+  const gridSubtitle =
+    selectedCategoryData?.subheader ??
+    "Browse and install agents to help you automate tasks.";
+
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
-      {/* Header */}
+      {/* Main Header */}
       <Header
         title="Agents"
         subtitle="Easily install agents then assign a handler and customize the instructions."
       />
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-18">
         {/* Sidebar */}
         <div className="w-56 flex-shrink-0">
           <nav className="space-y-0.5">
-            {categories.map((category) => (
+            {categoriesConfig.map((category) => (
               <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
+                key={category.key}
+                onClick={() => setSelectedCategory(category.key)}
                 className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between ${
-                  selectedCategory === category
+                  selectedCategory === category.key
                     ? "bg-white border border-gray-200 font-medium text-gray-800"
                     : "text-gray-700 hover:text-gray-900 hover:bg-white border border-transparent"
                 }`}
               >
-                <span>{category}</span>
+                <span>{category.name}</span>
               </button>
             ))}
           </nav>
@@ -123,12 +155,8 @@ export function Agents() {
         <div className="flex-1">
           {/* Title & Subtitle */}
           <div className="mb-8">
-            <h2 className="text-2xl font-medium text-gray-800">
-              Explore Agents
-            </h2>
-            <p className="text-gray-500 text-sm mt-1">
-              Browse and install agents to help you automate tasks.
-            </p>
+            <h2 className="text-2xl font-medium text-gray-800">{gridTitle}</h2>
+            <p className="text-gray-500 text-sm mt-1">{gridSubtitle}</p>
           </div>
 
           {/* Grid */}
@@ -141,7 +169,7 @@ export function Agents() {
                 description={agent.description}
                 gradientFrom={agent.gradientFrom}
                 gradientTo={agent.gradientTo}
-                isInstalled={agent.categories.includes("Installed")}
+                isInstalled={agent.categories.includes("installed")}
                 image={agent.image}
                 onInstall={() => handleInstall(agent.id)}
                 onLaunch={() => setLaunchingAgent(agent)}
