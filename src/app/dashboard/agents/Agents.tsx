@@ -118,7 +118,7 @@ export function Agents() {
       </div>
 
       <div style={{ backgroundColor: "#FAFAFA" }}>
-        <div className="max-w-7xl mx-auto px-6 py-16 flex gap-18">
+        <div className="max-w-7xl mx-auto px-6 py-10 flex gap-18">
           {/* Sidebar */}
           <div className="w-56 flex-shrink-0">
             <nav className="space-y-0.5">

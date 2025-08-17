@@ -9,6 +9,7 @@ import { PopularIntegrations } from "./PopularIntegrations";
 import type { Integration } from "./DummyData";
 import { integrations } from "./DummyData";
 import { useIntegrationContext } from "../../../lib/integrationContext";
+import { Header } from "../../../components/Header";
 
 export function Integrations() {
   const router = useRouter();
@@ -38,41 +39,13 @@ export function Integrations() {
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
-      {/* === Header Section === */}
-      <div
-        className="border-b border-gray-200/60"
-        style={{ backgroundColor: "#FAFAFA" }}
-      >
-        <div className="max-w-7xl mx-auto p-6 py-8">
-          <div className="flex items-center justify-between mb-4">
-            {/* Left: stacked h1 and subtitle with link */}
-            <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
-              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight mb-4">
-                Integrations
-              </h1>
-              <h2 className="text-gray-500 text-sm font-normal mt-1">
-                Set up integrations so you can use them in your workflows and so
-                your AI can more easily help with tasks.{" "}
-                <a
-                  href="#"
-                  className="inline-flex items-center text-[#1A69FF] hover:text-[#1A69FF]/80 ml-1 transition-colors"
-                >
-                  <span>Learn more</span>
-                  <ExternalLink className="ml-1 h-4 w-4" />
-                </a>
-              </h2>
-            </div>
-
-            {/* Right: browse integrations button */}
-            <Button
-              onClick={handleBrowseClick}
-              className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100"
-            >
-              Browse integrations
-            </Button>
-          </div>
-        </div>
-      </div>
+      <Header
+        title="Integrations"
+        subtitle="Set up integrations so you can use them in your workflows and so your AI can more easily help with tasks."
+        buttonLabel="Browse integrations"
+        onButtonClick={handleBrowseClick}
+        variant="white"
+      />
 
       {/* === Main Content Section === */}
       <div className="max-w-7xl mx-auto px-6 py-10">
