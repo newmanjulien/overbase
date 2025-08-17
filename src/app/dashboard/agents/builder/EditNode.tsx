@@ -4,10 +4,17 @@ import { useState, useEffect } from "react";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
-import { Textarea } from "../../../../components/ui/textarea";
 import { Card } from "../../../../components/ui/card";
+import { Paperclip, Image } from "lucide-react";
 import type { NodeData } from "./Builder";
-import { Paperclip, Image, Camera } from "lucide-react";
+
+import {
+  Editor,
+  EditorState,
+  ContentState,
+  CompositeDecorator,
+} from "draft-js";
+import "draft-js/dist/Draft.css";
 
 interface EditingNodeProps {
   node: {
@@ -21,23 +28,47 @@ interface EditingNodeProps {
 export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
   const [formData, setFormData] = useState({
     title: node.data.title || "",
-    prompt: node.data.prompt || "",
     context: node.data.context || "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Draft.js editor state for prompt
+  const [editorState, setEditorState] = useState(() =>
+    node.data.prompt
+      ? EditorState.createWithContent(
+          ContentState.createFromText(node.data.prompt)
+        )
+      : EditorState.createEmpty()
+  );
+
+  // Decorator for @mentions
+  const mentionDecorator = new CompositeDecorator([
+    {
+      strategy: (contentBlock, callback) => {
+        const text = contentBlock.getText();
+        const regex = /@\w+/g;
+        let matchArr;
+        while ((matchArr = regex.exec(text)) !== null) {
+          callback(matchArr.index, matchArr.index + matchArr[0].length);
+        }
+      },
+      component: (props: any) => (
+        <span className="text-blue-500">{props.children}</span>
+      ),
+    },
+  ]);
+
   useEffect(() => {
-    setFormData({
-      title: node.data.title || "",
-      prompt: node.data.prompt || "",
-      context: node.data.context || "",
-    });
-  }, [node.data]);
+    setEditorState((prev) =>
+      EditorState.set(prev, { decorator: mentionDecorator })
+    );
+  }, [node.data.prompt]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (!formData.prompt.trim()) newErrors.prompt = "Prompt is required";
+    if (!editorState.getCurrentContent().hasText())
+      newErrors.prompt = "Prompt is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -46,7 +77,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
     if (!validateForm()) return;
     onSave({
       title: formData.title.trim(),
-      prompt: formData.prompt.trim(),
+      prompt: editorState.getCurrentContent().getPlainText().trim(),
       context: formData.context.trim(),
     });
   };
@@ -120,18 +151,17 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
           <Label htmlFor="prompt" className="text-sm font-normal text-gray-600">
             Prompt *
           </Label>
-          <Textarea
-            id="prompt"
-            value={formData.prompt}
-            onChange={(e) => handleInputChange("prompt", e.target.value)}
-            placeholder="Enter your prompt"
-            rows={5}
-            className={`resize-none text-xs rounded-sm border-gray-100 ${
-              errors.prompt
-                ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                : ""
+          <div
+            className={`border rounded-sm p-2 min-h-[5rem] text-sm ${
+              errors.prompt ? "border-red-500" : "border-gray-100"
             }`}
-          />
+          >
+            <Editor
+              editorState={editorState}
+              onChange={setEditorState}
+              placeholder="Enter your prompt"
+            />
+          </div>
           {errors.prompt && (
             <p className="text-xs text-red-600">{errors.prompt}</p>
           )}
@@ -145,25 +175,23 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
           >
             Context
           </Label>
-          <Textarea
+          <textarea
             id="context"
             value={formData.context}
             onChange={(e) => handleInputChange("context", e.target.value)}
             placeholder="Add additional context (optional)"
             rows={8}
-            className="resize-none text-xs rounded-sm border-gray-100"
+            className="resize-none text-sm rounded-sm border border-gray-100 w-full p-2"
           />
 
-          {/* Attachments line */}
+          {/* Attachments */}
           <div className="flex items-center justify-between mt-2">
             <div className="flex gap-1">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => {}}
                 className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-sm"
-                title="Attach files to your context"
               >
                 <Paperclip className="h-3 w-3 mr-1" strokeWidth={1.5} />
                 <span className="text-xs">Attach files</span>
@@ -172,9 +200,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => {}}
                 className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-sm"
-                title="Attach images to your context"
               >
                 <Image className="h-3 w-3 mr-1" strokeWidth={1.5} />
                 <span className="text-xs">Attach images</span>

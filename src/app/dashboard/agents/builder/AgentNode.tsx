@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
-import { MoreVertical, Plus } from "lucide-react"; // ✅ icons from lucide
+import { MoreVertical, Plus } from "lucide-react";
 import type { NodeData } from "./Builder";
 import Image from "next/image";
 
@@ -28,6 +28,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
   const {
     stepNumber,
     title,
+    prompt,
     onEdit,
     onDelete,
     onAddBelow,
@@ -37,8 +38,6 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
     onMoveDown,
     editingNodeId,
   } = data;
-
-  console.log("Node", id, "integration:", data.integration);
 
   const isEditing = editingNodeId === id;
 
@@ -53,6 +52,21 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       e.stopPropagation();
       if (!disabled && callback) callback();
     };
+
+  // Split prompt into words and highlight @mentions
+  const renderPrompt = () => {
+    if (!prompt) return "Click to tell the AI what you want it to do";
+
+    return prompt.split(/(\s+)/).map((word, i) =>
+      word.startsWith("@") ? (
+        <span key={i} className="text-blue-500">
+          {word}
+        </span>
+      ) : (
+        word
+      )
+    );
+  };
 
   return (
     <div className="w-88">
@@ -86,7 +100,6 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
               <span className="font-normal">{title || "New step"}</span>
             </h3>
             <div className="flex items-center space-x-1">
-              {/* Small round image */}
               {data.integration && (
                 <Image
                   src={data.integration}
@@ -97,7 +110,6 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                 />
               )}
 
-              {/* Kebab menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -156,6 +168,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           </div>
         </div>
 
+        {/* Prompt preview */}
         <div className="px-3 pb-3 pt-0 -mt-3">
           <div
             className={`rounded-md px-3 py-2 border ${
@@ -166,10 +179,10 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           >
             <p
               className={`text-sm font-regular leading-relaxed ${
-                data.prompt ? "text-gray-900" : "text-gray-400"
+                prompt ? "text-gray-900" : "text-gray-400"
               } truncate overflow-hidden whitespace-nowrap`}
             >
-              {data.prompt || "Click to tell the AI what you want it to do"}
+              {renderPrompt()}
             </p>
           </div>
         </div>

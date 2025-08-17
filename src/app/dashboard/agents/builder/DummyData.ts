@@ -9,7 +9,7 @@ export const dummySteps: DummyStep[] = [
   {
     title: "Understand user’s problem",
     prompt:
-      "Summarise the customer’s last three support tickets and identify the core pain point.",
+      "Summarise the @customer’s last three support tickets and identify the core pain point.",
     context:
       "We are preparing for a QBR with a high-value customer that has had repeated onboarding issues.",
     integration: "/images/gmail.png",
