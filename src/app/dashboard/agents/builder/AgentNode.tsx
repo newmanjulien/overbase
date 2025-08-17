@@ -83,7 +83,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
               <span className="font-normal">{title || "New step"}</span>
             </h3>
 
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -133,7 +133,71 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
+            <div className="flex items-center space-x-1">
+              {/* Small round image */}
+              <img
+                src="/images/gmail.png"
+                alt="Gmail"
+                className="h-5 w-5 rounded-full object-cover"
+              />
+
+              {/* Kebab menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 w-8 p-0 ${
+                      isEditing ? "hover:bg-white" : "hover:bg-gray-100"
+                    }`}
+                    aria-label="Actions"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  align="end"
+                  className="w-32"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <DropdownMenuItem
+                    onClick={handleItemClick(
+                      () => onMoveUp(id),
+                      totalNodes <= 1 || nodeIndex === 0
+                    )}
+                    disabled={totalNodes <= 1 || nodeIndex === 0}
+                    className="hover:bg-gray-100 disabled:text-gray-400"
+                  >
+                    Move Up
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={handleItemClick(
+                      () => onMoveDown(id),
+                      totalNodes <= 1 || nodeIndex === totalNodes - 1
+                    )}
+                    disabled={totalNodes <= 1 || nodeIndex === totalNodes - 1}
+                    className="hover:bg-gray-100 disabled:text-gray-400"
+                  >
+                    Move Down
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={handleItemClick(
+                      () => onDelete(id),
+                      totalNodes <= 1
+                    )}
+                    disabled={totalNodes <= 1}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 
