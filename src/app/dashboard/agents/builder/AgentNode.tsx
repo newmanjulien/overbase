@@ -76,14 +76,9 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
         }
         onClick={handleCardClick}
       >
-        <div
-          className="p-3 border-b"
-          style={{
-            borderColor: isEditing ? "rgba(252, 114, 54, 0.1)" : undefined,
-          }}
-        >
+        <div className="p-3 pb-0">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-gray-900">
+            <h3 className="font-semibold text-gray-900">
               {stepNumber}.{" "}
               <span className="font-normal">{title || "New step"}</span>
             </h3>
@@ -142,7 +137,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
           </div>
         </div>
 
-        <div className="px-3 pb-3 pt-0 -mt-1">
+        <div className="px-3 pb-3 pt-0 -mt-3">
           <div
             className={`rounded-md px-3 py-2 border ${
               isEditing
@@ -152,7 +147,9 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
             style={{ height: "4rem" }}
           >
             <p
-              className="text-sm font-regular leading-relaxed text-gray-900 line-clamp-2"
+              className={`text-sm font-regular leading-relaxed line-clamp-2 ${
+                data.prompt ? "text-gray-900" : "text-gray-400"
+              }`}
               style={{
                 display: "-webkit-box",
                 WebkitLineClamp: 2,

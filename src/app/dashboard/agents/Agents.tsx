@@ -18,6 +18,7 @@ interface Agent {
   categories: string[];
   gradientFrom: string;
   gradientTo: string;
+  image?: string;
 }
 
 const initialAgents: Agent[] = [
@@ -27,24 +28,27 @@ const initialAgents: Agent[] = [
     description:
       "Find emails and Slacks where you can highlight your team's success",
     categories: ["Email & Slack"],
-    gradientFrom: "from-pink-400",
-    gradientTo: "to-purple-500",
+    gradientFrom: "from-yellow-300",
+    gradientTo: "to-yellow-500",
+    image: "/images/slack.png",
   },
   {
     id: 2,
     title: "Call to CRM",
     description: "Update your CRM after your call with a prospect",
     categories: ["After sales calls"],
-    gradientFrom: "from-green-400",
-    gradientTo: "to-teal-500",
+    gradientFrom: "from-purple-700",
+    gradientTo: "to-pink-400",
+    image: "/images/gong.png",
   },
   {
     id: 3,
     title: "Action CRM to-dos",
     description: "Take the to-dos assigned to you in your CRM and action them",
     categories: ["Customer success"],
-    gradientFrom: "from-yellow-400",
-    gradientTo: "to-orange-500",
+    gradientFrom: "from-green-900",
+    gradientTo: "to-green-500",
+    image: "/images/pipedrive.png",
   },
   {
     id: 4,
@@ -53,6 +57,7 @@ const initialAgents: Agent[] = [
     categories: ["After sales calls", "Installed"],
     gradientFrom: "from-blue-400",
     gradientTo: "to-indigo-500",
+    image: "/images/notion.png",
   },
 ];
 
@@ -125,13 +130,15 @@ export function Agents() {
               {filteredAgents.map((agent) => (
                 <AgentCard
                   key={agent.id}
+                  id={agent.id}
                   title={agent.title}
                   description={agent.description}
                   gradientFrom={agent.gradientFrom}
                   gradientTo={agent.gradientTo}
                   isInstalled={agent.categories.includes("Installed")}
+                  image={agent.image}
                   onInstall={() => handleInstall(agent.id)}
-                  onLaunch={() => setLaunchingAgent(agent)} // <-- LaunchModal opens here
+                  onLaunch={() => setLaunchingAgent(agent)}
                 />
               ))}
             </div>
