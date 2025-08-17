@@ -1,11 +1,11 @@
 "use client";
 import {
-  Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "../components/ui/select";
+  Select,
+} from "../../../components/ui/select";
 
 export const handlerOptions = [
   { id: "1", name: "Henry Brown", avatar: "/images/profile-1.png" },
