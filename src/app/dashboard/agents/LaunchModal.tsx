@@ -24,11 +24,17 @@ export function LaunchModal({ isOpen, onClose }: LaunchModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-md shadow-md w-full max-w-md overflow-hidden">
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+      onClick={onClose} // <- clicking background closes modal
+    >
+      <div
+        className="bg-white rounded-sm shadow-md w-full max-w-md overflow-hidden"
+        onClick={(e) => e.stopPropagation()} // <- stop bubbling so modal itself doesn’t trigger close
+      >
         {/* Header */}
-        <div className="flex items-center justify-between bg-gray-50 p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Launch Agent</h2>
+        <div className="flex items-center justify-between bg-gray-50 p-3 border-b border-gray-200">
+          <h2 className="text-md font-semibold text-gray-900">Launch Agent</h2>
           <Button
             variant="ghost"
             size="sm"
@@ -40,7 +46,7 @@ export function LaunchModal({ isOpen, onClose }: LaunchModalProps) {
         </div>
 
         {/* Content */}
-        <div className="bg-white p-6 space-y-6">
+        <div className="bg-white p-4 space-y-6">
           {/* API Key Input */}
           <div className="space-y-2">
             <Label
@@ -55,14 +61,14 @@ export function LaunchModal({ isOpen, onClose }: LaunchModalProps) {
               placeholder="sk-abcdefg..."
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              className="w-full border-gray-200 focus:ring-black focus:border-black"
+              className="w-full border-gray-200 focus:ring-black focus:border-black rounded-sm"
             />
           </div>
 
           {/* Enabled Section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium text-gray-900">Enabled</h3>
+              <h3 className="text-sm font-medium text-gray-900">Enabled</h3>
               <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
             </div>
             <p className="text-sm text-gray-500">
@@ -74,17 +80,17 @@ export function LaunchModal({ isOpen, onClose }: LaunchModalProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-2">
             <Button
               variant="secondary"
               onClick={onClose}
-              className="flex-1 bg-white text-gray-800 border border-gray-200 hover:bg-gray-50"
+              className="flex-1 bg-white text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
             >
               Cancel
             </Button>
             <Button
               onClick={handleAddKey}
-              className="flex-1 bg-black text-white hover:bg-gray-800"
+              className="flex-1 bg-black text-white hover:bg-gray-900 font-normal text-sm px-3 py-1.5 h-auto"
             >
               Add Key
             </Button>
