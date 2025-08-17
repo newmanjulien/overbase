@@ -31,6 +31,7 @@ export interface NodeData {
   title?: string;
   prompt?: string;
   context?: string;
+  integration?: string;
   onEdit: (nodeId: string) => void;
   onDelete: (nodeId: string) => void;
   onAddBelow: (nodeId: string) => void;
@@ -63,6 +64,7 @@ export default function Builder() {
         title: step.title,
         prompt: step.prompt,
         context: step.context,
+        integration: step.integration,
         onEdit: () => {},
         onDelete: () => {},
         onAddBelow: () => {},

@@ -12,6 +12,7 @@ import {
 } from "../../../../components/ui/dropdown-menu";
 import { MoreVertical, Plus } from "lucide-react"; // ✅ icons from lucide
 import type { NodeData } from "./Builder";
+import Image from "next/image";
 
 interface AgentNodeProps extends NodeProps {
   data: NodeData & {
@@ -36,6 +37,8 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
     onMoveDown,
     editingNodeId,
   } = data;
+
+  console.log("Node", id, "integration:", data.integration);
 
   const isEditing = editingNodeId === id;
 
@@ -82,65 +85,17 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
               {stepNumber}.{" "}
               <span className="font-normal">{title || "New step"}</span>
             </h3>
-
-            {/* <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-8 w-8 p-0 ${
-                    isEditing ? "hover:bg-white" : "hover:bg-gray-100"
-                  }`}
-                  aria-label="Actions"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent
-                align="end"
-                className="w-32"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <DropdownMenuItem
-                  onClick={handleItemClick(
-                    () => onMoveUp(id),
-                    totalNodes <= 1 || nodeIndex === 0
-                  )}
-                  disabled={totalNodes <= 1 || nodeIndex === 0}
-                  className="hover:bg-gray-100 disabled:text-gray-400"
-                >
-                  Move Up
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={handleItemClick(
-                    () => onMoveDown(id),
-                    totalNodes <= 1 || nodeIndex === totalNodes - 1
-                  )}
-                  disabled={totalNodes <= 1 || nodeIndex === totalNodes - 1}
-                  className="hover:bg-gray-100 disabled:text-gray-400"
-                >
-                  Move Down
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={handleItemClick(() => onDelete(id), totalNodes <= 1)}
-                  disabled={totalNodes <= 1}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu> */}
             <div className="flex items-center space-x-1">
               {/* Small round image */}
-              <img
-                src="/images/gmail.png"
-                alt="Gmail"
-                className="h-5 w-5 rounded-full object-cover"
-              />
+              {data.integration && (
+                <Image
+                  src={data.integration}
+                  alt={title || "Agent"}
+                  width={20}
+                  height={20}
+                  className="rounded-full object-cover"
+                />
+              )}
 
               {/* Kebab menu */}
               <DropdownMenu>

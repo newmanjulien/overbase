@@ -2,6 +2,7 @@ export interface DummyStep {
   title: string;
   prompt: string;
   context: string;
+  integration?: string;
 }
 
 export const dummySteps: DummyStep[] = [
@@ -11,6 +12,7 @@ export const dummySteps: DummyStep[] = [
       "Summarise the customer’s last three support tickets and identify the core pain point.",
     context:
       "We are preparing for a QBR with a high-value customer that has had repeated onboarding issues.",
+    integration: "/images/gmail.png",
   },
   {
     title: "Pull usage data",
@@ -24,6 +26,7 @@ export const dummySteps: DummyStep[] = [
     prompt:
       "Take the usage metrics and create a 2-paragraph ROI story that can be pasted into the deck.",
     context: "Target KPIs: 20 % reduction in churn, 3× feature adoption.",
+    integration: "/images/slack.png",
   },
   {
     title: "Draft follow-up email",
@@ -36,6 +39,7 @@ export const dummySteps: DummyStep[] = [
     prompt:
       "Create three follow-up tasks in HubSpot assigned to the CSM: schedule next check-in, share roadmap, send case-study request.",
     context: "Due dates: 1 week, 4 weeks, 8 weeks respectively.",
+    integration: "/images/slack.png",
   },
   {
     title: "Slack summary to team",
