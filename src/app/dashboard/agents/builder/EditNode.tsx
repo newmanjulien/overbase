@@ -1,6 +1,6 @@
 // "use client";
 
-// import { useState } from "react";
+// import { useState, useEffect } from "react";
 // import { Button } from "../../../../components/ui/button";
 // import { Input } from "../../../../components/ui/input";
 // import { Label } from "../../../../components/ui/label";
@@ -8,7 +8,6 @@
 // import { Paperclip, Image } from "lucide-react";
 // import type { NodeData } from "./Builder";
 
-// import { EditorState, ContentState } from "draft-js";
 // import RichTextarea from "../../../../components/ui/richtext-input";
 
 // interface EditingNodeProps {
@@ -23,24 +22,25 @@
 // export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
 //   const [formData, setFormData] = useState({
 //     title: node.data.title || "",
+//     prompt: node.data.prompt || "",
 //     context: node.data.context || "",
 //   });
-//   const [errors, setErrors] = useState<Record<string, string>>({});
 
-//   // Draft.js editor state for prompt
-//   const [editorState, setEditorState] = useState(() =>
-//     node.data.prompt
-//       ? EditorState.createWithContent(
-//           ContentState.createFromText(node.data.prompt)
-//         )
-//       : EditorState.createEmpty()
-//   );
+//   // --- SYNC WHEN NODE CHANGES ---
+//   useEffect(() => {
+//     setFormData({
+//       title: node.data.title || "",
+//       prompt: node.data.prompt || "",
+//       context: node.data.context || "",
+//     });
+//   }, [node.id, node.data.title, node.data.prompt, node.data.context]);
+
+//   const [errors, setErrors] = useState<Record<string, string>>({});
 
 //   const validateForm = () => {
 //     const newErrors: Record<string, string> = {};
 //     if (!formData.title.trim()) newErrors.title = "Title is required";
-//     if (!editorState.getCurrentContent().hasText())
-//       newErrors.prompt = "Prompt is required";
+//     if (!formData.prompt.trim()) newErrors.prompt = "Prompt is required";
 //     setErrors(newErrors);
 //     return Object.keys(newErrors).length === 0;
 //   };
@@ -49,7 +49,7 @@
 //     if (!validateForm()) return;
 //     onSave({
 //       title: formData.title.trim(),
-//       prompt: editorState.getCurrentContent().getPlainText().trim(),
+//       prompt: formData.prompt.trim(),
 //       context: formData.context.trim(),
 //     });
 //   };
@@ -62,9 +62,7 @@
 //   return (
 //     <Card
 //       className="h-full flex flex-col overflow-hidden p-0 rounded-lg shadow-sm transition-shadow"
-//       style={{
-//         border: "1.5px solid rgba(255, 110, 100, 0.6)",
-//       }}
+//       style={{ border: "1.5px solid rgba(255, 110, 100, 0.6)" }}
 //     >
 //       {/* Header */}
 //       <div
@@ -123,17 +121,11 @@
 //           <Label htmlFor="prompt" className="text-sm font-normal text-gray-600">
 //             Prompt *
 //           </Label>
-//           <div
-//             className={`border rounded-md p-2 min-h-[5rem] text-sm ${
-//               errors.prompt ? "border-red-500" : "border-gray-100"
-//             }`}
-//           >
-//             <RichTextarea
-//               editorState={editorState}
-//               onChange={setEditorState}
-//               placeholder="Enter your prompt"
-//             />
-//           </div>
+//           <RichTextarea
+//             value={formData.prompt}
+//             onChange={(val) => handleInputChange("prompt", val)}
+//             placeholder="Enter your prompt"
+//           />
 //           {errors.prompt && (
 //             <p className="text-xs text-red-600">{errors.prompt}</p>
 //           )}
@@ -147,37 +139,34 @@
 //           >
 //             Context
 //           </Label>
-//           <textarea
-//             id="context"
+//           <RichTextarea
 //             value={formData.context}
-//             onChange={(e) => handleInputChange("context", e.target.value)}
+//             onChange={(val) => handleInputChange("context", val)}
 //             placeholder="Add additional context (optional)"
-//             rows={8}
-//             className="resize-none text-sm rounded-md border border-gray-100 w-full p-2"
 //           />
+//         </div>
 
-//           {/* Attachments */}
-//           <div className="flex items-center justify-between mt-2">
-//             <div className="flex gap-1">
-//               <Button
-//                 type="button"
-//                 variant="ghost"
-//                 size="sm"
-//                 className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-md"
-//               >
-//                 <Paperclip className="h-3 w-3 mr-1" strokeWidth={1.5} />
-//                 <span className="text-xs">Attach files</span>
-//               </Button>
-//               <Button
-//                 type="button"
-//                 variant="ghost"
-//                 size="sm"
-//                 className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-md"
-//               >
-//                 <Image className="h-3 w-3 mr-1" strokeWidth={1.5} />
-//                 <span className="text-xs">Attach images</span>
-//               </Button>
-//             </div>
+//         {/* Attachments */}
+//         <div className="flex items-center justify-between mt-2">
+//           <div className="flex gap-1">
+//             <Button
+//               type="button"
+//               variant="ghost"
+//               size="sm"
+//               className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-md"
+//             >
+//               <Paperclip className="h-3 w-3 mr-1" strokeWidth={1.5} />
+//               <span className="text-xs">Attach files</span>
+//             </Button>
+//             <Button
+//               type="button"
+//               variant="ghost"
+//               size="sm"
+//               className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-md"
+//             >
+//               <Image className="h-3 w-3 mr-1" strokeWidth={1.5} />
+//               <span className="text-xs">Attach images</span>
+//             </Button>
 //           </div>
 //         </div>
 //       </div>
@@ -299,7 +288,16 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-3 pt-0 space-y-4 bg-white">
+      <div
+        className="flex-1 overflow-y-auto p-3 pt-0 space-y-4 bg-white"
+        style={{ scrollbarWidth: "none" }}
+      >
+        <style jsx>{`
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+
         {/* Title */}
         <div className="space-y-2">
           <Label htmlFor="title" className="text-sm font-normal text-gray-600">
