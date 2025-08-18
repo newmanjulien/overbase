@@ -7,22 +7,20 @@ export interface PreviewImage {
 export interface Integration {
   id: string;
   title: string;
-  subtitle: string; // required
+  subtitle: string;
   logo: string;
   status?: string;
   badge?: string;
   lastUpdated?: string;
-  previewImages?: PreviewImage[]; // optional now
+  previewImages?: PreviewImage[];
 }
 
 export const integrations: Integration[] = [
   {
-    id: "growthbook",
+    id: "docs",
     title: "Google Docs",
-    subtitle: "Open source feature flags and A/B tests",
-    logo: "/images/gmail.png",
-    badge: "Billed Via Vercel",
-    lastUpdated: "just now",
+    subtitle: "Read, create and share Google Docs",
+    logo: "/images/docs.png",
     previewImages: [
       {
         id: "first",
@@ -52,9 +50,9 @@ export const integrations: Integration[] = [
     ],
   },
   {
-    id: "clerk",
-    title: "Gmail",
-    subtitle: "Drop-in authentication for React",
+    id: "gmail",
+    title: "Gmail read only",
+    subtitle: "Access your email and create drafts (cannot send)",
     logo: "/images/gmail.png",
     previewImages: [
       {
@@ -65,33 +63,33 @@ export const integrations: Integration[] = [
     ],
   },
   {
-    id: "inngest",
-    title: "Slack",
-    subtitle: "Reliable & powerful background functions",
-    logo: "/images/gmail.png",
+    id: "slack",
+    title: "Slack public",
+    subtitle: "Access public Slack channels (not DMs)",
+    logo: "/images/slack.png",
   },
   {
-    id: "upstash",
+    id: "gong",
     title: "Gong",
-    subtitle: "Serverless DB (Redis, Vector, Queue)",
-    logo: "/images/gmail.png",
+    subtitle: "Get recordings and transcripts from Gong",
+    logo: "/images/gong.png",
   },
   {
-    id: "turso",
+    id: "pipedrive",
     title: "Pipedrive",
-    subtitle: "SQLite for the age of AI",
-    logo: "/images/gmail.png",
+    subtitle: "Full access to your Pipedrive CRM",
+    logo: "/images/pipedrive.png",
   },
   {
-    id: "planetscale",
+    id: "notion",
     title: "Notion",
-    subtitle: "The world's most advanced serverless MySQL platform",
-    logo: "/images/gmail.png",
+    subtitle: "Full access to your Notion docs",
+    logo: "/images/notion.png",
   },
   {
-    id: "stripe",
+    id: "salesforce",
     title: "Salesforce",
-    subtitle: "Online payment processing for internet businesses",
-    logo: "/images/gmail.png",
+    subtitle: "Full access to your Salesforce CRM",
+    logo: "/images/salesforce.png",
   },
 ];
