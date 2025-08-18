@@ -1,32 +1,28 @@
 export interface DummyStep {
   title: string;
   prompt: string;
-  context: string;
+  context?: string;
   integration?: string;
 }
 
 export const dummySteps: DummyStep[] = [
   {
-    title: "Understand user’s problem",
+    title: "Emails from the past 24h",
     prompt:
-      "Summarise the @customer’s last three support tickets and identify the core pain point.",
-    context:
-      "We are preparing for a QBR with a high-value customer that has had repeated onboarding issues.",
+      "Grab from my @gmail all the emails from the past 24h. Filter to only emails where there's at least 1 of my internal colleagues",
     integration: "/images/gmail.png",
   },
   {
-    title: "Pull usage data",
+    title: "Slacks from the past 24h",
     prompt:
-      "Query Redshift for daily active users, seats provisioned vs. seats used, and top 5 features used last 30 days.",
-    context:
-      "Redshift schema: analytics.usage_metrics. Date column is event_date.",
+      "Grab from @slack all the conversations in public channels which I'm a member of",
+    integration: "/images/slack.png",
   },
   {
-    title: "Generate ROI narrative",
+    title: "Find messages where a colleague did something worth celebrating",
     prompt:
-      "Take the usage metrics and create a 2-paragraph ROI story that can be pasted into the deck.",
+      "Hard to achieve result. Surpassing a goal. Keeping a deadline. Innovative ideas. Take screenshots and put them in a @doc. Include the % of certainty beside each screenshot",
     context: "Target KPIs: 20 % reduction in churn, 3× feature adoption.",
-    integration: "/images/slack.png",
   },
   {
     title: "Draft follow-up email",

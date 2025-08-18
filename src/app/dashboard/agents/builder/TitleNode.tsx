@@ -73,7 +73,7 @@ export default function TitleNode({
             onFocus={() => setIsEditing(true)}
             onBlur={() => setIsEditing(false)}
             className="border-0 shadow-none w-full text-lg font-medium focus:ring-0 focus:outline-none bg-transparent"
-            placeholder="Agent Title"
+            placeholder="Enter agent Title"
           />
         </div>
 
