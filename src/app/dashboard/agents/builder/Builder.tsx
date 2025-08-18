@@ -459,7 +459,8 @@ export default function Builder() {
                 onAddBelow: () => handleAddNodeBelow(node.id),
                 onMoveUp: () => handleMoveNodeUp(node.id),
                 onMoveDown: () => handleMoveNodeDown(node.id),
-                onSave: (data) => handleSaveNode(node.id, data),
+                onSave: (data: Partial<NodeData>) =>
+                  handleSaveNode(node.id, data),
               },
             }))}
             edges={edges}
