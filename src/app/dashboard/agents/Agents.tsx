@@ -29,12 +29,14 @@ export function Agents() {
     setSelectedCategory("installed");
   };
 
-  const filteredAgents = agents.filter((agent) =>
-    selectedCategory === "installed"
-      ? agent.categories.includes("installed")
-      : !agent.categories.includes("installed") &&
-        agent.categories.includes(selectedCategory)
-  );
+  const filteredAgents = agents
+    .filter((agent) =>
+      selectedCategory === "installed"
+        ? agent.categories.includes("installed")
+        : !agent.categories.includes("installed") &&
+          agent.categories.includes(selectedCategory)
+    )
+    .sort((a, b) => a.id - b.id);
 
   const selectedCategoryData = categoriesConfig.find(
     (category) => category.key === selectedCategory

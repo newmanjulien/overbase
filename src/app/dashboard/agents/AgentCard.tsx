@@ -7,12 +7,13 @@ import Image from "next/image";
 import { HandlerSelect } from "./HandlerSelect";
 
 interface AgentCardProps {
+  id: number;
   title: string;
   description: string;
   gradientFrom?: string;
   gradientTo?: string;
   isInstalled: boolean;
-  image?: string; // optional image
+  image?: string;
   onInstall: () => void;
   onLaunch?: () => void;
 }
