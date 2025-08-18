@@ -19,10 +19,11 @@ export const dummySteps: DummyStep[] = [
     integration: "/images/slack.png",
   },
   {
-    title: "Find messages where a colleague did something worth celebrating",
+    title: "Messages where a colleague did something worth celebrating",
     prompt:
-      "Hard to achieve result. Surpassing a goal. Keeping a deadline. Innovative ideas. Take screenshots and put them in a @doc. Include the % of certainty beside each screenshot",
-    context: "Target KPIs: 20 % reduction in churn, 3× feature adoption.",
+      "Find hard to achieve result. Surpassing a goal. Keeping a deadline. Innovative ideas. Take screenshots and put them in a @doc. Include the % of certainty beside each screenshot",
+    context: "Look at the Success folder in my @gmail for examples",
+    integration: "/images/docs.png",
   },
   {
     title: "Draft follow-up email",
