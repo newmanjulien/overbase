@@ -494,7 +494,7 @@ export default function Builder() {
               setIsInitialized(true);
             }}
           >
-            <Background color="#FF6060" gap={25} size={1} />
+            <Background color="#DDDDDD" gap={30} size={2} />
           </ReactFlow>
 
           <div className="absolute top-4 left-4 z-10">
