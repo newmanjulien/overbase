@@ -94,7 +94,16 @@
 //       </div>
 
 //       {/* Content */}
-//       <div className="flex-1 overflow-y-auto p-3 pt-0 space-y-4 bg-white">
+//       <div
+//         className="flex-1 overflow-y-auto p-3 pt-0 space-y-4 bg-white"
+//         style={{ scrollbarWidth: "none" }}
+//       >
+//         <style jsx>{`
+//           div::-webkit-scrollbar {
+//             display: none;
+//           }
+//         `}</style>
+
 //         {/* Title */}
 //         <div className="space-y-2">
 //           <Label htmlFor="title" className="text-sm font-normal text-gray-600">
@@ -217,6 +226,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
   const [formData, setFormData] = useState({
     title: node.data.title || "",
     prompt: node.data.prompt || "",
+    conditions: node.data.conditions || "",
     context: node.data.context || "",
   });
 
@@ -225,9 +235,16 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
     setFormData({
       title: node.data.title || "",
       prompt: node.data.prompt || "",
+      conditions: node.data.conditions || "",
       context: node.data.context || "",
     });
-  }, [node.id, node.data.title, node.data.prompt, node.data.context]);
+  }, [
+    node.id,
+    node.data.title,
+    node.data.prompt,
+    node.data.conditions,
+    node.data.context,
+  ]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -244,6 +261,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
     onSave({
       title: formData.title.trim(),
       prompt: formData.prompt.trim(),
+      conditions: formData.conditions.trim(),
       context: formData.context.trim(),
     });
   };
@@ -334,6 +352,21 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
           )}
         </div>
 
+        {/* Conditions */}
+        <div className="space-y-2">
+          <Label
+            htmlFor="conditions"
+            className="text-sm font-normal text-gray-600"
+          >
+            Conditions
+          </Label>
+          <RichTextarea
+            value={formData.conditions}
+            onChange={(val) => handleInputChange("conditions", val)}
+            placeholder="What to do in different scenarios (optional)"
+          />
+        </div>
+
         {/* Context */}
         <div className="space-y-2">
           <Label
@@ -345,7 +378,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
           <RichTextarea
             value={formData.context}
             onChange={(val) => handleInputChange("context", val)}
-            placeholder="Add additional context (optional)"
+            placeholder="Where to find context to help the AI (optional)"
           />
         </div>
 

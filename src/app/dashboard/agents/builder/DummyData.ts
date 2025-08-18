@@ -1,6 +1,7 @@
 export interface DummyStep {
   title: string;
   prompt: string;
+  conditions?: string;
   context?: string;
   integration?: string;
 }
@@ -26,28 +27,18 @@ export const dummySteps: DummyStep[] = [
     integration: "/images/docs.png",
   },
   {
-    title: "Draft follow-up email",
+    title: "Run it by Rebecca",
     prompt:
-      "Write a concise follow-up email thanking the customer and attaching the ROI story.",
-    context: "Tone: professional, upbeat, 120 words max.",
+      "Email the @doc to @rebecca and ask her which of the messages she would keep. Tell her you need her input by 4pm. Remind her at 3pm. Adjust the @doc to only have the messages @rebecca approved",
+    integration: "/images/docs.png",
   },
+
   {
-    title: "Create CRM tasks",
+    title: "Send me the opportunities",
     prompt:
-      "Create three follow-up tasks in HubSpot assigned to the CSM: schedule next check-in, share roadmap, send case-study request.",
-    context: "Due dates: 1 week, 4 weeks, 8 weeks respectively.",
-    integration: "/images/slack.png",
-  },
-  {
-    title: "Slack summary to team",
-    prompt:
-      "Post a short Slack message in #customer-success summarising the call and next steps.",
-    context: "Channel: #customer-success. Tag @cs-lead.",
-  },
-  {
-    title: "Save artefacts to Drive",
-    prompt:
-      "Upload the deck and ROI story to the shared Google Drive folder: /Customers/CustomerName/QBR-2024-Q3.",
-    context: "Ensure the folder is shared with the customer’s champions.",
+      "Send me the opportunities to highlight success/wins by emailing me the @doc",
+    conditions:
+      "If @rebecca answered. Adjust the @doc and email it to me at 5pm. If @rebecca did NOT answer. Email me the @doc at 4pm. CC @rebecca. Note in your email to me that this doesn't include @rebecca's input",
+    integration: "/images/docs.png",
   },
 ];

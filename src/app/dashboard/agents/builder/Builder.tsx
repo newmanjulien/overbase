@@ -39,8 +39,9 @@ const nodeTypes: NodeTypes = { agentNode: AgentNode };
 export interface NodeData {
   [key: string]: unknown;
   stepNumber: number;
-  title?: string;
-  prompt?: string;
+  title: string;
+  prompt: string;
+  conditions?: string;
   context?: string;
   integration?: string;
   onEdit: (nodeId: string) => void;
@@ -89,6 +90,7 @@ export default function Builder() {
         stepNumber: index + 1,
         title: step.title,
         prompt: step.prompt,
+        conditions: step.conditions,
         context: step.context,
         integration: step.integration,
         onEdit: () => {},
