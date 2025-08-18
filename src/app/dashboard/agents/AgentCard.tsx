@@ -7,7 +7,6 @@ import Image from "next/image";
 import { HandlerSelect } from "./HandlerSelect";
 
 interface AgentCardProps {
-  id: number;
   title: string;
   description: string;
   gradientFrom?: string;
@@ -19,7 +18,6 @@ interface AgentCardProps {
 }
 
 export function AgentCard({
-  id,
   title,
   description,
   gradientFrom = "from-emerald-400",
@@ -31,7 +29,7 @@ export function AgentCard({
 }: AgentCardProps) {
   const router = useRouter();
   const [isAnimating, setIsAnimating] = useState(false);
-  const [selectedHandler, setSelectedHandler] = useState("");
+  const [selectedHandler, setSelectedHandler] = useState("1"); // default to first handler
 
   const handleInstallClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -94,7 +92,10 @@ export function AgentCard({
       {/* Handler selector footer (only if installed) */}
       {isInstalled && (
         <div className="p-3 pt-0 bg-white" onClick={(e) => e.stopPropagation()}>
-          <HandlerSelect value="1" onChange={setSelectedHandler} />
+          <HandlerSelect
+            value={selectedHandler}
+            onChange={setSelectedHandler}
+          />
         </div>
       )}
     </div>
