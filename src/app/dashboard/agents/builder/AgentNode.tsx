@@ -73,7 +73,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       <Handle type="target" position={Position.Top} className="opacity-0" />
 
       <Card
-        className="bg-white border border-gray-100 hover:border-gray-200 rounded-md overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow p-0"
+        className="bg-white border border-gray-100 hover:border-gray-200 rounded-lg overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow p-0"
         style={
           isEditing
             ? {

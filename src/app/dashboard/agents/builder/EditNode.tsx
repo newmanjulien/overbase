@@ -89,7 +89,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
 
   return (
     <Card
-      className="h-full flex flex-col overflow-hidden p-0 rounded-md shadow-sm transition-shadow"
+      className="h-full flex flex-col overflow-hidden p-0 rounded-lg shadow-sm transition-shadow"
       style={{
         border: "1.5px solid rgba(255, 110, 100, 0.6)",
       }}
@@ -152,7 +152,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
             Prompt *
           </Label>
           <div
-            className={`border rounded-sm p-2 min-h-[5rem] text-sm ${
+            className={`border rounded-md p-2 min-h-[5rem] text-sm ${
               errors.prompt ? "border-red-500" : "border-gray-100"
             }`}
           >
@@ -181,7 +181,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
             onChange={(e) => handleInputChange("context", e.target.value)}
             placeholder="Add additional context (optional)"
             rows={8}
-            className="resize-none text-sm rounded-sm border border-gray-100 w-full p-2"
+            className="resize-none text-sm rounded-md border border-gray-100 w-full p-2"
           />
 
           {/* Attachments */}
@@ -191,7 +191,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-sm"
+                className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-md"
               >
                 <Paperclip className="h-3 w-3 mr-1" strokeWidth={1.5} />
                 <span className="text-xs">Attach files</span>
@@ -200,7 +200,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-sm"
+                className="h-7 px-2 text-gray-600 font-normal border border-gray-200/60 hover:bg-gray-50 hover:text-gray-800 transition-colors rounded-md"
               >
                 <Image className="h-3 w-3 mr-1" strokeWidth={1.5} />
                 <span className="text-xs">Attach images</span>
