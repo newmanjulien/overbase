@@ -1,49 +1,131 @@
+// // "use client";
+
+// // import { useEffect } from "react";
+// // import { Editor, EditorState, CompositeDecorator } from "draft-js";
+// // import "draft-js/dist/Draft.css";
+
+// // interface RichTextareaProps {
+// //   editorState: EditorState;
+// //   onChange: (state: EditorState) => void;
+// //   placeholder?: string;
+// // }
+
+// // export default function RichTextarea({
+// //   editorState,
+// //   onChange,
+// //   placeholder = "Enter text...",
+// // }: RichTextareaProps) {
+// //   // Mention decorator
+// //   const mentionDecorator = new CompositeDecorator([
+// //     {
+// //       strategy: (contentBlock, callback) => {
+// //         const text = contentBlock.getText();
+// //         const regex = /@\w+/g;
+// //         let matchArr;
+// //         while ((matchArr = regex.exec(text)) !== null) {
+// //           callback(matchArr.index, matchArr.index + matchArr[0].length);
+// //         }
+// //       },
+// //       component: (props: any) => (
+// //         <span className="text-blue-500">{props.children}</span>
+// //       ),
+// //     },
+// //   ]);
+
+// //   useEffect(() => {
+// //     // ensure the decorator is applied
+// //     onChange(EditorState.set(editorState, { decorator: mentionDecorator }));
+// //     // eslint-disable-next-line react-hooks/exhaustive-deps
+// //   }, []);
+
+// //   return (
+// //     <Editor
+// //       editorState={editorState}
+// //       onChange={onChange}
+// //       placeholder={placeholder}
+// //     />
+// //   );
+// // }
+
 // "use client";
 
-// import { useEffect } from "react";
-// import { Editor, EditorState, CompositeDecorator } from "draft-js";
+// import { useEffect, useState } from "react";
+// import {
+//   Editor,
+//   EditorState,
+//   CompositeDecorator,
+//   ContentState,
+// } from "draft-js";
 // import "draft-js/dist/Draft.css";
 
 // interface RichTextareaProps {
-//   editorState: EditorState;
-//   onChange: (state: EditorState) => void;
+//   value: string;
+//   onChange: (value: string) => void;
 //   placeholder?: string;
+//   highlightRegex?: RegExp;
+//   highlightClassName?: string;
 // }
 
+// /**
+//  * Drop-in Draft.js textarea with pattern highlighting.
+//  * Accepts plain string value and calls onChange with updated string.
+//  */
 // export default function RichTextarea({
-//   editorState,
+//   value,
 //   onChange,
 //   placeholder = "Enter text...",
+//   highlightRegex = /@\w+/g,
+//   highlightClassName = "text-blue-500",
 // }: RichTextareaProps) {
-//   // Mention decorator
-//   const mentionDecorator = new CompositeDecorator([
-//     {
-//       strategy: (contentBlock, callback) => {
-//         const text = contentBlock.getText();
-//         const regex = /@\w+/g;
-//         let matchArr;
-//         while ((matchArr = regex.exec(text)) !== null) {
-//           callback(matchArr.index, matchArr.index + matchArr[0].length);
-//         }
+//   const [editorState, setEditorState] = useState(() => {
+//     const decorator = new CompositeDecorator([
+//       {
+//         strategy: (contentBlock, callback) => {
+//           const text = contentBlock.getText();
+//           let matchArr;
+//           while ((matchArr = highlightRegex.exec(text)) !== null) {
+//             callback(matchArr.index, matchArr.index + matchArr[0].length);
+//           }
+//         },
+//         component: (props: any) => (
+//           <span className={highlightClassName}>{props.children}</span>
+//         ),
 //       },
-//       component: (props: any) => (
-//         <span className="text-blue-500">{props.children}</span>
-//       ),
-//     },
-//   ]);
+//     ]);
+//     return EditorState.createWithContent(
+//       ContentState.createFromText(value),
+//       decorator
+//     );
+//   });
 
+//   // Update internal EditorState when `value` prop changes
 //   useEffect(() => {
-//     // ensure the decorator is applied
-//     onChange(EditorState.set(editorState, { decorator: mentionDecorator }));
+//     const content = editorState.getCurrentContent().getPlainText();
+//     if (value !== content) {
+//       const decorator = editorState.getDecorator();
+//       const newState = EditorState.createWithContent(
+//         ContentState.createFromText(value),
+//         decorator
+//       );
+//       setEditorState(newState);
+//     }
 //     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, []);
+//   }, [value]);
+
+//   const handleChange = (state: EditorState) => {
+//     setEditorState(state);
+//     const plainText = state.getCurrentContent().getPlainText();
+//     onChange(plainText);
+//   };
 
 //   return (
-//     <Editor
-//       editorState={editorState}
-//       onChange={onChange}
-//       placeholder={placeholder}
-//     />
+//     <div className="border rounded-md p-2 min-h-[5rem] text-sm border-gray-100">
+//       <Editor
+//         editorState={editorState}
+//         onChange={handleChange}
+//         placeholder={placeholder}
+//       />
+//     </div>
 //   );
 // }
 
@@ -55,6 +137,7 @@ import {
   EditorState,
   CompositeDecorator,
   ContentState,
+  ContentBlock,
 } from "draft-js";
 import "draft-js/dist/Draft.css";
 
@@ -64,6 +147,15 @@ interface RichTextareaProps {
   placeholder?: string;
   highlightRegex?: RegExp;
   highlightClassName?: string;
+}
+
+// Props passed to decorator components in Draft.js
+interface DecoratorComponentProps {
+  children: React.ReactNode;
+  contentState: ContentState;
+  entityKey: string | null;
+  start: number;
+  end: number;
 }
 
 /**
@@ -80,28 +172,32 @@ export default function RichTextarea({
   const [editorState, setEditorState] = useState(() => {
     const decorator = new CompositeDecorator([
       {
-        strategy: (contentBlock, callback) => {
+        strategy: (
+          contentBlock: ContentBlock,
+          callback: (start: number, end: number) => void
+        ) => {
           const text = contentBlock.getText();
-          let matchArr;
+          let matchArr: RegExpExecArray | null;
           while ((matchArr = highlightRegex.exec(text)) !== null) {
             callback(matchArr.index, matchArr.index + matchArr[0].length);
           }
         },
-        component: (props: any) => (
+        component: (props: DecoratorComponentProps) => (
           <span className={highlightClassName}>{props.children}</span>
         ),
       },
     ]);
+
     return EditorState.createWithContent(
       ContentState.createFromText(value),
       decorator
     );
   });
 
-  // Update internal EditorState when `value` prop changes
+  // Sync internal EditorState with external `value` prop
   useEffect(() => {
-    const content = editorState.getCurrentContent().getPlainText();
-    if (value !== content) {
+    const currentText = editorState.getCurrentContent().getPlainText();
+    if (value !== currentText) {
       const decorator = editorState.getDecorator();
       const newState = EditorState.createWithContent(
         ContentState.createFromText(value),
@@ -114,8 +210,7 @@ export default function RichTextarea({
 
   const handleChange = (state: EditorState) => {
     setEditorState(state);
-    const plainText = state.getCurrentContent().getPlainText();
-    onChange(plainText);
+    onChange(state.getCurrentContent().getPlainText());
   };
 
   return (
