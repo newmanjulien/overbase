@@ -1,10 +1,7 @@
-import { Suspense } from "react";
-import Dashboard from "../dashboard/Dashboard";
+// /src/app/page.tsx
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Dashboard />
-    </Suspense>
-  );
+  // You can pick whichever dashboard subpage should be the default
+  redirect("/dashboard/agents");
 }
