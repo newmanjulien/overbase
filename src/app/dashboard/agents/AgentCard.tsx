@@ -47,7 +47,7 @@ export function AgentCard({
 
   return (
     <div
-      className={`rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transform transition-all duration-200
+      className={`rounded-lg border border-gray-200/60 overflow-hidden cursor-pointer hover:shadow-md transform transition-all duration-200
         ${isAnimating ? "opacity-0 scale-95" : "opacity-100 scale-100"}
       `}
       onClick={() => router.push("/dashboard/agents/builder")}

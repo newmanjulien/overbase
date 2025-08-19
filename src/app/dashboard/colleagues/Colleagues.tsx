@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { WorkflowCard } from "../../../components/WorkflowCard";
+import { RowCard } from "../../../components/RowCard";
 import { InfoCard } from "../../../components/InfoCard";
 import { useRouter } from "next/navigation";
 import { Header } from "../../../components/Header";
@@ -66,7 +66,7 @@ export function Colleagues() {
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="w-full flex flex-col gap-3">
           {/* Select All card */}
-          <WorkflowCard
+          <RowCard
             title="Select all"
             titleClassName="text-gray-500 font-normal"
             subtitle=""
@@ -105,7 +105,7 @@ export function Colleagues() {
 
           {/* Colleague cards */}
           {mockColleagues.map((colleague) => (
-            <WorkflowCard
+            <RowCard
               key={colleague.id}
               title={colleague.name}
               subtitle={colleague.role}

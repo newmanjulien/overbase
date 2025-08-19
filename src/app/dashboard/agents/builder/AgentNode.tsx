@@ -14,6 +14,7 @@ import { MoreVertical, Plus } from "lucide-react";
 import type { NodeData } from "./Builder";
 import { useEditingNodeContext } from "./Builder";
 import Image from "next/image";
+import { AddStepButton } from "./AddStepButton"; // adjust path
 
 interface AgentNodeProps extends NodeProps {
   data: NodeData & {
@@ -72,7 +73,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       <Handle type="target" position={Position.Top} className="opacity-0" />
 
       <Card
-        className="bg-white border border-gray-100 hover:border-gray-200 rounded-lg overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-shadow p-0"
+        className="bg-white border border-gray-100 hover:border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow transition-all duration-200 p-0"
         style={
           isEditing
             ? {
@@ -191,50 +192,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       </Card>
 
       {/* Add-step button */}
-      <div
-        className="nodrag nopan"
-        style={{ position: "relative", height: 60 }}
-      >
-        <svg
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <line
-            x1="50%"
-            y1="0"
-            x2="50%"
-            y2="calc(50% + 18px)"
-            stroke="#E5E7EB"
-            strokeWidth="1"
-          />
-        </svg>
-        <div
-          style={{
-            position: "absolute",
-            top: "60%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            pointerEvents: "all",
-          }}
-        >
-          <Button
-            size="sm"
-            variant="outline"
-            className="rounded-full h-8 w-8 flex items-center justify-center bg-white border-gray-200 hover:bg-gray-50 shadow-sm text-gray-600 hover:text-gray-800 font-normal text-sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddBelow(id);
-            }}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <AddStepButton onAddBelow={() => onAddBelow(id)} />
 
       <Handle type="source" position={Position.Bottom} className="opacity-0" />
     </div>

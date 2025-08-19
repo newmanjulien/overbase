@@ -53,7 +53,7 @@ export function PopularIntegrations({
                   }
                 }}
               >
-                <div className="w-10 h-10 rounded-md flex items-center justify-center relative overflow-hidden border border-gray-200 bg-white flex-shrink-0">
+                <div className="w-10 h-10 rounded-md flex items-center justify-center relative overflow-hidden border border-gray-200/60 bg-white flex-shrink-0">
                   <Image
                     src={integration.logo}
                     alt={integration.title}
@@ -75,7 +75,7 @@ export function PopularIntegrations({
           )}
         </div>
 
-        <hr className="border-t border-gray-200 my-6 " />
+        <hr className="border-t border-gray-200/60 my-6 " />
 
         <Button
           variant="outline"
