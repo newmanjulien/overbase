@@ -73,7 +73,7 @@ export function Integrations() {
           {/* Right Section - Popular Integrations */}
           <PopularIntegrations
             popularIntegrations={popularIntegrations}
-            onAddIntegration={handleSelectIntegration} // rename for clarity if you want
+            onAddIntegration={handleSelectIntegration}
             onBrowseClick={handleBrowseClick}
           />
         </div>

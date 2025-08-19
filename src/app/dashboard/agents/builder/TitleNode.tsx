@@ -39,7 +39,7 @@ export default function TitleNode({
 
   return (
     <div className="absolute top-4 left-4 z-10">
-      <div className="flex items-center bg-white border border-gray-100 hover:border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 w-[320px]">
+      <div className="flex items-center bg-white border border-gray-200/60 hover:border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 w-[320px]">
         {/* Back Button */}
         <Button
           variant="ghost"
