@@ -110,6 +110,7 @@
   }
 }
 
+/* Fixes cursors on React Flow nodes */
 .react-flow__node {
   cursor: default !important;
 }

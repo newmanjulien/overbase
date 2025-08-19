@@ -63,7 +63,7 @@ export function Agents() {
                 onClick={() => setSelectedCategory(category.key)}
                 className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between ${
                   selectedCategory === category.key
-                    ? "bg-white border border-gray-200 font-medium text-gray-800"
+                    ? "bg-white border border-gray-100 font-medium text-gray-800"
                     : "text-gray-700 hover:text-gray-900 hover:bg-white border border-transparent"
                 }`}
               >
