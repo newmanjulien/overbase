@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { IntegrationCard } from "./IntegrationCard";
+import { RowCard } from "../../../components/RowCard";
 import { EmptyState } from "./EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
 import type { Integration } from "./DummyData";
@@ -53,7 +53,7 @@ export function Integrations() {
               <EmptyState onButtonClick={handleBrowseClick} />
             ) : (
               installedIntegrations.map((integration) => (
-                <IntegrationCard
+                <RowCard
                   key={integration.id}
                   title={integration.title}
                   subtitle={integration.subtitle}
