@@ -70,7 +70,7 @@ export default function EditNode({ node, onSave, onClose }: EditingNodeProps) {
 
   return (
     <Card
-      className="h-full flex flex-col overflow-hidden p-0 rounded-lg shadow-sm transition-shadow"
+      className="h-full flex flex-col overflow-hidden p-0 rounded-lg shadow-sm hover:shadow-md transition-shadow transition-all duration-200"
       style={{ border: "1.5px solid rgba(255, 110, 100, 0.6)" }}
     >
       {/* Header */}

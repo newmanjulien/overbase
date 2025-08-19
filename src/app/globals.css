@@ -231,3 +231,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+.react-flow__node {
+  cursor: default !important;
+}
+
+.react-flow__edge {
+  cursor: default !important;
+}
