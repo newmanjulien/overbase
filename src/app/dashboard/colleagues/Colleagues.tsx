@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { WorkflowCard } from "../../../components/WorkflowCard";
+import { WorkflowCard } from "../integrations/IntegrationCard";
 import { InfoCard } from "../../../components/InfoCard";
 import { useRouter } from "next/navigation";
 import { Header } from "../../../components/Header";

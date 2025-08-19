@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { ReactNode } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../../../components/ui/button";
 
-interface WorkflowCardProps {
+interface IntegrationCardProps {
   id?: number;
   title: string;
-  titleClassName?: string; // New optional prop to customize title styling
+  titleClassName?: string; // optional prop to customize title styling
   subtitle?: ReactNode;
   image?: string;
   actions?: ReactNode;
@@ -17,7 +17,7 @@ interface WorkflowCardProps {
   leading?: ReactNode; // content on the left (e.g. checkbox)
 }
 
-export function WorkflowCard({
+export function IntegrationCard({
   title,
   titleClassName,
   subtitle,
@@ -29,16 +29,16 @@ export function WorkflowCard({
   buttonClassName = "text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60",
   showGreenDot = false,
   leading,
-}: WorkflowCardProps) {
+}: IntegrationCardProps) {
   return (
     <div className="flex items-center justify-between py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-lg">
       <div className="flex items-center space-x-4 min-w-0">
         {leading || image ? (
           image ? (
-            <div className="w-10 h-10 rounded-xl overflow-hidden border border-gray-200/60 flex items-center justify-center relative">
+            <div className="w-10 h-10 rounded-md overflow-hidden border border-gray-200/60 flex items-center justify-center relative">
               <Image
                 src={image}
-                alt={typeof title === "string" ? title : "workflow image"}
+                alt={typeof title === "string" ? title : "integration image"}
                 fill
                 style={{ objectFit: "cover" }}
               />

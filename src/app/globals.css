@@ -126,8 +126,3 @@
     transform: rotate(360deg);
   }
 }
-
-/* Fixes cursors on React Flow nodes */
-.react-flow__edge {
-  cursor: default !important;
-}

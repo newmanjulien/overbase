@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { WorkflowCard } from "../../../components/WorkflowCard";
+import { IntegrationCard } from "./IntegrationCard";
 import { EmptyState } from "./EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
 import type { Integration } from "./DummyData";
@@ -11,7 +11,6 @@ import { Header } from "../../../components/Header";
 
 export function Integrations() {
   const router = useRouter();
-
   const { installedIntegrations } = useIntegrationContext();
 
   // Compute popular integrations dynamically based on installed ones
@@ -54,7 +53,7 @@ export function Integrations() {
               <EmptyState onButtonClick={handleBrowseClick} />
             ) : (
               installedIntegrations.map((integration) => (
-                <WorkflowCard
+                <IntegrationCard
                   key={integration.id}
                   title={integration.title}
                   subtitle={integration.subtitle}
