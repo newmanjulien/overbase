@@ -26,15 +26,12 @@ import AgentNode from "./AgentNode";
 import TitleNode from "./TitleNode";
 import { dummyData } from "./DummyData";
 import { useAgentNodeActions } from "./useAgentNodeActions";
+import HelperNode from "./HelperNode";
 
-// --- Dynamically import EditNode ---
 const EditNode = dynamic(() => import("./EditNode"), { ssr: false });
-
-// --- TypeScript type for static preload method ---
 interface EditNodeWithPreload {
   preload?: () => void;
 }
-
 const EditNodeTyped = EditNode as unknown as EditNodeWithPreload;
 
 const VERTICAL_SPACING = 185;
@@ -70,7 +67,6 @@ interface EditingNodeContextValue {
 const EditingNodeContext = createContext<EditingNodeContextValue | undefined>(
   undefined
 );
-
 export const useEditingNodeContext = () => {
   const ctx = useContext(EditingNodeContext);
   if (!ctx)
@@ -87,6 +83,10 @@ export default function Builder() {
   );
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // ---- Controlled positions for the floating nodes ----
+  const titleNodePosition = { top: 24, left: 24 };
+  const helperNodePosition = { bottom: 24, left: 24 };
 
   const createInitialNodes = useCallback((): AgentNodeType[] => {
     return (
@@ -188,7 +188,6 @@ export default function Builder() {
     return () => window.removeEventListener("resize", handleResize);
   }, [nodes, setNodes, updateNodesPositions]);
 
-  // --- Preload EditNode safely with proper typing ---
   useEffect(() => {
     const timer = setTimeout(() => {
       EditNodeTyped.preload?.();
@@ -242,9 +241,16 @@ export default function Builder() {
             <Background color="#DDDDDD" gap={30} size={2} />
           </ReactFlow>
 
-          <div className="absolute top-4 left-4 z-10">
-            <TitleNode title={agentTitle} onTitleChange={setAgentTitle} />
-          </div>
+          {/* Controlled floating nodes */}
+          <TitleNode
+            title={agentTitle}
+            onTitleChange={setAgentTitle}
+            position={titleNodePosition}
+          />
+          <HelperNode
+            onClick={() => console.log("star clicked")}
+            position={helperNodePosition}
+          />
 
           {editingNodeId && (
             <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)]">
