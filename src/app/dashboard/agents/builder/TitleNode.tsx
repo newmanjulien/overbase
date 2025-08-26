@@ -44,7 +44,7 @@ export default function TitleNode({
       className="absolute z-10"
       style={{ top: position?.top ?? 16, left: position?.left ?? 16 }}
     >
-      <div className="flex items-center bg-white border border-gray-200/60 hover:border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 w-[320px]">
+      <div className="flex items-center bg-white border border-gray-200/60 hover:border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 w-[320px]">
         <Button
           variant="ghost"
           size="sm"

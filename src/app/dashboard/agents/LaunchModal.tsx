@@ -29,7 +29,7 @@ export function LaunchModal({ isOpen, onClose }: LaunchModalProps) {
       onClick={onClose} // <- clicking background closes modal
     >
       <div
-        className="bg-white rounded-sm shadow-md w-full max-w-md overflow-hidden"
+        className="bg-white rounded-xl shadow-md w-full max-w-md overflow-hidden"
         onClick={(e) => e.stopPropagation()} // <- stop bubbling so modal itself doesn’t trigger close
       >
         {/* Header */}

@@ -59,7 +59,7 @@ export function Agents() {
               <button
                 key={skill.key}
                 onClick={() => setSelectedSkill(skill.key)}
-                className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between ${
+                className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between ${
                   selectedSkill === skill.key
                     ? "bg-white border border-gray-200/60 font-medium text-gray-800"
                     : "text-gray-700 hover:text-gray-900 hover:bg-white border border-transparent"
@@ -78,7 +78,7 @@ export function Agents() {
           </div>
 
           <div
-            className={`rounded-md ${
+            className={`rounded-xl ${
               selectedSkill === "installed" ? "p-6 bg-white" : ""
             }`}
           >
