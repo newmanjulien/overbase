@@ -16,9 +16,9 @@ export default function DashboardLayout({
 
   const navItems = [
     { href: "/dashboard/agents", label: "Agents" },
+    { href: "/dashboard/integrations", label: "Integrations" },
     { href: "/dashboard/colleagues", label: "Colleagues" },
     { href: "/dashboard/external", label: "External" },
-    { href: "/dashboard/integrations", label: "Integrations" },
   ];
 
   return (
