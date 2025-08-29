@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
-import { MoreVertical, Plus } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import type { NodeData } from "./Builder";
 import { useEditingNodeContext } from "./Builder";
 import Image from "next/image";

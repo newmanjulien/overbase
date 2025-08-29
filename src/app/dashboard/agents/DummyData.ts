@@ -94,6 +94,7 @@ export const initialAgents: Agent[] = [
     gradientFrom: "from-blue-400",
     gradientVia: "via-indigo-500",
     gradientTo: "to-violet-600",
+    image: "/images/supabase.png",
   },
 
   // --- QUARTERLY ---

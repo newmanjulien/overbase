@@ -12,13 +12,12 @@ export interface DummyData {
 }
 
 export const dummyData: DummyData = {
-  defaultTitle:
-    "Proactive Data Import & Migration (Email-Based with Customer Monitoring)",
+  defaultTitle: "Data Import & Migration",
   steps: [
     {
       title: "Monitor New Customers via Supabase",
       prompt:
-        "Periodically query the Supabase database to detect newly added customers who may need data import or migration support. Collect customer contact info, subscription details, and any relevant metadata.",
+        "Periodically query the @Supabase database to detect newly added customers who may need data import or migration support. Collect customer contact info, subscription details, and any relevant metadata.",
       conditions:
         "Trigger the next step (proactive outreach) automatically when a new customer is detected. Only include customers eligible for migration assistance.",
       integration: "/images/supabase.png",
