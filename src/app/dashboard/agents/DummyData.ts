@@ -320,26 +320,60 @@ export const initialAgents: Agent[] = [
     title: "Shipping Delay Concerns",
     description: `"I haven't receive my order. Can you help?"`,
     skills: ["shipping"],
-    gradientFrom: "from-orange-400",
-    gradientVia: "via-red-500",
-    gradientTo: "to-rose-600",
+    gradientFrom: "from-yellow-400",
+    gradientVia: "via-amber-500",
+    gradientTo: "to-orange-600",
   },
   {
     id: 27,
-    title: "Tracking Number Request",
-    description: `"Can you send me my tracking info? I can't find it"`,
+    title: "Tracking Inquiry",
+    description: `"Where is my package? I need a tracking link"`,
     skills: ["shipping"],
-    gradientFrom: "from-cyan-400",
-    gradientVia: "via-sky-500",
-    gradientTo: "to-blue-600",
+    gradientFrom: "from-pink-400",
+    gradientVia: "via-rose-500",
+    gradientTo: "to-red-600",
   },
   {
     id: 28,
-    title: "Damaged Item Received",
-    description: `"My item arrived broken and I can't use it at all"`,
+    title: "Shipping Address Change",
+    description: `"I want to update the shipping address for my order"`,
     skills: ["shipping"],
-    gradientFrom: "from-rose-400",
-    gradientVia: "via-red-500",
-    gradientTo: "to-pink-600",
+    gradientFrom: "from-green-400",
+    gradientVia: "via-emerald-500",
+    gradientTo: "to-teal-600",
   },
 ];
+
+// === LaunchModal Data ===
+export interface ModalField {
+  type: "input" | "switch";
+  label: string;
+  placeholder?: string;
+}
+
+export interface ModalAction {
+  label: string;
+  type: "primary" | "secondary";
+  callback: string;
+}
+
+export interface ModalContent {
+  title: string;
+  fields: ModalField[];
+  description?: string;
+  actions: ModalAction[];
+}
+
+export const launchModalData: ModalContent = {
+  title: "Launch Agent",
+  fields: [
+    { type: "input", label: "Anthropic API Key", placeholder: "sk-abcdefg..." },
+    { type: "switch", label: "Enabled" },
+  ],
+  description:
+    "Your Anthropic key is securely encrypted. If enabled, your key will be used for all requests routed to Anthropic. If a rate limit or failure occurs, AI Gateway will work to increase your uptime with system credentials.",
+  actions: [
+    { label: "Cancel", type: "secondary", callback: "onClose" },
+    { label: "Add Key", type: "primary", callback: "onAddKey" },
+  ],
+};

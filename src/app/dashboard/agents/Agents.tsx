@@ -2,16 +2,25 @@
 
 import { useState } from "react";
 import { AgentCard } from "./AgentCard";
-import { LaunchModal } from "./LaunchModal";
+import { LaunchModal } from "../../../components/LaunchModal";
 import { Header } from "../../../components/Header";
 
 // Import data from DummyData.ts
-import { skillsConfig, initialAgents, Agent } from "./DummyData";
+import {
+  skillsConfig,
+  initialAgents,
+  Agent,
+  launchModalData,
+} from "./DummyData";
 
 export function Agents() {
   const [selectedSkill, setSelectedSkill] = useState("installed");
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [launchingAgent, setLaunchingAgent] = useState<Agent | null>(null);
+
+  // Modal state
+  const [apiKey, setApiKey] = useState("");
+  const [isEnabled, setIsEnabled] = useState(true);
 
   const handleInstall = (agentId: number) => {
     setAgents((previousAgents) =>
@@ -25,6 +34,13 @@ export function Agents() {
       )
     );
     setSelectedSkill("installed");
+  };
+
+  const handleModalAction = (callback: string) => {
+    if (callback === "onAddKey") {
+      console.log("Adding API key:", apiKey);
+      setLaunchingAgent(null);
+    }
   };
 
   const filteredAgents = agents
@@ -106,6 +122,13 @@ export function Agents() {
         <LaunchModal
           isOpen={!!launchingAgent}
           onClose={() => setLaunchingAgent(null)}
+          content={launchModalData}
+          size="md"
+          apiKey={apiKey}
+          onApiKeyChange={setApiKey}
+          isEnabled={isEnabled}
+          onEnabledChange={setIsEnabled}
+          onAction={handleModalAction}
         />
       )}
     </div>
