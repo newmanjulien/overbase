@@ -64,7 +64,7 @@ export function Agents() {
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
       <Header
-        title="Email agents"
+        title="Agents"
         subtitle="Easily install agents then assign a handler and customize the instructions."
       />
 

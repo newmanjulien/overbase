@@ -12,58 +12,79 @@ export interface DummyData {
 }
 
 export const dummyData: DummyData = {
-  defaultTitle: "Product Material Question",
+  defaultTitle:
+    "Proactive Data Import & Migration (Email-Based with Customer Monitoring)",
   steps: [
     {
-      title: "Understand the Customer’s Question Clearly",
+      title: "Monitor New Customers via Supabase",
       prompt:
-        "Identify exactly what information the customer is requesting. Check if the customer is asking about: size/fit, material or ingredients, usage instructions, compatibility (e.g., with other products/devices), care instructions, expiry (for consumables), country of origin, warranty or guarantee, or other feature-specific questions.",
+        "Periodically query the Supabase database to detect newly added customers who may need data import or migration support. Collect customer contact info, subscription details, and any relevant metadata.",
       conditions:
-        "If the question is vague, respond by asking for clarification, e.g., 'Thanks for reaching out! Could you clarify what details you're looking for about the product?'",
+        "Trigger the next step (proactive outreach) automatically when a new customer is detected. Only include customers eligible for migration assistance.",
+      integration: "/images/supabase.png",
     },
     {
-      title: "Locate the Product in the Catalog or Database",
+      title: "Proactively Reach Out to Introduce Migration Assistance",
       prompt:
-        "Use @shopify and the product name or SKU provided in the email to find the exact item in your system.",
+        "Send an introductory email to the newly detected customer offering help with data import or migration. Explain the process, benefits, and how you can guide them. Ask for their current data format and target system details.",
       conditions:
-        "If the customer didn’t specify clearly, reply requesting: order number (if already purchased), product link, screenshot, or name/description.",
-      integration: "/images/shopify.png",
+        "Example email:\n'Hi [Name],\nWelcome to [SaaS Platform]! We’d be happy to assist you with importing your data smoothly. Could you share the type and format of your data, so we can plan the best approach?'\nDo not wait for the customer to initiate contact.",
     },
     {
-      title: "Check Official Product Details",
+      title: "Proactively Request Sample Data or Access",
       prompt:
-        "Consult the Product Details @notion to get accurate product information, including: product description on the website, internal product sheets or documentation, supplier/manufacturer information, FAQ sections, and size charts or fitting guides.",
+        "Email the customer to request a small sample of their data or temporary access to the source system, so you can evaluate it and provide tailored guidance.",
       conditions:
-        "Do not guess or assume details. Always use verified sources.",
-      integration: "/images/notion.png",
+        "Explain clearly why the sample is needed and how it helps prevent errors during the migration.",
     },
     {
-      title: "Respond in Clear, Friendly, and Helpful Language",
+      title: "Confirm Target System Requirements via Email",
       prompt:
-        "Write a professional, warm, and approachable response. Structure your email as follows:\n1. Acknowledge the question and thank them.\n2. Provide the specific details they asked for.\n3. Anticipate related questions (e.g., mention care tips if they asked about material).\n4. Offer help if they need more info or want to compare with other products.",
+        "Reach out to the customer to verify that the destination system can handle the data format, volume, and field structure. Explain required fields, validation rules, and permissions. Proactively suggest adjustments if needed.",
       conditions:
-        "Example:\nHi [Name],\nThanks for reaching out! This tote bag is made from 100% recycled cotton and has a capacity of 20 liters. It’s machine washable (cold cycle) and great for everyday use.\nIf you’re looking for a waterproof option, let me know—I’d be happy to recommend a few alternatives.\nLet us know if you have any other questions!\nBest, [Your Name]",
+        "The email should guide the customer and prevent downstream errors.",
     },
     {
-      title: "Tag or Escalate if Needed",
+      title: "Proactively Share Migration Plan",
       prompt:
-        "If the product is discontinued, out of stock, or the information isn’t available, escalate to a supervisor or product specialist. Tag the message for product team review if using a CRM like Zendesk, Gorgias, or Freshdesk.",
+        "Draft and send an email outlining the proposed migration steps, including data cleaning, transformations, field mappings, estimated timeline, potential risks, and rollback plans. Request confirmation or approval before execution.",
       conditions:
-        "Let the customer know you’re checking and will follow up shortly.",
+        "Explain in clear, friendly language why each step is necessary for a safe migration.",
     },
     {
-      title: "Log or Label the Email Appropriately",
+      title: "Perform Migration and Provide Regular Status Emails",
       prompt:
-        "Tag the email based on inquiry type: Product Inquiry, Size Question, Material Info, etc. Add notes for future agents if using shared inboxes or helpdesk tools.",
+        "As you execute the migration, proactively send status updates to the customer, highlighting progress, any minor issues, and next steps. Offer guidance on what to review or prepare next.",
       conditions:
-        "Ensure all relevant details are logged for easy tracking and follow-up.",
+        "Ensure the customer feels informed and supported at every stage.",
     },
     {
-      title: "Follow Up if You Promised More Info",
+      title: "Verify Data and Share Validation Results",
       prompt:
-        "Set a reminder or assign a task if you told the customer you’d get back to them or are confirming something with another team.",
+        "After migration, cross-check source and target data, then proactively send a detailed email to the customer summarizing verification results. Include any discrepancies and guidance for resolution if needed.",
       conditions:
-        "Do not let the thread go cold; follow up in a timely manner.",
+        "Provide clear instructions for the customer to validate the imported data themselves.",
+    },
+    {
+      title: "Send Completion Summary and Recommendations",
+      prompt:
+        "Compose a proactive completion email detailing what was migrated, adjustments made, and recommendations for future imports or maintenance. Include attachments or screenshots if helpful.",
+      conditions:
+        "Reassure the customer that their data is accurate, ready for use, and provide next steps proactively.",
+    },
+    {
+      title: "Document Migration Process Internally",
+      prompt:
+        "Record all migration steps, field mappings, transformations, errors, and resolutions in internal documentation or CRM. Include copies of proactive emails for future reference.",
+      conditions:
+        "Ensure future agents can understand and replicate the process if needed.",
+    },
+    {
+      title: "Proactively Follow Up",
+      prompt:
+        "Send follow-up emails checking in on customer satisfaction, pending validations, or additional migration needs. Offer further assistance proactively.",
+      conditions:
+        "Do not wait for the customer to reach out; ensure they feel fully supported throughout.",
     },
   ],
 };
