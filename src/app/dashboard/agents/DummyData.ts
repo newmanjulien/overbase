@@ -229,7 +229,7 @@ export const initialAgents: Agent[] = [
     id: 17,
     title: "Report Bugs to Engineering",
     description: `"Document and submit client-reported bugs to engineering"`,
-    skills: ["productFeedback", "installed"],
+    skills: ["productFeedback"],
     gradientFrom: "from-red-400",
     gradientVia: "via-rose-500",
     gradientTo: "to-pink-600",
