@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
-import { MoreVertical, Plus } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import type { NodeData } from "./Builder";
 import { useEditingNodeContext } from "./Builder";
 import Image from "next/image";
@@ -73,7 +73,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       <Handle type="target" position={Position.Top} className="opacity-0" />
 
       <Card
-        className="bg-white border border-gray-100 hover:border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow transition-all duration-200 p-0"
+        className="bg-white border border-gray-100 hover:border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow transition-all duration-200 p-0"
         style={
           isEditing
             ? {

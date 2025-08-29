@@ -9,56 +9,48 @@ export const skillsConfig = [
     subheader: "Assign a handler then launch the agents you've installed",
   },
   {
-    key: "order",
-    name: "Order-Related",
-    header: "Order-Related",
+    key: "onboarding",
+    name: "Onboarding",
+    header: "Onboarding Tasks",
     subheader:
-      "Assist customers with tracking, confirming, or correcting orders",
+      "Guide new clients to adopt and start using the platform effectively",
   },
   {
-    key: "payment",
-    name: "Payment & Billing",
-    header: "Payment & Billing",
-    subheader: "Handle payment issues, billing questions, and refund requests",
+    key: "quarterly",
+    name: "Quarterly Reviews",
+    header: "Quarterly Check-ins",
+    subheader: "Prepare and present quarterly business reviews to clients",
   },
   {
-    key: "return",
-    name: "Returns & Exchanges",
-    header: "Returns & Exchanges",
+    key: "support",
+    name: "Support & Troubleshooting",
+    header: "Support & Troubleshooting",
+    subheader: "Assist clients with technical or product-related issues",
+  },
+  {
+    key: "adoption",
+    name: "Product Adoption",
+    header: "Product Adoption",
+    subheader: "Help clients adopt new features and maximize usage",
+  },
+  {
+    key: "renewals",
+    name: "Renewals & Upsell",
+    header: "Renewals & Upsell",
+    subheader: "Manage subscription renewals and identify upsell opportunities",
+  },
+  {
+    key: "feedback",
+    name: "Feedback & Advocacy",
+    header: "Feedback & Advocacy",
+    subheader: "Collect client feedback and build advocacy programs",
+  },
+  {
+    key: "productFeedback",
+    name: "Product Feedback",
+    header: "Product Feedback",
     subheader:
-      "Support customers with returns, exchanges, and status follow-ups",
-  },
-  {
-    key: "account",
-    name: "Account-Related",
-    header: "Account-Related",
-    subheader: "Manage login issues, account updates, and deletion requests",
-  },
-  {
-    key: "product",
-    name: "Product & Inventory",
-    header: "Product & Inventory",
-    subheader:
-      "Answer questions about product details, availability, and recommendations",
-  },
-  {
-    key: "complaint",
-    name: "Complaints & Feedback",
-    header: "Complaints & Feedback",
-    subheader: "Handle complaints and collect customer feedback effectively",
-  },
-  {
-    key: "promo",
-    name: "Promotions & Discounts",
-    header: "Promotions & Discounts",
-    subheader:
-      "Assist customers with coupons, discounts, and pricing inquiries",
-  },
-  {
-    key: "shipping",
-    name: "Shipping & Delivery",
-    header: "Shipping & Delivery",
-    subheader: "Provide updates on shipping, tracking, and delivery issues",
+      "Communicate customer insights and feature requests to the product team",
   },
 ];
 
@@ -75,271 +67,214 @@ export interface Agent {
 }
 
 export const initialAgents: Agent[] = [
-  // --- ORDER ---
+  // --- ONBOARDING ---
   {
     id: 1,
-    title: "Order Status Inquiry",
-    description: `"Where is my order?" or "Has my order shipped yet?"`,
-    skills: ["order"],
+    title: "Client Kickoff Call",
+    description: `"Schedule and conduct a kickoff call with a new client"`,
+    skills: ["onboarding"],
     gradientFrom: "from-yellow-400",
     gradientVia: "via-yellow-500",
     gradientTo: "to-orange-600",
   },
   {
     id: 2,
-    title: "Order Not Received",
-    description: `"It's been 2 weeks, and I still haven't received my package"`,
-    skills: ["order"],
+    title: "Setup Client Account",
+    description: `"Configure client account settings, permissions, and integrations"`,
+    skills: ["onboarding"],
     gradientFrom: "from-green-400",
     gradientVia: "via-lime-500",
     gradientTo: "to-teal-600",
   },
   {
     id: 3,
-    title: "Wrong Item Received",
-    description: `"I ordered a blue hoodie, but received a red one"`,
-    skills: ["order", "installed"],
+    title: "Data Import & Migration",
+    description: `"Assist client with importing their data into the platform"`,
+    skills: ["onboarding", "installed"],
     gradientFrom: "from-blue-400",
     gradientVia: "via-indigo-500",
     gradientTo: "to-violet-600",
+    image: "/images/supabase.png",
   },
+
+  // --- QUARTERLY ---
   {
     id: 4,
-    title: "Missing Item in Package",
-    description: `"I ordered 3 items, but then I only received 2"`,
-    skills: ["order"],
+    title: "Prepare QBRs",
+    description: `"Analyze usage, metrics, and outcomes to prepare a report for client review"`,
+    skills: ["quarterly"],
     gradientFrom: "from-purple-400",
     gradientVia: "via-fuchsia-500",
     gradientTo: "to-pink-600",
   },
   {
     id: 5,
-    title: "Order Confirmation Not Received",
-    description: `"I placed an order but didn't get a confirmation email"`,
-    skills: ["order"],
+    title: "Present QBR to Client",
+    description: `"Deliver insights, recommendations, and roadmap in a client meeting"`,
+    skills: ["quarterly"],
     gradientFrom: "from-rose-400",
     gradientVia: "via-red-500",
     gradientTo: "to-rose-600",
   },
+
+  // --- SUPPORT ---
   {
     id: 6,
-    title: "Change or Cancel Order",
-    description: `"Can I update my shipping address?" or "I want to cancel my order"`,
-    skills: ["order"],
+    title: "Resolve Technical Issue",
+    description: `"Help client troubleshoot product or integration issues"`,
+    skills: ["support"],
     gradientFrom: "from-orange-400",
     gradientVia: "via-amber-500",
     gradientTo: "to-red-600",
   },
-
-  // --- PAYMENT ---
   {
     id: 7,
-    title: "Payment Not Going Through",
-    description: `"I'm trying to check out, but my card keeps getting declined"`,
-    skills: ["payment"],
+    title: "Answer Feature Questions",
+    description: `"Respond to client inquiries about platform features and functionality"`,
+    skills: ["support"],
     gradientFrom: "from-emerald-400",
     gradientVia: "via-green-500",
     gradientTo: "to-teal-600",
   },
   {
     id: 8,
-    title: "Double Charge or Incorrect Billing",
-    description: `"I was charged twice for my order. How do I get my money back"`,
-    skills: ["payment"],
+    title: "Escalate Critical Issue",
+    description: `"Identify urgent problems and coordinate with engineering team"`,
+    skills: ["support"],
     gradientFrom: "from-fuchsia-400",
     gradientVia: "via-purple-500",
     gradientTo: "to-indigo-600",
   },
+
+  // --- ADOPTION ---
   {
     id: 9,
-    title: "Request for Invoice or Receipt",
-    description: `"Can you send me a copy of my invoice?"`,
-    skills: ["payment"],
+    title: "Feature Adoption Campaign",
+    description: `"Encourage clients to start using new platform features"`,
+    skills: ["adoption"],
     gradientFrom: "from-cyan-400",
     gradientVia: "via-sky-500",
     gradientTo: "to-blue-600",
   },
   {
     id: 10,
-    title: "Refund Request",
-    description: `"I returned an item but haven’t received my refund yet"`,
-    skills: ["payment"],
-    gradientFrom: "from-orange-400",
-    gradientVia: "via-red-500",
-    gradientTo: "to-rose-600",
-  },
-
-  // --- RETURN ---
-  {
-    id: 11,
-    title: "Return Request",
-    description: `"How do I return this item I purchased I don't want?"`,
-    skills: ["return"],
-    gradientFrom: "from-indigo-400",
-    gradientVia: "via-violet-500",
-    gradientTo: "to-purple-600",
-  },
-  {
-    id: 12,
-    title: "Exchange Request",
-    description: `"Can I exchange this shirt for a different size?"`,
-    skills: ["return"],
-    gradientFrom: "from-teal-400",
-    gradientVia: "via-cyan-500",
-    gradientTo: "to-blue-600",
-  },
-  {
-    id: 13,
-    title: "Return Status Follow-Up",
-    description: `"I sent back my order last week. Has it been processed?"`,
-    skills: ["return"],
-    gradientFrom: "from-pink-400",
-    gradientVia: "via-rose-500",
-    gradientTo: "to-red-600",
-  },
-
-  // --- ACCOUNT ---
-  {
-    id: 14,
-    title: "Login Issues / Password Reset",
-    description: `"I can't log into my account and my password doesn't work"`,
-    skills: ["account"],
-    gradientFrom: "from-blue-400",
-    gradientVia: "via-sky-500",
-    gradientTo: "to-indigo-600",
-  },
-  {
-    id: 15,
-    title: "Account Information Update",
-    description: `"How do I change the email address on my account?"`,
-    skills: ["account"],
-    gradientFrom: "from-purple-400",
-    gradientVia: "via-indigo-500",
-    gradientTo: "to-violet-600",
-  },
-  {
-    id: 16,
-    title: "Deactivate/Delete Account",
-    description: `"Please delete my account and all associated data"`,
-    skills: ["account"],
-    gradientFrom: "from-red-400",
-    gradientVia: "via-rose-500",
-    gradientTo: "to-pink-600",
-  },
-
-  // --- PRODUCT ---
-  {
-    id: 17,
-    title: "Product Availability",
-    description: `"When will this item I want be back in stock?"`,
-    skills: ["product"],
+    title: "Monitor Usage Metrics",
+    description: `"Track client engagement and highlight areas for improvement"`,
+    skills: ["adoption"],
     gradientFrom: "from-teal-400",
     gradientVia: "via-emerald-500",
     gradientTo: "to-green-600",
   },
+
+  // --- RENEWALS ---
   {
-    id: 18,
-    title: "Product Sizing Question",
-    description: `"What size should I order? I don't understand your sizing"`,
-    skills: ["product"],
-    gradientFrom: "from-orange-400",
-    gradientVia: "via-amber-500",
-    gradientTo: "to-pink-600",
+    id: 11,
+    title: "Prepare Renewal Proposal",
+    description: `"Draft contract renewal proposals including upsell opportunities"`,
+    skills: ["renewals"],
+    gradientFrom: "from-pink-400",
+    gradientVia: "via-rose-500",
+    gradientTo: "to-red-600",
   },
   {
-    id: 19,
-    title: "Product Material Question",
-    description: `"Is this item made from actually real leather?"`,
-    skills: ["product", "installed"],
-    gradientFrom: "from-rose-400",
-    gradientVia: "via-red-500",
-    gradientTo: "to-rose-600",
-  },
-  {
-    id: 20,
-    title: "Request for Recommendations",
-    description: `"Can you help me find a gift for my husband?"`,
-    skills: ["product"],
-    gradientFrom: "from-sky-400",
+    id: 12,
+    title: "Conduct Renewal Meeting",
+    description: `"Meet client to review contract, usage, and propose renewal terms"`,
+    skills: ["renewals"],
+    gradientFrom: "from-purple-400",
     gradientVia: "via-indigo-500",
-    gradientTo: "to-purple-600",
+    gradientTo: "to-violet-600",
   },
 
-  // --- COMPLAINT ---
+  // --- FEEDBACK & ADVOCACY ---
   {
-    id: 21,
-    title: "Product Quality Complaint",
-    description: `"The item I bought from you broke after one use"`,
-    skills: ["complaint"],
-    gradientFrom: "from-red-500",
+    id: 13,
+    title: "Collect Client Feedback",
+    description: `"Send surveys or conduct interviews to gather feedback"`,
+    skills: ["feedback"],
+    gradientFrom: "from-red-400",
     gradientVia: "via-rose-500",
     gradientTo: "to-pink-600",
   },
   {
-    id: 22,
-    title: "Customer Service Complaint",
-    description: `"I had a bad experience with your chat support"`,
-    skills: ["complaint"],
-    gradientFrom: "from-fuchsia-400",
-    gradientVia: "via-pink-500",
-    gradientTo: "to-rose-600",
-  },
-  {
-    id: 23,
-    title: "General Feedback",
-    description: `"Just wanted to say how much I love your brand"`,
-    skills: ["complaint"],
+    id: 14,
+    title: "Create Client Advocacy Program",
+    description: `"Identify happy clients for testimonials, case studies, or references"`,
+    skills: ["feedback"],
     gradientFrom: "from-green-400",
     gradientVia: "via-emerald-500",
     gradientTo: "to-teal-600",
   },
 
-  // --- PROMO ---
+  // --- PRODUCT FEEDBACK ---
   {
-    id: 24,
-    title: "Coupon Code Not Working",
-    description: `"Your discount code isn't applying at checkout"`,
-    skills: ["promo"],
-    gradientFrom: "from-purple-400",
-    gradientVia: "via-indigo-500",
-    gradientTo: "to-violet-600",
+    id: 15,
+    title: "Collect Feature Requests",
+    description: `"Gather client requests and ideas for new features"`,
+    skills: ["productFeedback"],
+    gradientFrom: "from-indigo-400",
+    gradientVia: "via-violet-500",
+    gradientTo: "to-purple-600",
   },
   {
-    id: 25,
-    title: "Price Adjustment Request",
-    description: `"I bought this yesterday, and now it's on sale"`,
-    skills: ["promo"],
-    gradientFrom: "from-sky-400",
-    gradientVia: "via-indigo-500",
-    gradientTo: "to-blue-600",
-  },
-
-  // --- SHIPPING ---
-  {
-    id: 26,
-    title: "Shipping Delay Concerns",
-    description: `"I haven't receive my order. Can you help?"`,
-    skills: ["shipping"],
-    gradientFrom: "from-orange-400",
-    gradientVia: "via-red-500",
-    gradientTo: "to-rose-600",
-  },
-  {
-    id: 27,
-    title: "Tracking Number Request",
-    description: `"Can you send me my tracking info? I can't find it"`,
-    skills: ["shipping"],
-    gradientFrom: "from-cyan-400",
-    gradientVia: "via-sky-500",
+    id: 16,
+    title: "Summarize Client Feedback",
+    description: `"Compile and organize customer feedback for the product team"`,
+    skills: ["productFeedback"],
+    gradientFrom: "from-teal-400",
+    gradientVia: "via-cyan-500",
     gradientTo: "to-blue-600",
   },
   {
-    id: 28,
-    title: "Damaged Item Received",
-    description: `"My item arrived broken and I can't use it at all"`,
-    skills: ["shipping"],
-    gradientFrom: "from-rose-400",
-    gradientVia: "via-red-500",
+    id: 17,
+    title: "Report Bugs to Engineering",
+    description: `"Document and submit client-reported bugs to engineering"`,
+    skills: ["productFeedback", "installed"],
+    gradientFrom: "from-red-400",
+    gradientVia: "via-rose-500",
     gradientTo: "to-pink-600",
   },
+  {
+    id: 18,
+    title: "Feature Prioritization Meeting",
+    description: `"Collaborate with product team to prioritize features based on customer feedback"`,
+    skills: ["productFeedback"],
+    gradientFrom: "from-orange-400",
+    gradientVia: "via-amber-500",
+    gradientTo: "to-red-600",
+  },
 ];
+
+// === Modal Data ===
+export interface ModalField {
+  type: "input" | "switch";
+  label: string;
+  placeholder?: string;
+}
+
+export interface ModalAction {
+  label: string;
+  type: "primary" | "secondary";
+  callback: string;
+}
+
+export interface ModalContent {
+  title: string;
+  fields: ModalField[];
+  description?: string;
+  actions: ModalAction[];
+}
+
+export const modalData: ModalContent = {
+  title: "Launch Agent",
+  fields: [
+    { type: "input", label: "Anthropic API Key", placeholder: "sk-abcdefg..." },
+    { type: "switch", label: "Enabled" },
+  ],
+  description:
+    "Your Anthropic key is securely encrypted. If enabled, your key will be used for all requests routed to Anthropic. If a rate limit or failure occurs, AI Gateway will work to increase your uptime with system credentials.",
+  actions: [
+    { label: "Cancel", type: "secondary", callback: "onClose" },
+    { label: "Add Key", type: "primary", callback: "onAddKey" },
+  ],
+};

@@ -10,12 +10,14 @@ interface TitleNodeProps {
   title: string;
   onTitleChange: (newTitle: string) => void;
   onBack?: () => void;
+  position?: { top?: number; left?: number };
 }
 
 export default function TitleNode({
   title,
   onTitleChange,
   onBack,
+  position = { top: 16, left: 16 },
 }: TitleNodeProps) {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -38,25 +40,23 @@ export default function TitleNode({
   }, [showSettingsMenu]);
 
   return (
-    <div className="absolute top-4 left-4 z-10">
-      <div className="flex items-center bg-white border border-gray-200/60 hover:border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 w-[320px]">
-        {/* Back Button */}
+    <div
+      className="absolute z-10"
+      style={{ top: position?.top ?? 16, left: position?.left ?? 16 }}
+    >
+      <div className="flex items-center bg-white border border-gray-200/60 hover:border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 w-[320px]">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => {
-            if (onBack) {
-              onBack();
-            } else {
-              router.push("/dashboard/agents");
-            }
+            if (onBack) onBack();
+            else router.push("/dashboard/agents");
           }}
           className="h-13 w-12 p-0 border-0 shadow-none rounded-l-md rounded-r-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
         >
           <ArrowLeft className="h-6 w-6 text-gray-600" />
         </Button>
 
-        {/* Editable Title */}
         <div className="flex-1 px-2 py-2">
           <Input
             value={title}
@@ -68,7 +68,6 @@ export default function TitleNode({
           />
         </div>
 
-        {/* Divider & Settings */}
         {!isEditing && (
           <>
             <div className="w-px h-13 bg-gray-100" />
@@ -76,7 +75,7 @@ export default function TitleNode({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowSettingsMenu((prev) => !prev)} // moved inline
+                onClick={() => setShowSettingsMenu((prev) => !prev)}
                 className="h-13 w-12 p-0 border-0 shadow-none rounded-r-md rounded-l-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
               >
                 <Settings className="h-5 w-5 text-gray-600" />

@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import { AgentCard } from "./AgentCard";
-import { LaunchModal } from "./LaunchModal";
+import { Modal } from "../../../components/Modal";
 import { Header } from "../../../components/Header";
 
 // Import data from DummyData.ts
-import { skillsConfig, initialAgents, Agent } from "./DummyData";
+import { skillsConfig, initialAgents, Agent, modalData } from "./DummyData";
 
 export function Agents() {
   const [selectedSkill, setSelectedSkill] = useState("installed");
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [launchingAgent, setLaunchingAgent] = useState<Agent | null>(null);
+
+  // Modal state
+  const [apiKey, setApiKey] = useState("");
+  const [isEnabled, setIsEnabled] = useState(true);
 
   const handleInstall = (agentId: number) => {
     setAgents((previousAgents) =>
@@ -25,6 +29,13 @@ export function Agents() {
       )
     );
     setSelectedSkill("installed");
+  };
+
+  const handleModalAction = (callback: string) => {
+    if (callback === "onAddKey") {
+      console.log("Adding API key:", apiKey);
+      setLaunchingAgent(null);
+    }
   };
 
   const filteredAgents = agents
@@ -48,7 +59,7 @@ export function Agents() {
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
       <Header
-        title="Email agents"
+        title="Agents"
         subtitle="Easily install agents then assign a handler and customize the instructions."
       />
 
@@ -59,7 +70,7 @@ export function Agents() {
               <button
                 key={skill.key}
                 onClick={() => setSelectedSkill(skill.key)}
-                className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between ${
+                className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between ${
                   selectedSkill === skill.key
                     ? "bg-white border border-gray-200/60 font-medium text-gray-800"
                     : "text-gray-700 hover:text-gray-900 hover:bg-white border border-transparent"
@@ -78,7 +89,7 @@ export function Agents() {
           </div>
 
           <div
-            className={`rounded-md ${
+            className={`rounded-xl ${
               selectedSkill === "installed" ? "p-6 bg-white" : ""
             }`}
           >
@@ -103,9 +114,16 @@ export function Agents() {
       </div>
 
       {launchingAgent && (
-        <LaunchModal
+        <Modal
           isOpen={!!launchingAgent}
           onClose={() => setLaunchingAgent(null)}
+          content={modalData}
+          size="md"
+          apiKey={apiKey}
+          onApiKeyChange={setApiKey}
+          isEnabled={isEnabled}
+          onEnabledChange={setIsEnabled}
+          onAction={handleModalAction}
         />
       )}
     </div>
