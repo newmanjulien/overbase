@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { X } from "lucide-react";
 import { ModalContent } from "../app/dashboard/agents/DummyData";
 
-interface LaunchModalProps {
+interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   size?: "sm" | "md" | "lg";
@@ -30,7 +30,7 @@ const sizeMap = {
   lg: "max-w-2xl",
 };
 
-export function LaunchModal({
+export function Modal({
   isOpen,
   onClose,
   size = "md",
@@ -41,7 +41,7 @@ export function LaunchModal({
   onEnabledChange,
   onAction,
   classNameOverrides = {},
-}: LaunchModalProps) {
+}: ModalProps) {
   if (!isOpen) return null;
 
   return (

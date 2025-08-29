@@ -2,16 +2,11 @@
 
 import { useState } from "react";
 import { AgentCard } from "./AgentCard";
-import { LaunchModal } from "../../../components/LaunchModal";
+import { Modal } from "../../../components/Modal";
 import { Header } from "../../../components/Header";
 
 // Import data from DummyData.ts
-import {
-  skillsConfig,
-  initialAgents,
-  Agent,
-  launchModalData,
-} from "./DummyData";
+import { skillsConfig, initialAgents, Agent, modalData } from "./DummyData";
 
 export function Agents() {
   const [selectedSkill, setSelectedSkill] = useState("installed");
@@ -119,10 +114,10 @@ export function Agents() {
       </div>
 
       {launchingAgent && (
-        <LaunchModal
+        <Modal
           isOpen={!!launchingAgent}
           onClose={() => setLaunchingAgent(null)}
-          content={launchModalData}
+          content={modalData}
           size="md"
           apiKey={apiKey}
           onApiKeyChange={setApiKey}

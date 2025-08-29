@@ -245,7 +245,7 @@ export const initialAgents: Agent[] = [
   },
 ];
 
-// === LaunchModal Data ===
+// === Modal Data ===
 export interface ModalField {
   type: "input" | "switch";
   label: string;
@@ -265,7 +265,7 @@ export interface ModalContent {
   actions: ModalAction[];
 }
 
-export const launchModalData: ModalContent = {
+export const modalData: ModalContent = {
   title: "Launch Agent",
   fields: [
     { type: "input", label: "Anthropic API Key", placeholder: "sk-abcdefg..." },
