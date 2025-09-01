@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Logo from "../../components/Logo";
-import LogoSmall from "../../components/LogoSmall";
+import Logo from "../../components/ui/Logo";
+import LogoSmall from "../../components/ui/LogoSmall";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IntegrationProvider } from "../../lib/integrationContext";

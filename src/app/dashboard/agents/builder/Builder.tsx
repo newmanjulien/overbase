@@ -25,7 +25,7 @@ import dynamic from "next/dynamic";
 import AgentNode from "./AgentNode";
 import TitleNode from "./TitleNode";
 import { dummyData } from "./DummyData";
-import { useAgentNodeActions } from "./useAgentNodeActions";
+import { useAgentNodeActions } from "../../../../components/useAgentNodeActions";
 import HelperNode from "./HelperNode";
 
 const EditNode = dynamic(() => import("./EditNode"), { ssr: false });

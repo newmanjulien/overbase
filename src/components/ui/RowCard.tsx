@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ReactNode } from "react";
-import { Button } from "./ui/button";
+import { Button } from "./button";
 
 interface RowCardProps {
   id?: number;

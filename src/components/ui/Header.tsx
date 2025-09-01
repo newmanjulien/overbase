@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "./button";
 
 interface HeaderProps {
   title: string;

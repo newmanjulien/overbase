@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { RowCard } from "../../../components/RowCard";
+import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "./EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
 import type { Integration } from "./DummyData";
 import { integrations } from "./DummyData";
 import { useIntegrationContext } from "../../../lib/integrationContext";
-import { Header } from "../../../components/Header";
+import { Header } from "../../../components/ui/Header";
 
 export function Integrations() {
   const router = useRouter();

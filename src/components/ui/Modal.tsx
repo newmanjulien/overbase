@@ -1,11 +1,11 @@
 "use client";
 
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Switch } from "./ui/switch";
-import { Button } from "./ui/button";
+import { Input } from "./input";
+import { Label } from "./label";
+import { Switch } from "./switch";
+import { Button } from "./button";
 import { X } from "lucide-react";
-import { ModalContent } from "../app/dashboard/agents/DummyData";
+import { ModalContent } from "../../app/dashboard/agents/DummyData";
 
 interface ModalProps {
   isOpen: boolean;

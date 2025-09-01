@@ -1,5 +1,8 @@
 import { useCallback } from "react";
-import type { AgentNodeType, NodeData } from "./Builder";
+import type {
+  AgentNodeType,
+  NodeData,
+} from "../app/dashboard/agents/builder/Builder";
 
 export const useAgentNodeActions = (
   nodes: AgentNodeType[],

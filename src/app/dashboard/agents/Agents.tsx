@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { AgentCard } from "./AgentCard";
-import { Modal } from "../../../components/Modal";
-import { Header } from "../../../components/Header";
+import { Modal } from "../../../components/ui/Modal";
+import { Header } from "../../../components/ui/Header";
 
 // Import data from DummyData.ts
 import { skillsConfig, initialAgents, Agent, modalData } from "./DummyData";
