@@ -88,7 +88,7 @@ export const initialAgents: Agent[] = [
   },
   {
     id: 3,
-    title: "Data Import & Migration",
+    title: "Data Import & Dick",
     description: `"Assist client with importing their data into the platform"`,
     skills: ["onboarding", "installed"],
     gradientFrom: "from-blue-400",
