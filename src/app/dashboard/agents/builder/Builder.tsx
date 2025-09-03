@@ -38,6 +38,9 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../../lib/firebase";
 
+// NEW: hook that talks to Firestore
+import { useNodeActions } from "../../../../hooks/useNodeActions"; // adjust path if needed
+
 const EditNode = dynamic(() => import("./EditNode"), { ssr: false });
 interface EditNodeWithPreload {
   preload?: () => void;
@@ -108,6 +111,18 @@ export default function Builder() {
   const titleNodePosition = { top: 24, left: 24 };
   const helperNodePosition = { bottom: 24, left: 24 };
 
+  // ---------------- Firestore write hook ----------------
+  const workflowId = "B1BG67XmaLgEaIvwKiM7"; // TODO: pass as prop or route param
+  const {
+    addStep,
+    deleteStep,
+    updateStep,
+    moveStep,
+    updateTitle,
+    loading: apiLoading,
+    error: apiError,
+  } = useNodeActions({ workflowId });
+
   // ---------------- Hybrid layout pattern ----------------
   const {
     handleEditNode,
@@ -145,15 +160,13 @@ export default function Builder() {
 
   // ---------------- Firestore listeners ----------------
   useEffect(() => {
-    const workflowId = "B1BG67XmaLgEaIvwKiM7"; // TODO: pass as prop or route param
-
     // Title listener
     const unsubWorkflow = onSnapshot(
       doc(db, "playbooks", workflowId),
       (snap) => {
         if (snap.exists()) {
-          const data = snap.data() as DocumentData;
-          if (data.title) setAgentTitle(data.title);
+          const raw = snap.data();
+          if (raw.title) setAgentTitle(raw.title as string);
         }
       }
     );
@@ -162,16 +175,16 @@ export default function Builder() {
     const stepsRef = collection(db, "playbooks", workflowId, "steps");
     const q = query(stepsRef, orderBy("order", "asc"));
     const unsubSteps = onSnapshot(q, (snapshot) => {
-      const fetched: FirestoreStep[] = snapshot.docs.map((doc) => {
-        const data = doc.data() as DocumentData;
+      const fetched: FirestoreStep[] = snapshot.docs.map((d) => {
+        const raw = d.data();
         return {
-          id: doc.id,
-          title: data.title ?? "",
-          prompt: data.prompt ?? "",
-          conditions: data.conditions ?? "",
-          context: data.context ?? "",
-          integration: data.integration ?? "",
-          order: data.order ?? 0,
+          id: d.id,
+          title: (raw.title as string) ?? "",
+          prompt: (raw.prompt as string) ?? "",
+          conditions: (raw.conditions as string) ?? "",
+          context: (raw.context as string) ?? "",
+          integration: (raw.integration as string) ?? "",
+          order: (raw.order as number) ?? 0,
         };
       });
 
@@ -187,10 +200,13 @@ export default function Builder() {
           conditions: step.conditions,
           context: step.context,
           integration: step.integration,
-          onEdit: () => {},
-          onDelete: () => {},
-          onAddBelow: () => {},
-          onSave: () => {},
+          onEdit: () => handleEditNode(step.id),
+          onDelete: () => deleteStep(step.id),
+          onAddBelow: () => addStep(step.id),
+          onMoveUp: () => moveStep(step.id, "up"),
+          onMoveDown: () => moveStep(step.id, "down"),
+          onSave: (_: string, data: Partial<NodeData>) =>
+            updateStep(step.id, data),
         },
         draggable: false,
       }));
@@ -206,7 +222,7 @@ export default function Builder() {
       unsubWorkflow();
       unsubSteps();
     };
-  }, [setNodes, layoutNodes]);
+  }, [workflowId, setNodes, layoutNodes]);
 
   // ---------------- Edges ----------------
   const buildSequentialEdges = useCallback(
@@ -280,12 +296,11 @@ export default function Builder() {
                 nodeIndex: index,
                 totalNodes: nodes.length,
                 onEdit: () => handleEditNode(node.id),
-                onDelete: () => handleDeleteNode(node.id),
-                onAddBelow: () => handleAddNodeBelow(node.id),
-                onMoveUp: () => handleMoveNodeUp(node.id),
-                onMoveDown: () => handleMoveNodeDown(node.id),
-                onSave: (data: Partial<NodeData>) =>
-                  handleSaveNode(node.id, data),
+                onDelete: () => deleteStep(node.id),
+                onAddBelow: () => addStep(node.id),
+                onMoveUp: () => moveStep(node.id, "up"),
+                onMoveDown: () => moveStep(node.id, "down"),
+                onSave: (data: Partial<NodeData>) => updateStep(node.id, data),
               },
             }))}
             edges={edges}
@@ -315,7 +330,7 @@ export default function Builder() {
 
           <TitleNode
             title={agentTitle}
-            onTitleChange={setAgentTitle}
+            onTitleChange={updateTitle} // <-- Firestore write
             position={titleNodePosition}
           />
           <HelperNode
@@ -327,7 +342,7 @@ export default function Builder() {
             <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)]">
               <EditNode
                 node={nodes.find((n) => n.id === editingNodeId)!}
-                onSave={(data) => handleSaveNode(editingNodeId, data)}
+                onSave={(data) => updateStep(editingNodeId, data)}
                 onClose={() => setEditingNodeId(null)}
               />
             </div>
