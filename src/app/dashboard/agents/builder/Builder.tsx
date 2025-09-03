@@ -24,9 +24,19 @@ import dynamic from "next/dynamic";
 
 import AgentNode from "./AgentNode";
 import TitleNode from "./TitleNode";
-import { dummyData } from "./DummyData";
 import { useAgentNodeActions } from "../../../../components/useAgentNodeActions";
 import HelperNode from "./HelperNode";
+
+// Firestore imports
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  DocumentData,
+} from "firebase/firestore";
+import { db } from "../../../../lib/firebase";
 
 const EditNode = dynamic(() => import("./EditNode"), { ssr: false });
 interface EditNodeWithPreload {
@@ -74,24 +84,99 @@ export const useEditingNodeContext = () => {
   return ctx;
 };
 
+// Firestore step shape
+interface FirestoreStep {
+  id: string;
+  title: string;
+  prompt: string;
+  conditions?: string;
+  context?: string;
+  integration?: string;
+  order: number;
+}
+
 export default function Builder() {
   const flowWrapperRef = useRef<HTMLDivElement | null>(null);
   const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
 
-  const [agentTitle, setAgentTitle] = useState(
-    dummyData?.defaultTitle || "AI Agents"
-  );
+  const [agentTitle, setAgentTitle] = useState("AI Agents");
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [nodes, setNodes] = useNodesState<AgentNodeType>([]);
 
   // ---- Controlled positions for the floating nodes ----
   const titleNodePosition = { top: 24, left: 24 };
   const helperNodePosition = { bottom: 24, left: 24 };
 
-  const createInitialNodes = useCallback((): AgentNodeType[] => {
-    return (
-      dummyData?.steps.map((step, index) => ({
-        id: `${Date.now()}-${index}`,
+  // ---------------- Hybrid layout pattern ----------------
+  const {
+    handleEditNode,
+    handleDeleteNode,
+    handleAddNodeBelow,
+    handleSaveNode,
+    handleMoveNodeUp,
+    handleMoveNodeDown,
+    updateNodesPositions,
+  } = useAgentNodeActions(
+    nodes,
+    setNodes,
+    useCallback(() => {
+      const rf = rfInstanceRef.current;
+      const wrapper = flowWrapperRef.current;
+      if (!rf || !wrapper) return 0;
+      const { x: tx, zoom } = rf.getViewport();
+      const containerWidth = wrapper.clientWidth || 1200;
+      return (containerWidth / 2 - tx) / zoom;
+    }, []),
+    setEditingNodeId
+  );
+
+  const layoutNodes = useCallback(
+    (nodesToLayout: AgentNodeType[]) => updateNodesPositions(nodesToLayout),
+    [updateNodesPositions]
+  );
+
+  // Safety effect: position nodes once RF is ready
+  useEffect(() => {
+    if (!rfInstanceRef.current || nodes.length === 0) return;
+    const needsLayout = nodes.some((n) => (n.position?.y ?? 0) === 0);
+    if (needsLayout) setNodes((prev) => layoutNodes(prev));
+  }, [nodes, layoutNodes, setNodes]);
+
+  // ---------------- Firestore listeners ----------------
+  useEffect(() => {
+    const workflowId = "B1BG67XmaLgEaIvwKiM7"; // TODO: pass as prop or route param
+
+    // Title listener
+    const unsubWorkflow = onSnapshot(
+      doc(db, "playbooks", workflowId),
+      (snap) => {
+        if (snap.exists()) {
+          const data = snap.data() as DocumentData;
+          if (data.title) setAgentTitle(data.title);
+        }
+      }
+    );
+
+    // Steps listener
+    const stepsRef = collection(db, "playbooks", workflowId, "steps");
+    const q = query(stepsRef, orderBy("order", "asc"));
+    const unsubSteps = onSnapshot(q, (snapshot) => {
+      const fetched: FirestoreStep[] = snapshot.docs.map((doc) => {
+        const data = doc.data() as DocumentData;
+        return {
+          id: doc.id,
+          title: data.title ?? "",
+          prompt: data.prompt ?? "",
+          conditions: data.conditions ?? "",
+          context: data.context ?? "",
+          integration: data.integration ?? "",
+          order: data.order ?? 0,
+        };
+      });
+
+      const builtNodes: AgentNodeType[] = fetched.map((step, index) => ({
+        id: step.id,
         type: "agentNode",
         position: { x: 0, y: 0 },
         style: { opacity: 0 },
@@ -108,16 +193,22 @@ export default function Builder() {
           onSave: () => {},
         },
         draggable: false,
-      })) || []
-    );
-  }, []);
+      }));
 
-  const initialNodes = useMemo(
-    () => createInitialNodes(),
-    [createInitialNodes]
-  );
-  const [nodes, setNodes] = useNodesState<AgentNodeType>(initialNodes);
+      if (rfInstanceRef.current) {
+        setNodes(layoutNodes(builtNodes)); // position immediately
+      } else {
+        setNodes(builtNodes); // effect will catch it
+      }
+    });
 
+    return () => {
+      unsubWorkflow();
+      unsubSteps();
+    };
+  }, [setNodes, layoutNodes]);
+
+  // ---------------- Edges ----------------
   const buildSequentialEdges = useCallback(
     (nodeList: AgentNodeType[]): Edge[] => {
       if (nodeList.length < 2) return [];
@@ -146,25 +237,6 @@ export default function Builder() {
     [nodes, buildSequentialEdges, isInitialized]
   );
 
-  const getFlowCenterX = useCallback(() => {
-    const rf = rfInstanceRef.current;
-    const wrapper = flowWrapperRef.current;
-    if (!rf || !wrapper) return 0;
-    const { x: tx, zoom } = rf.getViewport();
-    const containerWidth = wrapper.clientWidth || 1200;
-    return (containerWidth / 2 - tx) / zoom;
-  }, []);
-
-  const {
-    handleEditNode,
-    handleDeleteNode,
-    handleAddNodeBelow,
-    handleSaveNode,
-    handleMoveNodeUp,
-    handleMoveNodeDown,
-    updateNodesPositions,
-  } = useAgentNodeActions(nodes, setNodes, getFlowCenterX, setEditingNodeId);
-
   const translateExtent: [[number, number], [number, number]] = [
     [-200, -100],
     [
@@ -182,11 +254,12 @@ export default function Builder() {
     ],
   ];
 
+  // Handle window resize
   useEffect(() => {
-    const handleResize = () => setNodes(updateNodesPositions(nodes));
+    const handleResize = () => setNodes((prev) => layoutNodes(prev));
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [nodes, setNodes, updateNodesPositions]);
+  }, [setNodes, layoutNodes]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -234,14 +307,12 @@ export default function Builder() {
             }}
             onInit={(instance) => {
               rfInstanceRef.current = instance as unknown as ReactFlowInstance;
-              setNodes(updateNodesPositions(nodes));
               setIsInitialized(true);
             }}
           >
             <Background color="#DDDDDD" gap={30} size={2} />
           </ReactFlow>
 
-          {/* Controlled floating nodes */}
           <TitleNode
             title={agentTitle}
             onTitleChange={setAgentTitle}
