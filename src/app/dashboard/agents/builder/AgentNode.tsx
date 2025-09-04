@@ -91,7 +91,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
         onClick={handleCardClick}
       >
         <div className="p-3 pb-0 flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 flex-1 min-w-0 truncate">
+          <h3 className="text-sm font-semibold text-gray-900 flex-1 min-w-0 truncate">
             {stepNumber}.{" "}
             <span className="font-normal truncate">{title || "New step"}</span>
           </h3>
@@ -171,7 +171,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
             }`}
           >
             <p
-              className={`text-sm font-regular leading-relaxed ${
+              className={`text-xs font-regular leading-relaxed ${
                 prompt ? "text-gray-900" : "text-gray-400"
               } truncate overflow-hidden whitespace-nowrap`}
             >
