@@ -75,11 +75,11 @@ interface FirestoreStep {
 }
 
 const VERTICAL_SPACING = 185;
-const PADDING_BELOW = 350;
 const MIN_CANVAS_HEIGHT = 800;
 
-// ------------------- NEW TOP OFFSET -------------------
+// ------------------- TOP & BOTTOM OFFSETS -------------------
 const TOP_OFFSET = 100;
+const BOTTOM_OFFSET = 60;
 
 export default function Builder() {
   const [agentTitle, setAgentTitle] = useState("AI Agents");
@@ -205,19 +205,21 @@ export default function Builder() {
           <div
             className="relative mx-auto"
             style={{
-              minHeight: MIN_CANVAS_HEIGHT,
+              minHeight: Math.max(
+                MIN_CANVAS_HEIGHT,
+                nodes.length * VERTICAL_SPACING + TOP_OFFSET + BOTTOM_OFFSET
+              ),
               width: "320px", // wrapper width
-              paddingBottom: PADDING_BELOW,
             }}
           >
             {nodes.map((node, index) => (
               <div key={node.id} className="relative">
-                {/* SVG Edge (render first → behind the node) */}
+                {/* SVG Edge */}
                 {index < nodes.length - 1 && (
                   <svg
                     style={{
                       position: "absolute",
-                      top: TOP_OFFSET + index * VERTICAL_SPACING + 60, // shifted down
+                      top: TOP_OFFSET + index * VERTICAL_SPACING + 60,
                       left: 0,
                       width: "100%",
                       height: VERTICAL_SPACING - 60,
@@ -240,7 +242,7 @@ export default function Builder() {
                 <div
                   style={{
                     position: "absolute",
-                    top: TOP_OFFSET + index * VERTICAL_SPACING, // shifted down
+                    top: TOP_OFFSET + index * VERTICAL_SPACING,
                     left: 0,
                     right: 0,
                   }}
