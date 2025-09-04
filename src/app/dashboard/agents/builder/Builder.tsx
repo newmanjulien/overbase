@@ -12,7 +12,6 @@ import dynamic from "next/dynamic";
 
 import AgentNode from "./AgentNode";
 import TitleNode from "./TitleNode";
-import HelperNode from "./HelperNode";
 
 import {
   collection,
@@ -253,16 +252,6 @@ export default function Builder() {
           {/* TitleNode (fixed to viewport) */}
           <div style={{ position: "fixed", top: 24, left: 24, zIndex: 50 }}>
             <TitleNode title={agentTitle} onTitleChange={updateTitle} />
-          </div>
-
-          {/* HelperNode (scrolls with canvas) */}
-          <div
-            style={{ position: "absolute", bottom: 24, left: 24, zIndex: 40 }}
-          >
-            <HelperNode
-              position={{ bottom: 24, left: 24 }}
-              onClick={() => {}}
-            />
           </div>
 
           {/* EditNode (fixed to viewport) */}
