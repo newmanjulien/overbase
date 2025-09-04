@@ -1,10 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef, createContext, useContext } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  createContext,
+  useContext,
+  useCallback,
+} from "react";
+import dynamic from "next/dynamic";
+
 import AgentNode from "./AgentNode";
 import TitleNode from "./TitleNode";
 import HelperNode from "./HelperNode";
-import dynamic from "next/dynamic";
 
 import {
   collection,
@@ -29,11 +37,11 @@ export interface NodeData {
   nodeIndex?: number;
   totalNodes?: number;
   onEdit: () => void;
-  onDelete: (id: string) => void;
-  onAddBelow: (id: string) => void;
-  onMoveUp?: (id: string) => void;
-  onMoveDown?: (id: string) => void;
-  onSave: (id: string, data: Partial<NodeData>) => void;
+  onDelete: () => void;
+  onAddBelow: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onSave: (data: Partial<NodeData>) => void; // single-parameter signature
 }
 
 export type AgentNodeType = {
@@ -45,6 +53,7 @@ interface EditingNodeContextValue {
   editingNodeId: string | null;
   setEditingNodeId: (id: string | null) => void;
 }
+
 const EditingNodeContext = createContext<EditingNodeContextValue | undefined>(
   undefined
 );
@@ -73,27 +82,45 @@ export default function Builder() {
   const [agentTitle, setAgentTitle] = useState("AI Agents");
   const [nodes, setNodes] = useState<AgentNodeType[]>([]);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
-
   const flowWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const workflowId = "B1BG67XmaLgEaIvwKiM7";
   const { addStep, deleteStep, updateStep, moveStep, updateTitle } =
     useNodeActions({ workflowId });
 
+  // ---------------- Stable callbacks ----------------
+  const handleEdit = useCallback((id: string) => setEditingNodeId(id), []);
+  const handleDelete = useCallback(
+    (id: string) => deleteStep(id),
+    [deleteStep]
+  );
+  const handleAddBelow = useCallback((id: string) => addStep(id), [addStep]);
+  const handleMove = useCallback(
+    (id: string, direction: "up" | "down") => moveStep(id, direction),
+    [moveStep]
+  );
+  const handleSave = useCallback(
+    (id: string, data: Partial<NodeData>) => updateStep(id, data),
+    [updateStep]
+  );
+
   // ---------------- Firestore listeners ----------------
   useEffect(() => {
-    const unsubWorkflow = onSnapshot(
-      doc(db, "playbooks", workflowId),
-      (snap) => {
-        if (snap.exists()) {
-          const raw = snap.data();
-          if (raw.title) setAgentTitle(raw.title as string);
-        }
-      }
-    );
+    const workflowRef = doc(db, "playbooks", workflowId);
 
+    // Listen for title updates
+    const unsubWorkflow = onSnapshot(workflowRef, (snap) => {
+      if (snap.exists()) {
+        const raw = snap.data();
+        if (raw.title && raw.title !== agentTitle)
+          setAgentTitle(raw.title as string);
+      }
+    });
+
+    // Listen for steps
     const stepsRef = collection(db, "playbooks", workflowId, "steps");
     const q = query(stepsRef, orderBy("order", "asc"));
+
     const unsubSteps = onSnapshot(q, (snapshot) => {
       const fetched: FirestoreStep[] = snapshot.docs.map((d) => {
         const raw = d.data();
@@ -108,37 +135,52 @@ export default function Builder() {
         };
       });
 
-      const builtNodes: AgentNodeType[] = fetched.map((step, index) => ({
-        id: step.id,
-        data: {
-          stepNumber: index + 1,
-          title: step.title,
-          prompt: step.prompt,
-          conditions: step.conditions,
-          context: step.context,
-          integration: step.integration,
-          nodeIndex: index,
-          totalNodes: fetched.length,
-          onEdit: () => setEditingNodeId(step.id),
-          onDelete: (id: string) => deleteStep(id),
-          onAddBelow: (id: string) => addStep(id),
-          onMoveUp: (id: string) => moveStep(id, "up"),
-          onMoveDown: (id: string) => moveStep(id, "down"),
-          onSave: (_id: string, data: Partial<NodeData>) =>
-            updateStep(step.id, data),
-        },
-      }));
+      setNodes((prevNodes) => {
+        const same =
+          prevNodes.length === fetched.length &&
+          prevNodes.every(
+            (n, i) =>
+              n.id === fetched[i].id && n.data.title === fetched[i].title
+          );
+        if (same) return prevNodes;
 
-      setNodes(builtNodes);
+        return fetched.map((step, index) => ({
+          id: step.id,
+          data: {
+            stepNumber: index + 1,
+            title: step.title,
+            prompt: step.prompt,
+            conditions: step.conditions,
+            context: step.context,
+            integration: step.integration,
+            nodeIndex: index,
+            totalNodes: fetched.length,
+            onEdit: () => handleEdit(step.id),
+            onDelete: () => handleDelete(step.id),
+            onAddBelow: () => handleAddBelow(step.id),
+            onMoveUp: () => handleMove(step.id, "up"),
+            onMoveDown: () => handleMove(step.id, "down"),
+            onSave: (data) => handleSave(step.id, data),
+          },
+        }));
+      });
     });
 
     return () => {
       unsubWorkflow();
       unsubSteps();
     };
-  }, [workflowId, addStep, deleteStep, updateStep, moveStep]);
+  }, [
+    workflowId,
+    agentTitle,
+    handleEdit,
+    handleDelete,
+    handleAddBelow,
+    handleMove,
+    handleSave,
+  ]);
 
-  // Handle window resize: keep nodes centered
+  // ---------------- Handle window resize ----------------
   const [containerWidth, setContainerWidth] = useState(0);
   useEffect(() => {
     const handleResize = () => {
@@ -150,6 +192,7 @@ export default function Builder() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // ---------------- Render ----------------
   return (
     <EditingNodeContext.Provider value={{ editingNodeId, setEditingNodeId }}>
       <div className="h-screen flex flex-col">
@@ -162,7 +205,7 @@ export default function Builder() {
             className="relative mx-auto"
             style={{
               minHeight: MIN_CANVAS_HEIGHT,
-              width: "320px", // match node width
+              width: "320px",
               paddingBottom: PADDING_BELOW,
             }}
           >
@@ -179,12 +222,11 @@ export default function Builder() {
                   <AgentNode {...node} />
                 </div>
 
-                {/* Edge to next node */}
                 {index < nodes.length - 1 && (
                   <div
                     style={{
                       position: "absolute",
-                      top: (index + 1) * VERTICAL_SPACING - 60, // leave gap for AddStepButton
+                      top: (index + 1) * VERTICAL_SPACING - 60,
                       left: "50%",
                       transform: "translateX(-50%)",
                       width: 2,
@@ -211,7 +253,7 @@ export default function Builder() {
             <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)]">
               <EditNode
                 node={nodes.find((n) => n.id === editingNodeId)!}
-                onSave={(data) => updateStep(editingNodeId, data)}
+                onSave={(data) => handleSave(editingNodeId, data)}
                 onClose={() => setEditingNodeId(null)}
               />
             </div>
