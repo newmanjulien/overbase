@@ -52,7 +52,7 @@ export default function TitleNode({
             if (onBack) onBack();
             else router.push("/dashboard/agents");
           }}
-          className="h-13 w-12 p-0 border-0 shadow-none rounded-l-md rounded-r-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
+          className="h-13 w-12 p-0 border-0 shadow-none rounded-l-xl rounded-r-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
         >
           <ArrowLeft className="h-6 w-6 text-gray-600" />
         </Button>
@@ -76,20 +76,20 @@ export default function TitleNode({
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowSettingsMenu((prev) => !prev)}
-                className="h-13 w-12 p-0 border-0 shadow-none rounded-r-md rounded-l-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
+                className="h-13 w-12 p-0 border-0 shadow-none rounded-r-xl rounded-l-none hover:bg-gray-50 flex-shrink-0 flex items-center justify-center"
               >
                 <Settings className="h-5 w-5 text-gray-600" />
               </Button>
 
               {showSettingsMenu && (
-                <div className="absolute top-14 left-0 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                <div className="absolute top-14 left-0 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                   <div className="py-1">
                     <button
                       onClick={() => {
                         router.push("/dashboard/agents/builder/success");
                         setShowSettingsMenu(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="w-[calc(100%-0.5rem)] text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors mx-1"
                     >
                       Define Success
                     </button>
@@ -98,7 +98,7 @@ export default function TitleNode({
                         router.push("/dashboard/agents/builder/context");
                         setShowSettingsMenu(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="w-[calc(100%-0.5rem)] text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors mx-1"
                     >
                       Context
                     </button>

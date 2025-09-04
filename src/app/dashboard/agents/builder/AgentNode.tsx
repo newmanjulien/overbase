@@ -113,7 +113,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                   variant="ghost"
                   size="sm"
                   className={`h-8 w-8 p-0 ${
-                    isEditing ? "hover:bg-white" : "hover:bg-gray-100"
+                    isEditing ? "hover:bg-white" : "hover:bg-gray-50"
                   }`}
                   aria-label="Actions"
                   onClick={(e) => e.stopPropagation()}
@@ -133,7 +133,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                     totalNodes <= 1 || nodeIndex === 0
                   )}
                   disabled={totalNodes <= 1 || nodeIndex === 0}
-                  className="hover:bg-gray-100 disabled:text-gray-400"
+                  className="hover:bg-gray-50 disabled:text-gray-400"
                 >
                   Move Up
                 </DropdownMenuItem>
@@ -144,7 +144,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                     totalNodes <= 1 || nodeIndex === totalNodes - 1
                   )}
                   disabled={totalNodes <= 1 || nodeIndex === totalNodes - 1}
-                  className="hover:bg-gray-100 disabled:text-gray-400"
+                  className="hover:bg-gray-50 disabled:text-gray-400"
                 >
                   Move Down
                 </DropdownMenuItem>
