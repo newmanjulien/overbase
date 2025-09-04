@@ -41,7 +41,7 @@ export interface NodeData {
   onAddBelow: () => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
-  onSave: (data: Partial<NodeData>) => void; // single-parameter signature
+  onSave: (data: Partial<NodeData>) => void;
 }
 
 export type AgentNodeType = {
@@ -108,7 +108,6 @@ export default function Builder() {
   useEffect(() => {
     const workflowRef = doc(db, "playbooks", workflowId);
 
-    // Listen for title updates
     const unsubWorkflow = onSnapshot(workflowRef, (snap) => {
       if (snap.exists()) {
         const raw = snap.data();
@@ -117,7 +116,6 @@ export default function Builder() {
       }
     });
 
-    // Listen for steps
     const stepsRef = collection(db, "playbooks", workflowId, "steps");
     const q = query(stepsRef, orderBy("order", "asc"));
 
@@ -205,12 +203,37 @@ export default function Builder() {
             className="relative mx-auto"
             style={{
               minHeight: MIN_CANVAS_HEIGHT,
-              width: "320px",
+              width: "320px", // wrapper width
               paddingBottom: PADDING_BELOW,
             }}
           >
             {nodes.map((node, index) => (
               <div key={node.id} className="relative">
+                {/* SVG Edge (render first → behind the node) */}
+                {index < nodes.length - 1 && (
+                  <svg
+                    style={{
+                      position: "absolute",
+                      top: index * VERTICAL_SPACING + 60, // below the card
+                      left: 0,
+                      width: "100%",
+                      height: VERTICAL_SPACING - 60,
+                      pointerEvents: "none",
+                      overflow: "visible",
+                    }}
+                  >
+                    <line
+                      x1={176} // card width / 2
+                      y1={0}
+                      x2={176}
+                      y2={VERTICAL_SPACING - 60}
+                      stroke="#E5E7EB"
+                      strokeWidth={1}
+                    />
+                  </svg>
+                )}
+
+                {/* Agent Node */}
                 <div
                   style={{
                     position: "absolute",
@@ -221,20 +244,6 @@ export default function Builder() {
                 >
                   <AgentNode {...node} />
                 </div>
-
-                {index < nodes.length - 1 && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: (index + 1) * VERTICAL_SPACING - 60,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: 2,
-                      height: VERTICAL_SPACING - 20,
-                      backgroundColor: "#E5E7EB",
-                    }}
-                  />
-                )}
               </div>
             ))}
           </div>
@@ -244,10 +253,7 @@ export default function Builder() {
             onTitleChange={updateTitle}
             position={{ top: 24, left: 24 }}
           />
-          <HelperNode
-            position={{ bottom: 24, left: 24 }}
-            onClick={() => console.log("star clicked")}
-          />
+          <HelperNode position={{ bottom: 24, left: 24 }} onClick={() => {}} />
 
           {editingNodeId && (
             <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)]">

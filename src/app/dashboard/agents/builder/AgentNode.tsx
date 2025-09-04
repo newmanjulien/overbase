@@ -42,14 +42,15 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest("button") || target.closest('[role="menuitem"]')) return;
-    onEdit?.(); // ✅ TS-safe, no arguments
+    onEdit?.();
   };
 
   // ---------------- Dropdown Menu Handler ----------------
   const handleItemClick =
-    (callback?: () => void, disabled?: boolean) => (e: React.MouseEvent) => {
+    (callback?: (id: string) => void, disabled?: boolean) =>
+    (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (!disabled && callback) callback();
+      if (!disabled && callback) callback(id);
     };
 
   // ---------------- Prompt Rendering ----------------
@@ -128,7 +129,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
               >
                 <DropdownMenuItem
                   onClick={handleItemClick(
-                    () => onMoveUp?.(id),
+                    onMoveUp,
                     totalNodes <= 1 || nodeIndex === 0
                   )}
                   disabled={totalNodes <= 1 || nodeIndex === 0}
@@ -139,7 +140,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
 
                 <DropdownMenuItem
                   onClick={handleItemClick(
-                    () => onMoveDown?.(id),
+                    onMoveDown,
                     totalNodes <= 1 || nodeIndex === totalNodes - 1
                   )}
                   disabled={totalNodes <= 1 || nodeIndex === totalNodes - 1}
@@ -149,10 +150,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  onClick={handleItemClick(
-                    () => onDelete?.(id),
-                    totalNodes <= 1
-                  )}
+                  onClick={handleItemClick(onDelete, totalNodes <= 1)}
                   disabled={totalNodes <= 1}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
@@ -184,7 +182,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       </Card>
 
       {/* Add-step button */}
-      <AddStepButton onAddBelow={() => onAddBelow?.(id)} />
+      <AddStepButton onAddBelow={onAddBelow} />
     </div>
   );
 });
