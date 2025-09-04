@@ -22,6 +22,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../../lib/firebase";
 import { useNodeActions } from "../../../../hooks/useNodeActions";
+import { useFooterContext } from "../../../../lib/footerContext";
 
 const EditNode = dynamic(() => import("./EditNode"), { ssr: false });
 
@@ -73,12 +74,17 @@ interface FirestoreStep {
   order: number;
 }
 
+// ---------------- Layout Constants ----------------
 const VERTICAL_SPACING = 185;
 const MIN_CANVAS_HEIGHT = 800;
 const TOP_OFFSET = 100;
 const BOTTOM_OFFSET = 60;
+const HEADER_HEIGHT = 56; // same as h-14 in DashboardLayout
+const TITLENODE_TOP_OFFSET = HEADER_HEIGHT + 14; // TitleNode sits below header
+const EDITNODE_TOP_OFFSET = HEADER_HEIGHT + 24; // EditNode panel offset
 
 export default function Builder() {
+  const { setHideFooter } = useFooterContext();
   const [agentTitle, setAgentTitle] = useState("AI Agents");
   const [nodes, setNodes] = useState<AgentNodeType[]>([]);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
@@ -87,6 +93,12 @@ export default function Builder() {
   const workflowId = "B1BG67XmaLgEaIvwKiM7";
   const { addStep, deleteStep, updateStep, moveStep, updateTitle } =
     useNodeActions({ workflowId });
+
+  // ---------------- Hide footer when Builder mounts ----------------
+  useEffect(() => {
+    setHideFooter(true);
+    return () => setHideFooter(false);
+  }, [setHideFooter]);
 
   // ---------------- Stable callbacks ----------------
   const handleEdit = useCallback((id: string) => setEditingNodeId(id), []);
@@ -210,7 +222,6 @@ export default function Builder() {
               width: "320px",
             }}
           >
-            {/* Agent Nodes + SVG edges */}
             {nodes.map((node, index) => (
               <div key={node.id} className="relative">
                 {index < nodes.length - 1 && (
@@ -250,7 +261,14 @@ export default function Builder() {
           </div>
 
           {/* TitleNode (fixed to viewport) */}
-          <div style={{ position: "fixed", top: 24, left: 24, zIndex: 50 }}>
+          <div
+            style={{
+              position: "fixed",
+              top: TITLENODE_TOP_OFFSET,
+              left: 24,
+              zIndex: 50,
+            }}
+          >
             <TitleNode title={agentTitle} onTitleChange={updateTitle} />
           </div>
 
@@ -259,10 +277,10 @@ export default function Builder() {
             <div
               style={{
                 position: "fixed",
-                top: 24,
+                top: EDITNODE_TOP_OFFSET,
                 right: 24,
                 width: 384,
-                height: "calc(100vh - 120px)",
+                height: `calc(100vh - ${EDITNODE_TOP_OFFSET + 40}px)`,
                 zIndex: 60,
               }}
             >
