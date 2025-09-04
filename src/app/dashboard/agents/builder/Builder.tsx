@@ -76,8 +76,6 @@ interface FirestoreStep {
 
 const VERTICAL_SPACING = 185;
 const MIN_CANVAS_HEIGHT = 800;
-
-// ------------------- TOP & BOTTOM OFFSETS -------------------
 const TOP_OFFSET = 100;
 const BOTTOM_OFFSET = 60;
 
@@ -197,11 +195,12 @@ export default function Builder() {
   return (
     <EditingNodeContext.Provider value={{ editingNodeId, setEditingNodeId }}>
       <div className="h-screen flex flex-col">
+        {/* Canvas Wrapper */}
         <div
           ref={flowWrapperRef}
           className="flex-1 relative bg-gray-50 overflow-auto"
         >
-          {/* Vertical Stack */}
+          {/* AgentNodes Canvas */}
           <div
             className="relative mx-auto"
             style={{
@@ -209,12 +208,12 @@ export default function Builder() {
                 MIN_CANVAS_HEIGHT,
                 nodes.length * VERTICAL_SPACING + TOP_OFFSET + BOTTOM_OFFSET
               ),
-              width: "320px", // wrapper width
+              width: "320px",
             }}
           >
+            {/* Agent Nodes + SVG edges */}
             {nodes.map((node, index) => (
               <div key={node.id} className="relative">
-                {/* SVG Edge */}
                 {index < nodes.length - 1 && (
                   <svg
                     style={{
@@ -228,7 +227,7 @@ export default function Builder() {
                     }}
                   >
                     <line
-                      x1={176} // card width / 2
+                      x1={176}
                       y1={0}
                       x2={176}
                       y2={VERTICAL_SPACING - 60}
@@ -237,8 +236,6 @@ export default function Builder() {
                     />
                   </svg>
                 )}
-
-                {/* Agent Node */}
                 <div
                   style={{
                     position: "absolute",
@@ -253,15 +250,33 @@ export default function Builder() {
             ))}
           </div>
 
-          <TitleNode
-            title={agentTitle}
-            onTitleChange={updateTitle}
-            position={{ top: 24, left: 24 }}
-          />
-          <HelperNode position={{ bottom: 24, left: 24 }} onClick={() => {}} />
+          {/* TitleNode (fixed to viewport) */}
+          <div style={{ position: "fixed", top: 24, left: 24, zIndex: 50 }}>
+            <TitleNode title={agentTitle} onTitleChange={updateTitle} />
+          </div>
 
+          {/* HelperNode (scrolls with canvas) */}
+          <div
+            style={{ position: "absolute", bottom: 24, left: 24, zIndex: 40 }}
+          >
+            <HelperNode
+              position={{ bottom: 24, left: 24 }}
+              onClick={() => {}}
+            />
+          </div>
+
+          {/* EditNode (fixed to viewport) */}
           {editingNodeId && (
-            <div className="absolute top-4 right-4 w-96 h-[calc(100vh-120px)]">
+            <div
+              style={{
+                position: "fixed",
+                top: 24,
+                right: 24,
+                width: 384,
+                height: "calc(100vh - 120px)",
+                zIndex: 60,
+              }}
+            >
               <EditNode
                 node={nodes.find((n) => n.id === editingNodeId)!}
                 onSave={(data) => handleSave(editingNodeId, data)}
