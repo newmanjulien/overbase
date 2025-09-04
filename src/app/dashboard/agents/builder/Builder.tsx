@@ -1,57 +1,22 @@
 "use client";
 
-import {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-  createContext,
-  useContext,
-} from "react";
-import {
-  ReactFlow,
-  type Node,
-  Background,
-  useNodesState,
-  type NodeTypes,
-  type ReactFlowInstance,
-  type Edge,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
-
-import dynamic from "next/dynamic";
-
+import { useState, useEffect, useRef, createContext, useContext } from "react";
 import AgentNode from "./AgentNode";
 import TitleNode from "./TitleNode";
-import { useAgentNodeActions } from "../../../../components/useAgentNodeActions";
 import HelperNode from "./HelperNode";
+import dynamic from "next/dynamic";
 
-// Firestore imports
 import {
   collection,
   doc,
   onSnapshot,
   orderBy,
   query,
-  DocumentData,
 } from "firebase/firestore";
 import { db } from "../../../../lib/firebase";
-
-// NEW: hook that talks to Firestore
-import { useNodeActions } from "../../../../hooks/useNodeActions"; // adjust path if needed
+import { useNodeActions } from "../../../../hooks/useNodeActions";
 
 const EditNode = dynamic(() => import("./EditNode"), { ssr: false });
-interface EditNodeWithPreload {
-  preload?: () => void;
-}
-const EditNodeTyped = EditNode as unknown as EditNodeWithPreload;
-
-const VERTICAL_SPACING = 185;
-const PADDING_BELOW = 350;
-const MIN_CANVAS_HEIGHT = 800;
-
-const nodeTypes: NodeTypes = { agentNode: AgentNode };
 
 export interface NodeData {
   [key: string]: unknown;
@@ -61,17 +26,20 @@ export interface NodeData {
   conditions?: string;
   context?: string;
   integration?: string;
-  onEdit: (nodeId: string) => void;
-  onDelete: (nodeId: string) => void;
-  onAddBelow: (nodeId: string) => void;
-  onSave: (nodeId: string, data: Partial<NodeData>) => void;
   nodeIndex?: number;
   totalNodes?: number;
+  onEdit: () => void;
+  onDelete: (id: string) => void;
+  onAddBelow: (id: string) => void;
   onMoveUp?: (id: string) => void;
   onMoveDown?: (id: string) => void;
+  onSave: (id: string, data: Partial<NodeData>) => void;
 }
 
-export type AgentNodeType = Node<NodeData, "agentNode">;
+export type AgentNodeType = {
+  id: string;
+  data: NodeData;
+};
 
 interface EditingNodeContextValue {
   editingNodeId: string | null;
@@ -87,7 +55,6 @@ export const useEditingNodeContext = () => {
   return ctx;
 };
 
-// Firestore step shape
 interface FirestoreStep {
   id: string;
   title: string;
@@ -98,69 +65,23 @@ interface FirestoreStep {
   order: number;
 }
 
+const VERTICAL_SPACING = 185;
+const PADDING_BELOW = 350;
+const MIN_CANVAS_HEIGHT = 800;
+
 export default function Builder() {
-  const flowWrapperRef = useRef<HTMLDivElement | null>(null);
-  const rfInstanceRef = useRef<ReactFlowInstance | null>(null);
-
   const [agentTitle, setAgentTitle] = useState("AI Agents");
+  const [nodes, setNodes] = useState<AgentNodeType[]>([]);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [nodes, setNodes] = useNodesState<AgentNodeType>([]);
 
-  // ---- Controlled positions for the floating nodes ----
-  const titleNodePosition = { top: 24, left: 24 };
-  const helperNodePosition = { bottom: 24, left: 24 };
+  const flowWrapperRef = useRef<HTMLDivElement | null>(null);
 
-  // ---------------- Firestore write hook ----------------
-  const workflowId = "B1BG67XmaLgEaIvwKiM7"; // TODO: pass as prop or route param
-  const {
-    addStep,
-    deleteStep,
-    updateStep,
-    moveStep,
-    updateTitle,
-    loading: apiLoading,
-    error: apiError,
-  } = useNodeActions({ workflowId });
-
-  // ---------------- Hybrid layout pattern ----------------
-  const {
-    handleEditNode,
-    handleDeleteNode,
-    handleAddNodeBelow,
-    handleSaveNode,
-    handleMoveNodeUp,
-    handleMoveNodeDown,
-    updateNodesPositions,
-  } = useAgentNodeActions(
-    nodes,
-    setNodes,
-    useCallback(() => {
-      const rf = rfInstanceRef.current;
-      const wrapper = flowWrapperRef.current;
-      if (!rf || !wrapper) return 0;
-      const { x: tx, zoom } = rf.getViewport();
-      const containerWidth = wrapper.clientWidth || 1200;
-      return (containerWidth / 2 - tx) / zoom;
-    }, []),
-    setEditingNodeId
-  );
-
-  const layoutNodes = useCallback(
-    (nodesToLayout: AgentNodeType[]) => updateNodesPositions(nodesToLayout),
-    [updateNodesPositions]
-  );
-
-  // Safety effect: position nodes once RF is ready
-  useEffect(() => {
-    if (!rfInstanceRef.current || nodes.length === 0) return;
-    const needsLayout = nodes.some((n) => (n.position?.y ?? 0) === 0);
-    if (needsLayout) setNodes((prev) => layoutNodes(prev));
-  }, [nodes, layoutNodes, setNodes]);
+  const workflowId = "B1BG67XmaLgEaIvwKiM7";
+  const { addStep, deleteStep, updateStep, moveStep, updateTitle } =
+    useNodeActions({ workflowId });
 
   // ---------------- Firestore listeners ----------------
   useEffect(() => {
-    // Title listener
     const unsubWorkflow = onSnapshot(
       doc(db, "playbooks", workflowId),
       (snap) => {
@@ -171,7 +92,6 @@ export default function Builder() {
       }
     );
 
-    // Steps listener
     const stepsRef = collection(db, "playbooks", workflowId, "steps");
     const q = query(stepsRef, orderBy("order", "asc"));
     const unsubSteps = onSnapshot(q, (snapshot) => {
@@ -190,9 +110,6 @@ export default function Builder() {
 
       const builtNodes: AgentNodeType[] = fetched.map((step, index) => ({
         id: step.id,
-        type: "agentNode",
-        position: { x: 0, y: 0 },
-        style: { opacity: 0 },
         data: {
           stepNumber: index + 1,
           title: step.title,
@@ -200,142 +117,94 @@ export default function Builder() {
           conditions: step.conditions,
           context: step.context,
           integration: step.integration,
-          onEdit: () => handleEditNode(step.id),
-          onDelete: () => deleteStep(step.id),
-          onAddBelow: () => addStep(step.id),
-          onMoveUp: () => moveStep(step.id, "up"),
-          onMoveDown: () => moveStep(step.id, "down"),
-          onSave: (_: string, data: Partial<NodeData>) =>
+          nodeIndex: index,
+          totalNodes: fetched.length,
+          onEdit: () => setEditingNodeId(step.id),
+          onDelete: (id: string) => deleteStep(id),
+          onAddBelow: (id: string) => addStep(id),
+          onMoveUp: (id: string) => moveStep(id, "up"),
+          onMoveDown: (id: string) => moveStep(id, "down"),
+          onSave: (_id: string, data: Partial<NodeData>) =>
             updateStep(step.id, data),
         },
-        draggable: false,
       }));
 
-      if (rfInstanceRef.current) {
-        setNodes(layoutNodes(builtNodes)); // position immediately
-      } else {
-        setNodes(builtNodes); // effect will catch it
-      }
+      setNodes(builtNodes);
     });
 
     return () => {
       unsubWorkflow();
       unsubSteps();
     };
-  }, [workflowId, setNodes, layoutNodes]);
+  }, [workflowId, addStep, deleteStep, updateStep, moveStep]);
 
-  // ---------------- Edges ----------------
-  const buildSequentialEdges = useCallback(
-    (nodeList: AgentNodeType[]): Edge[] => {
-      if (nodeList.length < 2) return [];
-      const edges: Edge[] = [];
-      for (let i = 0; i < nodeList.length - 1; i++) {
-        const a = nodeList[i];
-        const b = nodeList[i + 1];
-        edges.push({
-          id: `e-${a.id}-${b.id}`,
-          source: a.id,
-          target: b.id,
-          type: "smoothstep",
-        });
-      }
-      return edges;
-    },
-    []
-  );
-
-  const edges = useMemo(
-    () =>
-      buildSequentialEdges(nodes).map((edge) => ({
-        ...edge,
-        style: { stroke: "#E5E7EB", opacity: isInitialized ? 1 : 0 },
-      })),
-    [nodes, buildSequentialEdges, isInitialized]
-  );
-
-  const translateExtent: [[number, number], [number, number]] = [
-    [-200, -100],
-    [
-      1200,
-      Math.max(
-        nodes.length > 0
-          ? Math.max(
-              ...nodes.map((_, index) => 100 + index * VERTICAL_SPACING)
-            ) +
-              PADDING_BELOW +
-              (nodes.length > 0 ? 60 : 0)
-          : MIN_CANVAS_HEIGHT,
-        MIN_CANVAS_HEIGHT
-      ),
-    ],
-  ];
-
-  // Handle window resize
+  // Handle window resize: keep nodes centered
+  const [containerWidth, setContainerWidth] = useState(0);
   useEffect(() => {
-    const handleResize = () => setNodes((prev) => layoutNodes(prev));
+    const handleResize = () => {
+      if (flowWrapperRef.current)
+        setContainerWidth(flowWrapperRef.current.clientWidth);
+    };
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [setNodes, layoutNodes]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      EditNodeTyped.preload?.();
-    }, 1000);
-    return () => clearTimeout(timer);
   }, []);
 
   return (
     <EditingNodeContext.Provider value={{ editingNodeId, setEditingNodeId }}>
       <div className="h-screen flex flex-col">
-        <div ref={flowWrapperRef} className="flex-1 relative">
-          <ReactFlow
-            nodes={nodes.map((node, index) => ({
-              ...node,
-              data: {
-                ...node.data,
-                nodeIndex: index,
-                totalNodes: nodes.length,
-                onEdit: () => handleEditNode(node.id),
-                onDelete: () => deleteStep(node.id),
-                onAddBelow: () => addStep(node.id),
-                onMoveUp: () => moveStep(node.id, "up"),
-                onMoveDown: () => moveStep(node.id, "down"),
-                onSave: (data: Partial<NodeData>) => updateStep(node.id, data),
-              },
-            }))}
-            edges={edges}
-            nodeTypes={nodeTypes}
-            minZoom={0.9}
-            maxZoom={0.9}
-            translateExtent={translateExtent}
-            nodesDraggable={false}
-            nodesConnectable={false}
-            panOnScroll
-            panOnDrag={false}
-            zoomOnScroll={false}
-            className="bg-gray-50"
-            fitView={false}
-            defaultViewport={{ x: 0, y: 0, zoom: 0.9 }}
-            defaultEdgeOptions={{
-              type: "smoothstep" as const,
-              style: { stroke: "#E5E7EB" },
-            }}
-            onInit={(instance) => {
-              rfInstanceRef.current = instance as unknown as ReactFlowInstance;
-              setIsInitialized(true);
+        <div
+          ref={flowWrapperRef}
+          className="flex-1 relative bg-gray-50 overflow-auto"
+        >
+          {/* Vertical Stack */}
+          <div
+            className="relative mx-auto"
+            style={{
+              minHeight: MIN_CANVAS_HEIGHT,
+              width: "320px", // match node width
+              paddingBottom: PADDING_BELOW,
             }}
           >
-            <Background color="#DDDDDD" gap={30} size={2} />
-          </ReactFlow>
+            {nodes.map((node, index) => (
+              <div key={node.id} className="relative">
+                <div
+                  style={{
+                    position: "absolute",
+                    top: index * VERTICAL_SPACING,
+                    left: 0,
+                    right: 0,
+                  }}
+                >
+                  <AgentNode {...node} />
+                </div>
+
+                {/* Edge to next node */}
+                {index < nodes.length - 1 && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: (index + 1) * VERTICAL_SPACING - 60, // leave gap for AddStepButton
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: 2,
+                      height: VERTICAL_SPACING - 20,
+                      backgroundColor: "#E5E7EB",
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
 
           <TitleNode
             title={agentTitle}
-            onTitleChange={updateTitle} // <-- Firestore write
-            position={titleNodePosition}
+            onTitleChange={updateTitle}
+            position={{ top: 24, left: 24 }}
           />
           <HelperNode
+            position={{ bottom: 24, left: 24 }}
             onClick={() => console.log("star clicked")}
-            position={helperNodePosition}
           />
 
           {editingNodeId && (

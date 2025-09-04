@@ -1,9 +1,8 @@
 "use client";
 
 import { memo } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Button } from "../../../../components/ui/button";
 import { Card } from "../../../../components/ui/card";
+import { Button } from "../../../../components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,18 +10,14 @@ import {
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
+import Image from "next/image";
+import { AddStepButton } from "./AddStepButton";
 import type { NodeData } from "./Builder";
 import { useEditingNodeContext } from "./Builder";
-import Image from "next/image";
-import { AddStepButton } from "./AddStepButton"; // adjust path
 
-interface AgentNodeProps extends NodeProps {
-  data: NodeData & {
-    nodeIndex: number;
-    totalNodes: number;
-    onMoveUp: (id: string) => void;
-    onMoveDown: (id: string) => void;
-  };
+interface AgentNodeProps {
+  data: NodeData;
+  id: string;
 }
 
 const AgentNode = memo(({ data, id }: AgentNodeProps) => {
@@ -33,30 +28,33 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
     onEdit,
     onDelete,
     onAddBelow,
-    nodeIndex,
-    totalNodes,
+    nodeIndex = 0,
+    totalNodes = 1,
     onMoveUp,
     onMoveDown,
+    integration,
   } = data;
 
   const { editingNodeId } = useEditingNodeContext();
   const isEditing = editingNodeId === id;
 
+  // ---------------- Card Click ----------------
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest("button") || target.closest('[role="menuitem"]')) return;
-    onEdit(id);
+    onEdit?.(); // ✅ TS-safe, no arguments
   };
 
+  // ---------------- Dropdown Menu Handler ----------------
   const handleItemClick =
     (callback?: () => void, disabled?: boolean) => (e: React.MouseEvent) => {
       e.stopPropagation();
       if (!disabled && callback) callback();
     };
 
+  // ---------------- Prompt Rendering ----------------
   const renderPrompt = () => {
     if (!prompt) return "Click to tell the AI what you want it to do";
-
     return prompt.split(/(\s+)/).map((word, i) =>
       word.startsWith("@") ? (
         <span key={i} className="text-blue-500">
@@ -69,9 +67,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
   };
 
   return (
-    <div className="w-88">
-      <Handle type="target" position={Position.Top} className="opacity-0" />
-
+    <div className="w-88 mx-auto">
       <Card
         className="bg-white border border-gray-100 hover:border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow transition-all duration-200 p-0"
         style={
@@ -93,81 +89,77 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
         }
         onClick={handleCardClick}
       >
-        <div className="p-3 pb-0">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900 flex-1 min-w-0 truncate">
-              {stepNumber}.{" "}
-              <span className="font-normal truncate">
-                {title || "New step"}
-              </span>
-            </h3>
+        <div className="p-3 pb-0 flex items-center justify-between">
+          <h3 className="font-semibold text-gray-900 flex-1 min-w-0 truncate">
+            {stepNumber}.{" "}
+            <span className="font-normal truncate">{title || "New step"}</span>
+          </h3>
 
-            <div className="flex items-center space-x-1">
-              {data.integration && (
-                <Image
-                  src={data.integration}
-                  alt={title || "Agent"}
-                  width={20}
-                  height={20}
-                  className="rounded-full object-cover ml-2"
-                />
-              )}
+          <div className="flex items-center space-x-1">
+            {integration && (
+              <Image
+                src={integration}
+                alt={title || "Agent"}
+                width={20}
+                height={20}
+                className="rounded-full object-cover ml-2"
+              />
+            )}
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`h-8 w-8 p-0 ${
-                      isEditing ? "hover:bg-white" : "hover:bg-gray-100"
-                    }`}
-                    aria-label="Actions"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent
-                  align="end"
-                  className="w-32"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-8 w-8 p-0 ${
+                    isEditing ? "hover:bg-white" : "hover:bg-gray-100"
+                  }`}
+                  aria-label="Actions"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <DropdownMenuItem
-                    onClick={handleItemClick(
-                      () => onMoveUp(id),
-                      totalNodes <= 1 || nodeIndex === 0
-                    )}
-                    disabled={totalNodes <= 1 || nodeIndex === 0}
-                    className="hover:bg-gray-100 disabled:text-gray-400"
-                  >
-                    Move Up
-                  </DropdownMenuItem>
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
 
-                  <DropdownMenuItem
-                    onClick={handleItemClick(
-                      () => onMoveDown(id),
-                      totalNodes <= 1 || nodeIndex === totalNodes - 1
-                    )}
-                    disabled={totalNodes <= 1 || nodeIndex === totalNodes - 1}
-                    className="hover:bg-gray-100 disabled:text-gray-400"
-                  >
-                    Move Down
-                  </DropdownMenuItem>
+              <DropdownMenuContent
+                align="end"
+                className="w-32"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <DropdownMenuItem
+                  onClick={handleItemClick(
+                    () => onMoveUp?.(id),
+                    totalNodes <= 1 || nodeIndex === 0
+                  )}
+                  disabled={totalNodes <= 1 || nodeIndex === 0}
+                  className="hover:bg-gray-100 disabled:text-gray-400"
+                >
+                  Move Up
+                </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    onClick={handleItemClick(
-                      () => onDelete(id),
-                      totalNodes <= 1
-                    )}
-                    disabled={totalNodes <= 1}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                <DropdownMenuItem
+                  onClick={handleItemClick(
+                    () => onMoveDown?.(id),
+                    totalNodes <= 1 || nodeIndex === totalNodes - 1
+                  )}
+                  disabled={totalNodes <= 1 || nodeIndex === totalNodes - 1}
+                  className="hover:bg-gray-100 disabled:text-gray-400"
+                >
+                  Move Down
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={handleItemClick(
+                    () => onDelete?.(id),
+                    totalNodes <= 1
+                  )}
+                  disabled={totalNodes <= 1}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -192,9 +184,7 @@ const AgentNode = memo(({ data, id }: AgentNodeProps) => {
       </Card>
 
       {/* Add-step button */}
-      <AddStepButton onAddBelow={() => onAddBelow(id)} />
-
-      <Handle type="source" position={Position.Bottom} className="opacity-0" />
+      <AddStepButton onAddBelow={() => onAddBelow?.(id)} />
     </div>
   );
 });
