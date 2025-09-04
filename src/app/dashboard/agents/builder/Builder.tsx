@@ -78,6 +78,9 @@ const VERTICAL_SPACING = 185;
 const PADDING_BELOW = 350;
 const MIN_CANVAS_HEIGHT = 800;
 
+// ------------------- NEW TOP OFFSET -------------------
+const TOP_OFFSET = 100;
+
 export default function Builder() {
   const [agentTitle, setAgentTitle] = useState("AI Agents");
   const [nodes, setNodes] = useState<AgentNodeType[]>([]);
@@ -214,7 +217,7 @@ export default function Builder() {
                   <svg
                     style={{
                       position: "absolute",
-                      top: index * VERTICAL_SPACING + 60, // below the card
+                      top: TOP_OFFSET + index * VERTICAL_SPACING + 60, // shifted down
                       left: 0,
                       width: "100%",
                       height: VERTICAL_SPACING - 60,
@@ -237,7 +240,7 @@ export default function Builder() {
                 <div
                   style={{
                     position: "absolute",
-                    top: index * VERTICAL_SPACING,
+                    top: TOP_OFFSET + index * VERTICAL_SPACING, // shifted down
                     left: 0,
                     right: 0,
                   }}
