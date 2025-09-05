@@ -154,16 +154,18 @@ AgentList.Sidebar = ({
   loading?: boolean;
   skills?: { key: string; name: string }[];
 }) => {
-  // Predefined widths to mimic real text, SSR-safe
-  const skeletonWidths = [73, 86, 62, 73, 79, 74, 61, 67];
+  // SSR-safe skeleton: show if loading OR skills not yet loaded
+  const showSkeleton = loading || skills.length === 0;
 
-  if (loading) {
+  if (showSkeleton) {
+    const skeletonWidths = [73, 86, 62, 73, 79, 74, 61, 67];
+
     return (
       <nav className="space-y-2 px-1">
         {skeletonWidths.map((w, i) => (
           <div
             key={i}
-            className="h-10 rounded-lg skeleton"
+            className="h-10 rounded-lg skeleton bg-gray-300"
             style={{ width: `${w}%` }}
           />
         ))}
