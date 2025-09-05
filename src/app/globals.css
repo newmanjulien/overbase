@@ -44,7 +44,6 @@
 }
 
 /* Runtime CSS variables (browser-visible) */
-
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -83,7 +82,6 @@
 /* =================================================================
    2. TAILWIND BASE LAYER  (minimal CSS reset)
    ================================================================= */
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -107,22 +105,4 @@
   display: none; /* Chrome, Safari, Opera */
 }
 
-/* Loading wheel */
-.loader {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #d3d3d3;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-}
-
-/* Spin used by the loading wheel */
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
+/* --- Removed .loader CSS here, will move it to component --- */
