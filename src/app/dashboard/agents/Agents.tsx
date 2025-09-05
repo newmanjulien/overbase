@@ -3,12 +3,18 @@
 import { useState } from "react";
 import { Header } from "../../../components/ui/Header";
 import { Modal } from "../../../components/ui/Modal";
+import { LoadingOverlay } from "../../../components/ui/LoadingOverlay";
 import { AgentList } from "./AgentList";
+import { useInstalledAgents } from "../../../hooks/useInstalledAgents";
+import { useOtherAgents } from "../../../hooks/useOtherAgents";
 import { modalData } from "./DummyData";
 
 export function Agents() {
   const [selectedSkill, setSelectedSkill] = useState("installed");
   const [launchingAgent, setLaunchingAgent] = useState<string | null>(null);
+
+  const { agents: installedAgents, loading } = useInstalledAgents();
+  const { agents: otherAgents } = useOtherAgents(!loading);
 
   const handleModalAction = (callback: string) => {
     if (callback === "onAddKey") {
@@ -24,8 +30,9 @@ export function Agents() {
         subtitle="Easily install agents then assign a handler and customize the instructions."
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-18">
-        {/* Sidebar */}
+      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-18 relative">
+        {loading && <LoadingOverlay />}
+
         <div className="w-56 flex-shrink-0">
           <AgentList.Sidebar
             selectedSkill={selectedSkill}
@@ -33,7 +40,6 @@ export function Agents() {
           />
         </div>
 
-        {/* Agent Grid */}
         <div className="flex-1">
           <div className="mb-8">
             <h2 className="text-2xl font-medium text-gray-800">
@@ -44,16 +50,16 @@ export function Agents() {
             </p>
           </div>
 
-          {/* AgentList handles its own conditional wrapper */}
           <AgentList
+            installedAgents={installedAgents}
+            otherAgents={otherAgents}
             selectedSkill={selectedSkill}
+            setSelectedSkill={setSelectedSkill}
             onLaunchAgent={setLaunchingAgent}
-            setSelectedSkill={setSelectedSkill} // ✅ must pass this
           />
         </div>
       </div>
 
-      {/* Modal */}
       {launchingAgent && (
         <Modal
           isOpen={!!launchingAgent}

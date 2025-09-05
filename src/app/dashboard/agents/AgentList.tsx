@@ -1,98 +1,74 @@
 "use client";
 
+import { AgentCard } from "./AgentCard";
 import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
-import { useAgents } from "../../../hooks/useAgents";
 import { useSkills } from "../../../hooks/useSkills";
-import { AgentCard } from "./AgentCard";
 
-interface AgentListProps {
-  selectedSkill: string;
-  onLaunchAgent?: (agentId: string) => void;
-  setSelectedSkill: (skill: string) => void;
-}
-
-interface Agent {
+export interface Agent {
   id: string;
+  numericId?: number;
   title: string;
   description: string;
+  skills: string[];
   gradientFrom?: string;
   gradientTo?: string;
-  skills?: string[];
   image?: string;
   assignedHandler?: string;
-  numericId?: number;
 }
 
-type AgentListType = React.FC<AgentListProps> & {
-  Sidebar: React.FC<{
-    selectedSkill: string;
-    setSelectedSkill: (skill: string) => void;
-  }>;
+interface AgentListProps {
+  installedAgents: Agent[];
+  otherAgents: Agent[];
+  selectedSkill: string;
+  setSelectedSkill: (skill: string) => void;
+  onLaunchAgent?: (agentId: string) => void;
+}
+
+const getFilteredAgents = (
+  installed: Agent[],
+  other: Agent[],
+  skill: string
+) => {
+  if (skill === "installed") {
+    return installed.sort((a, b) => (a.numericId ?? 0) - (b.numericId ?? 0));
+  } else {
+    return other
+      .filter((a) => a.skills.includes(skill))
+      .sort((a, b) => (a.numericId ?? 0) - (b.numericId ?? 0));
+  }
 };
 
-// Helper: filter and sort agents
-const getFilteredAgents = (agents: Agent[], skill: string) =>
-  agents
-    .filter((a) =>
-      skill === "installed"
-        ? a.skills?.includes("installed")
-        : !a.skills?.includes("installed") && a.skills?.includes(skill)
-    )
-    .sort((a, b) => (a.numericId ?? 0) - (b.numericId ?? 0));
-
-// Wrapper for installed skill
-const SkillWrapper: React.FC<{
-  active: boolean;
-  children: React.ReactNode;
-}> = ({ active, children }) =>
-  active ? (
-    <div className="rounded-xl p-6 bg-white">{children}</div>
-  ) : (
-    <>{children}</>
-  );
-
-// Hook for updating agent skills
 const useUpdateAgentSkills = (agentId: string) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const updateSkills = async (skills: string[]) => {
     setLoading(true);
-    setError(null);
     try {
       const agentRef = doc(db, "agents", agentId);
       await updateDoc(agentRef, { skills });
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to update agent skills";
-      setError(message);
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  return { updateSkills, loading, error };
+  return { updateSkills, loading };
 };
 
-// Component to wrap each AgentCard
 const AgentCardWrapper: React.FC<{
   agent: Agent;
   setSelectedSkill: (skill: string) => void;
-  onLaunchAgent?: (agentId: string) => void;
+  onLaunchAgent?: (id: string) => void;
 }> = ({ agent, setSelectedSkill, onLaunchAgent }) => {
   const { updateSkills } = useUpdateAgentSkills(agent.id);
 
   const handleInstall = async () => {
-    const updatedSkills = agent.skills?.includes("installed")
+    const updatedSkills = agent.skills.includes("installed")
       ? agent.skills.filter((s) => s !== "installed")
-      : [...(agent.skills ?? []), "installed"];
+      : [...agent.skills, "installed"];
 
-    // Optimistic UI update
-    agent.skills = updatedSkills;
-
+    agent.skills = updatedSkills; // optimistic
     await updateSkills(updatedSkills);
     setSelectedSkill("installed");
   };
@@ -104,7 +80,7 @@ const AgentCardWrapper: React.FC<{
       description={agent.description}
       gradientFrom={agent.gradientFrom}
       gradientTo={agent.gradientTo}
-      isInstalled={agent.skills?.includes("installed")}
+      isInstalled={agent.skills.includes("installed")}
       image={agent.image}
       onInstall={handleInstall}
       onLaunch={() => onLaunchAgent?.(agent.id)}
@@ -112,53 +88,52 @@ const AgentCardWrapper: React.FC<{
     />
   );
 };
-AgentCardWrapper.displayName = "AgentCardWrapper";
 
-export const AgentList: AgentListType = ({
+export function AgentList({
+  installedAgents,
+  otherAgents,
   selectedSkill,
-  onLaunchAgent,
   setSelectedSkill,
-}) => {
-  const { agents, loading } = useAgents();
+  onLaunchAgent,
+}: AgentListProps) {
+  const { skills, loading: skillsLoading } = useSkills();
+  if (skillsLoading) return <p>Loading skills...</p>;
 
-  if (loading) return <p>Loading agents...</p>;
-  if (!agents?.length) return <p>No agents found.</p>;
+  const filteredAgents = getFilteredAgents(
+    installedAgents,
+    otherAgents,
+    selectedSkill
+  );
+
+  if (!filteredAgents.length) return <p>No agents found.</p>;
 
   return (
-    <SkillWrapper active={selectedSkill === "installed"}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {getFilteredAgents(agents, selectedSkill).map((agent) => (
-          <AgentCardWrapper
-            key={agent.id}
-            agent={agent}
-            setSelectedSkill={setSelectedSkill}
-            onLaunchAgent={onLaunchAgent}
-          />
-        ))}
-      </div>
-    </SkillWrapper>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {filteredAgents.map((agent) => (
+        <AgentCardWrapper
+          key={agent.id}
+          agent={agent}
+          setSelectedSkill={setSelectedSkill}
+          onLaunchAgent={onLaunchAgent}
+        />
+      ))}
+    </div>
   );
-};
+}
 
-// Sidebar component
-const AgentListSidebar: React.FC<{
+AgentList.Sidebar = ({
+  selectedSkill,
+  setSelectedSkill,
+}: {
   selectedSkill: string;
   setSelectedSkill: (skill: string) => void;
-}> = ({ selectedSkill, setSelectedSkill }) => {
-  const { skills, loading } = useSkills(); // no generic
-
+}) => {
+  const { skills, loading } = useSkills();
   if (loading) return <p>Loading skills...</p>;
 
   const sortedSkills = [...skills].sort((a, b) =>
     a.key === "installed" ? -1 : b.key === "installed" ? 1 : 0
   );
-
-  const buttonClass = (selected: boolean) =>
-    `w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between ${
-      selected
-        ? "bg-white border border-gray-200/60 font-medium text-gray-800"
-        : "text-gray-700 hover:text-gray-900 hover:bg-white border border-transparent"
-    }`;
 
   return (
     <nav className="space-y-0.5">
@@ -166,7 +141,11 @@ const AgentListSidebar: React.FC<{
         <button
           key={skill.key}
           onClick={() => setSelectedSkill(skill.key)}
-          className={buttonClass(skill.key === selectedSkill)}
+          className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between ${
+            skill.key === selectedSkill
+              ? "bg-white border border-gray-200/60 font-medium text-gray-800"
+              : "text-gray-700 hover:text-gray-900 hover:bg-white border border-transparent"
+          }`}
         >
           <span>{skill.name}</span>
         </button>
@@ -174,6 +153,3 @@ const AgentListSidebar: React.FC<{
     </nav>
   );
 };
-AgentListSidebar.displayName = "AgentListSidebar";
-
-AgentList.Sidebar = AgentListSidebar;

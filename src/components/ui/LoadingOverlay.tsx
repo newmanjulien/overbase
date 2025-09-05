@@ -2,13 +2,9 @@
 
 export function LoadingOverlay() {
   return (
-    <>
-      {/* Full-screen overlay */}
-      <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
-        <div className="loader"></div>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/70 overflow-hidden">
+      <div className="loader"></div>
 
-      {/* Loader CSS inside component */}
       <style jsx>{`
         .loader {
           border: 4px solid #f3f3f3;
@@ -28,6 +24,6 @@ export function LoadingOverlay() {
           }
         }
       `}</style>
-    </>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
 export interface Agent {
@@ -25,7 +25,7 @@ export function useInstalledAgents() {
       where("skills", "array-contains", "installed")
     );
 
-    const unsub = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const data: Agent[] = snapshot.docs.map((d) => {
         const raw = d.data() as Partial<Agent>;
         return {
@@ -42,7 +42,7 @@ export function useInstalledAgents() {
       setLoading(false);
     });
 
-    return () => unsub();
+    return () => unsubscribe();
   }, []);
 
   return { agents, loading };
