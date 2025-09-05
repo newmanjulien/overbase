@@ -4,7 +4,6 @@ import { AgentCard } from "./AgentCard";
 import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
-import { useSkills } from "../../../hooks/useSkills";
 
 export interface Agent {
   id: string;
@@ -24,6 +23,7 @@ interface AgentListProps {
   selectedSkill: string;
   setSelectedSkill: (skill: string) => void;
   onLaunchAgent?: (agentId: string) => void;
+  loading?: boolean;
 }
 
 const getFilteredAgents = (
@@ -95,17 +95,38 @@ export function AgentList({
   selectedSkill,
   setSelectedSkill,
   onLaunchAgent,
+  loading = false,
 }: AgentListProps) {
-  const { skills, loading: skillsLoading } = useSkills();
-  if (skillsLoading) return <p>Loading skills...</p>;
-
   const filteredAgents = getFilteredAgents(
     installedAgents,
     otherAgents,
     selectedSkill
   );
 
-  if (!filteredAgents.length) return <p>No agents found.</p>;
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-xl border border-gray-200/60 overflow-hidden"
+          >
+            <div className="relative h-56 flex items-center justify-center bg-gradient-to-r from-gray-200 to-gray-300 skeleton" />
+            <div className="absolute top-20 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full skeleton" />
+            <div className="bg-white p-4 pt-8 space-y-2">
+              <div className="h-4 w-3/4 skeleton-text rounded" />
+              <div className="h-3 w-5/6 skeleton-text rounded" />
+            </div>
+            <div className="p-3 pt-0">
+              <div className="h-8 w-full skeleton rounded" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (filteredAgents.length === 0) return <p>No agents found.</p>;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -121,22 +142,41 @@ export function AgentList({
   );
 }
 
+// ---------- Sidebar ----------
 AgentList.Sidebar = ({
   selectedSkill,
   setSelectedSkill,
+  loading = false,
+  skills = [],
 }: {
   selectedSkill: string;
   setSelectedSkill: (skill: string) => void;
+  loading?: boolean;
+  skills?: { key: string; name: string }[];
 }) => {
-  const { skills, loading } = useSkills();
-  if (loading) return <p>Loading skills...</p>;
+  // Predefined widths to mimic real text, SSR-safe
+  const skeletonWidths = [73, 86, 62, 73, 79, 74, 61, 67];
+
+  if (loading) {
+    return (
+      <nav className="space-y-2 px-1">
+        {skeletonWidths.map((w, i) => (
+          <div
+            key={i}
+            className="h-10 rounded-lg skeleton"
+            style={{ width: `${w}%` }}
+          />
+        ))}
+      </nav>
+    );
+  }
 
   const sortedSkills = [...skills].sort((a, b) =>
     a.key === "installed" ? -1 : b.key === "installed" ? 1 : 0
   );
 
   return (
-    <nav className="space-y-0.5">
+    <nav className="space-y-2">
       {sortedSkills.map((skill) => (
         <button
           key={skill.key}
