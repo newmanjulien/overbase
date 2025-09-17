@@ -19,7 +19,7 @@ interface CalendarProps {
   setSelectedDate: (date: Date | null) => void;
   currentDate: Date;
   setCurrentDate: (date: Date) => void;
-  requestsByDate: Record<string, string[]>; // NEW
+  requestsByDate: Record<string, string[]>; // ✅ only requests
 }
 
 export default function Calendar({
@@ -90,6 +90,7 @@ export default function Calendar({
           const isSelected = isSameDayCheck(selectedDate, day);
           const inMonth = isSameMonthCheck(currentDate, day);
 
+          // ✅ Only requests matter for dots
           const dateKey = day.toISOString().split("T")[0];
           const hasRequests = !!requestsByDate[dateKey]?.length;
 
@@ -103,7 +104,7 @@ export default function Calendar({
                   isSelected
                     ? "bg-gray-800 text-white"
                     : inMonth
-                    ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                    ? "bg-gray-100 text-gray-900 hover:bg-gray-300"
                     : "bg-transparent"
                 }
               `}
@@ -112,9 +113,9 @@ export default function Calendar({
               {hasRequests && inMonth && (
                 <div
                   className={`
-      w-1 h-1 rounded-full mx-auto mt-1
-      ${isSelected ? "bg-white" : "bg-green-500"}
-    `}
+                    w-1 h-1 rounded-full mx-auto mt-1
+                    ${isSelected ? "bg-white" : "bg-green-500"}
+                  `}
                 />
               )}
             </button>

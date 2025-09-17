@@ -31,7 +31,7 @@ export default function RequestsPage() {
           setSelectedDate={setSelectedDate}
           currentDate={currentDate}
           setCurrentDate={setCurrentDate}
-          requestsByDate={requestsByDate} // NEW
+          requestsByDate={requestsByDate} // ✅ passed down
         />
 
         {/* Right column - Data Section */}
