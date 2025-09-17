@@ -3,6 +3,7 @@
 import React from "react";
 import Logo from "../../components/ui/Logo";
 import LogoSmall from "../../components/ui/LogoSmall";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IntegrationProvider } from "../../lib/integrationContext";
@@ -43,9 +44,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center space-x-8">
-              <div className="h-9 w-[3.75rem]">
+              <div className="h-7">
                 <Link href="/dashboard/agents">
-                  <Logo />
+                  <Image
+                    src="/images/logo.png"
+                    alt="Logo"
+                    width={47}
+                    height={35}
+                    priority
+                  />
                 </Link>
               </div>
 
@@ -79,8 +86,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className="h-6 w-4">
-                  <LogoSmall />
+                <div className="h-4">
+                  <Image
+                    src="/images/logo.png"
+                    alt="Logo small"
+                    width={38}
+                    height={20}
+                  />
                 </div>
               </div>
               <nav className="flex space-x-8">
