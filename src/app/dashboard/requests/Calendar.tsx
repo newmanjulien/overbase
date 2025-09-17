@@ -38,7 +38,6 @@ export default function Calendar({
         : getNextMonth(currentDate);
 
     setCurrentDate(newDate);
-    setSelectedDate(null);
   };
 
   const handleDayClick = (day: Date) => {
