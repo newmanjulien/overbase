@@ -80,7 +80,7 @@ export default function DataSection({
           dataCards.length === 0 ? (
             <EmptyState
               title="No data requested"
-              description="You have no data requested yet. Your requested data will show up here."
+              description="You have not requested any data yet for this day"
               buttonLabel="Request data"
               onButtonClick={handleRequestData}
               buttonVariant="primary"
@@ -111,7 +111,7 @@ export default function DataSection({
           // Schedule view using EmptyState without button
           <EmptyState
             title="Nothing in your calendar"
-            description="You're all caught up."
+            description="There's nothing in your calendar on this day"
             withBorder={false}
             icon={<Calendar className="w-10 h-10 text-gray-600" />}
           />

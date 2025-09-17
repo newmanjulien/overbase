@@ -1,7 +1,7 @@
 "use client";
 
-import { Integrations } from "./Integrations";
+import { IntegrationsLayout } from "./layout";
 
 export default function IntegrationsPage() {
-  return <Integrations />;
+  return <IntegrationsLayout />;
 }

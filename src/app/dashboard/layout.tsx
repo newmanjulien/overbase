@@ -29,7 +29,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     { href: "/dashboard/requests", label: "Requests" },
     { href: "/dashboard/integrations", label: "Integrations" },
     { href: "/dashboard/colleagues", label: "Colleagues" },
-    { href: "/dashboard/external", label: "External" },
+    { href: "/dashboard/customers", label: "Customers" },
   ];
 
   return (

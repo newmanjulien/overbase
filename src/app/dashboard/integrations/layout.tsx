@@ -10,7 +10,7 @@ import { useIntegrationContext } from "../../../lib/integrationContext";
 import { Header } from "../../../components/ui/Header";
 import { Plug } from "lucide-react";
 
-export function Integrations() {
+export function IntegrationsLayout() {
   const router = useRouter();
   const { installedIntegrations } = useIntegrationContext();
 
