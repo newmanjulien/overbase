@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatDayLabel } from "../../utils/date";
+import { RowCard } from "../../../components/ui/RowCard";
 
 interface DataSectionProps {
   selectedDate: Date | null;
@@ -89,7 +90,7 @@ export default function DataSection({ selectedDate }: DataSectionProps) {
               </div>
             ) : (
               <div className="space-y-6">
-                {dataCards.map((card, index) => (
+                {/* {dataCards.map((card, index) => (
                   <div
                     key={index}
                     className="bg-white border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-colors"
@@ -110,6 +111,22 @@ export default function DataSection({ selectedDate }: DataSectionProps) {
                       </div>
                     </div>
                   </div>
+                ))} */}
+                {dataCards.map((card, index) => (
+                  <RowCard
+                    key={index}
+                    contentBox={card} // grey text box
+                    actions={
+                      <>
+                        <button className="py-2 px-4 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          Manage
+                        </button>
+                        <button className="py-2 px-4 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          View
+                        </button>
+                      </>
+                    }
+                  />
                 ))}
               </div>
             )

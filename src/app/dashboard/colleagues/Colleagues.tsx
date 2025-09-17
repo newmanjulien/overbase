@@ -53,7 +53,6 @@ export function Colleagues() {
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
-      {/* Header */}
       <Header
         title="Colleagues"
         subtitle="Add colleagues so you can reference them in workflows and so your AI can collaborate with them on your tasks."
@@ -62,16 +61,12 @@ export function Colleagues() {
         variant="black"
       />
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="w-full flex flex-col gap-3">
           {/* Select All card */}
           <RowCard
             title="Select all"
             titleClassName="text-gray-500 font-normal"
-            subtitle=""
-            buttonLabel=""
-            buttonOnClick={undefined}
             leading={
               <Checkbox
                 checked={selectAll}
@@ -100,7 +95,6 @@ export function Colleagues() {
                 </DropdownMenuContent>
               </DropdownMenu>
             }
-            image={undefined}
           />
 
           {/* Colleague cards */}
@@ -109,9 +103,6 @@ export function Colleagues() {
               key={colleague.id}
               title={colleague.name}
               subtitle={colleague.role}
-              image={undefined}
-              buttonLabel=""
-              buttonOnClick={undefined}
               leading={
                 <Checkbox
                   checked={selectedColleagues.includes(colleague.id)}

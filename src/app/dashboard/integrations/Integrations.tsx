@@ -13,7 +13,6 @@ export function Integrations() {
   const router = useRouter();
   const { installedIntegrations } = useIntegrationContext();
 
-  // Compute popular integrations dynamically based on installed ones
   const popularIntegrations = integrations.filter(
     (integration) =>
       !installedIntegrations.some(
@@ -21,7 +20,6 @@ export function Integrations() {
       )
   );
 
-  // Navigate to integration detail page
   const handleSelectIntegration = (integration: Integration) => {
     router.push(`/dashboard/integrations/${integration.id}`);
   };
@@ -44,10 +42,9 @@ export function Integrations() {
         variant="white"
       />
 
-      {/* === Main Content Section === */}
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex gap-8">
-          {/* Left Section - Installed Integrations */}
+          {/* Installed Integrations */}
           <div className="flex-1 flex flex-col gap-2">
             {installedIntegrations.length === 0 ? (
               <EmptyState onButtonClick={handleBrowseClick} />
@@ -63,13 +60,12 @@ export function Integrations() {
                     console.log(`Manage clicked for ${integration.title}`)
                   }
                   showGreenDot={integration.status === "active"}
-                  buttonClassName="text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
                 />
               ))
             )}
           </div>
 
-          {/* Right Section - Popular Integrations */}
+          {/* Popular Integrations */}
           <PopularIntegrations
             popularIntegrations={popularIntegrations}
             onAddIntegration={handleSelectIntegration}

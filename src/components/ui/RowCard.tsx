@@ -6,18 +6,18 @@ import { Button } from "./button";
 
 interface RowCardProps {
   id?: number;
-  title?: string; // now optional
+  title?: string; // optional
   titleClassName?: string;
   subtitle?: ReactNode;
   image?: string;
   actions?: ReactNode;
   onEdit?: () => void;
-  buttonLabel?: string;
+  buttonLabel?: string; // no default now
   buttonOnClick?: () => void;
   buttonClassName?: string;
   showGreenDot?: boolean;
   leading?: ReactNode;
-  contentBox?: ReactNode; // NEW — for grey text box
+  contentBox?: ReactNode; // grey box content
 }
 
 export function RowCard({
@@ -27,7 +27,7 @@ export function RowCard({
   image,
   actions,
   onEdit,
-  buttonLabel = "Launch",
+  buttonLabel,
   buttonOnClick,
   buttonClassName = "text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60",
   showGreenDot = false,

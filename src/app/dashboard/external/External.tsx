@@ -53,7 +53,6 @@ export function External() {
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
-      {/* Header */}
       <Header
         title="External Partners"
         subtitle="Add external partners so you can reference them in workflows and so your AI can collaborate with them on your tasks."
@@ -62,16 +61,12 @@ export function External() {
         variant="black"
       />
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="w-full flex flex-col gap-3">
           {/* Select All card */}
           <RowCard
             title="Select all"
             titleClassName="text-gray-500 font-normal"
-            subtitle=""
-            buttonLabel=""
-            buttonOnClick={undefined}
             leading={
               <Checkbox
                 checked={selectAll}
@@ -100,7 +95,6 @@ export function External() {
                 </DropdownMenuContent>
               </DropdownMenu>
             }
-            image={undefined}
           />
 
           {/* External Partner cards */}
@@ -109,9 +103,6 @@ export function External() {
               key={partner.id}
               title={partner.name}
               subtitle={partner.company}
-              image={undefined}
-              buttonLabel=""
-              buttonOnClick={undefined}
               leading={
                 <Checkbox
                   checked={selectedPartners.includes(partner.id)}
