@@ -19,6 +19,7 @@ interface CalendarProps {
   setSelectedDate: (date: Date | null) => void;
   currentDate: Date;
   setCurrentDate: (date: Date) => void;
+  requestsByDate: Record<string, string[]>; // NEW
 }
 
 export default function Calendar({
@@ -26,6 +27,7 @@ export default function Calendar({
   setSelectedDate,
   currentDate,
   setCurrentDate,
+  requestsByDate,
 }: CalendarProps) {
   const calendarDays = getCalendarGrid(currentDate);
 
@@ -88,6 +90,9 @@ export default function Calendar({
           const isSelected = isSameDayCheck(selectedDate, day);
           const inMonth = isSameMonthCheck(currentDate, day);
 
+          const dateKey = day.toISOString().split("T")[0];
+          const hasRequests = !!requestsByDate[dateKey]?.length;
+
           return (
             <button
               key={index}
@@ -104,9 +109,13 @@ export default function Calendar({
               `}
             >
               {formatDayOfMonth(day)}
-              {/* Example dot on day 16 */}
-              {formatDayOfMonth(day) === "16" && !isSelected && inMonth && (
-                <div className="w-1 h-1 bg-gray-600 rounded-full mx-auto mt-1" />
+              {hasRequests && inMonth && (
+                <div
+                  className={`
+      w-1 h-1 rounded-full mx-auto mt-1
+      ${isSelected ? "bg-white" : "bg-green-500"}
+    `}
+                />
               )}
             </button>
           );

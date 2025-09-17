@@ -11,6 +11,11 @@ export default function RequestsPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(today);
   const [currentDate, setCurrentDate] = useState<Date>(today);
 
+  // Track requests per date
+  const [requestsByDate, setRequestsByDate] = useState<
+    Record<string, string[]>
+  >({});
+
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
       {/* Section Header */}
@@ -26,11 +31,16 @@ export default function RequestsPage() {
           setSelectedDate={setSelectedDate}
           currentDate={currentDate}
           setCurrentDate={setCurrentDate}
+          requestsByDate={requestsByDate} // NEW
         />
 
         {/* Right column - Data Section */}
         <div className="flex-1">
-          <DataSection selectedDate={selectedDate} />
+          <DataSection
+            selectedDate={selectedDate}
+            requestsByDate={requestsByDate}
+            setRequestsByDate={setRequestsByDate}
+          />
         </div>
       </div>
     </div>
