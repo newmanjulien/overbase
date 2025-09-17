@@ -55,7 +55,7 @@ function CustomersLayout() {
     <div className="bg-[#FAFAFA] min-h-screen">
       <Header
         title="Customers"
-        subtitle="Add customers so you can reference them in workflows and so your AI can collaborate with them on your tasks."
+        subtitle="Add customers who you want us to consult while collecting data for you or who you want us to send data to."
         buttonLabel="Add customer"
         onButtonClick={() => {}}
         variant="black"
@@ -143,7 +143,7 @@ function CustomersLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="Your AI can collaborate with both customers and internal colleagues"
+            text="We can also consult your colleagues or share data with your colleagues"
             linkText="Colleagues"
             onClick={() => router.push("/dashboard/colleagues")}
           />
