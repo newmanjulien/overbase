@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "hndl",
-  description: "Create and edit workflows",
+  title: "Overbase",
+  description: "Easiest Customer Success data",
   icons: "/favicon.ico",
 };
 
