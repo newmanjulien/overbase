@@ -143,7 +143,7 @@ function CustomersLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="We can also consult your colleagues or share data with your colleagues"
+            text="We can also consult your colleagues when collecting data and we can also share data with your colleagues"
             linkText="Colleagues"
             onClick={() => router.push("/dashboard/colleagues")}
           />
