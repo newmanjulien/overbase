@@ -74,7 +74,7 @@ export function External() {
                 className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
               />
             }
-            actions={
+            menu={
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -112,7 +112,7 @@ export function External() {
                   className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
                 />
               }
-              actions={
+              menu={
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
