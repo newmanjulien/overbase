@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import Logo from "../../components/ui/Logo";
-import LogoSmall from "../../components/ui/LogoSmall";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,7 +26,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { hideFooter } = useFooterContext();
 
   const navItems = [
-    { href: "/dashboard/agents", label: "Agents" },
+    { href: "/dashboard/requests", label: "Requests" },
     { href: "/dashboard/integrations", label: "Integrations" },
     { href: "/dashboard/colleagues", label: "Colleagues" },
     { href: "/dashboard/external", label: "External" },
