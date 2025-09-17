@@ -8,6 +8,7 @@ import type { Integration } from "./DummyData";
 import { integrations } from "./DummyData";
 import { useIntegrationContext } from "../../../lib/integrationContext";
 import { Header } from "../../../components/ui/Header";
+import { Plug } from "lucide-react";
 
 export function Integrations() {
   const router = useRouter();
@@ -48,9 +49,13 @@ export function Integrations() {
           <div className="flex-1 flex flex-col gap-2">
             {installedIntegrations.length === 0 ? (
               <EmptyState
+                title="No Integrations Installed"
+                description="You don't have any integration installed."
+                buttonLabel="Browse integrations"
                 onButtonClick={handleBrowseClick}
                 className="py-32 min-h-[600px]"
-                withBorder={true} // ✅ show border
+                withBorder={true}
+                icon={<Plug className="w-full h-full" />}
               />
             ) : (
               installedIntegrations.map((integration) => (

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatDayLabel } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
+import { Calendar, Database } from "lucide-react";
 
 interface DataSectionProps {
   selectedDate: Date | null;
@@ -83,22 +84,8 @@ export default function DataSection({
               buttonLabel="Request data"
               onButtonClick={handleRequestData}
               buttonVariant="primary"
-              withBorder={false} // 🚫 no border
-              icon={
-                <svg
-                  className="w-10 h-10 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-6 0h6m-6 0V7a1 1 0 00-1 1v9a1 1 0 001 1h8a1 1 0 001-1V8a1 1 0 00-1-1h-1"
-                  />
-                </svg>
-              }
+              withBorder={false}
+              icon={<Database className="w-10 h-10 text-gray-600" />}
             />
           ) : (
             <div className="space-y-6">
@@ -121,10 +108,13 @@ export default function DataSection({
             </div>
           )
         ) : (
-          // Schedule view (empty for now)
-          <div className="text-gray-500 text-center italic">
-            No schedule available yet.
-          </div>
+          // Schedule view using EmptyState without button
+          <EmptyState
+            title="Nothing in your calendar"
+            description="You're all caught up."
+            withBorder={false}
+            icon={<Calendar className="w-10 h-10 text-gray-600" />}
+          />
         )}
       </>
     </div>
