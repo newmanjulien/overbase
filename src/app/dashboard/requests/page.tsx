@@ -8,9 +8,8 @@ import { Header } from "../../../components/ui/Header";
 export default function RequestsPage() {
   const today = new Date();
 
-  const [selectedDate, setSelectedDate] = useState<number | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(today);
+  const [currentDate, setCurrentDate] = useState<Date>(today);
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
@@ -25,19 +24,13 @@ export default function RequestsPage() {
         <Calendar
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
-          currentMonth={currentMonth}
-          setCurrentMonth={setCurrentMonth}
-          currentYear={currentYear}
-          setCurrentYear={setCurrentYear}
+          currentDate={currentDate}
+          setCurrentDate={setCurrentDate}
         />
 
         {/* Right column - Data Section */}
         <div className="flex-1">
-          <DataSection
-            selectedDate={selectedDate}
-            currentMonth={currentMonth}
-            currentYear={currentYear}
-          />
+          <DataSection selectedDate={selectedDate} />
         </div>
       </div>
     </div>

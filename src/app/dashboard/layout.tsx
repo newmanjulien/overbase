@@ -43,7 +43,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center space-x-8">
               <div className="h-7">
-                <Link href="/dashboard/agents">
+                <Link href="/dashboard/requests">
                   <Image
                     src="/images/logo.png"
                     alt="Logo"

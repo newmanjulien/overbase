@@ -1,117 +1,54 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../../../components/ui/button";
-
-const DAYS_OF_WEEK = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+import {
+  formatMonthYear,
+  formatDayOfMonth,
+  formatWeekdayShort,
+  getCalendarGrid,
+  getWeekdays,
+  getPrevMonth,
+  getNextMonth,
+  isSameDayCheck,
+  isSameMonthCheck,
+} from "../../utils/date";
 
 interface CalendarProps {
-  selectedDate: number | null;
-  setSelectedDate: (date: number | null) => void;
-  currentMonth: number;
-  setCurrentMonth: (month: number) => void;
-  currentYear: number;
-  setCurrentYear: (year: number) => void;
+  selectedDate: Date | null;
+  setSelectedDate: (date: Date | null) => void;
+  currentDate: Date;
+  setCurrentDate: (date: Date) => void;
 }
 
 export default function Calendar({
   selectedDate,
   setSelectedDate,
-  currentMonth,
-  setCurrentMonth,
-  currentYear,
-  setCurrentYear,
+  currentDate,
+  setCurrentDate,
 }: CalendarProps) {
-  const [currentDate, setCurrentDate] = useState(
-    new Date(currentYear, currentMonth)
-  );
+  const calendarDays = getCalendarGrid(currentDate);
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-
-  // First day of the month and number of days
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-  // Build calendar grid
-  const calendarDays: {
-    day: number;
-    isCurrentMonth: boolean;
-    isNextMonth: boolean;
-  }[] = [];
-
-  // Prev month trailing days
-  for (let i = firstDayOfMonth - 1; i >= 0; i--) {
-    calendarDays.push({
-      day: daysInPrevMonth - i,
-      isCurrentMonth: false,
-      isNextMonth: false,
-    });
-  }
-
-  // Current month days
-  for (let day = 1; day <= daysInMonth; day++) {
-    calendarDays.push({
-      day,
-      isCurrentMonth: true,
-      isNextMonth: false,
-    });
-  }
-
-  // Next month leading days
-  const remainingCells = 42 - calendarDays.length; // 6 rows × 7 cols
-  for (let day = 1; day <= remainingCells; day++) {
-    calendarDays.push({
-      day,
-      isCurrentMonth: false,
-      isNextMonth: true,
-    });
-  }
-
-  // Handlers
   const navigateMonth = (direction: "prev" | "next") => {
-    setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      if (direction === "prev") {
-        newDate.setMonth(prev.getMonth() - 1);
-      } else {
-        newDate.setMonth(prev.getMonth() + 1);
-      }
-      setCurrentMonth(newDate.getMonth());
-      setCurrentYear(newDate.getFullYear());
-      return newDate;
-    });
+    const newDate =
+      direction === "prev"
+        ? getPrevMonth(currentDate)
+        : getNextMonth(currentDate);
+
+    setCurrentDate(newDate);
     setSelectedDate(null);
   };
 
-  const handleDayClick = (day: number, isCurrentMonth: boolean) => {
-    if (isCurrentMonth) {
-      setSelectedDate(selectedDate === day ? null : day);
-    }
+  const handleDayClick = (day: Date) => {
+    setSelectedDate(isSameDayCheck(selectedDate, day) ? null : day);
   };
 
   return (
-    <div className="w-full max-w-lg bg-white p-8 rounded-lg">
+    <div className="w-full max-w-md bg-white p-6 rounded-lg">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-foreground">
-          {MONTHS[month]} {year}
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-xl font-medium text-foreground">
+          {formatMonthYear(currentDate)}
         </h1>
         <div className="flex items-center gap-2">
           <Button
@@ -134,44 +71,41 @@ export default function Calendar({
       </div>
 
       {/* Days of week */}
-      <div className="grid grid-cols-7 gap-3 mb-2">
-        {DAYS_OF_WEEK.map((day) => (
+      <div className="grid grid-cols-7 gap-3 mb-1">
+        {getWeekdays().map((day) => (
           <div
-            key={day}
-            className="text-sm font-medium text-muted-foreground text-center py-3"
+            key={formatWeekdayShort(day)}
+            className="text-xs text-muted-foreground text-center py-3"
           >
-            {day}
+            {formatWeekdayShort(day)}
           </div>
         ))}
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-y-1 gap-x-3">
-        {calendarDays.map((dateObj, index) => {
-          const isSelected =
-            dateObj.isCurrentMonth && selectedDate === dateObj.day;
-
-          if (!dateObj.isCurrentMonth) {
-            return <div key={index} className="h-16 w-16" />;
-          }
+      <div className="grid grid-cols-7 gap-1">
+        {calendarDays.map((day, index) => {
+          const isSelected = isSameDayCheck(selectedDate, day);
+          const inMonth = isSameMonthCheck(currentDate, day);
 
           return (
             <button
               key={index}
-              onClick={() =>
-                handleDayClick(dateObj.day, dateObj.isCurrentMonth)
-              }
+              onClick={() => inMonth && handleDayClick(day)}
               className={`
-                h-16 w-16 rounded-lg text-sm font-medium transition-colors
+                aspect-square w-full rounded-lg text-sm transition-colors
                 ${
                   isSelected
                     ? "bg-gray-800 text-white"
-                    : "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                    : inMonth
+                    ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                    : "bg-transparent"
                 }
               `}
             >
-              {dateObj.day}
-              {dateObj.day === 16 && !isSelected && (
+              {formatDayOfMonth(day)}
+              {/* Example dot on day 16 */}
+              {formatDayOfMonth(day) === "16" && !isSelected && inMonth && (
                 <div className="w-1 h-1 bg-gray-600 rounded-full mx-auto mt-1" />
               )}
             </button>

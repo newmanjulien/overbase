@@ -6,8 +6,8 @@ import { Button } from "./button";
 
 interface RowCardProps {
   id?: number;
-  title: string;
-  titleClassName?: string; // optional prop to customize title styling
+  title?: string; // now optional
+  titleClassName?: string;
   subtitle?: ReactNode;
   image?: string;
   actions?: ReactNode;
@@ -16,7 +16,8 @@ interface RowCardProps {
   buttonOnClick?: () => void;
   buttonClassName?: string;
   showGreenDot?: boolean;
-  leading?: ReactNode; // content on the left (e.g., checkbox)
+  leading?: ReactNode;
+  contentBox?: ReactNode; // NEW — for grey text box
 }
 
 export function RowCard({
@@ -31,6 +32,7 @@ export function RowCard({
   buttonClassName = "text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60",
   showGreenDot = false,
   leading,
+  contentBox,
 }: RowCardProps) {
   return (
     <div className="flex items-center justify-between py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-lg">
@@ -50,24 +52,34 @@ export function RowCard({
           )
         ) : null}
 
-        {/* Title and subtitle */}
+        {/* Main content area */}
         <div className="min-w-0 max-w-xl">
-          <h3
-            className={`text-sm tracking-tight leading-tight truncate ${
-              titleClassName ?? "text-gray-700 font-medium"
-            }`}
-          >
-            {title}
-          </h3>
-          {subtitle && (
-            <p className="text-gray-500 text-sm font-light leading-relaxed truncate">
-              {subtitle}
-            </p>
+          {contentBox ? (
+            <div className="p-2 bg-gray-50 rounded-lg text-sm text-gray-700 leading-tight overflow-hidden">
+              {contentBox}
+            </div>
+          ) : (
+            <>
+              {title && (
+                <h3
+                  className={`text-sm tracking-tight leading-tight truncate ${
+                    titleClassName ?? "text-gray-700 font-medium"
+                  }`}
+                >
+                  {title}
+                </h3>
+              )}
+              {subtitle && (
+                <p className="text-gray-500 text-sm font-light leading-relaxed truncate">
+                  {subtitle}
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>
 
-      {/* Actions and buttons on right */}
+      {/* Actions (horizontal by default) */}
       <div className="flex items-center space-x-3">
         {buttonLabel && buttonLabel.trim() !== "" && (
           <Button
