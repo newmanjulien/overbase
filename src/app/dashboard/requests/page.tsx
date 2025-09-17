@@ -21,7 +21,7 @@ export default function RequestsPage() {
       {/* Section Header */}
       <Header
         title="Requests"
-        subtitle="Track and manage data requests across your workflows."
+        subtitle="Request data and manage your data requests in a way that aligns with your customer meetings."
         buttonLabel="Request data"
         onButtonClick={() => {
           console.log("Request data clicked");
