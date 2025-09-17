@@ -83,7 +83,7 @@ export default function DataSection({
               description="You have not requested any data yet for this day"
               buttonLabel="Request data"
               onButtonClick={handleRequestData}
-              buttonVariant="primary"
+              buttonVariant="secondary"
               withBorder={false}
               icon={<Database className="w-10 h-10 text-gray-600" />}
             />
@@ -110,8 +110,10 @@ export default function DataSection({
         ) : (
           // Schedule view using EmptyState without button
           <EmptyState
-            title="Nothing in your calendar"
-            description="There's nothing in your calendar on this day"
+            title="Calendar not linked"
+            description="Link your calendar to see your schedule"
+            buttonLabel="Link calendar"
+            buttonVariant="secondary"
             withBorder={false}
             icon={<Calendar className="w-10 h-10 text-gray-600" />}
           />

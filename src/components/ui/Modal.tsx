@@ -5,7 +5,26 @@ import { Label } from "./label";
 import { Switch } from "./switch";
 import { Button } from "./button";
 import { X } from "lucide-react";
-import { ModalContent } from "../../app/dashboard/agents/DummyData";
+
+// Define the types directly in this file
+interface ModalField {
+  type: "input" | "switch";
+  label: string;
+  placeholder?: string;
+}
+
+interface ModalAction {
+  label: string;
+  type?: "default" | "secondary";
+  callback: string;
+}
+
+interface ModalContent {
+  title: string;
+  description?: string;
+  fields: ModalField[];
+  actions: ModalAction[];
+}
 
 interface ModalProps {
   isOpen: boolean;
