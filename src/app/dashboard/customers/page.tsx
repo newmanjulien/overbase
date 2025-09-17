@@ -15,20 +15,20 @@ import { InfoCard } from "../../../components/ui/InfoCard";
 import { useRouter } from "next/navigation";
 import { Header } from "../../../components/ui/Header";
 
-interface Colleague {
+interface Customer {
   id: string;
   name: string;
-  role: string;
+  company: string;
 }
 
-const mockColleagues: Colleague[] = [
-  { id: "1", name: "John Smith", role: "Developer" },
-  { id: "2", name: "Sarah Wilson", role: "Designer" },
-  { id: "3", name: "Mike Johnson", role: "Product Manager" },
+const mockCustomers: Customer[] = [
+  { id: "101", name: "Emily Carter", company: "Acme Corp" },
+  { id: "102", name: "David Lee", company: "Globex Inc" },
+  { id: "103", name: "Olivia Martinez", company: "Initech" },
 ];
 
-export function Colleagues() {
-  const [selectedColleagues, setSelectedColleagues] = useState<string[]>([]);
+function CustomersLayout() {
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const router = useRouter();
 
@@ -36,42 +36,37 @@ export function Colleagues() {
     const isChecked = checked === true;
     setSelectAll(isChecked);
     if (isChecked) {
-      setSelectedColleagues(mockColleagues.map((c) => c.id));
+      setSelectedCustomers(mockCustomers.map((c) => c.id));
     } else {
-      setSelectedColleagues([]);
+      setSelectedCustomers([]);
     }
   };
 
-  const handleSelectColleague = (colleagueId: string, checked: boolean) => {
+  const handleSelectCustomer = (customerId: string, checked: boolean) => {
     if (checked) {
-      setSelectedColleagues((prev) => [...prev, colleagueId]);
+      setSelectedCustomers((prev) => [...prev, customerId]);
     } else {
-      setSelectedColleagues((prev) => prev.filter((id) => id !== colleagueId));
+      setSelectedCustomers((prev) => prev.filter((id) => id !== customerId));
       setSelectAll(false);
     }
   };
 
   return (
     <div className="bg-[#FAFAFA] min-h-screen">
-      {/* Header */}
       <Header
-        title="Colleagues"
-        subtitle="Add colleagues so you can reference them in workflows and so your AI can collaborate with them on your tasks."
-        buttonLabel="Add colleague"
+        title="Customers"
+        subtitle="Add customers so you can reference them in workflows and so your AI can collaborate with them on your tasks."
+        buttonLabel="Add customer"
         onButtonClick={() => {}}
         variant="black"
       />
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="w-full flex flex-col gap-3">
           {/* Select All card */}
           <RowCard
             title="Select all"
             titleClassName="text-gray-500 font-normal"
-            subtitle=""
-            buttonLabel=""
-            buttonOnClick={undefined}
             leading={
               <Checkbox
                 checked={selectAll}
@@ -79,7 +74,7 @@ export function Colleagues() {
                 className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
               />
             }
-            actions={
+            menu={
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -100,28 +95,24 @@ export function Colleagues() {
                 </DropdownMenuContent>
               </DropdownMenu>
             }
-            image={undefined}
           />
 
-          {/* Colleague cards */}
-          {mockColleagues.map((colleague) => (
+          {/* Customer cards */}
+          {mockCustomers.map((customer) => (
             <RowCard
-              key={colleague.id}
-              title={colleague.name}
-              subtitle={colleague.role}
-              image={undefined}
-              buttonLabel=""
-              buttonOnClick={undefined}
+              key={customer.id}
+              title={customer.name}
+              subtitle={customer.company}
               leading={
                 <Checkbox
-                  checked={selectedColleagues.includes(colleague.id)}
+                  checked={selectedCustomers.includes(customer.id)}
                   onCheckedChange={(checked) =>
-                    handleSelectColleague(colleague.id, checked as boolean)
+                    handleSelectCustomer(customer.id, checked as boolean)
                   }
                   className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
                 />
               }
-              actions={
+              menu={
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -152,12 +143,16 @@ export function Colleagues() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="Your AI can collaborate with both internal colleagues and external partners"
-            linkText="External partners"
-            onClick={() => router.push("/dashboard/external")}
+            text="Your AI can collaborate with both customers and internal colleagues"
+            linkText="Colleagues"
+            onClick={() => router.push("/dashboard/colleagues")}
           />
         </div>
       </div>
     </div>
   );
+}
+
+export default function CustomersPage() {
+  return <CustomersLayout />;
 }
