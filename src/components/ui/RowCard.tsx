@@ -35,7 +35,7 @@ export function RowCard({
   contentBox,
 }: RowCardProps) {
   return (
-    <div className="flex items-center justify-between py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-lg">
+    <div className="flex items-center justify-start gap-x-6 py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-lg">
       <div className="flex items-center space-x-4 min-w-0">
         {leading || image ? (
           image ? (
@@ -55,7 +55,7 @@ export function RowCard({
         {/* Main content area */}
         <div className="min-w-0 max-w-xl">
           {contentBox ? (
-            <div className="p-2 bg-gray-50 rounded-lg text-sm text-gray-700 leading-tight overflow-hidden">
+            <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 leading-relaxed overflow-hidden line-clamp-2">
               {contentBox}
             </div>
           ) : (
