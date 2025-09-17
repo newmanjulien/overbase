@@ -114,6 +114,7 @@ export default function DataSection({
             description="Link your calendar to see your schedule"
             buttonLabel="Link calendar"
             buttonVariant="secondary"
+            onButtonClick={() => {}}
             withBorder={false}
             icon={<Calendar className="w-10 h-10 text-gray-600" />}
           />
