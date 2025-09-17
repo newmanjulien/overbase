@@ -48,7 +48,7 @@ export default function Calendar({
     <div className="w-full max-w-md bg-white border border-gray-100 p-6 rounded-lg self-start">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-medium text-foreground">
+        <h1 className="text-xl font-medium text-foreground">
           {formatMonthYear(currentDate)}
         </h1>
         <div className="flex items-center gap-2">
@@ -89,27 +89,29 @@ export default function Calendar({
           const isSelected = isSameDayCheck(selectedDate, day);
           const inMonth = isSameMonthCheck(currentDate, day);
 
-          // ✅ Only requests matter for dots
+          if (!inMonth) {
+            // 👇 Empty cell to preserve grid alignment
+            return <div key={index} className="aspect-square w-full" />;
+          }
+
           const dateKey = day.toISOString().split("T")[0];
           const hasRequests = !!requestsByDate[dateKey]?.length;
 
           return (
             <button
               key={index}
-              onClick={() => inMonth && handleDayClick(day)}
+              onClick={() => handleDayClick(day)}
               className={`
                 aspect-square w-full rounded-lg text-sm transition-colors
                 ${
                   isSelected
-                    ? "bg-gray-800 text-white"
-                    : inMonth
-                    ? "bg-gray-100 text-gray-900 hover:bg-gray-300"
-                    : "bg-transparent"
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-100"
                 }
               `}
             >
               {formatDayOfMonth(day)}
-              {hasRequests && inMonth && (
+              {hasRequests && (
                 <div
                   className={`
                     w-1 h-1 rounded-full mx-auto mt-1

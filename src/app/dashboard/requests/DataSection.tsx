@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatDayLabel } from "../../utils/date";
+import { formatDayLabel, isBeforeToday } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { Calendar, Database } from "lucide-react";
@@ -27,7 +27,7 @@ export default function DataSection({
   requestsByDate,
   setRequestsByDate,
 }: DataSectionProps) {
-  const [selectedView, setSelectedView] = useState<"requests" | "schedule">(
+  const [selectedView, setSelectedView] = useState<"requests" | "meetings">(
     "requests"
   );
 
@@ -49,6 +49,9 @@ export default function DataSection({
   const label = formatDayLabel(selectedDate);
   const [weekday, dayNumber] = label.split(" ");
 
+  // Check if the selected date is in the past
+  const isPastDate = isBeforeToday(selectedDate);
+
   return (
     <div className="w-full pt-4">
       <>
@@ -59,7 +62,7 @@ export default function DataSection({
             <span>{dayNumber}</span>
           </h2>
           <div className="flex bg-gray-50 border border-gray-200 rounded-lg p-1">
-            {(["requests", "schedule"] as const).map((view) => (
+            {(["requests", "meetings"] as const).map((view) => (
               <button
                 key={view}
                 onClick={() => setSelectedView(view)}
@@ -78,15 +81,24 @@ export default function DataSection({
         {/* Content */}
         {selectedView === "requests" ? (
           dataCards.length === 0 ? (
-            <EmptyState
-              title="No data requested"
-              description="You have not requested any data yet for this day"
-              buttonLabel="Request data"
-              onButtonClick={handleRequestData}
-              buttonVariant="secondary"
-              withBorder={false}
-              icon={<Database className="w-10 h-10 text-gray-600" />}
-            />
+            isPastDate ? (
+              <EmptyState
+                title="No data received"
+                description="You did not receive any data on this day"
+                withBorder={false}
+                icon={<Database className="w-10 h-10 text-gray-600" />}
+              />
+            ) : (
+              <EmptyState
+                title="No data requested"
+                description="You have not requested any data yet for this day"
+                buttonLabel="Request data"
+                onButtonClick={handleRequestData}
+                buttonVariant="secondary"
+                withBorder={false}
+                icon={<Database className="w-10 h-10 text-gray-600" />}
+              />
+            )
           ) : (
             <div className="space-y-6">
               {dataCards.map((card, index) => (
@@ -96,10 +108,17 @@ export default function DataSection({
                   actions={
                     <>
                       <button className="py-2 px-4 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                        Manage
+                        Edit
                       </button>
-                      <button className="py-2 px-4 bg-white border border-gray-100 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                        View
+                      <button
+                        disabled={isPastDate}
+                        className={`py-2 px-4 rounded-lg text-sm transition-colors ${
+                          isPastDate
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-white border border-gray-100 text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        Get data
                       </button>
                     </>
                   }
@@ -108,10 +127,9 @@ export default function DataSection({
             </div>
           )
         ) : (
-          // Schedule view using EmptyState without button
           <EmptyState
             title="Calendar not linked"
-            description="Link your calendar to see your schedule"
+            description="Link your calendar to see your meetings"
             buttonLabel="Link calendar"
             buttonVariant="secondary"
             onButtonClick={() => {}}

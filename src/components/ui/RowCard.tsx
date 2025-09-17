@@ -33,7 +33,7 @@ export function RowCard({
   onEdit,
   buttonLabel,
   buttonOnClick,
-  buttonClassName = "text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60",
+  buttonClassName = "text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60 whitespace-nowrap flex-shrink-0",
   showGreenDot = false,
 }: RowCardProps) {
   return (
@@ -57,7 +57,7 @@ export function RowCard({
       {/* Content area (shrinks first, always leaves space before buttons) */}
       <div className="min-w-0 max-w-xl flex-shrink mr-4">
         {contentBox ? (
-          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 leading-relaxed overflow-hidden line-clamp-2">
+          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 leading-tight overflow-hidden line-clamp-2">
             {contentBox}
           </div>
         ) : (
@@ -81,9 +81,9 @@ export function RowCard({
       </div>
 
       {/* Right: actions + green dot + menu */}
-      <div className="flex items-center gap-x-3 ml-auto">
+      <div className="flex items-center gap-x-3 ml-auto flex-shrink-0">
         {/* Actions group */}
-        <div className="flex items-center gap-x-3">
+        <div className="flex items-center gap-x-3 flex-shrink-0">
           {buttonLabel && buttonLabel.trim() !== "" && (
             <Button
               variant="ghost"
@@ -97,7 +97,7 @@ export function RowCard({
           {onEdit && (
             <Button
               variant="ghost"
-              className="text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60"
+              className="text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60 whitespace-nowrap flex-shrink-0"
               onClick={onEdit}
             >
               Edit

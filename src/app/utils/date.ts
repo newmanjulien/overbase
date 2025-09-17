@@ -9,6 +9,8 @@ import {
   eachDayOfInterval,
   isSameDay,
   isSameMonth,
+  startOfDay,
+  isBefore,
 } from "date-fns";
 
 /**
@@ -52,3 +54,13 @@ export const isSameDayCheck = (d1: Date | null, d2: Date) =>
 
 export const isSameMonthCheck = (reference: Date, day: Date) =>
   isSameMonth(day, reference);
+
+/**
+ * Custom helpers
+ */
+export const isBeforeToday = (date: Date) => {
+  const today = startOfDay(new Date());
+  return isBefore(date, today);
+};
+
+export const isTodayOrFuture = (date: Date) => !isBeforeToday(date);
