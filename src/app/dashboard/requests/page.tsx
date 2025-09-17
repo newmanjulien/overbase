@@ -22,6 +22,11 @@ export default function RequestsPage() {
       <Header
         title="Requests"
         subtitle="Track and manage data requests across your workflows."
+        buttonLabel="Request data"
+        onButtonClick={() => {
+          console.log("Request data clicked");
+        }}
+        variant="black"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-10">

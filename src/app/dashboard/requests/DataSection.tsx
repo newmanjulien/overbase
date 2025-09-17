@@ -83,7 +83,7 @@ export default function DataSection({
               description="You have not requested any data yet for this day"
               buttonLabel="Request data"
               onButtonClick={handleRequestData}
-              buttonVariant="primary"
+              buttonVariant="secondary"
               withBorder={false}
               icon={<Database className="w-10 h-10 text-gray-600" />}
             />
