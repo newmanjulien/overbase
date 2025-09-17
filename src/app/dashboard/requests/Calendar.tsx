@@ -106,7 +106,7 @@ export default function Calendar({
                 ${
                   isSelected
                     ? "bg-gray-900 text-white"
-                    : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-100"
+                    : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-00"
                 }
               `}
             >

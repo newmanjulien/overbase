@@ -12,20 +12,14 @@ interface DataSectionProps {
   setRequestsByDate: React.Dispatch<
     React.SetStateAction<Record<string, string[]>>
   >;
+  onRequestData: () => void; // ✅ added
 }
-
-const SAMPLE_PROMPTS = [
-  "I have an upcoming QBR with the Docusign account. Can you update the numbers in the attached deck?",
-  "Can you analyze the Q3 performance metrics and create a summary report for the leadership team?",
-  "Please review the customer feedback from last month and identify the top 3 areas for improvement",
-  "Generate a competitive analysis comparing our pricing strategy with the top 5 competitors",
-  "Create a project timeline for the new product launch including key milestones and dependencies",
-];
 
 export default function DataSection({
   selectedDate,
   requestsByDate,
   setRequestsByDate,
+  onRequestData,
 }: DataSectionProps) {
   const [selectedView, setSelectedView] = useState<"requests" | "meetings">(
     "requests"
@@ -35,15 +29,6 @@ export default function DataSection({
 
   const dateKey = selectedDate.toISOString().split("T")[0];
   const dataCards = requestsByDate[dateKey] || [];
-
-  const handleRequestData = () => {
-    const randomPrompt =
-      SAMPLE_PROMPTS[Math.floor(Math.random() * SAMPLE_PROMPTS.length)];
-    setRequestsByDate((prev) => ({
-      ...prev,
-      [dateKey]: [...(prev[dateKey] || []), randomPrompt],
-    }));
-  };
 
   // Split weekday and day number (e.g. "Fri 05")
   const label = formatDayLabel(selectedDate);
@@ -93,7 +78,7 @@ export default function DataSection({
                 title="No data requested"
                 description="You have not requested any data yet for this day"
                 buttonLabel="Request data"
-                onButtonClick={handleRequestData}
+                onButtonClick={onRequestData} // ✅ uses shared handler
                 buttonVariant="secondary"
                 withBorder={false}
                 icon={<Database className="w-10 h-10 text-gray-600" />}

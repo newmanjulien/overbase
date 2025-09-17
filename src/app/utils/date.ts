@@ -17,7 +17,7 @@ import {
  * Format helpers
  */
 export const formatMonthYear = (date: Date) => format(date, "MMMM yyyy");
-export const formatDayLabel = (date: Date) => format(date, "EEE dd"); // e.g. Mon 16
+export const formatDayLabel = (date: Date) => format(date, "MMM dd"); // e.g. Apr 04
 export const formatDayOfMonth = (date: Date) => format(date, "d");
 export const formatWeekdayShort = (date: Date) =>
   format(date, "EEE").toUpperCase();
