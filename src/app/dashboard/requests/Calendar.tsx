@@ -46,7 +46,7 @@ export default function Calendar({
   };
 
   return (
-    <div className="w-full max-w-md bg-white p-6 rounded-lg">
+    <div className="w-full max-w-md bg-white p-6 rounded-lg self-start">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-xl font-medium text-foreground">

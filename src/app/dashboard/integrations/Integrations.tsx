@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { RowCard } from "../../../components/ui/RowCard";
-import { EmptyState } from "./EmptyState";
+import { EmptyState } from "../../../components/ui/EmptyState";
 import { PopularIntegrations } from "./PopularIntegrations";
 import type { Integration } from "./DummyData";
 import { integrations } from "./DummyData";
@@ -47,7 +47,11 @@ export function Integrations() {
           {/* Installed Integrations */}
           <div className="flex-1 flex flex-col gap-2">
             {installedIntegrations.length === 0 ? (
-              <EmptyState onButtonClick={handleBrowseClick} />
+              <EmptyState
+                onButtonClick={handleBrowseClick}
+                className="py-32 min-h-[600px]"
+                withBorder={true} // ✅ show border
+              />
             ) : (
               installedIntegrations.map((integration) => (
                 <RowCard

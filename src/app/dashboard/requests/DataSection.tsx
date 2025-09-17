@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { formatDayLabel } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
+import { EmptyState } from "../../../components/ui/EmptyState";
 
 interface DataSectionProps {
   selectedDate: Date | null;
@@ -76,9 +77,14 @@ export default function DataSection({
         {/* Content */}
         {selectedView === "requests" ? (
           dataCards.length === 0 ? (
-            // Empty state
-            <div className="flex flex-col items-center justify-center px-4">
-              <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-6">
+            <EmptyState
+              title="No data requested"
+              description="You have no data requested yet. Your requested data will show up here."
+              buttonLabel="Request data"
+              onButtonClick={handleRequestData}
+              buttonVariant="primary"
+              withBorder={false} // 🚫 no border
+              icon={
                 <svg
                   className="w-10 h-10 text-gray-600"
                   fill="none"
@@ -92,21 +98,8 @@ export default function DataSection({
                     d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-6 0h6m-6 0V7a1 1 0 00-1 1v9a1 1 0 001 1h8a1 1 0 001-1V8a1 1 0 00-1-1h-1"
                   />
                 </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                No data requested
-              </h3>
-              <p className="text-gray-500 text-center mb-8 max-w-sm">
-                You have no data requested yet. Your requested data will show up
-                here.
-              </p>
-              <button
-                onClick={handleRequestData}
-                className="py-3 px-6 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                Request data
-              </button>
-            </div>
+              }
+            />
           ) : (
             <div className="space-y-6">
               {dataCards.map((card, index) => (
