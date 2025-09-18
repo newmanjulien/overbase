@@ -37,8 +37,8 @@ export function EmptyState({
       } py-12 px-10 flex flex-col items-center justify-center text-center min-h-[250px] ${className}`}
     >
       {/* Icon bubble */}
-      <div className="w-16 h-16 bg-gray-200/60 rounded-full flex items-center justify-center mb-6">
-        <Icon className="w-6 h-6 text-gray-600" />
+      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+        <Icon className="w-6 h-6 text-gray-400" />
       </div>
 
       <h2 className="text-lg font-medium text-gray-900 mb-2">{title}</h2>
