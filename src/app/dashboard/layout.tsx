@@ -62,7 +62,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`px-2.5 py-1.5 text-sm font-normal rounded-md hover:text-gray-900 hover:bg-gray-100 ${
+                      className={`px-2.5 py-1.5 text-sm font-normal rounded-lg hover:text-gray-900 hover:bg-gray-100 ${
                         isActive ? "text-gray-900 bg-gray-100" : "text-gray-500"
                       }`}
                     >

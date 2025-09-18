@@ -22,7 +22,7 @@ export function TemplateCard({
   onLaunch,
 }: TemplateCardProps) {
   return (
-    <div className="rounded-xl border border-gray-200/60 overflow-hidden cursor-pointer hover:shadow-md transform transition-all duration-200">
+    <div className="rounded-3xl border border-gray-200/60 overflow-hidden cursor-pointer hover:shadow-md transform transition-all duration-200">
       {/* Top gradient + image/logo */}
       <div
         className={`relative h-56 flex items-center justify-center bg-gradient-to-r ${gradientFrom} ${gradientTo}`}
@@ -48,7 +48,7 @@ export function TemplateCard({
         <Button
           variant="secondary"
           size="sm"
-          className="absolute top-3 right-3 bg-white text-gray-800 hover:bg-gray-50 font-normal"
+          className="absolute top-3 right-3 bg-white rounded-lg text-gray-800 hover:bg-gray-50 font-normal"
           onClick={onLaunch}
         >
           Launch
