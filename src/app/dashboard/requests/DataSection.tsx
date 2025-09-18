@@ -10,6 +10,10 @@ import {
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { Calendar, Database } from "lucide-react";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "../../../components/ui/toggle-group";
 
 interface DataSectionProps {
   selectedDate: Date | null;
@@ -49,21 +53,19 @@ export default function DataSection({
             <span className="font-medium">{weekday}</span>
             <span>{dayNumber}</span>
           </h2>
-          <div className="flex bg-gray-50 border border-gray-200 rounded-lg p-1">
-            {(["requests", "meetings"] as const).map((view) => (
-              <button
-                key={view}
-                onClick={() => setSelectedView(view)}
-                className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                  selectedView === view
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {view.charAt(0).toUpperCase() + view.slice(1)}
-              </button>
-            ))}
-          </div>
+
+          {/* Shadcn ToggleGroup */}
+          <ToggleGroup
+            type="single"
+            value={selectedView}
+            onValueChange={(val) =>
+              val && setSelectedView(val as "requests" | "meetings")
+            }
+            variant="outline"
+          >
+            <ToggleGroupItem value="requests">Requests</ToggleGroupItem>
+            <ToggleGroupItem value="meetings">Meetings</ToggleGroupItem>
+          </ToggleGroup>
         </div>
 
         {selectedView === "requests" ? (
