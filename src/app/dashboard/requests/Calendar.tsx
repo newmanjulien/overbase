@@ -47,7 +47,7 @@ export default function Calendar({
     <div className="w-full max-w-lg bg-white border border-gray-100 p-6 rounded-2xl self-start">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-medium text-foreground">
+        <h1 className="text-lg font-medium text-foreground">
           {formatMonthYear(currentDate)}
         </h1>
         <div className="flex items-center gap-2">

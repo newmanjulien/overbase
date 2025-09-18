@@ -119,7 +119,7 @@ export default function DataSection({
   return (
     <div className="w-full pt-4">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl text-foreground flex items-baseline gap-1">
+        <h2 className="text-lg text-foreground flex items-baseline gap-1">
           <span className="font-medium">{monthLabel}</span>
           <span>{dayNumber}</span>
         </h2>
