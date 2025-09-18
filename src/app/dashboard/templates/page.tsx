@@ -65,7 +65,7 @@ function Templates() {
                   gradientFrom={template.gradientFrom}
                   gradientTo={template.gradientTo}
                   image={template.image}
-                  onLaunch={() => console.log(`Launching ${template.title}`)}
+                  onUse={() => console.log(`Using ${template.title}`)}
                 />
               ))}
             </div>

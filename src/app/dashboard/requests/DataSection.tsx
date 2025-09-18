@@ -6,6 +6,7 @@ import {
   isBeforeToday,
   getLocalDateKey,
   isToday,
+  isAfterToday, // ⬅️ new import
 } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -147,7 +148,8 @@ export default function DataSection({
               actions={
                 <>
                   <SecondaryButton>Edit</SecondaryButton>
-                  <SecondaryButton disabled={isPastDate}>
+                  {/* ✅ now disabled for future days */}
+                  <SecondaryButton disabled={isAfterToday(selectedDate)}>
                     Get data
                   </SecondaryButton>
                 </>

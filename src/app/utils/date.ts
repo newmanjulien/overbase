@@ -149,6 +149,11 @@ export function isTodayCheck(date: Date): boolean {
   return _isToday(date);
 }
 
+// ✅ NEW: disable future dates
+export function isAfterToday(date: Date): boolean {
+  return isBefore(startOfToday(), date);
+}
+
 // ---------------------------------------------------------------------------
 // Canonical re-exports (so call sites can gradually adopt date-fns names)
 // ---------------------------------------------------------------------------
