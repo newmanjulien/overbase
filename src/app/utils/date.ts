@@ -6,11 +6,31 @@ import {
   addMonths,
   isSameDay,
   isSameMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  addDays,
+  isBefore,
+  startOfToday,
 } from "date-fns";
 
-// ----------------------------
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+
+/**
+ * Calendar grid is Sunday-start, 6 weeks (42 cells) to match current UI.
+ * If you ever want Monday-start, change WEEK_STARTS_ON to 1 and you're done.
+ */
+const WEEK_STARTS_ON: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 0; // Sunday
+const GRID_CELLS = 42;
+
+/** Known Sunday used only to generate weekday labels. */
+const WEEK_REF = new Date(2000, 0, 2); // 2000-01-02 was a Sunday
+
+// ---------------------------------------------------------------------------
 // Formatting helpers
-// ----------------------------
+// ---------------------------------------------------------------------------
 
 export function formatMonthYear(date: Date): string {
   return format(date, "MMMM yyyy"); // e.g. "September 2025"
@@ -34,48 +54,42 @@ export function formatWeekdayLong(date: Date): string {
 
 // Composite label: for display only (don't parse downstream!)
 export function formatDayLabel(date: Date): string {
-  return `${formatMonthShort(date)} ${formatDayOfMonth(date)}`; // e.g. "Sep 17"
+  // Equivalent to `${formatMonthShort(date)} ${formatDayOfMonth(date)}`
+  return format(date, "MMM d"); // e.g. "Sep 17"
 }
 
-// ----------------------------
+// ---------------------------------------------------------------------------
 // Calendar utilities
-// ----------------------------
+// ---------------------------------------------------------------------------
 
+/**
+ * Returns 7 consecutive dates starting from the week start (Sunday),
+ * suitable for formatting weekday names. Date values are stable but arbitrary.
+ */
 export function getWeekdays(): Date[] {
-  const baseDate = new Date(2021, 5, 6); // Sunday
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(baseDate);
-    d.setDate(baseDate.getDate() + i);
-    return d;
-  });
+  const start = startOfWeek(WEEK_REF, { weekStartsOn: WEEK_STARTS_ON });
+  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
 }
 
+/**
+ * Returns a fixed 6x7 grid (42 dates) covering the month, padded with
+ * leading/trailing days as needed. DST-safe and locale-week-start aware.
+ */
 export function getCalendarGrid(date: Date): Date[] {
-  const start = startOfMonth(date);
-  const end = endOfMonth(date);
+  const monthStart = startOfMonth(date);
+  const monthEnd = endOfMonth(date);
 
-  const startDay = start.getDay(); // Sunday = 0
-  const daysInMonth = parseInt(format(end, "d")); // total days in month
+  const gridStart = startOfWeek(monthStart, { weekStartsOn: WEEK_STARTS_ON });
+  const gridEnd = endOfWeek(monthEnd, { weekStartsOn: WEEK_STARTS_ON });
 
-  const grid: Date[] = [];
+  const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
-  // Fill in days before start
-  for (let i = 0; i < startDay; i++) {
-    grid.push(new Date(start.getTime() - (startDay - i) * 86400000));
+  // Ensure 6 rows even when a month spans only 5 weeks visually.
+  while (days.length < GRID_CELLS) {
+    days.push(addDays(days[days.length - 1], 1));
   }
 
-  // Fill in days of current month
-  for (let i = 1; i <= daysInMonth; i++) {
-    grid.push(new Date(date.getFullYear(), date.getMonth(), i));
-  }
-
-  // Fill in next month's days to complete grid (6 weeks max = 42 cells)
-  while (grid.length < 42) {
-    const lastDate = grid[grid.length - 1];
-    grid.push(new Date(lastDate.getTime() + 86400000));
-  }
-
-  return grid;
+  return days;
 }
 
 export function getPrevMonth(date: Date): Date {
@@ -86,9 +100,9 @@ export function getNextMonth(date: Date): Date {
   return addMonths(date, 1);
 }
 
-// ----------------------------
+// ---------------------------------------------------------------------------
 // Comparisons
-// ----------------------------
+// ---------------------------------------------------------------------------
 
 export function isSameDayCheck(date1: Date | null, date2: Date): boolean {
   return !!date1 && isSameDay(date1, date2);
@@ -103,9 +117,7 @@ export function getLocalDateKey(date: Date): string {
 }
 
 export function isBeforeToday(date: Date): boolean {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return date < today;
+  return isBefore(date, startOfToday());
 }
 
 export function isTodayCheck(date: Date): boolean {

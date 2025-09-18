@@ -46,7 +46,7 @@ export default function RequestsPage() {
         variant="black"
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-14">
+      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-10">
         <Calendar
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
