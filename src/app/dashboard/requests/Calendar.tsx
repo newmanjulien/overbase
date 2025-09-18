@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../../../components/ui/button";
+import clsx from "clsx";
+
 import {
   formatMonthYear,
   formatDayOfMonth,
@@ -70,7 +72,7 @@ export default function Calendar({
         </div>
       </div>
 
-      {/* Days of week (labels directly from util; casing via CSS) */}
+      {/* Days of week */}
       <div className="grid grid-cols-7 gap-3 mb-1">
         {getWeekdayLabels().map((label) => (
           <div
@@ -98,23 +100,25 @@ export default function Calendar({
             <button
               key={cell.key}
               onClick={() => handleDayClick(cell.date)}
-              className={`
-                aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors
-                ${
-                  isSelected
-                    ? "bg-gray-900 text-white"
-                    : "bg-gray-50 text-gray-900 border border-gray-100 hover:border-2 hover:border-gray-900"
+              className={clsx(
+                "aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors",
+                {
+                  "bg-gray-900 text-white": isSelected,
+                  "bg-gray-100 text-gray-900 border border-2 border-gray-200 hover:border-2 hover:border-gray-900":
+                    cell.isToday && !isSelected, // today, not selected
+                  "bg-gray-50 text-gray-900 border border-gray-100 hover:border-2 hover:border-gray-900":
+                    !isSelected && !cell.isToday,
                 }
-              `}
+              )}
             >
               <span>{formatDayOfMonth(cell.date)}</span>
 
               {hasRequests && (
                 <span
-                  className={`
-                    absolute bottom-3 w-1.5 h-1.5 rounded-full 
-                    ${isSelected ? "bg-white" : "bg-green-500"}
-                  `}
+                  className={clsx(
+                    "absolute bottom-3 w-1.5 h-1.5 rounded-full",
+                    isSelected ? "bg-white" : "bg-green-500"
+                  )}
                 />
               )}
             </button>
