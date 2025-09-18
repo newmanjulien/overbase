@@ -46,7 +46,7 @@ export default function Calendar({
   };
 
   return (
-    <div className="w-full max-w-lg bg-white border border-gray-100 p-6 rounded-xl self-start">
+    <div className="w-full max-w-lg bg-white border border-gray-100 p-6 rounded-2xl self-start">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl font-medium text-foreground">
@@ -106,7 +106,7 @@ export default function Calendar({
                 ${
                   isSelected
                     ? "bg-gray-900 text-white"
-                    : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200 hover:border-2 hover:border-gray-900"
+                    : "bg-gray-50 text-gray-900 border border-gray-100 hover:border-2 hover:border-gray-900"
                 }
               `}
             >
