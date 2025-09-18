@@ -102,17 +102,24 @@ export default function Calendar({
               key={index}
               onClick={() => handleDayClick(day)}
               className={`
-                aspect-square w-full rounded-lg text-sm flex items-center justify-center transition-colors
+                aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors
                 ${
                   isSelected
                     ? "bg-gray-900 text-white"
-                    : hasRequests
-                    ? "bg-green-50 text-gray-900 hover:bg-green-100 border border-gray-200"
                     : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200"
                 }
               `}
             >
-              {formatDayOfMonth(day)}
+              <span>{formatDayOfMonth(day)}</span>
+
+              {hasRequests && (
+                <span
+                  className={`
+                    absolute bottom-3 w-1.5 h-1.5 rounded-full 
+                    ${isSelected ? "bg-white" : "bg-gray-900"}
+                  `}
+                />
+              )}
             </button>
           );
         })}
