@@ -19,7 +19,7 @@ export default function ConnectorsPage() {
   );
 
   const handleSelectConnector = (connector: Connectors) => {
-    router.push(`/dashboard/Connectors/${connector.id}`);
+    router.push(`/dashboard/connectors/${connector.id}`);
   };
 
   const handleBrowseClick = () => {
