@@ -1,25 +1,26 @@
 "use client";
 
+import { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../../../components/ui/button";
+import clsx from "clsx";
+
 import {
   formatMonthYear,
   formatDayOfMonth,
-  formatWeekdayShort,
-  getCalendarGrid,
-  getWeekdays,
-  getPrevMonth,
-  getNextMonth,
-  isSameDayCheck,
-  isSameMonthCheck,
+  getWeekdayLabels,
+  buildMonthGrid,
+  addMonths,
+  subMonths,
+  isSameDay,
 } from "../../utils/date";
 
 interface CalendarProps {
   selectedDate: Date | null;
-  setSelectedDate: (date: Date | null) => void;
+  setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
   currentDate: Date;
-  setCurrentDate: (date: Date) => void;
-  requestsByDate: Record<string, string[]>; // ✅ only requests
+  setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
+  requestsByDate: Record<string, string[]>;
 }
 
 export default function Calendar({
@@ -29,27 +30,24 @@ export default function Calendar({
   setCurrentDate,
   requestsByDate,
 }: CalendarProps) {
-  const calendarDays = getCalendarGrid(currentDate);
+  // Memoize: pure derivation from currentDate
+  const monthCells = useMemo(() => buildMonthGrid(currentDate), [currentDate]);
 
   const navigateMonth = (direction: "prev" | "next") => {
-    const newDate =
-      direction === "prev"
-        ? getPrevMonth(currentDate)
-        : getNextMonth(currentDate);
-
-    setCurrentDate(newDate);
-    setSelectedDate(null);
+    setCurrentDate((prev) =>
+      direction === "prev" ? subMonths(prev, 1) : addMonths(prev, 1)
+    );
   };
 
   const handleDayClick = (day: Date) => {
-    setSelectedDate(isSameDayCheck(selectedDate, day) ? null : day);
+    setSelectedDate((prev) => (prev && isSameDay(prev, day) ? null : day));
   };
 
   return (
-    <div className="w-full max-w-md bg-white p-6 rounded-lg self-start">
+    <div className="w-full max-w-lg bg-white border border-gray-100 p-8 rounded-3xl self-start">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-xl font-medium text-foreground">
+        <h1 className="text-lg font-medium text-foreground">
           {formatMonthYear(currentDate)}
         </h1>
         <div className="flex items-center gap-2">
@@ -58,6 +56,7 @@ export default function Calendar({
             size="icon"
             onClick={() => navigateMonth("prev")}
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
+            aria-label="Previous month"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -66,6 +65,7 @@ export default function Calendar({
             size="icon"
             onClick={() => navigateMonth("next")}
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
+            aria-label="Next month"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
@@ -74,48 +74,51 @@ export default function Calendar({
 
       {/* Days of week */}
       <div className="grid grid-cols-7 gap-3 mb-1">
-        {getWeekdays().map((day) => (
+        {getWeekdayLabels().map((label) => (
           <div
-            key={formatWeekdayShort(day)}
-            className="text-xs text-muted-foreground text-center py-3"
+            key={label}
+            className="text-xs text-muted-foreground text-center py-3 uppercase"
           >
-            {formatWeekdayShort(day)}
+            {label}
           </div>
         ))}
       </div>
 
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1">
-        {calendarDays.map((day, index) => {
-          const isSelected = isSameDayCheck(selectedDate, day);
-          const inMonth = isSameMonthCheck(currentDate, day);
+        {monthCells.map((cell) => {
+          const isSelected =
+            !!selectedDate && isSameDay(selectedDate, cell.date);
 
-          // ✅ Only requests matter for dots
-          const dateKey = day.toISOString().split("T")[0];
-          const hasRequests = !!requestsByDate[dateKey]?.length;
+          if (!cell.inMonth) {
+            return <div key={cell.key} className="aspect-square w-full" />;
+          }
+
+          const hasRequests = !!requestsByDate[cell.key]?.length;
 
           return (
             <button
-              key={index}
-              onClick={() => inMonth && handleDayClick(day)}
-              className={`
-                aspect-square w-full rounded-lg text-sm transition-colors
-                ${
-                  isSelected
-                    ? "bg-gray-800 text-white"
-                    : inMonth
-                    ? "bg-gray-100 text-gray-900 hover:bg-gray-300"
-                    : "bg-transparent"
+              key={cell.key}
+              onClick={() => handleDayClick(cell.date)}
+              className={clsx(
+                "aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors",
+                {
+                  "bg-gray-900 text-white": isSelected,
+                  "bg-gray-100 text-gray-900 border border-2 border-gray-200 hover:border-2 hover:border-gray-900":
+                    cell.isToday && !isSelected, // today, not selected
+                  "bg-gray-50 text-gray-900 border border-gray-100 hover:border-2 hover:border-gray-900":
+                    !isSelected && !cell.isToday,
                 }
-              `}
+              )}
             >
-              {formatDayOfMonth(day)}
-              {hasRequests && inMonth && (
-                <div
-                  className={`
-                    w-1 h-1 rounded-full mx-auto mt-1
-                    ${isSelected ? "bg-white" : "bg-green-500"}
-                  `}
+              <span>{formatDayOfMonth(cell.date)}</span>
+
+              {hasRequests && (
+                <span
+                  className={clsx(
+                    "absolute bottom-3 w-1.5 h-1.5 rounded-full",
+                    isSelected ? "bg-white" : "bg-green-500"
+                  )}
                 />
               )}
             </button>

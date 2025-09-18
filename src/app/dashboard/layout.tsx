@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IntegrationProvider } from "../../lib/integrationContext";
+import { ConnectorProvider } from "../../lib/connectorContext";
 import { FooterProvider, useFooterContext } from "../../lib/footerContext";
 
 export default function DashboardLayout({
@@ -13,11 +13,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <IntegrationProvider>
+    <ConnectorProvider>
       <FooterProvider>
         <DashboardLayoutContent>{children}</DashboardLayoutContent>
       </FooterProvider>
-    </IntegrationProvider>
+    </ConnectorProvider>
   );
 }
 
@@ -27,7 +27,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/dashboard/requests", label: "Requests" },
-    { href: "/dashboard/integrations", label: "Integrations" },
+    { href: "/dashboard/templates", label: "Templates" },
+    { href: "/dashboard/connectors", label: "Connectors" },
     { href: "/dashboard/colleagues", label: "Colleagues" },
     { href: "/dashboard/customers", label: "Customers" },
   ];
@@ -61,7 +62,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`px-2.5 py-1.5 text-sm font-normal rounded-md hover:text-gray-900 hover:bg-gray-100 ${
+                      className={`px-2.5 py-1.5 text-sm font-normal rounded-lg hover:text-gray-900 hover:bg-gray-100 ${
                         isActive ? "text-gray-900 bg-gray-100" : "text-gray-500"
                       }`}
                     >

@@ -4,7 +4,7 @@ export interface PreviewImage {
   alt: string;
 }
 
-export interface Integration {
+export interface Connectors {
   id: string;
   title: string;
   subtitle: string;
@@ -15,7 +15,7 @@ export interface Integration {
   previewImages?: PreviewImage[];
 }
 
-export const integrations: Integration[] = [
+export const connectors: Connectors[] = [
   {
     id: "docs",
     title: "Google Docs",

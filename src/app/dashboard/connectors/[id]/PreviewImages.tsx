@@ -91,7 +91,7 @@ export function PreviewImages({ images }: PreviewImagesProps) {
       <div className="flex gap-4 items-start">
         {/* Main preview image */}
         <div
-          className="relative bg-gray-100 rounded-lg overflow-hidden"
+          className="relative bg-gray-100 rounded-xl overflow-hidden"
           style={{
             height: "25rem", // same height as thumbnails
             aspectRatio: "16 / 10",
@@ -125,7 +125,7 @@ export function PreviewImages({ images }: PreviewImagesProps) {
                 ref={(el) => {
                   thumbnailRefs.current[index] = el;
                 }}
-                className="relative bg-gray-100 rounded-md overflow-hidden cursor-pointer transition-all"
+                className="relative bg-gray-100 rounded-xl overflow-hidden cursor-pointer transition-all"
                 style={{
                   width: "12rem",
                   height: "7rem",
@@ -150,7 +150,7 @@ export function PreviewImages({ images }: PreviewImagesProps) {
 
                 {index === currentIndex && (
                   <div
-                    className="pointer-events-none absolute inset-0 rounded-md"
+                    className="pointer-events-none absolute inset-0 rounded-xl"
                     style={{
                       boxShadow: "inset 0 0 0 2px rgb(31 41 55)", // gray-800 inner border
                     }}

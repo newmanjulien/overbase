@@ -1,22 +1,20 @@
 "use client";
 
-import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import type { Integration } from "../DummyData";
+import type { Connectors } from "../DummyData";
 import { useRouter } from "next/navigation";
 import { PreviewImages } from "./PreviewImages";
+import { Header } from "../../../../components/ui/Header";
 
 interface OverviewProps {
-  integration: Integration;
+  connector: Connectors;
   onBack?: () => void; // optional, fallback to router.back()
-  onInstall: () => void; // add this
+  onInstall: () => void;
 }
 
-export default function Overview({ integration, onBack }: OverviewProps) {
+export default function Overview({ connector, onBack }: OverviewProps) {
   const router = useRouter();
 
-  const previewImages = integration.previewImages ?? [];
+  const previewImages = connector.previewImages ?? [];
 
   const handleBack = () => {
     if (onBack) {
@@ -36,46 +34,18 @@ export default function Overview({ integration, onBack }: OverviewProps) {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      {/* Header */}
-      <header className="bg-[#FAFAFA] border-b border-gray-200/60">
-        <div className="max-w-7xl mx-auto px-6 py-10 flex items-center justify-between">
-          <div className="flex flex-col gap-2 max-w-[calc(100%-180px)]">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 text-gray-500 hover:text-gray-600 text-sm font-base"
-            >
-              <ChevronLeft className="w-5 h-5" />
-              Back to integrations
-            </button>
-            <div className="flex items-center gap-4 mt-1">
-              <div className="w-10 h-10 rounded-md overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
-                <Image
-                  src={integration.logo}
-                  alt={integration.title}
-                  width={50}
-                  height={50}
-                  className="object-contain"
-                />
-              </div>
-              <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
-                {integration.title}
-              </h1>
-            </div>
-          </div>
-
-          <div>
-            <Button
-              onClick={() =>
-                router.push(`/dashboard/integrations/${integration.id}/setup`)
-              }
-              variant="default"
-              className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
-            >
-              Install
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Reusable Header component in "overview" mode */}
+      <Header
+        variant="overview"
+        title={connector.title}
+        showBackButton
+        onBackClick={handleBack}
+        logo={connector.logo}
+        actionButtonLabel="Install"
+        onActionButtonClick={() =>
+          router.push(`/dashboard/connectors/${connector.id}/setup`)
+        }
+      />
 
       <div className="max-w-7xl mx-auto flex gap-8 px-6 py-10">
         {/* Sidebar */}
@@ -86,7 +56,7 @@ export default function Overview({ integration, onBack }: OverviewProps) {
                 Installs
               </h3>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                {integration.status === "active" ? (
+                {connector.status === "active" ? (
                   <span className="font-semibold">Installed</span>
                 ) : (
                   <span>{"<500 installs"}</span>
@@ -139,12 +109,12 @@ export default function Overview({ integration, onBack }: OverviewProps) {
               </h2>
               <div className="space-y-6 text-gray-700 leading-relaxed">
                 <p className="text-md">
-                  {integration.title} is a powerful integration designed to
-                  enhance your workflow. It offers seamless capabilities and
-                  reliable performance.
+                  {connector.title} is a powerful connector designed to enhance
+                  your workflow. It offers seamless capabilities and reliable
+                  performance.
                 </p>
                 <p className="text-md">
-                  Integrate {integration.title} into your projects to unlock new
+                  Integrate {connector.title} into your projects to unlock new
                   features and streamline your development experience.
                 </p>
               </div>

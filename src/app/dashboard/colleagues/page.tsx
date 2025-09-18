@@ -55,7 +55,7 @@ function ColleaguesLayout() {
     <div className="bg-[#FAFAFA] min-h-screen">
       <Header
         title="Colleagues"
-        subtitle="Add colleagues so you can reference them in workflows and so your AI can collaborate with them on your tasks."
+        subtitle="Add colleagues who you want us to consult while collecting data for you or who you want us to send data to."
         buttonLabel="Add colleague"
         onButtonClick={() => {}}
         variant="black"
@@ -103,6 +103,7 @@ function ColleaguesLayout() {
               key={colleague.id}
               title={colleague.name}
               subtitle={colleague.role}
+              image="/images/shopify.png"
               leading={
                 <Checkbox
                   checked={selectedColleagues.includes(colleague.id)}
@@ -143,9 +144,9 @@ function ColleaguesLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="Your AI can collaborate with both internal colleagues and external partners"
-            linkText="External partners"
-            onClick={() => router.push("/dashboard/external")}
+            text="We can also consult your customers when collecting data and we can also share data with your customers"
+            linkText="Customers"
+            onClick={() => router.push("/dashboard/customers")}
           />
         </div>
       </div>
