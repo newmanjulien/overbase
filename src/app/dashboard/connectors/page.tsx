@@ -34,7 +34,7 @@ export default function ConnectorsPage() {
     <div className="bg-[#FAFAFA] min-h-screen">
       <Header
         title="Connectors"
-        subtitle="Set up connectors so you can use them in your workflows and so your AI can more easily help with tasks."
+        subtitle="Set up connectors we can automatically get data from all your sources."
         buttonLabel="Browse connectors"
         onButtonClick={() => {}}
         variant="white"

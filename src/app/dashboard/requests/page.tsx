@@ -41,7 +41,7 @@ export default function RequestsPage() {
     <div className="bg-[#FAFAFA] min-h-screen">
       <Header
         title="Requests"
-        subtitle="Request data and manage your data requests in a way that aligns with your customer meetings."
+        subtitle="Request data and manage your data requests in a way that aligns with your meetings and deadlines."
         buttonLabel="Request data"
         onButtonClick={handleRequestData}
         variant="black"
