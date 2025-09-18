@@ -69,7 +69,7 @@ export default function Overview({ connector, onBack }: OverviewProps) {
                 router.push(`/dashboard/connectors/${connector.id}/setup`)
               }
               variant="default"
-              className="font-normal rounded-xl bg-black text-white hover:bg-black/90 border border-transparent"
+              className="font-normal rounded-lg bg-black text-white hover:bg-black/90 border border-transparent"
             >
               Install
             </Button>

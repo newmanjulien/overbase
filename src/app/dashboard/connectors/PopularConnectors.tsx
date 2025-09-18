@@ -79,7 +79,7 @@ export function PopularConnectors({
 
         <Button
           variant="outline"
-          className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100 w-full rounded-xl"
+          className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100 w-full rounded-lg"
           onClick={onBrowseClick}
         >
           Browse connectors
