@@ -47,7 +47,7 @@ export default function RequestsPage() {
         variant="black"
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-14">
+      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-8">
         <Calendar
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate} // typed as React.Dispatch<React.SetStateAction<Date | null>>

@@ -72,12 +72,12 @@ function Leading({
   if (!image && !leading) return null;
 
   return (
-    <div className="flex items-center mr-3">
+    <div className="flex items-center mr-2">
       {leading && (
         <div
           className={
             image !== undefined
-              ? "mr-4 flex items-center justify-center"
+              ? "mr-3 flex items-center justify-center"
               : "flex items-center justify-center"
           }
         >
