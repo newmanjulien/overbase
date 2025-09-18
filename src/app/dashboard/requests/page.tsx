@@ -50,9 +50,9 @@ export default function RequestsPage() {
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-12">
         <Calendar
           selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate} // typed as React.Dispatch<React.SetStateAction<Date | null>>
+          setSelectedDate={setSelectedDate}
           currentDate={currentDate}
-          setCurrentDate={setCurrentDate} // typed as React.Dispatch<React.SetStateAction<Date>>
+          setCurrentDate={setCurrentDate}
           requestsByDate={requestsByDate}
         />
 
@@ -60,7 +60,7 @@ export default function RequestsPage() {
           <DataSection
             selectedDate={selectedDate}
             requestsByDate={requestsByDate}
-            setRequestsByDate={setRequestsByDate} // typed as React.Dispatch<React.SetStateAction<Record<string, string[]>>>
+            setRequestsByDate={setRequestsByDate}
             onRequestData={handleRequestData}
           />
         </div>
