@@ -14,6 +14,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "../../../components/ui/toggle-group";
+import clsx from "clsx";
 
 interface DataSectionProps {
   selectedDate: Date | null;
@@ -108,11 +109,12 @@ export default function DataSection({
                       </button>
                       <button
                         disabled={isPastDate}
-                        className={`py-2 px-4 rounded-lg text-sm transition-colors ${
+                        className={clsx(
+                          "py-2 px-4 rounded-lg text-sm transition-colors",
                           isPastDate
                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                             : "bg-white border border-gray-100 text-gray-700 hover:bg-gray-50"
-                        }`}
+                        )}
                       >
                         Get data
                       </button>
