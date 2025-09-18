@@ -1,4 +1,3 @@
-// utils/date.ts
 import {
   format,
   startOfMonth,
@@ -8,6 +7,10 @@ import {
   isSameDay,
   isSameMonth,
 } from "date-fns";
+
+// ----------------------------
+// Formatting helpers
+// ----------------------------
 
 export function formatMonthYear(date: Date): string {
   return format(date, "MMMM yyyy"); // e.g. "September 2025"
@@ -29,10 +32,14 @@ export function formatWeekdayLong(date: Date): string {
   return format(date, "EEEE"); // e.g. "Monday"
 }
 
+// Composite label: for display only (don't parse downstream!)
 export function formatDayLabel(date: Date): string {
-  // ✅ Returns "Sep 17"
-  return format(date, "MMM d");
+  return `${formatMonthShort(date)} ${formatDayOfMonth(date)}`; // e.g. "Sep 17"
 }
+
+// ----------------------------
+// Calendar utilities
+// ----------------------------
 
 export function getWeekdays(): Date[] {
   const baseDate = new Date(2021, 5, 6); // Sunday
@@ -78,6 +85,10 @@ export function getPrevMonth(date: Date): Date {
 export function getNextMonth(date: Date): Date {
   return addMonths(date, 1);
 }
+
+// ----------------------------
+// Comparisons
+// ----------------------------
 
 export function isSameDayCheck(date1: Date | null, date2: Date): boolean {
   return !!date1 && isSameDay(date1, date2);

@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import {
-  formatDayLabel,
+  formatMonthShort,
+  formatDayOfMonth,
   isBeforeToday,
   getLocalDateKey,
   isTodayCheck,
 } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
-import { Calendar, Database } from "lucide-react";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -27,6 +27,28 @@ interface DataSectionProps {
   onRequestData: () => void;
 }
 
+// 🔹 Reusable secondary button
+function SecondaryButton({
+  children,
+  disabled,
+  onClick,
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className={clsx(
+        "py-2 px-4 rounded-lg text-sm transition-colors",
+        disabled
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-white border border-gray-100 text-gray-700 hover:bg-gray-50"
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function DataSection({
   selectedDate,
   requestsByDate,
@@ -40,8 +62,8 @@ export default function DataSection({
   const dateKey = getLocalDateKey(selectedDate);
   const dataCards = requestsByDate[dateKey] || [];
 
-  const label = formatDayLabel(selectedDate); // e.g. "Sep 17"
-  const [monthLabel, dayNumber] = label.split(" ");
+  const monthLabel = formatMonthShort(selectedDate); // "Sep"
+  const dayNumber = formatDayOfMonth(selectedDate); // "17"
 
   const isPastDate = isBeforeToday(selectedDate);
   const todaySelected = isTodayCheck(selectedDate);
@@ -55,8 +77,7 @@ export default function DataSection({
           buttonLabel="Link calendar"
           buttonVariant="secondary"
           onButtonClick={() => {}}
-          withBorder={false}
-          icon={<Calendar className="w-10 h-10 text-gray-600" />}
+          iconType="calendar"
         />
       );
     }
@@ -66,8 +87,7 @@ export default function DataSection({
         <EmptyState
           title="No data received"
           description="You did not receive any data on this day"
-          withBorder={false}
-          icon={<Database className="w-10 h-10 text-gray-600" />}
+          iconType="database"
         />
       );
     }
@@ -77,8 +97,7 @@ export default function DataSection({
         <EmptyState
           title="No data today"
           description="You did not receive any data today"
-          withBorder={false}
-          icon={<Database className="w-10 h-10 text-gray-600" />}
+          iconType="database"
         />
       );
     }
@@ -91,8 +110,7 @@ export default function DataSection({
         buttonLabel="Request data"
         onButtonClick={onRequestData}
         buttonVariant="secondary"
-        withBorder={false}
-        icon={<Database className="w-10 h-10 text-gray-600" />}
+        iconType="database"
       />
     );
   }
@@ -108,7 +126,9 @@ export default function DataSection({
         <ToggleGroup
           type="single"
           value={selectedView}
-          onValueChange={(val) => val && setSelectedView(val as ViewType)}
+          onValueChange={(val: ViewType | undefined) =>
+            val && setSelectedView(val)
+          }
           variant="outline"
         >
           <ToggleGroupItem value="requests">Requests</ToggleGroupItem>
@@ -124,25 +144,10 @@ export default function DataSection({
               contentBox={card}
               actions={
                 <>
-                  <button
-                    className={clsx(
-                      "py-2 px-4 rounded-lg text-sm transition-colors",
-                      "bg-white border border-gray-100 text-gray-700 hover:bg-gray-50"
-                    )}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    disabled={isPastDate}
-                    className={clsx(
-                      "py-2 px-4 rounded-lg text-sm transition-colors",
-                      isPastDate
-                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        : "bg-white border border-gray-100 text-gray-700 hover:bg-gray-50"
-                    )}
-                  >
+                  <SecondaryButton>Edit</SecondaryButton>
+                  <SecondaryButton disabled={isPastDate}>
                     Get data
-                  </button>
+                  </SecondaryButton>
                 </>
               }
             />

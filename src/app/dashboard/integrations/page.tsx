@@ -8,7 +8,6 @@ import type { Integration } from "./DummyData";
 import { integrations } from "./DummyData";
 import { useIntegrationContext } from "../../../lib/integrationContext";
 import { Header } from "../../../components/ui/Header";
-import { Plug } from "lucide-react";
 
 export default function IntegrationsPage() {
   const router = useRouter();
@@ -55,7 +54,7 @@ export default function IntegrationsPage() {
                 onButtonClick={handleBrowseClick}
                 className="py-32 min-h-[600px]"
                 withBorder={true}
-                icon={<Plug className="w-full h-full" />}
+                iconType="plug"
               />
             ) : (
               installedIntegrations.map((integration) => (
