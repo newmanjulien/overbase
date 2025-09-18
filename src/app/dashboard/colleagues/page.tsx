@@ -103,7 +103,7 @@ function ColleaguesLayout() {
               key={colleague.id}
               title={colleague.name}
               subtitle={colleague.role}
-              image=""
+              image="/images/shopify.png"
               leading={
                 <Checkbox
                   checked={selectedColleagues.includes(colleague.id)}
