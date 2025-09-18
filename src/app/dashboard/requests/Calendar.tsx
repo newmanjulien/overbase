@@ -116,7 +116,7 @@ export default function Calendar({
                 <span
                   className={`
                     absolute bottom-3 w-1.5 h-1.5 rounded-full 
-                    ${isSelected ? "bg-white" : "bg-gray-900"}
+                    ${isSelected ? "bg-white" : "bg-green-500"}
                   `}
                 />
               )}
