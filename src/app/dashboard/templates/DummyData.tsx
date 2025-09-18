@@ -1,5 +1,5 @@
 // === Category Definitions ===
-export const skillsConfig = [
+export const tagsConfig = [
   {
     key: "onboarding",
     name: "Onboarding",
@@ -51,7 +51,7 @@ export interface Template {
   id: number;
   title: string;
   description: string;
-  skills: string[];
+  tags: string[];
   gradientFrom: string;
   gradientVia: string;
   gradientTo: string;
@@ -64,7 +64,7 @@ export const initialTemplates: Template[] = [
     id: 1,
     title: "Client Kickoff Call",
     description: "Schedule and conduct a kickoff call with a new client",
-    skills: ["onboarding"],
+    tags: ["onboarding"],
     gradientFrom: "from-yellow-400",
     gradientVia: "via-yellow-500",
     gradientTo: "to-orange-600",
@@ -74,7 +74,7 @@ export const initialTemplates: Template[] = [
     title: "Setup Client Account",
     description:
       "Configure client account settings, permissions, and integrations",
-    skills: ["onboarding"],
+    tags: ["onboarding"],
     gradientFrom: "from-green-400",
     gradientVia: "via-lime-500",
     gradientTo: "to-teal-600",
@@ -83,7 +83,7 @@ export const initialTemplates: Template[] = [
     id: 3,
     title: "Data Import & Migration",
     description: "Assist client with importing their data into the platform",
-    skills: ["onboarding"],
+    tags: ["onboarding"],
     gradientFrom: "from-blue-400",
     gradientVia: "via-indigo-500",
     gradientTo: "to-violet-600",
@@ -96,7 +96,7 @@ export const initialTemplates: Template[] = [
     title: "Prepare QBRs",
     description:
       "Analyze usage, metrics, and outcomes to prepare a report for client review",
-    skills: ["quarterly"],
+    tags: ["quarterly"],
     gradientFrom: "from-purple-400",
     gradientVia: "via-fuchsia-500",
     gradientTo: "to-pink-600",
@@ -106,7 +106,7 @@ export const initialTemplates: Template[] = [
     title: "Present QBR to Client",
     description:
       "Deliver insights, recommendations, and roadmap in a client meeting",
-    skills: ["quarterly"],
+    tags: ["quarterly"],
     gradientFrom: "from-rose-400",
     gradientVia: "via-red-500",
     gradientTo: "to-rose-600",
@@ -117,7 +117,7 @@ export const initialTemplates: Template[] = [
     id: 6,
     title: "Resolve Technical Issue",
     description: "Help client troubleshoot product or integration issues",
-    skills: ["support"],
+    tags: ["support"],
     gradientFrom: "from-orange-400",
     gradientVia: "via-amber-500",
     gradientTo: "to-red-600",
@@ -127,7 +127,7 @@ export const initialTemplates: Template[] = [
     title: "Answer Feature Questions",
     description:
       "Respond to client inquiries about platform features and functionality",
-    skills: ["support"],
+    tags: ["support"],
     gradientFrom: "from-emerald-400",
     gradientVia: "via-green-500",
     gradientTo: "to-teal-600",
@@ -137,7 +137,7 @@ export const initialTemplates: Template[] = [
     title: "Escalate Critical Issue",
     description:
       "Identify urgent problems and coordinate with engineering team",
-    skills: ["support"],
+    tags: ["support"],
     gradientFrom: "from-fuchsia-400",
     gradientVia: "via-purple-500",
     gradientTo: "to-indigo-600",
@@ -148,7 +148,7 @@ export const initialTemplates: Template[] = [
     id: 9,
     title: "Feature Adoption Campaign",
     description: "Encourage clients to start using new platform features",
-    skills: ["adoption"],
+    tags: ["adoption"],
     gradientFrom: "from-cyan-400",
     gradientVia: "via-sky-500",
     gradientTo: "to-blue-600",
@@ -157,7 +157,7 @@ export const initialTemplates: Template[] = [
     id: 10,
     title: "Monitor Usage Metrics",
     description: "Track client engagement and highlight areas for improvement",
-    skills: ["adoption"],
+    tags: ["adoption"],
     gradientFrom: "from-teal-400",
     gradientVia: "via-emerald-500",
     gradientTo: "to-green-600",
@@ -169,7 +169,7 @@ export const initialTemplates: Template[] = [
     title: "Prepare Renewal Proposal",
     description:
       "Draft contract renewal proposals including upsell opportunities",
-    skills: ["renewals"],
+    tags: ["renewals"],
     gradientFrom: "from-pink-400",
     gradientVia: "via-rose-500",
     gradientTo: "to-red-600",
@@ -179,7 +179,7 @@ export const initialTemplates: Template[] = [
     title: "Conduct Renewal Meeting",
     description:
       "Meet client to review contract, usage, and propose renewal terms",
-    skills: ["renewals"],
+    tags: ["renewals"],
     gradientFrom: "from-purple-400",
     gradientVia: "via-indigo-500",
     gradientTo: "to-violet-600",
@@ -190,7 +190,7 @@ export const initialTemplates: Template[] = [
     id: 13,
     title: "Collect Client Feedback",
     description: "Send surveys or conduct interviews to gather feedback",
-    skills: ["feedback"],
+    tags: ["feedback"],
     gradientFrom: "from-red-400",
     gradientVia: "via-rose-500",
     gradientTo: "to-pink-600",
@@ -200,7 +200,7 @@ export const initialTemplates: Template[] = [
     title: "Create Client Advocacy Program",
     description:
       "Identify happy clients for testimonials, case studies, or references",
-    skills: ["feedback"],
+    tags: ["feedback"],
     gradientFrom: "from-green-400",
     gradientVia: "via-emerald-500",
     gradientTo: "to-teal-600",
@@ -211,7 +211,7 @@ export const initialTemplates: Template[] = [
     id: 15,
     title: "Collect Feature Requests",
     description: "Gather client requests and ideas for new features",
-    skills: ["productFeedback"],
+    tags: ["productFeedback"],
     gradientFrom: "from-indigo-400",
     gradientVia: "via-violet-500",
     gradientTo: "to-purple-600",
@@ -220,7 +220,7 @@ export const initialTemplates: Template[] = [
     id: 16,
     title: "Summarize Client Feedback",
     description: "Compile and organize customer feedback for the product team",
-    skills: ["productFeedback"],
+    tags: ["productFeedback"],
     gradientFrom: "from-teal-400",
     gradientVia: "via-cyan-500",
     gradientTo: "to-blue-600",
@@ -229,7 +229,7 @@ export const initialTemplates: Template[] = [
     id: 17,
     title: "Report Bugs to Engineering",
     description: "Document and submit client-reported bugs to engineering",
-    skills: ["productFeedback"],
+    tags: ["productFeedback"],
     gradientFrom: "from-red-400",
     gradientVia: "via-rose-500",
     gradientTo: "to-pink-600",
@@ -239,7 +239,7 @@ export const initialTemplates: Template[] = [
     title: "Feature Prioritization Meeting",
     description:
       "Collaborate with product team to prioritize features based on customer feedback",
-    skills: ["productFeedback"],
+    tags: ["productFeedback"],
     gradientFrom: "from-orange-400",
     gradientVia: "via-amber-500",
     gradientTo: "to-red-600",

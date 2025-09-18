@@ -4,7 +4,7 @@ import { useState } from "react";
 import { TemplateCard } from "./TemplateCard";
 import { Header } from "../../../components/ui/Header";
 
-import { skillsConfig, initialTemplates, Template } from "./DummyData";
+import { skillsConfig, initialTemplates } from "./DummyData";
 
 function Templates() {
   const [selectedSkill, setSelectedSkill] = useState(skillsConfig[0].key);

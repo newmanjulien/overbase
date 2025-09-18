@@ -15,7 +15,6 @@ const SAMPLE_PROMPTS = [
 export default function RequestsPage() {
   const today = startOfToday();
 
-  // State + setters explicitly typed
   const [selectedDate, setSelectedDate] = useState<Date | null>(today);
   const [currentDate, setCurrentDate] = useState<Date>(today);
 
@@ -60,7 +59,6 @@ export default function RequestsPage() {
           <DataSection
             selectedDate={selectedDate}
             requestsByDate={requestsByDate}
-            setRequestsByDate={setRequestsByDate}
             onRequestData={handleRequestData}
           />
         </div>

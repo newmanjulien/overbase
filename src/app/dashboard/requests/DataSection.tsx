@@ -6,7 +6,7 @@ import {
   isBeforeToday,
   getLocalDateKey,
   isToday,
-  isAfterToday, // ⬅️ new import
+  isAfterToday,
 } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -21,9 +21,6 @@ type ViewType = "requests" | "meetings";
 interface DataSectionProps {
   selectedDate: Date | null;
   requestsByDate: Record<string, string[]>;
-  setRequestsByDate: React.Dispatch<
-    React.SetStateAction<Record<string, string[]>>
-  >;
   onRequestData: () => void;
 }
 
@@ -52,7 +49,6 @@ function SecondaryButton({
 export default function DataSection({
   selectedDate,
   requestsByDate,
-  setRequestsByDate,
   onRequestData,
 }: DataSectionProps) {
   const [selectedView, setSelectedView] = useState<ViewType>("requests");
@@ -62,7 +58,6 @@ export default function DataSection({
   const dateKey = getLocalDateKey(selectedDate);
   const dataCards = requestsByDate[dateKey] || [];
 
-  // Use the single, display-only label from the util
   const dayLabel = formatDayLabel(selectedDate); // "Sep 17"
   const [monthLabel, dayNumber] = dayLabel.split(" ");
 
@@ -103,7 +98,6 @@ export default function DataSection({
       );
     }
 
-    // Future or selected day with no data
     return (
       <EmptyState
         title="No data requested"
@@ -148,7 +142,6 @@ export default function DataSection({
               actions={
                 <>
                   <SecondaryButton>Edit</SecondaryButton>
-                  {/* ✅ now disabled for future days */}
                   <SecondaryButton disabled={isAfterToday(selectedDate)}>
                     Get data
                   </SecondaryButton>
