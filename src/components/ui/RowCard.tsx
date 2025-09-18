@@ -115,7 +115,7 @@ function Content({
   return (
     <div className="min-w-0 max-w-xl flex-shrink mr-4">
       {contentBox ? (
-        <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 leading-tight">
+        <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-700 leading-tight">
           <p className="line-clamp-2">{contentBox}</p>
         </div>
       ) : (

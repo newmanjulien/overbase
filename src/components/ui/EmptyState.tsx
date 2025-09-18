@@ -49,8 +49,8 @@ export function EmptyState({
           onClick={onButtonClick}
           className={
             buttonVariant === "primary"
-              ? "bg-gray-900 text-white hover:bg-gray-800 font-medium px-6 py-3 text-sm rounded-lg"
-              : "text-gray-900 border border-gray-200 hover:bg-gray-50 bg-white font-normal px-4 py-2 text-sm rounded-lg"
+              ? "bg-gray-900 text-white hover:bg-gray-800 font-medium px-6 py-3 text-sm rounded-xl"
+              : "text-gray-900 border border-gray-200 hover:bg-gray-50 bg-white font-normal px-4 py-2 text-sm rounded-xl"
           }
         >
           {buttonLabel}
