@@ -10,7 +10,7 @@ interface TemplateCardProps {
   gradientFrom?: string;
   gradientTo?: string;
   image?: string;
-  onLaunch?: () => void;
+  onUse?: () => void;
 }
 
 export function TemplateCard({
@@ -19,7 +19,7 @@ export function TemplateCard({
   gradientFrom = "from-emerald-400",
   gradientTo = "to-teal-500",
   image,
-  onLaunch,
+  onUse,
 }: TemplateCardProps) {
   return (
     <div className="rounded-3xl border border-gray-200/60 overflow-hidden cursor-pointer hover:shadow-md transform transition-all duration-200">
@@ -49,9 +49,9 @@ export function TemplateCard({
           variant="secondary"
           size="sm"
           className="absolute top-3 right-3 bg-white rounded-lg text-gray-800 hover:bg-gray-50 font-normal"
-          onClick={onLaunch}
+          onClick={onUse}
         >
-          Launch
+          Use
         </Button>
       </div>
 
