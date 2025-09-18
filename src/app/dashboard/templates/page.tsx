@@ -4,22 +4,20 @@ import { useState } from "react";
 import { TemplateCard } from "./TemplateCard";
 import { Header } from "../../../components/ui/Header";
 
-import { skillsConfig, initialTemplates } from "./DummyData";
+import { tagsConfig, initialTemplates } from "./DummyData";
 
 function Templates() {
-  const [selectedSkill, setSelectedSkill] = useState(skillsConfig[0].key);
+  const [selectedTag, setSelectedTag] = useState(tagsConfig[0].key);
 
   const filteredTemplates = initialTemplates.filter((t) =>
-    t.skills.includes(selectedSkill)
+    t.tags.includes(selectedTag)
   );
 
-  const selectedSkillData = skillsConfig.find(
-    (skill) => skill.key === selectedSkill
-  );
+  const selectedTagData = tagsConfig.find((tag) => tag.key === selectedTag);
 
-  const gridTitle = selectedSkillData?.header ?? "Explore Templates";
+  const gridTitle = selectedTagData?.header ?? "Explore Templates";
   const gridSubtitle =
-    selectedSkillData?.subheader ??
+    selectedTagData?.subheader ??
     "Easily apply templates created by your organization and which your colleagues are already using.";
 
   return (
@@ -32,17 +30,17 @@ function Templates() {
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-18">
         <div className="w-56 flex-shrink-0">
           <nav className="space-y-0.5">
-            {skillsConfig.map((skill) => (
+            {tagsConfig.map((tag) => (
               <button
-                key={skill.key}
-                onClick={() => setSelectedSkill(skill.key)}
+                key={tag.key}
+                onClick={() => setSelectedTag(tag.key)}
                 className={`w-full text-left px-3 py-2 text-sm rounded-xl transition-colors flex items-center justify-between ${
-                  selectedSkill === skill.key
+                  selectedTag === tag.key
                     ? "bg-white border border-gray-200/60 font-medium text-gray-800"
                     : "text-gray-700 hover:text-gray-900 hover:bg-white border border-transparent"
                 }`}
               >
-                <span>{skill.name}</span>
+                <span>{tag.name}</span>
               </button>
             ))}
           </nav>
