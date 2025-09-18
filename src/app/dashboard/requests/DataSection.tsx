@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { formatDayLabel, isBeforeToday } from "../../utils/date";
+import {
+  formatDayLabel,
+  isBeforeToday,
+  getLocalDateKey,
+} from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { Calendar, Database } from "lucide-react";
@@ -12,7 +16,7 @@ interface DataSectionProps {
   setRequestsByDate: React.Dispatch<
     React.SetStateAction<Record<string, string[]>>
   >;
-  onRequestData: () => void; // ✅ added
+  onRequestData: () => void;
 }
 
 export default function DataSection({
@@ -27,20 +31,17 @@ export default function DataSection({
 
   if (!selectedDate) return null;
 
-  const dateKey = selectedDate.toISOString().split("T")[0];
+  const dateKey = getLocalDateKey(selectedDate);
   const dataCards = requestsByDate[dateKey] || [];
 
-  // Split weekday and day number (e.g. "Fri 05")
   const label = formatDayLabel(selectedDate);
   const [weekday, dayNumber] = label.split(" ");
 
-  // Check if the selected date is in the past
   const isPastDate = isBeforeToday(selectedDate);
 
   return (
     <div className="w-full pt-4">
       <>
-        {/* Date + Selector */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl text-foreground flex items-baseline gap-1">
             <span className="font-medium">{weekday}</span>
@@ -63,7 +64,6 @@ export default function DataSection({
           </div>
         </div>
 
-        {/* Content */}
         {selectedView === "requests" ? (
           dataCards.length === 0 ? (
             isPastDate ? (
@@ -78,7 +78,7 @@ export default function DataSection({
                 title="No data requested"
                 description="You have not requested any data yet for this day"
                 buttonLabel="Request data"
-                onButtonClick={onRequestData} // ✅ uses shared handler
+                onButtonClick={onRequestData}
                 buttonVariant="secondary"
                 withBorder={false}
                 icon={<Database className="w-10 h-10 text-gray-600" />}

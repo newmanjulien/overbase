@@ -12,6 +12,7 @@ import {
   getNextMonth,
   isSameDayCheck,
   isSameMonthCheck,
+  getLocalDateKey,
 } from "../../utils/date";
 
 interface CalendarProps {
@@ -19,7 +20,7 @@ interface CalendarProps {
   setSelectedDate: (date: Date | null) => void;
   currentDate: Date;
   setCurrentDate: (date: Date) => void;
-  requestsByDate: Record<string, string[]>; // ✅ only requests
+  requestsByDate: Record<string, string[]>;
 }
 
 export default function Calendar({
@@ -45,10 +46,10 @@ export default function Calendar({
   };
 
   return (
-    <div className="w-full max-w-md bg-white border border-gray-100 p-6 rounded-xl self-start">
+    <div className="w-full max-w-lg bg-white border border-gray-100 p-6 rounded-xl self-start">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-xl font-medium text-foreground">
+        <h1 className="text-2xl font-medium text-foreground">
           {formatMonthYear(currentDate)}
         </h1>
         <div className="flex items-center gap-2">
@@ -76,7 +77,7 @@ export default function Calendar({
         {getWeekdays().map((day) => (
           <div
             key={formatWeekdayShort(day)}
-            className="text-xs text-muted-foreground text-center py-3"
+            className="text-sm text-muted-foreground text-center py-3"
           >
             {formatWeekdayShort(day)}
           </div>
@@ -90,11 +91,10 @@ export default function Calendar({
           const inMonth = isSameMonthCheck(currentDate, day);
 
           if (!inMonth) {
-            // 👇 Empty cell to preserve grid alignment
             return <div key={index} className="aspect-square w-full" />;
           }
 
-          const dateKey = day.toISOString().split("T")[0];
+          const dateKey = getLocalDateKey(day);
           const hasRequests = !!requestsByDate[dateKey]?.length;
 
           return (
@@ -102,23 +102,17 @@ export default function Calendar({
               key={index}
               onClick={() => handleDayClick(day)}
               className={`
-                aspect-square w-full rounded-lg text-sm transition-colors
+                aspect-square w-full rounded-lg text-sm flex items-center justify-center transition-colors
                 ${
                   isSelected
                     ? "bg-gray-900 text-white"
-                    : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-00"
+                    : hasRequests
+                    ? "bg-green-50 text-gray-900 hover:bg-green-100 border border-gray-200"
+                    : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200"
                 }
               `}
             >
               {formatDayOfMonth(day)}
-              {hasRequests && (
-                <div
-                  className={`
-                    w-1 h-1 rounded-full mx-auto mt-1
-                    ${isSelected ? "bg-white" : "bg-green-500"}
-                  `}
-                />
-              )}
             </button>
           );
         })}
