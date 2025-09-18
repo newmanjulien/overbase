@@ -25,7 +25,7 @@ export function EmptyState({
   return (
     <div
       className={`${
-        withBorder ? "border border-gray-200/60 rounded-lg" : ""
+        withBorder ? "border border-gray-200/60 rounded-2xl" : ""
       } py-12 px-10 flex flex-col items-center justify-center text-center min-h-[250px] ${className}`}
     >
       {/* Icon bubble */}
@@ -45,7 +45,7 @@ export function EmptyState({
           className={
             buttonVariant === "primary"
               ? "bg-gray-900 text-white hover:bg-gray-800 font-medium px-6 py-3 text-sm rounded-lg"
-              : "text-gray-600 border border-gray-200 hover:bg-gray-50 bg-white font-normal px-4 py-2 text-sm"
+              : "text-gray-900 border border-gray-200 hover:bg-gray-50 bg-white font-normal px-4 py-2 text-sm rounded-lg"
           }
         >
           {buttonLabel}

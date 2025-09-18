@@ -38,7 +38,7 @@ export function RowCard(props: RowCardProps) {
   } = props;
 
   return (
-    <div className="flex items-center py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-lg">
+    <div className="flex items-center py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-xl">
       <Leading image={image} leading={leading} title={title} />
       <Content
         title={title}

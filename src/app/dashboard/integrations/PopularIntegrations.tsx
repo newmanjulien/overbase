@@ -23,7 +23,7 @@ export function PopularIntegrations({
       className="w-80"
       aria-label="Popular integrations"
     >
-      <div className="border border-gray-200/60 rounded-lg p-8">
+      <div className="border border-gray-200/60 rounded-xl p-8">
         <div className="mb-6 flex flex-col items-center text-center">
           <Layers className="w-4 h-4 text-gray-600" />
           <h2 className="text-md font-medium text-gray-800 mt-4">
@@ -79,7 +79,7 @@ export function PopularIntegrations({
 
         <Button
           variant="outline"
-          className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100 w-full"
+          className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100 w-full rounded-lg"
           onClick={onBrowseClick}
         >
           Browse integrations

@@ -77,7 +77,7 @@ export default function Calendar({
         {getWeekdays().map((day) => (
           <div
             key={formatWeekdayShort(day)}
-            className="text-sm text-muted-foreground text-center py-3"
+            className="text-xs text-muted-foreground text-center py-3"
           >
             {formatWeekdayShort(day)}
           </div>

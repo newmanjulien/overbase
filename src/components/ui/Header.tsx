@@ -52,8 +52,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onButtonClick}
               className={`font-normal border ${
                 isBlack
-                  ? "bg-black text-white hover:bg-black/90 border-transparent"
-                  : "bg-white text-black border-gray-200 hover:bg-gray-100"
+                  ? "bg-black text-white hover:bg-black/90 border-transparent rounded-lg"
+                  : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100 rounded-lg"
               }`}
             >
               {buttonLabel}
