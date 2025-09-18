@@ -127,9 +127,11 @@ export default function DataSection({
         <ToggleGroup
           type="single"
           value={selectedView}
-          onValueChange={(val: ViewType | undefined) =>
-            val && setSelectedView(val)
-          }
+          onValueChange={(val) => {
+            if (val === "requests" || val === "meetings") {
+              setSelectedView(val);
+            }
+          }}
           variant="outline"
         >
           <ToggleGroupItem value="requests">Requests</ToggleGroupItem>
