@@ -10,7 +10,7 @@ export const skillsConfig = [
   {
     key: "quarterly",
     name: "Quarterly Reviews",
-    header: "Quarterly Check-ins",
+    header: "Quarterly Reviews",
     subheader: "Prepare and present quarterly business reviews to clients",
   },
   {
