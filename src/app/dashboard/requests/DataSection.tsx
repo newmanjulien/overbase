@@ -5,6 +5,7 @@ import {
   formatDayLabel,
   isBeforeToday,
   getLocalDateKey,
+  isTodayCheck,
 } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
@@ -38,6 +39,7 @@ export default function DataSection({
   const [weekday, dayNumber] = label.split(" ");
 
   const isPastDate = isBeforeToday(selectedDate);
+  const todaySelected = isTodayCheck(selectedDate);
 
   return (
     <div className="w-full pt-4">
@@ -70,6 +72,13 @@ export default function DataSection({
               <EmptyState
                 title="No data received"
                 description="You did not receive any data on this day"
+                withBorder={false}
+                icon={<Database className="w-10 h-10 text-gray-600" />}
+              />
+            ) : todaySelected ? (
+              <EmptyState
+                title="No data today"
+                description="You did not receive any data today"
                 withBorder={false}
                 icon={<Database className="w-10 h-10 text-gray-600" />}
               />
