@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { startOfToday } from "date-fns";
 import Calendar from "./Calendar";
 import DataSection from "./DataSection";
 import { Header } from "../../../components/ui/Header";
@@ -12,9 +13,9 @@ const SAMPLE_PROMPTS = [
 ];
 
 export default function RequestsPage() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = startOfToday();
 
+  // State + setters explicitly typed
   const [selectedDate, setSelectedDate] = useState<Date | null>(today);
   const [currentDate, setCurrentDate] = useState<Date>(today);
 
@@ -46,12 +47,12 @@ export default function RequestsPage() {
         variant="black"
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-10">
+      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-14">
         <Calendar
           selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
+          setSelectedDate={setSelectedDate} // typed as React.Dispatch<React.SetStateAction<Date | null>>
           currentDate={currentDate}
-          setCurrentDate={setCurrentDate}
+          setCurrentDate={setCurrentDate} // typed as React.Dispatch<React.SetStateAction<Date>>
           requestsByDate={requestsByDate}
         />
 
@@ -59,7 +60,7 @@ export default function RequestsPage() {
           <DataSection
             selectedDate={selectedDate}
             requestsByDate={requestsByDate}
-            setRequestsByDate={setRequestsByDate}
+            setRequestsByDate={setRequestsByDate} // typed as React.Dispatch<React.SetStateAction<Record<string, string[]>>>
             onRequestData={handleRequestData}
           />
         </div>

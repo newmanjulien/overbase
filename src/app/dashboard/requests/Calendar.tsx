@@ -1,25 +1,23 @@
 "use client";
 
+import { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import {
   formatMonthYear,
   formatDayOfMonth,
-  formatWeekdayShort,
-  getCalendarGrid,
-  getWeekdays,
-  getPrevMonth,
-  getNextMonth,
-  isSameDayCheck,
-  isSameMonthCheck,
-  getLocalDateKey,
+  getWeekdayLabels,
+  buildMonthGrid,
+  addMonths,
+  subMonths,
+  isSameDay,
 } from "../../utils/date";
 
 interface CalendarProps {
   selectedDate: Date | null;
-  setSelectedDate: (date: Date | null) => void;
+  setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
   currentDate: Date;
-  setCurrentDate: (date: Date) => void;
+  setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
   requestsByDate: Record<string, string[]>;
 }
 
@@ -30,19 +28,17 @@ export default function Calendar({
   setCurrentDate,
   requestsByDate,
 }: CalendarProps) {
-  const calendarDays = getCalendarGrid(currentDate);
+  // Memoize: pure derivation from currentDate
+  const monthCells = useMemo(() => buildMonthGrid(currentDate), [currentDate]);
 
   const navigateMonth = (direction: "prev" | "next") => {
-    const newDate =
-      direction === "prev"
-        ? getPrevMonth(currentDate)
-        : getNextMonth(currentDate);
-
-    setCurrentDate(newDate);
+    setCurrentDate((prev) =>
+      direction === "prev" ? subMonths(prev, 1) : addMonths(prev, 1)
+    );
   };
 
   const handleDayClick = (day: Date) => {
-    setSelectedDate(isSameDayCheck(selectedDate, day) ? null : day);
+    setSelectedDate((prev) => (prev && isSameDay(prev, day) ? null : day));
   };
 
   return (
@@ -58,6 +54,7 @@ export default function Calendar({
             size="icon"
             onClick={() => navigateMonth("prev")}
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
+            aria-label="Previous month"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -66,41 +63,41 @@ export default function Calendar({
             size="icon"
             onClick={() => navigateMonth("next")}
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
+            aria-label="Next month"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
-      {/* Days of week */}
+      {/* Days of week (labels directly from util; casing via CSS) */}
       <div className="grid grid-cols-7 gap-3 mb-1">
-        {getWeekdays().map((day) => (
+        {getWeekdayLabels().map((label) => (
           <div
-            key={formatWeekdayShort(day)}
-            className="text-xs text-muted-foreground text-center py-3"
+            key={label}
+            className="text-xs text-muted-foreground text-center py-3 uppercase"
           >
-            {formatWeekdayShort(day)}
+            {label}
           </div>
         ))}
       </div>
 
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1">
-        {calendarDays.map((day, index) => {
-          const isSelected = isSameDayCheck(selectedDate, day);
-          const inMonth = isSameMonthCheck(currentDate, day);
+        {monthCells.map((cell) => {
+          const isSelected =
+            !!selectedDate && isSameDay(selectedDate, cell.date);
 
-          if (!inMonth) {
-            return <div key={index} className="aspect-square w-full" />;
+          if (!cell.inMonth) {
+            return <div key={cell.key} className="aspect-square w-full" />;
           }
 
-          const dateKey = getLocalDateKey(day);
-          const hasRequests = !!requestsByDate[dateKey]?.length;
+          const hasRequests = !!requestsByDate[cell.key]?.length;
 
           return (
             <button
-              key={index}
-              onClick={() => handleDayClick(day)}
+              key={cell.key}
+              onClick={() => handleDayClick(cell.date)}
               className={`
                 aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors
                 ${
@@ -110,7 +107,7 @@ export default function Calendar({
                 }
               `}
             >
-              <span>{formatDayOfMonth(day)}</span>
+              <span>{formatDayOfMonth(cell.date)}</span>
 
               {hasRequests && (
                 <span

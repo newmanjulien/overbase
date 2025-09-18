@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import {
-  formatMonthShort,
-  formatDayOfMonth,
+  formatDayLabel,
   isBeforeToday,
   getLocalDateKey,
-  isTodayCheck,
+  isToday,
 } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
+import { Calendar, Database } from "lucide-react";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -62,11 +62,12 @@ export default function DataSection({
   const dateKey = getLocalDateKey(selectedDate);
   const dataCards = requestsByDate[dateKey] || [];
 
-  const monthLabel = formatMonthShort(selectedDate); // "Sep"
-  const dayNumber = formatDayOfMonth(selectedDate); // "17"
+  // Use the single, display-only label from the util
+  const dayLabel = formatDayLabel(selectedDate); // "Sep 17"
+  const [monthLabel, dayNumber] = dayLabel.split(" ");
 
   const isPastDate = isBeforeToday(selectedDate);
-  const todaySelected = isTodayCheck(selectedDate);
+  const todaySelected = isToday(selectedDate);
 
   function renderEmptyState() {
     if (selectedView === "meetings") {
