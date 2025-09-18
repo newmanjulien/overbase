@@ -9,7 +9,6 @@ import {
 } from "../../utils/date";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
-import { Calendar, Database } from "lucide-react";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -117,7 +116,7 @@ export default function DataSection({
   }
 
   return (
-    <div className="w-full pt-4">
+    <div className="w-full pt-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg text-foreground flex items-baseline gap-1">
           <span className="font-medium">{monthLabel}</span>
