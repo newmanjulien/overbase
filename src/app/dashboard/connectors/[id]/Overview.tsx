@@ -48,12 +48,12 @@ export default function Overview({ connector, onBack }: OverviewProps) {
               Back to connectors
             </button>
             <div className="flex items-center gap-4 mt-1">
-              <div className="w-10 h-10 rounded-md overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
                 <Image
                   src={connector.logo}
                   alt={connector.title}
-                  width={50}
-                  height={50}
+                  width={35}
+                  height={35}
                   className="object-contain"
                 />
               </div>
@@ -69,7 +69,7 @@ export default function Overview({ connector, onBack }: OverviewProps) {
                 router.push(`/dashboard/connectors/${connector.id}/setup`)
               }
               variant="default"
-              className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
+              className="font-normal rounded-xl bg-black text-white hover:bg-black/90 border border-transparent"
             >
               Install
             </Button>

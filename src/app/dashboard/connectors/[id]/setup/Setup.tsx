@@ -97,7 +97,7 @@ export default function Setup({ connector }: SetupProps) {
               className="
                 w-full
                 border border-gray-200/60
-                rounded-sm
+                rounded-lg
                 px-3 py-1.5
                 text-gray-700 text-sm
                 placeholder:text-gray-400
@@ -132,7 +132,7 @@ export default function Setup({ connector }: SetupProps) {
               className="
                 w-full
                 border border-gray-200/60
-                rounded-sm
+                rounded-lg
                 px-3 py-1.5
                 text-gray-700 text-sm
                 placeholder:text-gray-400
@@ -151,7 +151,7 @@ export default function Setup({ connector }: SetupProps) {
           <div className="flex justify-between items-center">
             <Button
               type="button"
-              className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100"
+              className="font-normal rounded-xl bg-white text-black border border-gray-200 hover:bg-gray-100"
               onClick={() =>
                 router.push(`/dashboard/connectors/${connector.id}`)
               }
@@ -161,7 +161,7 @@ export default function Setup({ connector }: SetupProps) {
 
             <Button
               type="submit"
-              className="font-normal bg-black text-white hover:bg-black/90 border border-transparent"
+              className="font-normal rounded-xl bg-black text-white hover:bg-black/90 border border-transparent"
             >
               Create
             </Button>

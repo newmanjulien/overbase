@@ -23,13 +23,13 @@ export function PopularConnectors({
       className="w-80"
       aria-label="Popular connectors"
     >
-      <div className="border border-gray-200/60 rounded-2xl p-8">
+      <div className="border border-gray-200/60 rounded-2xl p-7">
         <div className="mb-6 flex flex-col items-center text-center">
           <Layers className="w-4 h-4 text-gray-600" />
           <h2 className="text-md font-medium text-gray-800 mt-4">
             Popular Connectors
           </h2>
-          <p className="text-sm text-gray-500 font-light leading-relaxed mt-1 max-w-xs mb-2">
+          <p className="text-sm text-gray-500 font-light leading-relaxed mt-1 max-w-xs">
             Easily set up connectors with the most popular platforms.
           </p>
         </div>
@@ -43,7 +43,7 @@ export function PopularConnectors({
             popularConnectors.map((connector) => (
               <div
                 key={connector.id}
-                className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 rounded-xl p-2"
+                className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 rounded-xl"
                 onClick={() => onAddConnector(connector)}
                 role="button"
                 tabIndex={0}
