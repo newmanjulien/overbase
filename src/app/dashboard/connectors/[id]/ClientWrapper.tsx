@@ -18,7 +18,7 @@ export default function ClientWrapper({ connector }: ClientWrapperProps) {
   return (
     <Overview
       connector={connector}
-      onBack={() => router.back()}
+      onBack={() => router.push("/dashboard/connectors")}
       onInstall={handleInstall}
     />
   );

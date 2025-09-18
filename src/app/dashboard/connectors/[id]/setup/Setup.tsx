@@ -35,13 +35,13 @@ export default function Setup({ connector }: SetupProps) {
       {/* Left Sidebar */}
       <aside className="w-[28rem] bg-gray-100 border-r border-gray-200 pl-10 pr-15 pt-12 pb-6 flex flex-col">
         <button
-          onClick={() => router.push(`/dashboard/connectors/${connector.id}`)}
+          onClick={() => router.push("/dashboard/connectors")}
           className="flex items-center gap-2 text-sm text-gray-600 mb-8"
           aria-label="Back to connector overview"
           type="button"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Connector</span>
+          <span>Back to connectors</span>
         </button>
 
         <div className="flex items-center gap-3 mb-4">
