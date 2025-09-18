@@ -8,8 +8,8 @@ interface RowCardProps {
   title?: string;
   titleClassName?: string;
   subtitle?: ReactNode;
-  image?: string;
-  leading?: ReactNode;
+  image?: string; // if provided (even empty string), avatar area is shown
+  leading?: ReactNode; // sits even farther left (e.g., a checkbox)
   contentBox?: ReactNode;
   actions?: ReactNode;
   menu?: ReactNode;
@@ -69,24 +69,41 @@ function Leading({
   leading,
   title,
 }: Pick<RowCardProps, "image" | "leading" | "title">) {
-  if (image) {
-    return (
-      <div className="w-10 h-10 rounded-md overflow-hidden border border-gray-200/60 flex items-center justify-center relative mr-4">
-        <Image
-          src={image}
-          alt={typeof title === "string" ? title : "Row card image"}
-          fill
-          style={{ objectFit: "cover" }}
-        />
-      </div>
-    );
-  }
-  if (leading) {
-    return (
-      <div className="flex items-center justify-center mr-4">{leading}</div>
-    );
-  }
-  return null;
+  if (!image && !leading) return null;
+
+  return (
+    <div className="flex items-center mr-3">
+      {leading && (
+        <div
+          className={
+            image !== undefined
+              ? "mr-4 flex items-center justify-center"
+              : "flex items-center justify-center"
+          }
+        >
+          {leading}
+        </div>
+      )}
+
+      {image !== undefined && (
+        <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200/60 flex items-center justify-center bg-gray-100">
+          {image ? (
+            <Image
+              src={image}
+              alt={typeof title === "string" ? title : "Row card image"}
+              width={33}
+              height={33}
+              style={{ objectFit: "cover" }}
+            />
+          ) : (
+            <span className="text-gray-600 font-medium">
+              {typeof title === "string" ? title.charAt(0).toUpperCase() : "?"}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function Content({

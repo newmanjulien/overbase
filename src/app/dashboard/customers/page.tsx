@@ -103,6 +103,7 @@ function CustomersLayout() {
               key={customer.id}
               title={customer.name}
               subtitle={customer.company}
+              image=""
               leading={
                 <Checkbox
                   checked={selectedCustomers.includes(customer.id)}

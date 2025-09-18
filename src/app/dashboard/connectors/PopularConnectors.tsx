@@ -53,7 +53,7 @@ export function PopularConnectors({
                   }
                 }}
               >
-                <div className="w-10 h-10 rounded-md flex items-center justify-center relative overflow-hidden border border-gray-200/60 bg-white flex-shrink-0">
+                <div className="w-11 h-11 rounded-full flex items-center justify-center relative overflow-hidden border border-gray-200/60 bg-white flex-shrink-0">
                   <Image
                     src={connector.logo}
                     alt={connector.title}
