@@ -4,30 +4,30 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "../../../../../components/ui/button";
-import type { Integration } from "../../DummyData";
-import { useIntegrationContext } from "../../../../../lib/integrationContext";
+import type { Connectors } from "../../DummyData";
+import { useConnectorContext } from "../../../../../lib/connectorContext";
 
 interface SetupProps {
-  integration: Integration;
+  connector: Connectors;
 }
 
-export default function Setup({ integration }: SetupProps) {
+export default function Setup({ connector }: SetupProps) {
   const router = useRouter();
-  const { addIntegration } = useIntegrationContext();
+  const { addConnector } = useConnectorContext();
 
-  const [customName, setCustomName] = useState(integration.title);
+  const [customName, setCustomName] = useState(connector.title);
   const [config, setConfig] = useState("");
 
-  // Handle create/install integration
+  // Handle create/install connector
   const handleCreate = () => {
-    addIntegration({
-      ...integration,
+    addConnector({
+      ...connector,
       title: customName,
       status: "active",
       badge: "Billed Via Vercel",
       lastUpdated: "just now",
     });
-    router.push("/dashboard/integrations");
+    router.push("/dashboard/connectors");
   };
 
   return (
@@ -35,27 +35,25 @@ export default function Setup({ integration }: SetupProps) {
       {/* Left Sidebar */}
       <aside className="w-[28rem] bg-gray-100 border-r border-gray-200 pl-10 pr-15 pt-12 pb-6 flex flex-col">
         <button
-          onClick={() =>
-            router.push(`/dashboard/integrations/${integration.id}`)
-          }
+          onClick={() => router.push(`/dashboard/connectors/${connector.id}`)}
           className="flex items-center gap-2 text-sm text-gray-600 mb-8"
-          aria-label="Back to Integration overview"
+          aria-label="Back to connector overview"
           type="button"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Integration</span>
+          <span>Back to Connector</span>
         </button>
 
         <div className="flex items-center gap-3 mb-4">
           {/* You can replace this with logo image if you want */}
           <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center">
             <span className="text-white text-sm font-semibold">
-              {integration.title.charAt(0).toUpperCase()}
+              {connector.title.charAt(0).toUpperCase()}
             </span>
           </div>
           <span className="text-2xl font-semibold text-gray-900 leading-tight">
             <div>Get started with</div>
-            <div>{integration.title}</div>
+            <div>{connector.title}</div>
           </span>
         </div>
       </aside>
@@ -65,13 +63,12 @@ export default function Setup({ integration }: SetupProps) {
         {/* Header Section */}
         <div className="mb-8">
           <h1 className="text-2xl font-medium text-gray-900 mb-2">
-            Setup {integration.title}
+            Setup {connector.title}
           </h1>
 
           <p className="text-sm text-gray-600">
-            Set up your {integration.title} integration to enhance your
-            workflow. You can customize the name and add configuration notes
-            below.
+            Set up your {connector.title} connector to enhance your workflow.
+            You can customize the name and add configuration notes below.
           </p>
         </div>
 
@@ -85,13 +82,13 @@ export default function Setup({ integration }: SetupProps) {
           {/* Name Input */}
           <div className="mb-6">
             <label
-              htmlFor="integration-name"
+              htmlFor="connector-name"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Name (*)
             </label>
             <input
-              id="integration-name"
+              id="connector-name"
               type="text"
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
@@ -113,7 +110,7 @@ export default function Setup({ integration }: SetupProps) {
               "
             />
             <p className="text-xs text-gray-500 mt-1">
-              This name will be used to identify the integration in your
+              This name will be used to identify the connector in your
               dashboard.
             </p>
           </div>
@@ -121,13 +118,13 @@ export default function Setup({ integration }: SetupProps) {
           {/* Configuration textarea */}
           <div className="mb-10">
             <label
-              htmlFor="integration-config"
+              htmlFor="connector-config"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
               Configuration
             </label>
             <textarea
-              id="integration-config"
+              id="connector-config"
               rows={4}
               value={config}
               onChange={(e) => setConfig(e.target.value)}
@@ -156,7 +153,7 @@ export default function Setup({ integration }: SetupProps) {
               type="button"
               className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100"
               onClick={() =>
-                router.push(`/dashboard/integrations/${integration.id}`)
+                router.push(`/dashboard/connectors/${connector.id}`)
               }
             >
               Back

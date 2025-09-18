@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IntegrationProvider } from "../../lib/integrationContext";
+import { ConnectorProvider } from "../../lib/connectorContext";
 import { FooterProvider, useFooterContext } from "../../lib/footerContext";
 
 export default function DashboardLayout({
@@ -13,11 +13,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <IntegrationProvider>
+    <ConnectorProvider>
       <FooterProvider>
         <DashboardLayoutContent>{children}</DashboardLayoutContent>
       </FooterProvider>
-    </IntegrationProvider>
+    </ConnectorProvider>
   );
 }
 
@@ -27,7 +27,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/dashboard/requests", label: "Requests" },
-    { href: "/dashboard/integrations", label: "Integrations" },
+    { href: "/dashboard/connectors", label: "Connectors" },
     { href: "/dashboard/colleagues", label: "Colleagues" },
     { href: "/dashboard/customers", label: "Customers" },
   ];

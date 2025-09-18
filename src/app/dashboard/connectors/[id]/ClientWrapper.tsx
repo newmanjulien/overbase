@@ -2,22 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import Overview from "./Overview";
-import type { Integration } from "../DummyData";
+import type { Connectors } from "../DummyData";
 
 interface ClientWrapperProps {
-  integration: Integration;
+  connector: Connectors;
 }
 
-export default function ClientWrapper({ integration }: ClientWrapperProps) {
+export default function ClientWrapper({ connector }: ClientWrapperProps) {
   const router = useRouter();
 
   const handleInstall = () => {
-    alert(`Installing ${integration.title}`);
+    alert(`Installing ${connector.title}`);
   };
 
   return (
     <Overview
-      integration={integration}
+      connector={connector}
       onBack={() => router.back()}
       onInstall={handleInstall}
     />
