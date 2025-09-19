@@ -144,9 +144,9 @@ function CustomersLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="We can also consult your colleagues when collecting data and we can also share data with your colleagues"
-            linkText="Colleagues"
-            onClick={() => router.push("/dashboard/colleagues")}
+            text="Use the @ symbol when you create requests to specify that you'd like us to contact a specific customer when collecting data"
+            linkText="Requests"
+            onClick={() => router.push("/dashboard/requests")}
           />
         </div>
       </div>
