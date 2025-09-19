@@ -31,30 +31,28 @@ const WEEK_REF = new Date(2000, 0, 2); // 2000-01-02 (Sunday)
 // Formatting helpers
 // ---------------------------------------------------------------------------
 
-export function formatMonthYear(date: Date): string {
-  return format(date, "MMMM yyyy"); // e.g., "September 2025"
-}
-
-export function formatDayOfMonth(date: Date): string {
-  return format(date, "d"); // e.g., "17"
+export function formatMonthLong(date: Date): string {
+  return format(date, "MMMM"); // e.g., "September"
 }
 
 export function formatMonthShort(date: Date): string {
   return format(date, "MMM"); // e.g., "Sep"
 }
 
+export function formatYear(date: Date): string {
+  return format(date, "yyyy"); // e.g., "2025"
+}
+
+export function formatDayOfMonth(date: Date): string {
+  return format(date, "d"); // e.g., "17"
+}
+
 export function formatWeekdayShort(date: Date): string {
-  // Presentation (uppercase) is handled in CSS.
   return format(date, "EEE"); // e.g., "Mon"
 }
 
 export function formatWeekdayLong(date: Date): string {
   return format(date, "EEEE"); // e.g., "Monday"
-}
-
-/** Composite label: for display only (don't parse downstream!) */
-export function formatDayLabel(date: Date): string {
-  return format(date, "MMM d"); // e.g., "Sep 17"
 }
 
 // ---------------------------------------------------------------------------
@@ -67,17 +65,17 @@ export function getWeekdayLabels(): string[] {
   return Array.from({ length: 7 }, (_, i) => format(addDays(start, i), "EEE"));
 }
 
-/** Back-compat: returns dates (not used by the components after this change) */
-export function getWeekdays(): Date[] {
-  const start = startOfWeek(WEEK_REF, { weekStartsOn: WEEK_STARTS_ON });
-  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
-}
-
 // ---------------------------------------------------------------------------
 // Calendar grid
 // ---------------------------------------------------------------------------
 
-/** Raw 42-cell grid of dates (DST-safe). Kept for back-compat. */
+export type MonthCell = {
+  date: Date;
+  key: string; // "YYYY-MM-DD" in local time
+  inMonth: boolean;
+  isToday: boolean;
+};
+
 export function getCalendarGrid(date: Date): Date[] {
   const monthStart = startOfMonth(date);
   const monthEnd = endOfMonth(date);
@@ -94,14 +92,6 @@ export function getCalendarGrid(date: Date): Date[] {
   return days;
 }
 
-export type MonthCell = {
-  date: Date;
-  key: string; // "YYYY-MM-DD" in local time
-  inMonth: boolean;
-  isToday: boolean;
-};
-
-/** Richer grid cells: fewer re-computations in the component. */
 export function buildMonthGrid(date: Date): MonthCell[] {
   const grid = getCalendarGrid(date);
   return grid.map((d) => ({
@@ -137,8 +127,7 @@ export function isSameMonthCheck(date1: Date, date2: Date): boolean {
 }
 
 export function getLocalDateKey(date: Date): string {
-  // Equivalent behavior to "yyyy-MM-dd", more self-documenting.
-  return formatISO(date, { representation: "date" });
+  return formatISO(date, { representation: "date" }); // "yyyy-MM-dd"
 }
 
 export function isBeforeToday(date: Date): boolean {
@@ -149,13 +138,12 @@ export function isTodayCheck(date: Date): boolean {
   return _isToday(date);
 }
 
-// ✅ NEW: disable future dates
 export function isAfterToday(date: Date): boolean {
   return isBefore(startOfToday(), date);
 }
 
 // ---------------------------------------------------------------------------
-// Canonical re-exports (so call sites can gradually adopt date-fns names)
+// Canonical re-exports
 // ---------------------------------------------------------------------------
 
 export {
