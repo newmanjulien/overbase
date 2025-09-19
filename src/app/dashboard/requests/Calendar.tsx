@@ -6,7 +6,8 @@ import { Button } from "../../../components/ui/button";
 import clsx from "clsx";
 
 import {
-  formatMonthYear,
+  formatMonthLong,
+  formatYear,
   formatDayOfMonth,
   getWeekdayLabels,
   buildMonthGrid,
@@ -30,7 +31,6 @@ export default function Calendar({
   setCurrentDate,
   requestsByDate,
 }: CalendarProps) {
-  // Memoize: pure derivation from currentDate
   const monthCells = useMemo(() => buildMonthGrid(currentDate), [currentDate]);
 
   const navigateMonth = (direction: "prev" | "next") => {
@@ -47,8 +47,9 @@ export default function Calendar({
     <div className="w-full max-w-lg bg-white border border-gray-100 p-8 rounded-3xl self-start">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-lg font-medium text-foreground">
-          {formatMonthYear(currentDate)}
+        <h1 className="text-lg text-foreground flex items-baseline gap-2">
+          <span className="font-semibold">{formatMonthLong(currentDate)}</span>
+          <span className="text-muted-foreground">{formatYear(currentDate)}</span>
         </h1>
         <div className="flex items-center gap-2">
           <Button
@@ -105,7 +106,7 @@ export default function Calendar({
                 {
                   "bg-gray-900 text-white": isSelected,
                   "bg-gray-100 text-gray-900 border border-2 border-gray-200 hover:border-2 hover:border-gray-900":
-                    cell.isToday && !isSelected, // today, not selected
+                    cell.isToday && !isSelected,
                   "bg-gray-50 text-gray-900 border border-gray-100 hover:border-2 hover:border-gray-900":
                     !isSelected && !cell.isToday,
                 }
