@@ -111,8 +111,10 @@ export default function DataSection({
   return (
     <div className="w-full pt-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg text-foreground flex items-baseline gap-2">
-          <span className="font-medium">{formatMonthShort(selectedDate)}</span>
+        <h2 className="text-foreground flex items-baseline gap-1">
+          <span className="text-lg font-medium">
+            {formatMonthShort(selectedDate)}
+          </span>
           <span>{formatDayOfMonth(selectedDate)}</span>
         </h2>
 
