@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { format, formatISO, isBefore, startOfToday, isToday } from "date-fns";
-import { RowCard } from "../../../components/ui/RowCard";
-import { EmptyState } from "../../../components/ui/EmptyState";
+import { RowCard } from "../../../components/RowCard";
+import { EmptyState } from "../../../components/EmptyState";
 import {
   ToggleGroup,
   ToggleGroupItem,

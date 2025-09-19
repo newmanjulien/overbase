@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { RowCard } from "../../../components/ui/RowCard";
-import { EmptyState } from "../../../components/ui/EmptyState";
+import { RowCard } from "../../../components/RowCard";
+import { EmptyState } from "../../../components/EmptyState";
 import { PopularConnectors } from "./PopularConnectors";
 import type { Connectors } from "./DummyData";
 import { connectors } from "./DummyData";
 import { useConnectorContext } from "../../../lib/connectorContext";
-import { Header } from "../../../components/ui/Header";
+import { Header } from "../../../components/Header";
 
 export default function ConnectorsPage() {
   const router = useRouter();

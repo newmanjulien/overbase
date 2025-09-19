@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLink, ChevronLeft } from "lucide-react";
-import { Button } from "./button";
+import { Button } from "./ui/button";
 import Image from "next/image";
 
 interface HeaderProps {
@@ -48,7 +48,7 @@ function renderDefaultHeader({
 
   return (
     <div className="border-b border-gray-200/60">
-      <div className="max-w-7xl mx-auto p-6 py-8">
+      <div className="max-w-7xl mx-auto p-6">
         <div className="flex items-center justify-between mb-4">
           {/* Left: title + subtitle */}
           <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">

@@ -1,9 +1,9 @@
 "use client";
 
-import { Input } from "./input";
-import { Label } from "./label";
-import { Switch } from "./switch";
-import { Button } from "./button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
+import { Button } from "./ui/button";
 import { X } from "lucide-react";
 
 // Define the types directly in this file

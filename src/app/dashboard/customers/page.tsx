@@ -10,10 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { RowCard } from "../../../components/ui/RowCard";
-import { InfoCard } from "../../../components/ui/InfoCard";
+import { RowCard } from "../../../components/RowCard";
+import { InfoCard } from "../../../components/InfoCard";
 import { useRouter } from "next/navigation";
-import { Header } from "../../../components/ui/Header";
+import { Header } from "../../../components/Header";
 
 interface Customer {
   id: string;
