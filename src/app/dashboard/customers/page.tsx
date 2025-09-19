@@ -145,7 +145,7 @@ function CustomersLayout() {
         <div className="mt-8 w-full">
           <InfoCard
             text="You can ask in your requests that we contact one of your customers when we're collecting data"
-            linkText="Requests"
+            linkText="Request data"
             onClick={() => router.push("/dashboard/requests")}
           />
         </div>
