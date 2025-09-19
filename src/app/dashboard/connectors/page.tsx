@@ -34,7 +34,7 @@ export default function ConnectorsPage() {
     <div className="bg-[#FAFAFA] min-h-screen">
       <Header
         title="Connectors"
-        subtitle="Set up connectors we can automatically get data from all your sources."
+        subtitle="Set up connectors so we can automatically get data from all your sources."
         buttonLabel="Browse connectors"
         onButtonClick={() => {}}
         variant="white"
