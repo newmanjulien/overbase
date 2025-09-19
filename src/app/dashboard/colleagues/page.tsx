@@ -144,7 +144,7 @@ function ColleaguesLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="You can ask in your requests that we contact one of your colleagues when we're collecting data"
+            text="We can contact colleagues on your behalf when we're collecting data for your requests"
             linkText="Request data"
             onClick={() => router.push("/dashboard/requests")}
           />
