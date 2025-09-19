@@ -6,15 +6,57 @@ import { Button } from "../../../components/ui/button";
 import clsx from "clsx";
 
 import {
-  formatMonthLong,
-  formatYear,
-  formatDayOfMonth,
-  getWeekdayLabels,
-  buildMonthGrid,
+  format,
+  formatISO,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  addDays,
   addMonths,
   subMonths,
   isSameDay,
-} from "../../utils/date";
+  isSameMonth,
+  isToday,
+} from "date-fns";
+
+interface MonthCell {
+  date: Date;
+  key: string; // "YYYY-MM-DD" in local time
+  inMonth: boolean;
+  isToday: boolean;
+}
+
+function getLocalDateKey(date: Date): string {
+  return formatISO(date, { representation: "date" });
+}
+
+function buildMonthGrid(date: Date): MonthCell[] {
+  const monthStart = startOfMonth(date);
+  const monthEnd = endOfMonth(date);
+  const gridStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
+
+  // Ensure 6 rows (42 cells)
+  while (days.length < 42) {
+    days.push(addDays(days[days.length - 1], 1));
+  }
+
+  return days.map((d) => ({
+    date: d,
+    key: getLocalDateKey(d),
+    inMonth: isSameMonth(date, d),
+    isToday: isToday(d),
+  }));
+}
+
+function getWeekdayLabels(): string[] {
+  const WEEK_REF = new Date(2000, 0, 2); // Sunday
+  const start = startOfWeek(WEEK_REF, { weekStartsOn: 0 });
+  return Array.from({ length: 7 }, (_, i) => format(addDays(start, i), "EEE"));
+}
 
 interface CalendarProps {
   selectedDate: Date | null;
@@ -49,9 +91,11 @@ export default function Calendar({
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-lg text-foreground flex items-baseline gap-1">
           <span className="text-lg font-medium">
-            {formatMonthLong(currentDate)}
+            {format(currentDate, "MMMM")}
           </span>
-          <span className="text-foreground/60">{formatYear(currentDate)}</span>
+          <span className="text-foreground/60">
+            {format(currentDate, "yyyy")}
+          </span>
         </h1>
         <div className="flex items-center gap-2">
           <Button
@@ -114,7 +158,7 @@ export default function Calendar({
                 }
               )}
             >
-              <span>{formatDayOfMonth(cell.date)}</span>
+              <span>{format(cell.date, "d")}</span>
 
               {hasRequests && (
                 <span

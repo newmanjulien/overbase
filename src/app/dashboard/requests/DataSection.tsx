@@ -1,14 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  formatMonthShort,
-  formatDayOfMonth,
-  isBeforeToday,
-  getLocalDateKey,
-  isToday,
-  isAfterToday,
-} from "../../utils/date";
+import { format, formatISO, isBefore, startOfToday, isToday } from "date-fns";
 import { RowCard } from "../../../components/ui/RowCard";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import {
@@ -23,6 +16,18 @@ interface DataSectionProps {
   selectedDate: Date | null;
   requestsByDate: Record<string, string[]>;
   onRequestData: () => void;
+}
+
+function getLocalDateKey(date: Date): string {
+  return formatISO(date, { representation: "date" });
+}
+
+function isBeforeToday(date: Date): boolean {
+  return isBefore(date, startOfToday());
+}
+
+function isAfterToday(date: Date): boolean {
+  return isBefore(startOfToday(), date);
 }
 
 // 🔹 Reusable secondary button
@@ -113,9 +118,9 @@ export default function DataSection({
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-foreground flex items-baseline gap-1">
           <span className="text-lg font-medium">
-            {formatMonthShort(selectedDate)}
+            {format(selectedDate, "MMM")}
           </span>
-          <span>{formatDayOfMonth(selectedDate)}</span>
+          <span>{format(selectedDate, "d")}</span>
         </h2>
 
         <ToggleGroup

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { startOfToday } from "date-fns";
+import { startOfToday, formatISO } from "date-fns";
 import Calendar from "./Calendar";
 import DataSection from "./DataSection";
 import { Header } from "../../../components/ui/Header";
-import { getLocalDateKey } from "../../utils/date";
+
+function getLocalDateKey(date: Date): string {
+  return formatISO(date, { representation: "date" });
+}
 
 const SAMPLE_PROMPTS = [
   "I have an upcoming QBR with the Docusign account next Thursday. Please update the numbers in the attached deck to reflect the most recent pipeline metrics, including revenue by segment and churn data from the last quarter. Also, double-check that all charts are consistent with the latest Salesforce exports before sharing.",
