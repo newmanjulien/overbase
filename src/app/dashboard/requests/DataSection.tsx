@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import {
-  formatDayLabel,
+  formatMonthShort,
+  formatDayOfMonth,
   isBeforeToday,
   getLocalDateKey,
   isToday,
@@ -58,9 +59,6 @@ export default function DataSection({
   const dateKey = getLocalDateKey(selectedDate);
   const dataCards = requestsByDate[dateKey] || [];
 
-  const dayLabel = formatDayLabel(selectedDate); // "Sep 17"
-  const [monthLabel, dayNumber] = dayLabel.split(" ");
-
   const isPastDate = isBeforeToday(selectedDate);
   const todaySelected = isToday(selectedDate);
 
@@ -113,9 +111,9 @@ export default function DataSection({
   return (
     <div className="w-full pt-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-foreground flex items-baseline gap-1">
-          <span className="text-lg font-medium">{monthLabel}</span>
-          <span>{dayNumber}</span>
+        <h2 className="text-lg text-foreground flex items-baseline gap-2">
+          <span className="font-medium">{formatMonthShort(selectedDate)}</span>
+          <span>{formatDayOfMonth(selectedDate)}</span>
         </h2>
 
         <ToggleGroup
