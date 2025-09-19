@@ -18,18 +18,6 @@ interface DataSectionProps {
   onRequestData: () => void;
 }
 
-function getLocalDateKey(date: Date): string {
-  return formatISO(date, { representation: "date" });
-}
-
-function isBeforeToday(date: Date): boolean {
-  return isBefore(date, startOfToday());
-}
-
-function isAfterToday(date: Date): boolean {
-  return isBefore(startOfToday(), date);
-}
-
 // 🔹 Reusable secondary button
 function SecondaryButton({
   children,
@@ -61,11 +49,12 @@ export default function DataSection({
 
   if (!selectedDate) return null;
 
-  const dateKey = getLocalDateKey(selectedDate);
+  const dateKey = formatISO(selectedDate, { representation: "date" });
   const dataCards = requestsByDate[dateKey] || [];
 
-  const isPastDate = isBeforeToday(selectedDate);
+  const isPastDate = isBefore(selectedDate, startOfToday());
   const todaySelected = isToday(selectedDate);
+  const isFutureDate = isBefore(startOfToday(), selectedDate);
 
   function renderEmptyState() {
     if (selectedView === "meetings") {
@@ -147,7 +136,7 @@ export default function DataSection({
               actions={
                 <>
                   <SecondaryButton>Edit</SecondaryButton>
-                  <SecondaryButton disabled={isAfterToday(selectedDate)}>
+                  <SecondaryButton disabled={isFutureDate}>
                     Get data
                   </SecondaryButton>
                 </>

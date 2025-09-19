@@ -23,7 +23,7 @@ import {
 
 interface MonthCell {
   date: Date;
-  key: string; // "YYYY-MM-DD" in local time
+  key: string;
   inMonth: boolean;
   isToday: boolean;
 }
@@ -39,7 +39,6 @@ function buildMonthGrid(date: Date): MonthCell[] {
   const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
   const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
-  // Ensure 6 rows (42 cells)
   while (days.length < 42) {
     days.push(addDays(days[days.length - 1], 1));
   }

@@ -6,10 +6,6 @@ import Calendar from "./Calendar";
 import DataSection from "./DataSection";
 import { Header } from "../../../components/ui/Header";
 
-function getLocalDateKey(date: Date): string {
-  return formatISO(date, { representation: "date" });
-}
-
 const SAMPLE_PROMPTS = [
   "I have an upcoming QBR with the Docusign account next Thursday. Please update the numbers in the attached deck to reflect the most recent pipeline metrics, including revenue by segment and churn data from the last quarter. Also, double-check that all charts are consistent with the latest Salesforce exports before sharing.",
   "Please review the customer feedback from last month and identify the top 3 areas for improvement. Pay close attention to recurring themes around onboarding, response time from support, and the clarity of our product documentation. Summarize the findings in a short report that I can present during next week’s leadership sync.",
@@ -31,7 +27,7 @@ export default function RequestsPage() {
     const randomPrompt =
       SAMPLE_PROMPTS[Math.floor(Math.random() * SAMPLE_PROMPTS.length)];
 
-    const dateKey = getLocalDateKey(selectedDate);
+    const dateKey = formatISO(selectedDate, { representation: "date" });
 
     setRequestsByDate((prev) => ({
       ...prev,
