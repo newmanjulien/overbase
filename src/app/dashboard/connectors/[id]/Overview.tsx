@@ -1,28 +1,21 @@
 "use client";
 
 import type { Connectors } from "../DummyData";
-import { useRouter } from "next/navigation";
 import { PreviewImages } from "./PreviewImages";
 import { Header } from "@/components/Header";
 
 interface OverviewProps {
   connector: Connectors;
-  onBack?: () => void; // optional, fallback to router.back()
+  onBack: () => void;
   onInstall: () => void;
 }
 
-export default function Overview({ connector, onBack }: OverviewProps) {
-  const router = useRouter();
+export default function Overview({
+  connector,
+  onBack,
+  onInstall,
+}: OverviewProps) {
   const previewImages = connector.previewImages ?? [];
-
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      router.back();
-    }
-  };
-
   const resourceLinks = [
     "Support",
     "Documentation",
@@ -38,12 +31,10 @@ export default function Overview({ connector, onBack }: OverviewProps) {
         variant="overview"
         title={connector.title}
         showBackButton
-        onBackClick={handleBack}
+        onBackClick={onBack}
         logo={connector.logo}
         actionButtonLabel="Install"
-        onActionButtonClick={() =>
-          router.push(`/dashboard/connectors/${connector.id}/setup`)
-        }
+        onActionButtonClick={onInstall}
       />
 
       {/* Main layout with grid */}

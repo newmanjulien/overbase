@@ -9,7 +9,6 @@ export default async function ConnectorOverviewPage({
   params,
 }: ConnectorOverviewPageProps) {
   const { id } = await params;
-
   const connector = connectors.find((i) => i.id === id);
 
   if (!connector) {
