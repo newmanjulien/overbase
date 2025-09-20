@@ -4,8 +4,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectorProvider } from "../../lib/connectorContext";
-import { FooterProvider, useFooterContext } from "../../lib/footerContext";
+import { ConnectorProvider } from "@/lib/connectorContext";
+import { FooterProvider, useFooterContext } from "@/lib/footerContext";
 
 export default function DashboardLayout({
   children,

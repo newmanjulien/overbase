@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "../../../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import type { Connectors } from "../../DummyData";
-import { useConnectorContext } from "../../../../../lib/connectorContext";
+import { useConnectorContext } from "@/lib/connectorContext";
 
 interface SetupProps {
   connector: Connectors;

@@ -1,19 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../../components/ui/button";
-import { Checkbox } from "../../../components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { RowCard } from "../../../components/RowCard";
-import { InfoCard } from "../../../components/InfoCard";
+import { RowCard } from "@/components/RowCard";
+import { InfoCard } from "@/components/InfoCard";
 import { useRouter } from "next/navigation";
-import { Header } from "../../../components/Header";
+import { Header } from "@/components/Header";
 
 interface Colleague {
   id: string;

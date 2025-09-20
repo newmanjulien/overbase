@@ -3,7 +3,7 @@
 import type { Connectors } from "../DummyData";
 import { useRouter } from "next/navigation";
 import { PreviewImages } from "./PreviewImages";
-import { Header } from "../../../../components/Header";
+import { Header } from "@/components/Header";
 
 interface OverviewProps {
   connector: Connectors;

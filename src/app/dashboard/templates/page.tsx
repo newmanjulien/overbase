@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { TemplateCard } from "./TemplateCard";
-import { Header } from "../../../components/Header";
+import { Header } from "@/components/Header";
 
 import { tagsConfig, initialTemplates } from "./DummyData";
 

@@ -2,12 +2,9 @@
 
 import { useState } from "react";
 import { format, formatISO, isBefore, startOfToday, isToday } from "date-fns";
-import { RowCard } from "../../../components/RowCard";
-import { EmptyState } from "../../../components/EmptyState";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "../../../components/ui/toggle-group";
+import { RowCard } from "@/components/RowCard";
+import { EmptyState } from "@/components/EmptyState";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import clsx from "clsx";
 
 type ViewType = "requests" | "meetings";
