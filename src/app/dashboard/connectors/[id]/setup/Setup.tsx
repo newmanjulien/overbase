@@ -34,26 +34,28 @@ export default function Setup({ connector }: SetupProps) {
   return (
     <div className="flex min-h-screen">
       {/* Left Sidebar */}
-      <aside className="w-[28rem] bg-gray-100 border-r border-gray-200 pl-10 pr-15 pt-12 pb-6 flex flex-col">
-        <Button
-          onClick={() => router.push("/dashboard/connectors")}
-          variant="backLink"
-          leadingIcon={<ArrowLeft className="w-5 h-5" />}
-          className="mb-8"
-        >
-          Back to connectors
-        </Button>
+      <aside className="w-[28rem] bg-gray-100 border-r border-gray-200 pl-14 pr-15 pt-12 pb-6 flex flex-col">
+        <div className="flex flex-col gap-4">
+          <Button
+            onClick={() => router.push("/dashboard/connectors")}
+            variant="backLink"
+            size="backLink"
+            leadingIcon={<ArrowLeft className="w-5 h-5" />}
+          >
+            Back to connectors
+          </Button>
 
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-semibold">
-              {connector.title.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-semibold">
+                {connector.title.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-2xl font-semibold text-gray-900 leading-tight">
+              <div>Get started with</div>
+              <div>{connector.title}</div>
             </span>
           </div>
-          <span className="text-2xl font-semibold text-gray-900 leading-tight">
-            <div>Get started with</div>
-            <div>{connector.title}</div>
-          </span>
         </div>
       </aside>
 

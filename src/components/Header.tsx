@@ -48,43 +48,41 @@ function renderDefaultHeader({
 
   return (
     <div className="border-b border-gray-200/60">
-      <div className="max-w-7xl mx-auto p-6 pt-4">
-        <div className="flex items-center justify-between mb-4">
-          {/* Left: title + subtitle */}
-          <div className="flex flex-col leading-tight max-w-[calc(100%-180px)]">
-            <h1 className="text-[2rem] font-medium tracking-tight mb-4 text-gray-800">
-              {title}
-            </h1>
-            {subtitle && (
-              <h2 className="text-sm font-normal mt-1 text-gray-500">
-                {subtitle}
-                {learnMoreLink && (
-                  <a
-                    href={learnMoreLink}
-                    className="inline-flex items-center ml-1 text-[#1A69FF] hover:text-[#1A69FF]/80 transition-colors"
-                  >
-                    <span>Learn more</span>
-                    <ExternalLink className="ml-1 h-4 w-4" />
-                  </a>
-                )}
-              </h2>
-            )}
-          </div>
-
-          {/* Right: optional button */}
-          {showButton && (
-            <Button
-              onClick={onButtonClick}
-              className={`font-normal border ${
-                isBlack
-                  ? "bg-black text-white hover:bg-black/90 border-transparent rounded-lg"
-                  : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100 rounded-lg"
-              }`}
-            >
-              {buttonLabel}
-            </Button>
+      <div className="max-w-7xl mx-auto px-6 pt-6 pb-11 grid grid-cols-[1fr_auto] items-center gap-6">
+        {/* Left column */}
+        <div className="flex flex-col leading-tight">
+          <h1 className="text-3xl font-medium tracking-tight mb-4 text-gray-800">
+            {title}
+          </h1>
+          {subtitle && (
+            <h2 className="text-sm font-normal mt-1 text-gray-500">
+              {subtitle}
+              {learnMoreLink && (
+                <a
+                  href={learnMoreLink}
+                  className="inline-flex items-center ml-1 text-[#1A69FF] hover:text-[#1A69FF]/80 transition-colors"
+                >
+                  <span>Learn more</span>
+                  <ExternalLink className="ml-1 h-4 w-4" />
+                </a>
+              )}
+            </h2>
           )}
         </div>
+
+        {/* Right column */}
+        {showButton && (
+          <Button
+            onClick={onButtonClick}
+            className={`font-normal border ${
+              isBlack
+                ? "bg-black text-white hover:bg-black/90 border-transparent rounded-lg"
+                : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100 rounded-lg"
+            }`}
+          >
+            {buttonLabel}
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -100,18 +98,21 @@ function renderOverviewHeader({
 }: HeaderProps) {
   return (
     <header className="border-b border-gray-200/60">
-      <div className="max-w-7xl mx-auto px-6 py-10 flex items-center justify-between">
-        <div className="flex flex-col gap-2 max-w-[calc(100%-180px)]">
+      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-[1fr_auto] gap-6">
+        {/* Left column */}
+        <div className="flex flex-col gap-3">
           {showBackButton && (
             <Button
               onClick={onBackClick}
               variant="backLink"
+              size="backLink" // 👈 ensures no padding
               leadingIcon={<ChevronLeft className="w-5 h-5" />}
             >
               Back to connectors
             </Button>
           )}
-          <div className="flex items-center gap-4 mt-1">
+
+          <div className="flex items-center gap-4">
             {logo && (
               <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
                 <Image
@@ -129,6 +130,7 @@ function renderOverviewHeader({
           </div>
         </div>
 
+        {/* Right column */}
         {actionButtonLabel && (
           <Button
             onClick={onActionButtonClick}

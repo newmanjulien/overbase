@@ -22,13 +22,16 @@ const buttonVariants = cva(
 
         // NEW backLink variant
         backLink:
-          "bg-transparent px-0 text-gray-500 hover:text-gray-600 font-normal inline-flex items-center justify-start",
+          "bg-transparent text-gray-500 hover:text-gray-600 font-normal inline-flex items-center justify-start",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+
+        // NEW backLink size
+        backLink: "h-auto px-0 py-0",
       },
     },
     defaultVariants: {
