@@ -11,6 +11,19 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+
+  {
+    rules: {
+      // ❌ Prevent AI placeholder artifacts
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value='...']",
+          message: "Do not leave placeholder `...` in source files.",
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;
