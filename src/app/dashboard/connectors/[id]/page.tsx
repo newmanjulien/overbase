@@ -1,5 +1,5 @@
 import { connectors } from "../DummyData";
-import ClientWrapper from "./ClientWrapper";
+import ClientWrapper from "./Client";
 
 interface ConnectorOverviewPageProps {
   params: Promise<{ id: string }>;

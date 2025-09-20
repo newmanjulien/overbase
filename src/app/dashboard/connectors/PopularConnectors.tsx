@@ -43,7 +43,7 @@ export function PopularConnectors({
             popularConnectors.map((connector) => (
               <div
                 key={connector.id}
-                className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 rounded-xl"
+                className="flex items-center space-x-3 cursor-pointer rounded-xl"
                 onClick={() => onAddConnector(connector)}
                 role="button"
                 tabIndex={0}
