@@ -52,7 +52,7 @@ function ColleaguesLayout() {
   };
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen">
+    <div className="min-h-screen">
       <Header
         title="Colleagues"
         subtitle="Add colleagues who you want us to consult while collecting data for you or who you want us to send data to."

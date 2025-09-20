@@ -21,7 +21,7 @@ function Templates() {
     "Easily apply templates created by your organization and which your colleagues are already using.";
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen">
+    <div className="min-h-screen">
       <Header
         title="Templates"
         subtitle="Easily apply templates created by your organization and which your colleagues are already usingy."

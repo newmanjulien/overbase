@@ -36,7 +36,7 @@ export default function RequestsPage() {
   };
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen">
+    <div className="min-h-screen">
       <Header
         title="Requests"
         subtitle="Request data and manage your data requests in a way that aligns with your meetings and deadlines."

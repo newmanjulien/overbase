@@ -99,7 +99,7 @@ function renderOverviewHeader({
   onActionButtonClick,
 }: HeaderProps) {
   return (
-    <header className="bg-[#FAFAFA] border-b border-gray-200/60">
+    <header className="border-b border-gray-200/60">
       <div className="max-w-7xl mx-auto px-6 py-10 flex items-center justify-between">
         <div className="flex flex-col gap-2 max-w-[calc(100%-180px)]">
           {showBackButton && (

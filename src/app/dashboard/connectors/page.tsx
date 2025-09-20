@@ -31,7 +31,7 @@ export default function ConnectorsPage() {
   };
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen">
+    <div className="min-h-screen">
       <Header
         title="Connectors"
         subtitle="Set up connectors so we can automatically get data from all your sources."

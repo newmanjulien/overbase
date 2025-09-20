@@ -31,7 +31,7 @@ export default function Setup({ connector }: SetupProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#FAFAFA]">
+    <div className="flex min-h-screen">
       {/* Left Sidebar */}
       <aside className="w-[28rem] bg-gray-100 border-r border-gray-200 pl-10 pr-15 pt-12 pb-6 flex flex-col">
         <button
