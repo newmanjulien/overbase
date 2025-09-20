@@ -40,7 +40,7 @@ export function Connectors({
                 title="No Connectors Installed"
                 description="You don't have any connector installed."
                 buttonLabel="Browse connectors"
-                onButtonClick={onBrowseClick}
+                onButtonClick={() => {}}
                 className="py-32 min-h-[600px]"
                 withBorder={true}
                 iconType="plug"
