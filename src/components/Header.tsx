@@ -103,13 +103,13 @@ function renderOverviewHeader({
       <div className="max-w-7xl mx-auto px-6 py-10 flex items-center justify-between">
         <div className="flex flex-col gap-2 max-w-[calc(100%-180px)]">
           {showBackButton && (
-            <button
+            <Button
               onClick={onBackClick}
-              className="flex items-center gap-2 text-gray-500 hover:text-gray-600 text-sm font-base"
+              variant="backLink"
+              leadingIcon={<ChevronLeft className="w-5 h-5" />}
             >
-              <ChevronLeft className="w-5 h-5" />
               Back to connectors
-            </button>
+            </Button>
           )}
           <div className="flex items-center gap-4 mt-1">
             {logo && (

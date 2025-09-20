@@ -18,6 +18,11 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        ghostNoHover: "bg-transparent text-gray-600",
+
+        // NEW backLink variant
+        backLink:
+          "bg-transparent px-0 text-gray-500 hover:text-gray-600 font-normal inline-flex items-center justify-start",
       },
       size: {
         default: "h-10 px-4 py-2",
