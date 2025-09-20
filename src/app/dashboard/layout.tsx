@@ -41,14 +41,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200/60">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-12">
+          <div className="flex items-center justify-between h-11">
             <div className="flex items-center space-x-8">
-              <div className="h-7">
+              <div className="h-6">
                 <Link href="/dashboard/requests">
                   <Image
                     src="/images/logo.png"
                     alt="Logo"
-                    width={45}
+                    width={39}
                     height={30}
                     priority
                   />
@@ -62,8 +62,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`px-2.5 py-1.5 text-sm font-normal rounded-lg hover:text-gray-900 hover:bg-gray-100 ${
-                        isActive ? "text-gray-900 bg-gray-100" : "text-gray-500"
+                      className={`px-2 py-1 text-sm font-[350] rounded-lg hover:text-gray-900 hover:bg-gray-100 ${
+                        isActive ? "text-gray-700 bg-gray-100" : "text-gray-500"
                       }`}
                     >
                       {item.label}
@@ -89,7 +89,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <Image
                     src="/images/logo.png"
                     alt="Logo small"
-                    width={38}
+                    width={33}
                     height={20}
                   />
                 </div>
