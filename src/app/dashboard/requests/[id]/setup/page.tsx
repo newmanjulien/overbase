@@ -113,7 +113,7 @@ export default function RequestSetupPage() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => router.push("/requests")}
+            onClick={() => router.push("/dashboard/requests")}
           >
             Cancel
           </Button>
