@@ -77,11 +77,7 @@ export function PopularConnectors({
 
         <hr className="border-t border-gray-200/60 my-6 " />
 
-        <Button
-          variant="outline"
-          className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100 w-full rounded-lg"
-          onClick={onBrowseClick}
-        >
+        <Button variant="secondary" className="w-full" onClick={onBrowseClick}>
           Browse connectors
         </Button>
       </div>

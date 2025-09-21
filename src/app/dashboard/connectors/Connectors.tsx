@@ -28,7 +28,7 @@ export function Connectors({
         subtitle="Set up connectors so we can automatically get data from all your sources."
         buttonLabel="Browse connectors"
         onButtonClick={onBrowseClick}
-        variant="white"
+        buttonVariant="secondary"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10">
@@ -40,7 +40,7 @@ export function Connectors({
                 title="No Connectors Installed"
                 description="You don't have any connector installed."
                 buttonLabel="Browse connectors"
-                onButtonClick={() => {}}
+                onButtonClick={onBrowseClick}
                 className="py-32 min-h-[600px]"
                 withBorder={true}
                 iconType="plug"

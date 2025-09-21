@@ -7,139 +7,93 @@ import Image from "next/image";
 interface HeaderProps {
   title: string;
   subtitle?: string;
-  buttonLabel?: string;
-  onButtonClick?: () => void;
-  variant?: "white" | "black" | "overview";
   learnMoreLink?: string;
 
-  // New props for "overview" style
-  showBackButton?: boolean;
-  onBackClick?: () => void;
+  // Main CTA button (right column)
+  buttonLabel?: string;
+  onButtonClick?: () => void;
+  buttonVariant?: "default" | "secondary";
+
+  // Backlink (left-side navigation button with chevron)
+  backlink?: boolean;
+  onBacklinkClick?: () => void;
+  backlinkLabel?: string; // <-- NEW
+
+  // Optional logo next to the title
   logo?: string;
-  actionButtonLabel?: string;
-  onActionButtonClick?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = (props) => {
-  switch (props.variant) {
-    case "overview":
-      return renderOverviewHeader(props);
-    case "black":
-    case "white":
-    default:
-      return renderDefaultHeader(props);
-  }
-};
-
-/* -------------------------------
-   Render Helpers
---------------------------------*/
-
-function renderDefaultHeader({
+export const Header: React.FC<HeaderProps> = ({
   title,
   subtitle,
+  learnMoreLink,
   buttonLabel,
   onButtonClick,
-  variant,
-  learnMoreLink = "#",
-}: HeaderProps) {
-  const isBlack = variant === "black";
-  const showButton = buttonLabel && onButtonClick;
-
-  return (
-    <div className="border-b border-gray-200/60">
-      <div className="max-w-7xl mx-auto px-6 pt-6 pb-11 grid grid-cols-[1fr_auto] items-center gap-6">
-        {/* Left column */}
-        <div className="flex flex-col leading-tight">
-          <h1 className="text-3xl font-medium tracking-tight mb-4 text-gray-800">
-            {title}
-          </h1>
-          {subtitle && (
-            <h2 className="text-sm font-normal mt-1 text-gray-500">
-              {subtitle}
-              {learnMoreLink && (
-                <a
-                  href={learnMoreLink}
-                  className="inline-flex items-center ml-1 text-[#1A69FF] hover:text-[#1A69FF]/80 transition-colors"
-                >
-                  <span>Learn more</span>
-                  <ExternalLink className="ml-1 h-4 w-4" />
-                </a>
-              )}
-            </h2>
-          )}
-        </div>
-
-        {/* Right column */}
-        {showButton && (
-          <Button
-            onClick={onButtonClick}
-            className={`font-normal border ${
-              isBlack
-                ? "bg-black text-white hover:bg-black/90 border-transparent rounded-lg"
-                : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100 rounded-lg"
-            }`}
-          >
-            {buttonLabel}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function renderOverviewHeader({
-  title,
-  showBackButton,
-  onBackClick,
+  buttonVariant = "default",
+  backlink,
+  onBacklinkClick,
+  backlinkLabel, // <-- NEW
   logo,
-  actionButtonLabel,
-  onActionButtonClick,
-}: HeaderProps) {
+}) => {
   return (
     <header className="border-b border-gray-200/60">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-[1fr_auto] gap-6">
-        {/* Left column */}
+      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-[1fr_auto] items-center gap-6">
+        {/* Left side */}
         <div className="flex flex-col gap-3">
-          {showBackButton && (
+          {backlink && (
             <Button
-              onClick={onBackClick}
+              onClick={onBacklinkClick}
               variant="backLink"
-              size="backLink" // 👈 ensures no padding
-              leadingIcon={<ChevronLeft className="w-5 h-5" />}
+              size="backLink"
             >
-              Back to connectors
+              <ChevronLeft className="w-5 h-5" />
+              {backlinkLabel ?? "Back"}
             </Button>
           )}
 
-          <div className="flex items-center gap-4">
-            {logo && (
-              <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
-                <Image
-                  src={logo}
-                  alt={title}
-                  width={35}
-                  height={35}
-                  className="object-contain"
-                />
-              </div>
+          {/* Title + Subtitle block */}
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-4">
+              {logo && (
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
+                  <Image
+                    src={logo}
+                    alt={title}
+                    width={35}
+                    height={35}
+                    className="object-contain"
+                  />
+                </div>
+              )}
+              <h1 className="text-3xl font-medium tracking-tight text-gray-800">
+                {title}
+              </h1>
+            </div>
+
+            {subtitle && (
+              <h2 className="text-sm font-normal mt-1 text-gray-500">
+                {subtitle}
+                {learnMoreLink && (
+                  <a
+                    href={learnMoreLink}
+                    className="inline-flex items-center ml-1 text-[#1A69FF] hover:text-[#1A69FF]/80 transition-colors"
+                  >
+                    <span>Learn more</span>
+                    <ExternalLink className="ml-1 h-4 w-4" />
+                  </a>
+                )}
+              </h2>
             )}
-            <h1 className="text-[2rem] font-medium text-gray-800 tracking-tight">
-              {title}
-            </h1>
           </div>
         </div>
 
-        {/* Right column */}
-        {actionButtonLabel && (
-          <Button
-            onClick={onActionButtonClick}
-            className="font-normal rounded-lg bg-black text-white hover:bg-black/90 border border-transparent"
-          >
-            {actionButtonLabel}
+        {/* Right side */}
+        {buttonLabel && onButtonClick && (
+          <Button onClick={onButtonClick} variant={buttonVariant}>
+            {buttonLabel}
           </Button>
         )}
       </div>
     </header>
   );
-}
+};

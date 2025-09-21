@@ -28,13 +28,14 @@ export default function Overview({
     <div className="min-h-screen">
       {/* Header */}
       <Header
-        variant="overview"
         title={connector.title}
-        showBackButton
-        onBackClick={onBack}
         logo={connector.logo}
-        actionButtonLabel="Install"
-        onActionButtonClick={onInstall}
+        backlink
+        backlinkLabel="Back to connectors"
+        onBacklinkClick={onBack}
+        buttonLabel="Install"
+        onButtonClick={onInstall}
+        buttonVariant="default"
       />
 
       {/* Main layout with grid */}

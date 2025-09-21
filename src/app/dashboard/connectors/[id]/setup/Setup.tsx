@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,7 +40,7 @@ export default function Setup({ connector }: SetupProps) {
             onClick={() => router.push("/dashboard/connectors")}
             variant="backLink"
             size="backLink"
-            leadingIcon={<ArrowLeft className="w-5 h-5" />}
+            leadingIcon={<ChevronLeft className="w-5 h-5" />}
           >
             Back to connectors
           </Button>
