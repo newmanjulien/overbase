@@ -54,6 +54,7 @@ export function Connectors({
                   subtitle={connector.subtitle}
                   image={connector.logo}
                   buttonLabel="Manage"
+                  showAvatar
                   buttonOnClick={() => onManageConnector(connector)}
                   showGreenDot={connector.status === "active"}
                 />
