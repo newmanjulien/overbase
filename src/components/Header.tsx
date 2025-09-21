@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-4">
               {logo && (
-                <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
+                <div className="size-12 rounded-full overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
                   <Image
                     src={logo}
                     alt={title}
