@@ -18,7 +18,7 @@ interface MenuItem {
 }
 
 interface RowCardProps {
-  title: string;
+  title?: string;
   titleClassName?: string;
   subtitle?: ReactNode;
   image?: string;
