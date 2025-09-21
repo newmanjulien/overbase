@@ -78,7 +78,9 @@ export default function Setup({ connector }: SetupProps) {
           }}
         >
           <div className="mb-6">
-            <Label htmlFor="connector-name">Name (*)</Label>
+            <Label htmlFor="connector-name" className="mb-2 block">
+              Name (*)
+            </Label>
             <Input
               id="connector-name"
               type="text"
@@ -95,7 +97,9 @@ export default function Setup({ connector }: SetupProps) {
           </div>
 
           <div className="mb-10">
-            <Label htmlFor="connector-config">Configuration</Label>
+            <Label htmlFor="connector-config" className="mb-2 block">
+              Configuration
+            </Label>
             <Textarea
               id="connector-config"
               rows={4}
