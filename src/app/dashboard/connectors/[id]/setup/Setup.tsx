@@ -6,6 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import type { Connectors } from "../../DummyData";
 import { useConnectorContext } from "@/lib/connectorContext";
 
@@ -77,12 +78,7 @@ export default function Setup({ connector }: SetupProps) {
           }}
         >
           <div className="mb-6">
-            <label
-              htmlFor="connector-name"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Name (*)
-            </label>
+            <Label htmlFor="connector-name">Name (*)</Label>
             <Input
               id="connector-name"
               type="text"
@@ -99,12 +95,7 @@ export default function Setup({ connector }: SetupProps) {
           </div>
 
           <div className="mb-10">
-            <label
-              htmlFor="connector-config"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Configuration
-            </label>
+            <Label htmlFor="connector-config">Configuration</Label>
             <Textarea
               id="connector-config"
               rows={4}
