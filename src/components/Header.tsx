@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
               variant="backLink"
               size="backLink"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="size-5" />
               {backlinkLabel ?? "Back"}
             </Button>
           )}

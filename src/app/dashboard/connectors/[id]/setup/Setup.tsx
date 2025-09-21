@@ -34,19 +34,22 @@ export default function Setup({ connector }: SetupProps) {
   return (
     <div className="flex min-h-screen">
       {/* Left Sidebar */}
-      <aside className="w-[28rem] bg-gray-100 border-r border-gray-200 pl-14 pr-15 pt-12 pb-6 flex flex-col">
+      <aside
+        className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6
+ flex flex-col"
+      >
         <div className="flex flex-col gap-4">
           <Button
             onClick={() => router.push("/dashboard/connectors")}
             variant="backLink"
             size="backLink"
-            leadingIcon={<ChevronLeft className="w-5 h-5" />}
+            leadingIcon={<ChevronLeft className="size-5" />}
           >
             Back to connectors
           </Button>
 
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="size-9 bg-blue-600 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-semibold">
                 {connector.title.charAt(0).toUpperCase()}
               </span>
