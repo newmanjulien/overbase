@@ -42,7 +42,7 @@ export default function RequestsPage() {
         subtitle="Request data and manage your data requests in a way that aligns with your meetings and deadlines."
         buttonLabel="Request data"
         onButtonClick={handleRequestData}
-        variant="black"
+        buttonVariant="default"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-12">

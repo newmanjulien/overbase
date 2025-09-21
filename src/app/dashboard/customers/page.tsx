@@ -58,7 +58,7 @@ function CustomersLayout() {
         subtitle="Add customers who you want us to consult while collecting data for you or who you want us to send data to."
         buttonLabel="Add customer"
         onButtonClick={() => {}}
-        variant="black"
+        buttonVariant="default"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10">
