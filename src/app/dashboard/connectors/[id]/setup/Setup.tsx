@@ -109,6 +109,8 @@ export default function Setup({ connector }: SetupProps) {
             />
           </div>
 
+          <div className="border-t border-gray-200 my-6" />
+
           <div className="flex justify-between items-center">
             <Button
               type="button"
