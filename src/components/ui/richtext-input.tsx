@@ -72,18 +72,18 @@ export default function RichTextarea({
 
   // Sync external value and decorator
   useEffect(() => {
-    const currentText = editorState.getCurrentContent().getPlainText();
-    if (value !== currentText) {
-      setEditorState(
-        EditorState.createWithContent(
+    setEditorState((prevState) => {
+      const currentText = prevState.getCurrentContent().getPlainText();
+      if (value !== currentText) {
+        return EditorState.createWithContent(
           ContentState.createFromText(value),
           decorator
-        )
-      );
-    } else {
-      // Reapply decorator even if value is the same but decorator changed
-      setEditorState(EditorState.set(editorState, { decorator }));
-    }
+        );
+      } else {
+        // Reapply decorator even if value is the same but decorator changed
+        return EditorState.set(prevState, { decorator });
+      }
+    });
   }, [value, decorator]);
 
   const handleChange = (state: EditorState) => {
