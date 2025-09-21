@@ -24,7 +24,11 @@ export function InfoCard({
 
       {/* Right side: button OR link */}
       {onClick ? (
-        <button onClick={onClick} className="inline-flex items-center">
+        <button
+          type="button"
+          onClick={onClick}
+          className="inline-flex items-center"
+        >
           <span>{linkText}</span>
           <ExternalLink className="ml-1 h-4 w-4" />
         </button>
