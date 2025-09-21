@@ -8,6 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 
 import type { RequestItem } from "./Client";
+import Link from "next/link";
 
 type ViewType = "requests" | "meetings";
 
@@ -115,7 +116,9 @@ export default function DataSection({
               contentBox={req.prompt || "No prompt provided"}
               actions={
                 <>
-                  <Button variant="secondary">Edit</Button>
+                  <Link href={`/dashboard/requests/${req.id}/setup`}>
+                    <Button variant="secondary">Edit</Button>
+                  </Link>
                   <Button variant="secondary" disabled={isFutureDate}>
                     Get data
                   </Button>

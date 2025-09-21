@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import Link from "next/link";
 
 interface MenuItem {
   id?: string;
@@ -121,7 +120,7 @@ function Content({
   contentBox,
 }: Pick<RowCardProps, "title" | "titleClassName" | "subtitle" | "contentBox">) {
   return (
-    <div className="min-w-0 max-w-xl flex-shrink mr-4">
+    <div className="flex-1 min-w-0 mr-4">
       {contentBox ? (
         <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-700 leading-tight">
           {typeof contentBox === "string" ? (
@@ -164,7 +163,7 @@ function Actions({
 >) {
   return (
     <div className="flex items-center gap-x-3 ml-auto shrink-0">
-      <div className="flex items-center gap-x-3 flex-shrink-0">
+      <div className="flex items-center gap-x-2 flex-shrink-0">
         {buttonLabel && (
           <Button
             variant="ghost"
@@ -174,13 +173,6 @@ function Actions({
             {buttonLabel}
           </Button>
         )}
-
-        {/* View/Edit Button */}
-        <Link href={`/dashboard/requests/${id}/setup`}>
-          <Button variant="ghost" className={defaultButtonClasses}>
-            View/Edit
-          </Button>
-        </Link>
 
         {actions}
       </div>
