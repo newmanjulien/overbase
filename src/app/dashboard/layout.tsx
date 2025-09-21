@@ -4,8 +4,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectorProvider } from "../../lib/connectorContext";
-import { FooterProvider, useFooterContext } from "../../lib/footerContext";
+import { ConnectorProvider } from "@/lib/connectorContext";
+import { FooterProvider, useFooterContext } from "@/lib/footerContext";
 
 export default function DashboardLayout({
   children,
@@ -34,21 +34,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: "#FAFAFA" }}
-    >
+    <div className="min-h-screen flex flex-col bg-muted">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200/60">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-11">
             <div className="flex items-center space-x-8">
-              <div className="h-6">
+              <div className="h-7">
                 <Link href="/dashboard/requests">
                   <Image
                     src="/images/logo.png"
                     alt="Logo"
-                    width={39}
+                    width={42}
                     height={30}
                     priority
                   />
@@ -89,7 +86,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <Image
                     src="/images/logo.png"
                     alt="Logo small"
-                    width={33}
+                    width={38}
                     height={20}
                   />
                 </div>

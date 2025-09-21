@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import { format, formatISO, isBefore, startOfToday, isToday } from "date-fns";
-import { RowCard } from "../../../components/RowCard";
-import { EmptyState } from "../../../components/EmptyState";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "../../../components/ui/toggle-group";
-import clsx from "clsx";
+import { RowCard } from "@/components/RowCard";
+import { EmptyState } from "@/components/EmptyState";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
 
 type ViewType = "requests" | "meetings";
 
@@ -16,28 +13,6 @@ interface DataSectionProps {
   selectedDate: Date | null;
   requestsByDate: Record<string, string[]>;
   onRequestData: () => void;
-}
-
-// 🔹 Reusable secondary button
-function SecondaryButton({
-  children,
-  disabled,
-  onClick,
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-    <button
-      disabled={disabled}
-      onClick={onClick}
-      className={clsx(
-        "py-2 px-4 rounded-lg text-sm transition-colors",
-        disabled
-          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-          : "bg-white border border-gray-100 text-gray-700 hover:bg-gray-50"
-      )}
-    >
-      {children}
-    </button>
-  );
 }
 
 export default function DataSection({
@@ -63,7 +38,7 @@ export default function DataSection({
           title="Calendar not linked"
           description="Link your calendar to see your meetings"
           buttonLabel="Link calendar"
-          buttonVariant="secondary"
+          buttonVariant="outline"
           onButtonClick={() => {}}
           iconType="calendar"
         />
@@ -96,7 +71,7 @@ export default function DataSection({
         description="You have not requested any data yet for this day"
         buttonLabel="Request data"
         onButtonClick={onRequestData}
-        buttonVariant="secondary"
+        buttonVariant="outline"
         iconType="database"
       />
     );
@@ -135,10 +110,10 @@ export default function DataSection({
               contentBox={card}
               actions={
                 <>
-                  <SecondaryButton>Edit</SecondaryButton>
-                  <SecondaryButton disabled={isFutureDate}>
+                  <Button variant="secondary">Edit</Button>
+                  <Button variant="secondary" disabled={isFutureDate}>
                     Get data
-                  </SecondaryButton>
+                  </Button>
                 </>
               }
             />

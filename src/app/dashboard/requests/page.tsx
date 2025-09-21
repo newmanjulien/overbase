@@ -4,7 +4,7 @@ import { useState } from "react";
 import { startOfToday, formatISO } from "date-fns";
 import Calendar from "./Calendar";
 import DataSection from "./DataSection";
-import { Header } from "../../../components/Header";
+import { Header } from "@/components/Header";
 
 const SAMPLE_PROMPTS = [
   "I have an upcoming QBR with the Docusign account next Thursday. Please update the numbers in the attached deck to reflect the most recent pipeline metrics, including revenue by segment and churn data from the last quarter. Also, double-check that all charts are consistent with the latest Salesforce exports before sharing.",
@@ -36,13 +36,14 @@ export default function RequestsPage() {
   };
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen">
+    <div className="min-h-screen">
       <Header
         title="Requests"
         subtitle="Request data and manage your data requests in a way that aligns with your meetings and deadlines."
         buttonLabel="Request data"
         onButtonClick={handleRequestData}
-        variant="black"
+        buttonVariant="default"
+        learnMoreLink="#"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-12">

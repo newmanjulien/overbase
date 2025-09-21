@@ -1,45 +1,63 @@
 "use client";
 
-import Image from "next/image";
 import { ReactNode } from "react";
 import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
+
+interface MenuItem {
+  label: string;
+  onClick?: () => void;
+  destructive?: boolean;
+}
 
 interface RowCardProps {
   title?: string;
   titleClassName?: string;
   subtitle?: ReactNode;
-  image?: string; // if provided (even empty string), avatar area is shown
-  leading?: ReactNode; // sits even farther left (e.g., a checkbox)
+  image?: string;
+  showAvatar?: boolean;
+  leading?: ReactNode;
   contentBox?: ReactNode;
   actions?: ReactNode;
-  menu?: ReactNode;
   onEdit?: () => void;
   buttonLabel?: string;
   buttonOnClick?: () => void;
   buttonClassName?: string;
   showGreenDot?: boolean;
+  menuItems?: MenuItem[];
 }
 
-export function RowCard(props: RowCardProps) {
-  const {
-    title,
-    titleClassName,
-    subtitle,
-    image,
-    leading,
-    contentBox,
-    actions,
-    menu,
-    onEdit,
-    buttonLabel,
-    buttonOnClick,
-    buttonClassName = defaultButtonClasses,
-    showGreenDot = false,
-  } = props;
-
+export function RowCard({
+  title,
+  titleClassName,
+  subtitle,
+  image,
+  showAvatar = false,
+  leading,
+  contentBox,
+  actions,
+  onEdit,
+  buttonLabel,
+  buttonOnClick,
+  buttonClassName = defaultButtonClasses,
+  showGreenDot = false,
+  menuItems,
+}: RowCardProps) {
   return (
     <div className="flex items-center py-3 px-3 bg-white border border-gray-200/60 hover:border-gray-300 transition-all duration-200 rounded-xl">
-      <Leading image={image} leading={leading} title={title} />
+      <Leading
+        image={image}
+        leading={leading}
+        title={title}
+        showAvatar={showAvatar}
+      />
       <Content
         title={title}
         titleClassName={titleClassName}
@@ -53,7 +71,7 @@ export function RowCard(props: RowCardProps) {
         onEdit={onEdit}
         actions={actions}
         showGreenDot={showGreenDot}
-        menu={menu}
+        menuItems={menuItems}
       />
     </div>
   );
@@ -68,39 +86,27 @@ function Leading({
   image,
   leading,
   title,
-}: Pick<RowCardProps, "image" | "leading" | "title">) {
-  if (!image && !leading) return null;
+  showAvatar,
+}: Pick<RowCardProps, "image" | "leading" | "title" | "showAvatar">) {
+  if (!leading && !showAvatar) return null;
 
   return (
     <div className="flex items-center mr-2">
-      {leading && (
-        <div
-          className={
-            image !== undefined
-              ? "mr-3 flex items-center justify-center"
-              : "flex items-center justify-center"
-          }
-        >
-          {leading}
-        </div>
-      )}
+      {leading && <div className={showAvatar ? "mr-3" : ""}>{leading}</div>}
 
-      {image !== undefined && (
-        <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200/60 flex items-center justify-center bg-gray-100">
+      {showAvatar && (
+        <Avatar className="w-10 h-10 border border-gray-200/60 bg-gray-100">
           {image ? (
-            <Image
+            <AvatarImage
               src={image}
               alt={typeof title === "string" ? title : "Row card image"}
-              width={33}
-              height={33}
-              style={{ objectFit: "cover" }}
             />
           ) : (
-            <span className="text-gray-600 font-medium">
-              {typeof title === "string" ? title.charAt(0).toUpperCase() : "?"}
-            </span>
+            <AvatarFallback>
+              {title ? title.charAt(0).toUpperCase() : "?"}
+            </AvatarFallback>
           )}
-        </div>
+        </Avatar>
       )}
     </div>
   );
@@ -120,15 +126,13 @@ function Content({
         </div>
       ) : (
         <>
-          {title && (
-            <h3
-              className={`text-sm tracking-tight leading-tight truncate ${
-                titleClassName ?? "text-gray-700 font-medium"
-              }`}
-            >
-              {title}
-            </h3>
-          )}
+          <h3
+            className={`text-sm tracking-tight leading-tight truncate ${
+              titleClassName ?? "text-gray-700 font-medium"
+            }`}
+          >
+            {title}
+          </h3>
           {subtitle && (
             <p className="text-gray-500 text-sm font-light leading-relaxed truncate">
               {subtitle}
@@ -147,7 +151,7 @@ function Actions({
   onEdit,
   actions,
   showGreenDot,
-  menu,
+  menuItems,
 }: Omit<
   RowCardProps,
   "title" | "subtitle" | "image" | "leading" | "contentBox" | "titleClassName"
@@ -177,7 +181,32 @@ function Actions({
       </div>
 
       {showGreenDot && <div className="w-2 h-2 bg-green-500 rounded-full" />}
-      {menu && <div className="pl-2">{menu}</div>}
+
+      {menuItems && menuItems.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            {/* 👇 back to h-6 w-6 to match original behavior */}
+            <Button variant="ghost" size="icon" className="h-6 w-6">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {menuItems.map((item, i) => (
+              <DropdownMenuItem
+                key={i}
+                onClick={item.onClick}
+                className={
+                  item.destructive
+                    ? "text-red-600 focus:text-red-600 focus:bg-red-100"
+                    : ""
+                }
+              >
+                {item.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 }

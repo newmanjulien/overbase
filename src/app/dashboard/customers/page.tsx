@@ -1,19 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../../components/ui/button";
-import { Checkbox } from "../../../components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-import { RowCard } from "../../../components/RowCard";
-import { InfoCard } from "../../../components/InfoCard";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RowCard } from "@/components/RowCard";
+import { InfoCard } from "@/components/InfoCard";
 import { useRouter } from "next/navigation";
-import { Header } from "../../../components/Header";
+import { Header } from "@/components/Header";
 
 interface Customer {
   id: string;
@@ -52,18 +44,19 @@ function CustomersLayout() {
   };
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen">
+    <div className="min-h-screen">
       <Header
         title="Customers"
         subtitle="Add customers who you want us to consult while collecting data for you or who you want us to send data to."
         buttonLabel="Add customer"
         onButtonClick={() => {}}
-        variant="black"
+        buttonVariant="default"
+        learnMoreLink="#"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="w-full flex flex-col gap-3">
-          {/* Select All card */}
+          {/* Select All row (compact automatically, no showAvatar) */}
           <RowCard
             title="Select all"
             titleClassName="text-gray-500 font-normal"
@@ -74,36 +67,23 @@ function CustomersLayout() {
                 className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
               />
             }
-            menu={
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-gray-400 hover:text-gray-600 hover:bg-transparent"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-32 bg-white border border-gray-300 shadow-lg"
-                >
-                  <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-100">
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            }
+            menuItems={[
+              {
+                label: "Delete",
+                onClick: () => console.log("Delete all selected"),
+                destructive: true,
+              },
+            ]}
           />
 
-          {/* Customer cards */}
+          {/* Customer rows (normal height, showAvatar true) */}
           {mockCustomers.map((customer) => (
             <RowCard
               key={customer.id}
               title={customer.name}
               subtitle={customer.company}
-              image=""
+              image="" // empty → fallback letter
+              showAvatar
               leading={
                 <Checkbox
                   checked={selectedCustomers.includes(customer.id)}
@@ -113,30 +93,17 @@ function CustomersLayout() {
                   className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
                 />
               }
-              menu={
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-gray-400 hover:text-gray-600 hover:bg-transparent"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-32 bg-white border border-gray-300 shadow-lg"
-                  >
-                    <DropdownMenuItem className="text-gray-700 focus:bg-gray-100">
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-100">
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              }
+              menuItems={[
+                {
+                  label: "Edit",
+                  onClick: () => console.log("Edit", customer.id),
+                },
+                {
+                  label: "Delete",
+                  onClick: () => console.log("Delete", customer.id),
+                  destructive: true,
+                },
+              ]}
             />
           ))}
         </div>

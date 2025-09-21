@@ -11,15 +11,13 @@ interface ClientWrapperProps {
 export default function ClientWrapper({ connector }: ClientWrapperProps) {
   const router = useRouter();
 
-  const handleInstall = () => {
-    alert(`Installing ${connector.title}`);
-  };
-
   return (
     <Overview
       connector={connector}
       onBack={() => router.push("/dashboard/connectors")}
-      onInstall={handleInstall}
+      onInstall={() =>
+        router.push(`/dashboard/connectors/${connector.id}/setup`)
+      }
     />
   );
 }

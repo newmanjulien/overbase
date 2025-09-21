@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { TemplateCard } from "./TemplateCard";
-import { Header } from "../../../components/Header";
+import { Header } from "@/components/Header";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import { tagsConfig, initialTemplates } from "./DummyData";
 
@@ -21,31 +22,44 @@ function Templates() {
     "Easily apply templates created by your organization and which your colleagues are already using.";
 
   return (
-    <div className="bg-[#FAFAFA] min-h-screen">
+    <div className="min-h-screen">
       <Header
         title="Templates"
         subtitle="Easily apply templates created by your organization and which your colleagues are already usingy."
+        learnMoreLink="#"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-18">
+        {/* Sidebar */}
         <div className="w-56 flex-shrink-0">
-          <nav className="space-y-0.5">
+          <ToggleGroup
+            type="single"
+            value={selectedTag}
+            onValueChange={(val) => {
+              if (val) setSelectedTag(val);
+            }}
+            orientation="vertical"
+            className="flex-col w-full space-y-0.5"
+          >
             {tagsConfig.map((tag) => (
-              <button
+              <ToggleGroupItem
                 key={tag.key}
-                onClick={() => setSelectedTag(tag.key)}
-                className={`w-full text-left px-3 py-2 text-sm rounded-xl transition-colors flex items-center justify-between ${
-                  selectedTag === tag.key
-                    ? "bg-white border border-gray-200/60 font-medium text-gray-800"
-                    : "text-gray-700 hover:text-gray-900 hover:bg-white border border-transparent"
-                }`}
+                value={tag.key}
+                className={`
+                  w-full text-left px-3 py-2 text-sm rounded-xl transition-colors flex items-center justify-between
+                  data-[state=on]:bg-white data-[state=on]:border data-[state=on]:border-gray-200/60
+                  data-[state=on]:font-medium data-[state=on]:text-gray-800
+                  data-[state=off]:text-gray-700 data-[state=off]:hover:text-gray-900
+                  data-[state=off]:hover:bg-white data-[state=off]:border-transparent
+                `}
               >
-                <span>{tag.name}</span>
-              </button>
+                {tag.name}
+              </ToggleGroupItem>
             ))}
-          </nav>
+          </ToggleGroup>
         </div>
 
+        {/* Content */}
         <div className="flex-1">
           <div className="mb-8">
             <h2 className="text-2xl font-medium text-gray-800">{gridTitle}</h2>

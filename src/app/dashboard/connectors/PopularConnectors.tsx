@@ -3,7 +3,7 @@
 import { Layers } from "lucide-react";
 import Image from "next/image";
 import type { Connectors } from "./DummyData";
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 
 interface PopularConnectorsProps {
   popularConnectors: Connectors[];
@@ -43,7 +43,7 @@ export function PopularConnectors({
             popularConnectors.map((connector) => (
               <div
                 key={connector.id}
-                className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 rounded-xl"
+                className="flex items-center space-x-3 cursor-pointer rounded-xl"
                 onClick={() => onAddConnector(connector)}
                 role="button"
                 tabIndex={0}
@@ -77,11 +77,7 @@ export function PopularConnectors({
 
         <hr className="border-t border-gray-200/60 my-6 " />
 
-        <Button
-          variant="outline"
-          className="font-normal bg-white text-black border border-gray-200 hover:bg-gray-100 w-full rounded-lg"
-          onClick={onBrowseClick}
-        >
+        <Button variant="outline" className="w-full" onClick={onBrowseClick}>
           Browse connectors
         </Button>
       </div>
