@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Editor,
   EditorState,
@@ -38,44 +38,53 @@ export default function RichTextarea({
   highlightRegex = /@\w+/g,
   highlightClassName = "text-blue-500",
 }: RichTextareaProps) {
-  const [editorState, setEditorState] = useState(() => {
-    const decorator = new CompositeDecorator([
-      {
-        strategy: (
-          contentBlock: ContentBlock,
-          callback: (start: number, end: number) => void
-        ) => {
-          const text = contentBlock.getText();
-          let matchArr: RegExpExecArray | null;
-          while ((matchArr = highlightRegex.exec(text)) !== null) {
-            callback(matchArr.index, matchArr.index + matchArr[0].length);
-          }
+  // Create decorator whenever highlightRegex or highlightClassName changes
+  const decorator = useMemo(
+    () =>
+      new CompositeDecorator([
+        {
+          strategy: (
+            contentBlock: ContentBlock,
+            callback: (start: number, end: number) => void
+          ) => {
+            const text = contentBlock.getText();
+            const regex = new RegExp(
+              highlightRegex.source,
+              highlightRegex.flags
+            ); // fresh regex each time
+            let matchArr: RegExpExecArray | null;
+            while ((matchArr = regex.exec(text)) !== null) {
+              callback(matchArr.index, matchArr.index + matchArr[0].length);
+            }
+          },
+          component: (props: DecoratorComponentProps) => (
+            <span className={highlightClassName}>{props.children}</span>
+          ),
         },
-        component: (props: DecoratorComponentProps) => (
-          <span className={highlightClassName}>{props.children}</span>
-        ),
-      },
-    ]);
+      ]),
+    [highlightRegex, highlightClassName]
+  );
 
-    return EditorState.createWithContent(
-      ContentState.createFromText(value),
-      decorator
-    );
-  });
+  // Initial editor state
+  const [editorState, setEditorState] = useState(() =>
+    EditorState.createWithContent(ContentState.createFromText(value), decorator)
+  );
 
-  // Sync internal EditorState with external `value` prop
+  // Sync external value and decorator
   useEffect(() => {
     const currentText = editorState.getCurrentContent().getPlainText();
     if (value !== currentText) {
-      const decorator = editorState.getDecorator();
-      const newState = EditorState.createWithContent(
-        ContentState.createFromText(value),
-        decorator
+      setEditorState(
+        EditorState.createWithContent(
+          ContentState.createFromText(value),
+          decorator
+        )
       );
-      setEditorState(newState);
+    } else {
+      // Reapply decorator even if value is the same but decorator changed
+      setEditorState(EditorState.set(editorState, { decorator }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }, [value, decorator]);
 
   const handleChange = (state: EditorState) => {
     setEditorState(state);
