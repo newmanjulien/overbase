@@ -13,9 +13,9 @@ import Link from "next/link";
 type ViewType = "requests" | "meetings";
 
 export interface DataSectionProps {
-  selectedDate?: Date;
+  selectedDate?: Date | null;
   requestsByDate: Record<string, RequestItem[]>;
-  onRequestData: (prefillDate?: Date) => void;
+  onRequestData: (prefillDate?: Date | null) => void; // ✅ now allows null
 }
 
 export default function DataSection({
@@ -35,7 +35,7 @@ export default function DataSection({
   const isFutureDate = isBefore(startOfToday(), selectedDate);
 
   const sortedRequests = useMemo(() => {
-    return [...dataCards]; // new items stay at bottom
+    return [...dataCards];
   }, [dataCards]);
 
   function renderEmptyState() {
@@ -79,14 +79,13 @@ export default function DataSection({
         buttonLabel="Request data"
         buttonVariant="outline"
         iconType="database"
-        onButtonClick={() => onRequestData(selectedDate)} // ✅ normalized upstream
+        onButtonClick={() => onRequestData(selectedDate)} // ✅ safe
       />
     );
   }
 
   return (
     <div className="w-full pt-6">
-      {/* Top bar with date + toggle */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-foreground flex items-baseline gap-1">
           <span className="text-lg font-medium">

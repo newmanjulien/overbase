@@ -18,6 +18,12 @@ import { Calendar } from "@/components/ui/calendar";
 
 export default function RequestSetupPage() {
   const { id } = useParams();
+  const requestId = Array.isArray(id) ? id[0] : id;
+
+  if (!requestId) {
+    throw new Error("Request ID is missing in route.");
+  }
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -28,26 +34,22 @@ export default function RequestSetupPage() {
     scheduledDate?: string;
   }>({});
 
-  // 👇 check query param for ?date=
   useEffect(() => {
     const dateParam = searchParams.get("date");
-
-    // Prefill from ?date if available
     if (dateParam && !scheduledDate) {
       setScheduledDate(dateParam);
     }
 
-    // Load existing request from localStorage
     const stored = window.localStorage.getItem("requests");
     if (stored) {
       const all: RequestItem[] = JSON.parse(stored);
-      const existing = all.find((r) => r.id === id);
+      const existing = all.find((r) => r.id === requestId);
       if (existing) {
         setPrompt(existing.prompt);
         setScheduledDate(existing.scheduledDate);
       }
     }
-  }, [id, searchParams, scheduledDate]);
+  }, [requestId, searchParams, scheduledDate]);
 
   const validate = () => {
     const errs: typeof errors = {};
@@ -59,7 +61,7 @@ export default function RequestSetupPage() {
     } else {
       const today = startOfToday();
       const minDate = addDays(today, 2);
-      const selected = parseISO(scheduledDate); // ✅ safe local parse
+      const selected = parseISO(scheduledDate);
       if (isBefore(selected, minDate)) {
         errs.scheduledDate = "Date must be at least 2 days in the future.";
       }
@@ -72,24 +74,25 @@ export default function RequestSetupPage() {
     e.preventDefault();
     if (!validate()) return;
 
+    const stored = window.localStorage.getItem("requests");
+    let all: RequestItem[] = stored ? JSON.parse(stored) : [];
+
+    const existing = all.find((r) => r.id === requestId);
     const updated: RequestItem = {
-      id: id as string,
+      ...(existing || { id: requestId, q1: "", q2: "", q3: "" }),
       prompt,
       scheduledDate,
     };
 
-    const stored = window.localStorage.getItem("requests");
-    let all: RequestItem[] = stored ? JSON.parse(stored) : [];
     all = all.filter((r) => r.id !== updated.id);
     all.push(updated);
     window.localStorage.setItem("requests", JSON.stringify(all));
 
-    router.push("/dashboard/requests");
+    router.push(`/dashboard/requests/${requestId}/questions`);
   };
 
   return (
     <div className="flex min-h-screen">
-      {/* Left Sidebar */}
       <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6 flex flex-col">
         <Button
           onClick={() => router.push("/dashboard/requests")}
@@ -105,7 +108,6 @@ export default function RequestSetupPage() {
         </h2>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 max-w-2xl mx-auto px-10 pt-12 pb-6">
         <div className="mb-8">
           <h1 className="text-2xl font-medium text-gray-900 mb-2">
@@ -182,7 +184,7 @@ export default function RequestSetupPage() {
             >
               Back
             </Button>
-            <Button type="submit">Request</Button>
+            <Button type="submit">Next</Button>
           </div>
         </form>
       </main>

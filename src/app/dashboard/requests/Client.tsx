@@ -13,6 +13,9 @@ export interface RequestItem {
   id: string;
   prompt: string;
   scheduledDate: string;
+  q1: string;
+  q2: string;
+  q3: string;
 }
 
 export default function RequestsClient() {
@@ -33,7 +36,7 @@ export default function RequestsClient() {
 
       const grouped: Record<string, RequestItem[]> = {};
       for (const req of all) {
-        if (!req.scheduledDate) continue; // ignore unscheduled
+        if (!req.scheduledDate) continue;
         if (!grouped[req.scheduledDate]) grouped[req.scheduledDate] = [];
         grouped[req.scheduledDate].push(req);
       }
@@ -41,18 +44,29 @@ export default function RequestsClient() {
     }
   }, []);
 
-  // Create new request → placeholder row → navigate to setup
-  const handleNewRequest = () => {
+  // ✅ Single handler for new requests
+  const handleNewRequest = (prefillDate?: Date | null) => {
     const id = uuidv4();
-    const placeholder: RequestItem = { id, prompt: "", scheduledDate: "" };
+    const placeholder: RequestItem = {
+      id,
+      prompt: "",
+      scheduledDate: prefillDate ? prefillDate.toISOString().split("T")[0] : "",
+      q1: "",
+      q2: "",
+      q3: "",
+    };
 
-    // Save to localStorage immediately so Setup can find it
     const stored = window.localStorage.getItem("requests");
     let all: RequestItem[] = stored ? JSON.parse(stored) : [];
     all.push(placeholder);
     window.localStorage.setItem("requests", JSON.stringify(all));
 
-    router.push(`/dashboard/requests/${id}/setup`);
+    let url = `/dashboard/requests/${id}/setup`;
+    if (prefillDate) {
+      url += `?date=${placeholder.scheduledDate}`;
+    }
+
+    router.push(url);
   };
 
   const calendarProps: CalendarProps = {
@@ -66,14 +80,14 @@ export default function RequestsClient() {
   const dataSectionProps: DataSectionProps = {
     selectedDate,
     requestsByDate,
-    onRequestData: handleNewRequest,
+    onRequestData: handleNewRequest, // ✅ aligned
   };
 
   return (
     <Requests
       calendarProps={calendarProps}
       dataSectionProps={dataSectionProps}
-      onRequestData={handleNewRequest}
+      onRequestData={handleNewRequest} // ✅ aligned
     />
   );
 }
