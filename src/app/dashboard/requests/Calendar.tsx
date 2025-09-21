@@ -162,7 +162,7 @@ export default function Calendar({
               {hasRequests && (
                 <span
                   className={clsx(
-                    "absolute bottom-3 w-1.5 h-1.5 rounded-full",
+                    "absolute bottom-3 size-1.5 rounded-full",
                     isSelected ? "bg-white" : "bg-green-500"
                   )}
                 />
