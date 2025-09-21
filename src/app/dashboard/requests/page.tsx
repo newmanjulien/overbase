@@ -43,6 +43,7 @@ export default function RequestsPage() {
         buttonLabel="Request data"
         onButtonClick={handleRequestData}
         buttonVariant="default"
+        learnMoreLink="#"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-12">

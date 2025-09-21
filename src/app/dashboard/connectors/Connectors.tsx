@@ -29,6 +29,7 @@ export function Connectors({
         buttonLabel="Browse connectors"
         onButtonClick={onBrowseClick}
         buttonVariant="outline"
+        learnMoreLink="#"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10">

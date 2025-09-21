@@ -26,6 +26,7 @@ function Templates() {
       <Header
         title="Templates"
         subtitle="Easily apply templates created by your organization and which your colleagues are already usingy."
+        learnMoreLink="#"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-18">
