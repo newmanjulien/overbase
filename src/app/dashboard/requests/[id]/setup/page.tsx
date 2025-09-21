@@ -3,12 +3,19 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { startOfToday, addDays } from "date-fns";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { RequestItem } from "../../Client";
+
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 export default function RequestSetupPage() {
   const { id } = useParams();
@@ -123,14 +130,32 @@ export default function RequestSetupPage() {
             <Label htmlFor="scheduledDate" className="mb-2">
               Scheduled Date
             </Label>
-            <Input
-              type="date"
-              id="scheduledDate"
-              value={scheduledDate}
-              onChange={(e) => setScheduledDate(e.target.value)}
-              required
-              className="mt-1"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left hover:bg-gray-50"
+                >
+                  {scheduledDate ? (
+                    format(new Date(scheduledDate), "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent side="bottom" align="end" className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={scheduledDate ? new Date(scheduledDate) : undefined}
+                  onSelect={(d) =>
+                    setScheduledDate(d ? d.toISOString().split("T")[0] : "")
+                  }
+                  disabled={(date) => date < addDays(startOfToday(), 2)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
             {errors.scheduledDate && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.scheduledDate}
