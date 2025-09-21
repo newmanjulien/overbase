@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { startOfToday, addDays } from "date-fns";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { startOfToday, addDays, format } from "date-fns";
 import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,11 +15,11 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
 
 export default function RequestSetupPage() {
   const { id } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [prompt, setPrompt] = useState("");
   const [scheduledDate, setScheduledDate] = useState("");
@@ -28,7 +28,16 @@ export default function RequestSetupPage() {
     scheduledDate?: string;
   }>({});
 
+  // 👇 check query param for ?date=
   useEffect(() => {
+    const dateParam = searchParams.get("date");
+
+    // Prefill from ?date if available
+    if (dateParam && !scheduledDate) {
+      setScheduledDate(dateParam);
+    }
+
+    // Load existing request from localStorage
     const stored = window.localStorage.getItem("requests");
     if (stored) {
       const all: RequestItem[] = JSON.parse(stored);
@@ -38,7 +47,7 @@ export default function RequestSetupPage() {
         setScheduledDate(existing.scheduledDate);
       }
     }
-  }, [id]);
+  }, [id, searchParams, scheduledDate]);
 
   const validate = () => {
     const errs: typeof errors = {};

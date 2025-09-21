@@ -13,9 +13,9 @@ import Link from "next/link";
 type ViewType = "requests" | "meetings";
 
 export interface DataSectionProps {
-  selectedDate: Date | null;
+  selectedDate?: Date; // 👈 normalized (no null)
   requestsByDate: Record<string, RequestItem[]>;
-  onRequestData: () => void;
+  onRequestData: (prefillDate?: Date) => void;
 }
 
 export default function DataSection({
@@ -35,8 +35,7 @@ export default function DataSection({
   const isFutureDate = isBefore(startOfToday(), selectedDate);
 
   const sortedRequests = useMemo(() => {
-    // Keep order but ensure new items are at the bottom
-    return [...dataCards];
+    return [...dataCards]; // new items stay at bottom
   }, [dataCards]);
 
   function renderEmptyState() {
@@ -78,9 +77,9 @@ export default function DataSection({
         title="No data requested"
         description="You have not requested any data yet for this day"
         buttonLabel="Request data"
-        onButtonClick={onRequestData}
         buttonVariant="outline"
         iconType="database"
+        onButtonClick={() => onRequestData(selectedDate)} // 👈 parent decides
       />
     );
   }

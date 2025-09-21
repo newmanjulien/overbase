@@ -5,7 +5,7 @@ interface EmptyStateProps {
   title: string;
   description: string;
   buttonLabel?: string;
-  onButtonClick?: () => void;
+  onButtonClick?: () => void; // 👈 no args anymore
   className?: string;
   buttonVariant?: "default" | "outline";
   iconType: "calendar" | "database" | "plug";
