@@ -34,10 +34,7 @@ export default function Setup({ connector }: SetupProps) {
   return (
     <div className="flex min-h-screen">
       {/* Left Sidebar */}
-      <aside
-        className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6
- flex flex-col"
-      >
+      <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6 flex flex-col">
         <div className="flex flex-col gap-4">
           <Button
             onClick={() => router.push("/dashboard/connectors")}
@@ -54,10 +51,9 @@ export default function Setup({ connector }: SetupProps) {
                 {connector.title.charAt(0).toUpperCase()}
               </span>
             </div>
-            <span className="text-2xl font-semibold text-gray-900 leading-tight">
-              <div>Get started with</div>
-              <div>{connector.title}</div>
-            </span>
+            <h2 className="text-2xl font-semibold text-gray-900 leading-tight">
+              Get started with <span className="block">{connector.title}</span>
+            </h2>
           </div>
         </div>
       </aside>
