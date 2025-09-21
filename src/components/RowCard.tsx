@@ -19,7 +19,6 @@ interface MenuItem {
 }
 
 export interface RowCardProps {
-  id: string;
   title?: string;
   titleClassName?: string;
   subtitle?: ReactNode;
@@ -36,7 +35,6 @@ export interface RowCardProps {
 }
 
 export function RowCard({
-  id,
   title,
   titleClassName,
   subtitle,
@@ -66,7 +64,6 @@ export function RowCard({
         contentBox={contentBox}
       />
       <Actions
-        id={id}
         buttonLabel={buttonLabel}
         buttonOnClick={buttonOnClick}
         buttonClassName={buttonClassName}
@@ -150,7 +147,6 @@ function Content({
 }
 
 function Actions({
-  id,
   buttonLabel,
   buttonOnClick,
   buttonClassName,
