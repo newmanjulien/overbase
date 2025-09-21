@@ -1,12 +1,12 @@
 import Setup from "./Setup";
 import { connectors } from "../../DummyData";
 
-export default async function SetupPage({
-  params,
-}: {
+interface SetupPageProps {
   params: Promise<{ id: string }>;
-}) {
-  // Unwrap params (now a Promise in Next.js 15+)
+}
+
+export default async function SetupPage({ params }: SetupPageProps) {
+  // ✅ Await params (Next.js 15+ dynamic routes)
   const { id } = await params;
 
   // Find the connector by ID

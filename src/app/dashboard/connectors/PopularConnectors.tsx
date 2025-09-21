@@ -40,21 +40,21 @@ export function PopularConnectors({
             </p>
           ) : (
             popularConnectors.map((connector) => (
-              <Button
+              <Link
                 key={connector.id}
-                asChild
-                variant="ghost"
-                className="w-full justify-start rounded-xl px-2 py-2 h-auto focus-visible:ring-2"
+                href={`/dashboard/connectors/${connector.id}`}
+                title={`Set up ${connector.title}`}
+                className="block"
               >
-                <Link
-                  href={`/connectors/${connector.id}`}
-                  title={`Set up ${connector.title}`}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start rounded-xl px-2 py-2 h-auto focus-visible:ring-2"
                 >
                   <div className="flex items-center space-x-3 w-full">
                     <div className="w-11 h-11 rounded-full flex items-center justify-center relative overflow-hidden border border-gray-200/60 bg-white flex-shrink-0">
                       <Image
                         src={connector.logo}
-                        alt=""
+                        alt={`${connector.title} logo`}
                         width={30}
                         height={30}
                         className="object-contain"
@@ -70,8 +70,8 @@ export function PopularConnectors({
                       </p>
                     </div>
                   </div>
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             ))
           )}
         </div>

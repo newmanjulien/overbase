@@ -8,7 +8,7 @@ interface ConnectorOverviewPageProps {
 export default async function ConnectorOverviewPage({
   params,
 }: ConnectorOverviewPageProps) {
-  const { id } = await params;
+  const { id } = await params; // ✅ must await
   const connector = connectors.find((i) => i.id === id);
 
   if (!connector) {
