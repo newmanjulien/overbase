@@ -18,7 +18,7 @@ export function InfoCard({
     <Alert className="flex items-center justify-between rounded-xl bg-gray-200/80 border-0 text-sm">
       {/* Left side: icon + text */}
       <div className="flex items-center space-x-2">
-        <Info className="h-4 w-4" />
+        <Info className="size-4" />
         <AlertDescription className="text-gray-800">{text}</AlertDescription>
       </div>
 
