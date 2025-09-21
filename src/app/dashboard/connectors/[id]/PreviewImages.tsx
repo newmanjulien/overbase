@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
-interface PreviewImage {
+export interface PreviewImage {
   id: string;
   src: string;
   alt: string;
 }
 
-interface PreviewImagesProps {
+export interface PreviewImagesProps {
   images: PreviewImage[];
 }
 
