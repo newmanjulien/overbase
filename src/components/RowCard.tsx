@@ -12,7 +12,7 @@ import {
 import { MoreHorizontal } from "lucide-react";
 
 interface MenuItem {
-  id?: string; // ✅ optional stable ID for menu items
+  id?: string;
   label: string;
   onClick?: () => void;
   destructive?: boolean;
@@ -25,10 +25,6 @@ interface RowCardProps {
   image?: string;
   showAvatar?: boolean;
   leading?: ReactNode;
-  /**
-   * Allows rich React nodes OR simple strings.
-   * Strings are wrapped in a <p>, nodes are rendered directly.
-   */
   contentBox?: string | ReactNode;
   actions?: ReactNode;
   onEdit?: () => void;
@@ -126,8 +122,12 @@ function Content({
   return (
     <div className="min-w-0 max-w-xl flex-shrink mr-4">
       {contentBox ? (
-        <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-700 leading-tight line-clamp-2">
-          {typeof contentBox === "string" ? <p>{contentBox}</p> : contentBox}
+        <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-700 leading-tight">
+          {typeof contentBox === "string" ? (
+            <p className="line-clamp-2">{contentBox}</p>
+          ) : (
+            contentBox
+          )}
         </div>
       ) : (
         <>
@@ -197,7 +197,7 @@ function Actions({
           <DropdownMenuContent align="end">
             {menuItems.map((item) => (
               <DropdownMenuItem
-                key={item.id ?? item.label} // ✅ use id if available, fallback to label
+                key={item.id ?? item.label}
                 onClick={item.onClick}
                 className={
                   item.destructive
