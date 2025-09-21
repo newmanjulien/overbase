@@ -7,9 +7,9 @@ interface EmptyStateProps {
   buttonLabel?: string;
   onButtonClick?: () => void;
   className?: string;
-  buttonVariant?: "default" | "secondary";
+  buttonVariant?: "default" | "outline";
   iconType: "calendar" | "database" | "plug";
-  withBorder?: boolean; // optional, defaults to false
+  withBorder?: boolean;
 }
 
 const iconMap = {
@@ -24,7 +24,7 @@ export function EmptyState({
   buttonLabel,
   onButtonClick,
   className = "",
-  buttonVariant = "secondary",
+  buttonVariant = "outline",
   iconType,
   withBorder = false,
 }: EmptyStateProps) {

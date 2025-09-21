@@ -38,7 +38,7 @@ export default function DataSection({
           title="Calendar not linked"
           description="Link your calendar to see your meetings"
           buttonLabel="Link calendar"
-          buttonVariant="secondary"
+          buttonVariant="outline"
           onButtonClick={() => {}}
           iconType="calendar"
         />
@@ -71,7 +71,7 @@ export default function DataSection({
         description="You have not requested any data yet for this day"
         buttonLabel="Request data"
         onButtonClick={onRequestData}
-        buttonVariant="secondary"
+        buttonVariant="outline"
         iconType="database"
       />
     );

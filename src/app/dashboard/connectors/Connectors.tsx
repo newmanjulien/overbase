@@ -28,7 +28,7 @@ export function Connectors({
         subtitle="Set up connectors so we can automatically get data from all your sources."
         buttonLabel="Browse connectors"
         onButtonClick={onBrowseClick}
-        buttonVariant="secondary"
+        buttonVariant="outline"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10">

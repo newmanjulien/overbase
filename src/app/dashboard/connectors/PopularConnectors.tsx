@@ -77,7 +77,7 @@ export function PopularConnectors({
 
         <hr className="border-t border-gray-200/60 my-6 " />
 
-        <Button variant="secondary" className="w-full" onClick={onBrowseClick}>
+        <Button variant="outline" className="w-full" onClick={onBrowseClick}>
           Browse connectors
         </Button>
       </div>

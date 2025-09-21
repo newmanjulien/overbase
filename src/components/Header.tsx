@@ -12,7 +12,7 @@ interface HeaderProps {
   // Main CTA button (right column)
   buttonLabel?: string;
   onButtonClick?: () => void;
-  buttonVariant?: "default" | "secondary";
+  buttonVariant?: "default" | "outline";
 
   // Backlink (left-side navigation button with chevron)
   backlink?: boolean;
@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="border-b border-gray-200/60">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-[1fr_auto] items-center gap-6">
+      <div className="max-w-7xl mx-auto px-6 pb-12 pt-8 grid grid-cols-[1fr_auto] items-center gap-6">
         {/* Left side */}
         <div className="flex flex-col gap-3">
           {backlink && (

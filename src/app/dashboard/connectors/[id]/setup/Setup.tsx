@@ -118,7 +118,7 @@ export default function Setup({ connector }: SetupProps) {
           <div className="flex justify-between items-center">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={() =>
                 router.push(`/dashboard/connectors/${connector.id}`)
               }
