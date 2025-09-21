@@ -95,7 +95,7 @@ function Leading({
       {leading && <div className={showAvatar ? "mr-3" : ""}>{leading}</div>}
 
       {showAvatar && (
-        <Avatar className="w-10 h-10 border border-gray-200/60 bg-gray-100">
+        <Avatar className="size-10 border border-gray-200/60 bg-gray-100">
           {image ? (
             <AvatarImage
               src={image}
