@@ -112,7 +112,6 @@ export default function DataSection({
           {sortedRequests.map((req) => (
             <RowCard
               key={req.id}
-              id={req.id}
               contentBox={req.prompt || "No prompt provided"}
               actions={
                 <>
