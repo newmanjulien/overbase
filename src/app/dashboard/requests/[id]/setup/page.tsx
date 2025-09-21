@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { startOfToday, addDays, format } from "date-fns";
+import { startOfToday, addDays, format, parseISO, isBefore } from "date-fns";
 import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,8 +59,8 @@ export default function RequestSetupPage() {
     } else {
       const today = startOfToday();
       const minDate = addDays(today, 2);
-      const selected = new Date(scheduledDate + "T00:00:00Z");
-      if (selected < minDate) {
+      const selected = parseISO(scheduledDate); // ✅ safe local parse
+      if (isBefore(selected, minDate)) {
         errs.scheduledDate = "Date must be at least 2 days in the future.";
       }
     }
@@ -146,7 +146,7 @@ export default function RequestSetupPage() {
                   className="w-full justify-start text-left hover:bg-gray-50"
                 >
                   {scheduledDate ? (
-                    format(new Date(scheduledDate), "PPP")
+                    format(parseISO(scheduledDate), "PPP")
                   ) : (
                     <span>Pick a date</span>
                   )}
@@ -156,7 +156,7 @@ export default function RequestSetupPage() {
               <PopoverContent side="bottom" align="end" className="w-auto p-0">
                 <Calendar
                   mode="single"
-                  selected={scheduledDate ? new Date(scheduledDate) : undefined}
+                  selected={scheduledDate ? parseISO(scheduledDate) : undefined}
                   onSelect={(d) =>
                     setScheduledDate(d ? d.toISOString().split("T")[0] : "")
                   }

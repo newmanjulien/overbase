@@ -13,7 +13,7 @@ import Link from "next/link";
 type ViewType = "requests" | "meetings";
 
 export interface DataSectionProps {
-  selectedDate?: Date; // 👈 normalized (no null)
+  selectedDate?: Date;
   requestsByDate: Record<string, RequestItem[]>;
   onRequestData: (prefillDate?: Date) => void;
 }
@@ -79,7 +79,7 @@ export default function DataSection({
         buttonLabel="Request data"
         buttonVariant="outline"
         iconType="database"
-        onButtonClick={() => onRequestData(selectedDate)} // 👈 parent decides
+        onButtonClick={() => onRequestData(selectedDate)} // ✅ normalized upstream
       />
     );
   }

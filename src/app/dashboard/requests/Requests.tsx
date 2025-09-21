@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import Calendar, { CalendarProps } from "./Calendar";
 import DataSection, { DataSectionProps } from "./DataSection";
+import { formatISO } from "date-fns";
 
 interface RequestsProps {
   calendarProps: CalendarProps;
@@ -17,7 +18,8 @@ export function Requests({ calendarProps, dataSectionProps }: RequestsProps) {
     const id = "new"; // 👈 or however you generate/request IDs
     let url = `/dashboard/requests/${id}/setup`;
     if (prefillDate) {
-      url += `?date=${prefillDate.toISOString().split("T")[0]}`;
+      // ✅ normalize to YYYY-MM-DD in local timezone
+      url += `?date=${formatISO(prefillDate, { representation: "date" })}`;
     }
     router.push(url);
   };
