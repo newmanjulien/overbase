@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { startOfToday, formatISO } from "date-fns";
-import Calendar from "./Calendar";
-import DataSection from "./DataSection";
+import Calendar, { CalendarProps } from "./Calendar";
+import DataSection, { DataSectionProps } from "./DataSection";
 import { Header } from "@/components/Header";
 
 const SAMPLE_PROMPTS = [
@@ -35,6 +35,20 @@ export default function RequestsPage() {
     }));
   };
 
+  const calendarProps: CalendarProps = {
+    selectedDate,
+    setSelectedDate,
+    currentDate,
+    setCurrentDate,
+    requestsByDate,
+  };
+
+  const dataSectionProps: DataSectionProps = {
+    selectedDate,
+    requestsByDate,
+    onRequestData: handleRequestData,
+  };
+
   return (
     <div className="min-h-screen">
       <Header
@@ -47,20 +61,10 @@ export default function RequestsPage() {
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-12">
-        <Calendar
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          currentDate={currentDate}
-          setCurrentDate={setCurrentDate}
-          requestsByDate={requestsByDate}
-        />
+        <Calendar {...calendarProps} />
 
         <div className="flex-1">
-          <DataSection
-            selectedDate={selectedDate}
-            requestsByDate={requestsByDate}
-            onRequestData={handleRequestData}
-          />
+          <DataSection {...dataSectionProps} />
         </div>
       </div>
     </div>
