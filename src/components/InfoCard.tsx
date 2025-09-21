@@ -15,7 +15,7 @@ export function InfoCard({
   onClick,
 }: InfoCardProps) {
   return (
-    <Alert className="flex items-center justify-between rounded-xl bg-gray-200/80 border border-none text-sm">
+    <Alert className="flex items-center justify-between rounded-xl bg-gray-200/80 border-0 text-sm">
       {/* Left side: icon + text */}
       <div className="flex items-center space-x-2">
         <Info className="h-4 w-4" />
