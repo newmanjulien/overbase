@@ -57,7 +57,7 @@ function getWeekdayLabels(): string[] {
   return Array.from({ length: 7 }, (_, i) => format(addDays(start, i), "EEE"));
 }
 
-interface CalendarProps {
+export interface CalendarProps {
   selectedDate: Date | null;
   setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
   currentDate: Date;

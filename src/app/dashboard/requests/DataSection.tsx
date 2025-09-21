@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 
 type ViewType = "requests" | "meetings";
 
-interface DataSectionProps {
+export interface DataSectionProps {
   selectedDate: Date | null;
   requestsByDate: Record<string, string[]>;
   onRequestData: () => void;
