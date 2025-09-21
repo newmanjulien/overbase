@@ -157,7 +157,7 @@ function Actions({
   "title" | "subtitle" | "image" | "leading" | "contentBox" | "titleClassName"
 >) {
   return (
-    <div className="flex items-center gap-x-3 ml-auto flex-shrink-0">
+    <div className="flex items-center gap-x-3 ml-auto shrink-0">
       <div className="flex items-center gap-x-3 flex-shrink-0">
         {buttonLabel && (
           <Button
