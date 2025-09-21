@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
                     className="inline-flex items-center ml-1 text-blue-600 hover:text-blue-600/80 transition-colors"
                   >
                     <span>Learn more</span>
-                    <ExternalLink className="ml-1 h-4 w-4" />
+                    <ExternalLink className="ml-1 size-4" />
                   </a>
                 )}
               </h2>
