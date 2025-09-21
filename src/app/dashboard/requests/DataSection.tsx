@@ -68,16 +68,7 @@ export default function DataSection({
             <RowCard
               key={req.id}
               id={req.id}
-              title={req.prompt || "Untitled Request"}
-              subtitle={
-                req.scheduledDate
-                  ? `Scheduled for ${format(
-                      new Date(req.scheduledDate),
-                      "PPP"
-                    )}`
-                  : "No scheduled date"
-              }
-              showAvatar={true}
+              contentBox={req.prompt || "No prompt provided"}
             />
           ))}
         </div>
