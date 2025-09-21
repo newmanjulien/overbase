@@ -2,7 +2,6 @@
 
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Switch } from "./ui/switch";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
 
@@ -118,10 +117,6 @@ export function Modal({
                     <h3 className="text-sm font-medium text-gray-900">
                       {field.label}
                     </h3>
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={onEnabledChange}
-                    />
                   </div>
                   {content.description && (
                     <p className="text-sm text-gray-500">
