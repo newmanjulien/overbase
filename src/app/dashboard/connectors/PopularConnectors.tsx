@@ -2,18 +2,17 @@
 
 import { Layers } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Connectors } from "./DummyData";
 import { Button } from "@/components/ui/button";
 
 interface PopularConnectorsProps {
   popularConnectors: Connectors[];
-  onAddConnector: (connector: Connectors) => void;
   onBrowseClick: () => void;
 }
 
 export function PopularConnectors({
   popularConnectors,
-  onAddConnector,
   onBrowseClick,
 }: PopularConnectorsProps) {
   return (
@@ -34,43 +33,45 @@ export function PopularConnectors({
           </p>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-3">
           {popularConnectors.length === 0 ? (
             <p className="text-center text-gray-400 italic">
               No more connectors to add
             </p>
           ) : (
             popularConnectors.map((connector) => (
-              <div
+              <Button
                 key={connector.id}
-                className="flex items-center space-x-3 cursor-pointer rounded-xl"
-                onClick={() => onAddConnector(connector)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    onAddConnector(connector);
-                  }
-                }}
+                asChild
+                variant="ghost"
+                className="w-full justify-start rounded-xl px-2 py-2 h-auto focus-visible:ring-2"
               >
-                <div className="w-11 h-11 rounded-full flex items-center justify-center relative overflow-hidden border border-gray-200/60 bg-white flex-shrink-0">
-                  <Image
-                    src={connector.logo}
-                    alt={connector.title}
-                    width={30}
-                    height={30}
-                    className="object-contain"
-                  />
-                </div>
-                <div className="min-w-0 flex flex-col">
-                  <h3 className="font-medium text-gray-800 text-sm truncate">
-                    {connector.title}
-                  </h3>
-                  <p className="text-gray-400 text-xs mt-0.5 font-light">
-                    {connector.subtitle}
-                  </p>
-                </div>
-              </div>
+                <Link
+                  href={`/connectors/${connector.id}`}
+                  title={`Set up ${connector.title}`}
+                >
+                  <div className="flex items-center space-x-3 w-full">
+                    <div className="w-11 h-11 rounded-full flex items-center justify-center relative overflow-hidden border border-gray-200/60 bg-white flex-shrink-0">
+                      <Image
+                        src={connector.logo}
+                        alt=""
+                        width={30}
+                        height={30}
+                        className="object-contain"
+                        aria-hidden
+                      />
+                    </div>
+                    <div className="min-w-0 flex flex-col text-left">
+                      <h3 className="font-medium text-gray-800 text-sm truncate">
+                        {connector.title}
+                      </h3>
+                      <p className="text-gray-400 text-xs mt-0.5 font-light truncate">
+                        {connector.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </Button>
             ))
           )}
         </div>
