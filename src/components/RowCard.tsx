@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
 interface MenuItem {
   id?: string;
@@ -18,7 +19,8 @@ interface MenuItem {
   destructive?: boolean;
 }
 
-interface RowCardProps {
+export interface RowCardProps {
+  id: string;
   title?: string;
   titleClassName?: string;
   subtitle?: ReactNode;
@@ -27,7 +29,6 @@ interface RowCardProps {
   leading?: ReactNode;
   contentBox?: string | ReactNode;
   actions?: ReactNode;
-  onEdit?: () => void;
   buttonLabel?: string;
   buttonOnClick?: () => void;
   buttonClassName?: string;
@@ -36,6 +37,7 @@ interface RowCardProps {
 }
 
 export function RowCard({
+  id,
   title,
   titleClassName,
   subtitle,
@@ -44,7 +46,6 @@ export function RowCard({
   leading,
   contentBox,
   actions,
-  onEdit,
   buttonLabel,
   buttonOnClick,
   buttonClassName = defaultButtonClasses,
@@ -66,10 +67,10 @@ export function RowCard({
         contentBox={contentBox}
       />
       <Actions
+        id={id}
         buttonLabel={buttonLabel}
         buttonOnClick={buttonOnClick}
         buttonClassName={buttonClassName}
-        onEdit={onEdit}
         actions={actions}
         showGreenDot={showGreenDot}
         menuItems={menuItems}
@@ -150,10 +151,10 @@ function Content({
 }
 
 function Actions({
+  id,
   buttonLabel,
   buttonOnClick,
   buttonClassName,
-  onEdit,
   actions,
   showGreenDot,
   menuItems,
@@ -173,15 +174,14 @@ function Actions({
             {buttonLabel}
           </Button>
         )}
-        {onEdit && (
-          <Button
-            variant="ghost"
-            className={defaultButtonClasses}
-            onClick={onEdit}
-          >
-            Edit
+
+        {/* View/Edit Button */}
+        <Link href={`/dashboard/requests/${id}/setup`}>
+          <Button variant="ghost" className={defaultButtonClasses}>
+            View/Edit
           </Button>
-        )}
+        </Link>
+
         {actions}
       </div>
 

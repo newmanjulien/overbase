@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
+import type { RequestItem } from "./Client";
 
 import {
   format,
@@ -62,7 +63,7 @@ export interface CalendarProps {
   setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
   currentDate: Date;
   setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
-  requestsByDate: Record<string, string[]>;
+  requestsByDate: Record<string, RequestItem[]>;
 }
 
 export default function Calendar({
@@ -140,7 +141,7 @@ export default function Calendar({
             return <div key={cell.key} className="aspect-square w-full" />;
           }
 
-          const hasRequests = !!requestsByDate[cell.key]?.length;
+          const hasRequests = !!requestsByDate?.[cell.key]?.length;
 
           return (
             <button
