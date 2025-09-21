@@ -29,7 +29,7 @@ function Templates() {
         learnMoreLink="#"
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-18">
+      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-16">
         {/* Sidebar */}
         <div className="w-56 flex-shrink-0">
           <ToggleGroup
