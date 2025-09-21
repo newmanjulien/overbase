@@ -48,7 +48,7 @@ export function TemplateCard({
         <Button
           variant="secondary"
           size="sm"
-          className="absolute top-3 right-3 bg-white rounded-lg text-gray-800 hover:bg-gray-50 font-normal"
+          className="absolute top-3 right-3"
           onClick={onUse}
         >
           Use

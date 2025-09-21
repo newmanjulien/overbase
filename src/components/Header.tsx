@@ -89,9 +89,11 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right side */}
         {buttonLabel && onButtonClick && (
-          <Button onClick={onButtonClick} variant={buttonVariant}>
-            {buttonLabel}
-          </Button>
+          <div className="flex items-center">
+            <Button onClick={onButtonClick} variant={buttonVariant}>
+              {buttonLabel}
+            </Button>
+          </div>
         )}
       </div>
     </header>
