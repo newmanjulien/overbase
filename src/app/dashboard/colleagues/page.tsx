@@ -21,13 +21,16 @@ const mockColleagues: Colleague[] = [
 
 function ColleaguesLayout() {
   const [selectedColleagues, setSelectedColleagues] = useState<string[]>([]);
-  const [selectAll, setSelectAll] = useState(false);
   const router = useRouter();
 
+  // Derive selectAll state instead of storing it separately
+  const allSelected = selectedColleagues.length === mockColleagues.length;
+  const someSelected =
+    selectedColleagues.length > 0 &&
+    selectedColleagues.length < mockColleagues.length;
+
   const handleSelectAll = (checked: boolean | "indeterminate") => {
-    const isChecked = checked === true;
-    setSelectAll(isChecked);
-    if (isChecked) {
+    if (checked) {
       setSelectedColleagues(mockColleagues.map((c) => c.id));
     } else {
       setSelectedColleagues([]);
@@ -39,7 +42,6 @@ function ColleaguesLayout() {
       setSelectedColleagues((prev) => [...prev, colleagueId]);
     } else {
       setSelectedColleagues((prev) => prev.filter((id) => id !== colleagueId));
-      setSelectAll(false);
     }
   };
 
@@ -56,15 +58,18 @@ function ColleaguesLayout() {
 
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="w-full flex flex-col gap-3">
-          {/* Select All row (compact automatically, no showAvatar) */}
+          {/* Select All row */}
           <RowCard
             title="Select all"
             titleClassName="text-gray-500 font-normal"
             leading={
               <Checkbox
-                checked={selectAll}
+                checked={
+                  allSelected ? true : someSelected ? "indeterminate" : false
+                }
                 onCheckedChange={handleSelectAll}
-                className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
+                className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
+                  data-[state=checked]:border-gray-800 rounded-sm"
               />
             }
             menuItems={[
@@ -76,13 +81,13 @@ function ColleaguesLayout() {
             ]}
           />
 
-          {/* Colleague rows (normal height, showAvatar true) */}
+          {/* Colleague rows */}
           {mockColleagues.map((colleague) => (
             <RowCard
               key={colleague.id}
               title={colleague.name}
               subtitle={colleague.role}
-              image="/images/shopify.png" // or "" for letter fallback
+              image="/images/shopify.png"
               showAvatar
               leading={
                 <Checkbox
@@ -90,7 +95,8 @@ function ColleaguesLayout() {
                   onCheckedChange={(checked) =>
                     handleSelectColleague(colleague.id, checked as boolean)
                   }
-                  className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
+                  className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
+                    data-[state=checked]:border-gray-800 rounded-sm"
                 />
               }
               menuItems={[

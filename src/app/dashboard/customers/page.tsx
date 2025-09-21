@@ -21,13 +21,16 @@ const mockCustomers: Customer[] = [
 
 function CustomersLayout() {
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
-  const [selectAll, setSelectAll] = useState(false);
   const router = useRouter();
 
+  // Derive selectAll state
+  const allSelected = selectedCustomers.length === mockCustomers.length;
+  const someSelected =
+    selectedCustomers.length > 0 &&
+    selectedCustomers.length < mockCustomers.length;
+
   const handleSelectAll = (checked: boolean | "indeterminate") => {
-    const isChecked = checked === true;
-    setSelectAll(isChecked);
-    if (isChecked) {
+    if (checked) {
       setSelectedCustomers(mockCustomers.map((c) => c.id));
     } else {
       setSelectedCustomers([]);
@@ -39,7 +42,6 @@ function CustomersLayout() {
       setSelectedCustomers((prev) => [...prev, customerId]);
     } else {
       setSelectedCustomers((prev) => prev.filter((id) => id !== customerId));
-      setSelectAll(false);
     }
   };
 
@@ -56,15 +58,18 @@ function CustomersLayout() {
 
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="w-full flex flex-col gap-3">
-          {/* Select All row (compact automatically, no showAvatar) */}
+          {/* Select All row */}
           <RowCard
             title="Select all"
             titleClassName="text-gray-500 font-normal"
             leading={
               <Checkbox
-                checked={selectAll}
+                checked={
+                  allSelected ? true : someSelected ? "indeterminate" : false
+                }
                 onCheckedChange={handleSelectAll}
-                className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
+                className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
+                  data-[state=checked]:border-gray-800 rounded-sm"
               />
             }
             menuItems={[
@@ -76,13 +81,13 @@ function CustomersLayout() {
             ]}
           />
 
-          {/* Customer rows (normal height, showAvatar true) */}
+          {/* Customer rows */}
           {mockCustomers.map((customer) => (
             <RowCard
               key={customer.id}
               title={customer.name}
               subtitle={customer.company}
-              image="" // empty → fallback letter
+              image="" // fallback letter
               showAvatar
               leading={
                 <Checkbox
@@ -90,7 +95,8 @@ function CustomersLayout() {
                   onCheckedChange={(checked) =>
                     handleSelectCustomer(customer.id, checked as boolean)
                   }
-                  className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 data-[state=checked]:border-gray-800 rounded-sm"
+                  className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
+                    data-[state=checked]:border-gray-800 rounded-sm"
                 />
               }
               menuItems={[
