@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,7 +18,7 @@ interface MenuItem {
   destructive?: boolean;
 }
 
-interface RowCardProps {
+export interface RowCardProps {
   title?: string;
   titleClassName?: string;
   subtitle?: ReactNode;
@@ -27,7 +27,6 @@ interface RowCardProps {
   leading?: ReactNode;
   contentBox?: string | ReactNode;
   actions?: ReactNode;
-  onEdit?: () => void;
   buttonLabel?: string;
   buttonOnClick?: () => void;
   buttonClassName?: string;
@@ -44,7 +43,6 @@ export function RowCard({
   leading,
   contentBox,
   actions,
-  onEdit,
   buttonLabel,
   buttonOnClick,
   buttonClassName = defaultButtonClasses,
@@ -69,7 +67,6 @@ export function RowCard({
         buttonLabel={buttonLabel}
         buttonOnClick={buttonOnClick}
         buttonClassName={buttonClassName}
-        onEdit={onEdit}
         actions={actions}
         showGreenDot={showGreenDot}
         menuItems={menuItems}
@@ -120,7 +117,7 @@ function Content({
   contentBox,
 }: Pick<RowCardProps, "title" | "titleClassName" | "subtitle" | "contentBox">) {
   return (
-    <div className="min-w-0 max-w-xl flex-shrink mr-4">
+    <div className="flex-1 min-w-0 mr-4">
       {contentBox ? (
         <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-700 leading-tight">
           {typeof contentBox === "string" ? (
@@ -153,7 +150,6 @@ function Actions({
   buttonLabel,
   buttonOnClick,
   buttonClassName,
-  onEdit,
   actions,
   showGreenDot,
   menuItems,
@@ -163,7 +159,7 @@ function Actions({
 >) {
   return (
     <div className="flex items-center gap-x-3 ml-auto shrink-0">
-      <div className="flex items-center gap-x-3 flex-shrink-0">
+      <div className="flex items-center gap-x-2 flex-shrink-0">
         {buttonLabel && (
           <Button
             variant="ghost"
@@ -173,15 +169,7 @@ function Actions({
             {buttonLabel}
           </Button>
         )}
-        {onEdit && (
-          <Button
-            variant="ghost"
-            className={defaultButtonClasses}
-            onClick={onEdit}
-          >
-            Edit
-          </Button>
-        )}
+
         {actions}
       </div>
 

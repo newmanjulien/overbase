@@ -1,11 +1,11 @@
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Calendar, Database, Plug } from "lucide-react";
 
 interface EmptyStateProps {
   title: string;
   description: string;
   buttonLabel?: string;
-  onButtonClick?: () => void;
+  onButtonClick?: () => void; // 👈 no args anymore
   className?: string;
   buttonVariant?: "default" | "outline";
   iconType: "calendar" | "database" | "plug";

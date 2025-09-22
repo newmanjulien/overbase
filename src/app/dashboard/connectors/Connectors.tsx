@@ -1,8 +1,8 @@
 "use client";
 
-import { Header } from "@/components/Header";
-import { RowCard } from "@/components/RowCard";
-import { EmptyState } from "@/components/EmptyState";
+import { Header } from "@/components/blocks/Header";
+import { RowCard } from "@/components/blocks/RowCard";
+import { EmptyState } from "@/components/blocks/EmptyState";
 import { PopularConnectors } from "./PopularConnectors";
 import type { Connectors } from "./DummyData";
 

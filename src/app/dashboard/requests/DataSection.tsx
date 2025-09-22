@@ -1,18 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format, formatISO, isBefore, startOfToday, isToday } from "date-fns";
-import { RowCard } from "@/components/RowCard";
-import { EmptyState } from "@/components/EmptyState";
+import { RowCard } from "@/components/blocks/RowCard";
+import { EmptyState } from "@/components/blocks/EmptyState";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
+
+import type { RequestItem } from "./Client";
+import Link from "next/link";
 
 type ViewType = "requests" | "meetings";
 
 export interface DataSectionProps {
-  selectedDate: Date | null;
-  requestsByDate: Record<string, string[]>;
-  onRequestData: () => void;
+  selectedDate?: Date | null;
+  requestsByDate: Record<string, RequestItem[]>;
+  onRequestData: (prefillDate?: Date | null) => void;
 }
 
 export default function DataSection({
@@ -22,14 +25,36 @@ export default function DataSection({
 }: DataSectionProps) {
   const [selectedView, setSelectedView] = useState<ViewType>("requests");
 
+  // Always call hooks before any conditional return
+  const { dataCards, isPastDate, todaySelected, isFutureDate } = useMemo(() => {
+    if (!selectedDate) {
+      return {
+        dataCards: [] as RequestItem[],
+        isPastDate: false,
+        todaySelected: false,
+        isFutureDate: false,
+      };
+    }
+
+    const key = formatISO(selectedDate, { representation: "date" });
+    const cards: RequestItem[] = requestsByDate[key] || [];
+    const past = isBefore(selectedDate, startOfToday());
+    const today = isToday(selectedDate);
+    const future = isBefore(startOfToday(), selectedDate);
+
+    return {
+      dataCards: cards,
+      isPastDate: past,
+      todaySelected: today,
+      isFutureDate: future,
+    };
+  }, [selectedDate, requestsByDate]);
+
+  const sortedRequests = useMemo(() => {
+    return [...dataCards];
+  }, [dataCards]);
+
   if (!selectedDate) return null;
-
-  const dateKey = formatISO(selectedDate, { representation: "date" });
-  const dataCards = requestsByDate[dateKey] || [];
-
-  const isPastDate = isBefore(selectedDate, startOfToday());
-  const todaySelected = isToday(selectedDate);
-  const isFutureDate = isBefore(startOfToday(), selectedDate);
 
   function renderEmptyState() {
     if (selectedView === "meetings") {
@@ -70,9 +95,9 @@ export default function DataSection({
         title="No data requested"
         description="You have not requested any data yet for this day"
         buttonLabel="Request data"
-        onButtonClick={onRequestData}
         buttonVariant="outline"
         iconType="database"
+        onButtonClick={() => onRequestData(selectedDate)}
       />
     );
   }
@@ -90,11 +115,7 @@ export default function DataSection({
         <ToggleGroup
           type="single"
           value={selectedView}
-          onValueChange={(val) => {
-            if (val === "requests" || val === "meetings") {
-              setSelectedView(val);
-            }
-          }}
+          onValueChange={(val) => val && setSelectedView(val as ViewType)}
           variant="outline"
         >
           <ToggleGroupItem value="requests">Requests</ToggleGroupItem>
@@ -102,15 +123,17 @@ export default function DataSection({
         </ToggleGroup>
       </div>
 
-      {selectedView === "requests" && dataCards.length > 0 ? (
-        <div className="space-y-6">
-          {dataCards.map((card, index) => (
+      {selectedView === "requests" && sortedRequests.length > 0 ? (
+        <div className="space-y-3">
+          {sortedRequests.map((req) => (
             <RowCard
-              key={index}
-              contentBox={card}
+              key={req.id}
+              contentBox={req.prompt || "No prompt provided"}
               actions={
                 <>
-                  <Button variant="secondary">Edit</Button>
+                  <Link href={`/dashboard/requests/${req.id}/setup`}>
+                    <Button variant="secondary">Edit</Button>
+                  </Link>
                   <Button variant="secondary" disabled={isFutureDate}>
                     Get data
                   </Button>

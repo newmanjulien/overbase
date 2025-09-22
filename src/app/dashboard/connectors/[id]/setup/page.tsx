@@ -16,6 +16,6 @@ export default async function SetupPage({ params }: SetupPageProps) {
     return <p className="p-6 text-center text-gray-500">Connector not found</p>;
   }
 
-  // Pass the connector into the client component
+  // Pass the connector to the Setup client component
   return <Setup connector={connector} />;
 }

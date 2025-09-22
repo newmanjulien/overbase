@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
+import type { RequestItem } from "./Client";
 
 import {
   format,
@@ -57,12 +58,38 @@ function getWeekdayLabels(): string[] {
   return Array.from({ length: 7 }, (_, i) => format(addDays(start, i), "EEE"));
 }
 
+function getDayButtonClasses({
+  isSelected,
+  isToday,
+}: {
+  isSelected: boolean;
+  isToday: boolean;
+}) {
+  return clsx(
+    "aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors",
+    {
+      "bg-gray-900 text-white": isSelected,
+      "bg-gray-100 text-gray-900 border border-2 border-gray-200 hover:border-2 hover:border-gray-900":
+        isToday && !isSelected,
+      "bg-gray-50 text-gray-900 border border-gray-100 hover:border-2 hover:border-gray-900":
+        !isSelected && !isToday,
+    }
+  );
+}
+
+function getRequestIndicatorClasses(isSelected: boolean) {
+  return clsx(
+    "absolute bottom-3 size-1.5 rounded-full",
+    isSelected ? "bg-white" : "bg-green-500"
+  );
+}
+
 export interface CalendarProps {
   selectedDate: Date | null;
   setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
   currentDate: Date;
   setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
-  requestsByDate: Record<string, string[]>;
+  requestsByDate: Record<string, RequestItem[]>;
 }
 
 export default function Calendar({
@@ -140,32 +167,21 @@ export default function Calendar({
             return <div key={cell.key} className="aspect-square w-full" />;
           }
 
-          const hasRequests = !!requestsByDate[cell.key]?.length;
+          const hasRequests = !!requestsByDate?.[cell.key]?.length;
 
           return (
             <button
               key={cell.key}
               onClick={() => handleDayClick(cell.date)}
-              className={clsx(
-                "aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors",
-                {
-                  "bg-gray-900 text-white": isSelected,
-                  "bg-gray-100 text-gray-900 border border-2 border-gray-200 hover:border-2 hover:border-gray-900":
-                    cell.isToday && !isSelected,
-                  "bg-gray-50 text-gray-900 border border-gray-100 hover:border-2 hover:border-gray-900":
-                    !isSelected && !cell.isToday,
-                }
-              )}
+              className={getDayButtonClasses({
+                isSelected,
+                isToday: cell.isToday,
+              })}
             >
               <span>{format(cell.date, "d")}</span>
 
               {hasRequests && (
-                <span
-                  className={clsx(
-                    "absolute bottom-3 size-1.5 rounded-full",
-                    isSelected ? "bg-white" : "bg-green-500"
-                  )}
-                />
+                <span className={getRequestIndicatorClasses(isSelected)} />
               )}
             </button>
           );

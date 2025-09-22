@@ -1,13 +1,13 @@
 "use client";
 
-import { Header } from "@/components/Header";
+import { Header } from "@/components/blocks/Header";
 import Calendar, { CalendarProps } from "./Calendar";
 import DataSection, { DataSectionProps } from "./DataSection";
 
 interface RequestsProps {
   calendarProps: CalendarProps;
   dataSectionProps: DataSectionProps;
-  onRequestData: () => void;
+  onRequestData: (prefillDate?: Date | null) => void; // ✅ matches Client/DataSection
 }
 
 export function Requests({
@@ -21,7 +21,7 @@ export function Requests({
         title="Requests"
         subtitle="Request data and manage your data requests in a way that aligns with your meetings and deadlines."
         buttonLabel="Request data"
-        onButtonClick={onRequestData}
+        onButtonClick={() => onRequestData(undefined)} // ✅ consistent
         buttonVariant="default"
         learnMoreLink="#"
       />
