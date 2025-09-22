@@ -17,13 +17,17 @@ import { Calendar } from "@/components/ui/calendar";
 
 const DRAFT_KEY = (id: string) => `request_draft:${id}`;
 
-function getDraft<T = any>(id: string): T | null {
+function getDraft<T = unknown>(id: string): T | null {
   const raw = window.sessionStorage.getItem(DRAFT_KEY(id));
   return raw ? JSON.parse(raw) : null;
 }
-function saveDraft(id: string, draft: any) {
+
+type Draft = { id: string; prompt: string; scheduledDate: string };
+
+function saveDraft(id: string, draft: Draft) {
   window.sessionStorage.setItem(DRAFT_KEY(id), JSON.stringify(draft));
 }
+
 function clearDraft(id: string) {
   window.sessionStorage.removeItem(DRAFT_KEY(id));
 }
@@ -84,11 +88,11 @@ export default function RequestSetupPage() {
 
   // Load existing draft if present
   useEffect(() => {
-    const draft = getDraft<{ prompt: string; scheduledDate: string }>(
-      requestId
-    );
+    const draft = getDraft<Draft>(requestId);
     if (draft) {
-      draft.prompt && setPrompt(draft.prompt);
+      if (draft.prompt) {
+        setPrompt(draft.prompt);
+      }
       if (draft.scheduledDate) {
         const parsed = parseISODateLocal(draft.scheduledDate);
         if (parsed) setScheduledDate(parsed);

@@ -10,9 +10,9 @@ import type { RequestItem } from "../../Client";
 
 const DRAFT_KEY = (id: string) => `request_draft:${id}`;
 
-function getDraft<T = any>(id: string): T | null {
+function getDraft<T = unknown>(id: string): T | null {
   const raw = window.sessionStorage.getItem(DRAFT_KEY(id));
-  return raw ? JSON.parse(raw) : null;
+  return raw ? (JSON.parse(raw) as T) : null;
 }
 function clearDraft(id: string) {
   window.sessionStorage.removeItem(DRAFT_KEY(id));
@@ -38,9 +38,9 @@ export default function RequestQuestionsPage() {
       const all: RequestItem[] = JSON.parse(stored);
       const existing = all.find((r) => r.id === requestId);
       if (existing) {
-        existing.q1 && setQ1(existing.q1);
-        existing.q2 && setQ2(existing.q2);
-        existing.q3 && setQ3(existing.q3);
+        if (existing.q1) setQ1(existing.q1);
+        if (existing.q2) setQ2(existing.q2);
+        if (existing.q3) setQ3(existing.q3);
       }
     }
   }, [requestId]);
@@ -55,7 +55,7 @@ export default function RequestQuestionsPage() {
     }>(requestId);
 
     const stored = window.localStorage.getItem("requests");
-    let all: RequestItem[] = stored ? JSON.parse(stored) : [];
+    const all: RequestItem[] = stored ? JSON.parse(stored) : [];
 
     const idx = all.findIndex((r) => r.id === requestId);
 

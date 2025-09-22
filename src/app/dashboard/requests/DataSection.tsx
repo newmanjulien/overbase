@@ -15,7 +15,7 @@ type ViewType = "requests" | "meetings";
 export interface DataSectionProps {
   selectedDate?: Date | null;
   requestsByDate: Record<string, RequestItem[]>;
-  onRequestData: (prefillDate?: Date | null) => void; // ✅ now allows null
+  onRequestData: (prefillDate?: Date | null) => void;
 }
 
 export default function DataSection({
@@ -25,18 +25,36 @@ export default function DataSection({
 }: DataSectionProps) {
   const [selectedView, setSelectedView] = useState<ViewType>("requests");
 
-  if (!selectedDate) return null;
+  // Always call hooks before any conditional return
+  const { dataCards, isPastDate, todaySelected, isFutureDate } = useMemo(() => {
+    if (!selectedDate) {
+      return {
+        dataCards: [] as RequestItem[],
+        isPastDate: false,
+        todaySelected: false,
+        isFutureDate: false,
+      };
+    }
 
-  const dateKey = formatISO(selectedDate, { representation: "date" });
-  const dataCards: RequestItem[] = requestsByDate[dateKey] || [];
+    const key = formatISO(selectedDate, { representation: "date" });
+    const cards: RequestItem[] = requestsByDate[key] || [];
+    const past = isBefore(selectedDate, startOfToday());
+    const today = isToday(selectedDate);
+    const future = isBefore(startOfToday(), selectedDate);
 
-  const isPastDate = isBefore(selectedDate, startOfToday());
-  const todaySelected = isToday(selectedDate);
-  const isFutureDate = isBefore(startOfToday(), selectedDate);
+    return {
+      dataCards: cards,
+      isPastDate: past,
+      todaySelected: today,
+      isFutureDate: future,
+    };
+  }, [selectedDate, requestsByDate]);
 
   const sortedRequests = useMemo(() => {
     return [...dataCards];
   }, [dataCards]);
+
+  if (!selectedDate) return null;
 
   function renderEmptyState() {
     if (selectedView === "meetings") {
@@ -79,7 +97,7 @@ export default function DataSection({
         buttonLabel="Request data"
         buttonVariant="outline"
         iconType="database"
-        onButtonClick={() => onRequestData(selectedDate)} // ✅ safe
+        onButtonClick={() => onRequestData(selectedDate)}
       />
     );
   }
