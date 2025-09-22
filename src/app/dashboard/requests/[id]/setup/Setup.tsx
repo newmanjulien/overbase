@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { startOfToday, addDays, format, isBefore } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -161,6 +162,43 @@ export default function Setup({ requestId, prefillDate }: SetupProps) {
       </div>
 
       <div>
+        {/* <Label htmlFor="scheduledDate" className="mb-2">
+          Scheduled Date
+        </Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-left hover:bg-gray-50"
+              aria-label={
+                scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"
+              }
+              title={
+                scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"
+              }
+            >
+              {scheduledDate ? (
+                format(scheduledDate, "PPP")
+              ) : (
+                <span>Pick a date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent side="bottom" align="end" className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={scheduledDate ?? undefined}
+              onSelect={(d) => setScheduledDate(d ?? null)}
+              disabled={(date) => date < minSelectableDate}
+              defaultMonth={scheduledDate ?? undefined}
+              autoFocus
+            />
+          </PopoverContent>
+        </Popover>
+        {errors.scheduledDate && (
+          <p className="text-red-500 text-sm mt-1">{errors.scheduledDate}</p>
+        )} */}
+
         <Label htmlFor="scheduledDate" className="mb-2">
           Scheduled Date
         </Label>
@@ -181,6 +219,8 @@ export default function Setup({ requestId, prefillDate }: SetupProps) {
               ) : (
                 <span>Pick a date</span>
               )}
+              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />{" "}
+              {/* 👈 icon */}
             </Button>
           </PopoverTrigger>
           <PopoverContent side="bottom" align="end" className="w-auto p-0">
