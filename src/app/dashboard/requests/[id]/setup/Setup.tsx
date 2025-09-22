@@ -203,7 +203,8 @@ export default function Setup({ requestId, prefillDate }: SetupProps) {
                   selected={scheduledDate ?? undefined}
                   onSelect={(d) => setScheduledDate(d ?? null)}
                   disabled={(date) => date < minSelectableDate}
-                  initialFocus
+                  defaultMonth={scheduledDate ?? undefined}
+                  autoFocus
                 />
               </PopoverContent>
             </Popover>
