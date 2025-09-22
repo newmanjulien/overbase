@@ -17,7 +17,18 @@ import { Calendar } from "@/components/ui/calendar";
 
 const DRAFT_KEY = (id: string) => `request_draft:${id}`;
 
-// Parse "YYYY-MM-DD" as a *local* date (avoid UTC shift)
+function getDraft<T = any>(id: string): T | null {
+  const raw = window.sessionStorage.getItem(DRAFT_KEY(id));
+  return raw ? JSON.parse(raw) : null;
+}
+function saveDraft(id: string, draft: any) {
+  window.sessionStorage.setItem(DRAFT_KEY(id), JSON.stringify(draft));
+}
+function clearDraft(id: string) {
+  window.sessionStorage.removeItem(DRAFT_KEY(id));
+}
+
+// Parse "YYYY-MM-DD" as a *local* date
 function parseISODateLocal(s: string | null | undefined): Date | null {
   if (!s) return null;
   const parts = s.split("-");
@@ -48,14 +59,12 @@ export default function RequestSetupPage() {
   const searchParams = useSearchParams();
 
   const [prompt, setPrompt] = useState("");
-  // UI state uses Date (dual-model)
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [errors, setErrors] = useState<{
     prompt?: string;
     scheduledDate?: string;
   }>({});
 
-  // Single source of truth for min selectable date
   const minSelectableDate = useMemo(() => addDays(startOfToday(), 2), []);
 
   // Prefill from query string once
@@ -75,16 +84,15 @@ export default function RequestSetupPage() {
 
   // Load existing draft if present
   useEffect(() => {
-    const draftRaw = window.sessionStorage.getItem(DRAFT_KEY(requestId));
-    if (draftRaw) {
-      try {
-        const d = JSON.parse(draftRaw);
-        d.prompt && setPrompt(d.prompt);
-        if (d.scheduledDate) {
-          const parsed = parseISODateLocal(d.scheduledDate);
-          if (parsed) setScheduledDate(parsed);
-        }
-      } catch {}
+    const draft = getDraft<{ prompt: string; scheduledDate: string }>(
+      requestId
+    );
+    if (draft) {
+      draft.prompt && setPrompt(draft.prompt);
+      if (draft.scheduledDate) {
+        const parsed = parseISODateLocal(draft.scheduledDate);
+        if (parsed) setScheduledDate(parsed);
+      }
     }
   }, [requestId]);
 
@@ -95,10 +103,8 @@ export default function RequestSetupPage() {
     }
     if (!scheduledDate) {
       errs.scheduledDate = "Scheduled date is required.";
-    } else {
-      if (isBefore(scheduledDate, minSelectableDate)) {
-        errs.scheduledDate = "Date must be at least 2 days in the future.";
-      }
+    } else if (isBefore(scheduledDate, minSelectableDate)) {
+      errs.scheduledDate = "Date must be at least 2 days in the future.";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -108,14 +114,11 @@ export default function RequestSetupPage() {
     e.preventDefault();
     if (!validate()) return;
 
-    const draft = {
+    saveDraft(requestId, {
       id: requestId,
       prompt,
       scheduledDate: toISODateStringLocal(scheduledDate),
-    };
-
-    // Save only to sessionStorage
-    window.sessionStorage.setItem(DRAFT_KEY(requestId), JSON.stringify(draft));
+    });
 
     router.push(`/dashboard/requests/${requestId}/questions`);
   };
@@ -125,7 +128,7 @@ export default function RequestSetupPage() {
       <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6 flex flex-col">
         <Button
           onClick={() => {
-            window.sessionStorage.removeItem(DRAFT_KEY(requestId));
+            clearDraft(requestId);
             router.push("/dashboard/requests");
           }}
           variant="backLink"
@@ -217,7 +220,7 @@ export default function RequestSetupPage() {
               type="button"
               variant="outline"
               onClick={() => {
-                window.sessionStorage.removeItem(DRAFT_KEY(requestId));
+                clearDraft(requestId);
                 router.push("/dashboard/requests");
               }}
             >
