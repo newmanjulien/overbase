@@ -37,38 +37,44 @@ export default function SetupLayout({
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6 flex flex-col">
-        {/* Always back to dashboard (or equivalent) */}
-        <Button
-          onClick={onSidebarBack}
-          variant="backLink"
-          size="backLink"
-          leadingIcon={<ChevronLeft className="size-5" />}
-        >
-          {sidebarBackText}
-        </Button>
+      <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-10 pb-6 flex flex-col">
+        <header>
+          {/* Always back to dashboard (or equivalent) */}
+          <Button
+            onClick={onSidebarBack}
+            variant="backLink"
+            size="backLink"
+            leadingIcon={<ChevronLeft className="size-5" />}
+          >
+            {sidebarBackText}
+          </Button>
 
-        {/* Sidebar title + optional icon */}
-        <div className={`mt-6 ${sidebarIcon ? "flex items-center gap-3" : ""}`}>
-          {sidebarIcon && (
-            <div className="flex-shrink-0 w-9 h-9 rounded-full overflow-hidden flex items-center justify-center">
-              {sidebarIcon}
-            </div>
-          )}
-          <h2 className="text-2xl font-semibold text-gray-900 leading-tight">
-            {sidebarTitle}
-          </h2>
-        </div>
+          {/* Sidebar title + optional icon */}
+          <div
+            className={`mt-2 ${sidebarIcon ? "flex items-center gap-3" : ""}`}
+          >
+            {sidebarIcon && (
+              <div className="flex-shrink-0 w-9 h-9 rounded-full overflow-hidden flex items-center justify-center">
+                {sidebarIcon}
+              </div>
+            )}
+            <h2 className="text-2xl font-semibold text-gray-900 leading-tight">
+              {sidebarTitle}
+            </h2>
+          </div>
+        </header>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-2xl mx-auto px-10 pt-12 pb-6">
+      <main className="flex-1 max-w-2xl mx-auto px-10 pt-10 pb-6">
         <form onSubmit={onSubmit} className="space-y-6">
           {/* Header */}
-          <div>
-            <h1 className="text-2xl font-medium text-gray-900 mb-2">{title}</h1>
+          <header className="mt-6">
+            <h1 className="text-2xl font-medium text-gray-900 mb-2 mt-8">
+              {title}
+            </h1>
             {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
-          </div>
+          </header>
 
           {/* Custom fields */}
           <div className="space-y-4">{children}</div>

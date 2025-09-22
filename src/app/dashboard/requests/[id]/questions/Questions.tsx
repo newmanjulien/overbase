@@ -104,7 +104,7 @@ export default function Questions({ requestId }: QuestionsProps) {
       // Footer
       onFlowBack={() => {
         clearDraft(requestId);
-        router.push("/dashboard/requests");
+        router.push(`/dashboard/requests/${requestId}/setup`);
       }}
       primaryButtonText="Save"
       onSubmit={handleSubmit}
