@@ -1,4 +1,3 @@
-// src/app/dashboard/requests/[id]/setup/page.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -8,7 +7,6 @@ import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import type { RequestItem } from "../../Client";
 
 import {
   Popover,
@@ -16,6 +14,8 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+
+const DRAFT_KEY = (id: string) => `request_draft:${id}`;
 
 // Parse "YYYY-MM-DD" as a *local* date (avoid UTC shift)
 function parseISODateLocal(s: string | null | undefined): Date | null {
@@ -55,10 +55,10 @@ export default function RequestSetupPage() {
     scheduledDate?: string;
   }>({});
 
-  // (2) Single source of truth for min selectable date
+  // Single source of truth for min selectable date
   const minSelectableDate = useMemo(() => addDays(startOfToday(), 2), []);
 
-  // (1) Prefill from query string once, but don't reset if it matches current state
+  // Prefill from query string once
   useEffect(() => {
     const dateParam = searchParams.get("date");
     if (dateParam) {
@@ -70,21 +70,21 @@ export default function RequestSetupPage() {
         if (d) setScheduledDate(d);
       }
     }
-    // intentionally NOT depending on scheduledDate to avoid loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Load existing item once per requestId change
+  // Load existing draft if present
   useEffect(() => {
-    const stored = window.localStorage.getItem("requests");
-    if (stored) {
-      const all: RequestItem[] = JSON.parse(stored);
-      const existing = all.find((r) => r.id === requestId);
-      if (existing) {
-        setPrompt(existing.prompt);
-        const d = parseISODateLocal(existing.scheduledDate);
-        if (d) setScheduledDate(d);
-      }
+    const draftRaw = window.sessionStorage.getItem(DRAFT_KEY(requestId));
+    if (draftRaw) {
+      try {
+        const d = JSON.parse(draftRaw);
+        d.prompt && setPrompt(d.prompt);
+        if (d.scheduledDate) {
+          const parsed = parseISODateLocal(d.scheduledDate);
+          if (parsed) setScheduledDate(parsed);
+        }
+      } catch {}
     }
   }, [requestId]);
 
@@ -108,20 +108,14 @@ export default function RequestSetupPage() {
     e.preventDefault();
     if (!validate()) return;
 
-    const stored = window.localStorage.getItem("requests");
-    let all: RequestItem[] = stored ? JSON.parse(stored) : [];
-
-    const existing = all.find((r) => r.id === requestId);
-    const updated: RequestItem = {
-      ...(existing || { id: requestId, q1: "", q2: "", q3: "" }),
+    const draft = {
+      id: requestId,
       prompt,
-      // Storage & transport: string "YYYY-MM-DD"
       scheduledDate: toISODateStringLocal(scheduledDate),
     };
 
-    all = all.filter((r) => r.id !== updated.id);
-    all.push(updated);
-    window.localStorage.setItem("requests", JSON.stringify(all));
+    // Save only to sessionStorage
+    window.sessionStorage.setItem(DRAFT_KEY(requestId), JSON.stringify(draft));
 
     router.push(`/dashboard/requests/${requestId}/questions`);
   };
@@ -130,7 +124,10 @@ export default function RequestSetupPage() {
     <div className="flex min-h-screen">
       <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6 flex flex-col">
         <Button
-          onClick={() => router.push("/dashboard/requests")}
+          onClick={() => {
+            window.sessionStorage.removeItem(DRAFT_KEY(requestId));
+            router.push("/dashboard/requests");
+          }}
           variant="backLink"
           size="backLink"
           leadingIcon={<ChevronLeft className="size-5" />}
@@ -181,7 +178,6 @@ export default function RequestSetupPage() {
                 <Button
                   variant="outline"
                   className="w-full justify-start text-left hover:bg-gray-50"
-                  // (6) a11y micro-nit
                   aria-label={
                     scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"
                   }
@@ -220,7 +216,10 @@ export default function RequestSetupPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/dashboard/requests")}
+              onClick={() => {
+                window.sessionStorage.removeItem(DRAFT_KEY(requestId));
+                router.push("/dashboard/requests");
+              }}
             >
               Back
             </Button>

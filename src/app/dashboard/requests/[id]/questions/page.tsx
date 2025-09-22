@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { RequestItem } from "../../Client";
 
+const DRAFT_KEY = (id: string) => `request_draft:${id}`;
+
 export default function RequestQuestionsPage() {
   const { id } = useParams();
   const requestId = Array.isArray(id) ? id[0] : id;
@@ -23,6 +25,7 @@ export default function RequestQuestionsPage() {
   const [q3, setQ3] = useState("");
 
   useEffect(() => {
+    // Load existing q1–q3 if editing
     const stored = window.localStorage.getItem("requests");
     if (stored) {
       const all: RequestItem[] = JSON.parse(stored);
@@ -38,12 +41,44 @@ export default function RequestQuestionsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const draftRaw = window.sessionStorage.getItem(DRAFT_KEY(requestId));
+    const draft = draftRaw ? JSON.parse(draftRaw) : null;
+
     const stored = window.localStorage.getItem("requests");
     let all: RequestItem[] = stored ? JSON.parse(stored) : [];
 
-    all = all.map((r) => (r.id === requestId ? { ...r, q1, q2, q3 } : r));
+    const idx = all.findIndex((r) => r.id === requestId);
+
+    if (idx >= 0) {
+      // Editing: merge questions and optionally prompt/date from draft
+      const existing = all[idx];
+      all[idx] = {
+        ...existing,
+        ...(draft
+          ? { prompt: draft.prompt, scheduledDate: draft.scheduledDate }
+          : {}),
+        q1,
+        q2,
+        q3,
+      };
+    } else {
+      // New: only now create the row
+      if (!draft) {
+        throw new Error("Missing draft for new request.");
+      }
+      const newItem: RequestItem = {
+        id: requestId,
+        prompt: draft.prompt || "",
+        scheduledDate: draft.scheduledDate || "",
+        q1,
+        q2,
+        q3,
+      };
+      all.push(newItem);
+    }
 
     window.localStorage.setItem("requests", JSON.stringify(all));
+    window.sessionStorage.removeItem(DRAFT_KEY(requestId));
 
     router.push("/dashboard/requests");
   };
@@ -52,7 +87,10 @@ export default function RequestQuestionsPage() {
     <div className="flex min-h-screen">
       <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6 flex flex-col">
         <Button
-          onClick={() => router.push("/dashboard/requests")}
+          onClick={() => {
+            window.sessionStorage.removeItem(DRAFT_KEY(requestId));
+            router.push("/dashboard/requests");
+          }}
           variant="backLink"
           size="backLink"
           leadingIcon={<ChevronLeft className="size-5" />}
@@ -83,7 +121,10 @@ export default function RequestQuestionsPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/dashboard/requests")}
+              onClick={() => {
+                window.sessionStorage.removeItem(DRAFT_KEY(requestId));
+                router.push("/dashboard/requests");
+              }}
             >
               Back
             </Button>

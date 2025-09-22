@@ -1,4 +1,3 @@
-// src/app/dashboard/requests/Client.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -48,24 +47,11 @@ export default function RequestsClient() {
   // Create a new request; UI state may provide a prefill date
   const handleNewRequest = (prefillDate?: Date | null) => {
     const id = uuidv4();
-    const placeholder: RequestItem = {
-      id,
-      prompt: "",
-      // store/transport as "YYYY-MM-DD" (no UTC shift)
-      scheduledDate: prefillDate ? format(prefillDate, "yyyy-MM-dd") : "",
-      q1: "",
-      q2: "",
-      q3: "",
-    };
 
-    const stored = window.localStorage.getItem("requests");
-    let all: RequestItem[] = stored ? JSON.parse(stored) : [];
-    all.push(placeholder);
-    window.localStorage.setItem("requests", JSON.stringify(all));
-
+    // Only navigate, do not persist yet
     let url = `/dashboard/requests/${id}/setup`;
     if (prefillDate) {
-      url += `?date=${placeholder.scheduledDate}`;
+      url += `?date=${format(prefillDate, "yyyy-MM-dd")}`;
     }
 
     router.push(url);
