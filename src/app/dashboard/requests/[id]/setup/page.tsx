@@ -1,8 +1,9 @@
+// src/app/dashboard/requests/[id]/setup/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { startOfToday, addDays, format, parseISO, isBefore } from "date-fns";
+import { startOfToday, addDays, format, isBefore } from "date-fns";
 import { ChevronLeft, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +17,25 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
+// Parse "YYYY-MM-DD" as a *local* date (avoid UTC shift)
+function parseISODateLocal(s: string | null | undefined): Date | null {
+  if (!s) return null;
+  const parts = s.split("-");
+  if (parts.length !== 3) return null;
+  const [yStr, mStr, dStr] = parts;
+  const y = Number(yStr);
+  const m = Number(mStr);
+  const d = Number(dStr);
+  if (!y || !m || !d) return null;
+  const dt = new Date(y, m - 1, d);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+// Format Date as "YYYY-MM-DD" for storage/transport
+function toISODateStringLocal(d: Date | null): string {
+  return d ? format(d, "yyyy-MM-dd") : "";
+}
+
 export default function RequestSetupPage() {
   const { id } = useParams();
   const requestId = Array.isArray(id) ? id[0] : id;
@@ -28,28 +48,45 @@ export default function RequestSetupPage() {
   const searchParams = useSearchParams();
 
   const [prompt, setPrompt] = useState("");
-  const [scheduledDate, setScheduledDate] = useState("");
+  // UI state uses Date (dual-model)
+  const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [errors, setErrors] = useState<{
     prompt?: string;
     scheduledDate?: string;
   }>({});
 
+  // (2) Single source of truth for min selectable date
+  const minSelectableDate = useMemo(() => addDays(startOfToday(), 2), []);
+
+  // (1) Prefill from query string once, but don't reset if it matches current state
   useEffect(() => {
     const dateParam = searchParams.get("date");
-    if (dateParam && !scheduledDate) {
-      setScheduledDate(dateParam);
+    if (dateParam) {
+      const currentStr = scheduledDate
+        ? format(scheduledDate, "yyyy-MM-dd")
+        : null;
+      if (currentStr !== dateParam) {
+        const d = parseISODateLocal(dateParam);
+        if (d) setScheduledDate(d);
+      }
     }
+    // intentionally NOT depending on scheduledDate to avoid loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
+  // Load existing item once per requestId change
+  useEffect(() => {
     const stored = window.localStorage.getItem("requests");
     if (stored) {
       const all: RequestItem[] = JSON.parse(stored);
       const existing = all.find((r) => r.id === requestId);
       if (existing) {
         setPrompt(existing.prompt);
-        setScheduledDate(existing.scheduledDate);
+        const d = parseISODateLocal(existing.scheduledDate);
+        if (d) setScheduledDate(d);
       }
     }
-  }, [requestId, searchParams, scheduledDate]);
+  }, [requestId]);
 
   const validate = () => {
     const errs: typeof errors = {};
@@ -59,10 +96,7 @@ export default function RequestSetupPage() {
     if (!scheduledDate) {
       errs.scheduledDate = "Scheduled date is required.";
     } else {
-      const today = startOfToday();
-      const minDate = addDays(today, 2);
-      const selected = parseISO(scheduledDate);
-      if (isBefore(selected, minDate)) {
+      if (isBefore(scheduledDate, minSelectableDate)) {
         errs.scheduledDate = "Date must be at least 2 days in the future.";
       }
     }
@@ -81,7 +115,8 @@ export default function RequestSetupPage() {
     const updated: RequestItem = {
       ...(existing || { id: requestId, q1: "", q2: "", q3: "" }),
       prompt,
-      scheduledDate,
+      // Storage & transport: string "YYYY-MM-DD"
+      scheduledDate: toISODateStringLocal(scheduledDate),
     };
 
     all = all.filter((r) => r.id !== updated.id);
@@ -146,9 +181,16 @@ export default function RequestSetupPage() {
                 <Button
                   variant="outline"
                   className="w-full justify-start text-left hover:bg-gray-50"
+                  // (6) a11y micro-nit
+                  aria-label={
+                    scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"
+                  }
+                  title={
+                    scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"
+                  }
                 >
                   {scheduledDate ? (
-                    format(parseISO(scheduledDate), "PPP")
+                    format(scheduledDate, "PPP")
                   ) : (
                     <span>Pick a date</span>
                   )}
@@ -158,11 +200,9 @@ export default function RequestSetupPage() {
               <PopoverContent side="bottom" align="end" className="w-auto p-0">
                 <Calendar
                   mode="single"
-                  selected={scheduledDate ? parseISO(scheduledDate) : undefined}
-                  onSelect={(d) =>
-                    setScheduledDate(d ? d.toISOString().split("T")[0] : "")
-                  }
-                  disabled={(date) => date < addDays(startOfToday(), 2)}
+                  selected={scheduledDate ?? undefined}
+                  onSelect={(d) => setScheduledDate(d ?? null)}
+                  disabled={(date) => date < minSelectableDate}
                   initialFocus
                 />
               </PopoverContent>

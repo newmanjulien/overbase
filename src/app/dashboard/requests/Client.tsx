@@ -1,7 +1,8 @@
+// src/app/dashboard/requests/Client.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { startOfToday } from "date-fns";
+import { startOfToday, format } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 
@@ -28,7 +29,7 @@ export default function RequestsClient() {
     Record<string, RequestItem[]>
   >({});
 
-  // 🔑 Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount
   useEffect(() => {
     const stored = window.localStorage.getItem("requests");
     if (stored) {
@@ -44,13 +45,14 @@ export default function RequestsClient() {
     }
   }, []);
 
-  // ✅ Single handler for new requests
+  // Create a new request; UI state may provide a prefill date
   const handleNewRequest = (prefillDate?: Date | null) => {
     const id = uuidv4();
     const placeholder: RequestItem = {
       id,
       prompt: "",
-      scheduledDate: prefillDate ? prefillDate.toISOString().split("T")[0] : "",
+      // store/transport as "YYYY-MM-DD" (no UTC shift)
+      scheduledDate: prefillDate ? format(prefillDate, "yyyy-MM-dd") : "",
       q1: "",
       q2: "",
       q3: "",
@@ -80,14 +82,14 @@ export default function RequestsClient() {
   const dataSectionProps: DataSectionProps = {
     selectedDate,
     requestsByDate,
-    onRequestData: handleNewRequest, // ✅ aligned
+    onRequestData: handleNewRequest,
   };
 
   return (
     <Requests
       calendarProps={calendarProps}
       dataSectionProps={dataSectionProps}
-      onRequestData={handleNewRequest} // ✅ aligned
+      onRequestData={handleNewRequest}
     />
   );
 }
