@@ -1,12 +1,10 @@
-// components/SetupPageLayout.tsx
-
 "use client";
 
 import { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
-interface SetupPageLayoutProps {
+interface SetupLayoutProps {
   // Sidebar
   sidebarBackText: string; // usually "Back to dashboard"
   onSidebarBack: () => void;
@@ -24,7 +22,7 @@ interface SetupPageLayoutProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-export default function SetupPageLayout({
+export default function SetupLayout({
   sidebarBackText,
   onSidebarBack,
   sidebarTitle,
@@ -35,7 +33,7 @@ export default function SetupPageLayout({
   onFlowBack,
   primaryButtonText,
   onSubmit,
-}: SetupPageLayoutProps) {
+}: SetupLayoutProps) {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}

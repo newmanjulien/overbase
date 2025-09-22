@@ -1,6 +1,6 @@
 "use client";
 
-import { Header } from "@/components/Header";
+import { Header } from "@/components/blocks/Header";
 import Calendar, { CalendarProps } from "./Calendar";
 import DataSection, { DataSectionProps } from "./DataSection";
 

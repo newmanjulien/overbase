@@ -2,7 +2,7 @@
 
 import type { Connectors } from "../DummyData";
 import { PreviewImages } from "./PreviewImages";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/blocks/Header";
 
 interface OverviewProps {
   connector: Connectors;

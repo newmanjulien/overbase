@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLink, ChevronLeft } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 interface HeaderProps {

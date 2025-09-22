@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RowCard } from "@/components/RowCard";
-import { InfoCard } from "@/components/InfoCard";
+import { RowCard } from "@/components/blocks/RowCard";
+import { InfoCard } from "@/components/blocks/InfoCard";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/Header";
+import { Header } from "@/components/blocks/Header";
 
 interface Customer {
   id: string;
