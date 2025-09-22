@@ -1,4 +1,4 @@
-import Setup from "./Setup";
+import SetupClient from "./Client";
 
 interface SetupPageProps {
   params: Promise<{ id: string }>;
@@ -19,5 +19,5 @@ export default async function RequestSetupPage({
       ? search.date[0]
       : undefined;
 
-  return <Setup requestId={id} prefillDate={prefillDate} />;
+  return <SetupClient requestId={id} prefillDate={prefillDate} />;
 }
