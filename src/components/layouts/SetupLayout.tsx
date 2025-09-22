@@ -50,7 +50,11 @@ export default function SetupLayout({
 
         {/* Sidebar title + optional icon */}
         <div className={`mt-6 ${sidebarIcon ? "flex items-center gap-3" : ""}`}>
-          {sidebarIcon}
+          {sidebarIcon && (
+            <div className="flex-shrink-0 w-9 h-9 rounded-full overflow-hidden flex items-center justify-center">
+              {sidebarIcon}
+            </div>
+          )}
           <h2 className="text-2xl font-semibold text-gray-900 leading-tight">
             {sidebarTitle}
           </h2>
