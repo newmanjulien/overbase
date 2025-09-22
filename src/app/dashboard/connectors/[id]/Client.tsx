@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import Overview from "./Overview";
 import type { Connectors } from "../DummyData";
 
-interface ClientWrapperProps {
+interface OverviewClientProps {
   connector: Connectors;
 }
 
-export default function ClientWrapper({ connector }: ClientWrapperProps) {
+export default function OverviewClient({ connector }: OverviewClientProps) {
   const router = useRouter();
 
   return (
