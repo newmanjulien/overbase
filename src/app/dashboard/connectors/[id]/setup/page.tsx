@@ -1,4 +1,4 @@
-import Setup from "./Setup";
+import SetupClient from "./Client";
 import { connectors } from "../../DummyData";
 
 interface SetupPageProps {
@@ -17,5 +17,5 @@ export default async function SetupPage({ params }: SetupPageProps) {
   }
 
   // Pass the connector to the Setup client component
-  return <Setup connector={connector} />;
+  return <SetupClient connector={connector} />;
 }

@@ -1,5 +1,5 @@
 import { connectors } from "../DummyData";
-import ClientWrapper from "./Client";
+import OverviewClient from "./Client";
 
 interface ConnectorOverviewPageProps {
   params: Promise<{ id: string }>;
@@ -15,5 +15,5 @@ export default async function ConnectorOverviewPage({
     return <p className="p-6 text-center text-gray-500">Connector not found</p>;
   }
 
-  return <ClientWrapper connector={connector} />;
+  return <OverviewClient connector={connector} />;
 }

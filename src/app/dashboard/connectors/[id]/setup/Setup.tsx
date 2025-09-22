@@ -1,41 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import type { Connectors } from "../../DummyData";
-import { useConnectorContext } from "@/lib/connectorContext";
 import SetupLayout from "@/components/layouts//SetupLayout";
 
 interface SetupProps {
   connector: Connectors;
+  customName: string;
+  config: string;
+  onCustomNameChange: (name: string) => void;
+  onConfigChange: (config: string) => void;
+  onCreate: () => void;
+  onBack: () => void;
+  onFlowBack: () => void;
 }
 
-export default function Setup({ connector }: SetupProps) {
-  const router = useRouter();
-  const { addConnector } = useConnectorContext();
-
-  const [customName, setCustomName] = useState(connector.title);
-  const [config, setConfig] = useState("");
-
-  const handleCreate = () => {
-    addConnector({
-      ...connector,
-      title: customName,
-      status: "active",
-      badge: "Billed Via Vercel",
-      lastUpdated: "just now",
-    });
-    router.push("/dashboard/connectors");
-  };
-
+export default function Setup({
+  connector,
+  customName,
+  config,
+  onCustomNameChange,
+  onConfigChange,
+  onCreate,
+  onBack,
+  onFlowBack,
+}: SetupProps) {
   return (
     <SetupLayout
       // Sidebar
       sidebarBackText="Back to connectors"
-      onSidebarBack={() => router.push("/dashboard/connectors")}
+      onSidebarBack={onBack}
       sidebarTitle={`Get started with ${connector.title}`}
       sidebarIcon={
         <div className="size-9 bg-blue-600 rounded-full flex items-center justify-center">
@@ -48,11 +45,11 @@ export default function Setup({ connector }: SetupProps) {
       title={`Setup ${connector.title}`}
       subtitle={`Set up your ${connector.title} connector to enhance your workflow. You can customize the name and add configuration notes below.`}
       // Footer
-      onFlowBack={() => router.push(`/dashboard/connectors/${connector.id}`)}
+      onFlowBack={onFlowBack}
       primaryButtonText="Create"
       onSubmit={(e) => {
         e.preventDefault();
-        handleCreate();
+        onCreate();
       }}
     >
       {/* Children = form fields */}
@@ -64,7 +61,7 @@ export default function Setup({ connector }: SetupProps) {
           id="connector-name"
           type="text"
           value={customName}
-          onChange={(e) => setCustomName(e.target.value)}
+          onChange={(e) => onCustomNameChange(e.target.value)}
           maxLength={50}
           required
           placeholder="Enter connector name"
@@ -82,7 +79,7 @@ export default function Setup({ connector }: SetupProps) {
           id="connector-config"
           rows={4}
           value={config}
-          onChange={(e) => setConfig(e.target.value)}
+          onChange={(e) => onConfigChange(e.target.value)}
           placeholder="Enter any configuration or notes here..."
         />
       </div>
