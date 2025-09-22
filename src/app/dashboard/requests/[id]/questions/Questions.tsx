@@ -110,15 +110,21 @@ export default function Questions({ requestId }: QuestionsProps) {
       onSubmit={handleSubmit}
     >
       <div>
-        <Label htmlFor="q1">Question 1</Label>
+        <Label htmlFor="q1" className="mb-2">
+          Question 1
+        </Label>
         <Input id="q1" value={q1} onChange={(e) => setQ1(e.target.value)} />
       </div>
       <div>
-        <Label htmlFor="q2">Question 2</Label>
+        <Label htmlFor="q2" className="mb-2">
+          Question 2
+        </Label>
         <Input id="q2" value={q2} onChange={(e) => setQ2(e.target.value)} />
       </div>
       <div>
-        <Label htmlFor="q3">Question 3</Label>
+        <Label htmlFor="q3" className="mb-2">
+          Question 3
+        </Label>
         <Input id="q3" value={q3} onChange={(e) => setQ3(e.target.value)} />
       </div>
     </SetupLayout>
