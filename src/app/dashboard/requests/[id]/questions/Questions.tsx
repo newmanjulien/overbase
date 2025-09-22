@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { RequestItem } from "../../Client";
+import SetupLayout from "@/components/layouts/SetupLayout";
 
 const DRAFT_KEY = (id: string) => `request_draft:${id}`;
 
@@ -91,54 +90,37 @@ export default function Questions({ requestId }: QuestionsProps) {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-12 pb-6 flex flex-col">
-        <Button
-          onClick={() => {
-            clearDraft(requestId);
-            router.push("/dashboard/requests");
-          }}
-          variant="backLink"
-          size="backLink"
-          leadingIcon={<ChevronLeft className="size-5" />}
-        >
-          Back to requests
-        </Button>
-        <h2 className="mt-6 text-2xl font-semibold text-gray-900 leading-tight">
-          Answer 3 short questions
-        </h2>
-      </aside>
-
-      <main className="flex-1 max-w-2xl mx-auto px-10 pt-12 pb-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label htmlFor="q1">Question 1</Label>
-            <Input id="q1" value={q1} onChange={(e) => setQ1(e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="q2">Question 2</Label>
-            <Input id="q2" value={q2} onChange={(e) => setQ2(e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="q3">Question 3</Label>
-            <Input id="q3" value={q3} onChange={(e) => setQ3(e.target.value)} />
-          </div>
-
-          <div className="flex justify-between items-center border-t border-gray-200 pt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                clearDraft(requestId);
-                router.push("/dashboard/requests");
-              }}
-            >
-              Back
-            </Button>
-            <Button type="submit">Save</Button>
-          </div>
-        </form>
-      </main>
-    </div>
+    <SetupLayout
+      // Sidebar
+      sidebarBackText="Back to requests"
+      onSidebarBack={() => {
+        clearDraft(requestId);
+        router.push("/dashboard/requests");
+      }}
+      sidebarTitle="Answer 3 short questions"
+      // Main
+      title="Answer 3 questions"
+      subtitle="Provide details to complete your request."
+      // Footer
+      onFlowBack={() => {
+        clearDraft(requestId);
+        router.push("/dashboard/requests");
+      }}
+      primaryButtonText="Save"
+      onSubmit={handleSubmit}
+    >
+      <div>
+        <Label htmlFor="q1">Question 1</Label>
+        <Input id="q1" value={q1} onChange={(e) => setQ1(e.target.value)} />
+      </div>
+      <div>
+        <Label htmlFor="q2">Question 2</Label>
+        <Input id="q2" value={q2} onChange={(e) => setQ2(e.target.value)} />
+      </div>
+      <div>
+        <Label htmlFor="q3">Question 3</Label>
+        <Input id="q3" value={q3} onChange={(e) => setQ3(e.target.value)} />
+      </div>
+    </SetupLayout>
   );
 }
