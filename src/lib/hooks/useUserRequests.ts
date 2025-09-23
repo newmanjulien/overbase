@@ -1,55 +1,46 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-import {
-  collection,
-  onSnapshot,
-  DocumentData,
-  QueryDocumentSnapshot,
-} from "firebase/firestore";
-import { db } from "../firebase";
-import { requestConverter, Request } from "../models/request";
+import { useEffect, useState, useMemo } from "react";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { Request, requestConverter } from "@/lib/models/request";
 import { format } from "date-fns";
+import { useAuth } from "@/lib/auth";
 
-export function useUserRequests(uid: string) {
+export function useUserRequests() {
+  const { user } = useAuth();
   const [requests, setRequests] = useState<Request[]>([]);
-  const loading = !uid;
 
   useEffect(() => {
-    if (!uid) return;
+    if (!user) {
+      setRequests([]);
+      return;
+    }
 
-    const col = collection(db, "users", uid, "requests").withConverter(
-      requestConverter
+    const q = query(
+      collection(db, "users", user.uid, "requests").withConverter(
+        requestConverter
+      ),
+      where("status", "==", "submitted")
     );
 
-    // ❌ Removed orderBy("scheduledDate") – not a top-level Timestamp
-    const unsub = onSnapshot(col, (snap) => {
-      let data: Request[] = snap.docs.map(
-        (d: QueryDocumentSnapshot<DocumentData>) => d.data() as Request
-      );
-
-      // ✅ Only keep submitted
-      data = data.filter((r) => r.status === "submitted");
-
-      // ✅ Sort in memory by scheduledDate (asc)
-      data.sort(
-        (a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime()
-      );
-
-      setRequests(data);
+    const unsub = onSnapshot(q, (snap) => {
+      const arr = snap.docs.map((doc) => doc.data() as Request);
+      setRequests(arr);
     });
 
     return () => unsub();
-  }, [uid]);
+  }, [user]);
 
+  // Build map of requests by date string
   const byDate = useMemo(() => {
     const map: Record<string, Request[]> = {};
-    for (const r of requests) {
-      const key = format(r.scheduledDate, "yyyy-MM-dd"); // local day key
-      (map[key] ||= []).push(r);
-    }
+    requests.forEach((r) => {
+      if (!r.scheduledDate || isNaN(r.scheduledDate.getTime())) return; // ✅ skip invalid
+      const key = format(r.scheduledDate, "yyyy-MM-dd");
+      if (!map[key]) map[key] = [];
+      map[key].push(r);
+    });
     return map;
   }, [requests]);
 
-  return { requests, byDate, loading };
+  return { requests, byDate };
 }

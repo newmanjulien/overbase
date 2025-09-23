@@ -1,62 +1,53 @@
-// src/lib/services/requestService.ts
-"use client";
-
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import { requestConverter, Request } from "@/lib/models/request";
 
-export interface PersistedRequest {
-  id: string;
-  status: "draft" | "submitted";
-  createdAt?: any;
-  updatedAt?: any;
-  // flexible structure to match your steps
-  [k: string]: any;
-}
+export async function saveDraft(uid: string, requestId: string, data: any) {
+  const ref = doc(db, "users", uid, "requests", requestId).withConverter(
+    requestConverter
+  );
 
-export async function getRequest(
-  uid: string,
-  requestId: string
-): Promise<PersistedRequest | null> {
-  const ref = doc(db, "users", uid, "requests", requestId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  return { id: snap.id, ...(snap.data() as any) };
-}
-
-export async function saveDraft(
-  uid: string,
-  requestId: string,
-  data: Record<string, any>
-) {
-  const ref = doc(db, "users", uid, "requests", requestId);
   await setDoc(
     ref,
     {
-      ...data,
       id: requestId,
+      prompt: data.step1?.prompt ?? "",
+      scheduledDate: data.step1?.scheduledDate ?? null,
+      q1: data.step2?.q1 ?? "",
+      q2: data.step2?.q2 ?? "",
+      q3: data.step2?.q3 ?? "",
       status: "draft",
       updatedAt: serverTimestamp(),
-      // ❌ do not overwrite createdAt on every save
-    },
+    } as Request,
     { merge: true }
   );
 }
 
-export async function submitRequest(
-  uid: string,
-  requestId: string,
-  data: Record<string, any>
-) {
-  const ref = doc(db, "users", uid, "requests", requestId);
+export async function submitRequest(uid: string, requestId: string, data: any) {
+  const ref = doc(db, "users", uid, "requests", requestId).withConverter(
+    requestConverter
+  );
+
   await setDoc(
     ref,
     {
-      ...data,
       id: requestId,
+      prompt: data.step1?.prompt ?? "",
+      scheduledDate: data.step1?.scheduledDate ?? null,
+      q1: data.step2?.q1 ?? "",
+      q2: data.step2?.q2 ?? "",
+      q3: data.step2?.q3 ?? "",
       status: "submitted",
       updatedAt: serverTimestamp(),
-      // ❌ do not overwrite createdAt on every save
-    },
+    } as Request,
     { merge: true }
   );
+}
+
+export async function getRequest(uid: string, requestId: string) {
+  const ref = doc(db, "users", uid, "requests", requestId).withConverter(
+    requestConverter
+  );
+  const snap = await getDoc(ref);
+  return snap.exists() ? snap.data() : null;
 }

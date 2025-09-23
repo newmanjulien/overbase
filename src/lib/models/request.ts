@@ -1,50 +1,67 @@
 import {
-  Timestamp,
+  FirestoreDataConverter,
   QueryDocumentSnapshot,
   SnapshotOptions,
 } from "firebase/firestore";
-import { format } from "date-fns";
 
 export interface Request {
   id: string;
   prompt: string;
-  scheduledDate: Date;
-  q1?: string;
-  q2?: string;
-  q3?: string;
-  status?: "draft" | "submitted";
-  createdAt?: Date;
-  updatedAt?: Date;
-  [key: string]: any;
+  scheduledDate: Date | null;
+  q1: string;
+  q2: string;
+  q3: string;
+  status: "draft" | "submitted";
+  createdAt?: any;
+  updatedAt?: any;
 }
 
-export const requestConverter = {
-  toFirestore(r: Omit<Request, "id" | "createdAt" | "updatedAt">) {
+export const requestConverter: FirestoreDataConverter<Request> = {
+  toFirestore(request: Request) {
+    let scheduledDate: string | null = null;
+
+    if (request.scheduledDate instanceof Date) {
+      // Format Date → string
+      scheduledDate = `${request.scheduledDate.getFullYear()}-${String(
+        request.scheduledDate.getMonth() + 1
+      ).padStart(2, "0")}-${String(request.scheduledDate.getDate()).padStart(
+        2,
+        "0"
+      )}`;
+    } else if (typeof request.scheduledDate === "string") {
+      // Already normalized
+      scheduledDate = request.scheduledDate;
+    }
+
     return {
-      ...r,
-      // Persist step1.scheduledDate as a string for Firestore
+      id: request.id,
       step1: {
-        ...r["step1"],
-        scheduledDate: r.scheduledDate
-          ? format(r.scheduledDate, "yyyy-MM-dd")
-          : "",
-        prompt: r.prompt,
+        prompt: request.prompt,
+        scheduledDate,
       },
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      step2: {
+        q1: request.q1,
+        q2: request.q2,
+        q3: request.q3,
+      },
+      status: request.status,
+      createdAt: request.createdAt ?? null,
+      updatedAt: request.updatedAt ?? null,
     };
   },
+
   fromFirestore(
     snap: QueryDocumentSnapshot,
     options: SnapshotOptions
   ): Request {
     const d = snap.data(options) as any;
 
-    // Parse scheduledDate string into a Date at local midnight
-    let parsedDate: Date = new Date();
-    if (d.step1?.scheduledDate) {
+    let parsedDate: Date | null = null;
+    if (typeof d.step1?.scheduledDate === "string") {
       const [y, m, dnum] = d.step1.scheduledDate.split("-").map(Number);
-      parsedDate = new Date(y, m - 1, dnum);
+      if (y && m && dnum) {
+        parsedDate = new Date(y, m - 1, dnum);
+      }
     }
 
     return {
@@ -54,25 +71,9 @@ export const requestConverter = {
       q1: d.step2?.q1 ?? "",
       q2: d.step2?.q2 ?? "",
       q3: d.step2?.q3 ?? "",
-      status: d.status,
-      createdAt:
-        d.createdAt && typeof d.createdAt.toDate === "function"
-          ? d.createdAt.toDate()
-          : d.createdAt && d.createdAt.seconds
-          ? new Date(
-              d.createdAt.seconds * 1000 +
-                Math.floor(d.createdAt.nanoseconds / 1e6)
-            )
-          : undefined,
-      updatedAt:
-        d.updatedAt && typeof d.updatedAt.toDate === "function"
-          ? d.updatedAt.toDate()
-          : d.updatedAt && d.updatedAt.seconds
-          ? new Date(
-              d.updatedAt.seconds * 1000 +
-                Math.floor(d.updatedAt.nanoseconds / 1e6)
-            )
-          : undefined,
+      status: d.status ?? "draft",
+      createdAt: d.createdAt ?? null,
+      updatedAt: d.updatedAt ?? null,
     };
   },
 };

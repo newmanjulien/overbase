@@ -10,6 +10,8 @@ import {
   submitRequest,
 } from "@/lib/services/requestService";
 import { useRequestStore } from "@/lib/stores/useRequestStore";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface QuestionsClientProps {
   requestId: string;
@@ -87,7 +89,10 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    if (user) {
+      await deleteDoc(doc(db, "users", user.uid, "requests", requestId));
+    }
     router.push("/dashboard/requests");
   };
 

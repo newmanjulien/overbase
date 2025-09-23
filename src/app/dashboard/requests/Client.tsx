@@ -36,7 +36,7 @@ export default function RequestsClient() {
     return null;
   }
 
-  const { byDate } = useUserRequests(user.uid);
+  const { byDate } = useUserRequests();
 
   const requestsByDate: Record<string, RequestItem[]> = useMemo(() => {
     const out: Record<string, RequestItem[]> = {};
