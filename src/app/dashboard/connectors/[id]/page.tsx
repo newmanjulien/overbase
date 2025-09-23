@@ -2,7 +2,9 @@ import { connectors } from "../DummyData";
 import OverviewClient from "./Client";
 
 interface ConnectorOverviewPageProps {
-  params: { id: string };
+  params: {
+    id: string;
+  };
 }
 
 export default function ConnectorOverviewPage({

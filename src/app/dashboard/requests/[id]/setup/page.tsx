@@ -1,21 +1,23 @@
 import SetupClient from "./Client";
 
 interface SetupPageProps {
-  params: { id: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default function RequestSetupPage({
+export default async function RequestSetupPage({
   params,
   searchParams,
 }: SetupPageProps) {
-  const { id } = params; // ✅ synchronous object
+  const { id } = await params;
+
+  const sp = searchParams ? await searchParams : undefined;
 
   const prefillDate =
-    typeof searchParams?.date === "string"
-      ? searchParams.date
-      : Array.isArray(searchParams?.date)
-      ? searchParams.date[0]
+    typeof sp?.date === "string"
+      ? sp.date
+      : Array.isArray(sp?.date)
+      ? sp.date[0]
       : undefined;
 
   return <SetupClient requestId={id} prefillDate={prefillDate} />;

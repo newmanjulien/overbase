@@ -14,7 +14,6 @@ import { Calendar } from "@/components/ui/calendar";
 import SetupLayout from "@/components/layouts/SetupLayout";
 
 interface SetupProps {
-  requestId: string;
   prompt: string;
   scheduledDate: Date | null;
   errors: { prompt?: string; scheduledDate?: string };
@@ -26,7 +25,6 @@ interface SetupProps {
 }
 
 export default function Setup({
-  requestId,
   prompt,
   scheduledDate,
   errors,

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { startOfToday, addDays, format, isBefore } from "date-fns";
 import Setup from "./Setup";
 
+// ---- Storage helpers ----
 const DRAFT_KEY = (id: string) => `request_draft:${id}`;
 
 function getDraft<T = unknown>(id: string): T | null {
@@ -12,7 +13,14 @@ function getDraft<T = unknown>(id: string): T | null {
   return raw ? (JSON.parse(raw) as T) : null;
 }
 
-type Draft = { id: string; prompt: string; scheduledDate: string };
+type Draft = {
+  id: string;
+  prompt: string;
+  scheduledDate: string;
+  q1?: string;
+  q2?: string;
+  q3?: string;
+};
 
 function saveDraft(id: string, draft: Draft) {
   window.sessionStorage.setItem(DRAFT_KEY(id), JSON.stringify(draft));
@@ -138,7 +146,6 @@ export default function SetupClient({
 
   return (
     <Setup
-      requestId={requestId}
       prompt={prompt}
       scheduledDate={scheduledDate}
       errors={errors}
