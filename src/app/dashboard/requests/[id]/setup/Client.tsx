@@ -1,53 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { startOfToday, addDays, format, isBefore } from "date-fns";
+import { startOfToday, addDays, isBefore } from "date-fns";
 import Setup from "./Setup";
 
-// ---- Storage helpers ----
-const DRAFT_KEY = (id: string) => `request_draft:${id}`;
-
-function getDraft<T = unknown>(id: string): T | null {
-  const raw = window.sessionStorage.getItem(DRAFT_KEY(id));
-  return raw ? (JSON.parse(raw) as T) : null;
-}
-
-type Draft = {
-  id: string;
-  prompt: string;
-  scheduledDate: string;
-  q1?: string;
-  q2?: string;
-  q3?: string;
-};
-
-function saveDraft(id: string, draft: Draft) {
-  window.sessionStorage.setItem(DRAFT_KEY(id), JSON.stringify(draft));
-}
-
-function clearDraft(id: string) {
-  window.sessionStorage.removeItem(DRAFT_KEY(id));
-}
-
-// Parse "YYYY-MM-DD" as a *local* date
-function parseISODateLocal(s: string | null | undefined): Date | null {
-  if (!s) return null;
-  const parts = s.split("-");
-  if (parts.length !== 3) return null;
-  const [yStr, mStr, dStr] = parts;
-  const y = Number(yStr);
-  const m = Number(mStr);
-  const d = Number(dStr);
-  if (!y || !m || !d) return null;
-  const dt = new Date(y, m - 1, d);
-  return isNaN(dt.getTime()) ? null : dt;
-}
-
-// Format Date as "YYYY-MM-DD"
-function toISODateStringLocal(d: Date | null): string {
-  return d ? format(d, "yyyy-MM-dd") : "";
-}
+import { useRequestStore } from "@/lib/stores/useRequestStore";
+import { getRequest, saveDraft } from "@/lib/services/requestService";
+import { useAuth } from "@/lib/auth";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface SetupClientProps {
   requestId: string;
@@ -59,9 +21,15 @@ export default function SetupClient({
   prefillDate,
 }: SetupClientProps) {
   const router = useRouter();
+  const { user } = useAuth();
 
-  const [prompt, setPrompt] = useState("");
-  const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
+  const storeRef = useRef<ReturnType<typeof useRequestStore> | null>(null);
+  if (!storeRef.current) {
+    storeRef.current = useRequestStore(requestId);
+  }
+  const useStore = storeRef.current;
+  const { data, updateData, setAllData } = useStore();
+
   const [errors, setErrors] = useState<{
     prompt?: string;
     scheduledDate?: string;
@@ -71,86 +39,94 @@ export default function SetupClient({
 
   // Prefill from query string once
   useEffect(() => {
-    const dateParam = prefillDate;
-    if (dateParam) {
-      const currentStr = scheduledDate
-        ? format(scheduledDate, "yyyy-MM-dd")
-        : null;
-      if (currentStr !== dateParam) {
-        const d = parseISODateLocal(dateParam);
-        if (d) setScheduledDate(d);
+    if (prefillDate) {
+      const [y, m, d] = prefillDate.split("-").map(Number);
+      const dObj = new Date(y, m - 1, d);
+      if (
+        !data.step1?.scheduledDate ||
+        data.step1.scheduledDate.getTime() !== dObj.getTime()
+      ) {
+        updateData("step1", { scheduledDate: dObj });
       }
     }
-  }, [prefillDate, scheduledDate]);
+  }, [prefillDate, data.step1?.scheduledDate, updateData]);
 
-  // Load existing draft if present, otherwise fallback to localStorage
+  // Hydrate once from Firestore if store is empty
   useEffect(() => {
-    const draft = getDraft<Draft>(requestId);
-    if (draft) {
-      if (draft.prompt) setPrompt(draft.prompt);
-      if (draft.scheduledDate) {
-        const parsed = parseISODateLocal(draft.scheduledDate);
-        if (parsed) setScheduledDate(parsed);
+    if (!user) return;
+    if (data && (data.step1 || data.step2)) return;
+    (async () => {
+      const existing = await getRequest(user.uid, requestId);
+      if (existing) {
+        setAllData(existing);
       }
-    } else {
-      const stored = window.localStorage.getItem("requests");
-      if (stored) {
-        const all: Array<{
-          id: string;
-          prompt: string;
-          scheduledDate: string;
-        }> = JSON.parse(stored);
-        const existing = all.find((r) => r.id === requestId);
-        if (existing) {
-          if (existing.prompt) setPrompt(existing.prompt);
-          if (existing.scheduledDate) {
-            const parsed = parseISODateLocal(existing.scheduledDate);
-            if (parsed) setScheduledDate(parsed);
-          }
-        }
-      }
-    }
-  }, [requestId]);
+    })();
+  }, [user, requestId, data, setAllData]);
+
+  // Debounced auto-save when step1 fields change
+  useEffect(() => {
+    if (!user) return;
+
+    const timeout = setTimeout(() => {
+      saveDraft(user.uid, requestId, {
+        ...data,
+        step1: {
+          prompt: data.step1?.prompt ?? "",
+          scheduledDate: data.step1?.scheduledDate ?? null,
+        },
+      }).catch(() => {});
+    }, 800);
+
+    return () => clearTimeout(timeout);
+  }, [data.step1?.prompt, data.step1?.scheduledDate, user, requestId, data]);
 
   const validate = () => {
     const errs: typeof errors = {};
-    if (!prompt.trim()) {
+    if (!data.step1?.prompt?.trim()) {
       errs.prompt = "Prompt is required.";
     }
-    if (!scheduledDate) {
+    if (!data.step1?.scheduledDate) {
       errs.scheduledDate = "Scheduled date is required.";
-    } else if (isBefore(scheduledDate, minSelectableDate)) {
+    } else if (isBefore(data.step1.scheduledDate, minSelectableDate)) {
       errs.scheduledDate = "Date must be at least 2 days in the future.";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+    if (!user) {
+      alert("No Firebase user yet — please wait a moment and try again.");
+      return;
+    }
 
-    saveDraft(requestId, {
-      id: requestId,
-      prompt,
-      scheduledDate: toISODateStringLocal(scheduledDate),
+    await saveDraft(user.uid, requestId, {
+      ...data,
+      step1: {
+        scheduledDate: data.step1?.scheduledDate ?? null,
+        prompt: data.step1?.prompt ?? "",
+      },
     });
 
     router.push(`/dashboard/requests/${requestId}/questions`);
   };
 
-  const handleCancel = () => {
-    clearDraft(requestId);
+  const handleCancel = async () => {
+    if (user) {
+      await deleteDoc(doc(db, "users", user.uid, "requests", requestId));
+    }
     router.push("/dashboard/requests");
   };
 
   return (
     <Setup
-      prompt={prompt}
-      scheduledDate={scheduledDate}
+      prompt={data.step1?.prompt ?? ""}
+      scheduledDate={data.step1?.scheduledDate ?? null}
       errors={errors}
-      setPrompt={setPrompt}
-      setScheduledDate={setScheduledDate}
+      setPrompt={(val) => updateData("step1", { prompt: val })}
+      setScheduledDate={(val) => updateData("step1", { scheduledDate: val })}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       minSelectableDate={minSelectableDate}

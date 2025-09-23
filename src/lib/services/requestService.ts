@@ -14,16 +14,21 @@ export interface PersistedRequest {
 }
 
 export async function getRequest(
+  uid: string,
   requestId: string
 ): Promise<PersistedRequest | null> {
-  const ref = doc(db, "requests", requestId);
+  const ref = doc(db, "users", uid, "requests", requestId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
   return { id: snap.id, ...(snap.data() as any) };
 }
 
-export async function saveDraft(requestId: string, data: Record<string, any>) {
-  const ref = doc(db, "requests", requestId);
+export async function saveDraft(
+  uid: string,
+  requestId: string,
+  data: Record<string, any>
+) {
+  const ref = doc(db, "users", uid, "requests", requestId);
   await setDoc(
     ref,
     {
@@ -31,17 +36,18 @@ export async function saveDraft(requestId: string, data: Record<string, any>) {
       id: requestId,
       status: "draft",
       updatedAt: serverTimestamp(),
-      createdAt: data.createdAt ?? serverTimestamp(),
+      // ❌ do not overwrite createdAt on every save
     },
     { merge: true }
   );
 }
 
 export async function submitRequest(
+  uid: string,
   requestId: string,
   data: Record<string, any>
 ) {
-  const ref = doc(db, "requests", requestId);
+  const ref = doc(db, "users", uid, "requests", requestId);
   await setDoc(
     ref,
     {
@@ -49,7 +55,7 @@ export async function submitRequest(
       id: requestId,
       status: "submitted",
       updatedAt: serverTimestamp(),
-      createdAt: data.createdAt ?? serverTimestamp(),
+      // ❌ do not overwrite createdAt on every save
     },
     { merge: true }
   );

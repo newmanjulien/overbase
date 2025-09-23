@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { startOfToday, format } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,8 @@ import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
 import { useUserRequests } from "@/lib/hooks/useUserRequests";
+import { useRequestStore } from "@/lib/stores/useRequestStore";
+import { getRequest } from "@/lib/services/requestService";
 
 export interface RequestItem {
   id: string;
@@ -29,17 +31,20 @@ export default function RequestsClient() {
   const [currentDate, setCurrentDate] = useState<Date>(today);
 
   const { user } = useAuth();
-  const { byDate } = useUserRequests(user?.uid ?? null); // byDate: Record<string, Request[]>
+  if (!user) {
+    // Defensive guard: no user yet, render empty
+    return null;
+  }
 
-  // Adapt Firestore Request[] -> UI RequestItem[]
+  const { byDate } = useUserRequests(user.uid);
+
   const requestsByDate: Record<string, RequestItem[]> = useMemo(() => {
     const out: Record<string, RequestItem[]> = {};
     for (const [key, list] of Object.entries(byDate)) {
-      // key is already "yyyy-MM-dd" (local)
       out[key] = list.map((r) => ({
         id: r.id,
         prompt: r.prompt,
-        scheduledDate: key, // keep exact local key to avoid timezone drift
+        scheduledDate: key,
         q1: r.q1 ?? "",
         q2: r.q2 ?? "",
         q3: r.q3 ?? "",
@@ -55,6 +60,17 @@ export default function RequestsClient() {
       url += `?date=${format(prefillDate, "yyyy-MM-dd")}`;
     }
     router.push(url);
+  };
+
+  const handleEdit = async (requestId: string) => {
+    const store = useRequestStore(requestId);
+    const { setAllData, setStep } = store();
+    const existing = await getRequest(user.uid, requestId);
+    if (existing) {
+      setAllData(existing);
+      setStep(1);
+    }
+    router.push(`/dashboard/requests/${requestId}/setup`);
   };
 
   const calendarProps: CalendarProps = {

@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   collection,
   onSnapshot,
-  orderBy,
-  query,
   DocumentData,
   QueryDocumentSnapshot,
 } from "firebase/firestore";
@@ -13,9 +11,9 @@ import { db } from "../firebase";
 import { requestConverter, Request } from "../models/request";
 import { format } from "date-fns";
 
-export function useUserRequests(uid: string | null) {
+export function useUserRequests(uid: string) {
   const [requests, setRequests] = useState<Request[]>([]);
-  const loading = uid == null;
+  const loading = !uid;
 
   useEffect(() => {
     if (!uid) return;
@@ -23,12 +21,21 @@ export function useUserRequests(uid: string | null) {
     const col = collection(db, "users", uid, "requests").withConverter(
       requestConverter
     );
-    const q = query(col, orderBy("scheduledDate", "asc"));
 
-    const unsub = onSnapshot(q, (snap) => {
-      const data: Request[] = snap.docs.map(
-        (d: QueryDocumentSnapshot<DocumentData>) => d.data() as Request // explicitly cast here
+    // ❌ Removed orderBy("scheduledDate") – not a top-level Timestamp
+    const unsub = onSnapshot(col, (snap) => {
+      let data: Request[] = snap.docs.map(
+        (d: QueryDocumentSnapshot<DocumentData>) => d.data() as Request
       );
+
+      // ✅ Only keep submitted
+      data = data.filter((r) => r.status === "submitted");
+
+      // ✅ Sort in memory by scheduledDate (asc)
+      data.sort(
+        (a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime()
+      );
+
       setRequests(data);
     });
 

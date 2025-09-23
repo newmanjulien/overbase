@@ -36,14 +36,11 @@ export default function Setup({
 }: SetupProps) {
   return (
     <SetupLayout
-      // Sidebar
       sidebarBackText="Back to requests"
       onSidebarBack={onCancel}
       sidebarTitle="Request data about your customer"
-      // Main
       title="Explain what data you need"
       subtitle="Fill out the details to configure your request. You can set the prompt and schedule a date below."
-      // Footer
       onFlowBack={onCancel}
       primaryButtonText="Next"
       onSubmit={onSubmit}

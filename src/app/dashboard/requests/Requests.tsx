@@ -7,7 +7,7 @@ import DataSection, { DataSectionProps } from "./DataSection";
 interface RequestsProps {
   calendarProps: CalendarProps;
   dataSectionProps: DataSectionProps;
-  onRequestData: (prefillDate?: Date | null) => void; // ✅ matches Client/DataSection
+  onRequestData: (prefillDate?: Date | null) => void;
 }
 
 export function Requests({
@@ -21,7 +21,7 @@ export function Requests({
         title="Requests"
         subtitle="Request data and manage your data requests in a way that aligns with your meetings and deadlines."
         buttonLabel="Request data"
-        onButtonClick={() => onRequestData(undefined)} // ✅ consistent
+        onButtonClick={() => onRequestData(undefined)}
         buttonVariant="default"
         learnMoreLink="#"
       />
