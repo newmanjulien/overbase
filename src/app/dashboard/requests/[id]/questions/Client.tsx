@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { RequestItem } from "../../Client";
 import QuestionsUI from "./Questions";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/lib/auth";
 
 // ---- Storage helpers ----
 const DRAFT_KEY = (id: string) => `request_draft:${id}`;
@@ -21,75 +24,44 @@ function clearDraft(id: string) {
   window.sessionStorage.removeItem(DRAFT_KEY(id));
 }
 
-function loadRequests(): RequestItem[] {
-  try {
-    return JSON.parse(window.localStorage.getItem("requests") || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveRequests(requests: RequestItem[]) {
-  window.localStorage.setItem("requests", JSON.stringify(requests));
-}
-
-function upsertRequest(request: RequestItem) {
-  const all = loadRequests();
-  const idx = all.findIndex((r) => r.id === request.id);
-  if (idx >= 0) {
-    all[idx] = request;
-  } else {
-    all.push(request);
-  }
-  saveRequests(all);
-}
-
 interface QuestionsClientProps {
   requestId: string;
 }
 
 export default function QuestionsClient({ requestId }: QuestionsClientProps) {
   const router = useRouter();
+  const { user } = useAuth();
 
   const [q1, setQ1] = useState("");
   const [q2, setQ2] = useState("");
   const [q3, setQ3] = useState("");
 
+  // Load existing Firestore doc or draft
   useEffect(() => {
-    const all = loadRequests();
-    const existing = all.find((r) => r.id === requestId);
-    if (existing) {
-      if (existing.q1) setQ1(existing.q1);
-      if (existing.q2) setQ2(existing.q2);
-      if (existing.q3) setQ3(existing.q3);
-    }
+    if (!user) return;
+    const ref = doc(db, "users", user.uid, "requests", requestId);
+    getDoc(ref).then((snap) => {
+      if (snap.exists()) {
+        const data = snap.data() as any;
+        if (data.q1) setQ1(data.q1);
+        if (data.q2) setQ2(data.q2);
+        if (data.q3) setQ3(data.q3);
+      } else {
+        const draft = getDraft<any>(requestId);
+        if (draft) {
+          if (draft.q1) setQ1(draft.q1);
+          if (draft.q2) setQ2(draft.q2);
+          if (draft.q3) setQ3(draft.q3);
+        } else {
+          router.push(`/dashboard/requests/${requestId}/setup`);
+        }
+      }
+    });
+  }, [user, requestId, router]);
 
-    const draft = getDraft<{
-      id: string;
-      prompt: string;
-      scheduledDate: string;
-      q1?: string;
-      q2?: string;
-      q3?: string;
-    }>(requestId);
-
-    if (draft) {
-      if (draft.q1) setQ1(draft.q1);
-      if (draft.q2) setQ2(draft.q2);
-      if (draft.q3) setQ3(draft.q3);
-    }
-  }, [requestId]);
-
+  // Keep draft in sessionStorage
   useEffect(() => {
-    const draft = getDraft<{
-      id: string;
-      prompt: string;
-      scheduledDate: string;
-      q1?: string;
-      q2?: string;
-      q3?: string;
-    }>(requestId);
-
+    const draft = getDraft<any>(requestId);
     if (draft) {
       saveDraft(requestId, {
         ...draft,
@@ -100,8 +72,14 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
     }
   }, [q1, q2, q3, requestId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting...", { user, requestId });
+
+    if (!user) {
+      alert("No Firebase user yet — please wait a moment and try again.");
+      return;
+    }
 
     const draft = getDraft<{
       id: string;
@@ -112,42 +90,33 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
       q3?: string;
     }>(requestId);
 
-    const all = loadRequests();
-    const idx = all.findIndex((r) => r.id === requestId);
-
-    if (idx >= 0) {
-      const existing = all[idx];
-      upsertRequest({
-        ...existing,
-        ...(draft
-          ? {
-              prompt: draft.prompt,
-              scheduledDate: draft.scheduledDate,
-              q1: draft.q1 ?? q1,
-              q2: draft.q2 ?? q2,
-              q3: draft.q3 ?? q3,
-            }
-          : { q1, q2, q3 }),
-      });
-    } else {
-      if (!draft) {
-        // Graceful fallback: redirect back to setup if no draft
-        router.push(`/dashboard/requests/${requestId}/setup`);
-        return;
-      }
-      const newItem: RequestItem = {
-        id: requestId,
-        prompt: draft.prompt || "",
-        scheduledDate: draft.scheduledDate || "",
-        q1: draft.q1 ?? q1,
-        q2: draft.q2 ?? q2,
-        q3: draft.q3 ?? q3,
-      };
-      upsertRequest(newItem);
+    if (!draft) {
+      console.warn("No draft found, redirecting back to setup.");
+      router.push(`/dashboard/requests/${requestId}/setup`);
+      return;
     }
 
-    clearDraft(requestId);
-    router.push("/dashboard/requests");
+    try {
+      const ref = doc(db, "users", user.uid, "requests", requestId);
+      await setDoc(
+        ref,
+        {
+          prompt: draft.prompt,
+          scheduledDate: new Date(draft.scheduledDate),
+          q1: draft.q1 ?? q1,
+          q2: draft.q2 ?? q2,
+          q3: draft.q3 ?? q3,
+          status: "submitted",
+        },
+        { merge: true }
+      );
+      console.log("Saved successfully.");
+      clearDraft(requestId);
+      router.push("/dashboard/requests");
+    } catch (err) {
+      console.error("Save failed:", err);
+      alert("Save failed — check console for details.");
+    }
   };
 
   const handleCancel = () => {

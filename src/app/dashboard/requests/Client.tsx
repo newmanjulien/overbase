@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { startOfToday, format } from "date-fns";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
@@ -9,10 +9,13 @@ import type { CalendarProps } from "./Calendar";
 import type { DataSectionProps } from "./DataSection";
 import { Requests } from "./Requests";
 
+import { useAuth } from "@/lib/auth";
+import { useUserRequests } from "@/lib/hooks/useUserRequests";
+
 export interface RequestItem {
   id: string;
   prompt: string;
-  scheduledDate: string;
+  scheduledDate: string; // yyyy-MM-dd string for UI
   q1: string;
   q2: string;
   q3: string;
@@ -24,36 +27,33 @@ export default function RequestsClient() {
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(today);
   const [currentDate, setCurrentDate] = useState<Date>(today);
-  const [requestsByDate, setRequestsByDate] = useState<
-    Record<string, RequestItem[]>
-  >({});
 
-  // Hydrate from localStorage on mount
-  useEffect(() => {
-    const stored = window.localStorage.getItem("requests");
-    if (stored) {
-      const all: RequestItem[] = JSON.parse(stored);
+  const { user } = useAuth();
+  const { byDate } = useUserRequests(user?.uid ?? null); // byDate: Record<string, Request[]>
 
-      const grouped: Record<string, RequestItem[]> = {};
-      for (const req of all) {
-        if (!req.scheduledDate) continue;
-        if (!grouped[req.scheduledDate]) grouped[req.scheduledDate] = [];
-        grouped[req.scheduledDate].push(req);
-      }
-      setRequestsByDate(grouped);
+  // Adapt Firestore Request[] -> UI RequestItem[]
+  const requestsByDate: Record<string, RequestItem[]> = useMemo(() => {
+    const out: Record<string, RequestItem[]> = {};
+    for (const [key, list] of Object.entries(byDate)) {
+      // key is already "yyyy-MM-dd" (local)
+      out[key] = list.map((r) => ({
+        id: r.id,
+        prompt: r.prompt,
+        scheduledDate: key, // keep exact local key to avoid timezone drift
+        q1: r.q1 ?? "",
+        q2: r.q2 ?? "",
+        q3: r.q3 ?? "",
+      }));
     }
-  }, []);
+    return out;
+  }, [byDate]);
 
-  // Create a new request; UI state may provide a prefill date
   const handleNewRequest = (prefillDate?: Date | null) => {
     const id = uuidv4();
-
-    // Only navigate, do not persist yet
     let url = `/dashboard/requests/${id}/setup`;
     if (prefillDate) {
       url += `?date=${format(prefillDate, "yyyy-MM-dd")}`;
     }
-
     router.push(url);
   };
 
