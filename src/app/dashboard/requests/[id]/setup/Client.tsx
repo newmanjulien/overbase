@@ -75,7 +75,7 @@ export default function SetupClient({
     }
   }, [prefillDate, scheduledDate]);
 
-  // Load existing draft if present
+  // Load existing draft if present, otherwise fallback to localStorage
   useEffect(() => {
     const draft = getDraft<Draft>(requestId);
     if (draft) {
@@ -83,6 +83,23 @@ export default function SetupClient({
       if (draft.scheduledDate) {
         const parsed = parseISODateLocal(draft.scheduledDate);
         if (parsed) setScheduledDate(parsed);
+      }
+    } else {
+      const stored = window.localStorage.getItem("requests");
+      if (stored) {
+        const all: Array<{
+          id: string;
+          prompt: string;
+          scheduledDate: string;
+        }> = JSON.parse(stored);
+        const existing = all.find((r) => r.id === requestId);
+        if (existing) {
+          if (existing.prompt) setPrompt(existing.prompt);
+          if (existing.scheduledDate) {
+            const parsed = parseISODateLocal(existing.scheduledDate);
+            if (parsed) setScheduledDate(parsed);
+          }
+        }
       }
     }
   }, [requestId]);
