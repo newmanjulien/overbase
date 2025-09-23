@@ -1,4 +1,4 @@
-import Questions from "./Questions";
+import QuestionsClient from "./Client";
 
 interface QuestionsPageProps {
   params: Promise<{ id: string }>;
@@ -8,5 +8,5 @@ export default async function RequestQuestionsPage({
   params,
 }: QuestionsPageProps) {
   const { id } = await params;
-  return <Questions requestId={id} />;
+  return <QuestionsClient requestId={id} />;
 }
