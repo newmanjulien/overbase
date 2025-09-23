@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import type { Connectors } from "../../DummyData";
-import SetupLayout from "@/components/layouts//SetupLayout";
+import SetupLayout from "@/components/layouts/SetupLayout";
 
 interface SetupProps {
   connector: Connectors;
