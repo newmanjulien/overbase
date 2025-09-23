@@ -103,7 +103,6 @@ export default function Questions({ requestId }: QuestionsProps) {
       subtitle="Provide details to complete your request."
       // Footer
       onFlowBack={() => {
-        clearDraft(requestId);
         router.push(`/dashboard/requests/${requestId}/setup`);
       }}
       primaryButtonText="Save"
