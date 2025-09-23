@@ -1,12 +1,10 @@
 import QuestionsClient from "./Client";
 
 interface QuestionsPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
-export default async function RequestQuestionsPage({
-  params,
-}: QuestionsPageProps) {
-  const { id } = await params;
+export default function RequestQuestionsPage({ params }: QuestionsPageProps) {
+  const { id } = params; // ✅ synchronous object
   return <QuestionsClient requestId={id} />;
 }
