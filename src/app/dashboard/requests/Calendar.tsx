@@ -24,12 +24,12 @@ function getDayButtonClasses({
   isToday: boolean;
 }) {
   return clsx(
-    "aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors",
+    "aspect-square w-full rounded-lg text-sm flex items-center justify-center relative transition-colors border-2",
     {
-      "bg-gray-900 text-white": isSelected,
-      "bg-gray-100 text-gray-900 border border-2 border-gray-200 hover:border-2 hover:border-gray-900":
+      "bg-gray-900 text-white border-gray-900": isSelected,
+      "bg-gray-100 text-gray-900 border-gray-200 hover:border-gray-900":
         isToday && !isSelected,
-      "bg-gray-50 text-gray-900 border border-gray-100 hover:border-2 hover:border-gray-900":
+      "bg-gray-50 text-gray-900 border-gray-100 hover:border-gray-900":
         !isSelected && !isToday,
     }
   );
