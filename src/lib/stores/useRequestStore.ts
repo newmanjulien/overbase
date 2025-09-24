@@ -31,13 +31,13 @@ interface RequestState {
   reset: () => void;
 }
 
-export const makeRequestStoreKey = (requestId?: string) =>
-  requestId ? `request_draft:${requestId}` : "request_draft:__new__";
-
-export const useRequestStore = (requestId?: string) =>
+/**
+ * Hook factory: returns a bound Zustand hook for a specific requestId.
+ */
+export const createRequestStore = (requestId?: string) =>
   create<RequestState>()(
     persist(
-      (set, get) => ({
+      (set) => ({
         currentStep: 1,
         data: { id: requestId },
         setStep: (n) => set({ currentStep: n }),
@@ -49,16 +49,13 @@ export const useRequestStore = (requestId?: string) =>
             },
           })),
         setAllData: (data) => set({ data }),
-        reset: () =>
-          set({
-            currentStep: 1,
-            data: { id: requestId },
-          }),
+        reset: () => set({ currentStep: 1, data: { id: requestId } }),
       }),
       {
-        name: makeRequestStoreKey(requestId),
+        name: requestId
+          ? `request_draft:${requestId}`
+          : "request_draft:__new__",
         storage: createJSONStorage(() => sessionStorage),
-        partialize: (state) => state,
       }
     )
   );

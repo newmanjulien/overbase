@@ -1,10 +1,15 @@
-import { useEffect, useState, useMemo } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { useEffect, useMemo, useState } from "react";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Request, requestConverter } from "@/lib/models/request";
-import { format } from "date-fns";
 import { useAuth } from "@/lib/auth";
+import { toDateKey } from "@/lib/requestDates";
 
+/**
+ * Reads the current user's requests from:
+ *   /users/{uid}/requests
+ * And builds a byDate map using centralized date keys.
+ */
 export function useUserRequests() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<Request[]>([]);
@@ -15,30 +20,30 @@ export function useUserRequests() {
       return;
     }
 
-    const q = query(
-      collection(db, "users", user.uid, "requests").withConverter(
-        requestConverter
-      ),
-      where("status", "==", "submitted")
+    const ref = collection(db, "users", user.uid, "requests").withConverter(
+      requestConverter
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      const arr = snap.docs.map((doc) => doc.data() as Request);
-      setRequests(arr);
+    const unsub = onSnapshot(ref, (snap) => {
+      const rows: Request[] = [];
+      snap.forEach((doc) => {
+        const data = doc.data(); // already converted to Request
+        rows.push(data);
+      });
+      setRequests(rows);
     });
 
     return () => unsub();
   }, [user]);
 
-  // Build map of requests by date string
+  // Build map of requests by "yyyy-MM-dd"
   const byDate = useMemo(() => {
     const map: Record<string, Request[]> = {};
-    requests.forEach((r) => {
-      if (!r.scheduledDate || isNaN(r.scheduledDate.getTime())) return; // ✅ skip invalid
-      const key = format(r.scheduledDate, "yyyy-MM-dd");
-      if (!map[key]) map[key] = [];
-      map[key].push(r);
-    });
+    for (const r of requests) {
+      if (!r.scheduledDate || isNaN(r.scheduledDate.getTime())) continue;
+      const key = toDateKey(r.scheduledDate);
+      (map[key] ??= []).push(r);
+    }
     return map;
   }, [requests]);
 

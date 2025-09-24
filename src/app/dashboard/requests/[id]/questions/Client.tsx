@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import QuestionsUI from "./Questions";
 import { useAuth } from "@/lib/auth";
@@ -9,7 +9,7 @@ import {
   saveDraft,
   submitRequest,
 } from "@/lib/services/requestService";
-import { useRequestStore } from "@/lib/stores/useRequestStore";
+import { createRequestStore } from "@/lib/stores/useRequestStore";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -21,11 +21,8 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
-  const storeRef = useRef<ReturnType<typeof useRequestStore> | null>(null);
-  if (!storeRef.current) {
-    storeRef.current = useRequestStore(requestId);
-  }
-  const useStore = storeRef.current!;
+  // Create a store bound to this requestId
+  const useStore = useMemo(() => createRequestStore(requestId), [requestId]);
   const { data, updateData, setAllData } = useStore();
 
   // Hydrate once from Firestore if store is empty
@@ -51,7 +48,7 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
         ...data,
         step1: {
           prompt: data.step1?.prompt ?? "",
-          scheduledDate: data.step1?.scheduledDate ?? null, // ✅ keep as Date internally
+          scheduledDate: data.step1?.scheduledDate ?? null,
         },
         step2: {
           q1: data.step2?.q1 ?? "",

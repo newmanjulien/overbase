@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { startOfToday, addDays, isBefore } from "date-fns";
 import Setup from "./Setup";
 
-import { useRequestStore } from "@/lib/stores/useRequestStore";
+import { createRequestStore } from "@/lib/stores/useRequestStore";
 import { getRequest, saveDraft } from "@/lib/services/requestService";
 import { useAuth } from "@/lib/auth";
 import { deleteDoc, doc } from "firebase/firestore";
@@ -23,11 +23,8 @@ export default function SetupClient({
   const router = useRouter();
   const { user } = useAuth();
 
-  const storeRef = useRef<ReturnType<typeof useRequestStore> | null>(null);
-  if (!storeRef.current) {
-    storeRef.current = useRequestStore(requestId);
-  }
-  const useStore = storeRef.current;
+  // Create a store bound to this requestId
+  const useStore = useMemo(() => createRequestStore(requestId), [requestId]);
   const { data, updateData, setAllData } = useStore();
 
   const [errors, setErrors] = useState<{
