@@ -19,9 +19,13 @@ interface SetupProps {
   errors: { prompt?: string; scheduledDate?: string };
   setPrompt: (val: string) => void;
   setScheduledDate: (val: Date | null) => void;
-  onSubmit: () => void; // simplified, no FormEvent needed
-  onCancel: () => void;
+  onSubmit: () => void | Promise<void>;
+  onCancel: () => void | Promise<void>;
+  onHome: () => void | Promise<void>;
+  onDraft: () => void | Promise<void>;
   minSelectableDate: Date;
+  status: "draft" | "active";
+  setStatus: (val: "draft" | "active") => void;
 }
 
 export default function Setup({
@@ -32,15 +36,29 @@ export default function Setup({
   setScheduledDate,
   onSubmit,
   onCancel,
+  onHome,
+  onDraft,
   minSelectableDate,
+  status,
+  setStatus,
 }: SetupProps) {
   return (
     <SetupLayout
+      // Sidebar
       sidebarBackText="Back to requests"
-      onSidebarBack={onCancel}
+      onSidebarBack={onHome}
       sidebarTitle="Request data about your customer"
+      sidebarActionText="Make draft"
+      onSidebarAction={onDraft}
+      // Main
       title="Explain what data you need"
       subtitle="Fill out the details to configure your request. You can set the prompt and schedule a date below."
+      toggleValue={status}
+      onToggleChange={(val) => setStatus(val as "draft" | "active")}
+      toggleOptions={[
+        { value: "draft", label: "Draft" },
+        { value: "active", label: "Active" },
+      ]}
       // Footer
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}

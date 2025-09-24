@@ -3,13 +3,18 @@
 import { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface SetupLayoutProps {
   // Sidebar
   sidebarBackText: string; // usually "Back to dashboard"
-  onSidebarBack: () => void;
+  onSidebarBack: () => void | Promise<void>;
   sidebarTitle: string;
   sidebarIcon?: ReactNode; // optional, fully controlled by caller
+
+  // Optional sidebar actions (bottom)
+  sidebarActionText?: string;
+  onSidebarAction?: () => void | Promise<void>;
 
   // Main content
   title: string; // always required
@@ -18,9 +23,14 @@ interface SetupLayoutProps {
 
   // Footer (always 2 buttons, symmetric)
   primaryButtonText: string;
-  onPrimaryAction: () => void;
+  onPrimaryAction: () => void | Promise<void>;
   secondaryButtonText: string;
-  onSecondaryAction: () => void;
+  onSecondaryAction: () => void | Promise<void>;
+
+  // Optional top-right toggle
+  toggleValue?: string;
+  onToggleChange?: (val: string) => void;
+  toggleOptions?: Array<{ value: string; label: string }>;
 }
 
 export default function SetupLayout({
@@ -28,6 +38,8 @@ export default function SetupLayout({
   onSidebarBack,
   sidebarTitle,
   sidebarIcon,
+  sidebarActionText,
+  onSidebarAction,
   title,
   subtitle,
   children,
@@ -35,9 +47,31 @@ export default function SetupLayout({
   onPrimaryAction,
   secondaryButtonText,
   onSecondaryAction,
+  toggleValue,
+  onToggleChange,
+  toggleOptions,
 }: SetupLayoutProps) {
   return (
     <div className="flex min-h-screen">
+      {/* Toggle */}
+      {toggleOptions && onToggleChange && (
+        <div className="absolute top-24 right-14">
+          <ToggleGroup
+            type="single"
+            value={toggleValue}
+            onValueChange={(val) => val && onToggleChange(val)}
+            variant="outline"
+            size="sm"
+          >
+            {toggleOptions.map((opt) => (
+              <ToggleGroupItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-10 pb-6 flex flex-col">
         <header>
@@ -63,18 +97,32 @@ export default function SetupLayout({
             </h2>
           </div>
         </header>
+
+        {/* Bottom sidebar action */}
+        {sidebarActionText && onSidebarAction && (
+          <div className="sticky bottom-6 w-96 px-12">
+            <Button
+              variant="backLink"
+              size="backLink"
+              onClick={onSidebarAction}
+            >
+              {sidebarActionText}
+            </Button>
+          </div>
+        )}
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 max-w-2xl mx-auto px-10 pt-10 pb-6">
-        {/* No onSubmit anymore — each button has its own handler */}
         <div className="space-y-6">
           {/* Header */}
-          <header className="mt-6">
-            <h1 className="text-2xl font-medium text-gray-900 mb-2 mt-8">
-              {title}
-            </h1>
-            {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+          <header className="mt-6 flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-medium text-gray-900 mb-2 mt-8">
+                {title}
+              </h1>
+              {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+            </div>
           </header>
 
           {/* Custom fields */}
@@ -85,7 +133,7 @@ export default function SetupLayout({
 
           {/* Footer: Secondary + Primary */}
           <div className="flex justify-between items-center">
-            <Button type="button" variant="ghost" onClick={onSecondaryAction}>
+            <Button type="button" variant="outline" onClick={onSecondaryAction}>
               {secondaryButtonText}
             </Button>
             <Button type="button" onClick={onPrimaryAction}>

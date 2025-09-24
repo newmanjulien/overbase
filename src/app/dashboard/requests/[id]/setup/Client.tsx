@@ -32,6 +32,8 @@ export default function SetupClient({
     scheduledDate?: string;
   }>({});
 
+  const [status, setStatus] = useState<"draft" | "active">("draft");
+
   const minSelectableDateValue = useMemo(() => minSelectableDate(2), []);
 
   // Prefill from query string once
@@ -91,8 +93,7 @@ export default function SetupClient({
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (): Promise<void> => {
     if (!validate()) return;
     if (!user) {
       alert("No Firebase user yet — please wait a moment and try again.");
@@ -110,11 +111,20 @@ export default function SetupClient({
     router.push(`/dashboard/requests/${requestId}/questions`);
   };
 
-  const handleCancel = async () => {
+  const handleCancel = async (): Promise<void> => {
     if (user) {
       await deleteDoc(doc(db, "users", user.uid, "requests", requestId));
     }
     router.push("/dashboard/requests");
+  };
+
+  const handleHome = async (): Promise<void> => {
+    router.push("/dashboard/requests");
+  };
+
+  const handleMakeDraft = async (): Promise<void> => {
+    // for now, do nothing
+    console.log("Make draft clicked");
   };
 
   return (
@@ -124,9 +134,13 @@ export default function SetupClient({
       errors={errors}
       setPrompt={(val) => updateData("step1", { prompt: val })}
       setScheduledDate={(val) => updateData("step1", { scheduledDate: val })}
-      onSubmit={handleSubmit}
       onCancel={handleCancel}
+      onSubmit={handleSubmit}
+      onHome={handleHome}
+      onDraft={handleMakeDraft}
       minSelectableDate={minSelectableDateValue}
+      status={status}
+      setStatus={setStatus}
     />
   );
 }

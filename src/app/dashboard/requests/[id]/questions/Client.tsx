@@ -70,8 +70,7 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
     data,
   ]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (): Promise<void> => {
     if (!user) {
       alert("No Firebase user yet — please wait a moment and try again.");
       return;
@@ -86,15 +85,12 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
     }
   };
 
-  const handleCancel = async () => {
-    if (user) {
-      await deleteDoc(doc(db, "users", user.uid, "requests", requestId));
-    }
-    router.push("/dashboard/requests");
+  const handleBack = async (): Promise<void> => {
+    router.push(`/dashboard/requests/${requestId}/setup`);
   };
 
-  const handleBack = () => {
-    router.push(`/dashboard/requests/${requestId}/setup`);
+  const handleHome = async (): Promise<void> => {
+    router.push("/dashboard/requests");
   };
 
   return (
@@ -106,8 +102,8 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
       setQ2={(val) => updateData("step2", { q2: val })}
       setQ3={(val) => updateData("step2", { q3: val })}
       onSubmit={handleSubmit}
-      onCancel={handleCancel}
       onBack={handleBack}
+      onHome={handleHome}
     />
   );
 }

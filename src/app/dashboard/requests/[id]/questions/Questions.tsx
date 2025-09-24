@@ -11,9 +11,9 @@ interface QuestionsProps {
   setQ1: (v: string) => void;
   setQ2: (v: string) => void;
   setQ3: (v: string) => void;
-  onSubmit: () => void; // simplified, no FormEvent needed now
-  onCancel: () => void;
-  onBack: () => void;
+  onSubmit: () => void | Promise<void>;
+  onBack: () => void | Promise<void>;
+  onHome: () => void | Promise<void>;
 }
 
 export default function Questions({
@@ -24,14 +24,14 @@ export default function Questions({
   setQ2,
   setQ3,
   onSubmit,
-  onCancel,
   onBack,
+  onHome,
 }: QuestionsProps) {
   return (
     <SetupLayout
       // Sidebar
       sidebarBackText="Back to requests"
-      onSidebarBack={onCancel}
+      onSidebarBack={onHome}
       sidebarTitle="Answer 3 short questions"
       // Main
       title="Answer 3 questions"
@@ -39,7 +39,7 @@ export default function Questions({
       // Footer (two buttons, required)
       primaryButtonText="Submit"
       onPrimaryAction={onSubmit}
-      secondaryButtonText="Cancel"
+      secondaryButtonText="Back"
       onSecondaryAction={onBack}
     >
       <div>
