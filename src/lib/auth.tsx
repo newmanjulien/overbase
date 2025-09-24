@@ -23,15 +23,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (u) {
         console.log("Auth state changed → signed in:", u.uid);
         setState({ user: u, loading: false });
+        console.log("session", { user: u, loading: false }); // 👈 added here
       } else {
         console.log("Auth state changed → no user, signing in anonymously...");
         try {
           const cred = await signInAnonymously(auth);
           console.log("Anonymous sign-in success:", cred.user.uid);
           setState({ user: cred.user, loading: false });
+          console.log("session", { user: cred.user, loading: false }); // 👈 added here
         } catch (err) {
           console.error("Anonymous sign-in failed:", err);
           setState({ user: null, loading: false });
+          console.log("session", { user: null, loading: false }); // 👈 added here
         }
       }
     });
