@@ -1,6 +1,6 @@
 "use client";
 
-import { format } from "date-fns";
+import { formatDisplayDate } from "@/lib/requestDates";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,14 +72,14 @@ export default function Setup({
               variant="outline"
               className="w-full justify-start text-left hover:bg-gray-50"
               aria-label={
-                scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"
+                scheduledDate ? formatDisplayDate(scheduledDate) : "Pick a date"
               }
               title={
-                scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"
+                scheduledDate ? formatDisplayDate(scheduledDate) : "Pick a date"
               }
             >
               {scheduledDate ? (
-                format(scheduledDate, "PPP")
+                formatDisplayDate(scheduledDate)
               ) : (
                 <span>Pick a date</span>
               )}

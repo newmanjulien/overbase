@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { startOfToday, addDays, isBefore } from "date-fns";
+import { minSelectableDate, isBeforeDate } from "@/lib/requestDates";
 import Setup from "./Setup";
 
 import { createRequestStore } from "@/lib/stores/useRequestStore";
@@ -32,7 +32,7 @@ export default function SetupClient({
     scheduledDate?: string;
   }>({});
 
-  const minSelectableDate = useMemo(() => addDays(startOfToday(), 2), []);
+  const minSelectableDateValue = useMemo(() => minSelectableDate(2), []);
 
   // Prefill from query string once
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function SetupClient({
     }
     if (!data.step1?.scheduledDate) {
       errs.scheduledDate = "Scheduled date is required.";
-    } else if (isBefore(data.step1.scheduledDate, minSelectableDate)) {
+    } else if (isBeforeDate(data.step1.scheduledDate, minSelectableDateValue)) {
       errs.scheduledDate = "Date must be at least 2 days in the future.";
     }
     setErrors(errs);
@@ -126,7 +126,7 @@ export default function SetupClient({
       setScheduledDate={(val) => updateData("step1", { scheduledDate: val })}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
-      minSelectableDate={minSelectableDate}
+      minSelectableDate={minSelectableDateValue}
     />
   );
 }

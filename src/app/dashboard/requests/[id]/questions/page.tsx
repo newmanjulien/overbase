@@ -4,7 +4,9 @@ interface QuestionsPageProps {
   params: { id: string };
 }
 
-export default function RequestQuestionsPage({ params }: QuestionsPageProps) {
-  const { id } = params;
+export default async function RequestQuestionsPage({
+  params,
+}: QuestionsPageProps) {
+  const { id } = await params;
   return <QuestionsClient requestId={id} />;
 }

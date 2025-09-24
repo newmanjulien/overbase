@@ -5,15 +5,14 @@ interface SetupPageProps {
   searchParams?: Record<string, string | string[] | undefined>;
 }
 
-export default function RequestSetupPage({
+export default async function RequestSetupPage({
   params,
   searchParams,
 }: SetupPageProps) {
-  const { id } = params;
+  const { id } = await params;
+  const raw = (await searchParams)?.date;
 
-  // Normalize `?date=YYYY-MM-DD`
   let prefillDate: string | undefined;
-  const raw = searchParams?.date;
   if (typeof raw === "string") {
     prefillDate = raw;
   } else if (Array.isArray(raw) && raw.length > 0) {

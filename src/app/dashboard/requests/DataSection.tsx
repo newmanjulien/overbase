@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { format, formatISO, isBefore, startOfToday, isToday } from "date-fns";
+import { format } from "date-fns"; // still used for pretty-printing headers
 import { RowCard } from "@/components/blocks/RowCard";
 import { EmptyState } from "@/components/blocks/EmptyState";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 
 import type { RequestItem } from "./Client";
 import Link from "next/link";
+
+import { analyzeDate } from "@/lib/requestDates";
 
 type ViewType = "requests" | "meetings";
 
@@ -25,28 +27,24 @@ export default function DataSection({
 }: DataSectionProps) {
   const [selectedView, setSelectedView] = useState<ViewType>("requests");
 
-  // Always call hooks before any conditional return
-  const { dataCards, isPastDate, todaySelected, isFutureDate } = useMemo(() => {
+  const { dataCards, past, todaySelected, future } = useMemo(() => {
     if (!selectedDate) {
       return {
         dataCards: [] as RequestItem[],
-        isPastDate: false,
+        past: false,
         todaySelected: false,
-        isFutureDate: false,
+        future: false,
       };
     }
 
-    const key = formatISO(selectedDate, { representation: "date" });
+    const { key, past, today, future } = analyzeDate(selectedDate);
     const cards: RequestItem[] = requestsByDate[key] || [];
-    const past = isBefore(selectedDate, startOfToday());
-    const today = isToday(selectedDate);
-    const future = isBefore(startOfToday(), selectedDate);
 
     return {
       dataCards: cards,
-      isPastDate: past,
+      past,
       todaySelected: today,
-      isFutureDate: future,
+      future,
     };
   }, [selectedDate, requestsByDate]);
 
@@ -70,7 +68,7 @@ export default function DataSection({
       );
     }
 
-    if (isPastDate) {
+    if (past) {
       return (
         <EmptyState
           title="No data received"
@@ -134,7 +132,7 @@ export default function DataSection({
                   <Link href={`/dashboard/requests/${req.id}/setup`}>
                     <Button variant="secondary">Edit</Button>
                   </Link>
-                  <Button variant="secondary" disabled={isFutureDate}>
+                  <Button variant="secondary" disabled={future}>
                     Get data
                   </Button>
                 </>

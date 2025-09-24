@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useRef } from "react";
-import { startOfToday, format } from "date-fns";
+import { today, toDateKey } from "@/lib/requestDates";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 
@@ -11,24 +11,24 @@ import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
 import { useUserRequests } from "@/lib/hooks/useUserRequests";
-import { useRequestStore } from "@/lib/stores/useRequestStore";
+import { createRequestStore } from "@/lib/stores/useRequestStore";
 import { getRequest } from "@/lib/services/requestService";
 
 export interface RequestItem {
   id: string;
   prompt: string;
-  scheduledDate: string; // yyyy-MM-dd string for UI
+  scheduledDate: string;
   q1: string;
   q2: string;
   q3: string;
 }
 
 export default function RequestsClient() {
-  const today = startOfToday();
   const router = useRouter();
+  const initialToday = today();
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(today);
-  const [currentDate, setCurrentDate] = useState<Date>(today);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(initialToday);
+  const [currentDate, setCurrentDate] = useState<Date>(initialToday);
 
   const { user } = useAuth();
   if (!user) {
@@ -57,13 +57,13 @@ export default function RequestsClient() {
     const id = uuidv4();
     let url = `/dashboard/requests/${id}/setup`;
     if (prefillDate) {
-      url += `?date=${format(prefillDate, "yyyy-MM-dd")}`;
+      url += `?date=${toDateKey(prefillDate)}`;
     }
     router.push(url);
   };
 
   const handleEdit = async (requestId: string) => {
-    const store = useRequestStore(requestId);
+    const store = createRequestStore(requestId);
     const { setAllData, setStep } = store();
     const existing = await getRequest(user.uid, requestId);
     if (existing) {
