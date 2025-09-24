@@ -44,13 +44,11 @@ export default function Setup({
       // Main
       title={`Setup ${connector.title}`}
       subtitle={`Set up your ${connector.title} connector to enhance your workflow. You can customize the name and add configuration notes below.`}
-      // Footer
-      onFlowBack={onFlowBack}
+      // Footer (new API: 2 required buttons)
       primaryButtonText="Create"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onCreate();
-      }}
+      onPrimaryAction={onCreate}
+      secondaryButtonText="Cancel"
+      onSecondaryAction={onFlowBack}
     >
       {/* Children = form fields */}
       <div>

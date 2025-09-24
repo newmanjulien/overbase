@@ -11,7 +11,7 @@ interface QuestionsProps {
   setQ1: (v: string) => void;
   setQ2: (v: string) => void;
   setQ3: (v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: () => void; // simplified, no FormEvent needed now
   onCancel: () => void;
   onBack: () => void;
 }
@@ -36,10 +36,11 @@ export default function Questions({
       // Main
       title="Answer 3 questions"
       subtitle="Provide details to complete your request."
-      // Footer
-      onFlowBack={onBack}
-      primaryButtonText="Save"
-      onSubmit={onSubmit}
+      // Footer (two buttons, required)
+      primaryButtonText="Submit"
+      onPrimaryAction={onSubmit}
+      secondaryButtonText="Cancel"
+      onSecondaryAction={onBack}
     >
       <div>
         <Label htmlFor="q1" className="mb-2">

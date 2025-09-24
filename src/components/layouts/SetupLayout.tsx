@@ -16,10 +16,11 @@ interface SetupLayoutProps {
   subtitle?: string;
   children: ReactNode;
 
-  // Footer
-  onFlowBack: () => void; // back to previous step/flow
+  // Footer (always 2 buttons, symmetric)
   primaryButtonText: string;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onPrimaryAction: () => void;
+  secondaryButtonText: string;
+  onSecondaryAction: () => void;
 }
 
 export default function SetupLayout({
@@ -30,16 +31,16 @@ export default function SetupLayout({
   title,
   subtitle,
   children,
-  onFlowBack,
   primaryButtonText,
-  onSubmit,
+  onPrimaryAction,
+  secondaryButtonText,
+  onSecondaryAction,
 }: SetupLayoutProps) {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-10 pb-6 flex flex-col">
         <header>
-          {/* Always back to dashboard (or equivalent) */}
           <Button
             onClick={onSidebarBack}
             variant="backLink"
@@ -49,7 +50,6 @@ export default function SetupLayout({
             {sidebarBackText}
           </Button>
 
-          {/* Sidebar title + optional icon */}
           <div
             className={`mt-2 ${sidebarIcon ? "flex items-center gap-3" : ""}`}
           >
@@ -67,7 +67,8 @@ export default function SetupLayout({
 
       {/* Main Content */}
       <main className="flex-1 max-w-2xl mx-auto px-10 pt-10 pb-6">
-        <form onSubmit={onSubmit} className="space-y-6">
+        {/* No onSubmit anymore — each button has its own handler */}
+        <div className="space-y-6">
           {/* Header */}
           <header className="mt-6">
             <h1 className="text-2xl font-medium text-gray-900 mb-2 mt-8">
@@ -82,14 +83,16 @@ export default function SetupLayout({
           {/* Divider */}
           <div className="border-t border-gray-200 my-6" />
 
-          {/* Footer: always Back (flow) + Primary */}
+          {/* Footer: Secondary + Primary */}
           <div className="flex justify-between items-center">
-            <Button type="button" variant="outline" onClick={onFlowBack}>
-              Back
+            <Button type="button" variant="ghost" onClick={onSecondaryAction}>
+              {secondaryButtonText}
             </Button>
-            <Button type="submit">{primaryButtonText}</Button>
+            <Button type="button" onClick={onPrimaryAction}>
+              {primaryButtonText}
+            </Button>
           </div>
-        </form>
+        </div>
       </main>
     </div>
   );

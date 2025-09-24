@@ -19,7 +19,7 @@ interface SetupProps {
   errors: { prompt?: string; scheduledDate?: string };
   setPrompt: (val: string) => void;
   setScheduledDate: (val: Date | null) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: () => void; // simplified, no FormEvent needed
   onCancel: () => void;
   minSelectableDate: Date;
 }
@@ -41,9 +41,11 @@ export default function Setup({
       sidebarTitle="Request data about your customer"
       title="Explain what data you need"
       subtitle="Fill out the details to configure your request. You can set the prompt and schedule a date below."
-      onFlowBack={onCancel}
+      // Footer
       primaryButtonText="Next"
-      onSubmit={onSubmit}
+      onPrimaryAction={onSubmit}
+      secondaryButtonText="Cancel"
+      onSecondaryAction={onCancel}
     >
       <div>
         <Label htmlFor="prompt" className="mb-2">
