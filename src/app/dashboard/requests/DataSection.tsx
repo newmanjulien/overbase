@@ -14,10 +14,15 @@ import { analyzeDate } from "@/lib/requestDates";
 
 type ViewType = "requests" | "meetings";
 
+interface RequestOptions {
+  prefillDate?: Date | null;
+  mode?: "create" | "edit" | "editDraft";
+}
+
 export interface DataSectionProps {
   selectedDate?: Date | null;
   requestsByDate: Record<string, RequestItem[]>;
-  onRequestData: (prefillDate?: Date | null) => void;
+  onRequestData: (options?: RequestOptions) => void;
 }
 
 export default function DataSection({
@@ -95,7 +100,7 @@ export default function DataSection({
         buttonLabel="Request data"
         buttonVariant="outline"
         iconType="database"
-        onButtonClick={() => onRequestData(selectedDate)}
+        onButtonClick={() => onRequestData({ prefillDate: selectedDate })}
       />
     );
   }

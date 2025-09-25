@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { today, toDateKey } from "@/lib/requestDates";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,12 @@ export interface RequestItem {
   q2: string;
   q3: string;
   status: "draft" | "active";
+}
+
+// 🔥 ADD: inline type for request handling
+interface RequestOptions {
+  prefillDate?: Date | null;
+  mode?: "create" | "edit" | "editDraft";
 }
 
 export default function RequestsClient() {
@@ -55,12 +61,16 @@ export default function RequestsClient() {
     return out;
   }, [byDate]);
 
-  const handleNewRequest = (prefillDate?: Date | null) => {
+  // 🔥 CHANGED: accept RequestOptions instead of just prefillDate
+  const handleRequestData = (options?: RequestOptions) => {
     const id = uuidv4();
-    let url = `/dashboard/requests/${id}/setup?mode=create`;
-    if (prefillDate) {
-      url += `?date=${toDateKey(prefillDate)}`;
+    const mode = options?.mode ?? "create"; // default create mode
+    let url = `/dashboard/requests/${id}/setup?mode=${mode}`;
+
+    if (options?.prefillDate) {
+      url += `&date=${toDateKey(options.prefillDate)}`; // 🔥 CHANGED: use & not ?
     }
+
     router.push(url);
   };
 
@@ -86,14 +96,14 @@ export default function RequestsClient() {
   const dataSectionProps: DataSectionProps = {
     selectedDate,
     requestsByDate,
-    onRequestData: handleNewRequest,
+    onRequestData: handleRequestData, // 🔥 CHANGED
   };
 
   return (
     <Requests
       calendarProps={calendarProps}
       dataSectionProps={dataSectionProps}
-      onRequestData={handleNewRequest}
+      onRequestData={handleRequestData} // 🔥 CHANGED
     />
   );
 }
