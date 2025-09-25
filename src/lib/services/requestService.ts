@@ -1,5 +1,11 @@
 import { db } from "@/lib/firebase";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { Request, requestConverter } from "@/lib/models/request";
 
 /**
@@ -36,8 +42,17 @@ export async function saveDraft(
   await setDoc(ref, draft as Request, { merge: true });
 }
 
+export async function updateStatus(
+  userId: string,
+  requestId: string,
+  status: "draft" | "active"
+): Promise<void> {
+  const ref = doc(db, "users", userId, "requests", requestId);
+  await updateDoc(ref, { status });
+}
+
 /**
- * Submit request: same fields as draft, but sets status to 'submitted'.
+ * Submit request: same fields as draft, but sets status to 'active'.
  */
 export async function submitRequest(
   uid: string,
@@ -61,7 +76,7 @@ export async function submitRequest(
     q1: data.step2?.q1 ?? "",
     q2: data.step2?.q2 ?? "",
     q3: data.step2?.q3 ?? "",
-    status: "submitted",
+    status: "active",
     updatedAt: serverTimestamp(),
   };
 

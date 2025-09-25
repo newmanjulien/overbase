@@ -13,7 +13,7 @@ export interface RequestData {
     q2?: string;
     q3?: string;
   };
-  status?: "draft" | "submitted";
+  status?: "draft" | "active";
   id?: string;
   createdAt?: any;
   updatedAt?: any;

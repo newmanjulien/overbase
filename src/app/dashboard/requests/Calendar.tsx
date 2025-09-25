@@ -35,11 +35,9 @@ function getDayButtonClasses({
   );
 }
 
-function getRequestIndicatorClasses(isSelected: boolean) {
-  return clsx(
-    "absolute bottom-3 size-1.5 rounded-full",
-    isSelected ? "bg-white" : "bg-green-500"
-  );
+function getRequestIndicatorClasses(hasActive: boolean, hasDraft: boolean) {
+  const colorClass = hasActive ? "bg-green-500" : hasDraft ? "bg-gray-400" : "";
+  return clsx("absolute bottom-3 size-1.5 rounded-full", colorClass);
 }
 
 export interface CalendarProps {
@@ -123,7 +121,10 @@ export default function Calendar({
             return <div key={cell.key} className="aspect-square w-full" />;
           }
 
-          const hasRequests = !!requestsByDate?.[cell.key]?.length;
+          const list = requestsByDate?.[cell.key] ?? [];
+          const hasActive = list.some((r) => r.status === "active");
+          const hasDraft = list.some((r) => r.status === "draft");
+          const hasRequests = list.length > 0;
 
           return (
             <button
@@ -137,7 +138,16 @@ export default function Calendar({
               <span>{formatDayNumber(cell.date)}</span>
 
               {hasRequests && (
-                <span className={getRequestIndicatorClasses(isSelected)} />
+                <span
+                  className={getRequestIndicatorClasses(hasActive, hasDraft)}
+                  aria-label={
+                    hasActive
+                      ? "Active requests"
+                      : hasDraft
+                      ? "Draft requests"
+                      : undefined
+                  }
+                />
               )}
             </button>
           );

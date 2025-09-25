@@ -128,14 +128,20 @@ export default function DataSection({
               key={req.id}
               contentBox={req.prompt || "No prompt provided"}
               actions={
-                <>
+                req.status === "draft" ? (
                   <Link href={`/dashboard/requests/${req.id}/setup`}>
-                    <Button variant="secondary">Edit</Button>
+                    <Button variant="secondary">Edit draft</Button>
                   </Link>
-                  <Button variant="secondary" disabled={future}>
-                    Get data
-                  </Button>
-                </>
+                ) : (
+                  <>
+                    <Link href={`/dashboard/requests/${req.id}/setup`}>
+                      <Button variant="secondary">Edit</Button>
+                    </Link>
+                    <Button variant="secondary" disabled={future}>
+                      Get data
+                    </Button>
+                  </>
+                )
               }
             />
           ))}

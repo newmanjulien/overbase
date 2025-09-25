@@ -21,6 +21,7 @@ export interface RequestItem {
   q1: string;
   q2: string;
   q3: string;
+  status: "draft" | "active";
 }
 
 export default function RequestsClient() {
@@ -48,6 +49,7 @@ export default function RequestsClient() {
         q1: r.q1 ?? "",
         q2: r.q2 ?? "",
         q3: r.q3 ?? "",
+        status: r.status,
       }));
     }
     return out;

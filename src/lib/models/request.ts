@@ -19,7 +19,7 @@ export interface Request {
   q1: string;
   q2: string;
   q3: string;
-  status: "draft" | "submitted";
+  status: "draft" | "active";
   createdAt?: any; // Firestore Timestamp or null
   updatedAt?: any; // Firestore Timestamp or null
 }

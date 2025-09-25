@@ -6,7 +6,11 @@ import { minSelectableDate, isBeforeDate } from "@/lib/requestDates";
 import Setup from "./Setup";
 
 import { createRequestStore } from "@/lib/stores/useRequestStore";
-import { getRequest, saveDraft } from "@/lib/services/requestService";
+import {
+  getRequest,
+  saveDraft,
+  updateStatus,
+} from "@/lib/services/requestService";
 import { useAuth } from "@/lib/auth";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -34,6 +38,13 @@ export default function SetupClient({
 
   const [status, setStatus] = useState<"draft" | "active">("draft");
 
+  const handleStatusChange = async (val: "draft" | "active") => {
+    setStatus(val);
+    if (user) {
+      await updateStatus(user.uid, requestId, val);
+    }
+  };
+
   const minSelectableDateValue = useMemo(() => minSelectableDate(2), []);
 
   // Prefill from query string once
@@ -58,6 +69,10 @@ export default function SetupClient({
       const existing = await getRequest(user.uid, requestId);
       if (existing) {
         setAllData(existing);
+        // Hydrate status from Firestore
+        if (existing.status) {
+          setStatus(existing.status === "active" ? "active" : "draft");
+        }
       }
     })();
   }, [user, requestId, data, setAllData]);
@@ -140,7 +155,7 @@ export default function SetupClient({
       onDraft={handleMakeDraft}
       minSelectableDate={minSelectableDateValue}
       status={status}
-      setStatus={setStatus}
+      setStatus={handleStatusChange}
     />
   );
 }
