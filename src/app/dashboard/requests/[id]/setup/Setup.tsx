@@ -50,12 +50,10 @@ export default function Setup({
       sidebarBackText="Back to requests"
       onSidebarBack={onHome}
       sidebarTitle="Request data about your customer"
-      sidebarActionText="Delete request"
-      onSidebarAction={onDraft}
-      // Main
-      title="Explain what data you need"
-      subtitle="Fill out the details to configure your request. You can set the prompt and schedule a date below."
+      // Conditional UI elements
       {...(mode !== "create" && {
+        sidebarActionText: "Delete request",
+        onSidebarAction: onDraft,
         toggleValue: status,
         onToggleChange: (val) => setStatus(val as "draft" | "active"),
         toggleOptions: [
@@ -63,6 +61,9 @@ export default function Setup({
           { value: "active", label: "Active" },
         ],
       })}
+      // Main
+      title="Explain what data you need"
+      subtitle="Fill out the details to configure your request. You can set the prompt and schedule a date below."
       // Footer
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}
