@@ -18,11 +18,13 @@ import { db } from "@/lib/firebase";
 interface SetupClientProps {
   requestId: string;
   prefillDate?: string;
+  mode: "create" | "edit" | "editDraft";
 }
 
 export default function SetupClient({
   requestId,
   prefillDate,
+  mode,
 }: SetupClientProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -156,6 +158,7 @@ export default function SetupClient({
       minSelectableDate={minSelectableDateValue}
       status={status}
       setStatus={handleStatusChange}
+      mode={mode}
     />
   );
 }

@@ -55,7 +55,7 @@ export default function SetupLayout({
     <div className="flex min-h-screen">
       {/* Toggle */}
       {toggleOptions && onToggleChange && (
-        <div className="absolute top-24 right-14">
+        <div className="absolute top-25 right-14">
           <ToggleGroup
             type="single"
             value={toggleValue}
@@ -73,7 +73,7 @@ export default function SetupLayout({
       )}
 
       {/* Sidebar */}
-      <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-10 pb-6 flex flex-col">
+      <aside className="sticky top-14 h-[calc(100vh-56px)] flex flex-col w-96 bg-gray-100 border-r border-gray-200 px-12 pt-10 pb-6">
         <header>
           <Button
             onClick={onSidebarBack}
@@ -100,7 +100,7 @@ export default function SetupLayout({
 
         {/* Bottom sidebar action */}
         {sidebarActionText && onSidebarAction && (
-          <div className="sticky bottom-6 w-96 px-12">
+          <div className="mt-auto">
             <Button
               variant="backLink"
               size="backLink"

@@ -129,12 +129,16 @@ export default function DataSection({
               contentBox={req.prompt || "No prompt provided"}
               actions={
                 req.status === "draft" ? (
-                  <Link href={`/dashboard/requests/${req.id}/setup`}>
+                  <Link
+                    href={`/dashboard/requests/${req.id}/setup?mode=editDraft`}
+                  >
                     <Button variant="secondary">Edit draft</Button>
                   </Link>
                 ) : (
                   <>
-                    <Link href={`/dashboard/requests/${req.id}/setup`}>
+                    <Link
+                      href={`/dashboard/requests/${req.id}/setup?mode=edit`}
+                    >
                       <Button variant="secondary">Edit</Button>
                     </Link>
                     <Button variant="secondary" disabled={future}>

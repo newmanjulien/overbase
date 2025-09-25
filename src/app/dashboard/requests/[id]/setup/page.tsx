@@ -19,5 +19,20 @@ export default async function RequestSetupPage({
     prefillDate = raw[0];
   }
 
-  return <SetupClient requestId={id} prefillDate={prefillDate} />;
+  // NEW: handle mode
+  const modeParam = (await searchParams)?.mode;
+  const mode =
+    (typeof modeParam === "string"
+      ? modeParam
+      : Array.isArray(modeParam)
+      ? modeParam[0]
+      : null) ?? "create";
+
+  return (
+    <SetupClient
+      requestId={id}
+      prefillDate={prefillDate}
+      mode={mode as "create" | "edit" | "editDraft"} // ✅ pass it down
+    />
+  );
 }

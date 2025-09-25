@@ -57,7 +57,7 @@ export default function RequestsClient() {
 
   const handleNewRequest = (prefillDate?: Date | null) => {
     const id = uuidv4();
-    let url = `/dashboard/requests/${id}/setup`;
+    let url = `/dashboard/requests/${id}/setup?mode=create`;
     if (prefillDate) {
       url += `?date=${toDateKey(prefillDate)}`;
     }
