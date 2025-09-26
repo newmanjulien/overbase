@@ -1,90 +1,18 @@
-import { db } from "@/lib/firebase";
+"use server";
+
 import {
   doc,
   getDoc,
-  serverTimestamp,
   setDoc,
   updateDoc,
+  deleteDoc,
+  serverTimestamp,
 } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { Request, requestConverter } from "@/lib/models/request";
 
 /**
- * Save draft: merges partial data from the setup form store into a Request.
- * Expects the caller to pass the current form data shape { step1, step2 }.
- * We write FLAT fields (prompt, scheduledDate, q1, q2, q3) using the converter.
- */
-export async function saveDraft(
-  uid: string,
-  requestId: string,
-  data: {
-    step1?: { prompt?: string; scheduledDate?: Date | null };
-    step2?: { q1?: string; q2?: string; q3?: string };
-  }
-) {
-  const ref = doc(db, "users", uid, "requests", requestId).withConverter(
-    requestConverter
-  );
-
-  const draft: Partial<Request> = {
-    id: requestId,
-    prompt: data.step1?.prompt ?? "",
-    scheduledDate:
-      data.step1 && "scheduledDate" in data.step1
-        ? data.step1.scheduledDate ?? null
-        : null,
-    q1: data.step2?.q1 ?? "",
-    q2: data.step2?.q2 ?? "",
-    q3: data.step2?.q3 ?? "",
-    status: "draft",
-    updatedAt: serverTimestamp(),
-  };
-
-  await setDoc(ref, draft as Request, { merge: true });
-}
-
-export async function updateStatus(
-  userId: string,
-  requestId: string,
-  status: "draft" | "active"
-): Promise<void> {
-  const ref = doc(db, "users", userId, "requests", requestId);
-  await updateDoc(ref, { status });
-}
-
-/**
- * Submit request: same fields as draft, but sets status to 'active'.
- */
-export async function submitRequest(
-  uid: string,
-  requestId: string,
-  data: {
-    step1?: { prompt?: string; scheduledDate?: Date | null };
-    step2?: { q1?: string; q2?: string; q3?: string };
-  }
-) {
-  const ref = doc(db, "users", uid, "requests", requestId).withConverter(
-    requestConverter
-  );
-
-  const payload: Partial<Request> = {
-    id: requestId,
-    prompt: data.step1?.prompt ?? "",
-    scheduledDate:
-      data.step1 && "scheduledDate" in data.step1
-        ? data.step1.scheduledDate ?? null
-        : null,
-    q1: data.step2?.q1 ?? "",
-    q2: data.step2?.q2 ?? "",
-    q3: data.step2?.q3 ?? "",
-    status: "active",
-    updatedAt: serverTimestamp(),
-  };
-
-  await setDoc(ref, payload as Request, { merge: true });
-}
-
-/**
- * Get a single request by id under the current user.
+ * Get a single request by ID.
  */
 export async function getRequest(uid: string, requestId: string) {
   const ref = doc(db, "users", uid, "requests", requestId).withConverter(
@@ -92,4 +20,94 @@ export async function getRequest(uid: string, requestId: string) {
   );
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data() : null;
+}
+
+/**
+ * Create a new draft request.
+ * Generates its own ID.
+ */
+export async function createDraft(
+  uid: string,
+  initialData: Partial<Request> = {}
+): Promise<Request> {
+  const id = crypto.randomUUID();
+  const ref = doc(db, "users", uid, "requests", id).withConverter(
+    requestConverter
+  );
+
+  const draft: Request = {
+    id,
+    prompt: initialData.prompt ?? "",
+    scheduledDate: initialData.scheduledDate ?? null,
+    q1: "",
+    q2: "",
+    q3: "",
+    status: "draft",
+    createdAt: serverTimestamp() as any,
+    updatedAt: serverTimestamp() as any,
+    submittedAt: null,
+  };
+
+  await setDoc(ref, draft);
+  return draft;
+}
+
+/**
+ * Submit draft → active
+ */
+export async function submitDraft(
+  uid: string,
+  requestId: string,
+  data: Partial<Request>
+): Promise<void> {
+  const ref = doc(db, "users", uid, "requests", requestId);
+  await updateDoc(ref, {
+    ...data,
+    status: "active",
+    updatedAt: serverTimestamp(),
+    submittedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Update active request (no status change)
+ */
+export async function updateActive(
+  uid: string,
+  requestId: string,
+  data: Partial<Request>
+): Promise<void> {
+  const ref = doc(db, "users", uid, "requests", requestId);
+  await updateDoc(ref, {
+    ...data,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Promote/demote
+ */
+export async function promoteToActive(uid: string, requestId: string) {
+  const ref = doc(db, "users", uid, "requests", requestId);
+  await updateDoc(ref, {
+    status: "active",
+    updatedAt: serverTimestamp(),
+    submittedAt: serverTimestamp(),
+  });
+}
+
+export async function demoteToDraft(uid: string, requestId: string) {
+  const ref = doc(db, "users", uid, "requests", requestId);
+  await updateDoc(ref, {
+    status: "draft",
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Delete request
+ */
+export async function deleteRequest(uid: string, requestId: string) {
+  const ref = doc(db, "users", uid, "requests", requestId);
+  await deleteDoc(ref);
 }

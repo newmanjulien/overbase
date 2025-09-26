@@ -5,15 +5,9 @@ import { useRouter } from "next/navigation";
 import { minSelectableDate, isBeforeDate } from "@/lib/requestDates";
 import Setup from "./Setup";
 
-import { createRequestStore } from "@/lib/stores/useRequestStore";
-import {
-  getRequest,
-  saveDraft,
-  updateStatus,
-} from "@/lib/services/requestService";
 import { useAuth } from "@/lib/auth";
-import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { createRequestFormStore } from "@/lib/stores/useRequestFormStore";
+import { useRequestListStore } from "@/lib/stores/useRequestListStore";
 
 interface SetupClientProps {
   requestId: string;
@@ -29,9 +23,11 @@ export default function SetupClient({
   const router = useRouter();
   const { user } = useAuth();
 
-  // Create a store bound to this requestId
-  const useStore = useMemo(() => createRequestStore(requestId), [requestId]);
-  const { data, updateData, setAllData } = useStore();
+  const useFormStore = useMemo(
+    () => createRequestFormStore(requestId),
+    [requestId]
+  );
+  const { data, updateData, setAllData } = useFormStore();
 
   const [errors, setErrors] = useState<{
     prompt?: string;
@@ -63,21 +59,25 @@ export default function SetupClient({
     }
   }, [prefillDate, data.step1?.scheduledDate, updateData]);
 
-  // Hydrate once from Firestore if store is empty
+  // Ask the list store to fetch this request into memory
   useEffect(() => {
     if (!user) return;
-    if (data && (data.step1 || data.step2)) return;
-    (async () => {
-      const existing = await getRequest(user.uid, requestId);
-      if (existing) {
-        setAllData(existing);
-        // Hydrate status from Firestore
-        if (existing.status) {
-          setStatus(existing.status === "active" ? "active" : "draft");
-        }
-      }
-    })();
-  }, [user, requestId, data, setAllData]);
+    loadOne(user.uid, requestId);
+  }, [user, requestId, loadOne]);
+
+  // When the request appears in the list store, seed the form + local status once
+  useEffect(() => {
+    const existing = requests.find((r) => r.id === requestId);
+    if (!existing) return;
+
+    // Seed form if empty
+    if (!data?.step1 && !data?.step2) {
+      setAllData(existing as any); // your form store expects the flat request shape; you already map fields below
+    }
+
+    // Seed local status
+    setStatus(existing.status);
+  }, [requests, requestId, data?.step1, data?.step2, setAllData]);
 
   // Debounced auto-save when step1 fields change
   useEffect(() => {

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { today, toDateKey } from "@/lib/requestDates";
-import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 
 import type { CalendarProps } from "./Calendar";
@@ -10,9 +9,7 @@ import type { DataSectionProps } from "./DataSection";
 import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
-import { useUserRequests } from "@/lib/hooks/useUserRequests";
-import { createRequestStore } from "@/lib/stores/useRequestStore";
-import { getRequest } from "@/lib/services/requestService";
+import { useRequestListStore } from "@/lib/stores/useRequestListStore";
 
 export interface RequestItem {
   id: string;
@@ -43,12 +40,14 @@ export default function RequestsClient() {
     return null;
   }
 
-  const { byDate } = useUserRequests();
+  const { requests, createDraft } = useRequestListStore();
 
-  const requestsByDate: Record<string, RequestItem[]> = useMemo(() => {
-    const out: Record<string, RequestItem[]> = {};
-    for (const [key, list] of Object.entries(byDate)) {
-      out[key] = list.map((r) => ({
+  const requestsByDate = useMemo(() => {
+    const map: Record<string, RequestItem[]> = {};
+    for (const r of requests) {
+      if (!r.scheduledDate) continue;
+      const key = toDateKey(r.scheduledDate);
+      (map[key] ??= []).push({
         id: r.id,
         prompt: r.prompt,
         scheduledDate: key,
@@ -56,33 +55,22 @@ export default function RequestsClient() {
         q2: r.q2 ?? "",
         q3: r.q3 ?? "",
         status: r.status,
-      }));
+      });
     }
-    return out;
-  }, [byDate]);
+    return map;
+  }, [requests]);
 
-  // 🔥 CHANGED: accept RequestOptions instead of just prefillDate
-  const handleRequestData = (options?: RequestOptions) => {
-    const id = uuidv4();
-    const mode = options?.mode ?? "create"; // default create mode
-    let url = `/dashboard/requests/${id}/setup?mode=${mode}`;
-
+  const handleRequestData = async (options?: RequestOptions) => {
+    if (!user) return;
+    const draft = await createDraft(user.uid, {
+      scheduledDate: options?.prefillDate ?? null,
+    });
+    const mode = options?.mode ?? "create";
+    let url = `/dashboard/requests/${draft.id}/setup?mode=${mode}`;
     if (options?.prefillDate) {
-      url += `&date=${toDateKey(options.prefillDate)}`; // 🔥 CHANGED: use & not ?
+      url += `&date=${toDateKey(options.prefillDate)}`;
     }
-
     router.push(url);
-  };
-
-  const handleEdit = async (requestId: string) => {
-    const store = createRequestStore(requestId);
-    const { setAllData, setStep } = store();
-    const existing = await getRequest(user.uid, requestId);
-    if (existing) {
-      setAllData(existing);
-      setStep(1);
-    }
-    router.push(`/dashboard/requests/${requestId}/setup`);
   };
 
   const calendarProps: CalendarProps = {

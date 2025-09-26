@@ -2,6 +2,7 @@ import {
   FirestoreDataConverter,
   QueryDocumentSnapshot,
   SnapshotOptions,
+  Timestamp,
 } from "firebase/firestore";
 import {
   deserializeScheduledDate,
@@ -10,7 +11,6 @@ import {
 
 /**
  * Flat Request model (no step1/step2 nesting).
- * Matches what the app actually uses in UI & services.
  */
 export interface Request {
   id: string;
@@ -20,8 +20,9 @@ export interface Request {
   q2: string;
   q3: string;
   status: "draft" | "active";
-  createdAt?: any; // Firestore Timestamp or null
-  updatedAt?: any; // Firestore Timestamp or null
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  submittedAt?: Timestamp | null;
 }
 
 export const requestConverter: FirestoreDataConverter<Request> = {
@@ -39,6 +40,7 @@ export const requestConverter: FirestoreDataConverter<Request> = {
       status: request.status,
       createdAt: request.createdAt ?? null,
       updatedAt: request.updatedAt ?? null,
+      submittedAt: request.submittedAt ?? null,
     };
   },
 
@@ -59,8 +61,9 @@ export const requestConverter: FirestoreDataConverter<Request> = {
       q2: d.q2 ?? "",
       q3: d.q3 ?? "",
       status: d.status ?? "draft",
-      createdAt: d.createdAt ?? null,
-      updatedAt: d.updatedAt ?? null,
+      createdAt: d.createdAt,
+      updatedAt: d.updatedAt,
+      submittedAt: d.submittedAt ?? null,
     };
   },
 };
