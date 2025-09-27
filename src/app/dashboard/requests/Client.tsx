@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { today, toDateKey } from "@/lib/requestDates";
 import { useRouter } from "next/navigation";
 
@@ -14,7 +14,7 @@ import { useRequestListStore } from "@/lib/stores/useRequestListStore";
 export interface RequestItem {
   id: string;
   prompt: string;
-  scheduledDate: string;
+  scheduledDate: Date | null;
   q1: string;
   q2: string;
   q3: string;
@@ -34,12 +34,18 @@ export default function RequestsClient() {
   const [currentDate, setCurrentDate] = useState<Date>(initialToday);
 
   const { user } = useAuth();
+  const { requests, createDraft, subscribe } = useRequestListStore();
+
+  useEffect(() => {
+    if (!user) return;
+    const unsub = subscribe(user.uid);
+    return () => unsub();
+  }, [user?.uid, subscribe]);
+
   if (!user) {
     // Defensive guard: no user yet, render empty
     return null;
   }
-
-  const { requests, createDraft } = useRequestListStore();
 
   const requestsByDate = useMemo(() => {
     const map: Record<string, RequestItem[]> = {};
@@ -49,7 +55,7 @@ export default function RequestsClient() {
       (map[key] ??= []).push({
         id: r.id,
         prompt: r.prompt,
-        scheduledDate: key,
+        scheduledDate: r.scheduledDate,
         q1: r.q1 ?? "",
         q2: r.q2 ?? "",
         q3: r.q3 ?? "",
@@ -83,14 +89,14 @@ export default function RequestsClient() {
   const dataSectionProps: DataSectionProps = {
     selectedDate,
     requestsByDate,
-    onRequestData: handleRequestData, // 🔥 CHANGED
+    onRequestData: handleRequestData,
   };
 
   return (
     <Requests
       calendarProps={calendarProps}
       dataSectionProps={dataSectionProps}
-      onRequestData={handleRequestData} // 🔥 CHANGED
+      onRequestData={handleRequestData}
     />
   );
 }

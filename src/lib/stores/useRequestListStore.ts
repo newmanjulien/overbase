@@ -12,10 +12,13 @@ import {
   getRequest,
 } from "@/lib/services/requestService";
 
+import { subscribeToRequestList } from "@/lib/client/requestSubscriptions";
+
 interface RequestListState {
   requests: Request[];
   drafts: () => Request[];
   actives: () => Request[];
+  subscribe: (uid: string) => () => void;
   loadOne: (uid: string, id: string) => Promise<void>;
   createDraft: (uid: string, data?: Partial<Request>) => Promise<Request>;
   submitDraft: (
@@ -35,6 +38,13 @@ interface RequestListState {
 
 export const useRequestListStore = create<RequestListState>((set, get) => ({
   requests: [],
+
+  subscribe: (uid: string) => {
+    const unsub = subscribeToRequestList(uid, (items) => {
+      set({ requests: items });
+    });
+    return unsub;
+  },
 
   drafts: () => get().requests.filter((r) => r.status === "draft"),
   actives: () => get().requests.filter((r) => r.status === "active"),
