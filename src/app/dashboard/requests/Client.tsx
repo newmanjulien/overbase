@@ -21,8 +21,7 @@ export interface RequestItem {
   status: "draft" | "active";
 }
 
-// 🔥 ADD: inline type for request handling
-interface RequestOptions {
+export interface RequestOptions {
   prefillDate?: Date | null;
   mode?: "create" | "edit" | "editDraft";
 }

@@ -27,83 +27,71 @@ export default function SetupClient({
     () => createRequestFormStore(requestId),
     [requestId]
   );
-  const { data, updateData, setAllData } = useFormStore();
+  const { prompt, scheduledDate, setPrompt, setScheduledDate } = useFormStore();
+
+  const {
+    requests,
+    loadOne,
+    updateActive,
+    promoteToActive,
+    demoteToDraft,
+    deleteRequest,
+  } = useRequestListStore();
 
   const [errors, setErrors] = useState<{
     prompt?: string;
     scheduledDate?: string;
   }>({});
 
-  const [status, setStatus] = useState<"draft" | "active">("draft");
-
-  const handleStatusChange = async (val: "draft" | "active") => {
-    setStatus(val);
-    if (user) {
-      await updateStatus(user.uid, requestId, val);
-    }
-  };
+  const didPrefill = React.useRef(false);
 
   const minSelectableDateValue = useMemo(() => minSelectableDate(2), []);
 
-  // Prefill from query string once
+  // Prefill from query string (runs only once on mount)
   useEffect(() => {
+    if (didPrefill.current) return;
     if (prefillDate) {
       const [y, m, d] = prefillDate.split("-").map(Number);
-      const dObj = new Date(y, m - 1, d);
-      if (
-        !data.step1?.scheduledDate ||
-        data.step1.scheduledDate.getTime() !== dObj.getTime()
-      ) {
-        updateData("step1", { scheduledDate: dObj });
-      }
+      setScheduledDate(new Date(y, m - 1, d));
+      didPrefill.current = true;
     }
-  }, [prefillDate, data.step1?.scheduledDate, updateData]);
+  }, [prefillDate, setScheduledDate]);
 
-  // Ask the list store to fetch this request into memory
+  // Load this request into the global store
   useEffect(() => {
     if (!user) return;
     loadOne(user.uid, requestId);
   }, [user, requestId, loadOne]);
 
-  // When the request appears in the list store, seed the form + local status once
+  // Seed form if empty
   useEffect(() => {
     const existing = requests.find((r) => r.id === requestId);
     if (!existing) return;
+    if (!prompt && existing.prompt) setPrompt(existing.prompt);
+    if (!scheduledDate && existing.scheduledDate)
+      setScheduledDate(existing.scheduledDate);
+  }, [requests, requestId, prompt, scheduledDate, setPrompt, setScheduledDate]);
 
-    // Seed form if empty
-    if (!data?.step1 && !data?.step2) {
-      setAllData(existing as any); // your form store expects the flat request shape; you already map fields below
-    }
-
-    // Seed local status
-    setStatus(existing.status);
-  }, [requests, requestId, data?.step1, data?.step2, setAllData]);
-
-  // Debounced auto-save when step1 fields change
+  // Debounced auto-save for prompt/scheduledDate
   useEffect(() => {
     if (!user) return;
-
     const timeout = setTimeout(() => {
-      saveDraft(user.uid, requestId, {
-        ...data,
-        step1: {
-          prompt: data.step1?.prompt ?? "",
-          scheduledDate: data.step1?.scheduledDate ?? null,
-        },
+      updateActive(user.uid, requestId, {
+        prompt: prompt ?? "",
+        scheduledDate: scheduledDate ?? null,
       }).catch(() => {});
     }, 800);
-
     return () => clearTimeout(timeout);
-  }, [data.step1?.prompt, data.step1?.scheduledDate, user, requestId, data]);
+  }, [prompt, scheduledDate, user, requestId, updateActive]);
 
   const validate = () => {
     const errs: typeof errors = {};
-    if (!data.step1?.prompt?.trim()) {
+    if (!prompt?.trim()) {
       errs.prompt = "Prompt is required.";
     }
-    if (!data.step1?.scheduledDate) {
+    if (!scheduledDate) {
       errs.scheduledDate = "Scheduled date is required.";
-    } else if (isBeforeDate(data.step1.scheduledDate, minSelectableDateValue)) {
+    } else if (isBeforeDate(scheduledDate, minSelectableDateValue)) {
       errs.scheduledDate = "Date must be at least 2 days in the future.";
     }
     setErrors(errs);
@@ -116,21 +104,25 @@ export default function SetupClient({
       alert("No Firebase user yet — please wait a moment and try again.");
       return;
     }
-
-    await saveDraft(user.uid, requestId, {
-      ...data,
-      step1: {
-        scheduledDate: data.step1?.scheduledDate ?? null,
-        prompt: data.step1?.prompt ?? "",
-      },
+    await updateActive(user.uid, requestId, {
+      prompt: prompt ?? "",
+      scheduledDate: scheduledDate ?? null,
     });
-
     router.push(`/dashboard/requests/${requestId}/questions`);
   };
 
   const handleCancel = async (): Promise<void> => {
+    if (mode === "create") {
+      if (user) {
+        await deleteRequest(user.uid, requestId); // hard delete draft but not active
+      }
+    }
+    router.push("/dashboard/requests"); // always go back to list
+  };
+
+  const handleDelete = async (): Promise<void> => {
     if (user) {
-      await deleteDoc(doc(db, "users", user.uid, "requests", requestId));
+      await deleteRequest(user.uid, requestId); // always delete
     }
     router.push("/dashboard/requests");
   };
@@ -139,25 +131,29 @@ export default function SetupClient({
     router.push("/dashboard/requests");
   };
 
-  const handleMakeDraft = async (): Promise<void> => {
-    // for now, do nothing
-    console.log("Make draft clicked");
+  const handleStatusChange = async (val: "draft" | "active") => {
+    if (!user) return;
+    if (val === "active") await promoteToActive(user.uid, requestId);
+    else await demoteToDraft(user.uid, requestId);
   };
+
+  const existing = requests.find((r) => r.id === requestId);
+  const status = existing?.status ?? "draft";
 
   return (
     <Setup
-      prompt={data.step1?.prompt ?? ""}
-      scheduledDate={data.step1?.scheduledDate ?? null}
+      prompt={prompt ?? ""}
+      scheduledDate={scheduledDate ?? null}
       errors={errors}
-      setPrompt={(val) => updateData("step1", { prompt: val })}
-      setScheduledDate={(val) => updateData("step1", { scheduledDate: val })}
+      setPrompt={setPrompt}
+      setScheduledDate={setScheduledDate}
       onCancel={handleCancel}
       onSubmit={handleSubmit}
       onHome={handleHome}
-      onDraft={handleMakeDraft}
+      onDelete={handleDelete}
       minSelectableDate={minSelectableDateValue}
       status={status}
-      setStatus={handleStatusChange}
+      setStatus={mode !== "create" ? handleStatusChange : undefined}
       mode={mode}
     />
   );

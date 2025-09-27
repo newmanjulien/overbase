@@ -7,9 +7,24 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
+  FieldValue,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Request, requestConverter } from "@/lib/models/request";
+import { serializeScheduledDate } from "@/lib/requestDates";
+
+interface WriteRequest {
+  id: string;
+  prompt: string;
+  scheduledDate: string | null;
+  q1: string;
+  q2: string;
+  q3: string;
+  status: "draft" | "active";
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
+  submittedAt: FieldValue | null;
+}
 
 /**
  * Get a single request by ID.
@@ -31,25 +46,30 @@ export async function createDraft(
   initialData: Partial<Request> = {}
 ): Promise<Request> {
   const id = crypto.randomUUID();
-  const ref = doc(db, "users", uid, "requests", id).withConverter(
-    requestConverter
-  );
 
-  const draft: Request = {
+  // ❌ no converter on write
+  const ref = doc(db, "users", uid, "requests", id);
+
+  const draft: WriteRequest = {
     id,
     prompt: initialData.prompt ?? "",
-    scheduledDate: initialData.scheduledDate ?? null,
+    scheduledDate: initialData.scheduledDate
+      ? serializeScheduledDate(initialData.scheduledDate)
+      : null,
     q1: "",
     q2: "",
     q3: "",
     status: "draft",
-    createdAt: serverTimestamp() as any,
-    updatedAt: serverTimestamp() as any,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
     submittedAt: null,
   };
 
   await setDoc(ref, draft);
-  return draft;
+
+  // ✅ apply converter on readback
+  const snap = await getDoc(ref.withConverter(requestConverter));
+  return snap.data()!;
 }
 
 /**
@@ -62,7 +82,13 @@ export async function submitDraft(
 ): Promise<void> {
   const ref = doc(db, "users", uid, "requests", requestId);
   await updateDoc(ref, {
-    ...data,
+    prompt: data.prompt ?? "",
+    q1: data.q1 ?? "",
+    q2: data.q2 ?? "",
+    q3: data.q3 ?? "",
+    scheduledDate: data.scheduledDate
+      ? serializeScheduledDate(data.scheduledDate)
+      : null,
     status: "active",
     updatedAt: serverTimestamp(),
     submittedAt: serverTimestamp(),
@@ -79,7 +105,13 @@ export async function updateActive(
 ): Promise<void> {
   const ref = doc(db, "users", uid, "requests", requestId);
   await updateDoc(ref, {
-    ...data,
+    prompt: data.prompt ?? "",
+    q1: data.q1 ?? "",
+    q2: data.q2 ?? "",
+    q3: data.q3 ?? "",
+    scheduledDate: data.scheduledDate
+      ? serializeScheduledDate(data.scheduledDate)
+      : null,
     updatedAt: serverTimestamp(),
   });
 }

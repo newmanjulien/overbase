@@ -22,10 +22,10 @@ interface SetupProps {
   onSubmit: () => void | Promise<void>;
   onCancel: () => void | Promise<void>;
   onHome: () => void | Promise<void>;
-  onDraft: () => void | Promise<void>;
+  onDelete: () => void | Promise<void>;
   minSelectableDate: Date;
   status: "draft" | "active";
-  setStatus: (val: "draft" | "active") => void;
+  setStatus?: (val: "draft" | "active") => void;
   mode: "create" | "edit" | "editDraft";
 }
 
@@ -38,7 +38,7 @@ export default function Setup({
   onSubmit,
   onCancel,
   onHome,
-  onDraft,
+  onDelete,
   minSelectableDate,
   status,
   setStatus,
@@ -51,16 +51,17 @@ export default function Setup({
       onSidebarBack={onHome}
       sidebarTitle="Request data about your customer"
       // Conditional UI elements
-      {...(mode !== "create" && {
-        sidebarActionText: "Delete request",
-        onSidebarAction: onDraft,
-        toggleValue: status,
-        onToggleChange: (val) => setStatus(val as "draft" | "active"),
-        toggleOptions: [
-          { value: "draft", label: "Draft" },
-          { value: "active", label: "Active" },
-        ],
-      })}
+      {...(mode !== "create" &&
+        setStatus && {
+          sidebarActionText: "Delete request",
+          onSidebarAction: onDelete,
+          toggleValue: status,
+          onToggleChange: (val) => void setStatus(val as "draft" | "active"),
+          toggleOptions: [
+            { value: "draft", label: "Draft" },
+            { value: "active", label: "Active" },
+          ],
+        })}
       // Main
       title="Explain what data you need"
       subtitle="Fill out the details to configure your request. You can set the prompt and schedule a date below."

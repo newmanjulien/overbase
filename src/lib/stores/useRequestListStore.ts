@@ -56,36 +56,42 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
   submitDraft: async (uid, id, data) => {
     await submitDraft(uid, id, data);
-    set((s) => ({
-      requests: s.requests.map((r) =>
-        r.id === id ? { ...r, ...data, status: "active" } : r
-      ),
-    }));
+    const updated = await getRequest(uid, id);
+    if (updated) {
+      set((s) => ({
+        requests: s.requests.map((r) => (r.id === id ? updated : r)),
+      }));
+    }
   },
 
   updateActive: async (uid, id, data) => {
     await updateActive(uid, id, data);
-    set((s) => ({
-      requests: s.requests.map((r) => (r.id === id ? { ...r, ...data } : r)),
-    }));
+    const updated = await getRequest(uid, id);
+    if (updated) {
+      set((s) => ({
+        requests: s.requests.map((r) => (r.id === id ? updated : r)),
+      }));
+    }
   },
 
   promoteToActive: async (uid, id) => {
     await promoteToActive(uid, id);
-    set((s) => ({
-      requests: s.requests.map((r) =>
-        r.id === id ? { ...r, status: "active" } : r
-      ),
-    }));
+    const updated = await getRequest(uid, id);
+    if (updated) {
+      set((s) => ({
+        requests: s.requests.map((r) => (r.id === id ? updated : r)),
+      }));
+    }
   },
 
   demoteToDraft: async (uid, id) => {
     await demoteToDraft(uid, id);
-    set((s) => ({
-      requests: s.requests.map((r) =>
-        r.id === id ? { ...r, status: "draft" } : r
-      ),
-    }));
+    const updated = await getRequest(uid, id);
+    if (updated) {
+      set((s) => ({
+        requests: s.requests.map((r) => (r.id === id ? updated : r)),
+      }));
+    }
   },
 
   deleteRequest: async (uid, id) => {

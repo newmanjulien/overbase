@@ -9,6 +9,10 @@ import {
   serializeScheduledDate,
 } from "@/lib/requestDates";
 
+function timestampToISO(ts: Timestamp | null | undefined): string | null {
+  return ts ? ts.toDate().toISOString() : null;
+}
+
 /**
  * Flat Request model (no step1/step2 nesting).
  */
@@ -20,9 +24,9 @@ export interface Request {
   q2: string;
   q3: string;
   status: "draft" | "active";
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  submittedAt?: Timestamp | null;
+  createdAt: string | null; // ISO string
+  updatedAt: string | null; // ISO string
+  submittedAt?: string | null;
 }
 
 export const requestConverter: FirestoreDataConverter<Request> = {
@@ -38,8 +42,8 @@ export const requestConverter: FirestoreDataConverter<Request> = {
       q2: request.q2,
       q3: request.q3,
       status: request.status,
-      createdAt: request.createdAt ?? null,
-      updatedAt: request.updatedAt ?? null,
+      createdAt: request.createdAt,
+      updatedAt: request.updatedAt,
       submittedAt: request.submittedAt ?? null,
     };
   },
@@ -61,9 +65,9 @@ export const requestConverter: FirestoreDataConverter<Request> = {
       q2: d.q2 ?? "",
       q3: d.q3 ?? "",
       status: d.status ?? "draft",
-      createdAt: d.createdAt,
-      updatedAt: d.updatedAt,
-      submittedAt: d.submittedAt ?? null,
+      createdAt: timestampToISO(d.createdAt),
+      updatedAt: timestampToISO(d.updatedAt),
+      submittedAt: timestampToISO(d.submittedAt),
     };
   },
 };

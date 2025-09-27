@@ -3,11 +3,7 @@
 import { Header } from "@/components/blocks/Header";
 import Calendar, { CalendarProps } from "./Calendar";
 import DataSection, { DataSectionProps } from "./DataSection";
-
-interface RequestOptions {
-  prefillDate?: Date | null;
-  mode?: "create" | "edit" | "editDraft";
-}
+import type { RequestOptions } from "./Client";
 
 interface RequestsProps {
   calendarProps: CalendarProps;
@@ -26,7 +22,7 @@ export function Requests({
         title="Requests"
         subtitle="Request data and manage your data requests in a way that aligns with your meetings and deadlines."
         buttonLabel="Request data"
-        onButtonClick={() => onRequestData({})}
+        onButtonClick={() => void onRequestData({})}
         buttonVariant="default"
         learnMoreLink="#"
       />

@@ -4,14 +4,8 @@ import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import QuestionsUI from "./Questions";
 import { useAuth } from "@/lib/auth";
-import {
-  getRequest,
-  saveDraft,
-  submitRequest,
-} from "@/lib/services/requestService";
-import { createRequestStore } from "@/lib/stores/useRequestStore";
-import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { createRequestFormStore } from "@/lib/stores/useRequestFormStore";
+import { useRequestListStore } from "@/lib/stores/useRequestListStore";
 
 interface QuestionsClientProps {
   requestId: string;
@@ -21,63 +15,52 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
-  // Create a store bound to this requestId
-  const useStore = useMemo(() => createRequestStore(requestId), [requestId]);
-  const { data, updateData, setAllData } = useStore();
+  // Per-request ephemeral form store (flat model)
+  const useFormStore = useMemo(
+    () => createRequestFormStore(requestId),
+    [requestId]
+  );
+  const { q1, q2, q3, setQ1, setQ2, setQ3 } = useFormStore();
 
-  // Hydrate once from Firestore if store is empty
+  // Global list store
+  const { requests, loadOne, updateActive, submitDraft } =
+    useRequestListStore();
+
+  // Hydrate request into global store
   useEffect(() => {
     if (!user) return;
-    if (data && (data.step1 || data.step2)) return;
-    (async () => {
-      const existing = await getRequest(user.uid, requestId);
-      if (existing) {
-        setAllData(existing);
-      } else {
-        router.push(`/dashboard/requests/${requestId}/setup`);
-      }
-    })();
-  }, [user, requestId, router, data, setAllData]);
+    loadOne(user.uid, requestId);
+  }, [user, requestId, loadOne]);
 
-  // Debounced saveDraft when answers change
+  // Seed form store values from existing request (if present)
+  useEffect(() => {
+    const existing = requests.find((r) => r.id === requestId);
+    if (!existing) {
+      router.push(`/dashboard/requests/${requestId}/setup`);
+      return;
+    }
+    if (!q1 && existing.q1) setQ1(existing.q1);
+    if (!q2 && existing.q2) setQ2(existing.q2);
+    if (!q3 && existing.q3) setQ3(existing.q3);
+  }, [requests, requestId, q1, q2, q3, setQ1, setQ2, setQ3, router]);
+
+  // Debounced auto-save for answers
   useEffect(() => {
     if (!user) return;
-
     const timeout = setTimeout(() => {
-      saveDraft(user.uid, requestId, {
-        ...data,
-        step1: {
-          prompt: data.step1?.prompt ?? "",
-          scheduledDate: data.step1?.scheduledDate ?? null,
-        },
-        step2: {
-          q1: data.step2?.q1 ?? "",
-          q2: data.step2?.q2 ?? "",
-          q3: data.step2?.q3 ?? "",
-        },
-      }).catch(() => {});
+      updateActive(user.uid, requestId, { q1, q2, q3 }).catch(() => {});
     }, 800);
-
     return () => clearTimeout(timeout);
-  }, [
-    data.step2?.q1,
-    data.step2?.q2,
-    data.step2?.q3,
-    data.step1?.prompt,
-    data.step1?.scheduledDate,
-    user,
-    requestId,
-    data,
-  ]);
+  }, [user, requestId, q1, q2, q3, updateActive]);
 
+  // Submit handler
   const handleSubmit = async (): Promise<void> => {
     if (!user) {
       alert("No Firebase user yet — please wait a moment and try again.");
       return;
     }
-
     try {
-      await submitRequest(user.uid, requestId, data);
+      await submitDraft(user.uid, requestId, { q1, q2, q3 });
       router.push("/dashboard/requests");
     } catch (err) {
       console.error("Save failed:", err);
@@ -95,12 +78,12 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
 
   return (
     <QuestionsUI
-      q1={data.step2?.q1 ?? ""}
-      q2={data.step2?.q2 ?? ""}
-      q3={data.step2?.q3 ?? ""}
-      setQ1={(val) => updateData("step2", { q1: val })}
-      setQ2={(val) => updateData("step2", { q2: val })}
-      setQ3={(val) => updateData("step2", { q3: val })}
+      q1={q1 ?? ""}
+      q2={q2 ?? ""}
+      q3={q3 ?? ""}
+      setQ1={setQ1}
+      setQ2={setQ2}
+      setQ3={setQ3}
       onSubmit={handleSubmit}
       onBack={handleBack}
       onHome={handleHome}
