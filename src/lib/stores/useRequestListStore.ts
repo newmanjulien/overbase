@@ -59,9 +59,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
   },
 
   createDraft: async (uid, data) => {
-    const draft = await createDraft(uid, data);
-    set((s) => ({ requests: [...s.requests, draft] }));
-    return draft;
+    return await createDraft(uid, data);
   },
 
   submitDraft: async (uid, id, data) => {
