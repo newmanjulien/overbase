@@ -2,11 +2,16 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { minSelectableDate, isBeforeDate } from "@/lib/requestDates";
+import {
+  minSelectableDate,
+  isBeforeDate,
+  fromDateKey,
+  isFutureDate,
+  type DateKey,
+} from "@/lib/requestDates";
 import Setup from "./Setup";
 
 import { useAuth } from "@/lib/auth";
-import { createRequestFormStore } from "@/lib/stores/useRequestFormStore";
 import { useRequestListStore } from "@/lib/stores/useRequestListStore";
 
 interface SetupClientProps {
@@ -23,11 +28,8 @@ export default function SetupClient({
   const router = useRouter();
   const { user } = useAuth();
 
-  const useFormStore = useMemo(
-    () => createRequestFormStore(requestId),
-    [requestId]
-  );
-  const { prompt, scheduledDate, setPrompt, setScheduledDate } = useFormStore();
+  const [prompt, setPrompt] = useState<string>("");
+  const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
 
   const {
     requests,
@@ -51,11 +53,10 @@ export default function SetupClient({
   useEffect(() => {
     if (didPrefill.current) return;
     if (prefillDate) {
-      const [y, m, d] = prefillDate.split("-").map(Number);
-      setScheduledDate(new Date(y, m - 1, d));
+      setScheduledDate(fromDateKey(prefillDate as DateKey));
       didPrefill.current = true;
     }
-  }, [prefillDate, setScheduledDate]);
+  }, [prefillDate]);
 
   // Load this request into the global store
   useEffect(() => {
@@ -91,6 +92,8 @@ export default function SetupClient({
     }
     if (!scheduledDate) {
       errs.scheduledDate = "Scheduled date is required.";
+    } else if (!isFutureDate(scheduledDate)) {
+      errs.scheduledDate = "Date must be in the future.";
     } else if (isBeforeDate(scheduledDate, minSelectableDateValue)) {
       errs.scheduledDate = "Date must be at least 2 days in the future.";
     }
