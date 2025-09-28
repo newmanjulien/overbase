@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QuestionsUI from "./Questions";
 import { useAuth } from "@/lib/auth";
-import { createRequestFormStore } from "@/lib/stores/useRequestFormStore";
 import { useRequestListStore } from "@/lib/stores/useRequestListStore";
 
 interface QuestionsClientProps {
@@ -15,12 +14,9 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
-  // Per-request ephemeral form store (flat model)
-  const useFormStore = useMemo(
-    () => createRequestFormStore(requestId),
-    [requestId]
-  );
-  const { q1, q2, q3, setQ1, setQ2, setQ3 } = useFormStore();
+  const [q1, setQ1] = useState<string>("");
+  const [q2, setQ2] = useState<string>("");
+  const [q3, setQ3] = useState<string>("");
 
   // Global list store
   const { requests, loadOne, updateActive, submitDraft, deleteRequest } =
@@ -32,7 +28,6 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
     loadOne(user.uid, requestId);
   }, [user, requestId, loadOne]);
 
-  // Seed form store values from existing request (if present)
   useEffect(() => {
     const existing = requests.find((r) => r.id === requestId);
     if (!existing) {
@@ -42,7 +37,7 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
     if (!q1 && existing.q1) setQ1(existing.q1);
     if (!q2 && existing.q2) setQ2(existing.q2);
     if (!q3 && existing.q3) setQ3(existing.q3);
-  }, [requests, requestId, q1, q2, q3, setQ1, setQ2, setQ3, router]);
+  }, [requests, requestId, q1, q2, q3, router]);
 
   // Debounced auto-save for answers
   useEffect(() => {
