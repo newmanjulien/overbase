@@ -81,18 +81,27 @@ export async function submitDraft(
   data: Partial<Request>
 ): Promise<void> {
   const ref = doc(db, "users", uid, "requests", requestId);
-  await updateDoc(ref, {
-    prompt: data.prompt ?? "",
-    q1: data.q1 ?? "",
-    q2: data.q2 ?? "",
-    q3: data.q3 ?? "",
-    scheduledDate: data.scheduledDate
-      ? serializeScheduledDate(data.scheduledDate)
-      : null,
+  const snap = await getDoc(ref.withConverter(requestConverter));
+  if (!snap.exists()) return;
+  const existing = snap.data();
+
+  const update: any = {
     status: "active",
     updatedAt: serverTimestamp(),
     submittedAt: serverTimestamp(),
-  });
+  };
+
+  if (data.prompt !== undefined) update.prompt = data.prompt;
+  if (data.q1 !== undefined) update.q1 = data.q1;
+  if (data.q2 !== undefined) update.q2 = data.q2;
+  if (data.q3 !== undefined) update.q3 = data.q3;
+  if (data.scheduledDate !== undefined) {
+    update.scheduledDate = data.scheduledDate
+      ? serializeScheduledDate(data.scheduledDate)
+      : null;
+  }
+
+  await updateDoc(ref, update);
 }
 
 /**
@@ -104,16 +113,25 @@ export async function updateActive(
   data: Partial<Request>
 ): Promise<void> {
   const ref = doc(db, "users", uid, "requests", requestId);
-  await updateDoc(ref, {
-    prompt: data.prompt ?? "",
-    q1: data.q1 ?? "",
-    q2: data.q2 ?? "",
-    q3: data.q3 ?? "",
-    scheduledDate: data.scheduledDate
-      ? serializeScheduledDate(data.scheduledDate)
-      : null,
+  const snap = await getDoc(ref.withConverter(requestConverter));
+  if (!snap.exists()) return;
+  const existing = snap.data();
+
+  const update: any = {
     updatedAt: serverTimestamp(),
-  });
+  };
+
+  if (data.prompt !== undefined) update.prompt = data.prompt;
+  if (data.q1 !== undefined) update.q1 = data.q1;
+  if (data.q2 !== undefined) update.q2 = data.q2;
+  if (data.q3 !== undefined) update.q3 = data.q3;
+  if (data.scheduledDate !== undefined) {
+    update.scheduledDate = data.scheduledDate
+      ? serializeScheduledDate(data.scheduledDate)
+      : null;
+  }
+
+  await updateDoc(ref, update);
 }
 
 /**
