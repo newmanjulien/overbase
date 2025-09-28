@@ -35,10 +35,11 @@ Empty = `""`.
   - Defines the canonical `Request` type.
   - **Reads (`fromFirestore`)**:
     - `scheduledDate`: convert `"yyyy-MM-dd"` string → `Date`.
-  - **Writes (`toFirestore`)**:
-    - `scheduledDate`: convert `Date` → `"yyyy-MM-dd"` string.
+  - **Writes: handled only in services.**:
+    - toFirestore is disabled (throws if used) to enforce consistency.
 
 - **Service Layer (`requestService.ts`)**
+
   - Responsible for all persistence-side normalization.
   - **On write**:
     - Always serialize `scheduledDate` before sending to Firestore.
@@ -113,3 +114,7 @@ scheduledDate: serializeScheduledDate(date),
 
 **Text fields as undefineds**:
 Firestore rejects undefined. Use "" for empty strings.
+
+**Using converter for writes**:
+// ❌ Wrong
+setDoc(ref.withConverter(requestConverter), request)

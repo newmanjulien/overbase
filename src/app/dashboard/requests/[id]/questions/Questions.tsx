@@ -14,6 +14,7 @@ interface QuestionsProps {
   onSubmit: () => void | Promise<void>;
   onBack: () => void | Promise<void>;
   onHome: () => void | Promise<void>;
+  onDelete: () => void | Promise<void>;
 }
 
 export default function Questions({

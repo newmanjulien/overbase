@@ -113,22 +113,40 @@ export default function SetupClient({
 
   const handleCancel = async (): Promise<void> => {
     if (mode === "create") {
+      const confirmed = window.confirm(
+        "Are you sure you want to cancel this draft request? This will delete the draft and cannot be undone"
+      );
+      if (!confirmed) return;
       if (user) {
-        await deleteRequest(user.uid, requestId); // hard delete draft but not active
+        await deleteRequest(user.uid, requestId);
       }
     }
-    router.push("/dashboard/requests"); // always go back to list
+    router.push("/dashboard/requests");
   };
 
   const handleDelete = async (): Promise<void> => {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this request?"
+    );
+    if (!confirmed) return;
     if (user) {
-      await deleteRequest(user.uid, requestId); // always delete
+      await deleteRequest(user.uid, requestId);
     }
     router.push("/dashboard/requests");
   };
 
   const handleHome = async (): Promise<void> => {
+    const existing = requests.find((r) => r.id === requestId);
+
+    if (existing?.status === "draft" && !existing?.scheduledDate) {
+      alert(
+        "This draft has no scheduled date.\n\nPlease add a scheduled date before leaving, or cancel this draft instead."
+      );
+      return;
+    }
+
     router.push("/dashboard/requests");
+    return;
   };
 
   const handleStatusChange = async (val: "draft" | "active") => {

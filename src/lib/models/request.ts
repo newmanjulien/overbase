@@ -30,22 +30,10 @@ export interface Request {
 }
 
 export const requestConverter: FirestoreDataConverter<Request> = {
-  toFirestore(request: Request) {
-    return {
-      id: request.id,
-      prompt: request.prompt,
-      // Store as "yyyy-MM-dd" string (stable, time-zone-safe for calendar)
-      scheduledDate: request.scheduledDate
-        ? serializeScheduledDate(request.scheduledDate)
-        : null,
-      q1: request.q1,
-      q2: request.q2,
-      q3: request.q3,
-      status: request.status,
-      createdAt: request.createdAt,
-      updatedAt: request.updatedAt,
-      submittedAt: request.submittedAt ?? null,
-    };
+  toFirestore() {
+    throw new Error(
+      "Writes must go through requestService (services serialize on write)."
+    );
   },
 
   fromFirestore(

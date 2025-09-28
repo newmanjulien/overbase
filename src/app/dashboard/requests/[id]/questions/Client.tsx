@@ -23,7 +23,7 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
   const { q1, q2, q3, setQ1, setQ2, setQ3 } = useFormStore();
 
   // Global list store
-  const { requests, loadOne, updateActive, submitDraft } =
+  const { requests, loadOne, updateActive, submitDraft, deleteRequest } =
     useRequestListStore();
 
   // Hydrate request into global store
@@ -72,6 +72,17 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
     router.push(`/dashboard/requests/${requestId}/setup`);
   };
 
+  const handleDelete = async (): Promise<void> => {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this request?"
+    );
+    if (!confirmed) return;
+    if (user) {
+      await deleteRequest(user.uid, requestId);
+    }
+    router.push("/dashboard/requests");
+  };
+
   const handleHome = async (): Promise<void> => {
     router.push("/dashboard/requests");
   };
@@ -87,6 +98,7 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
       onSubmit={handleSubmit}
       onBack={handleBack}
       onHome={handleHome}
+      onDelete={handleDelete}
     />
   );
 }
