@@ -4,10 +4,7 @@ import {
   SnapshotOptions,
   Timestamp,
 } from "firebase/firestore";
-import {
-  deserializeScheduledDate,
-  serializeScheduledDate,
-} from "@/lib/requestDates";
+import { deserializeScheduledDate } from "@/lib/requestDates";
 
 function timestampToISO(ts: Timestamp | null | undefined): string | null {
   return ts ? ts.toDate().toISOString() : null;
@@ -29,6 +26,23 @@ export interface Request {
   submittedAt?: string | null;
 }
 
+/**
+ * Raw Firestore shape before conversion.
+ * scheduledDate is stored as a "yyyy-MM-dd" string.
+ * createdAt/updatedAt/submittedAt are Firestore Timestamps.
+ */
+type FirestoreRequestData = {
+  prompt?: string;
+  scheduledDate?: string;
+  q1?: string;
+  q2?: string;
+  q3?: string;
+  status?: "draft" | "active";
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+  submittedAt?: Timestamp;
+};
+
 export const requestConverter: FirestoreDataConverter<Request> = {
   toFirestore() {
     throw new Error(
@@ -40,7 +54,7 @@ export const requestConverter: FirestoreDataConverter<Request> = {
     snap: QueryDocumentSnapshot,
     options: SnapshotOptions
   ): Request {
-    const d = snap.data(options) as any;
+    const d = snap.data(options) as FirestoreRequestData;
 
     return {
       id: snap.id,
