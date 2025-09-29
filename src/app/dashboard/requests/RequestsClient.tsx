@@ -37,9 +37,16 @@ export default function RequestsClient() {
   const { requests, createDraft, subscribe } = useRequestListStore();
 
   useEffect(() => {
-    if (!user) return;
-    const unsub = subscribe(user.uid);
-    return () => unsub();
+    if (!user?.uid) {
+      console.warn("RequestsClient: skipping subscribe (invalid uid)", user);
+      return;
+    }
+    try {
+      const unsub = subscribe(user.uid);
+      return () => unsub();
+    } catch (err) {
+      console.error("RequestsClient: subscribe failed", err);
+    }
   }, [user?.uid, subscribe]);
 
   if (!user) {
