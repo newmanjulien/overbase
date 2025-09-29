@@ -43,8 +43,12 @@ export default function RequestsClient() {
   }, [user?.uid, subscribe]);
 
   if (!user) {
-    // Defensive guard: no user yet, render empty
-    return null;
+    return (
+      <div className="p-6 text-center text-gray-600">
+        ⚠️ No authenticated user. Please check your Firebase setup or try again
+        later.
+      </div>
+    );
   }
 
   const requestsByDate = useMemo(() => {
