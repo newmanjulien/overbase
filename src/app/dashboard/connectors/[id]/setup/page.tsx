@@ -1,4 +1,4 @@
-import SetupClient from "./Client";
+import SetupClient from "./SetupClient";
 import { connectors } from "../../DummyData";
 
 interface SetupPageProps {

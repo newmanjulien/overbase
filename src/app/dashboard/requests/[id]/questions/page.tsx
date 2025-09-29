@@ -1,4 +1,4 @@
-import QuestionsClient from "./Client";
+import QuestionsClient from "./QuestionsClient";
 
 interface QuestionsPageProps {
   params: { id: string };

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import type { RequestItem } from "./Client";
+import type { RequestItem } from "./RequestsClient";
 
 import { addMonths, subMonths } from "date-fns";
 import {

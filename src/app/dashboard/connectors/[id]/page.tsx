@@ -1,5 +1,5 @@
 import { connectors } from "../DummyData";
-import OverviewClient from "./Client";
+import OverviewClient from "./OverviewClient";
 
 interface ConnectorOverviewPageProps {
   params: {

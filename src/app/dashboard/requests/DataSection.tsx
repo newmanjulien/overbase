@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/blocks/EmptyState";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 
-import type { RequestItem } from "./Client";
+import type { RequestItem } from "./RequestsClient";
 import Link from "next/link";
 
 import { analyzeDate } from "@/lib/requestDates";

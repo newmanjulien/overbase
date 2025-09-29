@@ -3,7 +3,7 @@
 import { Header } from "@/components/blocks/Header";
 import Calendar, { CalendarProps } from "./Calendar";
 import DataSection, { DataSectionProps } from "./DataSection";
-import type { RequestOptions } from "./Client";
+import type { RequestOptions } from "./RequestsClient";
 
 interface RequestsProps {
   calendarProps: CalendarProps;

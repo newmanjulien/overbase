@@ -39,20 +39,6 @@
 
 ---
 
-## 🔹 Auto-Save
-
-✅ **DO**
-
-- Persist form values to Firestore with **debounce** (e.g. 800ms).
-- Ensure data is always recoverable after a refresh.
-
-❌ **DON’T**
-
-- Require the user to explicitly “Save draft.”
-- Allow edits to linger unsaved in local state.
-
----
-
 ## 🔹 Local Form Inputs
 
 ✅ **DO**
@@ -65,6 +51,20 @@
 
 - Bind form inputs directly to store state (too chatty, introduces lag).
 - Push every keystroke straight to Firestore.
+
+---
+
+## 🔹 Auto-Save
+
+✅ **DO**
+
+- Persist form values to Firestore with **debounce** (e.g. 800ms).
+- Ensure data is always recoverable after a refresh.
+
+❌ **DON’T**
+
+- Require the user to explicitly “Save draft.”
+- Allow edits to linger unsaved in local state.
 
 ---
 
