@@ -33,12 +33,16 @@ export default function RequestsClient() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(initialToday);
   const [currentDate, setCurrentDate] = useState<Date>(initialToday);
 
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { requests, createDraft, subscribe } = useRequestListStore();
 
   useEffect(() => {
+    if (loading) {
+      console.log("RequestsClient: waiting for auth to finish...");
+      return;
+    }
     if (!user?.uid) {
-      console.warn("RequestsClient: skipping subscribe (invalid uid)", user);
+      console.warn("RequestsClient: no valid uid after loading", user);
       return;
     }
     try {
@@ -47,7 +51,11 @@ export default function RequestsClient() {
     } catch (err) {
       console.error("RequestsClient: subscribe failed", err);
     }
-  }, [user?.uid, subscribe]);
+  }, [user?.uid, loading, subscribe]);
+
+  if (loading) {
+    return <div className="p-6 text-center">Loading requests…</div>;
+  }
 
   if (!user) {
     return (
