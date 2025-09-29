@@ -53,10 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsub();
   }, []);
 
-  if (state.loading) {
-    return <div>Loading user...</div>;
-  }
-
   return <AuthCtx.Provider value={state}>{children}</AuthCtx.Provider>;
 }
 
