@@ -15,6 +15,9 @@ interface QuestionsProps {
   onBack: () => void | Promise<void>;
   onHome: () => void | Promise<void>;
   onDelete: () => void | Promise<void>;
+  status: "draft" | "active";
+  setStatus?: (val: "draft" | "active") => void;
+  mode: "create" | "edit" | "editDraft";
 }
 
 export default function Questions({
@@ -27,6 +30,10 @@ export default function Questions({
   onSubmit,
   onBack,
   onHome,
+  onDelete,
+  status,
+  setStatus,
+  mode,
 }: QuestionsProps) {
   return (
     <SetupLayout
@@ -34,6 +41,18 @@ export default function Questions({
       sidebarBackText="Back to requests"
       onSidebarBack={onHome}
       sidebarTitle="Answer 3 short questions"
+      // Conditional UI elements
+      {...(mode !== "create" &&
+        setStatus && {
+          sidebarActionText: "Delete request",
+          onSidebarAction: onDelete,
+          toggleValue: status,
+          onToggleChange: (val) => void setStatus(val as "draft" | "active"),
+          toggleOptions: [
+            { value: "draft", label: "Draft" },
+            { value: "active", label: "Active" },
+          ],
+        })}
       // Main
       title="Answer 3 questions"
       subtitle="Provide details to complete your request."

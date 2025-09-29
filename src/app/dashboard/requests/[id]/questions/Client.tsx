@@ -8,9 +8,13 @@ import { useRequestListStore } from "@/lib/stores/useRequestListStore";
 
 interface QuestionsClientProps {
   requestId: string;
+  mode: "create" | "edit" | "editDraft";
 }
 
-export default function QuestionsClient({ requestId }: QuestionsClientProps) {
+export default function QuestionsClient({
+  requestId,
+  mode,
+}: QuestionsClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -19,8 +23,15 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
   const [q3, setQ3] = useState<string>("");
 
   // Global list store
-  const { requests, loadOne, updateActive, submitDraft, deleteRequest } =
-    useRequestListStore();
+  const {
+    requests,
+    loadOne,
+    updateActive,
+    submitDraft,
+    deleteRequest,
+    promoteToActive,
+    demoteToDraft,
+  } = useRequestListStore();
 
   // Hydrate request into global store
   useEffect(() => {
@@ -64,7 +75,7 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
   };
 
   const handleBack = async (): Promise<void> => {
-    router.push(`/dashboard/requests/${requestId}/setup`);
+    router.push(`/dashboard/requests/${requestId}/setup?mode=${mode}`);
   };
 
   const handleDelete = async (): Promise<void> => {
@@ -82,6 +93,15 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
     router.push("/dashboard/requests");
   };
 
+  const handleStatusChange = async (val: "draft" | "active") => {
+    if (!user) return;
+    if (val === "active") await promoteToActive(user.uid, requestId);
+    else await demoteToDraft(user.uid, requestId);
+  };
+
+  const existing = requests.find((r) => r.id === requestId);
+  const status = existing?.status ?? "draft";
+
   return (
     <QuestionsUI
       q1={q1 ?? ""}
@@ -94,6 +114,9 @@ export default function QuestionsClient({ requestId }: QuestionsClientProps) {
       onBack={handleBack}
       onHome={handleHome}
       onDelete={handleDelete}
+      status={status}
+      setStatus={mode !== "create" ? handleStatusChange : undefined}
+      mode={mode}
     />
   );
 }

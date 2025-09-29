@@ -111,7 +111,7 @@ export default function SetupClient({
       prompt: prompt ?? "",
       scheduledDate: scheduledDate ?? null,
     });
-    router.push(`/dashboard/requests/${requestId}/questions`);
+    router.push(`/dashboard/requests/${requestId}/questions?mode=${mode}`);
   };
 
   const handleCancel = async (): Promise<void> => {
