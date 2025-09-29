@@ -2,11 +2,11 @@ import SetupClient from "./SetupClient";
 import { connectors } from "../../DummyData";
 
 interface SetupPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function SetupPage({ params }: SetupPageProps) {
-  const { id } = params; // ✅ synchronous object
+export default async function SetupPage({ params }: SetupPageProps) {
+  const { id } = await params; // ✅ synchronous object
 
   // Find the connector by ID
   const connector = connectors.find((i) => i.id === id);
