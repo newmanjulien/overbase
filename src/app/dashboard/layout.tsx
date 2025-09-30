@@ -29,7 +29,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     { href: "/dashboard/requests", label: "Requests" },
     { href: "/dashboard/templates", label: "Templates" },
     { href: "/dashboard/connectors", label: "Connectors" },
-    { href: "/dashboard/colleagues", label: "Colleagues" },
     { href: "/dashboard/customers", label: "Customers" },
   ];
 
