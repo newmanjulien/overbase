@@ -7,6 +7,7 @@ import {
   isBeforeDate,
   fromDateKey,
   isFutureDate,
+  toDateKey,
   type DateKey,
 } from "@/lib/requestDates";
 import Setup from "./Setup";
@@ -111,7 +112,10 @@ export default function SetupClient({
       prompt: prompt ?? "",
       scheduledDate: scheduledDate ?? null,
     });
-    router.push(`/dashboard/requests/${requestId}/questions?mode=${mode}`);
+    const dateParam = scheduledDate ? `&date=${toDateKey(scheduledDate)}` : "";
+    router.push(
+      `/dashboard/requests/${requestId}/questions?mode=${mode}${dateParam}`
+    );
   };
 
   const handleCancel = async (): Promise<void> => {
@@ -124,7 +128,8 @@ export default function SetupClient({
         await deleteRequest(user.uid, requestId);
       }
     }
-    router.push("/dashboard/requests");
+    const dateParam = scheduledDate ? `?date=${toDateKey(scheduledDate)}` : "";
+    router.push(`/dashboard/requests${dateParam}`);
   };
 
   const handleDelete = async (): Promise<void> => {
@@ -135,7 +140,8 @@ export default function SetupClient({
     if (user) {
       await deleteRequest(user.uid, requestId);
     }
-    router.push("/dashboard/requests");
+    const dateParam = scheduledDate ? `?date=${toDateKey(scheduledDate)}` : "";
+    router.push(`/dashboard/requests${dateParam}`);
   };
 
   const handleHome = async (): Promise<void> => {
@@ -148,7 +154,10 @@ export default function SetupClient({
       return;
     }
 
-    router.push("/dashboard/requests");
+    const dateParam = existing?.scheduledDate
+      ? `?date=${toDateKey(existing.scheduledDate)}`
+      : "";
+    router.push(`/dashboard/requests${dateParam}`);
     return;
   };
 
