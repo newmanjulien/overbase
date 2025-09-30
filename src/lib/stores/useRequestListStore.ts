@@ -15,7 +15,7 @@ import {
 import { subscribeToRequestList } from "@/lib/services/requestSubscriptions";
 
 interface RequestListState {
-  requests: Request[];
+  requests: Record<string, Request>;
   drafts: () => Request[];
   actives: () => Request[];
   subscribe: (uid: string) => () => void;
@@ -41,20 +41,23 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
   subscribe: (uid: string) => {
     const unsub = subscribeToRequestList(uid, (items) => {
-      set({ requests: items });
+      const map = Object.fromEntries(items.map((r) => [r.id, r]));
+      set({ requests: map });
     });
     return unsub;
   },
 
-  drafts: () => get().requests.filter((r) => r.status === "draft"),
-  actives: () => get().requests.filter((r) => r.status === "active"),
+  drafts: () =>
+    Object.values(get().requests).filter((r) => r.status === "draft"),
+  actives: () =>
+    Object.values(get().requests).filter((r) => r.status === "active"),
 
   // Keep this for deep-link fetch (before subscription is ready)
   loadOne: async (uid, id) => {
     const req = await getRequest(uid, id);
     if (req) {
       set((s) => ({
-        requests: [...s.requests.filter((r) => r.id !== id), req],
+        requests: { ...s.requests, [id]: req },
       }));
     }
   },
@@ -65,23 +68,16 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
   submitDraft: async (uid, id, data) => {
     await submitDraft(uid, id, data);
-
-    // Optimistic update: apply submitted answers immediately
     set((s) => ({
-      requests: s.requests.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              prompt: data.prompt ?? r.prompt ?? "",
-              q1: data.q1 ?? r.q1 ?? "",
-              q2: data.q2 ?? r.q2 ?? "",
-              q3: data.q3 ?? r.q3 ?? "",
-              scheduledDate: data.scheduledDate ?? r.scheduledDate ?? null,
-              status: "active",
-              submittedAt: new Date().toISOString(),
-            }
-          : r
-      ),
+      requests: {
+        ...s.requests,
+        [id]: {
+          ...s.requests[id],
+          ...data,
+          status: "active",
+          submittedAt: new Date().toISOString(),
+        },
+      },
     }));
   },
 
@@ -90,19 +86,19 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
     // Optimistic update: reflect field changes instantly
     set((s) => ({
-      requests: s.requests.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              prompt: data.prompt ?? r.prompt ?? "",
-              q1: data.q1 ?? r.q1 ?? "",
-              q2: data.q2 ?? r.q2 ?? "",
-              q3: data.q3 ?? r.q3 ?? "",
-              scheduledDate: data.scheduledDate ?? r.scheduledDate ?? null,
-              updatedAt: new Date().toISOString(),
-            }
-          : r
-      ),
+      requests: {
+        ...s.requests,
+        [id]: {
+          ...s.requests[id],
+          prompt: data.prompt ?? s.requests[id].prompt ?? "",
+          q1: data.q1 ?? s.requests[id].q1 ?? "",
+          q2: data.q2 ?? s.requests[id].q2 ?? "",
+          q3: data.q3 ?? s.requests[id].q3 ?? "",
+          scheduledDate:
+            data.scheduledDate ?? s.requests[id].scheduledDate ?? null,
+          updatedAt: new Date().toISOString(),
+        },
+      },
     }));
   },
 
@@ -112,15 +108,14 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
     // Optimistic update
     set((s) => ({
-      requests: s.requests.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status: "active",
-              submittedAt: new Date().toISOString(),
-            }
-          : r
-      ),
+      requests: {
+        ...s.requests,
+        [id]: {
+          ...s.requests[id],
+          status: "active",
+          submittedAt: new Date().toISOString(),
+        },
+      },
     }));
   },
 
@@ -130,22 +125,22 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
     // Optimistic update
     set((s) => ({
-      requests: s.requests.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status: "draft",
-            }
-          : r
-      ),
+      requests: {
+        ...s.requests,
+        [id]: {
+          ...s.requests[id],
+          status: "draft",
+        },
+      },
     }));
   },
 
   deleteRequest: async (uid, id) => {
     await deleteRequest(uid, id);
     // Local prune makes UI snappier while waiting for snapshot
-    set((s) => ({
-      requests: s.requests.filter((r) => r.id !== id),
-    }));
+    set((s) => {
+      const { [id]: _, ...rest } = s.requests;
+      return { requests: rest };
+    });
   },
 }));
