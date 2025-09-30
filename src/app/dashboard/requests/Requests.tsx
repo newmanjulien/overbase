@@ -20,7 +20,7 @@ export function Requests({
     <div className="min-h-screen">
       <Header
         title="Requests"
-        subtitle="Request data and manage your data requests in a way that aligns with your meetings and deadlines."
+        subtitle="Request data in a way that aligns with your meetings and deadlines."
         buttonLabel="Request data"
         onButtonClick={() => void onRequestData({})}
         buttonVariant="default"

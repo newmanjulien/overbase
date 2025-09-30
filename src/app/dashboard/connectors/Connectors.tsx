@@ -23,7 +23,7 @@ export function Connectors({
     <div className="min-h-screen">
       <Header
         title="Connectors"
-        subtitle="Set up connectors so we can automatically get data from all your sources."
+        subtitle="Set up connectors to any data source so we can collect the data you request."
         buttonLabel="Browse connectors"
         onButtonClick={onBrowseClick}
         buttonVariant="outline"
