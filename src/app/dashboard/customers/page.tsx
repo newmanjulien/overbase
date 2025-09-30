@@ -14,9 +14,9 @@ interface Customer {
 }
 
 const mockCustomers: Customer[] = [
-  { id: "101", name: "Emily Carter", company: "Acme Corp" },
-  { id: "102", name: "David Lee", company: "Globex Inc" },
-  { id: "103", name: "Olivia Martinez", company: "Initech" },
+  { id: "101", name: "Acme Corp", company: "$100,000 ACV" },
+  { id: "102", name: "Globex Inc", company: "$150,000 ACV" },
+  { id: "103", name: "Initech", company: "$700,000 ACV" },
 ];
 
 function CustomersLayout() {
@@ -49,7 +49,7 @@ function CustomersLayout() {
     <div className="min-h-screen">
       <Header
         title="Customers"
-        subtitle="Add customers who you want us to consult while collecting data for you or who you want us to send data to."
+        subtitle="Add customers who you want to request data about."
         buttonLabel="Add customer"
         onButtonClick={() => {}}
         buttonVariant="default"
@@ -117,7 +117,7 @@ function CustomersLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="We can contact customers on your behalf when we're collecting data for your requests"
+            text="You can easily request data about customers after having added and set them up here."
             linkText="Request data"
             onClick={() => router.push("/dashboard/requests")}
           />

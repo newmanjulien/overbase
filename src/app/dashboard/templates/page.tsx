@@ -19,13 +19,13 @@ function Templates() {
   const gridTitle = selectedTagData?.header ?? "Explore Templates";
   const gridSubtitle =
     selectedTagData?.subheader ??
-    "Easily apply templates created by your organization and which your colleagues are already using.";
+    "Use templates your colleagues are already using.";
 
   return (
     <div className="min-h-screen">
       <Header
         title="Templates"
-        subtitle="Easily apply templates created by your organization and which your colleagues are already usingy."
+        subtitle="Use templates your colleagues are already using."
         learnMoreLink="#"
       />
 
