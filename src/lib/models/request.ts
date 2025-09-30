@@ -66,7 +66,7 @@ export const requestConverter: FirestoreDataConverter<Request> = {
       q1: d.q1 ?? "",
       q2: d.q2 ?? "",
       q3: d.q3 ?? "",
-      status: d.status ?? "draft",
+      status: d.status === "active" ? "active" : "draft",
       createdAt: timestampToISO(d.createdAt),
       updatedAt: timestampToISO(d.updatedAt),
       submittedAt: timestampToISO(d.submittedAt),

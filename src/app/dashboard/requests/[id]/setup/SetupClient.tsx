@@ -66,7 +66,7 @@ export default function SetupClient({
 
   // Seed form if empty
   useEffect(() => {
-    const existing = requests.find((r) => r.id === requestId);
+    const existing = requests[requestId];
     if (!existing) return;
     if (!prompt && existing.prompt) setPrompt(existing.prompt);
     if (!scheduledDate && existing.scheduledDate)
@@ -139,7 +139,7 @@ export default function SetupClient({
   };
 
   const handleHome = async (): Promise<void> => {
-    const existing = requests.find((r) => r.id === requestId);
+    const existing = requests[requestId];
 
     if (existing?.status === "draft" && !existing?.scheduledDate) {
       alert(
@@ -158,7 +158,7 @@ export default function SetupClient({
     else await demoteToDraft(user.uid, requestId);
   };
 
-  const existing = requests.find((r) => r.id === requestId);
+  const existing = requests[requestId];
   const status = existing?.status ?? "draft";
 
   return (

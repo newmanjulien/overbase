@@ -40,7 +40,7 @@ export default function QuestionsClient({
   }, [user, requestId, loadOne]);
 
   useEffect(() => {
-    const existing = requests.find((r) => r.id === requestId);
+    const existing = requests[requestId];
     if (!existing) {
       router.push(`/dashboard/requests/${requestId}/setup`);
       return;
@@ -99,7 +99,7 @@ export default function QuestionsClient({
     else await demoteToDraft(user.uid, requestId);
   };
 
-  const existing = requests.find((r) => r.id === requestId);
+  const existing = requests[requestId];
   const status = existing?.status ?? "draft";
 
   return (
