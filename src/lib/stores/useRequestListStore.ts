@@ -12,12 +12,38 @@ import {
   getRequest,
 } from "@/lib/services/requestService";
 
+import { toDateKey } from "@/lib/requestDates";
+
 import { subscribeToRequestList } from "@/lib/services/requestSubscriptions";
+
+function buildRequestsByDate(
+  requests: Record<string, Request>
+): Record<string, Request[]> {
+  const map: Record<string, Request[]> = {};
+  for (const r of Object.values(requests)) {
+    if (!r.scheduledDate) continue;
+    const key = toDateKey(r.scheduledDate);
+    (map[key] ??= []).push(r);
+  }
+  return map;
+}
+
+function updateRequests(
+  requests: Record<string, Request>,
+  id: string,
+  patch: Partial<Request>
+): Record<string, Request> {
+  const prev = requests[id];
+  if (!prev) return requests; // nothing to update
+
+  // Build a complete Request, so TS type-checks the shape
+  const next: Request = { ...prev, ...patch };
+  return { ...requests, [id]: next };
+}
 
 interface RequestListState {
   requests: Record<string, Request>;
-  requestsByDate: Record<string, Request[]>; // ✅ new field
-
+  requestsByDate: Record<string, Request[]>;
   drafts: () => Request[];
   actives: () => Request[];
   subscribe: (uid: string) => () => void;
@@ -40,11 +66,12 @@ interface RequestListState {
 
 export const useRequestListStore = create<RequestListState>((set, get) => ({
   requests: {},
+  requestsByDate: {},
 
   subscribe: (uid: string) => {
     const unsub = subscribeToRequestList(uid, (items) => {
       const map = Object.fromEntries(items.map((r) => [r.id, r]));
-      set({ requests: map });
+      set({ requests: map, requestsByDate: buildRequestsByDate(map) });
     });
     return unsub;
   },
@@ -58,9 +85,13 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
   loadOne: async (uid, id) => {
     const req = await getRequest(uid, id);
     if (req) {
-      set((s) => ({
-        requests: { ...s.requests, [id]: req },
-      }));
+      set((s) => {
+        const updated = { ...s.requests, [id]: req };
+        return {
+          requests: updated,
+          requestsByDate: buildRequestsByDate(updated),
+        };
+      });
     }
   },
 
@@ -70,38 +101,38 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
   submitDraft: async (uid, id, data) => {
     await submitDraft(uid, id, data);
-    set((s) => ({
-      requests: {
-        ...s.requests,
-        [id]: {
-          ...s.requests[id],
-          ...data,
-          status: "active",
-          submittedAt: new Date().toISOString(),
-        },
-      },
-    }));
+
+    set((s) => {
+      const updated = updateRequests(s.requests, id, {
+        ...data,
+        status: "active", // explicit union member
+        submittedAt: new Date().toISOString(),
+      });
+      return {
+        requests: updated,
+        requestsByDate: buildRequestsByDate(updated),
+      };
+    });
   },
 
   updateActive: async (uid, id, data) => {
     await updateActive(uid, id, data);
 
     // Optimistic update: reflect field changes instantly
-    set((s) => ({
-      requests: {
-        ...s.requests,
-        [id]: {
-          ...s.requests[id],
-          prompt: data.prompt ?? s.requests[id].prompt ?? "",
-          q1: data.q1 ?? s.requests[id].q1 ?? "",
-          q2: data.q2 ?? s.requests[id].q2 ?? "",
-          q3: data.q3 ?? s.requests[id].q3 ?? "",
-          scheduledDate:
-            data.scheduledDate ?? s.requests[id].scheduledDate ?? null,
-          updatedAt: new Date().toISOString(),
-        },
-      },
-    }));
+    set((s) => {
+      const updated = updateRequests(s.requests, id, {
+        prompt: data.prompt ?? s.requests[id].prompt,
+        q1: data.q1 ?? s.requests[id].q1,
+        q2: data.q2 ?? s.requests[id].q2,
+        q3: data.q3 ?? s.requests[id].q3,
+        scheduledDate: data.scheduledDate ?? s.requests[id].scheduledDate,
+        updatedAt: new Date().toISOString(),
+      });
+      return {
+        requests: updated,
+        requestsByDate: buildRequestsByDate(updated),
+      };
+    });
   },
 
   promoteToActive: async (uid, id) => {
@@ -109,16 +140,16 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     await promoteToActive(uid, id);
 
     // Optimistic update
-    set((s) => ({
-      requests: {
-        ...s.requests,
-        [id]: {
-          ...s.requests[id],
-          status: "active",
-          submittedAt: new Date().toISOString(),
-        },
-      },
-    }));
+    set((s) => {
+      const updated = updateRequests(s.requests, id, {
+        status: "active",
+        submittedAt: new Date().toISOString(),
+      });
+      return {
+        requests: updated,
+        requestsByDate: buildRequestsByDate(updated),
+      };
+    });
   },
 
   demoteToDraft: async (uid, id) => {
@@ -126,15 +157,15 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     await demoteToDraft(uid, id);
 
     // Optimistic update
-    set((s) => ({
-      requests: {
-        ...s.requests,
-        [id]: {
-          ...s.requests[id],
-          status: "draft",
-        },
-      },
-    }));
+    set((s) => {
+      const updated = updateRequests(s.requests, id, {
+        status: "draft",
+      });
+      return {
+        requests: updated,
+        requestsByDate: buildRequestsByDate(updated),
+      };
+    });
   },
 
   deleteRequest: async (uid, id) => {
@@ -142,7 +173,10 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     // Local prune makes UI snappier while waiting for snapshot
     set((s) => {
       const { [id]: _, ...rest } = s.requests;
-      return { requests: rest };
+      return {
+        requests: rest,
+        requestsByDate: buildRequestsByDate(rest),
+      };
     });
   },
 }));

@@ -34,7 +34,7 @@ export default function RequestsClient() {
   const [currentDate, setCurrentDate] = useState<Date>(initialToday);
 
   const { user, loading } = useAuth();
-  const { requests, createDraft, subscribe } = useRequestListStore();
+  const { requestsByDate, createDraft, subscribe } = useRequestListStore();
 
   useEffect(() => {
     if (loading) return;
@@ -49,24 +49,6 @@ export default function RequestsClient() {
       console.error("RequestsClient: subscribe failed", err);
     }
   }, [user?.uid, loading, subscribe]);
-
-  const requestsByDate = useMemo(() => {
-    const map: Record<string, RequestItem[]> = {};
-    for (const r of Object.values(requests)) {
-      if (!r.scheduledDate) continue;
-      const key = toDateKey(r.scheduledDate);
-      (map[key] ??= []).push({
-        id: r.id,
-        prompt: r.prompt,
-        scheduledDate: r.scheduledDate,
-        q1: r.q1 ?? "",
-        q2: r.q2 ?? "",
-        q3: r.q3 ?? "",
-        status: r.status,
-      });
-    }
-    return map;
-  }, [requests]);
 
   // ✅ Conditional returns only after hooks
   if (loading) {
