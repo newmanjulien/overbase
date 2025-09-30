@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth";
+import { SessionLogger } from "@/components/SessionLogger";
 
 export const metadata: Metadata = {
   title: "Overbase",
@@ -14,7 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          <SessionLogger />
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

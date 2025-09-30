@@ -3,23 +3,34 @@
 import { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface SetupLayoutProps {
   // Sidebar
   sidebarBackText: string; // usually "Back to dashboard"
-  onSidebarBack: () => void;
+  onSidebarBack: () => void | Promise<void>;
   sidebarTitle: string;
   sidebarIcon?: ReactNode; // optional, fully controlled by caller
+
+  // Optional sidebar actions (bottom)
+  sidebarActionText?: string;
+  onSidebarAction?: () => void | Promise<void>;
 
   // Main content
   title: string; // always required
   subtitle?: string;
   children: ReactNode;
 
-  // Footer
-  onFlowBack: () => void; // back to previous step/flow
+  // Footer (always 2 buttons, symmetric)
   primaryButtonText: string;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onPrimaryAction: () => void | Promise<void>;
+  secondaryButtonText: string;
+  onSecondaryAction: () => void | Promise<void>;
+
+  // Optional top-right toggle
+  toggleValue?: string;
+  onToggleChange?: (val: string) => void;
+  toggleOptions?: Array<{ value: string; label: string }>;
 }
 
 export default function SetupLayout({
@@ -27,19 +38,43 @@ export default function SetupLayout({
   onSidebarBack,
   sidebarTitle,
   sidebarIcon,
+  sidebarActionText,
+  onSidebarAction,
   title,
   subtitle,
   children,
-  onFlowBack,
   primaryButtonText,
-  onSubmit,
+  onPrimaryAction,
+  secondaryButtonText,
+  onSecondaryAction,
+  toggleValue,
+  onToggleChange,
+  toggleOptions,
 }: SetupLayoutProps) {
   return (
     <div className="flex min-h-screen">
+      {/* Toggle */}
+      {toggleOptions && onToggleChange && (
+        <div className="absolute top-25 right-14">
+          <ToggleGroup
+            type="single"
+            value={toggleValue}
+            onValueChange={(val) => val && onToggleChange(val)}
+            variant="outline"
+            size="sm"
+          >
+            {toggleOptions.map((opt) => (
+              <ToggleGroupItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+      )}
+
       {/* Sidebar */}
-      <aside className="w-96 bg-gray-100 border-r border-gray-200 px-12 pt-10 pb-6 flex flex-col">
+      <aside className="sticky top-14 h-[calc(100vh-56px)] flex flex-col w-96 bg-gray-100 border-r border-gray-200 px-12 pt-10 pb-6">
         <header>
-          {/* Always back to dashboard (or equivalent) */}
           <Button
             onClick={onSidebarBack}
             variant="backLink"
@@ -49,7 +84,6 @@ export default function SetupLayout({
             {sidebarBackText}
           </Button>
 
-          {/* Sidebar title + optional icon */}
           <div
             className={`mt-2 ${sidebarIcon ? "flex items-center gap-3" : ""}`}
           >
@@ -63,17 +97,32 @@ export default function SetupLayout({
             </h2>
           </div>
         </header>
+
+        {/* Bottom sidebar action */}
+        {sidebarActionText && onSidebarAction && (
+          <div className="mt-auto">
+            <Button
+              variant="backLink"
+              size="backLink"
+              onClick={onSidebarAction}
+            >
+              {sidebarActionText}
+            </Button>
+          </div>
+        )}
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-2xl mx-auto px-10 pt-10 pb-6">
-        <form onSubmit={onSubmit} className="space-y-6">
+      <main className="flex-1 max-w-2xl mx-auto px-10 pt-4 pb-6">
+        <div className="space-y-6">
           {/* Header */}
-          <header className="mt-6">
-            <h1 className="text-2xl font-medium text-gray-900 mb-2 mt-8">
-              {title}
-            </h1>
-            {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+          <header className="mt-6 flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-medium text-gray-900 mb-2 mt-8">
+                {title}
+              </h1>
+              {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+            </div>
           </header>
 
           {/* Custom fields */}
@@ -82,14 +131,16 @@ export default function SetupLayout({
           {/* Divider */}
           <div className="border-t border-gray-200 my-6" />
 
-          {/* Footer: always Back (flow) + Primary */}
+          {/* Footer: Secondary + Primary */}
           <div className="flex justify-between items-center">
-            <Button type="button" variant="outline" onClick={onFlowBack}>
-              Back
+            <Button type="button" variant="outline" onClick={onSecondaryAction}>
+              {secondaryButtonText}
             </Button>
-            <Button type="submit">{primaryButtonText}</Button>
+            <Button type="button" onClick={onPrimaryAction}>
+              {primaryButtonText}
+            </Button>
           </div>
-        </form>
+        </div>
       </main>
     </div>
   );

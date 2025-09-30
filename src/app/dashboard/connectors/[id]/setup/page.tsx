@@ -1,4 +1,4 @@
-import SetupClient from "./Client";
+import SetupClient from "./SetupClient";
 import { connectors } from "../../DummyData";
 
 interface SetupPageProps {
@@ -6,16 +6,13 @@ interface SetupPageProps {
 }
 
 export default async function SetupPage({ params }: SetupPageProps) {
-  // ✅ Await params (Next.js 15+ dynamic routes)
   const { id } = await params;
 
-  // Find the connector by ID
   const connector = connectors.find((i) => i.id === id);
 
   if (!connector) {
     return <p className="p-6 text-center text-gray-500">Connector not found</p>;
   }
 
-  // Pass the connector to the Setup client component
   return <SetupClient connector={connector} />;
 }

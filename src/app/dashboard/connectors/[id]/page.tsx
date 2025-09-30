@@ -1,14 +1,16 @@
 import { connectors } from "../DummyData";
-import OverviewClient from "./Client";
+import OverviewClient from "./OverviewClient";
 
 interface ConnectorOverviewPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 export default async function ConnectorOverviewPage({
   params,
 }: ConnectorOverviewPageProps) {
-  const { id } = await params; // ✅ must await
+  const { id } = await params;
   const connector = connectors.find((i) => i.id === id);
 
   if (!connector) {
