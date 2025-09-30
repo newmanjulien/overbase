@@ -50,7 +50,6 @@ export default function SetupClient({
 
   const minSelectableDateValue = useMemo(() => minSelectableDate(2), []);
 
-  // Prefill from query string (runs only once on mount)
   useEffect(() => {
     if (didPrefill.current) return;
     if (prefillDate) {
@@ -59,13 +58,11 @@ export default function SetupClient({
     }
   }, [prefillDate]);
 
-  // Load this request into the global store
   useEffect(() => {
     if (!user) return;
     loadOne(user.uid, requestId);
   }, [user, requestId, loadOne]);
 
-  // Seed form if empty
   useEffect(() => {
     const existing = requests[requestId];
     if (!existing) return;
@@ -74,7 +71,6 @@ export default function SetupClient({
       setScheduledDate(existing.scheduledDate);
   }, [requests, requestId, prompt, scheduledDate, setPrompt, setScheduledDate]);
 
-  // Debounced auto-save for prompt/scheduledDate
   useEffect(() => {
     if (!user) return;
     const timeout = setTimeout(() => {
@@ -102,6 +98,14 @@ export default function SetupClient({
     return Object.keys(errs).length === 0;
   };
 
+  const existing = requests[requestId];
+  const status = existing?.status ?? "draft";
+
+  const dateParam = scheduledDate ? `?date=${toDateKey(scheduledDate)}` : "";
+  const dateParamWithAmp = scheduledDate
+    ? `&date=${toDateKey(scheduledDate)}`
+    : "";
+
   const handleSubmit = async (): Promise<void> => {
     if (!validate()) return;
     if (!user) {
@@ -112,9 +116,8 @@ export default function SetupClient({
       prompt: prompt ?? "",
       scheduledDate: scheduledDate ?? null,
     });
-    const dateParam = scheduledDate ? `&date=${toDateKey(scheduledDate)}` : "";
     router.push(
-      `/dashboard/requests/${requestId}/questions?mode=${mode}${dateParam}`
+      `/dashboard/requests/${requestId}/questions?mode=${mode}${dateParamWithAmp}`
     );
   };
 
@@ -128,7 +131,6 @@ export default function SetupClient({
         await deleteRequest(user.uid, requestId);
       }
     }
-    const dateParam = scheduledDate ? `?date=${toDateKey(scheduledDate)}` : "";
     router.push(`/dashboard/requests${dateParam}`);
   };
 
@@ -140,7 +142,6 @@ export default function SetupClient({
     if (user) {
       await deleteRequest(user.uid, requestId);
     }
-    const dateParam = scheduledDate ? `?date=${toDateKey(scheduledDate)}` : "";
     router.push(`/dashboard/requests${dateParam}`);
   };
 
@@ -154,9 +155,6 @@ export default function SetupClient({
       return;
     }
 
-    const dateParam = existing?.scheduledDate
-      ? `?date=${toDateKey(existing.scheduledDate)}`
-      : "";
     router.push(`/dashboard/requests${dateParam}`);
     return;
   };
@@ -166,9 +164,6 @@ export default function SetupClient({
     if (val === "active") await promoteToActive(user.uid, requestId);
     else await demoteToDraft(user.uid, requestId);
   };
-
-  const existing = requests[requestId];
-  const status = existing?.status ?? "draft";
 
   return (
     <Setup
