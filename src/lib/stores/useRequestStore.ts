@@ -170,9 +170,12 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
   deleteRequest: async (uid, id) => {
     await deleteRequest(uid, id);
+
     // Local prune makes UI snappier while waiting for snapshot
     set((s) => {
-      const { [id]: _, ...rest } = s.requests;
+      const rest = Object.fromEntries(
+        Object.entries(s.requests).filter(([key]) => key !== id)
+      );
       return {
         requests: rest,
         requestsByDate: buildRequestsByDate(rest),
