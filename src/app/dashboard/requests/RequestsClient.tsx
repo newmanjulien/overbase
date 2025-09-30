@@ -52,7 +52,7 @@ export default function RequestsClient() {
 
   const requestsByDate = useMemo(() => {
     const map: Record<string, RequestItem[]> = {};
-    for (const r of requests) {
+    for (const r of Object.values(requests)) {
       if (!r.scheduledDate) continue;
       const key = toDateKey(r.scheduledDate);
       (map[key] ??= []).push({

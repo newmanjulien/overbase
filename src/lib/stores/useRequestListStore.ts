@@ -16,6 +16,8 @@ import { subscribeToRequestList } from "@/lib/services/requestSubscriptions";
 
 interface RequestListState {
   requests: Record<string, Request>;
+  requestsByDate: Record<string, Request[]>; // ✅ new field
+
   drafts: () => Request[];
   actives: () => Request[];
   subscribe: (uid: string) => () => void;
@@ -37,7 +39,7 @@ interface RequestListState {
 }
 
 export const useRequestListStore = create<RequestListState>((set, get) => ({
-  requests: [],
+  requests: {},
 
   subscribe: (uid: string) => {
     const unsub = subscribeToRequestList(uid, (items) => {
