@@ -119,3 +119,49 @@ export default async function Page({ params }: PageProps) {
 
 👉 This should prevent confusion for anyone hitting the `Promise<any>`
 error in the future.
+
+## Extended boilerplate with `searchParams`
+
+For pages that use both `params` and `searchParams`, you can unwrap once and reuse:
+
+```ts
+interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function Page({ params, searchParams }: PageProps) {
+  const { id } = await params;
+  const search = await searchParams;
+
+  const raw = search?.date;
+  let prefillDate: string | undefined;
+  if (typeof raw === "string") {
+    prefillDate = raw;
+  } else if (Array.isArray(raw) && raw.length > 0) {
+    prefillDate = raw[0];
+  }
+
+  const modeParam = search?.mode;
+  const mode =
+    (typeof modeParam === "string"
+      ? modeParam
+      : Array.isArray(modeParam)
+      ? modeParam[0]
+      : null) ?? "create";
+
+  return (
+    <YourClientComponent
+      requestId={id}
+      prefillDate={prefillDate}
+      mode={mode as "create" | "edit" | "editDraft"}
+    />
+  );
+}
+```
+
+### Notes
+
+- ✅ Await `params` once at the top.
+- ✅ Await `searchParams` once and reuse it for all keys.
+- ✅ Pass plain objects to client components — don’t leak Promises.

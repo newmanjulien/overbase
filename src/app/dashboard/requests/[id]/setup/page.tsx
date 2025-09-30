@@ -1,8 +1,8 @@
 import SetupClient from "./SetupClient";
 
 interface SetupPageProps {
-  params: { id: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function RequestSetupPage({
@@ -10,8 +10,9 @@ export default async function RequestSetupPage({
   searchParams,
 }: SetupPageProps) {
   const { id } = await params;
-  const raw = (await searchParams)?.date;
+  const search = await searchParams;
 
+  const raw = search?.date;
   let prefillDate: string | undefined;
   if (typeof raw === "string") {
     prefillDate = raw;
@@ -20,7 +21,7 @@ export default async function RequestSetupPage({
   }
 
   // NEW: handle mode
-  const modeParam = (await searchParams)?.mode;
+  const modeParam = search?.mode;
   const mode =
     (typeof modeParam === "string"
       ? modeParam

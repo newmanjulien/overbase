@@ -1,8 +1,8 @@
 import QuestionsClient from "./QuestionsClient";
 
 interface QuestionsPageProps {
-  params: { id: string };
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function RequestQuestionsPage({
@@ -10,8 +10,9 @@ export default async function RequestQuestionsPage({
   searchParams,
 }: QuestionsPageProps) {
   const { id } = await params;
+  const search = await searchParams;
 
-  const modeParam = (await searchParams)?.mode;
+  const modeParam = search?.mode;
   const mode =
     (typeof modeParam === "string"
       ? modeParam

@@ -6,15 +6,13 @@ interface SetupPageProps {
 }
 
 export default async function SetupPage({ params }: SetupPageProps) {
-  const { id } = await params; // ✅ synchronous object
+  const { id } = await params;
 
-  // Find the connector by ID
   const connector = connectors.find((i) => i.id === id);
 
   if (!connector) {
     return <p className="p-6 text-center text-gray-500">Connector not found</p>;
   }
 
-  // Pass connector into client component
   return <SetupClient connector={connector} />;
 }
