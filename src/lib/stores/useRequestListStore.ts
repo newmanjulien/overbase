@@ -12,7 +12,7 @@ import {
   getRequest,
 } from "@/lib/services/requestService";
 
-import { subscribeToRequestList } from "@/lib/client/requestSubscriptions";
+import { subscribeToRequestList } from "@/lib/services/requestSubscriptions";
 
 interface RequestListState {
   requests: Request[];

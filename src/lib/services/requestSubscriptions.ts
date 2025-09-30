@@ -1,4 +1,5 @@
-// src/lib/client/requestSubscriptions.ts
+//Client side service
+
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Request, requestConverter } from "@/lib/models/request";
