@@ -47,6 +47,7 @@ export default function SetupClient({
   }>({});
 
   const didPrefill = React.useRef(false);
+  const didHydrateFromFirestore = React.useRef(false);
 
   const minSelectableDateValue = useMemo(() => minSelectableDate(2), []);
 
@@ -66,10 +67,14 @@ export default function SetupClient({
   useEffect(() => {
     const existing = requests[requestId];
     if (!existing) return;
-    if (!prompt && existing.prompt) setPrompt(existing.prompt);
-    if (!scheduledDate && existing.scheduledDate)
-      setScheduledDate(existing.scheduledDate);
-  }, [requests, requestId, prompt, scheduledDate, setPrompt, setScheduledDate]);
+
+    // Only hydrate once, to avoid overwriting user edits
+    if (!didHydrateFromFirestore.current) {
+      if (existing.prompt) setPrompt(existing.prompt);
+      if (existing.scheduledDate) setScheduledDate(existing.scheduledDate);
+      didHydrateFromFirestore.current = true;
+    }
+  }, [requests, requestId]);
 
   useEffect(() => {
     if (!user) return;
