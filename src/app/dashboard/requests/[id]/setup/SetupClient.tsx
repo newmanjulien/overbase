@@ -12,7 +12,7 @@ import {
 import Setup from "./Setup";
 
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/stores/useRequestListStore";
+import { useRequestListStore } from "@/lib/stores/useRequestStore";
 
 interface SetupClientProps {
   requestId: string;

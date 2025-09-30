@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QuestionsUI from "./Questions";
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/stores/useRequestListStore";
+import { useRequestListStore } from "@/lib/stores/useRequestStore";
 
 interface QuestionsClientProps {
   requestId: string;
