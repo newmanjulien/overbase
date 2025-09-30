@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { today, toDateKey } from "@/lib/requestDates";
-import { useRouter } from "next/navigation";
+import {
+  today,
+  toDateKey,
+  fromDateKey,
+  type DateKey,
+} from "@/lib/requestDates";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import type { CalendarProps } from "./Calendar";
 import type { DataSectionProps } from "./DataSection";
@@ -28,10 +33,16 @@ export interface RequestOptions {
 
 export default function RequestsClient() {
   const router = useRouter();
-  const initialToday = today();
+  const searchParams = useSearchParams();
+  const dateParam = searchParams?.get("date");
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(initialToday);
-  const [currentDate, setCurrentDate] = useState<Date>(initialToday);
+  const initialToday = today();
+  const initialDate = dateParam
+    ? fromDateKey(dateParam as DateKey)
+    : initialToday;
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate);
+  const [currentDate, setCurrentDate] = useState<Date>(initialDate);
 
   const { user, loading } = useAuth();
   const { requestsByDate, createDraft, subscribe } = useRequestListStore();
