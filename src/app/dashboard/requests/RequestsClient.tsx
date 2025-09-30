@@ -36,59 +36,10 @@ export default function RequestsClient() {
   const { user, loading } = useAuth();
   const { requests, createDraft, subscribe } = useRequestListStore();
 
-  // useEffect(() => {
-  //   if (loading) {
-  //     console.log("RequestsClient: waiting for auth to finish...");
-  //     return;
-  //   }
-  //   if (!user?.uid) {
-  //     console.warn("RequestsClient: no valid uid after loading", user);
-  //     return;
-  //   }
-  //   try {
-  //     const unsub = subscribe(user.uid);
-  //     return () => unsub();
-  //   } catch (err) {
-  //     console.error("RequestsClient: subscribe failed", err);
-  //   }
-  // }, [user?.uid, loading, subscribe]);
-
-  // if (loading) {
-  //   return <div className="p-6 text-center">Loading requests…</div>;
-  // }
-
-  // if (!user) {
-  //   return (
-  //     <div className="p-6 text-center text-gray-600">
-  //       ⚠️ No authenticated user. Please check your Firebase setup or try again
-  //       later.
-  //     </div>
-  //   );
-  // }
-
-  // const requestsByDate = useMemo(() => {
-  //   const map: Record<string, RequestItem[]> = {};
-  //   for (const r of requests) {
-  //     if (!r.scheduledDate) continue;
-  //     const key = toDateKey(r.scheduledDate);
-  //     (map[key] ??= []).push({
-  //       id: r.id,
-  //       prompt: r.prompt,
-  //       scheduledDate: r.scheduledDate,
-  //       q1: r.q1 ?? "",
-  //       q2: r.q2 ?? "",
-  //       q3: r.q3 ?? "",
-  //       status: r.status,
-  //     });
-  //   }
-  //   return map;
-  // }, [requests]);
-
-  // ✅ Always call useEffect and useMemo first
   useEffect(() => {
     if (loading) return;
     if (!user?.uid) {
-      console.warn("RequestsClient: no valid uid after loading", user);
+      console.warn("RequestsClient: no valid uid after loading", user?.uid);
       return;
     }
     try {

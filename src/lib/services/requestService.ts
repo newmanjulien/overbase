@@ -26,6 +26,19 @@ interface WriteRequest {
   submittedAt: FieldValue | null;
 }
 
+interface WriteUpdate {
+  prompt?: string;
+  q1?: string;
+  q2?: string;
+  q3?: string;
+  scheduledDate?: string | null;
+  status?: "draft" | "active";
+  updatedAt?: FieldValue;
+  submittedAt?: FieldValue | null;
+
+  [key: string]: unknown;
+}
+
 /**
  * Get a single request by ID.
  */
@@ -81,11 +94,8 @@ export async function submitDraft(
   data: Partial<Request>
 ): Promise<void> {
   const ref = doc(db, "users", uid, "requests", requestId);
-  const snap = await getDoc(ref.withConverter(requestConverter));
-  if (!snap.exists()) return;
-  const existing = snap.data();
 
-  const update: any = {
+  const update: WriteUpdate = {
     status: "active",
     updatedAt: serverTimestamp(),
     submittedAt: serverTimestamp(),
@@ -113,11 +123,8 @@ export async function updateActive(
   data: Partial<Request>
 ): Promise<void> {
   const ref = doc(db, "users", uid, "requests", requestId);
-  const snap = await getDoc(ref.withConverter(requestConverter));
-  if (!snap.exists()) return;
-  const existing = snap.data();
 
-  const update: any = {
+  const update: WriteUpdate = {
     updatedAt: serverTimestamp(),
   };
 
@@ -139,19 +146,21 @@ export async function updateActive(
  */
 export async function promoteToActive(uid: string, requestId: string) {
   const ref = doc(db, "users", uid, "requests", requestId);
-  await updateDoc(ref, {
+  const update: WriteUpdate = {
     status: "active",
     updatedAt: serverTimestamp(),
     submittedAt: serverTimestamp(),
-  });
+  };
+  await updateDoc(ref, update);
 }
 
 export async function demoteToDraft(uid: string, requestId: string) {
   const ref = doc(db, "users", uid, "requests", requestId);
-  await updateDoc(ref, {
+  const update: WriteUpdate = {
     status: "draft",
     updatedAt: serverTimestamp(),
-  });
+  };
+  await updateDoc(ref, update);
 }
 
 /**
