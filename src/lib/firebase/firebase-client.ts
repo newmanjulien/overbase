@@ -6,6 +6,7 @@ import {
   persistentLocalCache,
   persistentMultipleTabManager,
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Only expose NEXT_PUBLIC_* variables to the client
 const clientConfig = {
@@ -28,3 +29,5 @@ export const db = initializeFirestore(app, {
     tabManager: persistentMultipleTabManager(),
   }),
 });
+
+export const auth = getAuth(app);

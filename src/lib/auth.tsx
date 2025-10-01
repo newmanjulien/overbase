@@ -1,13 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInAnonymously,
-  User,
-} from "firebase/auth";
-import { app } from "./firebase/firebase-client"; // 👈 import your initialized app
+import { onAuthStateChanged, signInAnonymously, User } from "firebase/auth";
+import { auth } from "./firebase/firebase-client"; // 👈 now import centralized auth
 
 type AuthState = { user: User | null; loading: boolean };
 const AuthCtx = createContext<AuthState>({ user: null, loading: true });

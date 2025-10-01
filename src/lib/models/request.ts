@@ -43,8 +43,8 @@ type FirestoreRequestData = {
   submittedAt?: Timestamp;
 };
 
-export const requestConverter: FirestoreDataConverter<Request> = {
-  toFirestore() {
+export const requestReadConverter: FirestoreDataConverter<Request> = {
+  toFirestore(): never {
     throw new Error(
       "Writes must go through requestService (services serialize on write)."
     );
