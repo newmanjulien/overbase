@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signInAnonymously, User } from "firebase/auth";
-import { auth } from "./firebase/firebase-client"; // 👈 now import centralized auth
+import { auth } from "./firebase/firebase-client";
 
 type AuthState = { user: User | null; loading: boolean };
 const AuthCtx = createContext<AuthState>({ user: null, loading: true });
@@ -11,7 +11,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ user: null, loading: true });
 
   useEffect(() => {
-    const auth = getAuth(app);
     console.log("Setting up Firebase Auth...");
 
     const unsub = onAuthStateChanged(auth, async (u) => {
