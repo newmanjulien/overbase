@@ -2,7 +2,7 @@
 
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/firebase-admin";
-import { Request, requestReadConverter } from "@/lib/models/request";
+import { Request, requestReadConverterAdmin } from "@/lib/models/request-admin";
 import { serializeScheduledDate } from "@/lib/requestDates";
 
 //
@@ -41,7 +41,7 @@ interface WriteUpdate {
 export async function getRequest(uid: string, requestId: string) {
   const ref = adminDb
     .doc(`users/${uid}/requests/${requestId}`)
-    .withConverter(requestReadConverter);
+    .withConverter(requestReadConverterAdmin);
 
   const snap = await ref.get();
   return snap.exists ? snap.data() : null;
@@ -80,7 +80,7 @@ export async function createDraft(
   // Read back with converter
   const snap = await adminDb
     .doc(`users/${uid}/requests/${requestId}`)
-    .withConverter(requestReadConverter)
+    .withConverter(requestReadConverterAdmin)
     .get();
 
   return snap.data()!;

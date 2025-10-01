@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { Request } from "@/lib/models/request";
+import type { Request } from "@/lib/models/request-client";
 import {
   createDraft,
   submitDraft,
@@ -14,7 +14,7 @@ import {
 
 import { toDateKey } from "@/lib/requestDates";
 
-import { subscribeToRequestList } from "@/lib/services/requestSubscriptions";
+import { subscribeToRequestList } from "@/lib/services/requestService-client";
 
 function buildRequestsByDate(
   requests: Record<string, Request>
