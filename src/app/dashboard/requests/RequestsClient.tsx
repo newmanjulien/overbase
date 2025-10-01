@@ -15,6 +15,7 @@ import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
+import { v4 as uuid } from "uuid";
 
 export interface RequestItem {
   id: string;
@@ -75,17 +76,28 @@ export default function RequestsClient() {
     );
   }
 
-  const handleRequestData = async (options?: RequestOptions) => {
+  const handleRequestData = (options?: RequestOptions) => {
     if (!user) return;
-    const draft = await createDraft(user.uid, {
-      scheduledDate: options?.prefillDate ?? null,
-    });
+
+    // ✅ Step 1: generate UUID on client
+    const newId = uuid();
     const mode = options?.mode ?? "create";
-    let url = `/dashboard/requests/${draft.id}/setup?mode=${mode}`;
+
+    // ✅ Step 2: navigate immediately to final URL
+    let url = `/dashboard/requests/${newId}/setup?mode=${mode}`;
     if (options?.prefillDate) {
       url += `&date=${toDateKey(options.prefillDate)}`;
     }
     router.push(url);
+
+    // ✅ Step 3: create draft in Firestore with that ID in background
+    createDraft(
+      user.uid,
+      { scheduledDate: options?.prefillDate ?? null },
+      newId // pass it down
+    ).catch((err) => {
+      console.error("Failed to create draft", err);
+    });
   };
 
   const calendarProps: CalendarProps = {
