@@ -56,15 +56,16 @@ export async function getRequest(uid: string, requestId: string) {
  */
 export async function createDraft(
   uid: string,
-  initialData: Partial<Request> = {}
+  initialData: Partial<Request> = {},
+  id?: string // ✅ NEW optional param
 ): Promise<Request> {
-  const id = crypto.randomUUID();
+  const requestId = id ?? crypto.randomUUID();
 
   // ❌ no converter on write
-  const ref = doc(db, "users", uid, "requests", id);
+  const ref = doc(db, "users", uid, "requests", requestId);
 
   const draft: WriteRequest = {
-    id,
+    id: requestId,
     prompt: initialData.prompt ?? "",
     scheduledDate: initialData.scheduledDate
       ? serializeScheduledDate(initialData.scheduledDate)

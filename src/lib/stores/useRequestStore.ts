@@ -48,7 +48,11 @@ interface RequestListState {
   actives: () => Request[];
   subscribe: (uid: string) => () => void;
   loadOne: (uid: string, id: string) => Promise<void>;
-  createDraft: (uid: string, data?: Partial<Request>) => Promise<Request>;
+  createDraft: (
+    uid: string,
+    data?: Partial<Request>,
+    id?: string
+  ) => Promise<Request>;
   submitDraft: (
     uid: string,
     id: string,
@@ -95,8 +99,8 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     }
   },
 
-  createDraft: async (uid, data) => {
-    return await createDraft(uid, data);
+  createDraft: async (uid, data, id) => {
+    return await createDraft(uid, data, id); // ✅ forward optional id
   },
 
   submitDraft: async (uid, id, data) => {
