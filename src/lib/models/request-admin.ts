@@ -5,25 +5,10 @@ import {
 } from "firebase-admin/firestore";
 
 import { deserializeScheduledDate } from "@/lib/requestDates";
+import type { Request } from "@/lib/models/request-types";
 
 function timestampToISO(ts: Timestamp | null | undefined): string | null {
   return ts ? ts.toDate().toISOString() : null;
-}
-
-/**
- * Flat Request model (no step1/step2 nesting).
- */
-export interface Request {
-  id: string;
-  prompt: string;
-  scheduledDate: Date | null;
-  q1: string;
-  q2: string;
-  q3: string;
-  status: "draft" | "active";
-  createdAt: string | null; // ISO string
-  updatedAt: string | null; // ISO string
-  submittedAt?: string | null;
 }
 
 /**
