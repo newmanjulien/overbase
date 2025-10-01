@@ -7,10 +7,6 @@ import {
 import { deserializeScheduledDate } from "@/lib/requestDates";
 import type { Request } from "@/lib/models/request-types";
 
-function timestampToISO(ts: Timestamp | null | undefined): string | null {
-  return ts ? ts.toDate().toISOString() : null;
-}
-
 /**
  * Raw Firestore shape before conversion.
  * scheduledDate is stored as a "yyyy-MM-dd" string.
@@ -49,9 +45,9 @@ export const requestReadConverterClient: FirestoreDataConverter<Request> = {
       q2: d.q2 ?? "",
       q3: d.q3 ?? "",
       status: d.status === "active" ? "active" : "draft",
-      createdAt: timestampToISO(d.createdAt),
-      updatedAt: timestampToISO(d.updatedAt),
-      submittedAt: timestampToISO(d.submittedAt),
+      createdAt: d.createdAt ? d.createdAt.toDate() : null,
+      updatedAt: d.updatedAt ? d.updatedAt.toDate() : null,
+      submittedAt: d.submittedAt ? d.submittedAt.toDate() : null,
     };
   },
 };
