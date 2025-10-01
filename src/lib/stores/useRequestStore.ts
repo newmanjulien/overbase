@@ -1,20 +1,18 @@
 "use client";
 
 import { create } from "zustand";
-import type { Request } from "@/lib/models/request-client";
+import type { Request } from "@/lib/models/request-types";
 import {
+  subscribeToRequestList,
+  loadOne,
   createDraft,
-  submitDraft,
   updateActive,
   promoteToActive,
   demoteToDraft,
   deleteRequest,
-  getRequest,
-} from "@/lib/services/requestService-admin";
+} from "@/lib/services/requestService-client";
 
 import { toDateKey } from "@/lib/requestDates";
-
-import { subscribeToRequestList } from "@/lib/services/requestService-client";
 
 function buildRequestsByDate(
   requests: Record<string, Request>
@@ -52,12 +50,7 @@ interface RequestListState {
     uid: string,
     data?: Partial<Request>,
     id?: string
-  ) => Promise<Request>;
-  submitDraft: (
-    uid: string,
-    id: string,
-    data: Partial<Request>
-  ) => Promise<void>;
+  ) => Promise<string>;
   updateActive: (
     uid: string,
     id: string,
@@ -87,7 +80,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
   // Keep this for deep-link fetch (before subscription is ready)
   loadOne: async (uid, id) => {
-    const req = await getRequest(uid, id);
+    const req = await loadOne(uid, id);
     if (req) {
       set((s) => {
         const updated = { ...s.requests, [id]: req };
@@ -100,23 +93,9 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
   },
 
   createDraft: async (uid, data, id) => {
-    return await createDraft(uid, data, id);
-  },
-
-  submitDraft: async (uid, id, data) => {
-    await submitDraft(uid, id, data);
-
-    set((s) => {
-      const updated = updateRequests(s.requests, id, {
-        ...data,
-        status: "active", // explicit union member
-        submittedAt: new Date().toISOString(),
-      });
-      return {
-        requests: updated,
-        requestsByDate: buildRequestsByDate(updated),
-      };
-    });
+    const finalId = id ?? crypto.randomUUID();
+    await createDraft(uid, finalId, data ?? {});
+    return finalId;
   },
 
   updateActive: async (uid, id, data) => {
@@ -130,7 +109,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
         q2: data.q2 ?? s.requests[id].q2,
         q3: data.q3 ?? s.requests[id].q3,
         scheduledDate: data.scheduledDate ?? s.requests[id].scheduledDate,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date(),
       });
       return {
         requests: updated,
@@ -147,7 +126,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     set((s) => {
       const updated = updateRequests(s.requests, id, {
         status: "active",
-        submittedAt: new Date().toISOString(),
+        submittedAt: new Date(),
       });
       return {
         requests: updated,
