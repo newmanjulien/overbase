@@ -16,6 +16,7 @@ import { Requests } from "./Requests";
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
 import { v4 as uuid } from "uuid";
+import LoadingScreen from "@/components/blocks/LoadingScreen";
 
 export interface RequestItem {
   id: string;
@@ -62,7 +63,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
 
   // ✅ Conditional returns only after hooks
   if (loading) {
-    return <div className="p-6 text-center">Loading requests…</div>;
+    return <LoadingScreen />;
   }
 
   if (!user) {
