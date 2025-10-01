@@ -9,7 +9,7 @@ import {
   serverTimestamp,
   FieldValue,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/firebase/firebase";
 import { Request, requestConverter } from "@/lib/models/request";
 import { serializeScheduledDate } from "@/lib/requestDates";
 

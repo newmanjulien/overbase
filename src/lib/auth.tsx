@@ -7,7 +7,7 @@ import {
   signInAnonymously,
   User,
 } from "firebase/auth";
-import { app } from "./firebase"; // 👈 import your initialized app
+import { app } from "./firebase/firebase"; // 👈 import your initialized app
 
 type AuthState = { user: User | null; loading: boolean };
 const AuthCtx = createContext<AuthState>({ user: null, loading: true });

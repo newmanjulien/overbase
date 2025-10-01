@@ -1,7 +1,7 @@
 //Client side service
 
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/firebase/firebase";
 import { Request, requestConverter } from "@/lib/models/request";
 
 export function subscribeToRequestList(
