@@ -1,18 +1,13 @@
 "use server";
 
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp,
-  FieldValue,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/firebase";
-import { Request, requestConverter } from "@/lib/models/request";
+import { FieldValue } from "firebase-admin/firestore";
+import { adminDb } from "@/lib/firebase/firebase-admin";
+import { Request, requestReadConverter } from "@/lib/models/request";
 import { serializeScheduledDate } from "@/lib/requestDates";
 
+//
+// Firestore write shapes
+//
 interface WriteRequest {
   id: string;
   prompt: string;
@@ -35,34 +30,34 @@ interface WriteUpdate {
   status?: "draft" | "active";
   updatedAt?: FieldValue;
   submittedAt?: FieldValue | null;
-
   [key: string]: unknown;
 }
 
-/**
- * Get a single request by ID.
- */
+//
+// ---- READ ----
+//
+
+/** Get a single request by ID */
 export async function getRequest(uid: string, requestId: string) {
-  const ref = doc(db, "users", uid, "requests", requestId).withConverter(
-    requestConverter
-  );
-  const snap = await getDoc(ref);
-  return snap.exists() ? snap.data() : null;
+  const ref = adminDb
+    .doc(`users/${uid}/requests/${requestId}`)
+    .withConverter(requestReadConverter);
+
+  const snap = await ref.get();
+  return snap.exists ? snap.data() : null;
 }
 
-/**
- * Create a new draft request.
- * Generates its own ID.
- */
+//
+// ---- WRITE ----
+//
+
+/** Create a new draft request */
 export async function createDraft(
   uid: string,
   initialData: Partial<Request> = {},
-  id?: string // ✅ NEW optional param
+  id?: string
 ): Promise<Request> {
   const requestId = id ?? crypto.randomUUID();
-
-  // ❌ no converter on write
-  const ref = doc(db, "users", uid, "requests", requestId);
 
   const draft: WriteRequest = {
     id: requestId,
@@ -74,32 +69,35 @@ export async function createDraft(
     q2: "",
     q3: "",
     status: "draft",
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
     submittedAt: null,
   };
 
-  await setDoc(ref, draft);
+  // Write raw data
+  await adminDb.doc(`users/${uid}/requests/${requestId}`).set(draft);
 
-  // ✅ apply converter on readback
-  const snap = await getDoc(ref.withConverter(requestConverter));
+  // Read back with converter
+  const snap = await adminDb
+    .doc(`users/${uid}/requests/${requestId}`)
+    .withConverter(requestReadConverter)
+    .get();
+
   return snap.data()!;
 }
 
-/**
- * Submit draft → active
- */
+/** Submit draft → active */
 export async function submitDraft(
   uid: string,
   requestId: string,
   data: Partial<Request>
 ): Promise<void> {
-  const ref = doc(db, "users", uid, "requests", requestId);
+  const ref = adminDb.doc(`users/${uid}/requests/${requestId}`);
 
   const update: WriteUpdate = {
     status: "active",
-    updatedAt: serverTimestamp(),
-    submittedAt: serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    submittedAt: FieldValue.serverTimestamp(),
   };
 
   if (data.prompt !== undefined) update.prompt = data.prompt;
@@ -112,21 +110,19 @@ export async function submitDraft(
       : null;
   }
 
-  await updateDoc(ref, update);
+  await ref.update(update);
 }
 
-/**
- * Update active request (no status change)
- */
+/** Update active request (no status change) */
 export async function updateActive(
   uid: string,
   requestId: string,
   data: Partial<Request>
 ): Promise<void> {
-  const ref = doc(db, "users", uid, "requests", requestId);
+  const ref = adminDb.doc(`users/${uid}/requests/${requestId}`);
 
   const update: WriteUpdate = {
-    updatedAt: serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
   };
 
   if (data.prompt !== undefined) update.prompt = data.prompt;
@@ -139,35 +135,35 @@ export async function updateActive(
       : null;
   }
 
-  await updateDoc(ref, update);
+  await ref.update(update);
 }
 
-/**
- * Promote/demote
- */
+/** Promote active → active (explicit) */
 export async function promoteToActive(uid: string, requestId: string) {
-  const ref = doc(db, "users", uid, "requests", requestId);
+  const ref = adminDb.doc(`users/${uid}/requests/${requestId}`);
+
   const update: WriteUpdate = {
     status: "active",
-    updatedAt: serverTimestamp(),
-    submittedAt: serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    submittedAt: FieldValue.serverTimestamp(),
   };
-  await updateDoc(ref, update);
+
+  await ref.update(update);
 }
 
+/** Demote active → draft */
 export async function demoteToDraft(uid: string, requestId: string) {
-  const ref = doc(db, "users", uid, "requests", requestId);
+  const ref = adminDb.doc(`users/${uid}/requests/${requestId}`);
+
   const update: WriteUpdate = {
     status: "draft",
-    updatedAt: serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
   };
-  await updateDoc(ref, update);
+
+  await ref.update(update);
 }
 
-/**
- * Delete request
- */
+/** Delete request */
 export async function deleteRequest(uid: string, requestId: string) {
-  const ref = doc(db, "users", uid, "requests", requestId);
-  await deleteDoc(ref);
+  await adminDb.doc(`users/${uid}/requests/${requestId}`).delete();
 }

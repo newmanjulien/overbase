@@ -1,9 +1,9 @@
 import {
   FirestoreDataConverter,
   QueryDocumentSnapshot,
-  SnapshotOptions,
   Timestamp,
-} from "firebase/firestore";
+} from "firebase-admin/firestore";
+
 import { deserializeScheduledDate } from "@/lib/requestDates";
 
 function timestampToISO(ts: Timestamp | null | undefined): string | null {
@@ -50,11 +50,8 @@ export const requestConverter: FirestoreDataConverter<Request> = {
     );
   },
 
-  fromFirestore(
-    snap: QueryDocumentSnapshot,
-    options: SnapshotOptions
-  ): Request {
-    const d = snap.data(options) as FirestoreRequestData;
+  fromFirestore(snap: QueryDocumentSnapshot): Request {
+    const d = snap.data() as FirestoreRequestData;
 
     return {
       id: snap.id,
