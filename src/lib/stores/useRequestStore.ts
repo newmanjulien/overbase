@@ -10,7 +10,7 @@ import {
   demoteToDraft,
   deleteRequest,
   getRequest,
-} from "@/lib/services/requestService";
+} from "@/lib/services/requestService-admin";
 
 import { toDateKey } from "@/lib/requestDates";
 
