@@ -7,7 +7,7 @@ import {
   fromDateKey,
   type DateKey,
 } from "@/lib/requestDates";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import type { CalendarProps } from "./Calendar";
 import type { DataSectionProps } from "./DataSection";
@@ -32,10 +32,8 @@ export interface RequestOptions {
   mode?: "create" | "edit" | "editDraft";
 }
 
-export default function RequestsClient() {
+export default function RequestsClient({ dateParam }: { dateParam?: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const dateParam = searchParams?.get("date");
 
   const initialToday = today();
   const initialDate = dateParam
