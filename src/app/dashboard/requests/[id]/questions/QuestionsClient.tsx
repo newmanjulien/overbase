@@ -28,7 +28,6 @@ export default function QuestionsClient({
     requests,
     loadOne,
     updateActive,
-    submitDraft,
     deleteRequest,
     promoteToActive,
     demoteToDraft,
@@ -77,7 +76,9 @@ export default function QuestionsClient({
       return;
     }
     try {
-      await submitDraft(user.uid, requestId, { q1, q2, q3 });
+      // Ensure latest answers are saved before promoting
+      await updateActive(user.uid, requestId, { q1, q2, q3 });
+      await promoteToActive(user.uid, requestId);
       router.push(`/dashboard/requests${dateParam}`);
     } catch (err) {
       console.error("Save failed:", err);
