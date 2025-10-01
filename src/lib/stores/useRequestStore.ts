@@ -103,14 +103,21 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
     // Optimistic update: reflect field changes instantly
     set((s) => {
-      const updated = updateRequests(s.requests, id, {
+      const patch: Partial<Request> = {
         prompt: data.prompt ?? s.requests[id].prompt,
         q1: data.q1 ?? s.requests[id].q1,
         q2: data.q2 ?? s.requests[id].q2,
         q3: data.q3 ?? s.requests[id].q3,
-        scheduledDate: data.scheduledDate ?? s.requests[id].scheduledDate,
         updatedAt: new Date(),
-      });
+      };
+
+      if (Object.prototype.hasOwnProperty.call(data, "scheduledDate")) {
+        patch.scheduledDate = data.scheduledDate;
+      } else {
+        patch.scheduledDate = s.requests[id].scheduledDate;
+      }
+
+      const updated = updateRequests(s.requests, id, patch);
       return {
         requests: updated,
         requestsByDate: buildRequestsByDate(updated),

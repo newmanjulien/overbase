@@ -81,14 +81,27 @@ export async function updateActive(
   patch: RequestPatch
 ) {
   const ref = doc(db, "users", uid, "requests", id);
-  await updateDoc(ref, {
-    prompt: coalesceText(patch.prompt),
-    q1: coalesceText(patch.q1),
-    q2: coalesceText(patch.q2),
-    q3: coalesceText(patch.q3),
-    scheduledDate: serializeScheduledDate(patch.scheduledDate ?? null),
+  const update: Record<string, unknown> = {
     updatedAt: serverTimestamp(),
-  });
+  };
+
+  if ("prompt" in patch) {
+    update.prompt = coalesceText(patch.prompt);
+  }
+  if ("q1" in patch) {
+    update.q1 = coalesceText(patch.q1);
+  }
+  if ("q2" in patch) {
+    update.q2 = coalesceText(patch.q2);
+  }
+  if ("q3" in patch) {
+    update.q3 = coalesceText(patch.q3);
+  }
+  if ("scheduledDate" in patch) {
+    update.scheduledDate = serializeScheduledDate(patch.scheduledDate ?? null);
+  }
+
+  await updateDoc(ref, update);
 }
 
 export async function promoteToActive(uid: string, id: string) {

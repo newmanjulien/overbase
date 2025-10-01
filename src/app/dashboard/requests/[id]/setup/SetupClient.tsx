@@ -121,6 +121,7 @@ export default function SetupClient({
       prompt: prompt ?? "",
       scheduledDate: scheduledDate ?? null,
     });
+
     router.push(
       `/dashboard/requests/${requestId}/questions?mode=${mode}${dateParamWithAmp}`
     );
