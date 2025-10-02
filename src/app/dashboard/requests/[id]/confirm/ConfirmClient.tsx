@@ -16,7 +16,11 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
-  const [summary, setSummary] = useState<string>("");
+  const [summary, setSummary] = useState<string>(
+    mode === "create"
+      ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+      : ""
+  );
 
   // Global list store
   const {
