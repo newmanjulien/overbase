@@ -2,9 +2,7 @@ export interface Request {
   id: string;
   prompt: string;
   scheduledDate: Date | null;
-  q1: string;
-  q2: string;
-  q3: string;
+  summary: string;
   status: "draft" | "active";
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -14,5 +12,5 @@ export interface Request {
 
 // Shape for partial updates
 export type RequestPatch = Partial<
-  Pick<Request, "prompt" | "q1" | "q2" | "q3" | "scheduledDate" | "status">
+  Pick<Request, "prompt" | "summary" | "scheduledDate" | "status">
 >;

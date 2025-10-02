@@ -13,9 +13,7 @@ interface WriteRequest {
   id: string;
   prompt: string;
   scheduledDate: string | null;
-  q1: string;
-  q2: string;
-  q3: string;
+  summary: string;
   status: "draft" | "active";
   createdAt: FieldValue;
   updatedAt: FieldValue;
@@ -24,9 +22,7 @@ interface WriteRequest {
 
 interface WriteUpdate {
   prompt?: string;
-  q1?: string;
-  q2?: string;
-  q3?: string;
+  summary?: string;
   scheduledDate?: string | null;
   status?: "draft" | "active";
   updatedAt?: FieldValue;
@@ -66,9 +62,7 @@ export async function createDraft(
     scheduledDate: initialData.scheduledDate
       ? serializeScheduledDate(initialData.scheduledDate)
       : null,
-    q1: "",
-    q2: "",
-    q3: "",
+    summary: "",
     status: "draft",
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
@@ -102,9 +96,7 @@ export async function submitDraft(
   };
 
   if (data.prompt !== undefined) update.prompt = data.prompt;
-  if (data.q1 !== undefined) update.q1 = data.q1;
-  if (data.q2 !== undefined) update.q2 = data.q2;
-  if (data.q3 !== undefined) update.q3 = data.q3;
+  if (data.summary !== undefined) update.summary = data.summary;
   if (data.scheduledDate !== undefined) {
     update.scheduledDate = data.scheduledDate
       ? serializeScheduledDate(data.scheduledDate)
@@ -127,9 +119,7 @@ export async function updateActive(
   };
 
   if (data.prompt !== undefined) update.prompt = data.prompt;
-  if (data.q1 !== undefined) update.q1 = data.q1;
-  if (data.q2 !== undefined) update.q2 = data.q2;
-  if (data.q3 !== undefined) update.q3 = data.q3;
+  if (data.summary !== undefined) update.summary = data.summary;
   if (data.scheduledDate !== undefined) {
     update.scheduledDate = data.scheduledDate
       ? serializeScheduledDate(data.scheduledDate)
