@@ -12,6 +12,7 @@ type Props = {
 
 export default function LoadingClient({ requestId, mode, date }: Props) {
   const router = useRouter();
+  const duration = 10000; // single source of truth (10 seconds)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20,10 +21,10 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
           date ? `&date=${date}` : ""
         }`
       );
-    }, 10000); // 10 seconds
+    }, duration);
 
     return () => clearTimeout(timer);
-  }, [router, requestId, mode, date]);
+  }, [router, requestId, mode, date, duration]);
 
-  return <Loading />;
+  return <Loading duration={duration} />;
 }
