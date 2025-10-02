@@ -25,6 +25,7 @@ export interface RequestItem {
   q2: string;
   q3: string;
   status: "draft" | "active";
+  ephemeral?: boolean;
 }
 
 export interface RequestOptions {
@@ -50,9 +51,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     requestsByDate,
     ensureDraft,
     updateActive,
-
     subscribe,
-
     maybeCleanupEphemeral,
   } = useRequestListStore();
 

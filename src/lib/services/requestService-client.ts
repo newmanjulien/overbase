@@ -137,18 +137,23 @@ export async function updateActive(
 
   if ("prompt" in patch) {
     update.prompt = coalesceText(patch.prompt);
+    update.ephemeral = false;
   }
   if ("q1" in patch) {
     update.q1 = coalesceText(patch.q1);
+    update.ephemeral = false;
   }
   if ("q2" in patch) {
     update.q2 = coalesceText(patch.q2);
+    update.ephemeral = false;
   }
   if ("q3" in patch) {
     update.q3 = coalesceText(patch.q3);
+    update.ephemeral = false;
   }
   if ("scheduledDate" in patch) {
     update.scheduledDate = serializeScheduledDate(patch.scheduledDate ?? null);
+    update.ephemeral = false;
   }
 
   await updateDoc(ref, update);
@@ -158,6 +163,7 @@ export async function promoteToActive(uid: string, id: string) {
   await updateDoc(doc(db, "users", uid, "requests", id), {
     status: "active",
     updatedAt: serverTimestamp(),
+    ephemeral: false,
   });
 }
 

@@ -53,8 +53,11 @@ export default function DataSection({
     };
   }, [selectedDate, requestsByDate]);
 
-  const sortedRequests = useMemo(() => {
-    return [...dataCards];
+  const visibleRequests = useMemo(() => {
+    // Keep all active requests, only keep drafts that are NOT ephemeral
+    return (dataCards ?? []).filter(
+      (req) => req.status !== "draft" || req.ephemeral !== true
+    );
   }, [dataCards]);
 
   if (!selectedDate) return null;
