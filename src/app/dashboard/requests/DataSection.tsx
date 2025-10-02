@@ -129,9 +129,9 @@ export default function DataSection({
         </ToggleGroup>
       </div>
 
-      {selectedView === "requests" && sortedRequests.length > 0 ? (
+      {selectedView === "requests" && visibleRequests.length > 0 ? (
         <div className="space-y-3">
-          {sortedRequests.map((req) => (
+          {visibleRequests.map((req) => (
             <RowCard
               key={req.id}
               contentBox={req.prompt || "No prompt provided"}

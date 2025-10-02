@@ -153,7 +153,6 @@ export async function updateActive(
   }
   if ("scheduledDate" in patch) {
     update.scheduledDate = serializeScheduledDate(patch.scheduledDate ?? null);
-    update.ephemeral = false;
   }
 
   await updateDoc(ref, update);
