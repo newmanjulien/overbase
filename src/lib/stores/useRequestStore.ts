@@ -10,6 +10,7 @@ import {
   promoteToActive,
   demoteToDraft,
   deleteRequest,
+  ensureDraft,
 } from "@/lib/services/requestService-client";
 
 import { toDateKey } from "@/lib/requestDates";
@@ -51,6 +52,7 @@ interface RequestListState {
     data?: Partial<Request>,
     id?: string
   ) => Promise<string>;
+  ensureDraft: (uid: string) => Promise<string>;
   updateActive: (
     uid: string,
     id: string,
@@ -96,6 +98,13 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     const finalId = id ?? crypto.randomUUID();
     await createDraft(uid, finalId, data ?? {});
     return finalId;
+  },
+
+  ensureDraft: async (uid) => {
+    const id = await ensureDraft(uid);
+    // hydrate into local state so it's immediately available
+    await get().loadOne(uid, id);
+    return id;
   },
 
   updateActive: async (uid, id, data) => {
