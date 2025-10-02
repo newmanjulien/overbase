@@ -117,9 +117,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     set((s) => {
       const patch: Partial<Request> = {
         prompt: data.prompt ?? s.requests[id].prompt,
-        q1: data.q1 ?? s.requests[id].q1,
-        q2: data.q2 ?? s.requests[id].q2,
-        q3: data.q3 ?? s.requests[id].q3,
+        summary: data.summary ?? s.requests[id].summary,
         updatedAt: new Date(),
       };
 

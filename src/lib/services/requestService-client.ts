@@ -23,9 +23,7 @@ import { format } from "date-fns";
 
 interface WriteRequestClient {
   prompt: string;
-  q1: string;
-  q2: string;
-  q3: string;
+  summary: string;
   status: "draft" | "active";
   scheduledDate: string | null;
   createdAt: FieldValue;
@@ -77,9 +75,7 @@ export async function createDraft(
   const ref = doc(db, "users", uid, "requests", id);
   const write: WriteRequestClient = {
     prompt: coalesceText(data.prompt),
-    q1: coalesceText(data.q1),
-    q2: coalesceText(data.q2),
-    q3: coalesceText(data.q3),
+    summary: coalesceText(data.summary),
     status: "draft",
     scheduledDate: serializeScheduledDate(data.scheduledDate ?? null),
     createdAt: serverTimestamp(),
@@ -112,9 +108,7 @@ export async function ensureDraft(uid: string): Promise<string> {
   const newRef = doc(col);
   const write: WriteRequestClient = {
     prompt: "",
-    q1: "",
-    q2: "",
-    q3: "",
+    summary: "",
     status: "draft",
     scheduledDate: null,
     createdAt: serverTimestamp(),
@@ -139,16 +133,8 @@ export async function updateActive(
     update.prompt = coalesceText(patch.prompt);
     update.ephemeral = false;
   }
-  if ("q1" in patch) {
-    update.q1 = coalesceText(patch.q1);
-    update.ephemeral = false;
-  }
-  if ("q2" in patch) {
-    update.q2 = coalesceText(patch.q2);
-    update.ephemeral = false;
-  }
-  if ("q3" in patch) {
-    update.q3 = coalesceText(patch.q3);
+  if ("summary" in patch) {
+    update.summary = coalesceText(patch.summary);
     update.ephemeral = false;
   }
   if ("scheduledDate" in patch) {

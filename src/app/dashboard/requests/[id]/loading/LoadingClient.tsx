@@ -17,7 +17,7 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.push(
-        `/dashboard/requests/${requestId}/questions?mode=${mode}${
+        `/dashboard/requests/${requestId}/confirm?mode=${mode}${
           date ? `&date=${date}` : ""
         }`
       );

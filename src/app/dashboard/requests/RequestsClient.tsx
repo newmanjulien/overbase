@@ -21,9 +21,7 @@ export interface RequestItem {
   id: string;
   prompt: string;
   scheduledDate: Date | null;
-  q1: string;
-  q2: string;
-  q3: string;
+  summary: string;
   status: "draft" | "active";
   ephemeral?: boolean;
 }
