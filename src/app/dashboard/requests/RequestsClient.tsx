@@ -80,7 +80,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     } catch (err) {
       console.error("RequestsClient: subscribe failed", err);
     }
-  }, [user?.uid, loading, subscribe]);
+  }, [user?.uid, loading, subscribe, ensureDraft, router]);
 
   // 🧹 Cleanup unused draft on unmount
   useEffect(() => {
