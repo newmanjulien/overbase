@@ -64,7 +64,13 @@ export default function Calendar({
   };
 
   const handleDayClick = (day: Date) => {
-    setSelectedDate((prev) => (prev && isSameDayDate(prev, day) ? null : day));
+    setSelectedDate((prev) => {
+      if (prev && isSameDayDate(prev, day)) {
+        // Do nothing if user clicks the same day
+        return prev;
+      }
+      return day;
+    });
   };
 
   return (
