@@ -19,9 +19,7 @@ export default function QuestionsClient({
   const router = useRouter();
   const { user } = useAuth();
 
-  const [q1, setQ1] = useState<string>("");
-  const [q2, setQ2] = useState<string>("");
-  const [q3, setQ3] = useState<string>("");
+  const [summary, setSummary] = useState<string>("");
 
   // Global list store
   const {
@@ -45,19 +43,17 @@ export default function QuestionsClient({
       router.push(`/dashboard/requests/${requestId}/setup`);
       return;
     }
-    if (!q1 && existing.q1) setQ1(existing.q1);
-    if (!q2 && existing.q2) setQ2(existing.q2);
-    if (!q3 && existing.q3) setQ3(existing.q3);
-  }, [requests, requestId, q1, q2, q3, router]);
+    if (!summary && existing.summary) setSummary(existing.summary);
+  }, [requests, requestId, summary, router]);
 
   // Debounced auto-save for answers
   useEffect(() => {
     if (!user) return;
     const timeout = setTimeout(() => {
-      updateActive(user.uid, requestId, { q1, q2, q3 }).catch(() => {});
+      updateActive(user.uid, requestId, { summary }).catch(() => {});
     }, 800);
     return () => clearTimeout(timeout);
-  }, [user, requestId, q1, q2, q3, updateActive]);
+  }, [user, requestId, summary, updateActive]);
 
   const existing = requests[requestId];
   const status = existing?.status ?? "draft";
@@ -77,7 +73,7 @@ export default function QuestionsClient({
     }
     try {
       // Ensure latest answers are saved before promoting
-      await updateActive(user.uid, requestId, { q1, q2, q3 });
+      await updateActive(user.uid, requestId, { summary });
       await promoteToActive(user.uid, requestId);
       router.push(`/dashboard/requests${dateParam}`);
     } catch (err) {
@@ -115,12 +111,8 @@ export default function QuestionsClient({
 
   return (
     <QuestionsUI
-      q1={q1 ?? ""}
-      q2={q2 ?? ""}
-      q3={q3 ?? ""}
-      setQ1={setQ1}
-      setQ2={setQ2}
-      setQ3={setQ3}
+      summary={summary ?? ""}
+      setSummary={setSummary}
       onSubmit={handleSubmit}
       onBack={handleBack}
       onHome={handleHome}

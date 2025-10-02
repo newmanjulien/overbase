@@ -5,12 +5,8 @@ import { Input } from "@/components/ui/input";
 import SetupLayout from "@/components/layouts/SetupLayout";
 
 interface QuestionsProps {
-  q1: string;
-  q2: string;
-  q3: string;
-  setQ1: (v: string) => void;
-  setQ2: (v: string) => void;
-  setQ3: (v: string) => void;
+  summary: string;
+  setSummary: (v: string) => void;
   onSubmit: () => void | Promise<void>;
   onBack: () => void | Promise<void>;
   onHome: () => void | Promise<void>;
@@ -21,12 +17,8 @@ interface QuestionsProps {
 }
 
 export default function Questions({
-  q1,
-  q2,
-  q3,
-  setQ1,
-  setQ2,
-  setQ3,
+  summary,
+  setSummary,
   onSubmit,
   onBack,
   onHome,
@@ -63,22 +55,14 @@ export default function Questions({
       onSecondaryAction={onBack}
     >
       <div>
-        <Label htmlFor="q1" className="mb-2">
-          Question 1
+        <Label htmlFor="summary" className="mb-2">
+          Summary
         </Label>
-        <Input id="q1" value={q1} onChange={(e) => setQ1(e.target.value)} />
-      </div>
-      <div>
-        <Label htmlFor="q2" className="mb-2">
-          Question 2
-        </Label>
-        <Input id="q2" value={q2} onChange={(e) => setQ2(e.target.value)} />
-      </div>
-      <div>
-        <Label htmlFor="q3" className="mb-2">
-          Question 3
-        </Label>
-        <Input id="q3" value={q3} onChange={(e) => setQ3(e.target.value)} />
+        <Input
+          id="summary"
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+        />
       </div>
     </SetupLayout>
   );
