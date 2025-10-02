@@ -22,6 +22,7 @@ type FirestoreRequestData = {
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
   submittedAt?: Timestamp;
+  ephemeral?: boolean;
 };
 
 export const requestReadConverterAdmin: FirestoreDataConverter<Request> = {
@@ -48,6 +49,7 @@ export const requestReadConverterAdmin: FirestoreDataConverter<Request> = {
       createdAt: d.createdAt ? d.createdAt.toDate() : null,
       updatedAt: d.updatedAt ? d.updatedAt.toDate() : null,
       submittedAt: d.submittedAt ? d.submittedAt.toDate() : null,
+      ephemeral: d.ephemeral ?? false,
     };
   },
 };

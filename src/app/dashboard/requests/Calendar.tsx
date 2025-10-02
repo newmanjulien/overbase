@@ -128,9 +128,15 @@ export default function Calendar({
           }
 
           const list = requestsByDate?.[cell.key] ?? [];
-          const hasActive = list.some((r) => r.status === "active");
-          const hasDraft = list.some((r) => r.status === "draft");
-          const hasRequests = list.length > 0;
+
+          // only keep active requests and non-ephemeral drafts
+          const visibleList = list.filter(
+            (r) => r.status !== "draft" || r.ephemeral !== true
+          );
+
+          const hasActive = visibleList.some((r) => r.status === "active");
+          const hasDraft = visibleList.some((r) => r.status === "draft");
+          const hasRequests = visibleList.length > 0;
 
           return (
             <button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   today,
   toDateKey,
@@ -15,7 +15,6 @@ import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
-import { v4 as uuid } from "uuid";
 import LoadingScreen from "@/components/blocks/LoadingScreen";
 
 export interface RequestItem {
@@ -26,6 +25,7 @@ export interface RequestItem {
   q2: string;
   q3: string;
   status: "draft" | "active";
+  ephemeral?: boolean;
 }
 
 export interface RequestOptions {
@@ -43,9 +43,17 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate);
   const [currentDate, setCurrentDate] = useState<Date>(initialDate);
+  const [nextRequestId, setNextRequestId] = useState<string | null>(null);
+  const draftUsedRef = useRef(false);
 
   const { user, loading } = useAuth();
-  const { requestsByDate, createDraft, subscribe } = useRequestListStore();
+  const {
+    requestsByDate,
+    ensureDraft,
+    updateActive,
+    subscribe,
+    maybeCleanupEphemeral,
+  } = useRequestListStore();
 
   useEffect(() => {
     if (loading) return;
@@ -53,15 +61,36 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
       console.warn("RequestsClient: no valid uid after loading", user?.uid);
       return;
     }
+
     try {
       const unsub = subscribe(user.uid);
+
+      // Ensure a single draft exists, set it as nextRequestId
+      (async () => {
+        try {
+          const id = await ensureDraft(user.uid);
+          setNextRequestId(id);
+          router.prefetch(`/dashboard/requests/${id}/setup`);
+        } catch (err) {
+          console.error("RequestsClient: ensureDraft failed", err);
+        }
+      })();
+
       return () => unsub();
     } catch (err) {
       console.error("RequestsClient: subscribe failed", err);
     }
-  }, [user?.uid, loading, subscribe]);
+  }, [user?.uid, loading, subscribe, ensureDraft, router]);
 
-  // ✅ Conditional returns only after hooks
+  // 🧹 Cleanup unused draft on unmount
+  useEffect(() => {
+    return () => {
+      if (!user?.uid || !nextRequestId) return;
+      if (draftUsedRef.current) return;
+      maybeCleanupEphemeral(user.uid, nextRequestId).catch(() => {});
+    };
+  }, [user?.uid, nextRequestId, maybeCleanupEphemeral]);
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -75,28 +104,27 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     );
   }
 
-  const handleRequestData = (options?: RequestOptions) => {
-    if (!user) return;
+  const handleRequestData = async (options?: RequestOptions) => {
+    if (!user?.uid || !nextRequestId) return;
 
-    // ✅ Step 1: generate UUID on client
-    const newId = uuid();
     const mode = options?.mode ?? "create";
-
-    // ✅ Step 2: navigate immediately to final URL
-    let url = `/dashboard/requests/${newId}/setup?mode=${mode}`;
+    let url = `/dashboard/requests/${nextRequestId}/setup?mode=${mode}`;
     if (options?.prefillDate) {
       url += `&date=${toDateKey(options.prefillDate)}`;
+      try {
+        await updateActive(user.uid, nextRequestId, {
+          scheduledDate: options.prefillDate,
+        });
+      } catch (err) {
+        console.warn("Failed to assign date to draft", err);
+      }
     }
-    router.push(url);
 
-    // ✅ Step 3: create draft in Firestore with that ID in background
-    createDraft(
-      user.uid,
-      { scheduledDate: options?.prefillDate ?? null },
-      newId // pass it down
-    ).catch((err) => {
-      console.error("Failed to create draft", err);
-    });
+    try {
+      router.prefetch(url);
+    } catch {}
+    draftUsedRef.current = true;
+    router.push(url);
   };
 
   const calendarProps: CalendarProps = {

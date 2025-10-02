@@ -9,6 +9,7 @@ export interface Request {
   createdAt: Date | null;
   updatedAt: Date | null;
   submittedAt?: Date | null;
+  ephemeral?: boolean;
 }
 
 // Shape for partial updates
