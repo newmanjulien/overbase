@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import QuestionsUI from "./Questions";
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
+import { toDateKey } from "@/lib/requestDates";
 
 interface QuestionsClientProps {
   requestId: string;
@@ -27,7 +28,6 @@ export default function QuestionsClient({
     requests,
     loadOne,
     updateActive,
-    submitDraft,
     deleteRequest,
     promoteToActive,
     demoteToDraft,
@@ -59,6 +59,16 @@ export default function QuestionsClient({
     return () => clearTimeout(timeout);
   }, [user, requestId, q1, q2, q3, updateActive]);
 
+  const existing = requests[requestId];
+  const status = existing?.status ?? "draft";
+
+  const dateParam = existing?.scheduledDate
+    ? `?date=${toDateKey(existing.scheduledDate)}`
+    : "";
+  const dateParamWithAmp = existing?.scheduledDate
+    ? `&date=${toDateKey(existing.scheduledDate)}`
+    : "";
+
   // Submit handler
   const handleSubmit = async (): Promise<void> => {
     if (!user) {
@@ -66,8 +76,10 @@ export default function QuestionsClient({
       return;
     }
     try {
-      await submitDraft(user.uid, requestId, { q1, q2, q3 });
-      router.push("/dashboard/requests");
+      // Ensure latest answers are saved before promoting
+      await updateActive(user.uid, requestId, { q1, q2, q3 });
+      await promoteToActive(user.uid, requestId);
+      router.push(`/dashboard/requests${dateParam}`);
     } catch (err) {
       console.error("Save failed:", err);
       alert("Save failed — check console for details.");
@@ -75,7 +87,9 @@ export default function QuestionsClient({
   };
 
   const handleBack = async (): Promise<void> => {
-    router.push(`/dashboard/requests/${requestId}/setup?mode=${mode}`);
+    router.push(
+      `/dashboard/requests/${requestId}/setup?mode=${mode}${dateParamWithAmp}`
+    );
   };
 
   const handleDelete = async (): Promise<void> => {
@@ -86,11 +100,11 @@ export default function QuestionsClient({
     if (user) {
       await deleteRequest(user.uid, requestId);
     }
-    router.push("/dashboard/requests");
+    router.push(`/dashboard/requests${dateParam}`);
   };
 
   const handleHome = async (): Promise<void> => {
-    router.push("/dashboard/requests");
+    router.push(`/dashboard/requests${dateParam}`);
   };
 
   const handleStatusChange = async (val: "draft" | "active") => {
@@ -98,9 +112,6 @@ export default function QuestionsClient({
     if (val === "active") await promoteToActive(user.uid, requestId);
     else await demoteToDraft(user.uid, requestId);
   };
-
-  const existing = requests[requestId];
-  const status = existing?.status ?? "draft";
 
   return (
     <QuestionsUI

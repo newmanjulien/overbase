@@ -7,6 +7,7 @@ import {
   isBeforeDate,
   fromDateKey,
   isFutureDate,
+  toDateKey,
   type DateKey,
 } from "@/lib/requestDates";
 import Setup from "./Setup";
@@ -46,10 +47,10 @@ export default function SetupClient({
   }>({});
 
   const didPrefill = React.useRef(false);
+  const didHydrateFromFirestore = React.useRef(false);
 
   const minSelectableDateValue = useMemo(() => minSelectableDate(2), []);
 
-  // Prefill from query string (runs only once on mount)
   useEffect(() => {
     if (didPrefill.current) return;
     if (prefillDate) {
@@ -58,22 +59,23 @@ export default function SetupClient({
     }
   }, [prefillDate]);
 
-  // Load this request into the global store
   useEffect(() => {
     if (!user) return;
     loadOne(user.uid, requestId);
   }, [user, requestId, loadOne]);
 
-  // Seed form if empty
   useEffect(() => {
     const existing = requests[requestId];
     if (!existing) return;
-    if (!prompt && existing.prompt) setPrompt(existing.prompt);
-    if (!scheduledDate && existing.scheduledDate)
-      setScheduledDate(existing.scheduledDate);
-  }, [requests, requestId, prompt, scheduledDate, setPrompt, setScheduledDate]);
 
-  // Debounced auto-save for prompt/scheduledDate
+    // Only hydrate once, to avoid overwriting user edits
+    if (!didHydrateFromFirestore.current) {
+      if (existing.prompt) setPrompt(existing.prompt);
+      if (existing.scheduledDate) setScheduledDate(existing.scheduledDate);
+      didHydrateFromFirestore.current = true;
+    }
+  }, [requests, requestId]);
+
   useEffect(() => {
     if (!user) return;
     const timeout = setTimeout(() => {
@@ -101,6 +103,14 @@ export default function SetupClient({
     return Object.keys(errs).length === 0;
   };
 
+  const existing = requests[requestId];
+  const status = existing?.status ?? "draft";
+
+  const dateParam = scheduledDate ? `?date=${toDateKey(scheduledDate)}` : "";
+  const dateParamWithAmp = scheduledDate
+    ? `&date=${toDateKey(scheduledDate)}`
+    : "";
+
   const handleSubmit = async (): Promise<void> => {
     if (!validate()) return;
     if (!user) {
@@ -111,7 +121,10 @@ export default function SetupClient({
       prompt: prompt ?? "",
       scheduledDate: scheduledDate ?? null,
     });
-    router.push(`/dashboard/requests/${requestId}/questions?mode=${mode}`);
+
+    router.push(
+      `/dashboard/requests/${requestId}/questions?mode=${mode}${dateParamWithAmp}`
+    );
   };
 
   const handleCancel = async (): Promise<void> => {
@@ -124,7 +137,7 @@ export default function SetupClient({
         await deleteRequest(user.uid, requestId);
       }
     }
-    router.push("/dashboard/requests");
+    router.push(`/dashboard/requests${dateParam}`);
   };
 
   const handleDelete = async (): Promise<void> => {
@@ -135,7 +148,7 @@ export default function SetupClient({
     if (user) {
       await deleteRequest(user.uid, requestId);
     }
-    router.push("/dashboard/requests");
+    router.push(`/dashboard/requests${dateParam}`);
   };
 
   const handleHome = async (): Promise<void> => {
@@ -148,7 +161,7 @@ export default function SetupClient({
       return;
     }
 
-    router.push("/dashboard/requests");
+    router.push(`/dashboard/requests${dateParam}`);
     return;
   };
 
@@ -157,9 +170,6 @@ export default function SetupClient({
     if (val === "active") await promoteToActive(user.uid, requestId);
     else await demoteToDraft(user.uid, requestId);
   };
-
-  const existing = requests[requestId];
-  const status = existing?.status ?? "draft";
 
   return (
     <Setup

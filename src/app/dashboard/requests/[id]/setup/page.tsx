@@ -12,6 +12,10 @@ export default async function RequestSetupPage({
   const { id } = await params;
   const search = await searchParams;
 
+  if (!id) {
+    return <div className="p-6 text-center">⚠️ Invalid request ID</div>;
+  }
+
   const raw = search?.date;
   let prefillDate: string | undefined;
   if (typeof raw === "string") {
@@ -33,7 +37,7 @@ export default async function RequestSetupPage({
     <SetupClient
       requestId={id}
       prefillDate={prefillDate}
-      mode={mode as "create" | "edit" | "editDraft"} // ✅ pass it down
+      mode={mode as "create" | "edit" | "editDraft"}
     />
   );
 }
