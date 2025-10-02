@@ -1,1 +1,1 @@
-export { default } from "@/components/blocks/LoadingScreen";
+export { default } from "@/components/blocks/Loading";

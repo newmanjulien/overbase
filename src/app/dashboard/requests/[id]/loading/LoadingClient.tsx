@@ -20,7 +20,7 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
           date ? `&date=${date}` : ""
         }`
       );
-    }, 20000); // 20 seconds
+    }, 10000); // 10 seconds
 
     return () => clearTimeout(timer);
   }, [router, requestId, mode, date]);
