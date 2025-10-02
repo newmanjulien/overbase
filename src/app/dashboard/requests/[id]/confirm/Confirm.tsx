@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import SetupLayout from "@/components/layouts/SetupLayout";
 
-interface QuestionsProps {
+interface ConfirmProps {
   summary: string;
   setSummary: (v: string) => void;
   onSubmit: () => void | Promise<void>;
@@ -16,7 +16,7 @@ interface QuestionsProps {
   mode: "create" | "edit" | "editDraft";
 }
 
-export default function Questions({
+export default function Confirm({
   summary,
   setSummary,
   onSubmit,
@@ -26,7 +26,7 @@ export default function Questions({
   status,
   setStatus,
   mode,
-}: QuestionsProps) {
+}: ConfirmProps) {
   return (
     <SetupLayout
       // Sidebar

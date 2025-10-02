@@ -2,20 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import QuestionsUI from "./Questions";
+import ConfirmUI from "./Confirm";
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
 import { toDateKey } from "@/lib/requestDates";
 
-interface QuestionsClientProps {
+interface ConfirmClientProps {
   requestId: string;
   mode: "create" | "edit" | "editDraft";
 }
 
-export default function QuestionsClient({
-  requestId,
-  mode,
-}: QuestionsClientProps) {
+export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -110,7 +107,7 @@ export default function QuestionsClient({
   };
 
   return (
-    <QuestionsUI
+    <ConfirmUI
       summary={summary ?? ""}
       setSummary={setSummary}
       onSubmit={handleSubmit}
