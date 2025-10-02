@@ -31,6 +31,7 @@ interface WriteRequestClient {
   createdAt: FieldValue;
   updatedAt: FieldValue;
   submittedAt?: FieldValue;
+  ephemeral?: boolean;
 }
 
 // --- helpers ---
@@ -95,6 +96,7 @@ export async function ensureDraft(uid: string): Promise<string> {
   const q = query(
     col,
     where("status", "==", "draft"),
+    where("ephemeral", "==", true),
     orderBy("createdAt", "desc"),
     limit(1)
   );
@@ -116,6 +118,7 @@ export async function ensureDraft(uid: string): Promise<string> {
     scheduledDate: null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+    ephemeral: true, // mark as system scratchpad
   };
   await setDoc(newRef, write, { merge: false });
   return newRef.id;

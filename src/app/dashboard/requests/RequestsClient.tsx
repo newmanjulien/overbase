@@ -89,6 +89,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
       if (
         draft &&
         draft.status === "draft" &&
+        draft.ephemeral === true &&
         !draft.prompt &&
         !draft.scheduledDate
       ) {

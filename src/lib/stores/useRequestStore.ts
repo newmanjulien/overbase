@@ -76,7 +76,9 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
   },
 
   drafts: () =>
-    Object.values(get().requests).filter((r) => r.status === "draft"),
+    Object.values(get().requests).filter(
+      (r) => r.status === "draft" && !r.ephemeral
+    ),
   actives: () =>
     Object.values(get().requests).filter((r) => r.status === "active"),
 
