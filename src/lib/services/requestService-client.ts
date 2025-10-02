@@ -13,6 +13,9 @@ import {
   query,
   serverTimestamp,
   FieldValue,
+  where,
+  limit,
+  getDocs,
 } from "firebase/firestore";
 import { requestReadConverterClient } from "@/lib/models/request-client";
 import type { Request, RequestPatch } from "@/lib/models/request-types";
@@ -82,6 +85,40 @@ export async function createDraft(
     updatedAt: serverTimestamp(),
   };
   await setDoc(ref, write, { merge: false });
+}
+
+// --- ensure single draft ---
+export async function ensureDraft(uid: string): Promise<string> {
+  const col = collection(db, "users", uid, "requests");
+
+  // Look for an existing draft
+  const q = query(
+    col,
+    where("status", "==", "draft"),
+    orderBy("createdAt", "desc"),
+    limit(1)
+  );
+  const snap = await getDocs(q);
+
+  if (!snap.empty) {
+    // Reuse the first draft found
+    return snap.docs[0].id;
+  }
+
+  // Otherwise create a new one
+  const newRef = doc(col);
+  const write: WriteRequestClient = {
+    prompt: "",
+    q1: "",
+    q2: "",
+    q3: "",
+    status: "draft",
+    scheduledDate: null,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+  await setDoc(newRef, write, { merge: false });
+  return newRef.id;
 }
 
 export async function updateActive(
