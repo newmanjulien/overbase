@@ -1,7 +1,7 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import SetupLayout from "@/components/layouts/SetupLayout";
 
 interface QuestionsProps {
@@ -58,10 +58,12 @@ export default function Questions({
         <Label htmlFor="summary" className="mb-2">
           Summary
         </Label>
-        <Input
+        <Textarea
           id="summary"
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
+          grow
+          className="mt-1 min-h-60"
         />
       </div>
     </SetupLayout>
