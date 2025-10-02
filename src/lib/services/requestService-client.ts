@@ -84,6 +84,7 @@ export async function createDraft(
     scheduledDate: serializeScheduledDate(data.scheduledDate ?? null),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+    ephemeral: true,
   };
   await setDoc(ref, write, { merge: false });
 }

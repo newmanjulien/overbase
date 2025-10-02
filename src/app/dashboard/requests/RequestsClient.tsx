@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   today,
   toDateKey,
@@ -43,6 +43,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate);
   const [currentDate, setCurrentDate] = useState<Date>(initialDate);
   const [nextRequestId, setNextRequestId] = useState<string | null>(null);
+  const draftUsedRef = useRef(false);
 
   const { user, loading } = useAuth();
   const {
@@ -85,6 +86,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
   useEffect(() => {
     return () => {
       if (!user?.uid || !nextRequestId) return;
+      if (draftUsedRef.current) return;
       const draft = requests[nextRequestId];
       if (
         draft &&
@@ -130,6 +132,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     try {
       router.prefetch(url);
     } catch {}
+    draftUsedRef.current = true;
     router.push(url);
   };
 

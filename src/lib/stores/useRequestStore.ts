@@ -61,6 +61,7 @@ interface RequestListState {
   promoteToActive: (uid: string, id: string) => Promise<void>;
   demoteToDraft: (uid: string, id: string) => Promise<void>;
   deleteRequest: (uid: string, id: string) => Promise<void>;
+  maybeCleanupEphemeral: (uid: string, id: string) => Promise<void>;
 }
 
 export const useRequestListStore = create<RequestListState>((set, get) => ({
@@ -182,5 +183,18 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
         requestsByDate: buildRequestsByDate(rest),
       };
     });
+  },
+
+  maybeCleanupEphemeral: async (uid, id) => {
+    const draft = get().requests[id];
+    if (
+      draft &&
+      draft.status === "draft" &&
+      draft.ephemeral === true &&
+      !draft.prompt &&
+      !draft.scheduledDate
+    ) {
+      await deleteRequest(uid, id);
+    }
   },
 }));
