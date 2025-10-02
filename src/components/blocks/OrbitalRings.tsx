@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 
-export default function OrbitalRingsAligned() {
+export default function OrbitalRings() {
   // Explicit class strings so Tailwind won’t purge them.
   const rings = [
     {
