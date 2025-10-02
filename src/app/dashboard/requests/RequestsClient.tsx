@@ -50,9 +50,10 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     requestsByDate,
     ensureDraft,
     updateActive,
-    deleteRequest,
+
     subscribe,
-    requests,
+
+    maybeCleanupEphemeral,
   } = useRequestListStore();
 
   useEffect(() => {
@@ -87,18 +88,9 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     return () => {
       if (!user?.uid || !nextRequestId) return;
       if (draftUsedRef.current) return;
-      const draft = requests[nextRequestId];
-      if (
-        draft &&
-        draft.status === "draft" &&
-        draft.ephemeral === true &&
-        !draft.prompt &&
-        !draft.scheduledDate
-      ) {
-        deleteRequest(user.uid, nextRequestId).catch(() => {});
-      }
+      maybeCleanupEphemeral(user.uid, nextRequestId).catch(() => {});
     };
-  }, [user?.uid, nextRequestId, requests, deleteRequest]);
+  }, [user?.uid, nextRequestId, maybeCleanupEphemeral]);
 
   if (loading) {
     return <LoadingScreen />;
