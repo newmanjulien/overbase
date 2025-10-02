@@ -15,7 +15,7 @@ import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
-import LoadingScreen from "@/components/blocks/LoadingScreen";
+import LoadingScreen from "@/components/blocks/Loading";
 
 export interface RequestItem {
   id: string;
