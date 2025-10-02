@@ -113,7 +113,7 @@ export default function OrbitalRings() {
               style={{ animationDelay: r.delay }}
             >
               <div
-                className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full border ${
+                className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full border ${
                   r.dotBorder ?? ""
                 } shadow-none`}
               />
@@ -126,8 +126,8 @@ export default function OrbitalRings() {
           <Image
             src="/images/logo.png"
             alt="Logo"
-            width={50}
-            height={50}
+            width={55}
+            height={55}
             className="pointer-events-none select-none"
           />
         </div>
