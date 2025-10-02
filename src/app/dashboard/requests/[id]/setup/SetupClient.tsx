@@ -120,6 +120,7 @@ export default function SetupClient({
     await updateActive(user.uid, requestId, {
       prompt: prompt ?? "",
       scheduledDate: scheduledDate ?? null,
+      ephemeral: false,
     });
 
     router.push(
