@@ -12,14 +12,23 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  FieldValue,
 } from "firebase/firestore";
 import { requestReadConverterClient } from "@/lib/models/request-client";
-import type {
-  Request,
-  RequestDoc,
-  RequestPatch,
-} from "@/lib/models/request-types";
+import type { Request, RequestPatch } from "@/lib/models/request-types";
 import { format } from "date-fns";
+
+interface WriteRequestClient {
+  prompt: string;
+  q1: string;
+  q2: string;
+  q3: string;
+  status: "draft" | "active";
+  scheduledDate: string | null;
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
+  submittedAt?: FieldValue;
+}
 
 // --- helpers ---
 function serializeScheduledDate(d: Date | null): string | null {
@@ -62,7 +71,7 @@ export async function createDraft(
   data: RequestPatch = {}
 ) {
   const ref = doc(db, "users", uid, "requests", id);
-  const write: RequestDoc = {
+  const write: WriteRequestClient = {
     prompt: coalesceText(data.prompt),
     q1: coalesceText(data.q1),
     q2: coalesceText(data.q2),
