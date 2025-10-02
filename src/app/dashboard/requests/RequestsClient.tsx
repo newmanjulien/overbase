@@ -43,6 +43,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate);
   const [currentDate, setCurrentDate] = useState<Date>(initialDate);
+  const [nextRequestId, setNextRequestId] = useState<string | null>(null);
 
   const { user, loading } = useAuth();
   const { requestsByDate, createDraft, subscribe } = useRequestListStore();
@@ -53,13 +54,28 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
       console.warn("RequestsClient: no valid uid after loading", user?.uid);
       return;
     }
+
+    if (!nextRequestId) {
+      setNextRequestId(uuid());
+    }
+
     try {
       const unsub = subscribe(user.uid);
       return () => unsub();
     } catch (err) {
       console.error("RequestsClient: subscribe failed", err);
     }
-  }, [user?.uid, loading, subscribe]);
+  }, [user?.uid, loading, subscribe, nextRequestId]);
+
+  useEffect(() => {
+    if (!user?.uid || !nextRequestId) return;
+
+    try {
+      router.prefetch(`/dashboard/requests/${nextRequestId}/setup`);
+    } catch (err) {
+      console.error("Prefetch failed", err);
+    }
+  }, [user?.uid, nextRequestId]);
 
   // ✅ Conditional returns only after hooks
   if (loading) {
@@ -76,27 +92,31 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
   }
 
   const handleRequestData = (options?: RequestOptions) => {
-    if (!user) return;
+    if (!user || !nextRequestId) return;
 
-    // ✅ Step 1: generate UUID on client
-    const newId = uuid();
     const mode = options?.mode ?? "create";
 
-    // ✅ Step 2: navigate immediately to final URL
-    let url = `/dashboard/requests/${newId}/setup?mode=${mode}`;
+    let url = `/dashboard/requests/${nextRequestId}/setup?mode=${mode}`;
     if (options?.prefillDate) {
       url += `&date=${toDateKey(options.prefillDate)}`;
     }
+
+    try {
+      router.prefetch(url);
+    } catch {
+      // swallow errors, since prefetch is best effort
+    }
     router.push(url);
 
-    // ✅ Step 3: create draft in Firestore with that ID in background
     createDraft(
       user.uid,
       { scheduledDate: options?.prefillDate ?? null },
-      newId // pass it down
+      nextRequestId
     ).catch((err) => {
       console.error("Failed to create draft", err);
     });
+
+    setNextRequestId(uuid());
   };
 
   const calendarProps: CalendarProps = {
