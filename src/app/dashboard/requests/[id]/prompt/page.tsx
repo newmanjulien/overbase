@@ -1,4 +1,4 @@
-import SetupClient from "./SetupClient";
+import SetupClient from "./PromptClient";
 
 interface SetupPageProps {
   params: Promise<{ id: string }>;

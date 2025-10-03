@@ -10,22 +10,22 @@ import {
   toDateKey,
   type DateKey,
 } from "@/lib/requestDates";
-import Setup from "./Setup";
+import Prompt from "./Prompt";
 
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
 
-interface SetupClientProps {
+interface PromptClientProps {
   requestId: string;
   prefillDate?: string;
   mode: "create" | "edit" | "editDraft";
 }
 
-export default function SetupClient({
+export default function PromptClient({
   requestId,
   prefillDate,
   mode,
-}: SetupClientProps) {
+}: PromptClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -172,7 +172,7 @@ export default function SetupClient({
   };
 
   return (
-    <Setup
+    <Prompt
       prompt={prompt ?? ""}
       scheduledDate={scheduledDate ?? null}
       errors={errors}

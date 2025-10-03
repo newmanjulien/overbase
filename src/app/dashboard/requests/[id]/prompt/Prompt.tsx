@@ -13,7 +13,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import SetupLayout from "@/components/layouts/SetupLayout";
 
-interface SetupProps {
+interface PromptProps {
   prompt: string;
   scheduledDate: Date | null;
   errors: { prompt?: string; scheduledDate?: string };
@@ -29,7 +29,7 @@ interface SetupProps {
   mode: "create" | "edit" | "editDraft";
 }
 
-export default function Setup({
+export default function Prompt({
   prompt,
   scheduledDate,
   errors,
@@ -43,7 +43,7 @@ export default function Setup({
   status,
   setStatus,
   mode,
-}: SetupProps) {
+}: PromptProps) {
   return (
     <SetupLayout
       // Sidebar
