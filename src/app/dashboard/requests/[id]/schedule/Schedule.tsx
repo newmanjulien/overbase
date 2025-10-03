@@ -57,7 +57,7 @@ export default function Schedule({
       onSidebarBack={onHome}
       sidebarTitle="Schedule your data request"
       title="Schedule your request"
-      subtitle="When do you need the data and is this request recurring?"
+      subtitle="When do you need the data and should this request repeat?"
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}
       secondaryButtonText="Back"
@@ -89,7 +89,7 @@ export default function Schedule({
       </div>
 
       <Label htmlFor="scheduledDate" className="mt-6 mb-3 block">
-        Is this recurring?
+        Should this repeat?
       </Label>
       <Select
         onValueChange={(val) => setSelectedCustomer(val)}
