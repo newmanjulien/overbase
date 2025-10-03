@@ -31,18 +31,20 @@ export default function Questions({
 }: QuestionsProps) {
   return (
     <SetupLayout
-      sidebarBackText="Back to Setup"
+      sidebarBackText="Back to requests"
       onSidebarBack={onBack}
-      sidebarTitle="Choose when to schedule this request"
-      title="When do you want this data?"
-      subtitle="Pick a date to schedule your request"
+      sidebarTitle="3 final and quick questions"
+      title="Select a customer & schedule the request"
+      subtitle="Which customer is this for and when do you need the data?"
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}
       secondaryButtonText="Back"
       onSecondaryAction={onBack}
     >
       <div>
-        <Label htmlFor="scheduledDate">Scheduled Date</Label>
+        <Label htmlFor="scheduledDate" className="mb-3 block">
+          When do you need this data?
+        </Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start">
