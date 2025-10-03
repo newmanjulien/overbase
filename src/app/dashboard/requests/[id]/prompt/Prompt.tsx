@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { Textarea } from "@/components/ui/textarea";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import {
@@ -16,8 +14,10 @@ const CUSTOMERS = ["Acme Corp", "Globex", "Initech", "Soylent", "Umbrella"];
 
 interface PromptProps {
   prompt: string;
-  errors: { prompt?: string };
+  customer: string;
+  errors: { prompt?: string; customer?: string };
   setPrompt: (val: string) => void;
+  setCustomer: (val: string) => void;
   onSubmit: () => void | Promise<void>;
   onCancel: () => void | Promise<void>;
   onHome: () => void | Promise<void>;
@@ -29,8 +29,10 @@ interface PromptProps {
 
 export default function Prompt({
   prompt,
+  customer,
   errors,
   setPrompt,
+  setCustomer,
   onSubmit,
   onCancel,
   onHome,
@@ -39,8 +41,6 @@ export default function Prompt({
   setStatus,
   mode,
 }: PromptProps) {
-  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
-
   return (
     <SetupLayout
       // Sidebar
@@ -83,9 +83,13 @@ export default function Prompt({
         )}
       </div>
 
-      <Select onValueChange={(val) => setSelectedCustomer(val)}>
+      <Select value={customer} onValueChange={setCustomer}>
         <SelectTrigger className="mt-4 w-full border border-grey-50 rounded-xl">
-          <SelectValue placeholder="Which customer is this data for?" />
+          <SelectValue placeholder="Which customer is this data for?">
+            {customer ? (
+              <span className="truncate">Customer: {customer}</span>
+            ) : null}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {CUSTOMERS.map((cust) => (
@@ -95,6 +99,9 @@ export default function Prompt({
           ))}
         </SelectContent>
       </Select>
+      {errors.customer && (
+        <p className="text-red-500 text-sm mt-1">{errors.customer}</p>
+      )}
     </SetupLayout>
   );
 }

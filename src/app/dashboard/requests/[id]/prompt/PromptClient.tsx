@@ -18,6 +18,7 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
   const { user } = useAuth();
 
   const [prompt, setPrompt] = useState<string>("");
+  const [customer, setCustomer] = useState<string>("");
 
   const {
     requests,
@@ -28,7 +29,9 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     deleteRequest,
   } = useRequestListStore();
 
-  const [errors, setErrors] = useState<{ prompt?: string }>({});
+  const [errors, setErrors] = useState<{ prompt?: string; customer?: string }>(
+    {}
+  );
 
   const didHydrateFromFirestore = React.useRef(false);
 
@@ -44,25 +47,30 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     if (!existing) return;
     if (!didHydrateFromFirestore.current) {
       if (existing.prompt) setPrompt(existing.prompt);
+      if (existing.customer) setCustomer(existing.customer);
       didHydrateFromFirestore.current = true;
     }
   }, [requests, requestId]);
 
-  // Auto-save prompt only
+  // Auto-save
   useEffect(() => {
     if (!user) return;
     const timeout = setTimeout(() => {
       updateActive(user.uid, requestId, {
-        prompt: prompt ?? "",
+        prompt: prompt,
+        customer: customer,
       }).catch(() => {});
     }, 800);
     return () => clearTimeout(timeout);
-  }, [prompt, user, requestId, updateActive]);
+  }, [prompt, customer, user, requestId, updateActive]);
 
   const validate = () => {
     const errs: typeof errors = {};
     if (!prompt?.trim()) {
       errs.prompt = "Prompt is required.";
+    }
+    if (!customer?.trim()) {
+      errs.customer = "Customer is required.";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -78,7 +86,8 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       return;
     }
     await updateActive(user.uid, requestId, {
-      prompt: prompt ?? "",
+      prompt: prompt,
+      customer: customer,
     });
 
     // 👉 Now go to Questions step
@@ -125,9 +134,11 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
 
   return (
     <Prompt
-      prompt={prompt ?? ""}
+      prompt={prompt}
+      customer={customer}
       errors={errors}
       setPrompt={setPrompt}
+      setCustomer={setCustomer}
       onCancel={handleCancel}
       onSubmit={handleSubmit}
       onHome={handleHome}
