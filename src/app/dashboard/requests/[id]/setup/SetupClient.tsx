@@ -123,7 +123,7 @@ export default function SetupClient({
     });
 
     router.push(
-      `/dashboard/requests/${requestId}/questions?mode=${mode}${dateParamWithAmp}`
+      `/dashboard/requests/${requestId}/loading?mode=${mode}${dateParamWithAmp}`
     );
   };
 

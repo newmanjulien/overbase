@@ -1,14 +1,14 @@
-import QuestionsClient from "./QuestionsClient";
+import ConfirmClient from "./ConfirmClient";
 
-interface QuestionsPageProps {
+interface ConfirmPageProps {
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function RequestQuestionsPage({
+export default async function ConfirmPage({
   params,
   searchParams,
-}: QuestionsPageProps) {
+}: ConfirmPageProps) {
   const { id } = await params;
   const search = await searchParams;
 
@@ -21,7 +21,7 @@ export default async function RequestQuestionsPage({
       : null) ?? "create";
 
   return (
-    <QuestionsClient
+    <ConfirmClient
       requestId={id}
       mode={mode as "create" | "edit" | "editDraft"}
     />

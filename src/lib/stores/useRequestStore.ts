@@ -10,6 +10,7 @@ import {
   promoteToActive,
   demoteToDraft,
   deleteRequest,
+  ensureDraft,
 } from "@/lib/services/requestService-client";
 
 import { toDateKey } from "@/lib/requestDates";
@@ -51,6 +52,7 @@ interface RequestListState {
     data?: Partial<Request>,
     id?: string
   ) => Promise<string>;
+  ensureDraft: (uid: string) => Promise<string>;
   updateActive: (
     uid: string,
     id: string,
@@ -59,6 +61,7 @@ interface RequestListState {
   promoteToActive: (uid: string, id: string) => Promise<void>;
   demoteToDraft: (uid: string, id: string) => Promise<void>;
   deleteRequest: (uid: string, id: string) => Promise<void>;
+  maybeCleanupEphemeral: (uid: string, id: string) => Promise<void>;
 }
 
 export const useRequestListStore = create<RequestListState>((set, get) => ({
@@ -74,7 +77,9 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
   },
 
   drafts: () =>
-    Object.values(get().requests).filter((r) => r.status === "draft"),
+    Object.values(get().requests).filter(
+      (r) => r.status === "draft" && !r.ephemeral
+    ),
   actives: () =>
     Object.values(get().requests).filter((r) => r.status === "active"),
 
@@ -98,6 +103,13 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     return finalId;
   },
 
+  ensureDraft: async (uid) => {
+    const id = await ensureDraft(uid);
+    // hydrate into local state so it's immediately available
+    await get().loadOne(uid, id);
+    return id;
+  },
+
   updateActive: async (uid, id, data) => {
     await updateActive(uid, id, data);
 
@@ -105,9 +117,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     set((s) => {
       const patch: Partial<Request> = {
         prompt: data.prompt ?? s.requests[id].prompt,
-        q1: data.q1 ?? s.requests[id].q1,
-        q2: data.q2 ?? s.requests[id].q2,
-        q3: data.q3 ?? s.requests[id].q3,
+        summary: data.summary ?? s.requests[id].summary,
         updatedAt: new Date(),
       };
 
@@ -171,5 +181,18 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
         requestsByDate: buildRequestsByDate(rest),
       };
     });
+  },
+
+  maybeCleanupEphemeral: async (uid, id) => {
+    const draft = get().requests[id];
+    if (
+      draft &&
+      draft.status === "draft" &&
+      draft.ephemeral === true &&
+      !draft.prompt &&
+      !draft.scheduledDate
+    ) {
+      await deleteRequest(uid, id);
+    }
   },
 }));

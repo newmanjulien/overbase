@@ -53,8 +53,11 @@ export default function DataSection({
     };
   }, [selectedDate, requestsByDate]);
 
-  const sortedRequests = useMemo(() => {
-    return [...dataCards];
+  const visibleRequests = useMemo(() => {
+    // Keep all active requests, only keep drafts that are NOT ephemeral
+    return (dataCards ?? []).filter(
+      (req) => req.status !== "draft" || req.ephemeral !== true
+    );
   }, [dataCards]);
 
   if (!selectedDate) return null;
@@ -126,9 +129,9 @@ export default function DataSection({
         </ToggleGroup>
       </div>
 
-      {selectedView === "requests" && sortedRequests.length > 0 ? (
+      {selectedView === "requests" && visibleRequests.length > 0 ? (
         <div className="space-y-3">
-          {sortedRequests.map((req) => (
+          {visibleRequests.map((req) => (
             <RowCard
               key={req.id}
               contentBox={req.prompt || "No prompt provided"}

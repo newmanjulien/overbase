@@ -15,13 +15,12 @@ import type { Request } from "@/lib/models/request-types";
 type FirestoreRequestData = {
   prompt?: string;
   scheduledDate?: string;
-  q1?: string;
-  q2?: string;
-  q3?: string;
+  summary?: string;
   status?: "draft" | "active";
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
   submittedAt?: Timestamp;
+  ephemeral?: boolean;
 };
 
 export const requestReadConverterClient: FirestoreDataConverter<Request> = {
@@ -41,13 +40,12 @@ export const requestReadConverterClient: FirestoreDataConverter<Request> = {
       scheduledDate: d.scheduledDate
         ? deserializeScheduledDate(d.scheduledDate)
         : null,
-      q1: d.q1 ?? "",
-      q2: d.q2 ?? "",
-      q3: d.q3 ?? "",
+      summary: d.summary ?? "",
       status: d.status === "active" ? "active" : "draft",
       createdAt: d.createdAt ? d.createdAt.toDate() : null,
       updatedAt: d.updatedAt ? d.updatedAt.toDate() : null,
       submittedAt: d.submittedAt ? d.submittedAt.toDate() : null,
+      ephemeral: d.ephemeral ?? false,
     };
   },
 };
