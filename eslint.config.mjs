@@ -22,11 +22,6 @@ const eslintConfig = [
           message: "Do not leave placeholder `...` in source files.",
         },
       ],
-      "no-unused-vars": "warn",
-      "no-undef": "warn",
-      "no-console": "off",
-      semi: ["warn", "always"],
-      quotes: ["warn", "double"],
     },
   },
 ];
