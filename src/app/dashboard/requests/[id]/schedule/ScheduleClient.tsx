@@ -26,7 +26,14 @@ export default function ScheduleClient({
 }: ScheduleClientProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const { requests, loadOne, updateActive } = useRequestListStore();
+  const {
+    requests,
+    loadOne,
+    updateActive,
+    promoteToActive,
+    demoteToDraft,
+    deleteRequest,
+  } = useRequestListStore();
 
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [repeat, setRepeat] = useState<string>("Does not repeat");
@@ -45,11 +52,22 @@ export default function ScheduleClient({
     loadOne(user.uid, requestId);
   }, [user, requestId, loadOne]);
 
+  // hydrate scheduledDate + repeat when request loads
   useEffect(() => {
     const existing = requests[requestId];
     if (existing?.scheduledDate) setScheduledDate(existing.scheduledDate);
     if (existing?.repeat) setRepeat(existing.repeat);
   }, [requests, requestId]);
+
+  // derive status from store
+  const existing = requests[requestId];
+  const status = existing?.status ?? "draft";
+
+  const handleStatusChange = async (val: "draft" | "active") => {
+    if (!user) return;
+    if (val === "active") await promoteToActive(user.uid, requestId);
+    else await demoteToDraft(user.uid, requestId);
+  };
 
   // auto-save
   useEffect(() => {
@@ -85,6 +103,17 @@ export default function ScheduleClient({
     );
   };
 
+  const handleDelete = async (): Promise<void> => {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete this request?"
+    );
+    if (!confirmed) return;
+    if (user) {
+      await deleteRequest(user.uid, requestId);
+    }
+    router.push(`/dashboard/requests`);
+  };
+
   const handleBack = () => {
     router.push(`/dashboard/requests/${requestId}/prompt?mode=${mode}`);
   };
@@ -109,6 +138,9 @@ export default function ScheduleClient({
       onHome={handleHome}
       mode={mode}
       minSelectableDate={minSelectable}
+      status={status}
+      setStatus={mode !== "create" ? handleStatusChange : undefined}
+      onDelete={handleDelete}
     />
   );
 }

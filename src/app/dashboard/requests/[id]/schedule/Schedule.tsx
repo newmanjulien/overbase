@@ -38,6 +38,9 @@ interface ScheduleProps {
   onHome: () => void;
   minSelectableDate: Date;
   mode: "create" | "edit" | "editDraft";
+  status?: "draft" | "active";
+  setStatus?: (val: "draft" | "active") => void;
+  onDelete?: () => void;
 }
 
 export default function Schedule({
@@ -50,6 +53,10 @@ export default function Schedule({
   onBack,
   onHome,
   minSelectableDate,
+  mode,
+  status,
+  setStatus,
+  onDelete,
 }: ScheduleProps) {
   return (
     <SetupLayout
@@ -62,6 +69,18 @@ export default function Schedule({
       onPrimaryAction={onSubmit}
       secondaryButtonText="Back"
       onSecondaryAction={onBack}
+      {...(mode !== "create" &&
+        setStatus &&
+        onDelete && {
+          sidebarActionText: "Delete request",
+          onSidebarAction: onDelete,
+          toggleValue: status,
+          onToggleChange: (val) => void setStatus(val as "draft" | "active"),
+          toggleOptions: [
+            { value: "draft", label: "Draft" },
+            { value: "active", label: "Active" },
+          ],
+        })}
     >
       <div>
         <Label htmlFor="scheduledDate" className="mb-3 block">
