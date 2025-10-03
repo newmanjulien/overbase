@@ -2,6 +2,10 @@
 
 import OrbitalRings from "@/components/blocks/OrbitalRings";
 
-export default function Loading() {
+type Props = {
+  duration: number;
+};
+
+export default function Loading({}: Props) {
   return <OrbitalRings />;
 }

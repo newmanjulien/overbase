@@ -5,7 +5,7 @@ interface LoadingPageProps {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function RequestLoadingPage({
+export default async function LoadingPage({
   params,
   searchParams,
 }: LoadingPageProps) {
@@ -16,14 +16,16 @@ export default async function RequestLoadingPage({
     return <div className="p-6 text-center">⚠️ Invalid request ID</div>;
   }
 
-  const raw = search?.date;
-  let prefillDate: string | undefined;
-  if (typeof raw === "string") {
-    prefillDate = raw;
-  } else if (Array.isArray(raw) && raw.length > 0) {
-    prefillDate = raw[0];
-  }
+  // Parse optional date
+  const rawDate = search?.date;
+  const date =
+    typeof rawDate === "string"
+      ? rawDate
+      : Array.isArray(rawDate) && rawDate.length > 0
+      ? rawDate[0]
+      : undefined;
 
+  // Parse mode
   const modeParam = search?.mode;
   const mode =
     (typeof modeParam === "string"
@@ -35,8 +37,8 @@ export default async function RequestLoadingPage({
   return (
     <LoadingClient
       requestId={id}
-      prefillDate={prefillDate}
       mode={mode as "create" | "edit" | "editDraft"}
+      date={date}
     />
   );
 }
