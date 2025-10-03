@@ -84,7 +84,7 @@ export default function Prompt({
       </div>
 
       <Select onValueChange={(val) => setSelectedCustomer(val)}>
-        <SelectTrigger className="mt-4 w-full border border-grey-100 rounded-md">
+        <SelectTrigger className="mt-4 w-full border border-grey-50 rounded-xl">
           <SelectValue placeholder="Which customer is this data for?" />
         </SelectTrigger>
         <SelectContent>

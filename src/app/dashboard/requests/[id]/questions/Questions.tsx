@@ -95,7 +95,7 @@ export default function Questions({
         onValueChange={(val) => setSelectedCustomer(val)}
         defaultValue={REPEAT[0]} // 👈 set first option as default
       >
-        <SelectTrigger className="mt-4 w-full border border-grey-100 rounded-md">
+        <SelectTrigger className="mt-4 w-full border border-grey-50 rounded-xl">
           <SelectValue /> {/* no placeholder here */}
         </SelectTrigger>
         <SelectContent>
