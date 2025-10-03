@@ -68,7 +68,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
         try {
           const id = await ensureDraft(user.uid);
           setNextRequestId(id);
-          router.prefetch(`/dashboard/requests/${id}/setup`);
+          router.prefetch(`/dashboard/requests/${id}/prompt`);
         } catch (err) {
           console.error("RequestsClient: ensureDraft failed", err);
         }
@@ -106,7 +106,7 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     if (!user?.uid || !nextRequestId) return;
 
     const mode = options?.mode ?? "create";
-    let url = `/dashboard/requests/${nextRequestId}/setup?mode=${mode}`;
+    let url = `/dashboard/requests/${nextRequestId}/prompt?mode=${mode}`;
     if (options?.prefillDate) {
       url += `&date=${toDateKey(options.prefillDate)}`;
       try {

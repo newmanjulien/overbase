@@ -1,30 +1,28 @@
-import SetupClient from "./SetupClient";
+import QuestionsClient from "./QuestionsClient";
 
-interface SetupPageProps {
+interface QuestionsPageProps {
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function RequestSetupPage({
+export default async function QuestionsPage({
   params,
   searchParams,
-}: SetupPageProps) {
+}: QuestionsPageProps) {
   const { id } = await params;
   const search = await searchParams;
 
-  if (!id) {
-    return <div className="p-6 text-center">⚠️ Invalid request ID</div>;
-  }
+  if (!id) return <div className="p-6 text-center">⚠️ Invalid request ID</div>;
 
-  const raw = search?.date;
-  let prefillDate: string | undefined;
-  if (typeof raw === "string") {
-    prefillDate = raw;
-  } else if (Array.isArray(raw) && raw.length > 0) {
-    prefillDate = raw[0];
-  }
+  // handle optional ?date and ?mode just like setup does
+  const rawDate = search?.date;
+  const prefillDate =
+    typeof rawDate === "string"
+      ? rawDate
+      : Array.isArray(rawDate) && rawDate.length > 0
+      ? rawDate[0]
+      : undefined;
 
-  // NEW: handle mode
   const modeParam = search?.mode;
   const mode =
     (typeof modeParam === "string"
@@ -34,7 +32,7 @@ export default async function RequestSetupPage({
       : null) ?? "create";
 
   return (
-    <SetupClient
+    <QuestionsClient
       requestId={id}
       prefillDate={prefillDate}
       mode={mode as "create" | "edit" | "editDraft"}

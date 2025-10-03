@@ -41,7 +41,7 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   useEffect(() => {
     const existing = requests[requestId];
     if (!existing) {
-      router.push(`/dashboard/requests/${requestId}/setup`);
+      router.push(`/dashboard/requests/${requestId}/prompt`);
       return;
     }
     if (!summary && existing.summary) setSummary(existing.summary);
@@ -85,7 +85,7 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
 
   const handleBack = async (): Promise<void> => {
     router.push(
-      `/dashboard/requests/${requestId}/setup?mode=${mode}${dateParamWithAmp}`
+      `/dashboard/requests/${requestId}/prompt?mode=${mode}${dateParamWithAmp}`
     );
   };
 
@@ -101,7 +101,11 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   };
 
   const handleHome = async (): Promise<void> => {
-    router.push(`/dashboard/requests${dateParam}`);
+    const confirmed = window.confirm(
+      "Are you sure you want to return to the dashboard? Your changes will be deleted."
+    );
+    if (!confirmed) return;
+    router.push(`/dashboard/requests`);
   };
 
   const handleStatusChange = async (val: "draft" | "active") => {

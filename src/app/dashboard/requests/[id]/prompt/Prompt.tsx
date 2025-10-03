@@ -3,11 +3,12 @@
 import { Textarea } from "@/components/ui/textarea";
 import SetupLayout from "@/components/layouts/SetupLayout";
 
-interface ConfirmProps {
-  summary: string;
-  setSummary: (v: string) => void;
+interface PromptProps {
+  prompt: string;
+  errors: { prompt?: string };
+  setPrompt: (val: string) => void;
   onSubmit: () => void | Promise<void>;
-  onBack: () => void | Promise<void>;
+  onCancel: () => void | Promise<void>;
   onHome: () => void | Promise<void>;
   onDelete: () => void | Promise<void>;
   status: "draft" | "active";
@@ -15,23 +16,24 @@ interface ConfirmProps {
   mode: "create" | "edit" | "editDraft";
 }
 
-export default function Confirm({
-  summary,
-  setSummary,
+export default function Prompt({
+  prompt,
+  errors,
+  setPrompt,
   onSubmit,
-  onBack,
+  onCancel,
   onHome,
   onDelete,
   status,
   setStatus,
   mode,
-}: ConfirmProps) {
+}: PromptProps) {
   return (
     <SetupLayout
       // Sidebar
       sidebarBackText="Back to requests"
       onSidebarBack={onHome}
-      sidebarTitle="Answer 3 short questions"
+      sidebarTitle="Request data about your customer"
       // Conditional UI elements
       {...(mode !== "create" &&
         setStatus && {
@@ -45,22 +47,27 @@ export default function Confirm({
           ],
         })}
       // Main
-      title="Edit our understanding"
-      subtitle="This us a summary of what we understood from your request. But we might have misunderstood some of the details"
-      // Footer (two buttons, required)
-      primaryButtonText="Done"
+      title="What data do you want us to get for you?"
+      subtitle="Explain what data you need with as many details as possible. We can get data from any data source you set up in connectors"
+      // Footer
+      primaryButtonText="Next"
       onPrimaryAction={onSubmit}
-      secondaryButtonText="Restart"
-      onSecondaryAction={onBack}
+      secondaryButtonText="Cancel"
+      onSecondaryAction={onCancel}
     >
       <div>
         <Textarea
-          id="summary"
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
+          id="prompt"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          required
           grow
           className="mt-1 min-h-80"
+          placeholder="Explain with as many details as possible..."
         />
+        {errors.prompt && (
+          <p className="text-red-500 text-sm mt-1">{errors.prompt}</p>
+        )}
       </div>
     </SetupLayout>
   );
