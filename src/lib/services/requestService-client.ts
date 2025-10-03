@@ -30,6 +30,8 @@ interface WriteRequestClient {
   updatedAt: FieldValue;
   submittedAt?: FieldValue;
   ephemeral?: boolean;
+  customer?: string;
+  repeat?: string;
 }
 
 // --- helpers ---
@@ -81,6 +83,8 @@ export async function createDraft(
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     ephemeral: true,
+    customer: data.customer ?? "",
+    repeat: data.repeat ?? "Does not repeat",
   };
   await setDoc(ref, write, { merge: false });
 }
@@ -113,7 +117,9 @@ export async function ensureDraft(uid: string): Promise<string> {
     scheduledDate: null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-    ephemeral: true, // mark as system scratchpad
+    ephemeral: true,
+    customer: "",
+    repeat: "Does not repeat",
   };
   await setDoc(newRef, write, { merge: false });
   return newRef.id;
@@ -139,6 +145,14 @@ export async function updateActive(
   }
   if ("scheduledDate" in patch) {
     update.scheduledDate = serializeScheduledDate(patch.scheduledDate ?? null);
+  }
+  if ("customer" in patch) {
+    update.customer = patch.customer ?? "";
+    update.ephemeral = false;
+  }
+  if ("repeat" in patch) {
+    update.repeat = patch.repeat ?? "Does not repeat";
+    update.ephemeral = false;
   }
 
   await updateDoc(ref, update);
