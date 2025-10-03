@@ -1,7 +1,18 @@
 "use client";
 
+import { useState } from "react";
+
 import { Textarea } from "@/components/ui/textarea";
 import SetupLayout from "@/components/layouts/SetupLayout";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+
+const CUSTOMERS = ["Acme Corp", "Globex", "Initech", "Soylent", "Umbrella"];
 
 interface PromptProps {
   prompt: string;
@@ -28,6 +39,8 @@ export default function Prompt({
   setStatus,
   mode,
 }: PromptProps) {
+  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+
   return (
     <SetupLayout
       // Sidebar
@@ -63,12 +76,25 @@ export default function Prompt({
           required
           grow
           className="mt-1 min-h-80"
-          placeholder="Explain with as many details as possible..."
+          placeholder="Use @ symbols to tag customers and tag connectors..."
         />
         {errors.prompt && (
           <p className="text-red-500 text-sm mt-1">{errors.prompt}</p>
         )}
       </div>
+
+      <Select onValueChange={(val) => setSelectedCustomer(val)}>
+        <SelectTrigger className="mt-4 w-full border border-grey-100 rounded-md">
+          <SelectValue placeholder="Which customer is this data for?" />
+        </SelectTrigger>
+        <SelectContent>
+          {CUSTOMERS.map((cust) => (
+            <SelectItem key={cust} value={cust}>
+              {cust}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </SetupLayout>
   );
 }
