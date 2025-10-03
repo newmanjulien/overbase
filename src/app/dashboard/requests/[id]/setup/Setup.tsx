@@ -63,8 +63,8 @@ export default function Setup({
           ],
         })}
       // Main
-      title="Explain what data you need"
-      subtitle="Fill out the details to configure your request. You can set the prompt and schedule a date below."
+      title="What data do you want us to get for you?"
+      subtitle="Explain what data you need with as many details as possible. We can get data from any data source you set up in connectors"
       // Footer
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}
@@ -73,7 +73,7 @@ export default function Setup({
     >
       <div>
         <Label htmlFor="prompt" className="mb-2">
-          Prompt
+          Your data request
         </Label>
         <Textarea
           id="prompt"
@@ -81,7 +81,7 @@ export default function Setup({
           onChange={(e) => setPrompt(e.target.value)}
           required
           grow
-          className="mt-1 min-h-40"
+          className="mt-1 min-h-80"
         />
         {errors.prompt && (
           <p className="text-red-500 text-sm mt-1">{errors.prompt}</p>

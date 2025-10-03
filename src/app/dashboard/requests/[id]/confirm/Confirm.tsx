@@ -46,24 +46,24 @@ export default function Confirm({
           ],
         })}
       // Main
-      title="Answer 3 questions"
-      subtitle="Provide details to complete your request."
+      title="Did we understand correctly?"
+      subtitle="This us a summary of what we understood from your request. But we might have misunderstood some of the details"
       // Footer (two buttons, required)
-      primaryButtonText="Submit"
+      primaryButtonText="Done"
       onPrimaryAction={onSubmit}
-      secondaryButtonText="Back"
+      secondaryButtonText="Restart"
       onSecondaryAction={onBack}
     >
       <div>
         <Label htmlFor="summary" className="mb-2">
-          Summary
+          Edit our understanding
         </Label>
         <Textarea
           id="summary"
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           grow
-          className="mt-1 min-h-60"
+          className="mt-1 min-h-80"
         />
       </div>
     </SetupLayout>
