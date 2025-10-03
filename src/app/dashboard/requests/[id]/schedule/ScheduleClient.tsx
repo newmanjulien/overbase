@@ -29,6 +29,8 @@ export default function ScheduleClient({
   const { requests, loadOne, updateActive } = useRequestListStore();
 
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
+  const [repeat, setRepeat] = useState<string>("Does not repeat");
+
   const [errors, setErrors] = useState<{ scheduledDate?: string }>({});
   const minSelectable = useMemo(() => minSelectableDate(2), []);
 
@@ -46,16 +48,17 @@ export default function ScheduleClient({
   useEffect(() => {
     const existing = requests[requestId];
     if (existing?.scheduledDate) setScheduledDate(existing.scheduledDate);
+    if (existing?.repeat) setRepeat(existing.repeat);
   }, [requests, requestId]);
 
   // auto-save
   useEffect(() => {
     if (!user) return;
     const timeout = setTimeout(() => {
-      updateActive(user.uid, requestId, { scheduledDate });
+      updateActive(user.uid, requestId, { scheduledDate, repeat });
     }, 800);
     return () => clearTimeout(timeout);
-  }, [user, requestId, scheduledDate, updateActive]);
+  }, [user, requestId, scheduledDate, repeat, updateActive]);
 
   const validate = () => {
     if (!scheduledDate)
@@ -74,7 +77,7 @@ export default function ScheduleClient({
   const handleSubmit = async () => {
     if (!validate()) return;
     if (!user) return;
-    await updateActive(user.uid, requestId, { scheduledDate });
+    await updateActive(user.uid, requestId, { scheduledDate, repeat });
     router.push(
       `/dashboard/requests/${requestId}/loading?mode=${mode}&date=${toDateKey(
         scheduledDate!
@@ -98,6 +101,8 @@ export default function ScheduleClient({
     <ScheduleUI
       scheduledDate={scheduledDate}
       setScheduledDate={setScheduledDate}
+      repeat={repeat}
+      setRepeat={setRepeat}
       errors={errors}
       onSubmit={handleSubmit}
       onBack={handleBack}

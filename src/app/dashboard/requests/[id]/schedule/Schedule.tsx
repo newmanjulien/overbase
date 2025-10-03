@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +30,8 @@ const REPEAT = [
 interface ScheduleProps {
   scheduledDate: Date | null;
   setScheduledDate: (d: Date | null) => void;
+  repeat: string;
+  setRepeat: (val: string) => void;
   errors: { scheduledDate?: string };
   onSubmit: () => void;
   onBack: () => void;
@@ -43,14 +43,14 @@ interface ScheduleProps {
 export default function Schedule({
   scheduledDate,
   setScheduledDate,
+  repeat,
+  setRepeat,
   errors,
   onSubmit,
   onBack,
   onHome,
   minSelectableDate,
 }: ScheduleProps) {
-  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
-
   return (
     <SetupLayout
       sidebarBackText="Back to requests"
@@ -88,20 +88,21 @@ export default function Schedule({
         )}
       </div>
 
-      <Label htmlFor="scheduledDate" className="mt-6 mb-3 block">
+      <Label htmlFor="repeat" className="mt-6 mb-3 block">
         Should this repeat?
       </Label>
-      <Select
-        onValueChange={(val) => setSelectedCustomer(val)}
-        defaultValue={REPEAT[0]} // 👈 set first option as default
-      >
+      <Select value={repeat} onValueChange={setRepeat}>
         <SelectTrigger className="mt-4 w-full border border-grey-50 rounded-xl">
-          <SelectValue /> {/* no placeholder here */}
+          <SelectValue>
+            {repeat ? (
+              <span className="truncate">Repeats: {repeat}</span>
+            ) : null}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {REPEAT.map((cust) => (
-            <SelectItem key={cust} value={cust}>
-              {cust}
+          {REPEAT.map((opt) => (
+            <SelectItem key={opt} value={opt}>
+              {opt}
             </SelectItem>
           ))}
         </SelectContent>
