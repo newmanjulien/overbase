@@ -24,3 +24,5 @@ export const DEFAULT_MODELS = {
 export const MAX_TOKENS = 1024;
 
 export type ProviderType = "openai" | "anthropic";
+
+export const DEFAULT_PROVIDER: ProviderType = "anthropic";

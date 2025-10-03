@@ -8,8 +8,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createLLMProvider, getApiKey } from "./providers";
-import type { ProviderType } from "./config";
+import { createLLMProvider, getApiKey } from "@/lib/summarise/providers";
+import type { ProviderType } from "@/lib/summarise/config";
 
 /**
  * Request body schema
