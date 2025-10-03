@@ -90,8 +90,8 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       customer: customer,
     });
 
-    // 👉 Now go to Questions step
-    router.push(`/dashboard/requests/${requestId}/questions?mode=${mode}`);
+    // 👉 Now go to Schedule step
+    router.push(`/dashboard/requests/${requestId}/schedule?mode=${mode}`);
   };
 
   const handleCancel = async (): Promise<void> => {
