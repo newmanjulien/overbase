@@ -1,4 +1,7 @@
 "use client";
+
+import { useState } from "react";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,9 +10,24 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+
 import { Calendar as CalendarIcon } from "lucide-react";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import { formatDisplayDate } from "@/lib/requestDates";
+
+const REPEAT = [
+  "Does not repeat",
+  "Every week",
+  "Every month",
+  "Every quarter",
+];
 
 interface QuestionsProps {
   scheduledDate: Date | null;
@@ -31,13 +49,15 @@ export default function Questions({
   onHome,
   minSelectableDate,
 }: QuestionsProps) {
+  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+
   return (
     <SetupLayout
       sidebarBackText="Back to requests"
       onSidebarBack={onHome}
-      sidebarTitle="3 final and quick questions"
-      title="Select a customer & schedule the request"
-      subtitle="Which customer is this for and when do you need the data?"
+      sidebarTitle="Schedule your data request"
+      title="Schedule your request"
+      subtitle="When do you need the data and is this request recurring?"
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}
       secondaryButtonText="Back"
@@ -67,6 +87,25 @@ export default function Questions({
           <p className="text-red-500 text-sm">{errors.scheduledDate}</p>
         )}
       </div>
+
+      <Label htmlFor="scheduledDate" className="mt-6 mb-3 block">
+        Is this recurring?
+      </Label>
+      <Select
+        onValueChange={(val) => setSelectedCustomer(val)}
+        defaultValue={REPEAT[0]} // 👈 set first option as default
+      >
+        <SelectTrigger className="mt-4 w-full border border-grey-50 rounded-xl">
+          <SelectValue /> {/* no placeholder here */}
+        </SelectTrigger>
+        <SelectContent>
+          {REPEAT.map((cust) => (
+            <SelectItem key={cust} value={cust}>
+              {cust}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </SetupLayout>
   );
 }
