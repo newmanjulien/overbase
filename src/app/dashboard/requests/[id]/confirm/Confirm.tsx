@@ -31,7 +31,7 @@ export default function Confirm({
       // Sidebar
       sidebarBackText="Back to requests"
       onSidebarBack={onHome}
-      sidebarTitle="Answer 3 short questions"
+      sidebarTitle="Edit this summary of your request"
       // Conditional UI elements
       {...(mode !== "create" &&
         setStatus && {
@@ -45,7 +45,7 @@ export default function Confirm({
           ],
         })}
       // Main
-      title="Edit our understanding"
+      title="Edit what we understood"
       subtitle="This us a summary of what we understood from your request. But we might have misunderstood some of the details"
       // Footer (two buttons, required)
       primaryButtonText="Done"
