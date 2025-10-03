@@ -8,9 +8,14 @@ export interface Request {
   updatedAt: Date | null;
   submittedAt?: Date | null;
   ephemeral?: boolean;
+  customer?: string;
+  repeat?: string;
 }
 
 // Shape for partial updates
 export type RequestPatch = Partial<
-  Pick<Request, "prompt" | "summary" | "scheduledDate" | "status">
+  Pick<
+    Request,
+    "prompt" | "summary" | "scheduledDate" | "status" | "customer" | "repeat"
+  >
 >;

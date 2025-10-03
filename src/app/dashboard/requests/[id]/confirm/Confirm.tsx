@@ -45,8 +45,8 @@ export default function Confirm({
           ],
         })}
       // Main
-      title="Edit what we understood"
-      subtitle="This us a summary of what we understood from your request. But we might have misunderstood some of the details"
+      title="Did we understand correctly?"
+      subtitle="This us a summary of what we understood from your request. Make edits if misunderstood some of the details"
       // Footer (two buttons, required)
       primaryButtonText="Done"
       onPrimaryAction={onSubmit}

@@ -18,6 +18,8 @@ interface WriteRequest {
   createdAt: FieldValue;
   updatedAt: FieldValue;
   submittedAt: FieldValue | null;
+  customer?: string;
+  repeat?: string;
 }
 
 interface WriteUpdate {
@@ -27,6 +29,8 @@ interface WriteUpdate {
   status?: "draft" | "active";
   updatedAt?: FieldValue;
   submittedAt?: FieldValue | null;
+  customer?: string;
+  repeat?: string;
   [key: string]: unknown;
 }
 
@@ -67,6 +71,8 @@ export async function createDraft(
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
     submittedAt: null,
+    customer: initialData.customer ?? "",
+    repeat: initialData.repeat ?? "Does not repeat",
   };
 
   // Write raw data
@@ -102,6 +108,8 @@ export async function submitDraft(
       ? serializeScheduledDate(data.scheduledDate)
       : null;
   }
+  if (data.customer !== undefined) update.customer = data.customer;
+  if (data.repeat !== undefined) update.repeat = data.repeat;
 
   await ref.update(update);
 }
@@ -125,6 +133,8 @@ export async function updateActive(
       ? serializeScheduledDate(data.scheduledDate)
       : null;
   }
+  if (data.customer !== undefined) update.customer = data.customer;
+  if (data.repeat !== undefined) update.repeat = data.repeat;
 
   await ref.update(update);
 }

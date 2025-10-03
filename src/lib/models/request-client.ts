@@ -21,6 +21,8 @@ type FirestoreRequestData = {
   updatedAt?: Timestamp;
   submittedAt?: Timestamp;
   ephemeral?: boolean;
+  customer?: string;
+  repeat?: string;
 };
 
 export const requestReadConverterClient: FirestoreDataConverter<Request> = {
@@ -46,6 +48,8 @@ export const requestReadConverterClient: FirestoreDataConverter<Request> = {
       updatedAt: d.updatedAt ? d.updatedAt.toDate() : null,
       submittedAt: d.submittedAt ? d.submittedAt.toDate() : null,
       ephemeral: d.ephemeral ?? false,
+      customer: d.customer ?? "",
+      repeat: d.repeat ?? "Does not repeat",
     };
   },
 };
