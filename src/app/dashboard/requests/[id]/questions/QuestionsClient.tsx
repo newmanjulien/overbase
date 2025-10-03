@@ -83,7 +83,11 @@ export default function QuestionsClient({
   };
 
   const handleBack = () => {
-    router.push(`/dashboard/requests/${requestId}/setup?mode=${mode}`);
+    router.push(`/dashboard/requests/${requestId}/prompt?mode=${mode}`);
+  };
+
+  const handleHome = async (): Promise<void> => {
+    router.push(`/dashboard/requests`);
   };
 
   return (
@@ -93,6 +97,7 @@ export default function QuestionsClient({
       errors={errors}
       onSubmit={handleSubmit}
       onBack={handleBack}
+      onHome={handleHome}
       mode={mode}
       minSelectableDate={minSelectable}
     />

@@ -17,6 +17,7 @@ interface QuestionsProps {
   errors: { scheduledDate?: string };
   onSubmit: () => void;
   onBack: () => void;
+  onHome: () => void;
   minSelectableDate: Date;
   mode: "create" | "edit" | "editDraft";
 }
@@ -27,12 +28,13 @@ export default function Questions({
   errors,
   onSubmit,
   onBack,
+  onHome,
   minSelectableDate,
 }: QuestionsProps) {
   return (
     <SetupLayout
       sidebarBackText="Back to requests"
-      onSidebarBack={onBack}
+      onSidebarBack={onHome}
       sidebarTitle="3 final and quick questions"
       title="Select a customer & schedule the request"
       subtitle="Which customer is this for and when do you need the data?"
