@@ -11,19 +11,19 @@ import {
 } from "@/lib/requestDates";
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
-import QuestionsUI from "./Questions";
+import ScheduleUI from "./Schedule";
 
-interface QuestionsClientProps {
+interface ScheduleClientProps {
   requestId: string;
   prefillDate?: string;
   mode: "create" | "edit" | "editDraft";
 }
 
-export default function QuestionsClient({
+export default function ScheduleClient({
   requestId,
   prefillDate,
   mode,
-}: QuestionsClientProps) {
+}: ScheduleClientProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { requests, loadOne, updateActive } = useRequestListStore();
@@ -95,7 +95,7 @@ export default function QuestionsClient({
   };
 
   return (
-    <QuestionsUI
+    <ScheduleUI
       scheduledDate={scheduledDate}
       setScheduledDate={setScheduledDate}
       errors={errors}

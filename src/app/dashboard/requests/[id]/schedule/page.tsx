@@ -1,14 +1,14 @@
-import QuestionsClient from "./QuestionsClient";
+import ScheduleClient from "./ScheduleClient";
 
-interface QuestionsPageProps {
+interface SchedulePageProps {
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function QuestionsPage({
+export default async function SchedulePage({
   params,
   searchParams,
-}: QuestionsPageProps) {
+}: SchedulePageProps) {
   const { id } = await params;
   const search = await searchParams;
 
@@ -32,7 +32,7 @@ export default async function QuestionsPage({
       : null) ?? "create";
 
   return (
-    <QuestionsClient
+    <ScheduleClient
       requestId={id}
       prefillDate={prefillDate}
       mode={mode as "create" | "edit" | "editDraft"}

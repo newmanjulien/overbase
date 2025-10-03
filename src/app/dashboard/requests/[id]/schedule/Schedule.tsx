@@ -29,7 +29,7 @@ const REPEAT = [
   "Every quarter",
 ];
 
-interface QuestionsProps {
+interface ScheduleProps {
   scheduledDate: Date | null;
   setScheduledDate: (d: Date | null) => void;
   errors: { scheduledDate?: string };
@@ -40,7 +40,7 @@ interface QuestionsProps {
   mode: "create" | "edit" | "editDraft";
 }
 
-export default function Questions({
+export default function Schedule({
   scheduledDate,
   setScheduledDate,
   errors,
@@ -48,7 +48,7 @@ export default function Questions({
   onBack,
   onHome,
   minSelectableDate,
-}: QuestionsProps) {
+}: ScheduleProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
 
   return (
