@@ -138,14 +138,14 @@ export default function DataSection({
               actions={
                 req.status === "draft" ? (
                   <Link
-                    href={`/dashboard/requests/${req.id}/setup?mode=editDraft`}
+                    href={`/dashboard/requests/${req.id}/prompt?mode=editDraft`}
                   >
                     <Button variant="secondary">Edit draft</Button>
                   </Link>
                 ) : (
                   <>
                     <Link
-                      href={`/dashboard/requests/${req.id}/setup?mode=edit`}
+                      href={`/dashboard/requests/${req.id}/prompt?mode=edit`}
                     >
                       <Button variant="secondary">Edit</Button>
                     </Link>

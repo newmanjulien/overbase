@@ -101,7 +101,11 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   };
 
   const handleHome = async (): Promise<void> => {
-    router.push(`/dashboard/requests${dateParam}`);
+    const confirmed = window.confirm(
+      "Are you sure you want to return to the dashboard? Your changes will be deleted."
+    );
+    if (!confirmed) return;
+    router.push(`/dashboard/requests`);
   };
 
   const handleStatusChange = async (val: "draft" | "active") => {

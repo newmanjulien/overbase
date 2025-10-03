@@ -110,8 +110,11 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
   };
 
   const handleHome = async (): Promise<void> => {
+    const confirmed = window.confirm(
+      "Are you sure you want to return to the dashboard? Your changes will be deleted."
+    );
+    if (!confirmed) return;
     router.push(`/dashboard/requests`);
-    return;
   };
 
   const handleStatusChange = async (val: "draft" | "active") => {

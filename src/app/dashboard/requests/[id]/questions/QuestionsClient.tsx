@@ -87,6 +87,10 @@ export default function QuestionsClient({
   };
 
   const handleHome = async (): Promise<void> => {
+    const confirmed = window.confirm(
+      "Are you sure you want to return to the dashboard? Your changes will be deleted."
+    );
+    if (!confirmed) return;
     router.push(`/dashboard/requests`);
   };
 
