@@ -46,7 +46,7 @@ export default function Confirm({
           ],
         })}
       // Main
-      title="Did we understand correctly?"
+      title="Edit our understanding"
       subtitle="This us a summary of what we understood from your request. But we might have misunderstood some of the details"
       // Footer (two buttons, required)
       primaryButtonText="Done"
@@ -55,9 +55,6 @@ export default function Confirm({
       onSecondaryAction={onBack}
     >
       <div>
-        <Label htmlFor="summary" className="mb-2">
-          Edit our understanding
-        </Label>
         <Textarea
           id="summary"
           value={summary}

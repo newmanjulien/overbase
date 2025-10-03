@@ -72,9 +72,6 @@ export default function Setup({
       onSecondaryAction={onCancel}
     >
       <div>
-        <Label htmlFor="prompt" className="mb-2">
-          Your data request
-        </Label>
         <Textarea
           id="prompt"
           value={prompt}
@@ -82,6 +79,7 @@ export default function Setup({
           required
           grow
           className="mt-1 min-h-80"
+          placeholder="Explain with as many details as possible..."
         />
         {errors.prompt && (
           <p className="text-red-500 text-sm mt-1">{errors.prompt}</p>
