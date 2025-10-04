@@ -26,10 +26,10 @@ export function PopularConnectors({
         <div className="mb-6 flex flex-col items-center text-center">
           <Layers className="w-4 h-4 text-gray-600" />
           <h2 className="text-md font-medium text-gray-800 mt-4">
-            Popular Connectors
+            Installed connectors
           </h2>
           <p className="text-sm text-gray-500 font-light leading-relaxed mt-1 max-w-xs">
-            Easily set up connectors with the most popular platforms.
+            Easily add connectors your colleagues have already installed
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export function PopularConnectors({
         <hr className="border-t border-gray-200/60 my-6 " />
 
         <Button variant="outline" className="w-full" onClick={onBrowseClick}>
-          Browse connectors
+          See all installed connectors
         </Button>
       </div>
     </div>

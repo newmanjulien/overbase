@@ -23,7 +23,7 @@ export function Connectors({
     <div className="min-h-screen">
       <Header
         title="Connectors"
-        subtitle="Set up connectors to any data source so we can collect the data you request."
+        subtitle="Connect to any and all data sources so we can collect the data you need."
         buttonLabel="Add custom connector"
         onButtonClick={() => {}}
         secondButtonLabel="Browse connectors"
@@ -38,8 +38,8 @@ export function Connectors({
           <div className="flex-1 flex flex-col gap-2">
             {installedConnectors.length === 0 ? (
               <EmptyState
-                title="No Connectors Installed"
-                description="You don't have any connector installed."
+                title="No connectors added"
+                description="You haven't added any connectors"
                 buttonLabel="Browse connectors"
                 onButtonClick={() => {}}
                 className="py-32 min-h-[600px]"
@@ -62,7 +62,7 @@ export function Connectors({
             )}
           </div>
 
-          {/* Popular Connectors */}
+          {/* Installed Connectors */}
           <PopularConnectors
             popularConnectors={popularConnectors}
             onBrowseClick={() => {}}

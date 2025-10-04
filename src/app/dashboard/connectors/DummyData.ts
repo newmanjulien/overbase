@@ -28,7 +28,7 @@ export const connectors: Connectors[] = [
   {
     id: "docs",
     title: "Google Docs",
-    subtitle: "Read, create and share Google Docs",
+    subtitle: "Get data from your docs",
     logo: "/images/docs.png",
     status: "inactive",
     installs: "<500 installs",
@@ -48,8 +48,8 @@ export const connectors: Connectors[] = [
   },
   {
     id: "gmail",
-    title: "Gmail read only",
-    subtitle: "Access your email and create drafts (cannot send)",
+    title: "Gmail single",
+    subtitle: "Pull data from your inbox (not from colleagues)",
     logo: "/images/gmail.png",
     status: "inactive",
     installs: "1,200 installs",
@@ -66,7 +66,7 @@ export const connectors: Connectors[] = [
   {
     id: "slack",
     title: "Slack public",
-    subtitle: "Access public Slack channels (not DMs)",
+    subtitle: "Access public channels (not DMs)",
     logo: "/images/slack.png",
     status: "active",
     installs: "5,000 installs",
@@ -80,7 +80,7 @@ export const connectors: Connectors[] = [
   {
     id: "gong",
     title: "Gong",
-    subtitle: "Get recordings and transcripts from Gong",
+    subtitle: "Get recordings and transcripts",
     logo: "/images/gong.png",
     status: "inactive",
     installs: "300 installs",
@@ -89,10 +89,10 @@ export const connectors: Connectors[] = [
     resources: [{ label: "Docs", href: "https://gong.io" }],
   },
   {
-    id: "pipedrive",
-    title: "Pipedrive",
-    subtitle: "Full access to your Pipedrive CRM",
-    logo: "/images/pipedrive.png",
+    id: "docusign",
+    title: "Docusign",
+    subtitle: "Search customer agreements",
+    logo: "/images/docusign.png",
     status: "inactive",
     installs: "800 installs",
     categories: ["CRM", "Sales"],
@@ -102,7 +102,7 @@ export const connectors: Connectors[] = [
   {
     id: "notion",
     title: "Notion",
-    subtitle: "Full access to your Notion docs",
+    subtitle: "Access data from Notion",
     logo: "/images/notion.png",
     status: "inactive",
     installs: "2,500 installs",
@@ -113,7 +113,7 @@ export const connectors: Connectors[] = [
   {
     id: "salesforce",
     title: "Salesforce",
-    subtitle: "Full access to your Salesforce CRM",
+    subtitle: "Access data from your CRM",
     logo: "/images/salesforce.png",
     status: "inactive",
     installs: "4,200 installs",
