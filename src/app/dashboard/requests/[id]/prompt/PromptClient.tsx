@@ -6,6 +6,7 @@ import Prompt from "./Prompt";
 
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/stores/useRequestStore";
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 interface PromptClientProps {
   requestId: string;
@@ -18,7 +19,8 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
   const { user } = useAuth();
 
   const [prompt, setPrompt] = useState<string>("");
-  const [promptRich, setPromptRich] = useState<unknown | null>(null);
+  const [promptRich, setPromptRich] =
+    useState<SerializedEditorState<SerializedLexicalNode> | null>(null);
   const [customer, setCustomer] = useState<string>("");
 
   const {

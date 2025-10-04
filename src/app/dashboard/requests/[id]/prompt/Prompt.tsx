@@ -10,6 +10,8 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
+
 const CUSTOMERS = ["Acme Corp", "Globex", "Initech", "Soylent", "Umbrella"];
 const CONNECTORS = [
   { name: "Slack", logo: "/images/slack.png" },
@@ -20,11 +22,13 @@ const CONNECTORS = [
 
 interface PromptProps {
   prompt: string;
-  promptRich: unknown | null;
+  promptRich: SerializedEditorState<SerializedLexicalNode> | null;
   customer: string;
   errors: { prompt?: string; customer?: string };
   setPrompt: (val: string) => void;
-  setPromptRich: (val: unknown | null) => void;
+  setPromptRich: (
+    val: SerializedEditorState<SerializedLexicalNode> | null
+  ) => void;
   setCustomer: (val: string) => void;
   onSubmit: () => void | Promise<void>;
   onCancel: () => void | Promise<void>;

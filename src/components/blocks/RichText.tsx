@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  useCallback,
+} from "react";
 import {
   LexicalComposer,
   InitialConfigType,
@@ -26,7 +32,10 @@ import {
   KEY_ENTER_COMMAND,
   KEY_TAB_COMMAND,
   KEY_ESCAPE_COMMAND,
+  type SerializedEditorState,
+  type SerializedLexicalNode,
 } from "lexical";
+import Image from "next/image";
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -38,8 +47,10 @@ interface MentionOption {
 interface RichTextProps {
   value: string;
   onChange: (value: string) => void;
-  valueRich?: any; // serialized Lexical state (JSON)
-  onChangeRich?: (json: any) => void; // serialized Lexical output
+  valueRich: SerializedEditorState<SerializedLexicalNode> | null;
+  onChangeRich?: (
+    json: SerializedEditorState<SerializedLexicalNode> | null
+  ) => void;
   placeholder?: string;
   mentionOptions?: MentionOption[];
   className?: string;
@@ -53,13 +64,13 @@ function SyncFromProp({
   valueRich,
 }: {
   value: string;
-  valueRich?: any;
+  valueRich: SerializedEditorState<SerializedLexicalNode> | null;
 }) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
     // Avoid infinite loop — compare serialized state before updating
-    if (valueRich) {
+    if (valueRich !== null) {
       const current = editor.getEditorState().toJSON();
       if (JSON.stringify(current) === JSON.stringify(valueRich)) return;
 
@@ -157,36 +168,39 @@ function MentionHandler({
     };
   }, [showDropdown, editor]);
 
-  const insertMention = (mentionName: string) => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if (!$isRangeSelection(selection)) return;
+  const insertMention = useCallback(
+    (mentionName: string) => {
+      editor.update(() => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) return;
 
-      const anchorNode = selection.anchor.getNode();
+        const anchorNode = selection.anchor.getNode();
 
-      if ($isTextNode(anchorNode)) {
-        const text = anchorNode.getTextContent();
-        const cursorOffset = selection.anchor.offset;
-        const atIndex = text.lastIndexOf("@", cursorOffset - 1);
+        if ($isTextNode(anchorNode)) {
+          const text = anchorNode.getTextContent();
+          const cursorOffset = selection.anchor.offset;
+          const atIndex = text.lastIndexOf("@", cursorOffset - 1);
 
-        if (atIndex !== -1) {
-          anchorNode.spliceText(atIndex, cursorOffset, "");
+          if (atIndex !== -1) {
+            anchorNode.spliceText(atIndex, cursorOffset, "");
+            const mentionNode = $createTextNode(`@${mentionName}`);
+            mentionNode.setStyle("color: #3b82f6; font-weight: 500;");
+            anchorNode.insertAfter(mentionNode);
+            const spaceNode = $createTextNode(" ");
+            mentionNode.insertAfter(spaceNode);
+            spaceNode.select();
+          }
+        } else {
           const mentionNode = $createTextNode(`@${mentionName}`);
           mentionNode.setStyle("color: #3b82f6; font-weight: 500;");
-          anchorNode.insertAfter(mentionNode);
-          const spaceNode = $createTextNode(" ");
-          mentionNode.insertAfter(spaceNode);
-          spaceNode.select();
+          selection.insertNodes([mentionNode]);
         }
-      } else {
-        const mentionNode = $createTextNode(`@${mentionName}`);
-        mentionNode.setStyle("color: #3b82f6; font-weight: 500;");
-        selection.insertNodes([mentionNode]);
-      }
-    });
+      });
 
-    setShowDropdown(false);
-  };
+      setShowDropdown(false);
+    },
+    [editor]
+  );
 
   // Keyboard command handling
   useEffect(() => {
@@ -250,7 +264,14 @@ function MentionHandler({
     ];
 
     return () => unregisters.forEach((unreg) => unreg());
-  }, [editor, showDropdown, suggestions, highlightedIndex, disabled]);
+  }, [
+    editor,
+    showDropdown,
+    suggestions,
+    highlightedIndex,
+    disabled,
+    insertMention,
+  ]);
 
   if (!showDropdown || disabled || suggestions.length === 0) return null;
 
@@ -271,10 +292,12 @@ function MentionHandler({
           }`}
         >
           {s.logo && (
-            <img
+            <Image
               src={s.logo}
               alt={s.name}
-              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+              width={24}
+              height={24}
+              className="rounded-full object-cover flex-shrink-0"
             />
           )}
           <span className="text-gray-800 font-medium">{s.name}</span>
@@ -323,7 +346,7 @@ export default function RichText({
         });
       },
     }),
-    [disabled, valueRich]
+    [disabled, valueRich, value]
   );
 
   if (!mounted) {
@@ -378,23 +401,23 @@ export default function RichText({
         <HistoryPlugin />
 
         <OnChangePlugin
-          onChange={(
-            editorState: EditorState,
-            _editor: LexicalEditor,
-            _tags: Set<string>
-          ) => {
+          onChange={(editorState: EditorState) => {
             editorState.read(() => {
               const text = $getRoot().getTextContent();
               if (text !== value) onChange(text);
-            });
 
-            if (onChangeRich) {
-              const json = editorState.toJSON();
-              // Avoid feedback loop
-              if (JSON.stringify(json) !== JSON.stringify(valueRich)) {
-                onChangeRich(json);
+              if (onChangeRich) {
+                const json = editorState.toJSON();
+                const root = $getRoot();
+                const isEmpty =
+                  root.getChildrenSize() === 0 || !root.getTextContent().trim();
+
+                const newValue = isEmpty ? null : json;
+                if (JSON.stringify(newValue) !== JSON.stringify(valueRich)) {
+                  onChangeRich(newValue);
+                }
               }
-            }
+            });
           }}
         />
 

@@ -1,7 +1,9 @@
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
+
 export interface Request {
   id: string;
   prompt: string;
-  promptRich?: unknown | null;
+  promptRich: SerializedEditorState<SerializedLexicalNode> | null;
   scheduledDate: Date | null;
   summary: string;
   status: "draft" | "active";

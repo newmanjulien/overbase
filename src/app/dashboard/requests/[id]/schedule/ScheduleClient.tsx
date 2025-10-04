@@ -64,7 +64,7 @@ export default function ScheduleClient({
     if (repeat === "Does not repeat" && existing.repeat) {
       setRepeat(existing.repeat);
     }
-  }, [requests, requestId]);
+  }, [requests, requestId, scheduledDate, repeat]);
 
   // derive status from store
   const existing = requests[requestId];
