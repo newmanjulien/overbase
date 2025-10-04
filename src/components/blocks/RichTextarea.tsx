@@ -37,6 +37,8 @@ export default function RichTextarea({
   useEffect(() => setMounted(true), []);
 
   const editorRef = useRef<Editor | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   /** 🧩 Editor + mention state */
   const [mentions, setMentions] = useState<string[]>([]);
@@ -177,6 +179,21 @@ export default function RichTextarea({
     }
   };
 
+  /** 🖱️ Hide dropdown when clicking outside editor + dropdown */
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const clickedInside =
+        containerRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target);
+
+      if (!clickedInside) setShowDropdown(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   /** 🪄 SSR placeholder */
   if (!mounted) {
     return (
@@ -200,9 +217,10 @@ export default function RichTextarea({
     );
   }
 
-  /** ✨ Render Editor + Dropdown (simplified, no animation) */
+  /** ✨ Render Editor + Dropdown */
   return (
     <div
+      ref={containerRef}
       className={`relative border rounded-md p-2 min-h-[5rem] text-sm border-gray-200 ${
         disabled ? "bg-gray-100 opacity-70 cursor-not-allowed" : ""
       } ${className}`}
@@ -221,7 +239,10 @@ export default function RichTextarea({
       />
 
       {showDropdown && !disabled && suggestions.length > 0 && (
-        <div className="absolute left-2 top-full mt-1 w-60 bg-white border border-gray-200 rounded-xl shadow-md z-10">
+        <div
+          ref={dropdownRef}
+          className="absolute left-2 top-full mt-1 w-60 bg-white border border-gray-200 rounded-xl shadow-md z-10 p-1"
+        >
           {suggestions.map((s, i) => (
             <div
               key={s.name}
@@ -229,8 +250,8 @@ export default function RichTextarea({
                 e.preventDefault();
                 handleSelectMention(s.name);
               }}
-              className={`flex items-center gap-3 p-2 rounded-md cursor-pointer ${
-                i === highlightedIndex ? "bg-blue-50" : "hover:bg-gray-100"
+              className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer ${
+                i === highlightedIndex ? "bg-gray-100" : "hover:bg-gray-100"
               }`}
             >
               {s.logo && (

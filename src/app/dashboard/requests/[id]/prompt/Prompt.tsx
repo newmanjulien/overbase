@@ -1,6 +1,6 @@
 "use client";
 
-import RichTextarea from "@/components/blocks/RichTextarea";
+import RichText from "@/components/blocks/RichText";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import {
   Select,
@@ -75,7 +75,7 @@ export default function Prompt({
       onSecondaryAction={onCancel}
     >
       <div>
-        <RichTextarea
+        <RichText
           value={prompt}
           onChange={setPrompt}
           placeholder="Use @ symbols to tag connectors..."

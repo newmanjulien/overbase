@@ -16,8 +16,15 @@ import {
   $getSelection,
   $isRangeSelection,
   $createTextNode,
+  $createParagraphNode,
   EditorState,
   LexicalEditor,
+  COMMAND_PRIORITY_LOW,
+  KEY_ARROW_DOWN_COMMAND,
+  KEY_ARROW_UP_COMMAND,
+  KEY_ENTER_COMMAND,
+  KEY_TAB_COMMAND,
+  KEY_ESCAPE_COMMAND,
 } from "lexical";
 
 /* ----------------------------- Types ----------------------------- */
@@ -37,7 +44,7 @@ interface RichTextProps {
 }
 
 /* --------------------- Keep editor in sync with prop --------------------- */
-/** Updates editor text when external `value` changes without remounting. */
+
 function SyncFromProp({ value }: { value: string }) {
   const [editor] = useLexicalComposerContext();
 
@@ -50,7 +57,11 @@ function SyncFromProp({ value }: { value: string }) {
     editor.update(() => {
       const root = $getRoot();
       root.clear();
-      if (value) root.append($createTextNode(value));
+      if (value) {
+        const paragraph = $createParagraphNode();
+        paragraph.append($createTextNode(value));
+        root.append(paragraph);
+      }
     });
   }, [editor, value]);
 
@@ -71,6 +82,7 @@ function MentionHandler({
   const [suggestions, setSuggestions] = useState<MentionOption[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
 
+  // Detect @mentions
   useEffect(() => {
     if (disabled) return;
 
@@ -100,11 +112,11 @@ function MentionHandler({
     });
   }, [editor, mentionOptions, disabled]);
 
+  // Insert mention
   const insertMention = (mentionName: string) => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        // Create a styled node for the mention (blue like Draft.js decorator)
         const node = $createTextNode(`@${mentionName} `);
         node.setStyle("color: #3b82f6; font-weight: 500;");
         selection.insertNodes([node]);
@@ -113,43 +125,74 @@ function MentionHandler({
     setShowDropdown(false);
   };
 
-  // Keyboard navigation for dropdown
+  // ✅ Lexical keyboard command handling (TypeScript-safe)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!showDropdown || suggestions.length === 0) return;
+    if (disabled) return;
 
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault();
+    const unregisters = [
+      editor.registerCommand(
+        KEY_ARROW_DOWN_COMMAND,
+        (event) => {
+          if (!showDropdown || suggestions.length === 0) return false;
+          if (event) event.preventDefault();
           setHighlightedIndex((i) => (i + 1) % suggestions.length);
-          break;
-        case "ArrowUp":
-          e.preventDefault();
+          return true;
+        },
+        COMMAND_PRIORITY_LOW
+      ),
+      editor.registerCommand(
+        KEY_ARROW_UP_COMMAND,
+        (event) => {
+          if (!showDropdown || suggestions.length === 0) return false;
+          if (event) event.preventDefault();
           setHighlightedIndex(
             (i) => (i - 1 + suggestions.length) % suggestions.length
           );
-          break;
-        case "Enter":
-        case "Tab":
-          e.preventDefault();
+          return true;
+        },
+        COMMAND_PRIORITY_LOW
+      ),
+      editor.registerCommand(
+        KEY_ENTER_COMMAND,
+        (event) => {
+          if (!showDropdown || suggestions.length === 0) return false;
+          if (event) event.preventDefault();
           const selected = suggestions[highlightedIndex];
           if (selected) insertMention(selected.name);
-          break;
-        case "Escape":
-          e.preventDefault();
+          return true; // prevent Lexical newline
+        },
+        COMMAND_PRIORITY_LOW
+      ),
+      editor.registerCommand(
+        KEY_TAB_COMMAND,
+        (event) => {
+          if (!showDropdown || suggestions.length === 0) return false;
+          if (event) event.preventDefault();
+          const selected = suggestions[highlightedIndex];
+          if (selected) insertMention(selected.name);
+          return true;
+        },
+        COMMAND_PRIORITY_LOW
+      ),
+      editor.registerCommand(
+        KEY_ESCAPE_COMMAND,
+        (event) => {
+          if (!showDropdown) return false;
+          if (event) event.preventDefault();
           setShowDropdown(false);
-          break;
-      }
-    };
+          return true;
+        },
+        COMMAND_PRIORITY_LOW
+      ),
+    ];
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showDropdown, suggestions, highlightedIndex]);
+    return () => unregisters.forEach((unreg) => unreg());
+  }, [editor, showDropdown, suggestions, highlightedIndex, disabled]);
 
   if (!showDropdown || disabled || suggestions.length === 0) return null;
 
   return (
-    <div className="absolute left-2 top-full mt-1 w-60 bg-white border border-gray-200 rounded-xl shadow-md z-10">
+    <div className="absolute left-2 top-full mt-1 w-60 bg-white border border-gray-200 rounded-xl shadow-md z-10 p-1">
       {suggestions.map((s, i) => (
         <div
           key={s.name}
@@ -157,8 +200,8 @@ function MentionHandler({
             e.preventDefault();
             insertMention(s.name);
           }}
-          className={`flex items-center gap-3 p-2 rounded-md cursor-pointer ${
-            i === highlightedIndex ? "bg-blue-50" : "hover:bg-gray-100"
+          className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer ${
+            i === highlightedIndex ? "bg-gray-100" : "hover:bg-gray-100"
           }`}
         >
           {s.logo && (
@@ -197,7 +240,11 @@ export default function RichText({
         editor.update(() => {
           const root = $getRoot();
           root.clear();
-          if (value) root.append($createTextNode(value));
+          if (value) {
+            const paragraph = $createParagraphNode();
+            paragraph.append($createTextNode(value));
+            root.append(paragraph);
+          }
         });
       },
     }),
@@ -243,7 +290,11 @@ export default function RichText({
               }`}
             />
           }
-          placeholder={<div className="text-gray-400">{placeholder}</div>}
+          placeholder={
+            <div className="absolute top-2 left-3 text-gray-400 pointer-events-none select-none">
+              {placeholder}
+            </div>
+          }
           ErrorBoundary={LexicalErrorBoundary}
         />
 
