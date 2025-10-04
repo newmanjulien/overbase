@@ -12,6 +12,7 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
+  $isTextNode,
   $getRoot,
   $getSelection,
   $isRangeSelection,
@@ -112,20 +113,43 @@ function MentionHandler({
     });
   }, [editor, mentionOptions, disabled]);
 
-  // Insert mention
   const insertMention = (mentionName: string) => {
     editor.update(() => {
       const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        const node = $createTextNode(`@${mentionName} `);
-        node.setStyle("color: #3b82f6; font-weight: 500;");
-        selection.insertNodes([node]);
+      if (!$isRangeSelection(selection)) return;
+
+      const anchorNode = selection.anchor.getNode();
+
+      if ($isTextNode(anchorNode)) {
+        const text = anchorNode.getTextContent();
+        const cursorOffset = selection.anchor.offset;
+        const atIndex = text.lastIndexOf("@", cursorOffset - 1);
+
+        if (atIndex !== -1) {
+          // Remove @ and following typed text
+          anchorNode.spliceText(atIndex, cursorOffset, "");
+
+          // Create styled mention
+          const mentionNode = $createTextNode(`@${mentionName}`);
+          mentionNode.setStyle("color: #3b82f6; font-weight: 500;");
+
+          // Insert mention and space
+          anchorNode.insertAfter(mentionNode);
+          const spaceNode = $createTextNode(" ");
+          mentionNode.insertAfter(spaceNode);
+          spaceNode.select();
+        }
+      } else {
+        const mentionNode = $createTextNode(`@${mentionName}`);
+        mentionNode.setStyle("color: #3b82f6; font-weight: 500;");
+        selection.insertNodes([mentionNode]);
       }
     });
+
     setShowDropdown(false);
   };
 
-  // ✅ Lexical keyboard command handling (TypeScript-safe)
+  // Keyboard command handling
   useEffect(() => {
     if (disabled) return;
 
@@ -134,7 +158,7 @@ function MentionHandler({
         KEY_ARROW_DOWN_COMMAND,
         (event) => {
           if (!showDropdown || suggestions.length === 0) return false;
-          if (event) event.preventDefault();
+          event?.preventDefault();
           setHighlightedIndex((i) => (i + 1) % suggestions.length);
           return true;
         },
@@ -144,7 +168,7 @@ function MentionHandler({
         KEY_ARROW_UP_COMMAND,
         (event) => {
           if (!showDropdown || suggestions.length === 0) return false;
-          if (event) event.preventDefault();
+          event?.preventDefault();
           setHighlightedIndex(
             (i) => (i - 1 + suggestions.length) % suggestions.length
           );
@@ -156,10 +180,10 @@ function MentionHandler({
         KEY_ENTER_COMMAND,
         (event) => {
           if (!showDropdown || suggestions.length === 0) return false;
-          if (event) event.preventDefault();
+          event?.preventDefault();
           const selected = suggestions[highlightedIndex];
           if (selected) insertMention(selected.name);
-          return true; // prevent Lexical newline
+          return true;
         },
         COMMAND_PRIORITY_LOW
       ),
@@ -167,7 +191,7 @@ function MentionHandler({
         KEY_TAB_COMMAND,
         (event) => {
           if (!showDropdown || suggestions.length === 0) return false;
-          if (event) event.preventDefault();
+          event?.preventDefault();
           const selected = suggestions[highlightedIndex];
           if (selected) insertMention(selected.name);
           return true;
@@ -178,7 +202,7 @@ function MentionHandler({
         KEY_ESCAPE_COMMAND,
         (event) => {
           if (!showDropdown) return false;
-          if (event) event.preventDefault();
+          event?.preventDefault();
           setShowDropdown(false);
           return true;
         },
@@ -189,6 +213,7 @@ function MentionHandler({
     return () => unregisters.forEach((unreg) => unreg());
   }, [editor, showDropdown, suggestions, highlightedIndex, disabled]);
 
+  // ✅ Clean dropdown (no ARIA attributes)
   if (!showDropdown || disabled || suggestions.length === 0) return null;
 
   return (
@@ -211,7 +236,7 @@ function MentionHandler({
               className="w-6 h-6 rounded-full object-cover flex-shrink-0"
             />
           )}
-          <span className="text-gray-800 font-medium">@{s.name}</span>
+          <span className="text-gray-800 font-medium">{s.name}</span>
         </div>
       ))}
     </div>
