@@ -7,6 +7,7 @@ import {
   CompositeDecorator,
   ContentState,
   Modifier,
+  SelectionState,
 } from "draft-js";
 import "draft-js/dist/Draft.css";
 
@@ -31,56 +32,53 @@ export default function RichTextarea({
   useEffect(() => setMounted(true), []);
 
   const editorRef = useRef<Editor | null>(null);
-  const mentionRegex = /@[^\s@]+(?:\s[^\s@]+)*/g;
 
-  // ✅ decorator created once (safe, stable)
+  /** 🧩 State for editor and mentions */
+  const [mentions, setMentions] = useState<string[]>([]);
+  const [editorState, setEditorState] = useState(() =>
+    EditorState.createWithContent(ContentState.createFromText(value))
+  );
+
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+
+  /** 🎨 Decorator: only highlight known mentions */
   const decorator = useMemo(
     () =>
       new CompositeDecorator([
         {
           strategy: (contentBlock, callback) => {
             const text = contentBlock.getText();
-            let matchArr: RegExpExecArray | null;
-            while ((matchArr = mentionRegex.exec(text)) !== null) {
-              callback(matchArr.index, matchArr.index + matchArr[0].length);
-            }
+            mentions.forEach((m) => {
+              const index = text.indexOf(m);
+              if (index !== -1) callback(index, index + m.length);
+            });
           },
           component: (props: any) => (
             <span className="text-blue-500 font-medium">{props.children}</span>
           ),
         },
       ]),
-    []
+    [mentions]
   );
 
-  // ✅ initial editor state with decorator
-  const [editorState, setEditorState] = useState(() =>
-    EditorState.createWithContent(ContentState.createFromText(value), decorator)
-  );
+  /** 🔁 Recreate editor state when mentions change */
+  useEffect(() => {
+    setEditorState(EditorState.set(editorState, { decorator }));
+  }, [mentions]);
 
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [query, setQuery] = useState("");
-
-  // ✅ sync parent value safely (no getIn errors)
+  /** 🧠 Sync parent value safely */
   useEffect(() => {
     const currentText = editorState.getCurrentContent().getPlainText();
     if (currentText !== value) {
-      const content = editorState.getCurrentContent();
-      const selection = editorState.getSelection();
-      const newContent = Modifier.replaceText(content, selection, value);
-      const newState = EditorState.push(
-        editorState,
-        newContent,
-        "insert-characters"
-      );
-      setEditorState(
-        EditorState.forceSelection(newState, newContent.getSelectionAfter())
-      );
+      const content = ContentState.createFromText(value);
+      setEditorState(EditorState.createWithContent(content, decorator));
     }
   }, [value, decorator]);
 
-  // ✅ handle typing & mention detection
+  /** ⌨️ Handle typing and show mention suggestions */
   const handleChange = (state: EditorState) => {
     setEditorState(state);
     const text = state.getCurrentContent().getPlainText();
@@ -100,21 +98,35 @@ export default function RichTextarea({
       );
       setQuery(q);
       setSuggestions(filtered);
+      setHighlightedIndex(0);
       setShowDropdown(true);
     } else {
       setShowDropdown(false);
     }
   };
 
-  // ✅ insert mention
+  /** 🧩 Insert a selected mention cleanly */
   const handleSelectMention = (mention: string) => {
     const content = editorState.getCurrentContent();
     const selection = editorState.getSelection();
+    const anchorKey = selection.getAnchorKey();
+    const anchorOffset = selection.getAnchorOffset();
+    const block = content.getBlockForKey(anchorKey);
+    const blockText = block.getText().slice(0, anchorOffset);
 
+    const match = blockText.match(/@([^\s@]*)$/);
+    const startOffset = match ? blockText.lastIndexOf("@") : anchorOffset;
+
+    const mentionSelection = selection.merge({
+      anchorOffset: startOffset,
+      focusOffset: anchorOffset,
+    }) as SelectionState;
+
+    const fullMention = `@${mention}`;
     const newContent = Modifier.replaceText(
       content,
-      selection,
-      mention + " ",
+      mentionSelection,
+      fullMention + " ",
       undefined
     );
 
@@ -124,6 +136,7 @@ export default function RichTextarea({
       "insert-characters"
     );
 
+    setMentions((prev) => [...prev, fullMention]);
     setEditorState(
       EditorState.forceSelection(newState, newContent.getSelectionAfter())
     );
@@ -131,7 +144,35 @@ export default function RichTextarea({
     setShowDropdown(false);
   };
 
-  // ✅ SSR placeholder (looks like textarea — identical sizing & border)
+  /** ⌨️ Keyboard navigation for dropdown */
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!showDropdown || suggestions.length === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev + 1) % suggestions.length);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setHighlightedIndex(
+          (prev) => (prev - 1 + suggestions.length) % suggestions.length
+        );
+        break;
+      case "Enter":
+      case "Tab":
+        e.preventDefault();
+        const selected = suggestions[highlightedIndex];
+        if (selected) handleSelectMention(selected);
+        break;
+      case "Escape":
+        e.preventDefault();
+        setShowDropdown(false);
+        break;
+    }
+  };
+
+  /** 🪄 SSR placeholder (textarea-like) */
   if (!mounted) {
     return (
       <div
@@ -154,12 +195,14 @@ export default function RichTextarea({
     );
   }
 
-  // ✅ Client-side editor render
+  /** ✨ Render Editor + Dropdown */
   return (
     <div
       className={`relative border rounded-md p-2 min-h-[5rem] text-sm border-gray-200 ${
         disabled ? "bg-gray-100 opacity-70 cursor-not-allowed" : ""
       } ${className}`}
+      tabIndex={0}
+      onKeyDown={handleKeyDown} // ✅ attach here
       onClick={() => {
         if (!disabled) editorRef.current?.focus();
       }}
@@ -174,11 +217,16 @@ export default function RichTextarea({
 
       {showDropdown && !disabled && suggestions.length > 0 && (
         <div className="absolute left-2 top-full mt-1 w-48 bg-white border border-gray-200 rounded shadow-md z-10">
-          {suggestions.map((s) => (
+          {suggestions.map((s, i) => (
             <div
               key={s}
-              onMouseDown={() => handleSelectMention(s)}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
+              onMouseDown={(e) => {
+                e.preventDefault(); // ✅ keeps editor focus
+                handleSelectMention(s);
+              }}
+              className={`p-2 cursor-pointer ${
+                i === highlightedIndex ? "bg-blue-100" : "hover:bg-gray-100"
+              }`}
             >
               {s}
             </div>
