@@ -4,7 +4,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import type { Connectors } from "../app/dashboard/connectors/DummyData";
 
 interface ConnectorContextType {
-  installedConnectors: Connectors[];
+  addedConnectors: Connectors[];
   addConnector: (connector: Connectors) => void;
   removeConnector: (id: string) => void;
 }
@@ -14,23 +14,21 @@ const ConnectorContext = createContext<ConnectorContextType | undefined>(
 );
 
 export function ConnectorProvider({ children }: { children: ReactNode }) {
-  const [installedConnectors, setInstalledConnectors] = useState<Connectors[]>(
-    []
-  );
+  const [addedConnectors, setAddedConnectors] = useState<Connectors[]>([]);
 
   const addConnector = (connector: Connectors) => {
-    setInstalledConnectors((prev) =>
+    setAddedConnectors((prev) =>
       prev.some((i) => i.id === connector.id) ? prev : [...prev, connector]
     );
   };
 
   const removeConnector = (id: string) => {
-    setInstalledConnectors((prev) => prev.filter((i) => i.id !== id));
+    setAddedConnectors((prev) => prev.filter((i) => i.id !== id));
   };
 
   return (
     <ConnectorContext.Provider
-      value={{ installedConnectors, addConnector, removeConnector }}
+      value={{ addedConnectors, addConnector, removeConnector }}
     >
       {children}
     </ConnectorContext.Provider>

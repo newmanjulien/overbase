@@ -6,12 +6,11 @@ import { Connectors } from "./Connectors";
 import type { Connectors as ConnectorType } from "./DummyData";
 
 export default function ConnectorsClient() {
-  const { installedConnectors } = useConnectorContext();
+  const { addedConnectors } = useConnectorContext();
 
-  // Exclude installed connectors from popular list
+  // Exclude added connectors from popular list
   const popularConnectors = connectors.filter(
-    (connector) =>
-      !installedConnectors.some((installed) => installed.id === connector.id)
+    (connector) => !addedConnectors.some((added) => added.id === connector.id)
   );
 
   const handleBrowseClick = () => {
@@ -28,7 +27,7 @@ export default function ConnectorsClient() {
 
   return (
     <Connectors
-      installedConnectors={installedConnectors}
+      addedConnectors={addedConnectors}
       popularConnectors={popularConnectors}
       onBrowseClick={handleBrowseClick}
       onManageConnector={handleManageConnector}

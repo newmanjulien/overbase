@@ -7,14 +7,14 @@ import { PopularConnectors } from "./PopularConnectors";
 import type { Connectors } from "./DummyData";
 
 interface ConnectorsProps {
-  installedConnectors: Connectors[];
+  addedConnectors: Connectors[];
   popularConnectors: Connectors[];
   onBrowseClick: () => void;
   onManageConnector: (connector: Connectors) => void;
 }
 
 export function Connectors({
-  installedConnectors,
+  addedConnectors,
   popularConnectors,
   onBrowseClick,
   onManageConnector,
@@ -34,9 +34,9 @@ export function Connectors({
 
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex gap-8">
-          {/* Installed Connectors */}
+          {/* Added Connectors */}
           <div className="flex-1 flex flex-col gap-2">
-            {installedConnectors.length === 0 ? (
+            {addedConnectors.length === 0 ? (
               <EmptyState
                 title="No connectors added"
                 description="You haven't added any connectors"
@@ -47,7 +47,7 @@ export function Connectors({
                 iconType="plug"
               />
             ) : (
-              installedConnectors.map((connector) => (
+              addedConnectors.map((connector) => (
                 <RowCard
                   key={connector.id}
                   title={connector.title}

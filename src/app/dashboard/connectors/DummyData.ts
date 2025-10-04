@@ -18,7 +18,7 @@ export interface Connectors {
   badge?: string;
   lastUpdated?: string;
   previewImages?: PreviewImage[];
-  installs?: string;
+  adds?: string;
   categories?: string[];
   type?: string;
   resources?: ResourceLink[];
@@ -31,7 +31,7 @@ export const connectors: Connectors[] = [
     subtitle: "Get data from your docs",
     logo: "/images/docs.png",
     status: "inactive",
-    installs: "<500 installs",
+    adds: "Added by 40 colleagues",
     categories: ["Productivity", "Docs"],
     type: "API",
     resources: [
@@ -52,7 +52,7 @@ export const connectors: Connectors[] = [
     subtitle: "Pull data from your inbox (not from colleagues)",
     logo: "/images/gmail.png",
     status: "inactive",
-    installs: "1,200 installs",
+    adds: "Added by 10 colleagues",
     categories: ["Communication", "Email"],
     type: "OAuth",
     resources: [
@@ -69,7 +69,7 @@ export const connectors: Connectors[] = [
     subtitle: "Access public channels (not DMs)",
     logo: "/images/slack.png",
     status: "active",
-    installs: "5,000 installs",
+    adds: "5,000 installs",
     categories: ["Communication", "Collaboration"],
     type: "API",
     resources: [
@@ -83,7 +83,7 @@ export const connectors: Connectors[] = [
     subtitle: "Get recordings and transcripts",
     logo: "/images/gong.png",
     status: "inactive",
-    installs: "300 installs",
+    adds: "Added by 32 colleagues",
     categories: ["Sales", "Analytics"],
     type: "API",
     resources: [{ label: "Docs", href: "https://gong.io" }],
@@ -94,7 +94,7 @@ export const connectors: Connectors[] = [
     subtitle: "Search customer agreements",
     logo: "/images/docusign.png",
     status: "inactive",
-    installs: "800 installs",
+    adds: "Added by 100 colleagues",
     categories: ["CRM", "Sales"],
     type: "OAuth",
     resources: [{ label: "Docs", href: "https://pipedrive.com" }],
@@ -105,7 +105,7 @@ export const connectors: Connectors[] = [
     subtitle: "Access data from Notion",
     logo: "/images/notion.png",
     status: "inactive",
-    installs: "2,500 installs",
+    adds: "Added by 23 colleagues",
     categories: ["Productivity", "Docs"],
     type: "API",
     resources: [{ label: "Docs", href: "https://developers.notion.com" }],
@@ -116,7 +116,7 @@ export const connectors: Connectors[] = [
     subtitle: "Access data from your CRM",
     logo: "/images/salesforce.png",
     status: "inactive",
-    installs: "4,200 installs",
+    adds: "Added by 139 colleagues",
     categories: ["CRM", "Sales"],
     type: "OAuth",
     resources: [{ label: "Docs", href: "https://developer.salesforce.com" }],
