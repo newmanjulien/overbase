@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   LexicalComposer,
   InitialConfigType,
@@ -82,6 +82,7 @@ function MentionHandler({
   const [showDropdown, setShowDropdown] = useState(false);
   const [suggestions, setSuggestions] = useState<MentionOption[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Detect @mentions
   useEffect(() => {
@@ -112,6 +113,29 @@ function MentionHandler({
       });
     });
   }, [editor, mentionOptions, disabled]);
+
+  // Click outside to close
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const rootEl = editor.getRootElement();
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        rootEl &&
+        !rootEl.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown, editor]);
 
   const insertMention = (mentionName: string) => {
     editor.update(() => {
@@ -211,7 +235,10 @@ function MentionHandler({
   if (!showDropdown || disabled || suggestions.length === 0) return null;
 
   return (
-    <div className="absolute left-2 top-full mt-1 w-60 bg-white border border-gray-200 rounded-xl shadow-md z-10 p-1">
+    <div
+      ref={dropdownRef}
+      className="absolute left-2 top-full mt-1 w-60 bg-white border border-gray-200 rounded-xl shadow-md z-10 p-1"
+    >
       {suggestions.map((s, i) => (
         <div
           key={s.name}
