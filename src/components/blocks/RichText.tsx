@@ -328,7 +328,7 @@ export default function RichText({
       <LexicalComposer initialConfig={initialConfig}>
         <SyncFromProp value={value} />
 
-        <div className="flex flex-col min-h-[5rem] p-2">
+        <div className="flex flex-col min-h-[5rem] p-3">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
