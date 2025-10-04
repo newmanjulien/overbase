@@ -9,15 +9,21 @@ interface HeaderProps {
   subtitle?: string;
   learnMoreLink?: string;
 
-  // Main CTA button (right column)
+  // First CTA button
   buttonLabel?: string;
   onButtonClick?: () => void;
+
+  // Second CTA button
+  secondButtonLabel?: string;
+  onSecondButtonClick?: () => void;
+
+  // Variant shared across both buttons
   buttonVariant?: "default" | "outline";
 
   // Backlink (left-side navigation button with chevron)
   backlink?: boolean;
   onBacklinkClick?: () => void;
-  backlinkLabel?: string; // <-- NEW
+  backlinkLabel?: string;
 
   // Optional logo next to the title
   logo?: string;
@@ -29,10 +35,12 @@ export const Header: React.FC<HeaderProps> = ({
   learnMoreLink,
   buttonLabel,
   onButtonClick,
+  secondButtonLabel,
+  onSecondButtonClick,
   buttonVariant = "default",
   backlink,
   onBacklinkClick,
-  backlinkLabel, // <-- NEW
+  backlinkLabel,
   logo,
 }) => {
   return (
@@ -87,12 +95,19 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Right side */}
-        {buttonLabel && onButtonClick && (
-          <div className="flex items-center">
-            <Button onClick={onButtonClick} variant={buttonVariant}>
-              {buttonLabel}
-            </Button>
+        {/* Right side (1 or 2 buttons) */}
+        {(buttonLabel || secondButtonLabel) && (
+          <div className="flex items-center gap-3">
+            {buttonLabel && onButtonClick && (
+              <Button onClick={onButtonClick} variant={buttonVariant}>
+                {buttonLabel}
+              </Button>
+            )}
+            {secondButtonLabel && onSecondButtonClick && (
+              <Button onClick={onSecondButtonClick} variant={buttonVariant}>
+                {secondButtonLabel}
+              </Button>
+            )}
           </div>
         )}
       </div>
