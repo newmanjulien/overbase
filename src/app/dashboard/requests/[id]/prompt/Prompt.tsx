@@ -80,7 +80,7 @@ export default function Prompt({
           onChange={setPrompt}
           placeholder="Use @ symbols to tag connectors..."
           mentionOptions={CONNECTORS}
-          className="mt-1 rounded-xl bg-white min-h-100"
+          className="mt-1 rounded-xl bg-white min-h-70"
         />
 
         {errors.prompt && (

@@ -126,14 +126,9 @@ function MentionHandler({
         const atIndex = text.lastIndexOf("@", cursorOffset - 1);
 
         if (atIndex !== -1) {
-          // Remove @ and following typed text
           anchorNode.spliceText(atIndex, cursorOffset, "");
-
-          // Create styled mention
           const mentionNode = $createTextNode(`@${mentionName}`);
           mentionNode.setStyle("color: #3b82f6; font-weight: 500;");
-
-          // Insert mention and space
           anchorNode.insertAfter(mentionNode);
           const spaceNode = $createTextNode(" ");
           mentionNode.insertAfter(spaceNode);
@@ -213,7 +208,6 @@ function MentionHandler({
     return () => unregisters.forEach((unreg) => unreg());
   }, [editor, showDropdown, suggestions, highlightedIndex, disabled]);
 
-  // ✅ Clean dropdown (no ARIA attributes)
   if (!showDropdown || disabled || suggestions.length === 0) return null;
 
   return (
@@ -300,28 +294,30 @@ export default function RichText({
 
   return (
     <div
-      className={`relative border rounded-md p-2 min-h-[5rem] text-sm border-gray-200 ${
+      className={`relative border rounded-md text-sm border-gray-200 ${
         disabled ? "bg-gray-100 opacity-70 cursor-not-allowed" : ""
       } ${className}`}
     >
       <LexicalComposer initialConfig={initialConfig}>
         <SyncFromProp value={value} />
 
-        <RichTextPlugin
-          contentEditable={
-            <ContentEditable
-              className={`min-h-[4rem] outline-none ${
-                disabled ? "cursor-not-allowed opacity-70" : ""
-              }`}
-            />
-          }
-          placeholder={
-            <div className="absolute top-2 left-3 text-gray-400 pointer-events-none select-none">
-              {placeholder}
-            </div>
-          }
-          ErrorBoundary={LexicalErrorBoundary}
-        />
+        <div className="flex flex-col min-h-[5rem] p-2">
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                className={`flex-1 outline-none leading-relaxed ${
+                  disabled ? "cursor-not-allowed opacity-70" : ""
+                }`}
+              />
+            }
+            placeholder={
+              <div className="absolute top-3 left-3 text-gray-400 pointer-events-none select-none">
+                {placeholder}
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+        </div>
 
         <HistoryPlugin />
 
