@@ -11,6 +11,12 @@ import {
 } from "@/components/ui/select";
 
 const CUSTOMERS = ["Acme Corp", "Globex", "Initech", "Soylent", "Umbrella"];
+const CONNECTORS = [
+  { name: "Slack", logo: "/images/slack.png" },
+  { name: "Docusign", logo: "/images/docusign.png" },
+  { name: "Gmail", logo: "/images/gmail.png" },
+  { name: "Salesforce", logo: "/images/salesforce.png" },
+];
 
 interface PromptProps {
   prompt: string;
@@ -72,8 +78,8 @@ export default function Prompt({
         <RichTextarea
           value={prompt}
           onChange={setPrompt}
-          placeholder="Use @ symbols to tag customers and tag connectors..."
-          mentionOptions={CUSTOMERS} // 👈 autocomplete list
+          placeholder="Use @ symbols to tag connectors..."
+          mentionOptions={CONNECTORS}
           className="mt-1 rounded-xl bg-white min-h-100"
         />
 

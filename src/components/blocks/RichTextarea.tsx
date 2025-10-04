@@ -11,11 +11,16 @@ import {
 } from "draft-js";
 import "draft-js/dist/Draft.css";
 
+interface MentionOption {
+  name: string;
+  logo?: string;
+}
+
 interface RichTextareaProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  mentionOptions?: string[];
+  mentionOptions?: MentionOption[];
   className?: string;
   disabled?: boolean;
 }
@@ -32,19 +37,20 @@ export default function RichTextarea({
   useEffect(() => setMounted(true), []);
 
   const editorRef = useRef<Editor | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null); // 🆕 ref for click-outside detection
 
-  /** 🧩 State for editor and mentions */
+  /** 🧩 Editor + mention state */
   const [mentions, setMentions] = useState<string[]>([]);
   const [editorState, setEditorState] = useState(() =>
     EditorState.createWithContent(ContentState.createFromText(value))
   );
 
   const [showDropdown, setShowDropdown] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<MentionOption[]>([]);
   const [query, setQuery] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  /** 🎨 Decorator: only highlight known mentions */
+  /** 🎨 Decorator: highlight known mentions */
   const decorator = useMemo(
     () =>
       new CompositeDecorator([
@@ -78,6 +84,26 @@ export default function RichTextarea({
     }
   }, [value, decorator]);
 
+  /** 🖱️ Close dropdown on outside click */
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
+
   /** ⌨️ Handle typing and show mention suggestions */
   const handleChange = (state: EditorState) => {
     setEditorState(state);
@@ -94,7 +120,7 @@ export default function RichTextarea({
     if (match) {
       const q = match[1];
       const filtered = mentionOptions.filter((opt) =>
-        opt.toLowerCase().includes(q.toLowerCase())
+        opt.name.toLowerCase().includes(q.toLowerCase())
       );
       setQuery(q);
       setSuggestions(filtered);
@@ -106,7 +132,7 @@ export default function RichTextarea({
   };
 
   /** 🧩 Insert a selected mention cleanly */
-  const handleSelectMention = (mention: string) => {
+  const handleSelectMention = (mentionName: string) => {
     const content = editorState.getCurrentContent();
     const selection = editorState.getSelection();
     const anchorKey = selection.getAnchorKey();
@@ -122,7 +148,7 @@ export default function RichTextarea({
       focusOffset: anchorOffset,
     }) as SelectionState;
 
-    const fullMention = `@${mention}`;
+    const fullMention = `@${mentionName}`;
     const newContent = Modifier.replaceText(
       content,
       mentionSelection,
@@ -163,7 +189,7 @@ export default function RichTextarea({
       case "Tab":
         e.preventDefault();
         const selected = suggestions[highlightedIndex];
-        if (selected) handleSelectMention(selected);
+        if (selected) handleSelectMention(selected.name);
         break;
       case "Escape":
         e.preventDefault();
@@ -172,7 +198,7 @@ export default function RichTextarea({
     }
   };
 
-  /** 🪄 SSR placeholder (textarea-like) */
+  /** 🪄 SSR placeholder */
   if (!mounted) {
     return (
       <div
@@ -195,14 +221,15 @@ export default function RichTextarea({
     );
   }
 
-  /** ✨ Render Editor + Dropdown */
+  /** ✨ Render Editor + Dropdown (simplified, no animation) */
   return (
     <div
+      ref={containerRef} // 🆕 added for click-outside detection
       className={`relative border rounded-md p-2 min-h-[5rem] text-sm border-gray-200 ${
         disabled ? "bg-gray-100 opacity-70 cursor-not-allowed" : ""
       } ${className}`}
       tabIndex={0}
-      onKeyDown={handleKeyDown} // ✅ attach here
+      onKeyDown={handleKeyDown}
       onClick={() => {
         if (!disabled) editorRef.current?.focus();
       }}
@@ -216,19 +243,26 @@ export default function RichTextarea({
       />
 
       {showDropdown && !disabled && suggestions.length > 0 && (
-        <div className="absolute left-2 top-full mt-1 w-48 bg-white border border-gray-200 rounded shadow-md z-10">
+        <div className="absolute left-2 top-full mt-1 w-60 bg-white border border-gray-200 rounded-xl shadow-md z-10">
           {suggestions.map((s, i) => (
             <div
-              key={s}
+              key={s.name}
               onMouseDown={(e) => {
-                e.preventDefault(); // ✅ keeps editor focus
-                handleSelectMention(s);
+                e.preventDefault();
+                handleSelectMention(s.name);
               }}
-              className={`p-2 cursor-pointer ${
-                i === highlightedIndex ? "bg-blue-100" : "hover:bg-gray-100"
+              className={`flex items-center gap-3 p-2 rounded-md cursor-pointer ${
+                i === highlightedIndex ? "bg-blue-50" : "hover:bg-gray-100"
               }`}
             >
-              {s}
+              {s.logo && (
+                <img
+                  src={s.logo}
+                  alt={s.name}
+                  className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                />
+              )}
+              <span className="text-gray-800 font-medium">{s.name}</span>
             </div>
           ))}
         </div>
