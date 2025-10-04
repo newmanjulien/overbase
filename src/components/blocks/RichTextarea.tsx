@@ -37,7 +37,6 @@ export default function RichTextarea({
   useEffect(() => setMounted(true), []);
 
   const editorRef = useRef<Editor | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null); // 🆕 ref for click-outside detection
 
   /** 🧩 Editor + mention state */
   const [mentions, setMentions] = useState<string[]>([]);
@@ -83,26 +82,6 @@ export default function RichTextarea({
       setEditorState(EditorState.createWithContent(content, decorator));
     }
   }, [value, decorator]);
-
-  /** 🖱️ Close dropdown on outside click */
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, []);
 
   /** ⌨️ Handle typing and show mention suggestions */
   const handleChange = (state: EditorState) => {
@@ -224,7 +203,6 @@ export default function RichTextarea({
   /** ✨ Render Editor + Dropdown (simplified, no animation) */
   return (
     <div
-      ref={containerRef} // 🆕 added for click-outside detection
       className={`relative border rounded-md p-2 min-h-[5rem] text-sm border-gray-200 ${
         disabled ? "bg-gray-100 opacity-70 cursor-not-allowed" : ""
       } ${className}`}
