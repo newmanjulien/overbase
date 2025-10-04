@@ -1,6 +1,6 @@
 "use client";
 
-import { Textarea } from "@/components/ui/textarea";
+import RichTextarea from "@/components/blocks/RichTextarea";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import {
   Select,
@@ -69,15 +69,14 @@ export default function Prompt({
       onSecondaryAction={onCancel}
     >
       <div>
-        <Textarea
-          id="prompt"
+        <RichTextarea
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          required
-          grow
-          className="mt-1 min-h-80"
+          onChange={setPrompt}
           placeholder="Use @ symbols to tag customers and tag connectors..."
+          mentionOptions={CUSTOMERS} // 👈 autocomplete list
+          className="mt-1 rounded-xl bg-white min-h-100"
         />
+
         {errors.prompt && (
           <p className="text-red-500 text-sm mt-1">{errors.prompt}</p>
         )}
