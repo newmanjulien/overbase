@@ -4,6 +4,7 @@ import {
   Timestamp,
 } from "firebase-admin/firestore";
 
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 import { deserializeScheduledDate } from "@/lib/requestDates";
 import type { Request } from "@/lib/models/request-types";
 
@@ -14,6 +15,7 @@ import type { Request } from "@/lib/models/request-types";
  */
 type FirestoreRequestData = {
   prompt?: string;
+  promptRich?: unknown | null;
   scheduledDate?: string;
   summary?: string;
   status?: "draft" | "active";
@@ -38,6 +40,12 @@ export const requestReadConverterAdmin: FirestoreDataConverter<Request> = {
     return {
       id: snap.id,
       prompt: d.prompt ?? "",
+      promptRich:
+        d.promptRich &&
+        typeof d.promptRich === "object" &&
+        "root" in d.promptRich
+          ? (d.promptRich as SerializedEditorState<SerializedLexicalNode>)
+          : null,
       // Read back from "yyyy-MM-dd" into a real Date (local midnight)
       scheduledDate: d.scheduledDate
         ? deserializeScheduledDate(d.scheduledDate)
