@@ -8,16 +8,16 @@ import type { Connectors as ConnectorType } from "./DummyData";
 export default function ConnectorsClient() {
   const { addedConnectors } = useConnectorContext();
 
-  // Exclude added connectors from popular list
-  const popularConnectors = connectors.filter(
+  // Exclude added connectors from installed list
+  const installedConnectors = connectors.filter(
     (connector) => !addedConnectors.some((added) => added.id === connector.id)
   );
 
   const handleBrowseClick = () => {
-    const popularSection = document.getElementById("popular-connectors");
-    if (popularSection) {
-      popularSection.scrollIntoView({ behavior: "smooth" });
-      popularSection.focus();
+    const installedSection = document.getElementById("installed-connectors");
+    if (installedSection) {
+      installedSection.scrollIntoView({ behavior: "smooth" });
+      installedSection.focus();
     }
   };
 
@@ -28,7 +28,7 @@ export default function ConnectorsClient() {
   return (
     <Connectors
       addedConnectors={addedConnectors}
-      popularConnectors={popularConnectors}
+      installedConnectors={installedConnectors}
       onBrowseClick={handleBrowseClick}
       onManageConnector={handleManageConnector}
     />

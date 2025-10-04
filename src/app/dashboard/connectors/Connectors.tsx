@@ -3,20 +3,19 @@
 import { Header } from "@/components/blocks/Header";
 import { RowCard } from "@/components/blocks/RowCard";
 import { EmptyState } from "@/components/blocks/EmptyState";
-import { PopularConnectors } from "./PopularConnectors";
+import { InstalledConnectors } from "./InstalledConnectors";
 import type { Connectors } from "./DummyData";
 
 interface ConnectorsProps {
   addedConnectors: Connectors[];
-  popularConnectors: Connectors[];
+  installedConnectors: Connectors[];
   onBrowseClick: () => void;
   onManageConnector: (connector: Connectors) => void;
 }
 
 export function Connectors({
   addedConnectors,
-  popularConnectors,
-  onBrowseClick,
+  installedConnectors,
   onManageConnector,
 }: ConnectorsProps) {
   return (
@@ -63,8 +62,8 @@ export function Connectors({
           </div>
 
           {/* Installed Connectors */}
-          <PopularConnectors
-            popularConnectors={popularConnectors}
+          <InstalledConnectors
+            installedConnectors={installedConnectors}
             onBrowseClick={() => {}}
           />
         </div>

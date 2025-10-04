@@ -6,15 +6,15 @@ import Link from "next/link";
 import type { Connectors } from "./DummyData";
 import { Button } from "@/components/ui/button";
 
-interface PopularConnectorsProps {
-  popularConnectors: Connectors[];
+interface InstalledConnectorsProps {
+  installedConnectors: Connectors[];
   onBrowseClick: () => void;
 }
 
-export function PopularConnectors({
-  popularConnectors,
+export function InstalledConnectors({
+  installedConnectors,
   onBrowseClick,
-}: PopularConnectorsProps) {
+}: InstalledConnectorsProps) {
   return (
     <div
       id="popular-connectors"
@@ -34,12 +34,12 @@ export function PopularConnectors({
         </div>
 
         <div className="space-y-3">
-          {popularConnectors.length === 0 ? (
+          {installedConnectors.length === 0 ? (
             <p className="text-center text-gray-400 italic">
               No more connectors to add
             </p>
           ) : (
-            popularConnectors.map((connector) => (
+            installedConnectors.map((connector) => (
               <Link
                 key={connector.id}
                 href={`/dashboard/connectors/${connector.id}`}
