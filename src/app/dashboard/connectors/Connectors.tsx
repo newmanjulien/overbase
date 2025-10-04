@@ -9,7 +9,6 @@ import type { Connectors } from "./DummyData";
 interface ConnectorsProps {
   addedConnectors: Connectors[];
   installedConnectors: Connectors[];
-  onBrowseClick: () => void;
   onManageConnector: (connector: Connectors) => void;
 }
 
@@ -64,7 +63,7 @@ export function Connectors({
           {/* Installed Connectors */}
           <InstalledConnectors
             installedConnectors={installedConnectors}
-            onBrowseClick={() => {}}
+            onSeeAllClick={() => {}}
           />
         </div>
       </div>

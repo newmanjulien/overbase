@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 
 interface InstalledConnectorsProps {
   installedConnectors: Connectors[];
-  onBrowseClick: () => void;
+  onSeeAllClick: () => void;
 }
 
 export function InstalledConnectors({
   installedConnectors,
-  onBrowseClick,
+  onSeeAllClick,
 }: InstalledConnectorsProps) {
   return (
     <div
@@ -78,7 +78,7 @@ export function InstalledConnectors({
 
         <hr className="border-t border-gray-200/60 my-6 " />
 
-        <Button variant="outline" className="w-full" onClick={onBrowseClick}>
+        <Button variant="outline" className="w-full" onClick={onSeeAllClick}>
           See all installed connectors
         </Button>
       </div>

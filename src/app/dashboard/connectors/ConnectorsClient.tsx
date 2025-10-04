@@ -13,14 +13,6 @@ export default function ConnectorsClient() {
     (connector) => !addedConnectors.some((added) => added.id === connector.id)
   );
 
-  const handleBrowseClick = () => {
-    const installedSection = document.getElementById("installed-connectors");
-    if (installedSection) {
-      installedSection.scrollIntoView({ behavior: "smooth" });
-      installedSection.focus();
-    }
-  };
-
   const handleManageConnector = (connector: ConnectorType) => {
     console.log(`Manage clicked for ${connector.title}`);
   };
@@ -29,7 +21,6 @@ export default function ConnectorsClient() {
     <Connectors
       addedConnectors={addedConnectors}
       installedConnectors={installedConnectors}
-      onBrowseClick={handleBrowseClick}
       onManageConnector={handleManageConnector}
     />
   );
