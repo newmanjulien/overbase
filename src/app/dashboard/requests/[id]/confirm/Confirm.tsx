@@ -60,7 +60,7 @@ export default function Confirm({
           onChange={(e) => setSummary(e.target.value)}
           readOnly={!isEditable}
           className={`mt-1 min-h-80 ${
-            !isEditable ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+            !isEditable ? "bg-gray-100 text-gray-500" : ""
           }`}
         />
 

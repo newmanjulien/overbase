@@ -150,8 +150,8 @@ export async function updateActive(
     update.customer = patch.customer ?? "";
     update.ephemeral = false;
   }
-  if ("repeat" in patch) {
-    update.repeat = patch.repeat ?? "Does not repeat";
+  if (patch.repeat !== undefined) {
+    update.repeat = patch.repeat;
     update.ephemeral = false;
   }
 

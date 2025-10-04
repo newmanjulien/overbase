@@ -52,11 +52,18 @@ export default function ScheduleClient({
     loadOne(user.uid, requestId);
   }, [user, requestId, loadOne]);
 
-  // hydrate scheduledDate + repeat when request loads
+  // hydrate scheduledDate + repeat once when request loads
   useEffect(() => {
     const existing = requests[requestId];
-    if (existing?.scheduledDate) setScheduledDate(existing.scheduledDate);
-    if (existing?.repeat) setRepeat(existing.repeat);
+    if (!existing) return;
+
+    if (scheduledDate === null && existing.scheduledDate) {
+      setScheduledDate(existing.scheduledDate);
+    }
+
+    if (repeat === "Does not repeat" && existing.repeat) {
+      setRepeat(existing.repeat);
+    }
   }, [requests, requestId]);
 
   // derive status from store
