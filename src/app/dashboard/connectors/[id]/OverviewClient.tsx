@@ -15,9 +15,7 @@ export default function OverviewClient({ connector }: OverviewClientProps) {
     <Overview
       connector={connector}
       onBack={() => router.push("/dashboard/connectors")}
-      onInstall={() =>
-        router.push(`/dashboard/connectors/${connector.id}/setup`)
-      }
+      onAdd={() => router.push(`/dashboard/connectors/${connector.id}/setup`)}
     />
   );
 }

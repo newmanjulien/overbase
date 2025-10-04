@@ -3,49 +3,49 @@
 import { Header } from "@/components/blocks/Header";
 import { RowCard } from "@/components/blocks/RowCard";
 import { EmptyState } from "@/components/blocks/EmptyState";
-import { PopularConnectors } from "./PopularConnectors";
+import { InstalledConnectors } from "./InstalledConnectors";
 import type { Connectors } from "./DummyData";
 
 interface ConnectorsProps {
+  addedConnectors: Connectors[];
   installedConnectors: Connectors[];
-  popularConnectors: Connectors[];
-  onBrowseClick: () => void;
   onManageConnector: (connector: Connectors) => void;
 }
 
 export function Connectors({
+  addedConnectors,
   installedConnectors,
-  popularConnectors,
-  onBrowseClick,
   onManageConnector,
 }: ConnectorsProps) {
   return (
     <div className="min-h-screen">
       <Header
         title="Connectors"
-        subtitle="Set up connectors to any data source so we can collect the data you request."
-        buttonLabel="Browse connectors"
-        onButtonClick={onBrowseClick}
+        subtitle="Connect to any and all data sources so we can collect the data you need."
+        buttonLabel="Add custom connector"
+        onButtonClick={() => {}}
+        secondButtonLabel="Browse connectors"
+        onSecondButtonClick={() => {}}
         buttonVariant="outline"
         learnMoreLink="#"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex gap-8">
-          {/* Installed Connectors */}
+          {/* Added Connectors */}
           <div className="flex-1 flex flex-col gap-2">
-            {installedConnectors.length === 0 ? (
+            {addedConnectors.length === 0 ? (
               <EmptyState
-                title="No Connectors Installed"
-                description="You don't have any connector installed."
+                title="No connectors added"
+                description="You haven't added any connectors"
                 buttonLabel="Browse connectors"
-                onButtonClick={onBrowseClick}
+                onButtonClick={() => {}}
                 className="py-32 min-h-[600px]"
                 withBorder={true}
                 iconType="plug"
               />
             ) : (
-              installedConnectors.map((connector) => (
+              addedConnectors.map((connector) => (
                 <RowCard
                   key={connector.id}
                   title={connector.title}
@@ -60,10 +60,10 @@ export function Connectors({
             )}
           </div>
 
-          {/* Popular Connectors */}
-          <PopularConnectors
-            popularConnectors={popularConnectors}
-            onBrowseClick={onBrowseClick}
+          {/* Installed Connectors */}
+          <InstalledConnectors
+            installedConnectors={installedConnectors}
+            onSeeAllClick={() => {}}
           />
         </div>
       </div>
