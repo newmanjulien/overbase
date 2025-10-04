@@ -24,8 +24,10 @@ export function Connectors({
       <Header
         title="Connectors"
         subtitle="Set up connectors to any data source so we can collect the data you request."
-        buttonLabel="Browse connectors"
-        onButtonClick={onBrowseClick}
+        buttonLabel="Add custom connector"
+        onButtonClick={() => {}}
+        secondButtonLabel="Browse connectors"
+        onSecondButtonClick={() => {}}
         buttonVariant="outline"
         learnMoreLink="#"
       />
@@ -39,7 +41,7 @@ export function Connectors({
                 title="No Connectors Installed"
                 description="You don't have any connector installed."
                 buttonLabel="Browse connectors"
-                onButtonClick={onBrowseClick}
+                onButtonClick={() => {}}
                 className="py-32 min-h-[600px]"
                 withBorder={true}
                 iconType="plug"
@@ -63,7 +65,7 @@ export function Connectors({
           {/* Popular Connectors */}
           <PopularConnectors
             popularConnectors={popularConnectors}
-            onBrowseClick={onBrowseClick}
+            onBrowseClick={() => {}}
           />
         </div>
       </div>
