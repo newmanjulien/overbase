@@ -20,9 +20,11 @@ const CONNECTORS = [
 
 interface PromptProps {
   prompt: string;
+  promptRich: unknown | null;
   customer: string;
   errors: { prompt?: string; customer?: string };
   setPrompt: (val: string) => void;
+  setPromptRich: (val: unknown | null) => void;
   setCustomer: (val: string) => void;
   onSubmit: () => void | Promise<void>;
   onCancel: () => void | Promise<void>;
@@ -35,9 +37,11 @@ interface PromptProps {
 
 export default function Prompt({
   prompt,
+  promptRich,
   customer,
   errors,
   setPrompt,
+  setPromptRich,
   setCustomer,
   onSubmit,
   onCancel,
@@ -78,6 +82,8 @@ export default function Prompt({
         <RichText
           value={prompt}
           onChange={setPrompt}
+          valueRich={promptRich}
+          onChangeRich={setPromptRich}
           placeholder="Use @ symbols to tag connectors..."
           mentionOptions={CONNECTORS}
           className="mt-1 rounded-xl bg-white min-h-70"

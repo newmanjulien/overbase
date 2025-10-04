@@ -38,7 +38,7 @@ interface MentionOption {
 interface RichTextProps {
   value: string;
   onChange: (value: string) => void;
-  initialState?: any; // serialized Lexical state (JSON)
+  valueRich?: any; // serialized Lexical state (JSON)
   onChangeRich?: (json: any) => void; // serialized Lexical output
   placeholder?: string;
   mentionOptions?: MentionOption[];
@@ -50,27 +50,30 @@ interface RichTextProps {
 
 function SyncFromProp({
   value,
-  initialState,
+  valueRich,
 }: {
   value: string;
-  initialState?: any;
+  valueRich?: any;
 }) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    // If we have serialized JSON, use that instead of plain text
-    if (initialState) {
+    // Avoid infinite loop — compare serialized state before updating
+    if (valueRich) {
+      const current = editor.getEditorState().toJSON();
+      if (JSON.stringify(current) === JSON.stringify(valueRich)) return;
+
       editor.update(() => {
-        const parsed = editor.parseEditorState(initialState);
+        const parsed = editor.parseEditorState(valueRich);
         editor.setEditorState(parsed);
       });
       return;
     }
 
-    const current = editor
+    const currentText = editor
       .getEditorState()
       .read(() => $getRoot().getTextContent());
-    if (current === value) return;
+    if (currentText === value) return;
 
     editor.update(() => {
       const root = $getRoot();
@@ -81,7 +84,7 @@ function SyncFromProp({
         root.append(paragraph);
       }
     });
-  }, [editor, value, initialState]);
+  }, [editor, value, valueRich]);
 
   return null;
 }
@@ -286,7 +289,7 @@ function MentionHandler({
 export default function RichText({
   value,
   onChange,
-  initialState,
+  valueRich,
   onChangeRich,
   placeholder = "Type @ to mention someone...",
   mentionOptions = [],
@@ -306,8 +309,8 @@ export default function RichText({
           const root = $getRoot();
           root.clear();
 
-          if (initialState) {
-            const parsed = editor.parseEditorState(initialState);
+          if (valueRich) {
+            const parsed = editor.parseEditorState(valueRich);
             editor.setEditorState(parsed);
             return;
           }
@@ -320,7 +323,7 @@ export default function RichText({
         });
       },
     }),
-    [disabled, initialState]
+    [disabled, valueRich]
   );
 
   if (!mounted) {
@@ -352,7 +355,7 @@ export default function RichText({
       } ${className}`}
     >
       <LexicalComposer initialConfig={initialConfig}>
-        <SyncFromProp value={value} initialState={initialState} />
+        <SyncFromProp value={value} valueRich={valueRich} />
 
         <div className="flex flex-col min-h-[5rem] p-3">
           <RichTextPlugin
@@ -387,7 +390,10 @@ export default function RichText({
 
             if (onChangeRich) {
               const json = editorState.toJSON();
-              onChangeRich(json);
+              // Avoid feedback loop
+              if (JSON.stringify(json) !== JSON.stringify(valueRich)) {
+                onChangeRich(json);
+              }
             }
           }}
         />

@@ -18,6 +18,7 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
   const { user } = useAuth();
 
   const [prompt, setPrompt] = useState<string>("");
+  const [promptRich, setPromptRich] = useState<unknown | null>(null);
   const [customer, setCustomer] = useState<string>("");
 
   const {
@@ -47,6 +48,7 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     if (!existing) return;
     if (!didHydrateFromFirestore.current) {
       if (existing.prompt) setPrompt(existing.prompt);
+      if (existing.promptRich) setPromptRich(existing.promptRich);
       if (existing.customer) setCustomer(existing.customer);
       didHydrateFromFirestore.current = true;
     }
@@ -58,11 +60,12 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     const timeout = setTimeout(() => {
       updateActive(user.uid, requestId, {
         prompt: prompt,
+        promptRich: promptRich,
         customer: customer,
       }).catch(() => {});
     }, 800);
     return () => clearTimeout(timeout);
-  }, [prompt, customer, user, requestId, updateActive]);
+  }, [prompt, promptRich, customer, user, requestId, updateActive]);
 
   const validate = () => {
     const errs: typeof errors = {};
@@ -87,6 +90,7 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     }
     await updateActive(user.uid, requestId, {
       prompt: prompt,
+      promptRich: promptRich,
       customer: customer,
     });
 
@@ -135,9 +139,11 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
   return (
     <Prompt
       prompt={prompt}
+      promptRich={promptRich}
       customer={customer}
       errors={errors}
       setPrompt={setPrompt}
+      setPromptRich={setPromptRich}
       setCustomer={setCustomer}
       onCancel={handleCancel}
       onSubmit={handleSubmit}
