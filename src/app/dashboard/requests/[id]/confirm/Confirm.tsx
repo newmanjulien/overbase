@@ -47,7 +47,7 @@ export default function Confirm({
           ],
         })}
       title="Did we understand correctly?"
-      subtitle="This is a summary of what we understood from your request. Click edit if something is wrong."
+      subtitle="This is a summary of what we understood from your request. Click edit if something is wrong"
       primaryButtonText="Done"
       onPrimaryAction={onSubmit}
       secondaryButtonText="Restart"
@@ -59,8 +59,8 @@ export default function Confirm({
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           readOnly={!isEditable}
-          className={`mt-1 min-h-80 ${
-            !isEditable ? "bg-gray-100 text-gray-500" : ""
+          className={`mt-1 min-h-90 ${
+            !isEditable ? "bg-gray-50 text-gray-400" : ""
           }`}
         />
 
