@@ -95,7 +95,7 @@ export const connectors: Connectors[] = [
     logo: "/images/docusign.png",
     status: "inactive",
     adds: "Added by 100 colleagues",
-    categories: ["CRM", "Sales"],
+    categories: ["Productivity", "Signature"],
     type: "OAuth",
     resources: [{ label: "Docs", href: "https://pipedrive.com" }],
   },
