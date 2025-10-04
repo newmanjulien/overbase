@@ -23,6 +23,7 @@ import { format } from "date-fns";
 
 interface WriteRequestClient {
   prompt: string;
+  promptRich?: unknown | null;
   summary: string;
   status: "draft" | "active";
   scheduledDate: string | null;
@@ -77,6 +78,7 @@ export async function createDraft(
   const ref = doc(db, "users", uid, "requests", id);
   const write: WriteRequestClient = {
     prompt: coalesceText(data.prompt),
+    promptRich: data.promptRich ?? null,
     summary: coalesceText(data.summary),
     status: "draft",
     scheduledDate: serializeScheduledDate(data.scheduledDate ?? null),
@@ -112,6 +114,7 @@ export async function ensureDraft(uid: string): Promise<string> {
   const newRef = doc(col);
   const write: WriteRequestClient = {
     prompt: "",
+    promptRich: null,
     summary: "",
     status: "draft",
     scheduledDate: null,
@@ -137,6 +140,10 @@ export async function updateActive(
 
   if ("prompt" in patch) {
     update.prompt = coalesceText(patch.prompt);
+    update.ephemeral = false;
+  }
+  if ("promptRich" in patch) {
+    update.promptRich = patch.promptRich ?? null;
     update.ephemeral = false;
   }
   if ("summary" in patch) {

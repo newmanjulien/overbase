@@ -14,6 +14,7 @@ import type { Request } from "@/lib/models/request-types";
  */
 type FirestoreRequestData = {
   prompt?: string;
+  promptRich?: unknown | null;
   scheduledDate?: string;
   summary?: string;
   status?: "draft" | "active";
@@ -38,6 +39,7 @@ export const requestReadConverterClient: FirestoreDataConverter<Request> = {
     return {
       id: snap.id,
       prompt: d.prompt ?? "",
+      promptRich: d.promptRich ?? null,
       // Read back from "yyyy-MM-dd" into a real Date (local midnight)
       scheduledDate: d.scheduledDate
         ? deserializeScheduledDate(d.scheduledDate)

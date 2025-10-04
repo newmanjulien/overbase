@@ -1,6 +1,7 @@
 export interface Request {
   id: string;
   prompt: string;
+  promptRich?: unknown | null;
   scheduledDate: Date | null;
   summary: string;
   status: "draft" | "active";
@@ -16,6 +17,12 @@ export interface Request {
 export type RequestPatch = Partial<
   Pick<
     Request,
-    "prompt" | "summary" | "scheduledDate" | "status" | "customer" | "repeat"
+    | "prompt"
+    | "promptRich"
+    | "summary"
+    | "scheduledDate"
+    | "status"
+    | "customer"
+    | "repeat"
   >
 >;
