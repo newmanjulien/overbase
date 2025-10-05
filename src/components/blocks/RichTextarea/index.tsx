@@ -9,9 +9,10 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 
-import SyncPlugin from "./plugin-Sync";
 import PlainTextPlugin from "./plugin-PlainText";
 import MentionPlugin from "./plugin-Mention";
+
+import { $getRoot, $createParagraphNode, $createTextNode } from "lexical";
 
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
@@ -42,6 +43,26 @@ export default function RichTextarea({
     namespace: "RequestEditor",
     editable: !disabled,
     onError: (err) => console.error("Lexical error:", err),
+    editorState: (editor) => {
+      editor.update(() => {
+        const root = $getRoot();
+        root.clear();
+
+        // Hydrate from rich state if available
+        if (valueRich) {
+          const parsed = editor.parseEditorState(valueRich);
+          editor.setEditorState(parsed);
+          return;
+        }
+
+        // Otherwise initialize from plain text
+        if (value) {
+          const paragraph = $createParagraphNode();
+          paragraph.append($createTextNode(value));
+          root.append(paragraph);
+        }
+      });
+    },
   };
 
   return (
@@ -49,9 +70,6 @@ export default function RichTextarea({
       className={`relative border rounded-xl border-gray-200 bg-white p-2 ${className}`}
     >
       <LexicalComposer initialConfig={initialConfig}>
-        {/* Prop → Editor hydration */}
-        <SyncPlugin value={value} valueRich={valueRich} />
-
         <RichTextPlugin
           contentEditable={
             <ContentEditable
