@@ -41,7 +41,6 @@ export default function RichTextarea({
   const initialConfig: InitialConfigType = {
     namespace: "RequestEditor",
     editable: !disabled,
-    editorState: () => null, // hydrated by SyncPlugin
     onError: (err) => console.error("Lexical error:", err),
   };
 
