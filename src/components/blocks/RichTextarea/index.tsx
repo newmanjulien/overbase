@@ -23,19 +23,13 @@ import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 /* -------------------------------------------------------------------------- */
 
 interface RichTextareaProps {
-  /** Initial value (used once at mount) */
   initialValue?: string;
   initialValueRich?: SerializedEditorState<SerializedLexicalNode> | null;
-
-  /** Outbound change handlers */
   onChange?: (text: string) => void;
   onChangeRich?: (
     json: SerializedEditorState<SerializedLexicalNode> | null
   ) => void;
-
-  /** Optional key to force full reset */
   resetKey?: string | number;
-
   placeholder?: string;
   mentionOptions?: { id: string; name: string; logo?: string }[];
   disabled?: boolean;
@@ -92,7 +86,7 @@ function LoadStatePlugin({
       if (initialValue) p.append($createTextNode(initialValue));
       root.append(p);
     });
-  }, [editor, resetKey]); // ✅ only run on mount or reset
+  }, [editor, resetKey]);
   return null;
 }
 
@@ -159,14 +153,13 @@ export default function RichTextarea({
             resetKey={resetKey}
           />
 
-          {mentionOptions.length > 0 && (
-            <MentionPlugin
-              mentionOptions={mentionOptions}
-              disabled={disabled}
-              menuClassName={mentionMenuClassName}
-              menuStyle={mentionMenuStyle}
-            />
-          )}
+          {/* ✅ Always mount the MentionPlugin */}
+          <MentionPlugin
+            mentionOptions={mentionOptions}
+            disabled={disabled}
+            menuClassName={mentionMenuClassName}
+            menuStyle={mentionMenuStyle}
+          />
         </div>
       </LexicalComposer>
     </div>
