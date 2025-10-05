@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   LexicalComposer,
   InitialConfigType,
@@ -9,88 +9,119 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
 import PlainTextPlugin from "./plugin-PlainText";
 import MentionPlugin from "./plugin-Mention";
+import { MentionNode } from "./node-Mention";
 
 import { $getRoot, $createParagraphNode, $createTextNode } from "lexical";
-
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
+/* -------------------------------------------------------------------------- */
+/*                                   Props                                    */
+/* -------------------------------------------------------------------------- */
+
 interface RichTextareaProps {
-  value: string; // plain text (for summaries)
-  valueRich: SerializedEditorState<SerializedLexicalNode> | null; // lexical JSON
-  onChange: (text: string) => void;
-  onChangeRich: (
+  /** Initial value (used once at mount) */
+  initialValue?: string;
+  initialValueRich?: SerializedEditorState<SerializedLexicalNode> | null;
+
+  /** Outbound change handlers */
+  onChange?: (text: string) => void;
+  onChangeRich?: (
     json: SerializedEditorState<SerializedLexicalNode> | null
   ) => void;
+
+  /** Optional key to force full reset */
+  resetKey?: string | number;
+
   placeholder?: string;
-  mentionOptions?: { name: string; logo?: string }[];
+  mentionOptions?: { id: string; name: string; logo?: string }[];
   disabled?: boolean;
   className?: string;
+  mentionMenuClassName?: string;
+  mentionMenuStyle?: React.CSSProperties;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                          Editable state plugin                              */
+/* -------------------------------------------------------------------------- */
+
+function EditablePlugin({ disabled }: { disabled: boolean }) {
+  const [editor] = useLexicalComposerContext();
+  useEffect(() => {
+    editor.setEditable(!disabled);
+  }, [editor, disabled]);
+  return null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         Load-once or reset-on-key plugin                    */
+/* -------------------------------------------------------------------------- */
+
+function LoadStatePlugin({
+  initialValue,
+  initialValueRich,
+  resetKey,
+}: {
+  initialValue?: string;
+  initialValueRich?: SerializedEditorState<SerializedLexicalNode> | null;
+  resetKey?: string | number;
+}) {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+
+      if (initialValueRich) {
+        try {
+          const parsed = editor.parseEditorState(
+            JSON.stringify(initialValueRich)
+          );
+          editor.setEditorState(parsed);
+          return;
+        } catch (err) {
+          console.warn("Invalid rich content, falling back to text:", err);
+        }
+      }
+
+      const p = $createParagraphNode();
+      if (initialValue) p.append($createTextNode(initialValue));
+      root.append(p);
+    });
+  }, [editor, resetKey]); // ✅ only run on mount or reset
+  return null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 Component                                  */
+/* -------------------------------------------------------------------------- */
+
 export default function RichTextarea({
-  value,
-  valueRich,
+  initialValue,
+  initialValueRich,
   onChange,
   onChangeRich,
+  resetKey,
   placeholder = "Type @ to mention a connector...",
   mentionOptions = [],
   disabled = false,
   className = "",
+  mentionMenuClassName,
+  mentionMenuStyle,
 }: RichTextareaProps) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  const initialConfig: InitialConfigType = {
-    namespace: "RequestEditor",
-    editable: !disabled,
-    onError: (err) => console.error("Lexical error:", err),
-    editorState: (editor) => {
-      editor.update(() => {
-        const root = $getRoot();
-        root.clear();
-
-        // Hydrate from rich state if available
-        if (valueRich) {
-          const parsed = editor.parseEditorState(valueRich);
-          editor.setEditorState(parsed);
-          return;
-        }
-
-        // Otherwise initialize from plain text
-        if (value) {
-          const paragraph = $createParagraphNode();
-          paragraph.append($createTextNode(value));
-          root.append(paragraph);
-        }
-      });
-    },
-  };
-
-  // 🟡 Render static placeholder while SSR/hydrating
-  if (!mounted) {
-    return (
-      <div
-        className={`relative border rounded-xl border-gray-200 bg-white p-3 text-sm leading-relaxed ${className}`}
-      >
-        <div
-          className={`text-gray-400 ${
-            disabled ? "opacity-70 cursor-not-allowed" : ""
-          }`}
-          style={{
-            whiteSpace: "pre-wrap",
-            minHeight: "4rem",
-            display: "flex",
-            alignItems: "flex-start",
-          }}
-        >
-          {placeholder}
-        </div>
-      </div>
-    );
-  }
+  const initialConfig = useMemo<InitialConfigType>(
+    () => ({
+      namespace: "RequestEditor",
+      editable: !disabled,
+      onError: (err) => console.error("Lexical error:", err),
+      nodes: [MentionNode],
+    }),
+    [disabled]
+  );
 
   return (
     <div
@@ -117,12 +148,23 @@ export default function RichTextarea({
           />
 
           <HistoryPlugin />
-          <PlainTextPlugin onChange={onChange} onChangeRich={onChangeRich} />
+          <PlainTextPlugin
+            onChange={(t) => onChange?.(t)}
+            onChangeRich={(r) => onChangeRich?.(r)}
+          />
+          <EditablePlugin disabled={disabled} />
+          <LoadStatePlugin
+            initialValue={initialValue}
+            initialValueRich={initialValueRich}
+            resetKey={resetKey}
+          />
 
           {mentionOptions.length > 0 && (
             <MentionPlugin
               mentionOptions={mentionOptions}
               disabled={disabled}
+              menuClassName={mentionMenuClassName}
+              menuStyle={mentionMenuStyle}
             />
           )}
         </div>

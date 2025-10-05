@@ -14,10 +14,10 @@ import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 const CUSTOMERS = ["Acme Corp", "Globex", "Initech", "Soylent", "Umbrella"];
 const CONNECTORS = [
-  { name: "Slack", logo: "/images/slack.png" },
-  { name: "Docusign", logo: "/images/docusign.png" },
-  { name: "Gmail", logo: "/images/gmail.png" },
-  { name: "Salesforce", logo: "/images/salesforce.png" },
+  { id: "slack", name: "Slack", logo: "/images/slack.png" },
+  { id: "docusign", name: "Docusign", logo: "/images/docusign.png" },
+  { id: "gmail", name: "Gmail", logo: "/images/gmail.png" },
+  { id: "salesforce", name: "Salesforce", logo: "/images/salesforce.png" },
 ];
 
 interface PromptProps {
@@ -84,12 +84,18 @@ export default function Prompt({
     >
       <div>
         <RichTextarea
-          value={prompt}
+          // Initialize once
+          initialValue={prompt}
+          initialValueRich={promptRich}
+          // Listen for changes (optional; same functions work)
           onChange={setPrompt}
-          valueRich={promptRich}
           onChangeRich={setPromptRich}
-          placeholder="Use @ symbols to tag connectors..."
+          // Optional: pass a reset key if promptRich changes meaningfully
+          resetKey={mode + customer}
+          placeholder="@ to tag connectors..."
           mentionOptions={CONNECTORS}
+          mentionMenuClassName="bg-white border border-gray-200 shadow-lg rounded-lg p-1 w-64"
+          mentionMenuStyle={{ zIndex: 200 }}
           className="mt-1 rounded-xl bg-white min-h-70"
         />
 

@@ -2,6 +2,7 @@
 
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { EditorState, $getRoot } from "lexical";
+import { $isRootTextContentEmpty } from "@lexical/text";
 
 export default function PlainTextPlugin({
   onChange,
@@ -14,11 +15,12 @@ export default function PlainTextPlugin({
     <OnChangePlugin
       onChange={(editorState: EditorState) => {
         editorState.read(() => {
-          const text = $getRoot().getTextContent().trim();
+          const isEmpty = $isRootTextContentEmpty(true);
+          const text = $getRoot().getTextContent();
           const json = editorState.toJSON();
 
           onChange(text);
-          onChangeRich(text.length === 0 ? null : json);
+          onChangeRich(isEmpty ? null : json);
         });
       }}
     />
