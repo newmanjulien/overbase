@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import {
   LexicalComposer,
   InitialConfigType,
@@ -39,6 +40,9 @@ export default function RichTextarea({
   disabled = false,
   className = "",
 }: RichTextareaProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const initialConfig: InitialConfigType = {
     namespace: "RequestEditor",
     editable: !disabled,
@@ -65,33 +69,63 @@ export default function RichTextarea({
     },
   };
 
+  // 🟡 Render static placeholder while SSR/hydrating
+  if (!mounted) {
+    return (
+      <div
+        className={`relative border rounded-xl border-gray-200 bg-white p-3 text-sm leading-relaxed ${className}`}
+      >
+        <div
+          className={`text-gray-400 ${
+            disabled ? "opacity-70 cursor-not-allowed" : ""
+          }`}
+          style={{
+            whiteSpace: "pre-wrap",
+            minHeight: "4rem",
+            display: "flex",
+            alignItems: "flex-start",
+          }}
+        >
+          {placeholder}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
-      className={`relative border rounded-xl border-gray-200 bg-white p-2 ${className}`}
+      className={`relative border rounded-xl border-gray-200 bg-white text-sm leading-relaxed ${
+        disabled ? "bg-gray-100 opacity-70 cursor-not-allowed" : ""
+      } ${className}`}
     >
       <LexicalComposer initialConfig={initialConfig}>
-        <RichTextPlugin
-          contentEditable={
-            <ContentEditable
-              className={`outline-none min-h-[5rem] px-2 py-1 ${
-                disabled ? "opacity-70 cursor-not-allowed" : ""
-              }`}
+        <div className="relative flex flex-col min-h-[5rem] p-3">
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                className={`flex-1 outline-none leading-relaxed ${
+                  disabled ? "cursor-not-allowed opacity-70" : ""
+                }`}
+              />
+            }
+            placeholder={
+              <div className="absolute top-3 left-3 text-gray-400 select-none pointer-events-none">
+                {placeholder}
+              </div>
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+
+          <HistoryPlugin />
+          <PlainTextPlugin onChange={onChange} onChangeRich={onChangeRich} />
+
+          {mentionOptions.length > 0 && (
+            <MentionPlugin
+              mentionOptions={mentionOptions}
+              disabled={disabled}
             />
-          }
-          placeholder={
-            <div className="absolute top-2 left-3 text-gray-400 select-none pointer-events-none">
-              {placeholder}
-            </div>
-          }
-          ErrorBoundary={LexicalErrorBoundary}
-        />
-
-        <HistoryPlugin />
-        <PlainTextPlugin onChange={onChange} onChangeRich={onChangeRich} />
-
-        {mentionOptions.length > 0 && (
-          <MentionPlugin mentionOptions={mentionOptions} disabled={disabled} />
-        )}
+          )}
+        </div>
       </LexicalComposer>
     </div>
   );
