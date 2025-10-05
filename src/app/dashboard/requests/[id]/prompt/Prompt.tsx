@@ -1,6 +1,6 @@
 "use client";
 
-import RichText from "@/components/blocks/RichText";
+import RichTextarea from "@/components/blocks/RichTextarea/index";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import {
   Select,
@@ -83,7 +83,7 @@ export default function Prompt({
       onSecondaryAction={onCancel}
     >
       <div>
-        <RichText
+        <RichTextarea
           value={prompt}
           onChange={setPrompt}
           valueRich={promptRich}
