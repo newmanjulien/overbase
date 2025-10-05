@@ -12,6 +12,7 @@ import { serializeScheduledDate } from "@/lib/requestDates";
 interface WriteRequest {
   id: string;
   prompt: string;
+  promptRich?: unknown | null;
   scheduledDate: string | null;
   summary: string;
   summarySourcePrompt?: string;
@@ -26,6 +27,7 @@ interface WriteRequest {
 
 interface WriteUpdate {
   prompt?: string;
+  promptRich?: unknown | null;
   summary?: string;
   summarySourcePrompt?: string;
   summaryStatus?: "idle" | "pending" | "ready" | "failed";
@@ -67,6 +69,7 @@ export async function createDraft(
   const draft: WriteRequest = {
     id: requestId,
     prompt: initialData.prompt ?? "",
+    promptRich: initialData.promptRich ?? null,
     scheduledDate: initialData.scheduledDate
       ? serializeScheduledDate(initialData.scheduledDate)
       : null,
@@ -108,6 +111,7 @@ export async function submitDraft(
   };
 
   if (data.prompt !== undefined) update.prompt = data.prompt;
+  if (data.promptRich !== undefined) update.promptRich = data.promptRich;
   if (data.summary !== undefined) update.summary = data.summary;
   if (data.summarySourcePrompt !== undefined)
     update.summarySourcePrompt = data.summarySourcePrompt;
@@ -137,6 +141,7 @@ export async function updateActive(
   };
 
   if (data.prompt !== undefined) update.prompt = data.prompt;
+  if (data.promptRich !== undefined) update.promptRich = data.promptRich;
   if (data.summary !== undefined) update.summary = data.summary;
   if (data.summarySourcePrompt !== undefined)
     update.summarySourcePrompt = data.summarySourcePrompt;

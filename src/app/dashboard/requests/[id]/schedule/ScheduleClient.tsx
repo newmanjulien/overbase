@@ -53,7 +53,7 @@ export default function ScheduleClient({
     loadOne(user.uid, requestId);
   }, [user, requestId, loadOne]);
 
-  // hydrate scheduledDate + repeat when request loads
+  // hydrate scheduledDate + repeat once when request loads
   useEffect(() => {
     if (hydratedRef.current) return;
     const record = requests[requestId];

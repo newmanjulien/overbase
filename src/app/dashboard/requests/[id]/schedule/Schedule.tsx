@@ -112,11 +112,7 @@ export default function Schedule({
       </Label>
       <Select value={repeat} onValueChange={setRepeat}>
         <SelectTrigger className="mt-4 w-full border border-grey-50 rounded-xl">
-          <SelectValue>
-            {repeat ? (
-              <span className="truncate">Repeats: {repeat}</span>
-            ) : null}
-          </SelectValue>
+          <SelectValue>{repeat}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {REPEAT.map((opt) => (

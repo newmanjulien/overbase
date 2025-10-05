@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import SetupLayout from "@/components/layouts/SetupLayout";
+import { Button } from "@/components/ui/button"; // Assuming you have a Button component
 
 interface ConfirmProps {
   summary: string;
@@ -28,13 +30,13 @@ export default function Confirm({
   mode,
   infoMessage,
 }: ConfirmProps) {
+  const [isEditable, setIsEditable] = useState(false);
+
   return (
     <SetupLayout
-      // Sidebar
       sidebarBackText="Back to requests"
       onSidebarBack={onHome}
       sidebarTitle="Edit this summary of your request"
-      // Conditional UI elements
       {...(mode !== "create" &&
         setStatus && {
           sidebarActionText: "Delete request",
@@ -46,16 +48,14 @@ export default function Confirm({
             { value: "active", label: "Active" },
           ],
         })}
-      // Main
       title="Did we understand correctly?"
-      subtitle="This us a summary of what we understood from your request. Make edits if misunderstood some of the details"
-      // Footer (two buttons, required)
+      subtitle="This is a summary of what we understood from your request. Click edit if something is wrong"
       primaryButtonText="Done"
       onPrimaryAction={onSubmit}
       secondaryButtonText="Restart"
       onSecondaryAction={onBack}
     >
-      <div>
+      <div className="relative">
         {infoMessage && (
           <p className="text-sm text-muted-foreground mb-3">{infoMessage}</p>
         )}
@@ -63,9 +63,23 @@ export default function Confirm({
           id="summary"
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
-          grow
-          className="mt-1 min-h-80"
+          readOnly={!isEditable}
+          className={`mt-1 min-h-90 ${
+            !isEditable ? "bg-gray-50 text-gray-400" : ""
+          }`}
         />
+
+        {!isEditable && (
+          <div className="absolute bottom-2 right-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsEditable(true)}
+            >
+              Edit
+            </Button>
+          </div>
+        )}
       </div>
     </SetupLayout>
   );

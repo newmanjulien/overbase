@@ -7,7 +7,7 @@ interface ResourceLink {
 
 interface OverviewLayoutProps {
   status: "active" | "inactive";
-  installs?: string;
+  adds?: string;
   categories?: string[];
   type?: string;
   resources?: ResourceLink[];
@@ -16,7 +16,7 @@ interface OverviewLayoutProps {
 
 export default function OverviewLayout({
   status,
-  installs,
+  adds,
   categories = [],
   type,
   resources = [],
@@ -26,14 +26,14 @@ export default function OverviewLayout({
     <div className="max-w-7xl mx-auto grid grid-cols-[220px_1fr] gap-8 px-6 py-10">
       {/* Sidebar */}
       <aside className="space-y-12">
-        {/* Installs */}
+        {/* Adds */}
         <div>
-          <h3 className="text-sm font-medium text-gray-900 mb-4">Installs</h3>
+          <h3 className="text-sm font-medium text-gray-900 mb-4">Adds</h3>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             {status === "active" ? (
-              <span className="font-semibold">Installed</span>
+              <span className="font-semibold">Added</span>
             ) : (
-              <span>{installs ?? "<500 installs"}</span>
+              <span>{adds ?? "Added by <10 colleagues"}</span>
             )}
           </div>
         </div>

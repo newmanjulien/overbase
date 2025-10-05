@@ -23,6 +23,7 @@ import { format } from "date-fns";
 
 interface WriteRequestClient {
   prompt: string;
+  promptRich?: unknown | null;
   summary: string;
   summarySourcePrompt?: string;
   summaryStatus?: "idle" | "pending" | "ready" | "failed";
@@ -79,6 +80,7 @@ export async function createDraft(
   const ref = doc(db, "users", uid, "requests", id);
   const write: WriteRequestClient = {
     prompt: coalesceText(data.prompt),
+    promptRich: data.promptRich ?? null,
     summary: coalesceText(data.summary),
     summarySourcePrompt: data.summarySourcePrompt ?? "",
     summaryStatus: data.summaryStatus ?? "idle",
@@ -116,6 +118,7 @@ export async function ensureDraft(uid: string): Promise<string> {
   const newRef = doc(col);
   const write: WriteRequestClient = {
     prompt: "",
+    promptRich: null,
     summary: "",
     summarySourcePrompt: "",
     summaryStatus: "idle",
@@ -145,6 +148,10 @@ export async function updateActive(
     update.prompt = coalesceText(patch.prompt);
     update.ephemeral = false;
   }
+  if ("promptRich" in patch) {
+    update.promptRich = patch.promptRich ?? null;
+    update.ephemeral = false;
+  }
   if ("summary" in patch) {
     update.summary = coalesceText(patch.summary);
     update.ephemeral = false;
@@ -162,8 +169,8 @@ export async function updateActive(
     update.customer = patch.customer ?? "";
     update.ephemeral = false;
   }
-  if ("repeat" in patch) {
-    update.repeat = patch.repeat ?? "Does not repeat";
+  if (patch.repeat !== undefined) {
+    update.repeat = patch.repeat;
     update.ephemeral = false;
   }
 

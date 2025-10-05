@@ -6,15 +6,15 @@ import Link from "next/link";
 import type { Connectors } from "./DummyData";
 import { Button } from "@/components/ui/button";
 
-interface PopularConnectorsProps {
-  popularConnectors: Connectors[];
-  onBrowseClick: () => void;
+interface InstalledConnectorsProps {
+  installedConnectors: Connectors[];
+  onSeeAllClick: () => void;
 }
 
-export function PopularConnectors({
-  popularConnectors,
-  onBrowseClick,
-}: PopularConnectorsProps) {
+export function InstalledConnectors({
+  installedConnectors,
+  onSeeAllClick,
+}: InstalledConnectorsProps) {
   return (
     <div
       id="popular-connectors"
@@ -26,20 +26,20 @@ export function PopularConnectors({
         <div className="mb-6 flex flex-col items-center text-center">
           <Layers className="w-4 h-4 text-gray-600" />
           <h2 className="text-md font-medium text-gray-800 mt-4">
-            Popular Connectors
+            Installed connectors
           </h2>
           <p className="text-sm text-gray-500 font-light leading-relaxed mt-1 max-w-xs">
-            Easily set up connectors with the most popular platforms.
+            Easily add connectors your colleagues have already installed
           </p>
         </div>
 
         <div className="space-y-3">
-          {popularConnectors.length === 0 ? (
+          {installedConnectors.length === 0 ? (
             <p className="text-center text-gray-400 italic">
               No more connectors to add
             </p>
           ) : (
-            popularConnectors.map((connector) => (
+            installedConnectors.map((connector) => (
               <Link
                 key={connector.id}
                 href={`/dashboard/connectors/${connector.id}`}
@@ -78,8 +78,8 @@ export function PopularConnectors({
 
         <hr className="border-t border-gray-200/60 my-6 " />
 
-        <Button variant="outline" className="w-full" onClick={onBrowseClick}>
-          Browse connectors
+        <Button variant="outline" className="w-full" onClick={onSeeAllClick}>
+          See all installed connectors
         </Button>
       </div>
     </div>

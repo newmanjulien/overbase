@@ -1,6 +1,9 @@
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
+
 export interface Request {
   id: string;
   prompt: string;
+  promptRich: SerializedEditorState<SerializedLexicalNode> | null;
   scheduledDate: Date | null;
   summary: string;
   summarySourcePrompt?: string;
@@ -19,6 +22,7 @@ export type RequestPatch = Partial<
   Pick<
     Request,
     | "prompt"
+    | "promptRich"
     | "summary"
     | "summarySourcePrompt"
     | "summaryStatus"

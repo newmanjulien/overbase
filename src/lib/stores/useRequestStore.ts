@@ -117,6 +117,8 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
     set((s) => {
       const patch: Partial<Request> = {
         prompt: data.prompt ?? s.requests[id].prompt,
+        // 🆕 new: preserve or update serialized Lexical state
+        promptRich: data.promptRich ?? s.requests[id].promptRich ?? null,
         summary: data.summary ?? s.requests[id].summary,
         summarySourcePrompt:
           Object.prototype.hasOwnProperty.call(data, "summarySourcePrompt")

@@ -1,6 +1,6 @@
 "use client";
 
-import { Textarea } from "@/components/ui/textarea";
+import RichText from "@/components/blocks/RichText";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import {
   Select,
@@ -10,13 +10,25 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
+
 const CUSTOMERS = ["Acme Corp", "Globex", "Initech", "Soylent", "Umbrella"];
+const CONNECTORS = [
+  { name: "Slack", logo: "/images/slack.png" },
+  { name: "Docusign", logo: "/images/docusign.png" },
+  { name: "Gmail", logo: "/images/gmail.png" },
+  { name: "Salesforce", logo: "/images/salesforce.png" },
+];
 
 interface PromptProps {
   prompt: string;
+  promptRich: SerializedEditorState<SerializedLexicalNode> | null;
   customer: string;
   errors: { prompt?: string; customer?: string };
   setPrompt: (val: string) => void;
+  setPromptRich: (
+    val: SerializedEditorState<SerializedLexicalNode> | null
+  ) => void;
   setCustomer: (val: string) => void;
   onSubmit: () => void | Promise<void>;
   onCancel: () => void | Promise<void>;
@@ -29,9 +41,11 @@ interface PromptProps {
 
 export default function Prompt({
   prompt,
+  promptRich,
   customer,
   errors,
   setPrompt,
+  setPromptRich,
   setCustomer,
   onSubmit,
   onCancel,
@@ -69,15 +83,16 @@ export default function Prompt({
       onSecondaryAction={onCancel}
     >
       <div>
-        <Textarea
-          id="prompt"
+        <RichText
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          required
-          grow
-          className="mt-1 min-h-80"
-          placeholder="Use @ symbols to tag customers and tag connectors..."
+          onChange={setPrompt}
+          valueRich={promptRich}
+          onChangeRich={setPromptRich}
+          placeholder="Use @ symbols to tag connectors..."
+          mentionOptions={CONNECTORS}
+          className="mt-1 rounded-xl bg-white min-h-70"
         />
+
         {errors.prompt && (
           <p className="text-red-500 text-sm mt-1">{errors.prompt}</p>
         )}

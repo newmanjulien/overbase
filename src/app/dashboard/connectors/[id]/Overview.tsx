@@ -8,14 +8,10 @@ import OverviewLayout from "@/components//layouts/OverviewLayout";
 interface OverviewProps {
   connector: Connectors;
   onBack: () => void;
-  onInstall: () => void;
+  onAdd: () => void;
 }
 
-export default function Overview({
-  connector,
-  onBack,
-  onInstall,
-}: OverviewProps) {
+export default function Overview({ connector, onBack, onAdd }: OverviewProps) {
   const previewImages = connector.previewImages ?? [];
 
   return (
@@ -27,13 +23,13 @@ export default function Overview({
         backlink
         backlinkLabel="Back to connectors"
         onBacklinkClick={onBack}
-        buttonLabel="Install"
-        onButtonClick={onInstall}
+        buttonLabel="Add"
+        onButtonClick={onAdd}
         buttonVariant="default"
       />
 
       <OverviewLayout
-        installs={connector.installs}
+        adds={connector.adds}
         categories={connector.categories}
         type={connector.type}
         resources={connector.resources}
