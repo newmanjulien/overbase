@@ -1,4 +1,4 @@
-# Request System – Design Principles
+# Request System – Design Principles (Updated with Ephemeral Flag)
 
 ✅ **Summary**
 
@@ -6,6 +6,9 @@
 - **Firestore**: the single source of truth.
 - **Controlled inputs**: transient local state → persist on blur/debounce.
 - **UI flows**: just different views of the same Firestore-backed data.
+- **RichText editor**: dual-storage model (`prompt`, `promptRich`) with autosave.
+- **Summarisation API**: derives `summary` from `prompt` only.
+- **Ephemeral drafts**: client-only placeholder records prior to Firestore persistence.
 
 ---
 
@@ -31,11 +34,18 @@
 - Use **Firestore** as the **single source of truth**.
 - Persist all drafts and edits via the store’s service functions (`createDraft`, `updateActive`, `submitDraft`, etc.).
 - Keep Firestore in sync via snapshot subscriptions.
+- When persisting request data that includes rich text, **save both `prompt` and `promptRich` together**.
+- Support an optional `ephemeral: true` flag on client-side drafts to indicate a request that has not yet been fully persisted to Firestore.
+- Use `ephemeral` **only on the client** to track transient or optimistic records (e.g., drafts created offline or before confirmation).
+- Ensure that the admin or server write path removes the flag once the document is officially saved.
 
 ❌ **DON’T**
 
 - Leave important state in memory only.
 - Depend on manual “save” actions for persistence.
+- Send `promptRich` directly to APIs.
+- Persist `ephemeral: true` records permanently in Firestore.
+- Depend on the flag for business logic — treat it as a transient client hint only.
 
 ---
 
@@ -58,8 +68,10 @@
 
 ✅ **DO**
 
-- Persist form values to Firestore with **debounce** (e.g. 800ms).
+- Persist form values to Firestore with **debounce** (≈800ms).
 - Ensure data is always recoverable after a refresh.
+- For **Lexical-based editors**, debounce both the plain and serialized (`prompt` and `promptRich`) states together.
+- Prevent autosave during Firestore hydration.
 
 ❌ **DON’T**
 
@@ -84,6 +96,39 @@
 
 ---
 
+## 🔹 Derived Data (`summary`, `summarySourcePrompt`)
+
+✅ **DO**
+
+- Use `/api/summarise` to derive summaries from `prompt` (plain text only).
+- Store results in Firestore as `summary`, `summaryStatus`, and `summarySourcePrompt`.
+- Support both server-side and client-side Firestore updates (via `serverUpdated` flag).
+
+❌ **DON’T**
+
+- Summarize from `promptRich` (it’s structured JSON, not text).
+- Depend on unsaved summaries — always persist results.
+
+---
+
+## 🔹 Rich Text Fields (`prompt` / `promptRich`)
+
+✅ **DO**
+
+- Store both:
+  - `prompt`: the plain text representation (used for summaries, search, and display).
+  - `promptRich`: the serialized Lexical state (used for rehydration and mentions).
+- Treat **`promptRich` as the source of truth**.
+- Derive `prompt` from `promptRich` on change.
+- Persist both fields together in Firestore.
+
+❌ **DON’T**
+
+- Update one without the other.
+- Send `promptRich` to APIs or use it in AI summaries.
+
+---
+
 ## 🔹 Separation of Concerns
 
 ✅ **DO**
@@ -93,6 +138,7 @@
   - **Store** → state + subscriptions
   - **Client components** → orchestrate store + local form state
   - **UI components** → pure presentation
+- Keep Lexical (RichText) serialization logic inside client components — Firestore and APIs should handle only plain text.
 
 ❌ **DON’T**
 
@@ -108,11 +154,38 @@
 - Organize requests around **scheduledDate** (calendar-first).
 - Use `requestsByDate` consistently for UI.
 - Maintain TypeScript interfaces (`RequestItem`) as the contract.
+- Include dual prompt fields (`prompt`, `promptRich`) and summary data.
+- Support an optional `ephemeral` flag for transient client-side drafts.
 
 ❌ **DON’T**
 
 - Scatter date-handling logic across components.
 - Duplicate model definitions.
+
+### Example RequestItem (Updated)
+
+```ts
+interface RequestItem {
+  id: string;
+  uid: string;
+  status: "draft" | "active";
+  customer: string;
+  prompt: string;
+  promptRich: SerializedEditorState | null;
+  summary: string;
+  summarySourcePrompt: string;
+  summaryStatus: "pending" | "ready" | "failed";
+  scheduledDate: Date | null;
+  repeat: string;
+  ephemeral?: boolean; // true only for client-local drafts
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+```
+
+> **Note:**  
+> `ephemeral` is a **client-only flag** indicating a locally created or optimistic draft.  
+> It should never be relied on for logic in admin or backend systems. When the record is successfully written to Firestore, `ephemeral` must be removed or ignored by the server.
 
 ---
 
