@@ -1,6 +1,6 @@
-# Request System – Design Principles (Updated with Ephemeral Flag)
+# Request System – Design Principles
 
-✅ **Summary**
+✅ **Overview**
 
 - **Zustand**: a bridge between screens, not persistence.
 - **Firestore**: the single source of truth.
