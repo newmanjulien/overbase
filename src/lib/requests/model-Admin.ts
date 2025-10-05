@@ -2,11 +2,11 @@ import {
   FirestoreDataConverter,
   QueryDocumentSnapshot,
   Timestamp,
-} from "firebase/firestore";
+} from "firebase-admin/firestore";
 
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 import { deserializeScheduledDate } from "@/lib/requestDates";
-import type { Request } from "@/lib/models/request-types";
+import type { Request } from "@/lib/requests/model-Types";
 
 /**
  * Raw Firestore shape before conversion.
@@ -29,7 +29,7 @@ type FirestoreRequestData = {
   repeat?: string;
 };
 
-export const requestReadConverterClient: FirestoreDataConverter<Request> = {
+export const requestReadConverterAdmin: FirestoreDataConverter<Request> = {
   toFirestore(): never {
     throw new Error(
       "Writes must go through requestService (services serialize on write)."

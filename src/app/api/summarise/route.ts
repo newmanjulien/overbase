@@ -1,8 +1,8 @@
 /**
  * Task Summarization API Route
- * 
+ *
  * POST /api/summarise
- * 
+ *
  * Accepts task descriptions and returns structured summaries
  * using OpenAI or Anthropic LLMs
  */
@@ -18,7 +18,7 @@ import {
   markSummaryFailure,
   markSummaryPending,
   markSummarySuccess,
-} from "@/lib/services/requestService-admin";
+} from "@/lib/requests/service-Admin";
 
 /**
  * Request body schema
@@ -52,8 +52,7 @@ function validateRequest(body: unknown): body is SummariseRequest {
     return false;
   }
 
-  const { text, provider, model } =
-    body as Partial<SummariseRequest>;
+  const { text, provider, model } = body as Partial<SummariseRequest>;
 
   if (!text || typeof text !== "string" || text.trim().length === 0) {
     return false;
@@ -131,7 +130,10 @@ export async function POST(req: NextRequest) {
         await markSummaryPending(uid, requestId, promptText);
         serverUpdated = true;
       } catch (err) {
-        console.warn("markSummaryPending failed, falling back to client update", err);
+        console.warn(
+          "markSummaryPending failed, falling back to client update",
+          err
+        );
         serverUpdated = false;
       }
     }

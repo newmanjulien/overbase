@@ -10,7 +10,7 @@ import {
   type DateKey,
 } from "@/lib/requestDates";
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/stores/useRequestStore";
+import { useRequestListStore } from "@/lib/requests/store";
 import ScheduleUI from "./Schedule";
 
 interface ScheduleClientProps {

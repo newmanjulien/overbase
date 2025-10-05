@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Prompt from "./Prompt";
 
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/stores/useRequestStore";
+import { useRequestListStore } from "@/lib/requests/store";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 interface PromptClientProps {

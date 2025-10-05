@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { Request } from "@/lib/models/request-types";
+import type { Request } from "@/lib/requests/model-Types";
 import {
   subscribeToRequestList,
   loadOne,
@@ -11,9 +11,11 @@ import {
   demoteToDraft,
   deleteRequest,
   ensureDraft,
-} from "@/lib/services/requestService-client";
+} from "@/lib/requests/service-Client";
 
 import { toDateKey } from "@/lib/requestDates";
+import { lexicalToPlainText } from "@/lib/lexical/utils";
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 function buildRequestsByDate(
   requests: Record<string, Request>
@@ -38,6 +40,15 @@ function updateRequests(
   // Build a complete Request, so TS type-checks the shape
   const next: Request = { ...prev, ...patch };
   return { ...requests, [id]: next };
+}
+
+function derivePromptFieldsLocal(
+  data: Partial<Request>,
+  prev: Request
+): { prompt: string; promptRich: Request["promptRich"] } {
+  const rich = data.promptRich ?? prev.promptRich ?? null;
+  const plain = data.prompt ?? (rich ? lexicalToPlainText(rich) : prev.prompt);
+  return { prompt: plain, promptRich: rich };
 }
 
 interface RequestListState {
@@ -115,32 +126,40 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
 
     // Optimistic update: reflect field changes instantly
     set((s) => {
+      const prev = s.requests[id];
+      if (!prev) return s; // safety guard
+
+      const { prompt, promptRich } = derivePromptFieldsLocal(data, prev);
+
       const patch: Partial<Request> = {
-        prompt: data.prompt ?? s.requests[id].prompt,
-        // 🆕 new: preserve or update serialized Lexical state
-        promptRich: data.promptRich ?? s.requests[id].promptRich ?? null,
-        summary: data.summary ?? s.requests[id].summary,
-        summarySourcePrompt:
-          Object.prototype.hasOwnProperty.call(data, "summarySourcePrompt")
-            ? data.summarySourcePrompt
-            : s.requests[id].summarySourcePrompt,
-        summaryStatus:
-          Object.prototype.hasOwnProperty.call(data, "summaryStatus")
-            ? data.summaryStatus
-            : s.requests[id].summaryStatus,
+        prompt,
+        promptRich,
+        summary: data.summary ?? prev.summary,
+        summarySourcePrompt: Object.prototype.hasOwnProperty.call(
+          data,
+          "summarySourcePrompt"
+        )
+          ? data.summarySourcePrompt
+          : prev.summarySourcePrompt,
+        summaryStatus: Object.prototype.hasOwnProperty.call(
+          data,
+          "summaryStatus"
+        )
+          ? data.summaryStatus
+          : prev.summaryStatus,
         updatedAt: new Date(),
       };
 
       if (Object.prototype.hasOwnProperty.call(data, "scheduledDate")) {
         patch.scheduledDate = data.scheduledDate;
       } else {
-        patch.scheduledDate = s.requests[id].scheduledDate;
+        patch.scheduledDate = prev.scheduledDate;
       }
 
       if (Object.prototype.hasOwnProperty.call(data, "repeat")) {
         patch.repeat = data.repeat ?? "Does not repeat";
       } else {
-        patch.repeat = s.requests[id].repeat;
+        patch.repeat = prev.repeat;
       }
 
       const updated = updateRequests(s.requests, id, patch);

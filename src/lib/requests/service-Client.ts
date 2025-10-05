@@ -17,9 +17,10 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import { requestReadConverterClient } from "@/lib/models/request-client";
-import type { Request, RequestPatch } from "@/lib/models/request-types";
+import { requestReadConverterClient } from "@/lib/requests/model-Client";
+import type { Request, RequestPatch } from "@/lib/requests/model-Types";
 import { format } from "date-fns";
+import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 interface WriteRequestClient {
   prompt: string;
@@ -43,6 +44,13 @@ function serializeScheduledDate(d: Date | null): string | null {
 }
 function coalesceText(s: string | undefined | null): string {
   return s ?? "";
+}
+function derivePromptFields(data: RequestPatch) {
+  const rich = data.promptRich ?? null;
+  return {
+    promptRich: rich,
+    prompt: data.prompt ?? (rich ? lexicalToPlainText(rich) : ""),
+  };
 }
 
 // --- subscription ---
@@ -78,9 +86,12 @@ export async function createDraft(
   data: RequestPatch = {}
 ) {
   const ref = doc(db, "users", uid, "requests", id);
+
+  const { prompt, promptRich } = derivePromptFields(data);
+
   const write: WriteRequestClient = {
-    prompt: coalesceText(data.prompt),
-    promptRich: data.promptRich ?? null,
+    prompt,
+    promptRich,
     summary: coalesceText(data.summary),
     summarySourcePrompt: data.summarySourcePrompt ?? "",
     summaryStatus: data.summaryStatus ?? "idle",
@@ -144,31 +155,35 @@ export async function updateActive(
     updatedAt: serverTimestamp(),
   };
 
-  if ("prompt" in patch) {
-    update.prompt = coalesceText(patch.prompt);
+  if ("promptRich" in patch || "prompt" in patch) {
+    const { prompt, promptRich } = derivePromptFields(patch);
+    update.prompt = prompt;
+    update.promptRich = promptRich;
     update.ephemeral = false;
   }
-  if ("promptRich" in patch) {
-    update.promptRich = patch.promptRich ?? null;
-    update.ephemeral = false;
-  }
+
   if ("summary" in patch) {
     update.summary = coalesceText(patch.summary);
     update.ephemeral = false;
   }
+
   if ("summarySourcePrompt" in patch) {
     update.summarySourcePrompt = patch.summarySourcePrompt ?? "";
   }
+
   if ("summaryStatus" in patch) {
     update.summaryStatus = patch.summaryStatus ?? "idle";
   }
+
   if ("scheduledDate" in patch) {
     update.scheduledDate = serializeScheduledDate(patch.scheduledDate ?? null);
   }
+
   if ("customer" in patch) {
     update.customer = patch.customer ?? "";
     update.ephemeral = false;
   }
+
   if (patch.repeat !== undefined) {
     update.repeat = patch.repeat;
     update.ephemeral = false;
