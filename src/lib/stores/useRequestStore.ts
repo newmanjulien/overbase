@@ -120,6 +120,14 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
         // 🆕 new: preserve or update serialized Lexical state
         promptRich: data.promptRich ?? s.requests[id].promptRich ?? null,
         summary: data.summary ?? s.requests[id].summary,
+        summarySourcePrompt:
+          Object.prototype.hasOwnProperty.call(data, "summarySourcePrompt")
+            ? data.summarySourcePrompt
+            : s.requests[id].summarySourcePrompt,
+        summaryStatus:
+          Object.prototype.hasOwnProperty.call(data, "summaryStatus")
+            ? data.summaryStatus
+            : s.requests[id].summaryStatus,
         updatedAt: new Date(),
       };
 
@@ -127,6 +135,12 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
         patch.scheduledDate = data.scheduledDate;
       } else {
         patch.scheduledDate = s.requests[id].scheduledDate;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(data, "repeat")) {
+        patch.repeat = data.repeat ?? "Does not repeat";
+      } else {
+        patch.repeat = s.requests[id].repeat;
       }
 
       const updated = updateRequests(s.requests, id, patch);

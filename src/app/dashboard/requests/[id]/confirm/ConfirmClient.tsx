@@ -16,11 +16,8 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
-  const [summary, setSummary] = useState<string>(
-    mode === "create"
-      ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-      : ""
-  );
+  const [summary, setSummary] = useState<string>("");
+  const [summarySourcePrompt, setSummarySourcePrompt] = useState<string>("");
 
   // Global list store
   const {
@@ -32,6 +29,8 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
     demoteToDraft,
   } = useRequestListStore();
 
+  const existing = requests[requestId];
+
   // Hydrate request into global store
   useEffect(() => {
     if (!user) return;
@@ -39,24 +38,17 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   }, [user, requestId, loadOne]);
 
   useEffect(() => {
-    const existing = requests[requestId];
-    if (!existing) {
+    const current = existing;
+    if (!current) {
       router.push(`/dashboard/requests/${requestId}/prompt`);
       return;
     }
-    if (!summary && existing.summary) setSummary(existing.summary);
-  }, [requests, requestId, summary, router]);
+    if (!summary && current.summary) setSummary(current.summary);
+    if (!summarySourcePrompt && current.summarySourcePrompt) {
+      setSummarySourcePrompt(current.summarySourcePrompt);
+    }
+  }, [existing, requestId, router, summary, summarySourcePrompt]);
 
-  // Debounced auto-save for answers
-  useEffect(() => {
-    if (!user) return;
-    const timeout = setTimeout(() => {
-      updateActive(user.uid, requestId, { summary }).catch(() => {});
-    }, 800);
-    return () => clearTimeout(timeout);
-  }, [user, requestId, summary, updateActive]);
-
-  const existing = requests[requestId];
   const status = existing?.status ?? "draft";
 
   const dateParam = existing?.scheduledDate
@@ -74,7 +66,13 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
     }
     try {
       // Ensure latest answers are saved before promoting
-      await updateActive(user.uid, requestId, { summary });
+      const promptSnapshot = existing?.prompt ?? summarySourcePrompt;
+      const patch: Parameters<typeof updateActive>[2] = {
+        summary,
+        summarySourcePrompt: promptSnapshot,
+        summaryStatus: "ready",
+      };
+      await updateActive(user.uid, requestId, patch);
       await promoteToActive(user.uid, requestId);
       router.push(`/dashboard/requests${dateParam}`);
     } catch (err) {
@@ -114,6 +112,11 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
     else await demoteToDraft(user.uid, requestId);
   };
 
+  const infoMessage =
+    existing?.summaryStatus === "failed"
+      ? "Could not generate summary automatically."
+      : null;
+
   return (
     <ConfirmUI
       summary={summary ?? ""}
@@ -125,6 +128,7 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
       status={status}
       setStatus={mode !== "create" ? handleStatusChange : undefined}
       mode={mode}
+      infoMessage={infoMessage}
     />
   );
 }

@@ -15,6 +15,8 @@ interface WriteRequest {
   promptRich?: unknown | null;
   scheduledDate: string | null;
   summary: string;
+  summarySourcePrompt?: string;
+  summaryStatus: "idle" | "pending" | "ready" | "failed";
   status: "draft" | "active";
   createdAt: FieldValue;
   updatedAt: FieldValue;
@@ -27,6 +29,8 @@ interface WriteUpdate {
   prompt?: string;
   promptRich?: unknown | null;
   summary?: string;
+  summarySourcePrompt?: string;
+  summaryStatus?: "idle" | "pending" | "ready" | "failed";
   scheduledDate?: string | null;
   status?: "draft" | "active";
   updatedAt?: FieldValue;
@@ -70,6 +74,8 @@ export async function createDraft(
       ? serializeScheduledDate(initialData.scheduledDate)
       : null,
     summary: "",
+    summarySourcePrompt: "",
+    summaryStatus: "idle",
     status: "draft",
     createdAt: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
@@ -107,6 +113,10 @@ export async function submitDraft(
   if (data.prompt !== undefined) update.prompt = data.prompt;
   if (data.promptRich !== undefined) update.promptRich = data.promptRich;
   if (data.summary !== undefined) update.summary = data.summary;
+  if (data.summarySourcePrompt !== undefined)
+    update.summarySourcePrompt = data.summarySourcePrompt;
+  if (data.summaryStatus !== undefined)
+    update.summaryStatus = data.summaryStatus;
   if (data.scheduledDate !== undefined) {
     update.scheduledDate = data.scheduledDate
       ? serializeScheduledDate(data.scheduledDate)
@@ -133,6 +143,10 @@ export async function updateActive(
   if (data.prompt !== undefined) update.prompt = data.prompt;
   if (data.promptRich !== undefined) update.promptRich = data.promptRich;
   if (data.summary !== undefined) update.summary = data.summary;
+  if (data.summarySourcePrompt !== undefined)
+    update.summarySourcePrompt = data.summarySourcePrompt;
+  if (data.summaryStatus !== undefined)
+    update.summaryStatus = data.summaryStatus;
   if (data.scheduledDate !== undefined) {
     update.scheduledDate = data.scheduledDate
       ? serializeScheduledDate(data.scheduledDate)
@@ -172,4 +186,38 @@ export async function demoteToDraft(uid: string, requestId: string) {
 /** Delete request */
 export async function deleteRequest(uid: string, requestId: string) {
   await adminDb.doc(`users/${uid}/requests/${requestId}`).delete();
+}
+
+export async function markSummarySuccess(
+  uid: string,
+  requestId: string,
+  summary: string,
+  prompt: string
+) {
+  await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
+    summary,
+    summarySourcePrompt: prompt,
+    summaryStatus: "ready",
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+}
+
+export async function markSummaryFailure(uid: string, requestId: string) {
+  await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
+    summaryStatus: "failed",
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+}
+
+export async function markSummaryPending(
+  uid: string,
+  requestId: string,
+  prompt: string
+) {
+  await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
+    summaryStatus: "pending",
+    summary: "",
+    summarySourcePrompt: prompt,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
 }

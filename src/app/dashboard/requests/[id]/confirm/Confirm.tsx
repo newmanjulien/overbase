@@ -15,6 +15,7 @@ interface ConfirmProps {
   status: "draft" | "active";
   setStatus?: (val: "draft" | "active") => void;
   mode: "create" | "edit" | "editDraft";
+  infoMessage?: string | null;
 }
 
 export default function Confirm({
@@ -27,6 +28,7 @@ export default function Confirm({
   status,
   setStatus,
   mode,
+  infoMessage,
 }: ConfirmProps) {
   const [isEditable, setIsEditable] = useState(false);
 
@@ -54,6 +56,9 @@ export default function Confirm({
       onSecondaryAction={onBack}
     >
       <div className="relative">
+        {infoMessage && (
+          <p className="text-sm text-muted-foreground mb-3">{infoMessage}</p>
+        )}
         <Textarea
           id="summary"
           value={summary}

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   fromDateKey,
@@ -39,6 +39,7 @@ export default function ScheduleClient({
   const [repeat, setRepeat] = useState<string>("Does not repeat");
 
   const [errors, setErrors] = useState<{ scheduledDate?: string }>({});
+  const hydratedRef = useRef(false);
   const minSelectable = useMemo(() => minSelectableDate(2), []);
 
   // prefill
@@ -54,17 +55,13 @@ export default function ScheduleClient({
 
   // hydrate scheduledDate + repeat once when request loads
   useEffect(() => {
-    const existing = requests[requestId];
-    if (!existing) return;
-
-    if (scheduledDate === null && existing.scheduledDate) {
-      setScheduledDate(existing.scheduledDate);
-    }
-
-    if (repeat === "Does not repeat" && existing.repeat) {
-      setRepeat(existing.repeat);
-    }
-  }, [requests, requestId, scheduledDate, repeat]);
+    if (hydratedRef.current) return;
+    const record = requests[requestId];
+    if (!record) return;
+    if (record.scheduledDate) setScheduledDate(record.scheduledDate);
+    if (typeof record.repeat === "string") setRepeat(record.repeat);
+    hydratedRef.current = true;
+  }, [requests, requestId]);
 
   // derive status from store
   const existing = requests[requestId];
@@ -75,15 +72,6 @@ export default function ScheduleClient({
     if (val === "active") await promoteToActive(user.uid, requestId);
     else await demoteToDraft(user.uid, requestId);
   };
-
-  // auto-save
-  useEffect(() => {
-    if (!user) return;
-    const timeout = setTimeout(() => {
-      updateActive(user.uid, requestId, { scheduledDate, repeat });
-    }, 800);
-    return () => clearTimeout(timeout);
-  }, [user, requestId, scheduledDate, repeat, updateActive]);
 
   const validate = () => {
     if (!scheduledDate)
