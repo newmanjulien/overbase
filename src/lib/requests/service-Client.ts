@@ -17,8 +17,8 @@ import {
   limit,
   getDocs,
 } from "firebase/firestore";
-import { requestReadConverterClient } from "@/lib/models/request-client";
-import type { Request, RequestPatch } from "@/lib/models/request-types";
+import { requestReadConverterClient } from "@/lib/requests/model-Client";
+import type { Request, RequestPatch } from "@/lib/requests/model-Types";
 import { format } from "date-fns";
 
 interface WriteRequestClient {

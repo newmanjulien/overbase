@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Loading from "./Loading";
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/stores/useRequestStore";
+import { useRequestListStore } from "@/lib/requests/store";
 
 type Props = {
   requestId: string;
@@ -28,7 +28,10 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
     const fetchOnce = () => {
       if (!cancelled) {
         loadOne(user.uid!, requestId).catch((err) => {
-          console.error("Failed to load request while waiting for summary", err);
+          console.error(
+            "Failed to load request while waiting for summary",
+            err
+          );
         });
       }
     };

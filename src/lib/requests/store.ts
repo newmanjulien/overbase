@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { Request } from "@/lib/models/request-types";
+import type { Request } from "@/lib/requests/model-Types";
 import {
   subscribeToRequestList,
   loadOne,
@@ -11,7 +11,7 @@ import {
   demoteToDraft,
   deleteRequest,
   ensureDraft,
-} from "@/lib/services/requestService-client";
+} from "@/lib/requests/service-Client";
 
 import { toDateKey } from "@/lib/requestDates";
 
@@ -120,14 +120,18 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
         // 🆕 new: preserve or update serialized Lexical state
         promptRich: data.promptRich ?? s.requests[id].promptRich ?? null,
         summary: data.summary ?? s.requests[id].summary,
-        summarySourcePrompt:
-          Object.prototype.hasOwnProperty.call(data, "summarySourcePrompt")
-            ? data.summarySourcePrompt
-            : s.requests[id].summarySourcePrompt,
-        summaryStatus:
-          Object.prototype.hasOwnProperty.call(data, "summaryStatus")
-            ? data.summaryStatus
-            : s.requests[id].summaryStatus,
+        summarySourcePrompt: Object.prototype.hasOwnProperty.call(
+          data,
+          "summarySourcePrompt"
+        )
+          ? data.summarySourcePrompt
+          : s.requests[id].summarySourcePrompt,
+        summaryStatus: Object.prototype.hasOwnProperty.call(
+          data,
+          "summaryStatus"
+        )
+          ? data.summaryStatus
+          : s.requests[id].summaryStatus,
         updatedAt: new Date(),
       };
 

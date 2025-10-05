@@ -14,7 +14,7 @@ import type { DataSectionProps } from "./DataSection";
 import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/stores/useRequestStore";
+import { useRequestListStore } from "@/lib/requests/store";
 import LoadingScreen from "@/components/blocks/Loading";
 
 export interface RequestItem {

@@ -2,8 +2,8 @@
 
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/firebase-admin";
-import { requestReadConverterAdmin } from "@/lib/models/request-admin";
-import type { Request } from "@/lib/models/request-types";
+import { requestReadConverterAdmin } from "@/lib/requests/model-Admin";
+import type { Request } from "@/lib/requests/model-Types";
 import { serializeScheduledDate } from "@/lib/requestDates";
 
 //
