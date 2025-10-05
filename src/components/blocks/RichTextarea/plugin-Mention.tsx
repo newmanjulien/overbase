@@ -34,20 +34,60 @@ export default function MentionPlugin({
   const [highlight, setHighlight] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Detect mentions
+  // Position relative to the editor wrapper (parent of the root element)
+  const [position, setPosition] = useState<{ top: number; left: number }>({
+    top: 0,
+    left: 0,
+  });
+
+  const getContainerRect = useCallback(() => {
+    const root = editor.getRootElement();
+    // The wrapper in index.tsx is the parent of the root <ContentEditable/>
+    const container = root?.parentElement ?? undefined;
+    return container?.getBoundingClientRect();
+  }, [editor]);
+
+  const updateDropdownPosition = useCallback(() => {
+    const nativeSelection = window.getSelection();
+    if (!nativeSelection || nativeSelection.rangeCount === 0) return;
+
+    const range = nativeSelection.getRangeAt(0);
+    const caretRect = range.getBoundingClientRect();
+    const containerRect = getContainerRect();
+    if (!containerRect) return;
+
+    // Convert viewport coords -> container-relative coords
+    const dropdownWidth = dropdownRef.current?.offsetWidth ?? 224; // Tailwind w-56 = 224px
+    const padding = 6;
+
+    let left = caretRect.left - containerRect.left;
+    let top = caretRect.bottom - containerRect.top + padding;
+
+    // Keep within container horizontally
+    const maxLeft = Math.max(0, containerRect.width - dropdownWidth - 8);
+    if (left > maxLeft) left = maxLeft;
+    if (left < 8) left = 8;
+
+    setPosition({ top, left });
+  }, [getContainerRect]);
+
+  // Detect mentions + compute position
   useEffect(() => {
     if (disabled) return;
     return editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         const selection = $getSelection();
-        if (!$isRangeSelection(selection)) return;
+        if (!$isRangeSelection(selection)) {
+          setShow(false);
+          return;
+        }
 
-        const text = selection.anchor
-          .getNode()
+        const node = selection.anchor.getNode();
+        const textBeforeCaret = node
           .getTextContent()
           .slice(0, selection.anchor.offset);
 
-        const match = text.match(/@([^\s@]*)$/);
+        const match = textBeforeCaret.match(/@([^\s@]*)$/);
         if (match) {
           const q = match[1];
           const filtered = mentionOptions.filter((m) =>
@@ -55,13 +95,27 @@ export default function MentionPlugin({
           );
           setSuggestions(filtered);
           setHighlight(0);
-          setShow(true);
+          setShow(filtered.length > 0);
+          // Position under caret
+          updateDropdownPosition();
         } else {
           setShow(false);
         }
       });
     });
-  }, [editor, mentionOptions, disabled]);
+  }, [editor, mentionOptions, disabled, updateDropdownPosition]);
+
+  // Reposition on scroll/resize while visible
+  useEffect(() => {
+    if (!show) return;
+    const onScrollOrResize = () => updateDropdownPosition();
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [show, updateDropdownPosition]);
 
   const insertMention = useCallback(
     (name: string) => {
@@ -149,10 +203,16 @@ export default function MentionPlugin({
 
   if (!show || disabled || !suggestions.length) return null;
 
+  // Absolutely position INSIDE the editor wrapper (relative container)
   return (
     <div
       ref={dropdownRef}
-      className="absolute left-2 top-full mt-1 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-10 p-1"
+      style={{
+        position: "absolute",
+        top: position.top,
+        left: position.left,
+      }}
+      className="w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 p-1"
     >
       {suggestions.map((s, i) => (
         <div
