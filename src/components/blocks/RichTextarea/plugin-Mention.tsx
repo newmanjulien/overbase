@@ -76,7 +76,7 @@ function MentionMenu({
               className="rounded-full object-cover"
             />
           )}
-          <span className="font-medium">@{option.name}</span>
+          <span className="font-medium">{option.name}</span>
         </div>
       ))}
     </div>

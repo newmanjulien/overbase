@@ -51,7 +51,7 @@ function MentionComponent({ name, logo }: MentionPayload) {
           className="rounded-full object-cover"
         />
       )}
-      @{name}
+      {name}
     </span>
   );
 }
