@@ -52,18 +52,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     }
   }, [requests, requestId]);
 
-  // Auto-save
-  useEffect(() => {
-    if (!user) return;
-    const timeout = setTimeout(() => {
-      updateActive(user.uid, requestId, {
-        prompt: prompt,
-        customer: customer,
-      }).catch(() => {});
-    }, 800);
-    return () => clearTimeout(timeout);
-  }, [prompt, customer, user, requestId, updateActive]);
-
   const validate = () => {
     const errs: typeof errors = {};
     if (!prompt?.trim()) {
@@ -88,7 +76,37 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     await updateActive(user.uid, requestId, {
       prompt: prompt,
       customer: customer,
+      summary: "",
+      summarySourcePrompt: "",
+      summaryStatus: "pending",
     });
+
+    fetch("/api/summarise", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: prompt.trim(),
+        requestId,
+        uid: user.uid,
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as {
+          summary?: string;
+          serverUpdated?: boolean;
+        };
+        if (data.serverUpdated) return; // backend already saved
+        await updateActive(user.uid, requestId, {
+          summary: data.summary ?? "",
+          summarySourcePrompt: prompt,
+          summaryStatus: "ready",
+        });
+      })
+      .catch(async (err) => {
+        console.error("Summarisation request failed", err);
+        await updateActive(user.uid, requestId, { summaryStatus: "failed" });
+      });
 
     // 👉 Now go to Schedule step
     router.push(`/dashboard/requests/${requestId}/schedule?mode=${mode}`);

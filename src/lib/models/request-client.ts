@@ -16,6 +16,8 @@ type FirestoreRequestData = {
   prompt?: string;
   scheduledDate?: string;
   summary?: string;
+  summarySourcePrompt?: string;
+  summaryStatus?: "idle" | "pending" | "ready" | "failed";
   status?: "draft" | "active";
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
@@ -43,6 +45,8 @@ export const requestReadConverterClient: FirestoreDataConverter<Request> = {
         ? deserializeScheduledDate(d.scheduledDate)
         : null,
       summary: d.summary ?? "",
+      summarySourcePrompt: d.summarySourcePrompt ?? undefined,
+      summaryStatus: d.summaryStatus ?? "idle",
       status: d.status === "active" ? "active" : "draft",
       createdAt: d.createdAt ? d.createdAt.toDate() : null,
       updatedAt: d.updatedAt ? d.updatedAt.toDate() : null,

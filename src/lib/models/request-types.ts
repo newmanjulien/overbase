@@ -3,6 +3,8 @@ export interface Request {
   prompt: string;
   scheduledDate: Date | null;
   summary: string;
+  summarySourcePrompt?: string;
+  summaryStatus?: "idle" | "pending" | "ready" | "failed";
   status: "draft" | "active";
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -16,6 +18,13 @@ export interface Request {
 export type RequestPatch = Partial<
   Pick<
     Request,
-    "prompt" | "summary" | "scheduledDate" | "status" | "customer" | "repeat"
+    | "prompt"
+    | "summary"
+    | "summarySourcePrompt"
+    | "summaryStatus"
+    | "scheduledDate"
+    | "status"
+    | "customer"
+    | "repeat"
   >
 >;

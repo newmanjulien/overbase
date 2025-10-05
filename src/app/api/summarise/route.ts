@@ -1,7 +1,7 @@
 /**
  * Task Summarization API Route
  * 
- * POST /api/tasks/summarise
+ * POST /api/summarise
  * 
  * Accepts task descriptions and returns structured summaries
  * using OpenAI or Anthropic LLMs
@@ -9,22 +9,31 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createLLMProvider, getApiKey } from "@/lib/summarise/providers";
-import type { ProviderType } from "@/lib/summarise/config";
+import {
+  DEFAULT_PROVIDER,
+  PROVIDERS,
+  type ProviderType,
+} from "@/lib/summarise/config";
+import {
+  markSummaryFailure,
+  markSummaryPending,
+  markSummarySuccess,
+} from "@/lib/services/requestService-admin";
 
 /**
  * Request body schema
  */
 interface SummariseRequest {
   text: string;
+  requestId?: string;
+  uid?: string;
   provider?: ProviderType;
   model?: string;
 }
 
-/**
- * Response body schema
- */
 interface SummariseResponse {
-  text: string;
+  summary: string;
+  serverUpdated: boolean;
 }
 
 /**
@@ -43,19 +52,17 @@ function validateRequest(body: unknown): body is SummariseRequest {
     return false;
   }
 
-  const { text, provider, model } = body as Partial<SummariseRequest>;
+  const { text, provider, model } =
+    body as Partial<SummariseRequest>;
 
-  // text is required and must be non-empty string
   if (!text || typeof text !== "string" || text.trim().length === 0) {
     return false;
   }
 
-  // provider is optional but must be valid if provided
-  if (provider && provider !== "openai" && provider !== "anthropic") {
+  if (provider && !PROVIDERS.includes(provider as ProviderType)) {
     return false;
   }
 
-  // model is optional but must be string if provided
   if (model && typeof model !== "string") {
     return false;
   }
@@ -84,9 +91,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Get provider type (default from env or request override)
-    const defaultProvider =
-      (process.env.LLM_PROVIDER as ProviderType) || "anthropic";
+    const envProvider = process.env.LLM_PROVIDER;
+    const defaultProvider = PROVIDERS.includes(envProvider as ProviderType)
+      ? (envProvider as ProviderType)
+      : DEFAULT_PROVIDER;
     const providerType = body.provider || defaultProvider;
+    const promptText = body.text.trim();
+    const requestId = body.requestId;
+    const uid = body.uid;
 
     // Get API key
     let apiKey: string;
@@ -105,13 +117,52 @@ export async function POST(req: NextRequest) {
 
     // Create provider and generate response
     const baseURL = process.env.BASE_URL;
-    const provider = createLLMProvider(providerType, apiKey, body.model, baseURL);
-    const responseText = await provider.generate(body.text);
-
-    return NextResponse.json<SummariseResponse>(
-      { text: responseText },
-      { status: 200 }
+    const provider = createLLMProvider(
+      providerType,
+      apiKey,
+      body.model,
+      baseURL
     );
+
+    let serverUpdated = false;
+
+    if (uid && requestId) {
+      try {
+        await markSummaryPending(uid, requestId, promptText);
+        serverUpdated = true;
+      } catch (err) {
+        console.warn("markSummaryPending failed, falling back to client update", err);
+        serverUpdated = false;
+      }
+    }
+
+    try {
+      const responseText = await provider.generate(promptText);
+
+      if (serverUpdated && uid && requestId) {
+        try {
+          await markSummarySuccess(uid, requestId, responseText, promptText);
+        } catch (err) {
+          console.warn("markSummarySuccess failed", err);
+          serverUpdated = false;
+        }
+      }
+
+      return NextResponse.json<SummariseResponse>({
+        summary: responseText,
+        serverUpdated,
+      });
+    } catch (err) {
+      if (serverUpdated && uid && requestId) {
+        try {
+          await markSummaryFailure(uid, requestId);
+        } catch (innerErr) {
+          console.warn("markSummaryFailure failed", innerErr);
+        }
+      }
+
+      throw err;
+    }
   } catch (error) {
     // Handle unexpected errors
     console.error("Task summarization error:", error);
