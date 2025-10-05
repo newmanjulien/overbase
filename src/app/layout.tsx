@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="flex min-h-dvh flex-col bg-background text-foreground">
         <AuthProvider>
           <SessionLogger />
           {children}

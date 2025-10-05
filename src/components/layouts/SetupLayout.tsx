@@ -52,7 +52,7 @@ export default function SetupLayout({
   toggleOptions,
 }: SetupLayoutProps) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-full w-full">
       {/* Toggle */}
       {toggleOptions && onToggleChange && (
         <div className="absolute top-25 right-14">

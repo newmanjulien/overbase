@@ -15,7 +15,7 @@ export default function Overview({ connector, onBack, onAdd }: OverviewProps) {
   const previewImages = connector.previewImages ?? [];
 
   return (
-    <div className="min-h-screen">
+    <div className="h-full w-full">
       {/* Header at top */}
       <Header
         title={connector.title}

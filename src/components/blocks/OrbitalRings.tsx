@@ -55,7 +55,7 @@ export default function OrbitalRings() {
     .join("\n");
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center h-full w-full">
       <div className="relative flex items-center justify-center w-96 h-96">
         {/* Global styles */}
         <style jsx global>{`
