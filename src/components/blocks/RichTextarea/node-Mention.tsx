@@ -7,8 +7,10 @@ import {
   DOMConversionMap,
   DOMConversionOutput,
   DOMConversion,
+  LexicalNode,
 } from "lexical";
 import React from "react";
+import Image from "next/image";
 
 /* -------------------------------------------------------------------------- */
 /*                             1. Mention Payload                             */
@@ -42,8 +44,7 @@ function MentionComponent({ name, logo }: MentionPayload) {
       contentEditable={false}
     >
       {logo && (
-        // plain <img> keeps this node framework-agnostic
-        <img
+        <Image
           src={logo}
           alt={name}
           width={14}
@@ -161,6 +162,8 @@ export function $createMentionNode(payload: MentionPayload): MentionNode {
   return new MentionNode(payload.id, payload.name, payload.logo);
 }
 
-export function $isMentionNode(node: any): node is MentionNode {
+export function $isMentionNode(
+  node: LexicalNode | null | undefined
+): node is MentionNode {
   return node instanceof MentionNode;
 }
