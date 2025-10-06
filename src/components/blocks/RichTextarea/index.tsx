@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   LexicalComposer,
   InitialConfigType,
@@ -51,7 +51,7 @@ function EditablePlugin({ disabled }: { disabled: boolean }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                         Load-once or reset-on-key plugin                    */
+/*                 Load-once or reset-on-key plugin (ESLint-clean)            */
 /* -------------------------------------------------------------------------- */
 
 function LoadStatePlugin({
@@ -64,8 +64,16 @@ function LoadStatePlugin({
   resetKey?: string | number;
 }) {
   const [editor] = useLexicalComposerContext();
+  const prevSerializedRef = useRef<string | null>(null);
 
   useEffect(() => {
+    // Compute serialized form directly here so ESLint tracks dependencies properly
+    const serialized = JSON.stringify(initialValueRich ?? initialValue ?? "");
+
+    // Skip if nothing meaningful changed
+    if (prevSerializedRef.current === serialized) return;
+    prevSerializedRef.current = serialized;
+
     editor.update(() => {
       const root = $getRoot();
       root.clear();
@@ -86,7 +94,8 @@ function LoadStatePlugin({
       if (initialValue) p.append($createTextNode(initialValue));
       root.append(p);
     });
-  }, [editor, resetKey]);
+  }, [editor, resetKey, initialValue, initialValueRich]);
+
   return null;
 }
 
