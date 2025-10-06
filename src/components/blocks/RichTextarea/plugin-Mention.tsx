@@ -170,8 +170,6 @@ export default function MentionPlugin({
     []
   );
 
-  if (typeof window === "undefined") return null;
-
   /* -------------------------- 1️⃣ Trigger @ detection -------------------------- */
   const triggerFn = (text: string) => {
     const match = /(^|\s)@([\p{L}\p{N}_-]{0,30})$/u.exec(text);
@@ -197,6 +195,8 @@ export default function MentionPlugin({
       ),
     [mentionOptions]
   );
+
+  if (typeof window === "undefined") return null;
 
   const handleQueryChange = (query: string | null) => {
     const q = query?.toLowerCase() ?? "";
