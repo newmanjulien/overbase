@@ -84,6 +84,73 @@ function MentionMenu({
 }
 
 /* -------------------------------------------------------------------------- */
+/*                    🧩 StableMenuPosition Component                         */
+/* -------------------------------------------------------------------------- */
+
+function StableMenuPosition({
+  anchorRefFromLexical,
+  menuProps,
+  filteredOptions,
+  menuClassName,
+  menuStyle,
+}: any) {
+  const { selectedIndex, selectOptionAndCleanUp } = menuProps as any;
+  const anchorEl = anchorRefFromLexical?.current;
+
+  const baseRect =
+    (menuProps as any).anchorRect ??
+    anchorEl?.getBoundingClientRect?.() ??
+    null;
+
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    if (!baseRect) return;
+    let lastRect: DOMRect | null = null;
+    let frame: number;
+
+    const checkStable = () => {
+      const current = anchorEl?.getBoundingClientRect?.();
+      if (
+        current &&
+        lastRect &&
+        Math.abs(current.top - lastRect.top) < 0.5 &&
+        Math.abs(current.left - lastRect.left) < 0.5
+      ) {
+        setRect(current);
+      } else {
+        lastRect = current || lastRect;
+        frame = requestAnimationFrame(checkStable);
+      }
+    };
+
+    frame = requestAnimationFrame(checkStable);
+    return () => cancelAnimationFrame(frame);
+  }, [anchorEl, baseRect?.top, baseRect?.left, baseRect?.bottom]);
+
+  if (!rect || filteredOptions.length === 0) return null;
+
+  const style: React.CSSProperties = {
+    position: "fixed",
+    top: rect.bottom + 6,
+    left: rect.left,
+    zIndex: 9999,
+    ...menuStyle,
+  };
+
+  return createPortal(
+    <MentionMenu
+      options={filteredOptions}
+      selectedIndex={selectedIndex ?? -1}
+      onSelect={selectOptionAndCleanUp}
+      style={style}
+      menuClassName={menuClassName}
+    />,
+    document.body
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /*                              3. Mention Plugin                             */
 /* -------------------------------------------------------------------------- */
 
@@ -171,63 +238,15 @@ export default function MentionPlugin({
         });
         closeMenu();
       }}
-      menuRenderFn={(anchorRefFromLexical, menuProps) => {
-        const { selectedIndex, selectOptionAndCleanUp } = menuProps as any;
-        const anchorEl = anchorRefFromLexical?.current;
-
-        const baseRect =
-          ((menuProps as any).anchorRect as DOMRect | null) ??
-          anchorEl?.getBoundingClientRect?.() ??
-          null;
-
-        // ✅ Stabilize the rect before rendering to prevent downward drift
-        const [rect, setRect] = useState<DOMRect | null>(null);
-
-        useEffect(() => {
-          if (!baseRect) return;
-          let lastRect: DOMRect | null = null;
-          let frame: number;
-
-          const checkStable = () => {
-            const current = anchorEl?.getBoundingClientRect?.();
-            if (
-              current &&
-              lastRect &&
-              Math.abs(current.top - lastRect.top) < 0.5 &&
-              Math.abs(current.left - lastRect.left) < 0.5
-            ) {
-              setRect(current);
-            } else {
-              lastRect = current || lastRect;
-              frame = requestAnimationFrame(checkStable);
-            }
-          };
-
-          frame = requestAnimationFrame(checkStable);
-          return () => cancelAnimationFrame(frame);
-        }, [anchorEl, baseRect?.top, baseRect?.left, baseRect?.bottom]);
-
-        if (!rect || filteredOptions.length === 0) return null;
-
-        const style: React.CSSProperties = {
-          position: "fixed",
-          top: rect.bottom + 6,
-          left: rect.left,
-          zIndex: 9999,
-          ...menuStyle,
-        };
-
-        return createPortal(
-          <MentionMenu
-            options={filteredOptions}
-            selectedIndex={selectedIndex ?? -1}
-            onSelect={selectOptionAndCleanUp}
-            style={style}
-            menuClassName={menuClassName}
-          />,
-          document.body
-        );
-      }}
+      menuRenderFn={(anchorRefFromLexical, menuProps) => (
+        <StableMenuPosition
+          anchorRefFromLexical={anchorRefFromLexical}
+          menuProps={menuProps}
+          filteredOptions={filteredOptions}
+          menuClassName={menuClassName}
+          menuStyle={menuStyle}
+        />
+      )}
     />
   );
 }
