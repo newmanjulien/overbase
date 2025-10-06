@@ -23,7 +23,7 @@ export default function OverviewLayout({
   children,
 }: OverviewLayoutProps) {
   return (
-    <div className="max-w-7xl mx-auto grid grid-cols-[220px_1fr] gap-8 px-6 py-10">
+    <div className="max-w-7xl mx-auto grid grid-cols-[220px_1fr] gap-8 px-6 py-10 min-h-[calc(100vh-56px)]">
       {/* Sidebar */}
       <aside className="space-y-12">
         {/* Adds */}

@@ -73,7 +73,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 pt-14">{children}</main>
+      <main className="pt-14 flex-grow min-h-[calc(100vh-56px)]">
+        {children}
+      </main>
 
       {/* Footer */}
       {!hideFooter && (

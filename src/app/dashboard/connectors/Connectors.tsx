@@ -18,7 +18,7 @@ export function Connectors({
   onManageConnector,
 }: ConnectorsProps) {
   return (
-    <div className="h-full w-full">
+    <div className="min-h-[calc(100vh-56px)] w-full">
       <Header
         title="Connectors"
         subtitle="Connect to any and all data sources so we can collect the data you need."

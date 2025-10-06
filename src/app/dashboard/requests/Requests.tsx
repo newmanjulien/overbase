@@ -17,7 +17,7 @@ export function Requests({
   onRequestData,
 }: RequestsProps) {
   return (
-    <div className="h-full w-full">
+    <div className="min-h-[calc(100vh-56px)] w-full">
       <Header
         title="Requests"
         subtitle="Request data about your customers and easily get data from all your sources."

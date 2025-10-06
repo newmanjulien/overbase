@@ -113,7 +113,7 @@ export default function SetupLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-2xl mx-auto px-10 pt-4 pb-6">
+      <main className="flex-1 max-w-2xl mx-auto px-10 pt-4 pb-6 min-h-[calc(100vh-56px)]">
         <div className="space-y-6">
           {/* Header */}
           <header className="mt-6 flex justify-between items-center">
