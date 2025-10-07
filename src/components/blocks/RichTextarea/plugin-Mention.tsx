@@ -87,20 +87,33 @@ function MentionMenu({
 /*                    🧩 StableMenuPosition Component                         */
 /* -------------------------------------------------------------------------- */
 
+interface MenuRenderProps<T extends MenuOption> {
+  selectedIndex: number | null;
+  selectOptionAndCleanUp: (option: T) => void;
+  anchorRect?: DOMRect | null;
+  setHighlightedIndex?: (index: number) => void;
+  options?: T[];
+}
+
+interface StableMenuPositionProps {
+  anchorRefFromLexical: React.RefObject<HTMLElement | null>;
+  menuProps: MenuRenderProps<MentionMenuOption>;
+  filteredOptions: MentionMenuOption[];
+  menuClassName?: string;
+  menuStyle?: React.CSSProperties;
+}
+
 function StableMenuPosition({
   anchorRefFromLexical,
   menuProps,
   filteredOptions,
   menuClassName,
   menuStyle,
-}: any) {
-  const { selectedIndex, selectOptionAndCleanUp } = menuProps as any;
+}: StableMenuPositionProps) {
+  const { selectedIndex, selectOptionAndCleanUp, anchorRect } = menuProps;
   const anchorEl = anchorRefFromLexical?.current;
 
-  const baseRect =
-    (menuProps as any).anchorRect ??
-    anchorEl?.getBoundingClientRect?.() ??
-    null;
+  const baseRect = anchorRect ?? anchorEl?.getBoundingClientRect?.() ?? null;
 
   const [rect, setRect] = useState<DOMRect | null>(null);
 

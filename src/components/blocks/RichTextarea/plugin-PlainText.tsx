@@ -1,7 +1,12 @@
 "use client";
 
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { EditorState, $getRoot } from "lexical";
+import {
+  EditorState,
+  $getRoot,
+  type SerializedEditorState,
+  type SerializedLexicalNode,
+} from "lexical";
 import { $isRootTextContentEmpty } from "@lexical/text";
 
 export default function PlainTextPlugin({
@@ -9,7 +14,9 @@ export default function PlainTextPlugin({
   onChangeRich,
 }: {
   onChange: (text: string) => void;
-  onChangeRich: (json: any) => void;
+  onChangeRich: (
+    json: SerializedEditorState<SerializedLexicalNode> | null
+  ) => void;
 }) {
   return (
     <OnChangePlugin
@@ -17,7 +24,8 @@ export default function PlainTextPlugin({
         editorState.read(() => {
           const isEmpty = $isRootTextContentEmpty(true);
           const text = $getRoot().getTextContent();
-          const json = editorState.toJSON();
+          const json =
+            editorState.toJSON() as SerializedEditorState<SerializedLexicalNode>;
 
           onChange(text);
           onChangeRich(isEmpty ? null : json);
