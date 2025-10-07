@@ -17,15 +17,6 @@ import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/requests/store";
 import LoadingScreen from "@/components/blocks/Loading";
 
-export interface RequestItem {
-  id: string;
-  prompt: string;
-  scheduledDate: Date | null;
-  summary: string;
-  status: "draft" | "active";
-  ephemeral?: boolean;
-}
-
 export interface RequestOptions {
   prefillDate?: Date | null;
   mode?: "create" | "edit" | "editDraft";

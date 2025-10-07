@@ -10,8 +10,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { RichTextareaView } from "@/components/blocks/RichTextarea/RichTextareaView";
-import type { Request } from "@/lib/requests/model-Types";
+import RichTextarea from "@/components/blocks/RichTextarea/index";
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 interface MenuItem {
   id?: string;
@@ -27,7 +27,7 @@ export interface RowCardProps {
   image?: string;
   showAvatar?: boolean;
   leading?: ReactNode;
-  contentBoxRich: Request["promptRich"];
+  contentBoxRich?: SerializedEditorState<SerializedLexicalNode> | null;
   actions?: ReactNode;
   buttonLabel?: string;
   buttonOnClick?: () => void;
@@ -124,8 +124,11 @@ function Content({
   return (
     <div className="flex-1 min-w-0 mr-4">
       {contentBoxRich ? (
-        <div className="p-3 bg-gray-50 rounded-xl text-sm leading-tight">
-          <RichTextareaView valueRich={contentBoxRich} />
+        <div className="p-3 bg-gray-50 rounded-xl text-sm leading-tight pointer-events-none select-text caret-transparent">
+          <RichTextarea
+            initialValueRich={contentBoxRich}
+            disabled={false} // keep editable internally so mentions render
+          />
         </div>
       ) : (
         <>
