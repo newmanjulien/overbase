@@ -112,4 +112,11 @@
   display: none; /* Chrome, Safari, Opera */
 }
 
-/* --- Removed .loader CSS here, will move it to component --- */
+/* Line clamp for lexical JSON */
+.lexical-clamp [data-lexical-editor] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
