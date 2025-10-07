@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import type { RequestItem } from "./RequestsClient";
+import type { Request } from "@/lib/requests/model-Types";
 
 import { addMonths, subMonths } from "date-fns";
 import {
@@ -45,7 +45,7 @@ export interface CalendarProps {
   setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
   currentDate: Date;
   setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
-  requestsByDate: Record<string, RequestItem[]>;
+  requestsByDate: Record<string, Request[]>;
 }
 
 export default function Calendar({
