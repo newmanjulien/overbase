@@ -15,7 +15,6 @@ import {
 
 import { toDateKey } from "@/lib/requestDates";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
-import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 function buildRequestsByDate(
   requests: Record<string, Request>
