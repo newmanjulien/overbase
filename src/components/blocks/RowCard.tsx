@@ -124,11 +124,8 @@ function Content({
   return (
     <div className="flex-1 min-w-0 mr-4">
       {contentBoxRich ? (
-        <div className="p-3 bg-gray-50 rounded-xl text-sm leading-tight pointer-events-none select-text caret-transparent">
-          <RichTextarea
-            initialValueRich={contentBoxRich}
-            disabled={false} // keep editable internally so mentions render
-          />
+        <div className="text-sm leading-tight pointer-events-none select-text caret-transparent">
+          <RichTextarea initialValueRich={contentBoxRich} />
         </div>
       ) : (
         <>
