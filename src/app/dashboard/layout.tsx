@@ -33,7 +33,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted">
+    <div className="flex flex-1 flex-col bg-muted">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200/60">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -73,7 +73,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 pt-14">{children}</main>
+      <main className="pt-14 flex-grow min-h-[calc(100vh-56px)]">
+        {children}
+      </main>
 
       {/* Footer */}
       {!hideFooter && (

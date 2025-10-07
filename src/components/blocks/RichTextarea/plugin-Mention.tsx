@@ -84,6 +84,86 @@ function MentionMenu({
 }
 
 /* -------------------------------------------------------------------------- */
+/*                    🧩 StableMenuPosition Component                         */
+/* -------------------------------------------------------------------------- */
+
+interface MenuRenderProps<T extends MenuOption> {
+  selectedIndex: number | null;
+  selectOptionAndCleanUp: (option: T) => void;
+  anchorRect?: DOMRect | null;
+  setHighlightedIndex?: (index: number) => void;
+  options?: T[];
+}
+
+interface StableMenuPositionProps {
+  anchorRefFromLexical: React.RefObject<HTMLElement | null>;
+  menuProps: MenuRenderProps<MentionMenuOption>;
+  filteredOptions: MentionMenuOption[];
+  menuClassName?: string;
+  menuStyle?: React.CSSProperties;
+}
+
+function StableMenuPosition({
+  anchorRefFromLexical,
+  menuProps,
+  filteredOptions,
+  menuClassName,
+  menuStyle,
+}: StableMenuPositionProps) {
+  const { selectedIndex, selectOptionAndCleanUp, anchorRect } = menuProps;
+  const anchorEl = anchorRefFromLexical?.current;
+
+  const baseRect = anchorRect ?? anchorEl?.getBoundingClientRect?.() ?? null;
+
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    if (!baseRect) return;
+    let lastRect: DOMRect | null = null;
+    let frame: number;
+
+    const checkStable = () => {
+      const current = anchorEl?.getBoundingClientRect?.();
+      if (
+        current &&
+        lastRect &&
+        Math.abs(current.top - lastRect.top) < 0.5 &&
+        Math.abs(current.left - lastRect.left) < 0.5
+      ) {
+        setRect(current);
+      } else {
+        lastRect = current || lastRect;
+        frame = requestAnimationFrame(checkStable);
+      }
+    };
+
+    frame = requestAnimationFrame(checkStable);
+    return () => cancelAnimationFrame(frame);
+  }, [anchorEl, baseRect?.top, baseRect?.left, baseRect?.bottom]);
+
+  if (!rect || filteredOptions.length === 0) return null;
+
+  const style: React.CSSProperties = {
+    position: "fixed",
+    top: rect.bottom + 6,
+    left: rect.left,
+    zIndex: 9999,
+    ...menuStyle,
+  };
+
+  return createPortal(
+    <MentionMenu
+      options={filteredOptions}
+      selectedIndex={selectedIndex ?? -1}
+      onSelect={selectOptionAndCleanUp}
+      style={style}
+      menuClassName={menuClassName}
+    />,
+    document.body
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /*                              3. Mention Plugin                             */
 /* -------------------------------------------------------------------------- */
 
@@ -102,8 +182,6 @@ export default function MentionPlugin({
   const [filteredOptions, setFilteredOptions] = useState<MentionMenuOption[]>(
     []
   );
-
-  if (typeof window === "undefined") return null;
 
   /* -------------------------- 1️⃣ Trigger @ detection -------------------------- */
   const triggerFn = (text: string) => {
@@ -130,6 +208,8 @@ export default function MentionPlugin({
       ),
     [mentionOptions]
   );
+
+  if (typeof window === "undefined") return null;
 
   const handleQueryChange = (query: string | null) => {
     const q = query?.toLowerCase() ?? "";
@@ -171,63 +251,15 @@ export default function MentionPlugin({
         });
         closeMenu();
       }}
-      menuRenderFn={(anchorRefFromLexical, menuProps) => {
-        const { selectedIndex, selectOptionAndCleanUp } = menuProps as any;
-        const anchorEl = anchorRefFromLexical?.current;
-
-        const baseRect =
-          ((menuProps as any).anchorRect as DOMRect | null) ??
-          anchorEl?.getBoundingClientRect?.() ??
-          null;
-
-        // ✅ Stabilize the rect before rendering to prevent downward drift
-        const [rect, setRect] = useState<DOMRect | null>(null);
-
-        useEffect(() => {
-          if (!baseRect) return;
-          let lastRect: DOMRect | null = null;
-          let frame: number;
-
-          const checkStable = () => {
-            const current = anchorEl?.getBoundingClientRect?.();
-            if (
-              current &&
-              lastRect &&
-              Math.abs(current.top - lastRect.top) < 0.5 &&
-              Math.abs(current.left - lastRect.left) < 0.5
-            ) {
-              setRect(current);
-            } else {
-              lastRect = current || lastRect;
-              frame = requestAnimationFrame(checkStable);
-            }
-          };
-
-          frame = requestAnimationFrame(checkStable);
-          return () => cancelAnimationFrame(frame);
-        }, [anchorEl, baseRect?.top, baseRect?.left, baseRect?.bottom]);
-
-        if (!rect || filteredOptions.length === 0) return null;
-
-        const style: React.CSSProperties = {
-          position: "fixed",
-          top: rect.bottom + 6,
-          left: rect.left,
-          zIndex: 9999,
-          ...menuStyle,
-        };
-
-        return createPortal(
-          <MentionMenu
-            options={filteredOptions}
-            selectedIndex={selectedIndex ?? -1}
-            onSelect={selectOptionAndCleanUp}
-            style={style}
-            menuClassName={menuClassName}
-          />,
-          document.body
-        );
-      }}
+      menuRenderFn={(anchorRefFromLexical, menuProps) => (
+        <StableMenuPosition
+          anchorRefFromLexical={anchorRefFromLexical}
+          menuProps={menuProps}
+          filteredOptions={filteredOptions}
+          menuClassName={menuClassName}
+          menuStyle={menuStyle}
+        />
+      )}
     />
   );
 }

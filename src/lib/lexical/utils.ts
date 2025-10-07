@@ -1,11 +1,20 @@
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
+import type { SerializedMentionNode } from "@/components/blocks/RichTextarea/node-Mention";
 
 /**
  * Converts a serialized Lexical editor state to plain text.
  * Falls back gracefully if structure is malformed.
  */
+
+type SerializedRichNode = SerializedLexicalNode | SerializedMentionNode;
+type SerializedRichEditorState = SerializedEditorState<SerializedRichNode>;
+
+interface SerializedParentNode extends SerializedLexicalNode {
+  children?: SerializedRichNode[];
+}
+
 export function lexicalToPlainText(
-  serialized: SerializedEditorState<SerializedLexicalNode> | null
+  serialized: SerializedRichEditorState | null
 ): string {
   if (
     !serialized ||
@@ -16,13 +25,29 @@ export function lexicalToPlainText(
   }
 
   try {
-    // Lexical JSON -> extract all text nodes
-    const traverse = (node: any): string => {
+    const traverse = (node?: SerializedRichNode | null): string => {
       if (!node) return "";
-      if (node.text) return node.text;
-      if (Array.isArray(node.children)) {
-        return node.children.map(traverse).join(" ");
+
+      // Handle mentions
+      if (node.type === "mention" && "name" in node && node.name) {
+        return `@${node.name}`;
       }
+
+      // Handle text nodes
+      if ("text" in node && typeof node.text === "string") {
+        return node.text;
+      }
+
+      // Handle parent nodes (paragraphs, roots, etc.)
+      if (
+        "children" in node &&
+        Array.isArray((node as SerializedParentNode).children)
+      ) {
+        return ((node as SerializedParentNode).children ?? [])
+          .map(traverse)
+          .join(" ");
+      }
+
       return "";
     };
 

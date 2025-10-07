@@ -22,7 +22,7 @@ function Templates() {
     "Use templates your colleagues are already using.";
 
   return (
-    <div className="min-h-screen">
+    <div className="h-full w-full">
       <Header
         title="Templates"
         subtitle="Use templates your colleagues are already using."

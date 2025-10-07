@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Loading from "./Loading";
 import { useAuth } from "@/lib/auth";
@@ -82,16 +82,5 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
     }
   }, [target, router, requestId, mode, date]);
 
-  const message = useMemo(() => {
-    if (!target) return "Preparing your summary...";
-    if (target.summaryStatus === "failed") {
-      return "Summary generation failed.";
-    }
-    if (target.summary && target.summary.trim().length > 0) {
-      return "Summary ready";
-    }
-    return "Summarising your request...";
-  }, [target]);
-
-  return <Loading message={message} />;
+  return <Loading />;
 }

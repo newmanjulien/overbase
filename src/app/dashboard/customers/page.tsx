@@ -46,7 +46,7 @@ function CustomersLayout() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="h-full w-full">
       <Header
         title="Customers"
         subtitle="Add customers who you want to request data about."
