@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/blocks/EmptyState";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 
-import type { RequestItem } from "./RequestsClient";
+import type { Request } from "@/lib/requests/model-Types";
 import Link from "next/link";
 
 import { analyzeDate } from "@/lib/requestDates";
@@ -21,7 +21,7 @@ interface RequestOptions {
 
 export interface DataSectionProps {
   selectedDate?: Date | null;
-  requestsByDate: Record<string, RequestItem[]>;
+  requestsByDate: Record<string, Request[]>;
   onRequestData: (options?: RequestOptions) => void;
 }
 
@@ -35,7 +35,7 @@ export default function DataSection({
   const { dataCards, past, todaySelected, future } = useMemo(() => {
     if (!selectedDate) {
       return {
-        dataCards: [] as RequestItem[],
+        dataCards: [] as Request[],
         past: false,
         todaySelected: false,
         future: false,
@@ -43,7 +43,7 @@ export default function DataSection({
     }
 
     const { key, past, today, future } = analyzeDate(selectedDate);
-    const cards: RequestItem[] = requestsByDate[key] || [];
+    const cards: Request[] = requestsByDate[key] || [];
 
     return {
       dataCards: cards,
@@ -134,7 +134,8 @@ export default function DataSection({
           {visibleRequests.map((req) => (
             <RowCard
               key={req.id}
-              contentBox={req.prompt || "No prompt provided"}
+              contentBoxRich={req.promptRich}
+              title={req.prompt || "No prompt provided"}
               actions={
                 req.status === "draft" ? (
                   <Link

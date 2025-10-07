@@ -124,7 +124,7 @@ export default function RichTextarea({
       } ${className}`}
     >
       <LexicalComposer initialConfig={initialConfig}>
-        <div className="relative flex flex-col min-h-[5rem] p-3">
+        <div className="relative flex flex-col p-3">
           <RichTextPlugin
             contentEditable={
               <ContentEditable

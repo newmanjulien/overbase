@@ -10,6 +10,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import RichTextarea from "@/components/blocks/RichTextarea/index";
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 interface MenuItem {
   id?: string;
@@ -25,7 +27,7 @@ export interface RowCardProps {
   image?: string;
   showAvatar?: boolean;
   leading?: ReactNode;
-  contentBox?: string | ReactNode;
+  contentBoxRich?: SerializedEditorState<SerializedLexicalNode> | null;
   actions?: ReactNode;
   buttonLabel?: string;
   buttonOnClick?: () => void;
@@ -41,7 +43,7 @@ export function RowCard({
   image,
   showAvatar = false,
   leading,
-  contentBox,
+  contentBoxRich,
   actions,
   buttonLabel,
   buttonOnClick,
@@ -61,7 +63,7 @@ export function RowCard({
         title={title}
         titleClassName={titleClassName}
         subtitle={subtitle}
-        contentBox={contentBox}
+        contentBoxRich={contentBoxRich}
       />
       <Actions
         buttonLabel={buttonLabel}
@@ -114,17 +116,19 @@ function Content({
   title,
   titleClassName,
   subtitle,
-  contentBox,
-}: Pick<RowCardProps, "title" | "titleClassName" | "subtitle" | "contentBox">) {
+  contentBoxRich,
+}: Pick<
+  RowCardProps,
+  "title" | "titleClassName" | "subtitle" | "contentBoxRich"
+>) {
   return (
     <div className="flex-1 min-w-0 mr-4">
-      {contentBox ? (
-        <div className="p-3 bg-gray-50 rounded-xl text-sm text-gray-700 leading-tight">
-          {typeof contentBox === "string" ? (
-            <p className="line-clamp-2">{contentBox}</p>
-          ) : (
-            contentBox
-          )}
+      {contentBoxRich ? (
+        <div className="text-sm leading-tight pointer-events-none select-text caret-transparent richtext-row">
+          <RichTextarea
+            initialValueRich={contentBoxRich}
+            className="border-0"
+          />
         </div>
       ) : (
         <>
@@ -155,7 +159,12 @@ function Actions({
   menuItems,
 }: Omit<
   RowCardProps,
-  "title" | "subtitle" | "image" | "leading" | "contentBox" | "titleClassName"
+  | "title"
+  | "subtitle"
+  | "image"
+  | "leading"
+  | "contentBoxRich"
+  | "titleClassName"
 >) {
   return (
     <div className="flex items-center gap-x-3 ml-auto shrink-0">
