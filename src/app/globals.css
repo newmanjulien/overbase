@@ -113,10 +113,15 @@
 }
 
 /* Line clamp for lexical JSON */
-.lexical-clamp [data-lexical-editor] {
+.richtext-row [data-lexical-editor] {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Remove inner RichTextarea padding when inside .lexical-clamp */
+.richtext-row .relative.flex.flex-col {
+  padding: 0.4rem;
 }

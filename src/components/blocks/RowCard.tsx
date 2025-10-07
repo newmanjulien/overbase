@@ -124,7 +124,7 @@ function Content({
   return (
     <div className="flex-1 min-w-0 mr-4">
       {contentBoxRich ? (
-        <div className="text-sm leading-tight pointer-events-none select-text caret-transparent lexical-clamp">
+        <div className="text-sm leading-tight pointer-events-none select-text caret-transparent richtext-row">
           <RichTextarea
             initialValueRich={contentBoxRich}
             className="border-0"
