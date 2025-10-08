@@ -1,5 +1,6 @@
 import {
   addDays,
+  addMonths,
   format,
   formatISO,
   isAfter,
@@ -168,4 +169,97 @@ export function getRepeatOptions(
     { key: "monthly", label: `The ${ordinal} ${day} of each month` },
     { key: "quarterly", label: `The ${ordinal} ${day} of each quarter` },
   ];
+}
+
+// --- Expansion of repeat rules into actual dates ---
+
+/**
+ * Returns the Nth occurrence of a weekday (e.g., "first Friday") for a given month.
+ */
+export function getNthWeekdayOfMonth(
+  baseDate: Date,
+  dayName: string,
+  ordinal?: string
+): Date {
+  const WEEKDAYS = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const targetDay = WEEKDAYS.indexOf(dayName);
+  const ordinalIndex = ["first", "second", "third", "last"].indexOf(
+    ordinal ?? "first"
+  );
+
+  const monthStart = startOfMonth(baseDate);
+  let date = monthStart;
+
+  // find first target weekday of the month
+  const offset = (targetDay - date.getDay() + 7) % 7;
+  date = addDays(date, offset);
+
+  // move to nth occurrence (or last week if 'last')
+  if (ordinal === "last") {
+    const nextMonth = addMonths(monthStart, 1);
+    const lastWeekStart = addDays(nextMonth, -7);
+    return getNthWeekdayOfMonth(lastWeekStart, dayName, "first");
+  }
+
+  return addDays(date, ordinalIndex * 7);
+}
+
+/**
+ * Expand a single request's repeat rule into concrete future dates.
+ * @param scheduledDate - the base date
+ * @param repeat - the stored RepeatRule
+ * @param monthsAhead - how far into the future to expand
+ */
+export function expandRepeatDates(
+  scheduledDate: Date,
+  repeat: RepeatRule | undefined | null,
+  monthsAhead = 24
+): Date[] {
+  if (!repeat || repeat.type === "none") return [];
+
+  const results: Date[] = [];
+  const today = new Date();
+  const horizon = addMonths(today, monthsAhead);
+
+  let next = new Date(scheduledDate);
+
+  const addOccurrence = (d: Date) => {
+    if (isAfter(d, horizon)) return false;
+    results.push(d);
+    return true;
+  };
+
+  while (true) {
+    switch (repeat.type) {
+      case "weekly":
+        next = addDays(next, 7);
+        break;
+      case "monthly":
+        if (repeat.day && repeat.ordinal) {
+          // e.g. first Friday
+          const monthCursor = addMonths(next, 1);
+          next = getNthWeekdayOfMonth(monthCursor, repeat.day, repeat.ordinal);
+        } else {
+          next = addMonths(next, 1);
+        }
+        break;
+      case "quarterly":
+        next = addMonths(next, 3);
+        break;
+      default:
+        return results;
+    }
+
+    if (!addOccurrence(next)) break;
+  }
+
+  return results;
 }

@@ -13,18 +13,29 @@ import {
   ensureDraft,
 } from "@/lib/requests/service-Client";
 
-import { toDateKey, RepeatRule } from "@/lib/requests/Dates";
+import { toDateKey, expandRepeatDates } from "@/lib/requests/Dates";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 function buildRequestsByDate(
   requests: Record<string, Request>
 ): Record<string, Request[]> {
   const map: Record<string, Request[]> = {};
+
   for (const r of Object.values(requests)) {
     if (!r.scheduledDate) continue;
-    const key = toDateKey(r.scheduledDate);
-    (map[key] ??= []).push(r);
+
+    // Add base occurrence
+    const baseKey = toDateKey(r.scheduledDate);
+    (map[baseKey] ??= []).push(r);
+
+    // Expand repeats (24 months ahead)
+    const expanded = expandRepeatDates(new Date(r.scheduledDate), r.repeat, 24);
+    for (const d of expanded) {
+      const key = toDateKey(d);
+      (map[key] ??= []).push({ ...r, scheduledDate: d });
+    }
   }
+
   return map;
 }
 
