@@ -159,6 +159,18 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       "Are you sure you want to return to the dashboard? Your changes will be deleted."
     );
     if (!confirmed) return;
+
+    if (mode === "create") {
+      // Delete draft if we're still creating a new one
+      if (user) {
+        try {
+          await deleteRequest(user.uid, requestId);
+        } catch (err) {
+          console.error("Failed to delete draft during back navigation", err);
+        }
+      }
+    }
+
     router.push(`/dashboard/requests`);
   };
 

@@ -75,7 +75,7 @@ export default function Prompt({
         })}
       // Main
       title="What data do you want us to get for you?"
-      subtitle="Explain what data you need with as many details as possible. We can get data from any data source you set up in connectors"
+      subtitle="Explain what data you need with as many details as possible. Use the @ symbol to tag connectors"
       // Footer
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}

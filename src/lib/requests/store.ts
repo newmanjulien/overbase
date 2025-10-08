@@ -13,18 +13,29 @@ import {
   ensureDraft,
 } from "@/lib/requests/service-Client";
 
-import { toDateKey } from "@/lib/requestDates";
+import { toDateKey, expandRepeatDates } from "@/lib/requests/Dates";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 function buildRequestsByDate(
   requests: Record<string, Request>
 ): Record<string, Request[]> {
   const map: Record<string, Request[]> = {};
+
   for (const r of Object.values(requests)) {
     if (!r.scheduledDate) continue;
-    const key = toDateKey(r.scheduledDate);
-    (map[key] ??= []).push(r);
+
+    // Add base occurrence
+    const baseKey = toDateKey(r.scheduledDate);
+    (map[baseKey] ??= []).push(r);
+
+    // Expand repeats (24 months ahead)
+    const expanded = expandRepeatDates(new Date(r.scheduledDate), r.repeat, 24);
+    for (const d of expanded) {
+      const key = toDateKey(d);
+      (map[key] ??= []).push({ ...r, scheduledDate: d });
+    }
   }
+
   return map;
 }
 
@@ -156,7 +167,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
       }
 
       if (Object.prototype.hasOwnProperty.call(data, "repeat")) {
-        patch.repeat = data.repeat ?? "Does not repeat";
+        patch.repeat = data.repeat ?? { type: "none" };
       } else {
         patch.repeat = prev.repeat;
       }
@@ -224,7 +235,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
       draft.status === "draft" &&
       draft.ephemeral === true &&
       !draft.prompt &&
-      !draft.scheduledDate
+      !draft.customer
     ) {
       await deleteRequest(uid, id);
     }

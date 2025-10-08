@@ -1,5 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
+
+import SetupLayout from "@/components/layouts/SetupLayout";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,21 +21,17 @@ import {
 } from "@/components/ui/select";
 
 import { Calendar as CalendarIcon } from "lucide-react";
-import SetupLayout from "@/components/layouts/SetupLayout";
-import { formatDisplayDate } from "@/lib/requestDates";
-
-const REPEAT = [
-  "Does not repeat",
-  "Every week",
-  "Every month",
-  "Every quarter",
-];
+import {
+  formatDisplayDate,
+  getRepeatOptions,
+  type RepeatRule,
+} from "@/lib/requests/Dates";
 
 interface ScheduleProps {
   scheduledDate: Date | null;
   setScheduledDate: (d: Date | null) => void;
-  repeat: string;
-  setRepeat: (val: string) => void;
+  repeat: RepeatRule["type"];
+  setRepeat: (val: RepeatRule["type"]) => void;
   errors: { scheduledDate?: string };
   onSubmit: () => void;
   onBack: () => void;
@@ -58,6 +58,11 @@ export default function Schedule({
   setStatus,
   onDelete,
 }: ScheduleProps) {
+  const repeatOptions = useMemo(
+    () => getRepeatOptions(scheduledDate),
+    [scheduledDate]
+  );
+
   return (
     <SetupLayout
       sidebarBackText="Back to requests"
@@ -112,12 +117,15 @@ export default function Schedule({
       </Label>
       <Select value={repeat} onValueChange={setRepeat}>
         <SelectTrigger className="mt-4 w-full border border-grey-50 rounded-xl">
-          <SelectValue>{repeat}</SelectValue>
+          <SelectValue>
+            {repeatOptions.find((o) => o.key === repeat)?.label ??
+              "Select a cadence"}
+          </SelectValue>{" "}
         </SelectTrigger>
         <SelectContent>
-          {REPEAT.map((opt) => (
-            <SelectItem key={opt} value={opt}>
-              {opt}
+          {repeatOptions.map((opt) => (
+            <SelectItem key={opt.key} value={opt.key}>
+              {opt.label}
             </SelectItem>
           ))}
         </SelectContent>
