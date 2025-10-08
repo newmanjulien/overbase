@@ -95,7 +95,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       promptRich: promptRich,
       customer: customer,
       summary: "",
-      summarySourcePrompt: "",
       summaryStatus: "pending",
     });
 
@@ -117,7 +116,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
         if (data.serverUpdated) return; // backend already saved
         await updateActive(user.uid, requestId, {
           summary: data.summary ?? "",
-          summarySourcePrompt: prompt,
           summaryStatus: "ready",
         });
       })
