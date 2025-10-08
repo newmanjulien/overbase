@@ -102,3 +102,70 @@ export const formatDayNumber = (d: Date) => format(d, "d");
 
 /** Compare two dates for same day */
 export const isSameDayDate = (a: Date, b: Date) => isSameDay(a, b);
+
+// --- Repeat / Recurrence Utilities ---
+
+export interface RepeatRule {
+  type: "none" | "weekly" | "monthly" | "quarterly";
+  day?: string; // e.g., "Friday"
+  ordinal?: string; // e.g., "first"
+}
+
+// Weekday name for a given date
+export function getWeekday(date: Date): string {
+  return date.toLocaleDateString("en-US", { weekday: "long" });
+}
+
+// Ordinal week of the month (first, second, ...)
+export function getOrdinalWeek(date: Date): string {
+  const day = date.getDate();
+  const weekOfMonth = Math.ceil(day / 7);
+  const ordinals = ["first", "second", "third"];
+  return ordinals[weekOfMonth - 1] || "last";
+}
+
+// Build a normalized rule (store this in DB)
+export function makeRepeatRule(
+  type: RepeatRule["type"],
+  date: Date | null
+): RepeatRule {
+  if (!date || type === "none") return { type: "none" };
+  return {
+    type,
+    day: getWeekday(date),
+    ordinal: getOrdinalWeek(date),
+  };
+}
+
+// Human label for a rule (if you ever need to render from stored rule)
+export function describeRepeatRule(rule: RepeatRule): string {
+  if (!rule || rule.type === "none") return "Does not repeat";
+  if (rule.type === "weekly" && rule.day) return `Every ${rule.day}`;
+  if (rule.type === "monthly" && rule.day && rule.ordinal)
+    return `The ${rule.ordinal} ${rule.day} of each month`;
+  if (rule.type === "quarterly" && rule.day && rule.ordinal)
+    return `The ${rule.ordinal} ${rule.day} of each quarter`;
+  return "Does not repeat";
+}
+
+// Centralized, date-aware options for the UI dropdown
+export function getRepeatOptions(
+  date: Date | null
+): Array<{ key: RepeatRule["type"]; label: string }> {
+  if (!date) {
+    return [
+      { key: "none", label: "Does not repeat" },
+      { key: "weekly", label: "Every week" },
+      { key: "monthly", label: "Every month" },
+      { key: "quarterly", label: "Every quarter" },
+    ];
+  }
+  const day = getWeekday(date);
+  const ordinal = getOrdinalWeek(date);
+  return [
+    { key: "none", label: "Does not repeat" },
+    { key: "weekly", label: `Every ${day}` },
+    { key: "monthly", label: `The ${ordinal} ${day} of each month` },
+    { key: "quarterly", label: `The ${ordinal} ${day} of each quarter` },
+  ];
+}

@@ -4,7 +4,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/firebase-admin";
 import { requestReadConverterAdmin } from "@/lib/requests/model-Admin";
 import type { Request } from "@/lib/requests/model-Types";
-import { serializeScheduledDate } from "@/lib/requestDates";
+import { serializeScheduledDate, RepeatRule } from "@/lib/requests/Dates";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 //
@@ -36,7 +36,8 @@ interface WriteRequest {
   updatedAt: FieldValue;
   submittedAt: FieldValue | null;
   customer?: string;
-  repeat?: string;
+  // repeat?: string;
+  repeat?: RepeatRule | null;
 }
 
 interface WriteUpdate {
@@ -50,7 +51,9 @@ interface WriteUpdate {
   updatedAt?: FieldValue;
   submittedAt?: FieldValue | null;
   customer?: string;
-  repeat?: string;
+  // repeat?: string;
+  repeat?: RepeatRule | null;
+
   [key: string]: unknown;
 }
 
@@ -95,7 +98,7 @@ export async function createDraft(
     updatedAt: FieldValue.serverTimestamp(),
     submittedAt: null,
     customer: initialData.customer ?? "",
-    repeat: initialData.repeat ?? "Does not repeat",
+    repeat: initialData.repeat ?? { type: "none" },
   };
 
   // Write raw data
@@ -147,7 +150,7 @@ export async function submitDraft(
   if (data.customer !== undefined)
     update.customer = coalesceText(data.customer);
 
-  if (data.repeat !== undefined) update.repeat = coalesceText(data.repeat);
+  if (data.repeat !== undefined) update.repeat = data.repeat ?? null;
 
   await ref.update(update);
 }
@@ -187,7 +190,7 @@ export async function updateActive(
   if (data.customer !== undefined)
     update.customer = coalesceText(data.customer);
 
-  if (data.repeat !== undefined) update.repeat = coalesceText(data.repeat);
+  if (data.repeat !== undefined) update.repeat = data.repeat ?? null;
 
   await ref.update(update);
 }

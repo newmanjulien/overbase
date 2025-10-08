@@ -13,7 +13,7 @@ import {
   ensureDraft,
 } from "@/lib/requests/service-Client";
 
-import { toDateKey } from "@/lib/requestDates";
+import { toDateKey, RepeatRule } from "@/lib/requests/Dates";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 function buildRequestsByDate(
@@ -156,7 +156,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
       }
 
       if (Object.prototype.hasOwnProperty.call(data, "repeat")) {
-        patch.repeat = data.repeat ?? "Does not repeat";
+        patch.repeat = data.repeat ?? { type: "none" };
       } else {
         patch.repeat = prev.repeat;
       }
@@ -224,7 +224,7 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
       draft.status === "draft" &&
       draft.ephemeral === true &&
       !draft.prompt &&
-      !draft.scheduledDate
+      !draft.customer
     ) {
       await deleteRequest(uid, id);
     }

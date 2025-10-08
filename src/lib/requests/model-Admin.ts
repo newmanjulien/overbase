@@ -5,7 +5,7 @@ import {
 } from "firebase-admin/firestore";
 
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
-import { deserializeScheduledDate } from "@/lib/requestDates";
+import { deserializeScheduledDate, RepeatRule } from "@/lib/requests/Dates";
 import type { Request } from "@/lib/requests/model-Types";
 
 /**
@@ -26,7 +26,7 @@ type FirestoreRequestData = {
   submittedAt?: Timestamp;
   ephemeral?: boolean;
   customer?: string;
-  repeat?: string;
+  repeat?: RepeatRule | null;
 };
 
 export const requestReadConverterAdmin: FirestoreDataConverter<Request> = {
@@ -61,7 +61,7 @@ export const requestReadConverterAdmin: FirestoreDataConverter<Request> = {
       submittedAt: d.submittedAt ? d.submittedAt.toDate() : null,
       ephemeral: d.ephemeral ?? false,
       customer: d.customer ?? "",
-      repeat: d.repeat ?? "Does not repeat",
+      repeat: d.repeat ?? { type: "none" },
     };
   },
 };

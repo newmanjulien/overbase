@@ -21,6 +21,7 @@ import { requestReadConverterClient } from "@/lib/requests/model-Client";
 import type { Request, RequestPatch } from "@/lib/requests/model-Types";
 import { format } from "date-fns";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
+import { RepeatRule } from "@/lib/requests/Dates";
 
 interface WriteRequestClient {
   prompt: string;
@@ -35,7 +36,8 @@ interface WriteRequestClient {
   submittedAt?: FieldValue;
   ephemeral?: boolean;
   customer?: string;
-  repeat?: string;
+  // repeat?: string;
+  repeat?: RepeatRule | null;
 }
 
 // --- helpers ---
@@ -101,7 +103,7 @@ export async function createDraft(
     updatedAt: serverTimestamp(),
     ephemeral: true,
     customer: data.customer ?? "",
-    repeat: data.repeat ?? "Does not repeat",
+    repeat: data.repeat ?? { type: "none" },
   };
   await setDoc(ref, write, { merge: false });
 }
@@ -139,7 +141,7 @@ export async function ensureDraft(uid: string): Promise<string> {
     updatedAt: serverTimestamp(),
     ephemeral: true,
     customer: "",
-    repeat: "Does not repeat",
+    repeat: { type: "none" },
   };
   await setDoc(newRef, write, { merge: false });
   return newRef.id;
@@ -180,7 +182,7 @@ export async function updateActive(
   }
 
   if ("customer" in patch) {
-    update.customer = patch.customer ?? "";
+    update.repeat = patch.repeat ?? { type: "none" };
     update.ephemeral = false;
   }
 
