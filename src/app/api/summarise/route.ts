@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
           details:
             "Request must include 'text' field. Optional: 'provider' (openai|anthropic), 'model'",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
           details:
             error instanceof Error ? error.message : "API key not configured",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       providerType,
       apiKey,
       body.model,
-      baseURL
+      baseURL,
     );
 
     let serverUpdated = false;
@@ -132,14 +132,22 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.warn(
           "markSummaryPending failed, falling back to client update",
-          err
+          err,
         );
         serverUpdated = false;
       }
     }
 
     try {
-      const responseText = await provider.generate(promptText);
+      let responseText: string;
+      
+      // Skip actual LLM call in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Skipping LLM call in development mode');
+        responseText = `[MOCK SUMMARY] This is a mock summary for: ${promptText.substring(0, 50)}${promptText.length > 50 ? '...' : ''}`;
+      } else {
+        responseText = await provider.generate(promptText);
+      }
 
       if (serverUpdated && uid && requestId) {
         try {
@@ -174,7 +182,7 @@ export async function POST(req: NextRequest) {
         error: "Internal server error",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -188,6 +196,6 @@ export async function GET() {
       error: "Method not allowed",
       details: "Use POST method with JSON body containing 'text' field",
     },
-    { status: 405 }
+    { status: 405 },
   );
 }
