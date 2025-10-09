@@ -90,13 +90,28 @@ export function createLLMProvider(
 
 /**
  * Get API key from environment
+ * Falls back to provider-specific keys if API_KEY is not set or contains variable substitution
  */
 export function getApiKey(): string {
   const key = process.env.API_KEY;
 
-  if (!key) {
-    throw new Error(`API_KEY not found in environment variables`);
+  // Check if API_KEY exists and doesn't contain unresolved variable substitution
+  if (key && !key.includes('${')) {
+    return key;
   }
 
-  return key;
+  // Fall back to provider-specific keys
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+  // Return the first valid key found
+  if (openaiKey && !openaiKey.includes('${')) {
+    return openaiKey;
+  }
+
+  if (anthropicKey && !anthropicKey.includes('${')) {
+    return anthropicKey;
+  }
+
+  throw new Error(`No valid API key found. Please set API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY in environment variables`);
 }

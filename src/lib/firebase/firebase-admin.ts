@@ -11,14 +11,21 @@ import { getFirestore } from "firebase-admin/firestore";
 if (!getApps().length) {
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
-  initializeApp(
-    process.env.FIREBASE_SERVICE_ACCOUNT
-      ? { credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)) }
-      : {
-          credential: applicationDefault(),
-          projectId: projectId,
-        }
-  );
+  try {
+    initializeApp(
+      process.env.FIREBASE_SERVICE_ACCOUNT
+        ? { credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)) }
+        : {
+            credential: applicationDefault(),
+            projectId: projectId,
+          }
+    );
+  } catch (error) {
+    console.warn(
+      "Firebase Admin SDK initialization failed. Server-side updates will be skipped.",
+      error instanceof Error ? error.message : error
+    );
+  }
 }
 
 // Admin Firestore instance (no IndexedDB, full privileges)
