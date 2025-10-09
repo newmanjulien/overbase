@@ -83,15 +83,14 @@ function LoadStatePlugin({
           JSON.stringify(initialValueRich)
         );
 
-        // ✅ Apply new state
-        editor.setEditorState(parsed);
+        // ✅ Defer to the next tick so React is done rendering
+        queueMicrotask(() => {
+          editor.setEditorState(parsed);
 
-        // ✅ Refocus after replacing state
-        requestAnimationFrame(() => {
-          editor.focus(() => {
-            const root = editor.getRootElement();
-            if (root) root.focus();
-          });
+          // optional: refocus only on reset
+          if (resetKey !== undefined) {
+            requestAnimationFrame(() => editor.focus());
+          }
         });
 
         return;
@@ -100,13 +99,15 @@ function LoadStatePlugin({
       }
     }
 
-    // Plain-text fallback
-    editor.update(() => {
-      const root = $getRoot();
-      root.clear();
-      const p = $createParagraphNode();
-      if (initialValue) p.append($createTextNode(initialValue));
-      root.append(p);
+    // Fallback plain-text init
+    queueMicrotask(() => {
+      editor.update(() => {
+        const root = $getRoot();
+        root.clear();
+        const p = $createParagraphNode();
+        if (initialValue) p.append($createTextNode(initialValue));
+        root.append(p);
+      });
     });
   }, [editor, resetKey, initialValue, initialValueRich]);
 
@@ -123,7 +124,7 @@ export default function RichTextarea({
   onChange,
   onChangeRich,
   resetKey,
-  placeholder = "Type @ to mention a connector...",
+  placeholder,
   mentionOptions = [],
   disabled = false,
   className = "",
@@ -157,9 +158,11 @@ export default function RichTextarea({
               />
             }
             placeholder={
-              <div className="absolute top-3 left-3 text-gray-400 select-none pointer-events-none">
-                {placeholder}
-              </div>
+              placeholder ? (
+                <div className="absolute top-3 left-3 text-gray-400 select-none pointer-events-none">
+                  {placeholder}
+                </div>
+              ) : null
             }
             ErrorBoundary={LexicalErrorBoundary}
           />
