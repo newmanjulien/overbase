@@ -44,6 +44,30 @@ interface ErrorResponse {
   details?: string;
 }
 
+function normalizeSummaryResponse(raw: string): string {
+  const trimmed = raw.trim();
+  const withoutCodeFence = trimmed
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```$/, "")
+    .trim();
+
+  const candidate = withoutCodeFence.length > 0 ? withoutCodeFence : trimmed;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(candidate);
+  } catch {
+    throw new Error("Summarizer response was not valid JSON");
+  }
+
+  if (!Array.isArray(parsed)) {
+    throw new Error("Summarizer response must be a JSON array");
+  }
+
+  return JSON.stringify(parsed);
+}
+
 /**
  * Validate request body
  */
@@ -82,8 +106,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json<ErrorResponse>(
         {
           error: "Invalid request",
-          details:
-            "Request must include 'text' field. Optional: 'provider' (openai|anthropic), 'model'",
+          details: "Please provide a valid task description to summarize",
         },
         { status: 400 },
       );
@@ -139,19 +162,21 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      let responseText: string;
-      
       // Skip actual LLM call in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Skipping LLM call in development mode');
-        responseText = `[MOCK SUMMARY] This is a mock summary for: ${promptText.substring(0, 50)}${promptText.length > 50 ? '...' : ''}`;
-      } else {
-        responseText = await provider.generate(promptText);
-      }
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log('Skipping LLM call in development mode');
+      //   return NextResponse.json<SummariseResponse>({
+      //     summary: `[MOCK SUMMARY] This is a mock summary for: ${promptText.substring(0, 50)}${promptText.length > 50 ? '...' : ''}`,
+      //     serverUpdated,
+      //   });
+      // }
+
+      const responseText = await provider.generate(promptText);
+      const summaryJson = normalizeSummaryResponse(responseText);
 
       if (serverUpdated && uid && requestId) {
         try {
-          await markSummarySuccess(uid, requestId, responseText, promptText);
+          await markSummarySuccess(uid, requestId, summaryJson, promptText);
         } catch (err) {
           console.warn("markSummarySuccess failed", err);
           serverUpdated = false;
@@ -159,7 +184,7 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json<SummariseResponse>({
-        summary: responseText,
+        summary: summaryJson,
         serverUpdated,
       });
     } catch (err) {
@@ -177,12 +202,25 @@ export async function POST(req: NextRequest) {
     // Handle unexpected errors
     console.error("Task summarization error:", error);
 
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
+    const isFormattingIssue =
+      error instanceof Error &&
+      error.message.includes("Summarizer response");
+
+    const friendlyFormattingMessage =
+      "We couldn't generate clarifying questions right now. Please try again.";
+    const friendlyGenericMessage =
+      "Something went wrong while generating clarifying questions. Please try again.";
+
     return NextResponse.json<ErrorResponse>(
       {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: isFormattingIssue
+          ? friendlyFormattingMessage
+          : friendlyGenericMessage,
+        details: message,
       },
-      { status: 500 },
+      { status: isFormattingIssue ? 502 : 500 },
     );
   }
 }
@@ -194,7 +232,7 @@ export async function GET() {
   return NextResponse.json<ErrorResponse>(
     {
       error: "Method not allowed",
-      details: "Use POST method with JSON body containing 'text' field",
+      details: "This endpoint requires a POST request",
     },
     { status: 405 },
   );
