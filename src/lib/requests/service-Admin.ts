@@ -4,7 +4,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/firebase-admin";
 import { requestReadConverterAdmin } from "@/lib/requests/model-Admin";
 import type { Request } from "@/lib/requests/model-Types";
-import { serializeScheduledDate } from "@/lib/requestDates";
+import { serializeScheduledDate, RepeatRule } from "@/lib/requests/Dates";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 //
@@ -36,7 +36,7 @@ interface WriteRequest {
   updatedAt: FieldValue;
   submittedAt: FieldValue | null;
   customer?: string;
-  repeat?: string;
+  repeat?: RepeatRule | null;
 }
 
 interface WriteUpdate {
@@ -50,7 +50,8 @@ interface WriteUpdate {
   updatedAt?: FieldValue;
   submittedAt?: FieldValue | null;
   customer?: string;
-  repeat?: string;
+  repeat?: RepeatRule | null;
+
   [key: string]: unknown;
 }
 
@@ -124,7 +125,7 @@ export async function createDraft(
     updatedAt: FieldValue.serverTimestamp(),
     submittedAt: null,
     customer: initialData.customer ?? "",
-    repeat: initialData.repeat ?? "Does not repeat",
+    repeat: initialData.repeat ?? { type: "none" },
   };
 
   // Write raw data
@@ -154,6 +155,31 @@ export async function submitDraft(
     ...buildUpdateFromData(data),
   };
 
+  if ("promptRich" in data || "prompt" in data) {
+    const { prompt, promptRich } = derivePromptFields(data);
+    update.prompt = prompt;
+    update.promptRich = promptRich;
+  }
+
+  if (data.summary !== undefined) update.summary = coalesceText(data.summary);
+
+  if (data.summarySourcePrompt !== undefined)
+    update.summarySourcePrompt = coalesceText(data.summarySourcePrompt);
+
+  if (data.summaryStatus !== undefined)
+    update.summaryStatus = data.summaryStatus;
+
+  if (data.scheduledDate !== undefined) {
+    update.scheduledDate = data.scheduledDate
+      ? serializeScheduledDate(data.scheduledDate)
+      : null;
+  }
+
+  if (data.customer !== undefined)
+    update.customer = coalesceText(data.customer);
+
+  if (data.repeat !== undefined) update.repeat = data.repeat ?? null;
+
   await ref.update(update);
 }
 
@@ -169,6 +195,31 @@ export async function updateActive(
     updatedAt: FieldValue.serverTimestamp(),
     ...buildUpdateFromData(data),
   };
+
+  if ("promptRich" in data || "prompt" in data) {
+    const { prompt, promptRich } = derivePromptFields(data);
+    update.prompt = prompt;
+    update.promptRich = promptRich;
+  }
+
+  if (data.summary !== undefined) update.summary = coalesceText(data.summary);
+
+  if (data.summarySourcePrompt !== undefined)
+    update.summarySourcePrompt = coalesceText(data.summarySourcePrompt);
+
+  if (data.summaryStatus !== undefined)
+    update.summaryStatus = data.summaryStatus;
+
+  if (data.scheduledDate !== undefined) {
+    update.scheduledDate = data.scheduledDate
+      ? serializeScheduledDate(data.scheduledDate)
+      : null;
+  }
+
+  if (data.customer !== undefined)
+    update.customer = coalesceText(data.customer);
+
+  if (data.repeat !== undefined) update.repeat = data.repeat ?? null;
 
   await ref.update(update);
 }

@@ -14,7 +14,7 @@ import {
   formatYear,
   formatDayNumber,
   isSameDayDate,
-} from "@/lib/requestDates";
+} from "@/lib/requests/Dates";
 
 function getDayButtonClasses({
   isSelected,
@@ -127,7 +127,7 @@ export default function Calendar({
             return <div key={cell.key} className="aspect-square w-full" />;
           }
 
-          const list = requestsByDate?.[cell.key] ?? [];
+          const list = (requestsByDate && requestsByDate[cell.key]) || [];
 
           // only keep active requests and non-ephemeral drafts
           const visibleList = list.filter(

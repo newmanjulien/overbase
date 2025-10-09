@@ -64,29 +64,53 @@ function LoadStatePlugin({
   resetKey?: string | number;
 }) {
   const [editor] = useLexicalComposerContext();
+  const lastAppliedRef = React.useRef<string>("");
 
   useEffect(() => {
-    editor.update(() => {
-      const root = $getRoot();
-      root.clear();
+    const serialized =
+      initialValueRich != null
+        ? JSON.stringify(initialValueRich)
+        : initialValue ?? "";
 
-      if (initialValueRich) {
-        try {
-          const parsed = editor.parseEditorState(
-            JSON.stringify(initialValueRich)
-          );
+    if (serialized === lastAppliedRef.current) return;
+    lastAppliedRef.current = serialized;
+
+    if (!initialValue && !initialValueRich) return;
+
+    if (initialValueRich) {
+      try {
+        const parsed = editor.parseEditorState(
+          JSON.stringify(initialValueRich)
+        );
+
+        // ✅ Defer to the next tick so React is done rendering
+        queueMicrotask(() => {
           editor.setEditorState(parsed);
-          return;
-        } catch (err) {
-          console.warn("Invalid rich content, falling back to text:", err);
-        }
-      }
 
-      const p = $createParagraphNode();
-      if (initialValue) p.append($createTextNode(initialValue));
-      root.append(p);
+          // optional: refocus only on reset
+          if (resetKey !== undefined) {
+            requestAnimationFrame(() => editor.focus());
+          }
+        });
+
+        return;
+      } catch (err) {
+        console.warn("Invalid rich content, falling back to text:", err);
+      }
+    }
+
+    // Fallback plain-text init
+    queueMicrotask(() => {
+      editor.update(() => {
+        const root = $getRoot();
+        root.clear();
+        const p = $createParagraphNode();
+        if (initialValue) p.append($createTextNode(initialValue));
+        root.append(p);
+      });
     });
-  }, [editor, resetKey]);
+  }, [editor, resetKey, initialValue, initialValueRich]);
+
   return null;
 }
 
@@ -100,7 +124,7 @@ export default function RichTextarea({
   onChange,
   onChangeRich,
   resetKey,
-  placeholder = "Type @ to mention a connector...",
+  placeholder,
   mentionOptions = [],
   disabled = false,
   className = "",
@@ -134,9 +158,11 @@ export default function RichTextarea({
               />
             }
             placeholder={
-              <div className="absolute top-3 left-3 text-gray-400 select-none pointer-events-none">
-                {placeholder}
-              </div>
+              placeholder ? (
+                <div className="absolute top-3 left-3 text-gray-400 select-none pointer-events-none">
+                  {placeholder}
+                </div>
+              ) : null
             }
             ErrorBoundary={LexicalErrorBoundary}
           />

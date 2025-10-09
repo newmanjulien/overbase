@@ -8,7 +8,9 @@ import {
   isBeforeDate,
   isFutureDate,
   type DateKey,
-} from "@/lib/requestDates";
+  type RepeatRule,
+  makeRepeatRule,
+} from "@/lib/requests/Dates";
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/requests/store";
 import ScheduleUI from "./Schedule";
@@ -36,7 +38,7 @@ export default function ScheduleClient({
   } = useRequestListStore();
 
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
-  const [repeat, setRepeat] = useState<string>("Does not repeat");
+  const [repeat, setRepeat] = useState<RepeatRule["type"]>("none");
 
   const [errors, setErrors] = useState<{ scheduledDate?: string }>({});
   const hydratedRef = useRef(false);
@@ -54,12 +56,24 @@ export default function ScheduleClient({
   }, [user, requestId, loadOne]);
 
   // hydrate scheduledDate + repeat once when request loads
+  // hydrate scheduledDate + repeat once when request loads
   useEffect(() => {
     if (hydratedRef.current) return;
     const record = requests[requestId];
     if (!record) return;
-    if (record.scheduledDate) setScheduledDate(record.scheduledDate);
-    if (typeof record.repeat === "string") setRepeat(record.repeat);
+
+    if (record.scheduledDate) {
+      setScheduledDate(record.scheduledDate);
+    }
+
+    if (
+      record.repeat &&
+      typeof record.repeat === "object" &&
+      "type" in record.repeat
+    ) {
+      setRepeat(record.repeat.type);
+    }
+
     hydratedRef.current = true;
   }, [requests, requestId]);
 
@@ -90,7 +104,15 @@ export default function ScheduleClient({
   const handleSubmit = async () => {
     if (!validate()) return;
     if (!user) return;
-    await updateActive(user.uid, requestId, { scheduledDate, repeat });
+
+    // Build the structured rule from the selected repeat-type and scheduled date
+    const rule = makeRepeatRule(repeat, scheduledDate);
+
+    await updateActive(user.uid, requestId, {
+      scheduledDate,
+      repeat: rule,
+    });
+
     router.push(
       `/dashboard/requests/${requestId}/loading?mode=${mode}&date=${toDateKey(
         scheduledDate!
@@ -118,6 +140,18 @@ export default function ScheduleClient({
       "Are you sure you want to return to the dashboard? Your changes will be deleted."
     );
     if (!confirmed) return;
+
+    if (mode === "create") {
+      // Delete draft if we're still creating a new one
+      if (user) {
+        try {
+          await deleteRequest(user.uid, requestId);
+        } catch (err) {
+          console.error("Failed to delete draft during back navigation", err);
+        }
+      }
+    }
+
     router.push(`/dashboard/requests`);
   };
 

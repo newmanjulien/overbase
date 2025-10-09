@@ -1,4 +1,5 @@
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
+import { type RepeatRule } from "@/lib/requests/Dates";
 
 export interface Request {
   id: string;
@@ -13,7 +14,7 @@ export interface Request {
   submittedAt?: Date | null;
   ephemeral?: boolean;
   customer?: string;
-  repeat?: string;
+  repeat?: RepeatRule | null;
 }
 
 // Shape for partial updates

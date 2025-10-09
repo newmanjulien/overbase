@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import type { Request } from "@/lib/requests/model-Types";
 import Link from "next/link";
 
-import { analyzeDate } from "@/lib/requestDates";
+import { analyzeDate } from "@/lib/requests/Dates";
 
 type ViewType = "requests" | "meetings";
 
