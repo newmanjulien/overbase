@@ -145,12 +145,6 @@ export const useRequestListStore = create<RequestListState>((set, get) => ({
         prompt,
         promptRich,
         summary: data.summary ?? prev.summary,
-        summarySourcePrompt: Object.prototype.hasOwnProperty.call(
-          data,
-          "summarySourcePrompt"
-        )
-          ? data.summarySourcePrompt
-          : prev.summarySourcePrompt,
         summaryStatus: Object.prototype.hasOwnProperty.call(
           data,
           "summaryStatus"
