@@ -9,10 +9,15 @@ import { getFirestore } from "firebase-admin/firestore";
 
 // Initialize Admin SDK once
 if (!getApps().length) {
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+
   initializeApp(
     process.env.FIREBASE_SERVICE_ACCOUNT
       ? { credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)) }
-      : { credential: applicationDefault() }
+      : {
+          credential: applicationDefault(),
+          projectId: projectId,
+        }
   );
 }
 

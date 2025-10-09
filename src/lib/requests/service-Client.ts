@@ -27,7 +27,6 @@ interface WriteRequestClient {
   prompt: string;
   promptRich?: unknown | null;
   summary: string;
-  summarySourcePrompt?: string;
   summaryStatus?: "idle" | "pending" | "ready" | "failed";
   status: "draft" | "active";
   scheduledDate: string | null;
@@ -94,7 +93,6 @@ export async function createDraft(
     prompt,
     promptRich,
     summary: coalesceText(data.summary),
-    summarySourcePrompt: data.summarySourcePrompt ?? "",
     summaryStatus: data.summaryStatus ?? "idle",
     status: "draft",
     scheduledDate: serializeScheduledDate(data.scheduledDate ?? null),
@@ -132,7 +130,6 @@ export async function ensureDraft(uid: string): Promise<string> {
     prompt: "",
     promptRich: null,
     summary: "",
-    summarySourcePrompt: "",
     summaryStatus: "idle",
     status: "draft",
     scheduledDate: null,
@@ -166,10 +163,6 @@ export async function updateActive(
   if ("summary" in patch) {
     update.summary = coalesceText(patch.summary);
     update.ephemeral = false;
-  }
-
-  if ("summarySourcePrompt" in patch) {
-    update.summarySourcePrompt = patch.summarySourcePrompt ?? "";
   }
 
   if ("summaryStatus" in patch) {

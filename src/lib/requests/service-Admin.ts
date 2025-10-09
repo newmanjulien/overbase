@@ -29,7 +29,6 @@ interface WriteRequest {
   promptRich?: unknown | null;
   scheduledDate: string | null;
   summary: string;
-  summarySourcePrompt?: string;
   summaryStatus: "idle" | "pending" | "ready" | "failed";
   status: "draft" | "active";
   createdAt: FieldValue;
@@ -43,7 +42,6 @@ interface WriteUpdate {
   prompt?: string;
   promptRich?: unknown | null;
   summary?: string;
-  summarySourcePrompt?: string;
   summaryStatus?: "idle" | "pending" | "ready" | "failed";
   scheduledDate?: string | null;
   status?: "draft" | "active";
@@ -97,7 +95,7 @@ function buildUpdateFromData(data: Partial<Request>): WriteUpdate {
   if (data.customer !== undefined)
     update.customer = coalesceText(data.customer);
 
-  if (data.repeat !== undefined) update.repeat = coalesceText(data.repeat);
+  if (data.repeat !== undefined) update.repeat = data.repeat ?? null;
 
   return update;
 }
@@ -118,7 +116,6 @@ export async function createDraft(
       ? serializeScheduledDate(initialData.scheduledDate)
       : null,
     summary: "",
-    summarySourcePrompt: "",
     summaryStatus: "idle",
     status: "draft",
     createdAt: FieldValue.serverTimestamp(),
@@ -163,9 +160,6 @@ export async function submitDraft(
 
   if (data.summary !== undefined) update.summary = coalesceText(data.summary);
 
-  if (data.summarySourcePrompt !== undefined)
-    update.summarySourcePrompt = coalesceText(data.summarySourcePrompt);
-
   if (data.summaryStatus !== undefined)
     update.summaryStatus = data.summaryStatus;
 
@@ -203,9 +197,6 @@ export async function updateActive(
   }
 
   if (data.summary !== undefined) update.summary = coalesceText(data.summary);
-
-  if (data.summarySourcePrompt !== undefined)
-    update.summarySourcePrompt = coalesceText(data.summarySourcePrompt);
 
   if (data.summaryStatus !== undefined)
     update.summaryStatus = data.summaryStatus;

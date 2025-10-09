@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
 
     if (uid && requestId) {
       try {
-        await markSummaryPending(uid, requestId, promptText);
+        await markSummaryPending(uid, requestId);
         serverUpdated = true;
       } catch (err) {
         console.warn(
@@ -171,13 +171,18 @@ export async function POST(req: NextRequest) {
 
     try {
       // Skip actual LLM call in development
-      // if (process.env.NODE_ENV === 'development') {
-      //   console.log('Skipping LLM call in development mode');
-      //   return NextResponse.json<SummariseResponse>({
-      //     summary: `[MOCK SUMMARY] This is a mock summary for: ${promptText.substring(0, 50)}${promptText.length > 50 ? '...' : ''}`,
-      //     serverUpdated,
-      //   });
-      // }
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Skipping LLM call in development mode');
+        const mockSummaryItems = [
+          { question: "What is the main goal?", answer: "Mock answer for development" },
+          { question: "Who is involved?", answer: "Mock stakeholders" },
+        ];
+        return NextResponse.json<SummariseResponse>({
+          summaryJson: JSON.stringify(mockSummaryItems),
+          summaryItems: mockSummaryItems,
+          serverUpdated,
+        });
+      }
 
       const responseText = await provider.generate(promptText);
       const { summaryJson, summaryItems } =
