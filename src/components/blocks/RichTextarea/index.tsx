@@ -64,29 +64,52 @@ function LoadStatePlugin({
   resetKey?: string | number;
 }) {
   const [editor] = useLexicalComposerContext();
+  const lastAppliedRef = React.useRef<string>("");
 
   useEffect(() => {
+    const serialized =
+      initialValueRich != null
+        ? JSON.stringify(initialValueRich)
+        : initialValue ?? "";
+
+    if (serialized === lastAppliedRef.current) return;
+    lastAppliedRef.current = serialized;
+
+    if (!initialValue && !initialValueRich) return;
+
+    if (initialValueRich) {
+      try {
+        const parsed = editor.parseEditorState(
+          JSON.stringify(initialValueRich)
+        );
+
+        // ✅ Apply new state
+        editor.setEditorState(parsed);
+
+        // ✅ Refocus after replacing state
+        requestAnimationFrame(() => {
+          editor.focus(() => {
+            const root = editor.getRootElement();
+            if (root) root.focus();
+          });
+        });
+
+        return;
+      } catch (err) {
+        console.warn("Invalid rich content, falling back to text:", err);
+      }
+    }
+
+    // Plain-text fallback
     editor.update(() => {
       const root = $getRoot();
       root.clear();
-
-      if (initialValueRich) {
-        try {
-          const parsed = editor.parseEditorState(
-            JSON.stringify(initialValueRich)
-          );
-          editor.setEditorState(parsed);
-          return;
-        } catch (err) {
-          console.warn("Invalid rich content, falling back to text:", err);
-        }
-      }
-
       const p = $createParagraphNode();
       if (initialValue) p.append($createTextNode(initialValue));
       root.append(p);
     });
-  }, [editor, resetKey]);
+  }, [editor, resetKey, initialValue, initialValueRich]);
+
   return null;
 }
 
