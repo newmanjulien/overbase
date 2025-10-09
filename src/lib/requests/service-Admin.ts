@@ -36,7 +36,6 @@ interface WriteRequest {
   updatedAt: FieldValue;
   submittedAt: FieldValue | null;
   customer?: string;
-  // repeat?: string;
   repeat?: RepeatRule | null;
 }
 
@@ -51,7 +50,6 @@ interface WriteUpdate {
   updatedAt?: FieldValue;
   submittedAt?: FieldValue | null;
   customer?: string;
-  // repeat?: string;
   repeat?: RepeatRule | null;
 
   [key: string]: unknown;

@@ -36,7 +36,6 @@ interface WriteRequestClient {
   submittedAt?: FieldValue;
   ephemeral?: boolean;
   customer?: string;
-  // repeat?: string;
   repeat?: RepeatRule | null;
 }
 
@@ -182,12 +181,12 @@ export async function updateActive(
   }
 
   if ("customer" in patch) {
-    update.repeat = patch.repeat ?? { type: "none" };
+    update.customer = coalesceText(patch.customer);
     update.ephemeral = false;
   }
 
   if (patch.repeat !== undefined) {
-    update.repeat = patch.repeat;
+    update.repeat = patch.repeat ?? { type: "none" };
     update.ephemeral = false;
   }
 
