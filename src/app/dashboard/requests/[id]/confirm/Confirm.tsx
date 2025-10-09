@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import { Button } from "@/components/ui/button"; // Assuming you have a Button component
@@ -32,6 +32,30 @@ export default function Confirm({
 }: ConfirmProps) {
   const [isEditable, setIsEditable] = useState(false);
 
+  // Temporary display formatting until the structured UI is in place.
+  const displaySummary = useMemo(() => {
+    if (isEditable) return summary;
+    try {
+      const parsed = JSON.parse(summary) as Array<{
+        question: string;
+        answer: string;
+      }>;
+
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return summary;
+      }
+
+      return parsed
+        .map(
+          (item, index) =>
+            `Q${index + 1}: ${item.question.trim()}\nA: ${item.answer.trim()}`,
+        )
+        .join("\n\n");
+    } catch {
+      return summary;
+    }
+  }, [summary, isEditable]);
+
   return (
     <SetupLayout
       sidebarBackText="Back to requests"
@@ -61,7 +85,7 @@ export default function Confirm({
         )}
         <Textarea
           id="summary"
-          value={summary}
+          value={displaySummary}
           onChange={(e) => setSummary(e.target.value)}
           readOnly={!isEditable}
           className={`mt-1 min-h-90 ${

@@ -113,12 +113,16 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as {
-          summary?: string;
+          summaryJson?: string;
+          summaryItems?: { question: string; answer: string }[];
           serverUpdated?: boolean;
         };
+        const summaryJson =
+          data.summaryJson ??
+          JSON.stringify(data.summaryItems ?? [], null, 0);
         if (data.serverUpdated) return; // backend already saved
         await updateActive(user.uid, requestId, {
-          summary: data.summary ?? "",
+          summary: summaryJson,
           summaryStatus: "ready",
         });
       })

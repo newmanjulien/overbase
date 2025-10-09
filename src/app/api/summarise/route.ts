@@ -32,7 +32,8 @@ interface SummariseRequest {
 }
 
 interface SummariseResponse {
-  summary: string;
+  summaryJson: string;
+  summaryItems: SummaryItem[];
   serverUpdated: boolean;
 }
 
@@ -44,7 +45,15 @@ interface ErrorResponse {
   details?: string;
 }
 
-function normalizeSummaryResponse(raw: string): string {
+interface SummaryItem {
+  question: string;
+  answer: string;
+}
+
+function normalizeSummaryResponse(raw: string): {
+  summaryJson: string;
+  summaryItems: SummaryItem[];
+} {
   const trimmed = raw.trim();
   const withoutCodeFence = trimmed
     .replace(/^```json\s*/i, "")
@@ -54,18 +63,17 @@ function normalizeSummaryResponse(raw: string): string {
 
   const candidate = withoutCodeFence.length > 0 ? withoutCodeFence : trimmed;
 
-  let parsed: unknown;
+  if (!candidate) {
+    return { summaryJson: "", summaryItems: [] };
+  }
+
   try {
-    parsed = JSON.parse(candidate);
-  } catch {
-    throw new Error("Summarizer response was not valid JSON");
+    const summaryItems = JSON.parse(candidate) as SummaryItem[];
+    return { summaryJson: candidate, summaryItems };
+  } catch (error) {
+    console.warn("Failed to parse summariser response as JSON", error);
+    return { summaryJson: "", summaryItems: [] };
   }
-
-  if (!Array.isArray(parsed)) {
-    throw new Error("Summarizer response must be a JSON array");
-  }
-
-  return JSON.stringify(parsed);
 }
 
 /**
@@ -172,11 +180,12 @@ export async function POST(req: NextRequest) {
       // }
 
       const responseText = await provider.generate(promptText);
-      const summaryJson = normalizeSummaryResponse(responseText);
+      const { summaryJson, summaryItems } =
+        normalizeSummaryResponse(responseText);
 
       if (serverUpdated && uid && requestId) {
         try {
-          await markSummarySuccess(uid, requestId, summaryJson, promptText);
+          await markSummarySuccess(uid, requestId, summaryJson);
         } catch (err) {
           console.warn("markSummarySuccess failed", err);
           serverUpdated = false;
@@ -184,7 +193,8 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json<SummariseResponse>({
-        summary: summaryJson,
+        summaryJson,
+        summaryItems,
         serverUpdated,
       });
     } catch (err) {
