@@ -139,7 +139,8 @@ function StableMenuPosition({
 
     frame = requestAnimationFrame(checkStable);
     return () => cancelAnimationFrame(frame);
-  }, [anchorEl, baseRect?.top, baseRect?.left, baseRect?.bottom]);
+    // }, [anchorEl, baseRect?.top, baseRect?.left, baseRect?.bottom]);
+  }, [anchorEl, baseRect]);
 
   if (!rect || filteredOptions.length === 0) return null;
 
