@@ -17,7 +17,6 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   const { user } = useAuth();
 
   const [summary, setSummary] = useState<string>("");
-  const [summarySourcePrompt, setSummarySourcePrompt] = useState<string>("");
 
   // Global list store
   const {
@@ -44,10 +43,7 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
       return;
     }
     if (!summary && current.summary) setSummary(current.summary);
-    if (!summarySourcePrompt && current.summarySourcePrompt) {
-      setSummarySourcePrompt(current.summarySourcePrompt);
-    }
-  }, [existing, requestId, router, summary, summarySourcePrompt]);
+  }, [existing, requestId, router, summary]);
 
   const status = existing?.status ?? "draft";
 
@@ -66,10 +62,8 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
     }
     try {
       // Ensure latest answers are saved before promoting
-      const promptSnapshot = existing?.prompt ?? summarySourcePrompt;
       const patch: Parameters<typeof updateActive>[2] = {
         summary,
-        summarySourcePrompt: promptSnapshot,
         summaryStatus: "ready",
       };
       await updateActive(user.uid, requestId, patch);

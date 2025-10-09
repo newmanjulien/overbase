@@ -32,7 +32,8 @@ interface SummariseRequest {
 }
 
 interface SummariseResponse {
-  summary: string;
+  summaryJson: string;
+  summaryItems: SummaryItem[];
   serverUpdated: boolean;
 }
 
@@ -42,6 +43,37 @@ interface SummariseResponse {
 interface ErrorResponse {
   error: string;
   details?: string;
+}
+
+interface SummaryItem {
+  question: string;
+  answer: string;
+}
+
+function normalizeSummaryResponse(raw: string): {
+  summaryJson: string;
+  summaryItems: SummaryItem[];
+} {
+  const trimmed = raw.trim();
+  const withoutCodeFence = trimmed
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```$/, "")
+    .trim();
+
+  const candidate = withoutCodeFence.length > 0 ? withoutCodeFence : trimmed;
+
+  if (!candidate) {
+    return { summaryJson: "", summaryItems: [] };
+  }
+
+  try {
+    const summaryItems = JSON.parse(candidate) as SummaryItem[];
+    return { summaryJson: candidate, summaryItems };
+  } catch (error) {
+    console.warn("Failed to parse summariser response as JSON", error);
+    return { summaryJson: "", summaryItems: [] };
+  }
 }
 
 /**
@@ -82,10 +114,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json<ErrorResponse>(
         {
           error: "Invalid request",
-          details:
-            "Request must include 'text' field. Optional: 'provider' (openai|anthropic), 'model'",
+          details: "Please provide a valid task description to summarize",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -110,7 +141,7 @@ export async function POST(req: NextRequest) {
           details:
             error instanceof Error ? error.message : "API key not configured",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -120,7 +151,7 @@ export async function POST(req: NextRequest) {
       providerType,
       apiKey,
       body.model,
-      baseURL
+      baseURL,
     );
 
     let serverUpdated = false;
@@ -132,18 +163,29 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.warn(
           "markSummaryPending failed, falling back to client update",
-          err
+          err,
         );
         serverUpdated = false;
       }
     }
 
     try {
+      // Skip actual LLM call in development
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log('Skipping LLM call in development mode');
+      //   return NextResponse.json<SummariseResponse>({
+      //     summary: `[MOCK SUMMARY] This is a mock summary for: ${promptText.substring(0, 50)}${promptText.length > 50 ? '...' : ''}`,
+      //     serverUpdated,
+      //   });
+      // }
+
       const responseText = await provider.generate(promptText);
+      const { summaryJson, summaryItems } =
+        normalizeSummaryResponse(responseText);
 
       if (serverUpdated && uid && requestId) {
         try {
-          await markSummarySuccess(uid, requestId, responseText, promptText);
+          await markSummarySuccess(uid, requestId, summaryJson);
         } catch (err) {
           console.warn("markSummarySuccess failed", err);
           serverUpdated = false;
@@ -151,7 +193,8 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json<SummariseResponse>({
-        summary: responseText,
+        summaryJson,
+        summaryItems,
         serverUpdated,
       });
     } catch (err) {
@@ -169,12 +212,25 @@ export async function POST(req: NextRequest) {
     // Handle unexpected errors
     console.error("Task summarization error:", error);
 
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
+    const isFormattingIssue =
+      error instanceof Error &&
+      error.message.includes("Summarizer response");
+
+    const friendlyFormattingMessage =
+      "We couldn't generate clarifying questions right now. Please try again.";
+    const friendlyGenericMessage =
+      "Something went wrong while generating clarifying questions. Please try again.";
+
     return NextResponse.json<ErrorResponse>(
       {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: isFormattingIssue
+          ? friendlyFormattingMessage
+          : friendlyGenericMessage,
+        details: message,
       },
-      { status: 500 }
+      { status: isFormattingIssue ? 502 : 500 },
     );
   }
 }
@@ -186,8 +242,8 @@ export async function GET() {
   return NextResponse.json<ErrorResponse>(
     {
       error: "Method not allowed",
-      details: "Use POST method with JSON body containing 'text' field",
+      details: "This endpoint requires a POST request",
     },
-    { status: 405 }
+    { status: 405 },
   );
 }

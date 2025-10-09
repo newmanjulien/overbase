@@ -73,6 +73,35 @@ export async function getRequest(uid: string, requestId: string) {
 // ---- WRITE ----
 //
 
+/** Helper function to build the update object from partial request data */
+function buildUpdateFromData(data: Partial<Request>): WriteUpdate {
+  const update: WriteUpdate = {};
+
+  if ("promptRich" in data || "prompt" in data) {
+    const { prompt, promptRich } = derivePromptFields(data);
+    update.prompt = prompt;
+    update.promptRich = promptRich;
+  }
+
+  if (data.summary !== undefined) update.summary = coalesceText(data.summary);
+
+  if (data.summaryStatus !== undefined)
+    update.summaryStatus = data.summaryStatus;
+
+  if (data.scheduledDate !== undefined) {
+    update.scheduledDate = data.scheduledDate
+      ? serializeScheduledDate(data.scheduledDate)
+      : null;
+  }
+
+  if (data.customer !== undefined)
+    update.customer = coalesceText(data.customer);
+
+  if (data.repeat !== undefined) update.repeat = coalesceText(data.repeat);
+
+  return update;
+}
+
 /** Create a new draft request */
 export async function createDraft(
   uid: string,
@@ -123,6 +152,7 @@ export async function submitDraft(
     status: "active",
     updatedAt: FieldValue.serverTimestamp(),
     submittedAt: FieldValue.serverTimestamp(),
+    ...buildUpdateFromData(data),
   };
 
   if ("promptRich" in data || "prompt" in data) {
@@ -163,6 +193,7 @@ export async function updateActive(
 
   const update: WriteUpdate = {
     updatedAt: FieldValue.serverTimestamp(),
+    ...buildUpdateFromData(data),
   };
 
   if ("promptRich" in data || "prompt" in data) {
@@ -226,12 +257,10 @@ export async function deleteRequest(uid: string, requestId: string) {
 export async function markSummarySuccess(
   uid: string,
   requestId: string,
-  summary: string,
-  prompt: string
+  summary: string
 ) {
   await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
     summary,
-    summarySourcePrompt: prompt,
     summaryStatus: "ready",
     updatedAt: FieldValue.serverTimestamp(),
   });
@@ -247,12 +276,10 @@ export async function markSummaryFailure(uid: string, requestId: string) {
 export async function markSummaryPending(
   uid: string,
   requestId: string,
-  prompt: string
 ) {
   await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
     summaryStatus: "pending",
     summary: "",
-    summarySourcePrompt: prompt,
     updatedAt: FieldValue.serverTimestamp(),
   });
 }

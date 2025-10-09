@@ -3,18 +3,13 @@ export const a = 1;
  * Configuration for the task summarization API
  */
 
-export const SYSTEM_PROMPT = `You are helping a customer success manager. Understand their request and summarize what they want to do.
-The summary should help the CS manager verify that their request is accurately understood. 
-Split their request into individual tasks if applicable. 
-Present these as bullet points
-"You need me to:
-- [Task 1]
-- [Task 2]
-- ... 
-- [Task N]"
-Do not add extra tasks or suggestions.
+export const SYSTEM_PROMPT = `You are helping a customer success manager clarify their task request. Generate up to 3 brief one-line questions to better understand what they need, with a short probable answer for each. Only ask questions that would genuinely help - fewer than 3 are okay. Drop any filler words.
 
-Example task: Cross-check and validate that all metrics, charts, and account performance details are refreshed and accurate for presentation`;
+Return your response as a valid JSON array of objects:
+[
+  {"question": "Question?", "answer": "Answer"},
+  {"question": "Question?", "answer": "Answer"}
+]`;
 
 export const PROVIDERS = ["openai", "openai-compatible", "anthropic"] as const;
 export type ProviderType = (typeof PROVIDERS)[number];

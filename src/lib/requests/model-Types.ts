@@ -7,7 +7,6 @@ export interface Request {
   promptRich: SerializedEditorState<SerializedLexicalNode> | null;
   scheduledDate: Date | null;
   summary: string;
-  summarySourcePrompt?: string;
   summaryStatus?: "idle" | "pending" | "ready" | "failed";
   status: "draft" | "active";
   createdAt: Date | null;
@@ -25,7 +24,6 @@ export type RequestPatch = Partial<
     | "prompt"
     | "promptRich"
     | "summary"
-    | "summarySourcePrompt"
     | "summaryStatus"
     | "scheduledDate"
     | "status"

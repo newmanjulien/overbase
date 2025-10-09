@@ -7,6 +7,7 @@ import Prompt from "./Prompt";
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/requests/store";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
+import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 interface PromptClientProps {
   requestId: string;
@@ -95,15 +96,16 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       promptRich: promptRich,
       customer: customer,
       summary: "",
-      summarySourcePrompt: "",
       summaryStatus: "pending",
     });
+
+    const promptText = promptRich ? lexicalToPlainText(promptRich) : prompt;
 
     fetch("/api/summarise", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: prompt.trim(),
+        text: promptText.trim(),
         requestId,
         uid: user.uid,
       }),
@@ -111,13 +113,16 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as {
-          summary?: string;
+          summaryJson?: string;
+          summaryItems?: { question: string; answer: string }[];
           serverUpdated?: boolean;
         };
+        const summaryJson =
+          data.summaryJson ??
+          JSON.stringify(data.summaryItems ?? [], null, 0);
         if (data.serverUpdated) return; // backend already saved
         await updateActive(user.uid, requestId, {
-          summary: data.summary ?? "",
-          summarySourcePrompt: prompt,
+          summary: summaryJson,
           summaryStatus: "ready",
         });
       })
