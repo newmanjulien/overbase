@@ -98,7 +98,7 @@ export default function Schedule({
               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent side="bottom" align="end">
+          <PopoverContent side="bottom" align="end" className="rounded-2xl p-3">
             <Calendar
               mode="single"
               selected={scheduledDate ?? undefined}
