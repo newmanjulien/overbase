@@ -118,8 +118,7 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
           serverUpdated?: boolean;
         };
         const summaryJson =
-          data.summaryJson ??
-          JSON.stringify(data.summaryItems ?? [], null, 0);
+          data.summaryJson ?? JSON.stringify(data.summaryItems ?? [], null, 0);
         if (data.serverUpdated) return; // backend already saved
         await updateActive(user.uid, requestId, {
           summary: summaryJson,
@@ -160,13 +159,12 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
   };
 
   const handleHome = async (): Promise<void> => {
-    const confirmed = window.confirm(
-      "Are you sure you want to return to the dashboard? Your changes will be deleted."
-    );
-    if (!confirmed) return;
-
     if (mode === "create") {
-      // Delete draft if we're still creating a new one
+      const confirmed = window.confirm(
+        "Are you sure you want to return to the dashboard? Your request will not be created"
+      );
+      if (!confirmed) return;
+
       if (user) {
         try {
           await deleteRequest(user.uid, requestId);
