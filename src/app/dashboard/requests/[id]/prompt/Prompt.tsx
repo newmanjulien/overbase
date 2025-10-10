@@ -74,7 +74,7 @@ export default function Prompt({
           ],
         })}
       // Main
-      title="What data do you want us to get for you?"
+      title="What data do you want us to get?"
       subtitle="Explain what data you need with as many details as possible. Use the @ symbol to tag connectors"
       // Footer
       primaryButtonText="Next"
