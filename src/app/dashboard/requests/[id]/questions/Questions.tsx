@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import SetupLayout from "@/components/layouts/SetupLayout";
-import { Questions } from "./Questions";
+import { QuestionBlock } from "@/components/blocks/QuestionBlock";
 
 const CONNECTORS = [
   { id: "slack", name: "Slack", logo: "/images/slack.png" },
@@ -11,7 +11,7 @@ const CONNECTORS = [
   { id: "salesforce", name: "Salesforce", logo: "/images/salesforce.png" },
 ];
 
-interface ConfirmProps {
+interface QuestionsProps {
   summary: string;
   setSummary: (v: string) => void;
   onSubmit: () => void | Promise<void>;
@@ -24,7 +24,7 @@ interface ConfirmProps {
   infoMessage?: string | null;
 }
 
-export default function Confirm({
+export default function Questions({
   summary,
   setSummary,
   onSubmit,
@@ -35,7 +35,7 @@ export default function Confirm({
   setStatus,
   mode,
   infoMessage,
-}: ConfirmProps) {
+}: QuestionsProps) {
   // Parse summary into questions array
   const questions = useMemo(() => {
     try {
@@ -60,7 +60,7 @@ export default function Confirm({
 
   // Handle answer changes
   const handleAnswerChange = (questionId: string, newAnswer: string) => {
-    const questionIndex = parseInt(questionId.replace('question-', ''));
+    const questionIndex = parseInt(questionId.replace("question-", ""));
     const updatedQuestions = [...questions];
 
     if (updatedQuestions[questionIndex]) {
@@ -70,7 +70,7 @@ export default function Confirm({
       };
 
       // Update summary JSON
-      const summaryData = updatedQuestions.map(q => ({
+      const summaryData = updatedQuestions.map((q) => ({
         question: q.question,
         answer: q.answer,
       }));
@@ -82,7 +82,7 @@ export default function Confirm({
     <SetupLayout
       sidebarBackText="Back to requests"
       onSidebarBack={onHome}
-      sidebarTitle="Edit this summary of your request"
+      sidebarTitle="Answer a few optional questions"
       {...(mode !== "create" &&
         setStatus && {
           sidebarActionText: "Delete request",
@@ -94,8 +94,8 @@ export default function Confirm({
             { value: "active", label: "Active" },
           ],
         })}
-      title="Did we understand correctly?"
-      subtitle="This is a summary of what we understood from your request. Click edit if something is wrong"
+      title="Optional questions"
+      subtitle="We did a quick review of your request and these are optional questions which might help us complete it"
       primaryButtonText="Done"
       onPrimaryAction={onSubmit}
       secondaryButtonText="Restart"
@@ -105,7 +105,7 @@ export default function Confirm({
         {infoMessage && (
           <p className="text-sm text-muted-foreground mb-3">{infoMessage}</p>
         )}
-        <Questions
+        <QuestionBlock
           questions={questions}
           mentionOptions={CONNECTORS}
           placeholder="Type your answer here..."

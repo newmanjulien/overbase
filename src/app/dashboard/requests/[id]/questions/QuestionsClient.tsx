@@ -2,17 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import ConfirmUI from "./Confirm";
+import QuestionsUI from "./Questions";
 import { useAuth } from "@/lib/auth";
 import { useRequestListStore } from "@/lib/requests/store";
 import { toDateKey } from "@/lib/requests/Dates";
 
-interface ConfirmClientProps {
+interface QuestionsClientProps {
   requestId: string;
   mode: "create" | "edit" | "editDraft";
 }
 
-export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
+export default function QuestionsClient({
+  requestId,
+  mode,
+}: QuestionsClientProps) {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -93,13 +96,12 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
   };
 
   const handleHome = async (): Promise<void> => {
-    const confirmed = window.confirm(
-      "Are you sure you want to return to the dashboard? Your changes will be deleted."
-    );
-    if (!confirmed) return;
-
     if (mode === "create") {
-      // Delete draft if we're still creating a new one
+      const confirmed = window.confirm(
+        "Are you sure you want to return to the dashboard? Your request will not be created"
+      );
+      if (!confirmed) return;
+
       if (user) {
         try {
           await deleteRequest(user.uid, requestId);
@@ -124,7 +126,7 @@ export default function ConfirmClient({ requestId, mode }: ConfirmClientProps) {
       : null;
 
   return (
-    <ConfirmUI
+    <QuestionsUI
       summary={summary ?? ""}
       setSummary={setSummary}
       onSubmit={handleSubmit}

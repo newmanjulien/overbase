@@ -136,13 +136,12 @@ export default function ScheduleClient({
   };
 
   const handleHome = async (): Promise<void> => {
-    const confirmed = window.confirm(
-      "Are you sure you want to return to the dashboard? Your changes will be deleted."
-    );
-    if (!confirmed) return;
-
     if (mode === "create") {
-      // Delete draft if we're still creating a new one
+      const confirmed = window.confirm(
+        "Are you sure you want to return to the dashboard? Your request will not be created"
+      );
+      if (!confirmed) return;
+
       if (user) {
         try {
           await deleteRequest(user.uid, requestId);
