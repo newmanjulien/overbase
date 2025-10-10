@@ -14,7 +14,7 @@ import type { DataSectionProps } from "../../../components/layouts/DataSection";
 import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/requests/store";
+import { useRequestList, useRequestActions } from "@/lib/requests/hooks";
 import LoadingScreen from "@/components/blocks/Loading";
 
 export interface RequestOptions {
@@ -36,40 +36,24 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
   const draftUsedRef = useRef(false);
 
   const { user, loading } = useAuth();
-  const {
-    requestsByDate,
-    ensureDraft,
-    updateActive,
-    subscribe,
-    maybeCleanupEphemeral,
-  } = useRequestListStore();
+  const { requestsByDate } = useRequestList(user?.uid);
+  const { ensureDraft, updateActive, maybeCleanupEphemeral } =
+    useRequestActions();
 
   useEffect(() => {
     if (loading) return;
-    if (!user?.uid) {
-      console.warn("RequestsClient: no valid uid after loading", user?.uid);
-      return;
-    }
+    if (!user?.uid) return;
 
-    try {
-      const unsub = subscribe(user.uid);
-
-      // Ensure a single draft exists, set it as nextRequestId
-      (async () => {
-        try {
-          const id = await ensureDraft(user.uid);
-          setNextRequestId(id);
-          router.prefetch(`/dashboard/requests/${id}/prompt`);
-        } catch (err) {
-          console.error("RequestsClient: ensureDraft failed", err);
-        }
-      })();
-
-      return () => unsub();
-    } catch (err) {
-      console.error("RequestsClient: subscribe failed", err);
-    }
-  }, [user?.uid, loading, subscribe, ensureDraft, router]);
+    (async () => {
+      try {
+        const id = await ensureDraft(user.uid);
+        setNextRequestId(id);
+        router.prefetch(`/dashboard/requests/${id}/prompt`);
+      } catch (err) {
+        console.error("RequestsClient: ensureDraft failed", err);
+      }
+    })();
+  }, [user?.uid, loading, ensureDraft, router]);
 
   // 🧹 Cleanup unused draft on unmount
   useEffect(() => {
@@ -79,19 +63,6 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
       maybeCleanupEphemeral(user.uid, nextRequestId).catch(() => {});
     };
   }, [user?.uid, nextRequestId, maybeCleanupEphemeral]);
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
-  if (!user) {
-    return (
-      <div className="p-6 text-center text-gray-600">
-        ⚠️ No authenticated user. Please check your Firebase setup or try again
-        later.
-      </div>
-    );
-  }
 
   const handleRequestData = async (options?: RequestOptions) => {
     if (!user?.uid || !nextRequestId) return;

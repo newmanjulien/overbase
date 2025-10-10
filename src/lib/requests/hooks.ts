@@ -102,7 +102,6 @@ export function useRequest(uid: string | undefined, id: string | undefined) {
 /* -------------------------------------------------------------------------- */
 
 export function useRequestActions() {
-  // All Firestore mutations are already defined in service-Client.ts
   const ensureDraftCb = useCallback((uid: string) => ensureDraft(uid), []);
   const updateActiveCb = useCallback(
     (uid: string, id: string, patch: RequestPatch) =>
@@ -126,6 +125,27 @@ export function useRequestActions() {
     []
   );
 
+  // 🧹 New helper: delete ephemeral drafts if they’re empty
+  const maybeCleanupEphemeralCb = useCallback(
+    async (uid: string, id: string) => {
+      try {
+        const draft = await svcLoadOne(uid, id);
+        if (
+          draft &&
+          draft.status === "draft" &&
+          draft.ephemeral === true &&
+          !draft.prompt &&
+          !draft.customer
+        ) {
+          await deleteRequest(uid, id);
+        }
+      } catch (err) {
+        console.warn("maybeCleanupEphemeral: failed", err);
+      }
+    },
+    []
+  );
+
   return useMemo(
     () => ({
       ensureDraft: ensureDraftCb,
@@ -134,6 +154,7 @@ export function useRequestActions() {
       demoteToDraft: demoteToDraftCb,
       deleteRequest: deleteRequestCb,
       loadOne: loadOneCb,
+      maybeCleanupEphemeral: maybeCleanupEphemeralCb, // 👈 new method exported
     }),
     [
       ensureDraftCb,
@@ -142,6 +163,7 @@ export function useRequestActions() {
       demoteToDraftCb,
       deleteRequestCb,
       loadOneCb,
+      maybeCleanupEphemeralCb,
     ]
   );
 }
