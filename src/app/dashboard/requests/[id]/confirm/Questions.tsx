@@ -57,6 +57,11 @@ export function Questions({ questions, mentionOptions, placeholder, onAnswerChan
       <div className="space-y-4">
         {questions.map((question) => {
           const isExpanded = expandedQuestion.has(question.id);
+          const parts = question.question
+            .split("\n")
+            .map((part) => part.trim())
+            .filter(Boolean);
+          const [title, ...details] = parts;
 
           return (
             <Card
@@ -68,8 +73,19 @@ export function Questions({ questions, mentionOptions, placeholder, onAnswerChan
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-baseline mb-1">
-                    <h2 className="text-sm font-medium">{question.question}</h2>
+                  <div className="space-y-1">
+                    <p className="text-base font-medium text-foreground">
+                      {title ?? question.question}
+                    </p>
+                    {details.length > 0 && (
+                      <div className="space-y-1">
+                        {details.map((line, idx) => (
+                          <p key={idx} className="text-sm text-muted-foreground">
+                            {line}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div

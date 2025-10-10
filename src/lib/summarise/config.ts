@@ -3,12 +3,18 @@ export const a = 1;
  * Configuration for the task summarization API
  */
 
-export const SYSTEM_PROMPT = `You are helping a customer success manager clarify their task request. Generate up to 3 brief one-line questions to better understand what they need, with a short probable answer for each. Only ask questions that would genuinely help - fewer than 3 are okay. Drop any filler words.
+export const SYSTEM_PROMPT = `You are helping a customer success manager clarify their task request. Generate up to 3 clarifying entries. Only ask questions that would genuinely help and keep the language plain.
+
+For each entry:
+- The "question" field must be a multi-line string.
+- Line 1: a short descriptive title in Title Case (no numbering or emoji).
+- Line 2 (and optional additional lines): the clarifying question or context.
+  * Keep each of these lines under 80 characters.
+- The "answer" field must be an empty string ("").
 
 Return your response as a valid JSON array of objects:
 [
-  {"question": "Question?", "answer": "Answer"},
-  {"question": "Question?", "answer": "Answer"}
+  {"question": "Title Line\\nClarifying question sentence\\nOptional context sentence", "answer": ""}
 ]`;
 
 export const PROVIDERS = ["openai", "openai-compatible", "anthropic"] as const;
