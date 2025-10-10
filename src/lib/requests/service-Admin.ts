@@ -100,20 +100,6 @@ function buildUpdateFromData(data: Partial<Request>): WriteUpdate {
   return update;
 }
 
-
-
-  // Write raw data
-  await adminDb.doc(`users/${uid}/requests/${requestId}`).set(draft);
-
-  // Read back with converter
-  const snap = await adminDb
-    .doc(`users/${uid}/requests/${requestId}`)
-    .withConverter(requestReadConverterAdmin)
-    .get();
-
-  return snap.data()!;
-}
-
 /** Submit draft → active */
 export async function submitDraft(
   uid: string,
@@ -241,10 +227,7 @@ export async function markSummaryFailure(uid: string, requestId: string) {
   });
 }
 
-export async function markSummaryPending(
-  uid: string,
-  requestId: string,
-) {
+export async function markSummaryPending(uid: string, requestId: string) {
   await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
     summaryStatus: "pending",
     summary: "",
