@@ -87,12 +87,8 @@ export default function Questions({
         setStatus && {
           sidebarActionText: "Delete request",
           onSidebarAction: onDelete,
-          toggleValue: status,
-          onToggleChange: (val) => void setStatus(val as "draft" | "active"),
-          toggleOptions: [
-            { value: "draft", label: "Draft" },
-            { value: "active", label: "Active" },
-          ],
+          topRightButtonText: "Refresh",
+          onTopRightButtonClick: () => {},
         })}
       title="Optional questions"
       subtitle="We did a quick review of your request and these are optional questions which might help us complete it"

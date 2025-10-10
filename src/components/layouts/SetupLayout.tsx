@@ -35,7 +35,6 @@ interface SetupLayoutProps {
   // Optional top-right button (alternative to toggle)
   topRightButtonText?: string;
   onTopRightButtonClick?: () => void | Promise<void>;
-  topRightButtonVariant?: "default" | "outline" | "ghost";
 }
 
 export default function SetupLayout({
@@ -57,7 +56,6 @@ export default function SetupLayout({
   toggleOptions,
   topRightButtonText,
   onTopRightButtonClick,
-  topRightButtonVariant,
 }: SetupLayoutProps) {
   return (
     <div className="flex h-full w-full">
@@ -80,11 +78,7 @@ export default function SetupLayout({
               ))}
             </ToggleGroup>
           ) : (
-            <Button
-              size="sm"
-              variant={topRightButtonVariant ?? "default"}
-              onClick={onTopRightButtonClick}
-            >
+            <Button size="sm" variant="outline" onClick={onTopRightButtonClick}>
               {topRightButtonText}
             </Button>
           )}

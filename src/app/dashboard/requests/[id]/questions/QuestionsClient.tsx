@@ -114,12 +114,6 @@ export default function QuestionsClient({
     router.push(`/dashboard/requests`);
   };
 
-  const handleStatusChange = async (val: "draft" | "active") => {
-    if (!user) return;
-    if (val === "active") await promoteToActive(user.uid, requestId);
-    else await demoteToDraft(user.uid, requestId);
-  };
-
   const infoMessage =
     existing?.summaryStatus === "failed"
       ? "Could not generate summary automatically."
@@ -134,7 +128,6 @@ export default function QuestionsClient({
       onHome={handleHome}
       onDelete={handleDelete}
       status={status}
-      setStatus={mode !== "create" ? handleStatusChange : undefined}
       mode={mode}
       infoMessage={infoMessage}
     />
