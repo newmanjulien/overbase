@@ -1,8 +1,12 @@
 "use client";
 
 import { Header } from "@/components/blocks/Header";
-import Calendar, { CalendarProps } from "./Calendar";
-import DataSection, { DataSectionProps } from "./DataSection";
+import Calendar, {
+  CalendarProps,
+} from "../../../components/layouts/CalendarSection";
+import DataSection, {
+  DataSectionProps,
+} from "../../../components/layouts/DataSection";
 import type { RequestOptions } from "./RequestsClient";
 
 interface RequestsProps {

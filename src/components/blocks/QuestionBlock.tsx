@@ -16,14 +16,19 @@ interface MentionOption {
   logo?: string;
 }
 
-interface QuestionsProps {
+interface QuestionBlockProps {
   questions: Question[];
   mentionOptions: MentionOption[];
   placeholder: string;
   onAnswerChange: (questionId: string, answer: string) => void;
 }
 
-export function Questions({ questions, mentionOptions, placeholder, onAnswerChange }: QuestionsProps) {
+export function QuestionBlock({
+  questions,
+  mentionOptions,
+  placeholder,
+  onAnswerChange,
+}: QuestionBlockProps) {
   const [expandedQuestion, setExpandedQuestion] = useState<Set<string>>(
     new Set(questions.length > 0 ? [questions[0].id] : [])
   );
@@ -32,7 +37,7 @@ export function Questions({ questions, mentionOptions, placeholder, onAnswerChan
   const initialAnswers = React.useRef<Record<string, string>>({});
 
   React.useEffect(() => {
-    questions.forEach(q => {
+    questions.forEach((q) => {
       if (!(q.id in initialAnswers.current)) {
         initialAnswers.current[q.id] = q.answer;
       }
@@ -102,7 +107,9 @@ export function Questions({ questions, mentionOptions, placeholder, onAnswerChan
                         key={question.id}
                         placeholder={placeholder}
                         className="text-sm border-gray-200 min-h-24"
-                        initialValue={initialAnswers.current[question.id] || question.answer}
+                        initialValue={
+                          initialAnswers.current[question.id] || question.answer
+                        }
                         onChange={(text) => {
                           onAnswerChange(question.id, text);
                         }}

@@ -9,8 +9,8 @@ import {
 } from "@/lib/requests/Dates";
 import { useRouter } from "next/navigation";
 
-import type { CalendarProps } from "./Calendar";
-import type { DataSectionProps } from "./DataSection";
+import type { CalendarProps } from "../../../components/layouts/CalendarSection";
+import type { DataSectionProps } from "../../../components/layouts/DataSection";
 import { Requests } from "./Requests";
 
 import { useAuth } from "@/lib/auth";
