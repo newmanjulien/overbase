@@ -100,30 +100,7 @@ function buildUpdateFromData(data: Partial<Request>): WriteUpdate {
   return update;
 }
 
-/** Create a new draft request */
-export async function createDraft(
-  uid: string,
-  initialData: Partial<Request> = {},
-  id?: string
-): Promise<Request> {
-  const requestId = id ?? crypto.randomUUID();
 
-  const draft: WriteRequest = {
-    id: requestId,
-    prompt: initialData.prompt ?? "",
-    promptRich: initialData.promptRich ?? null,
-    scheduledDate: initialData.scheduledDate
-      ? serializeScheduledDate(initialData.scheduledDate)
-      : null,
-    summary: "",
-    summaryStatus: "idle",
-    status: "draft",
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-    submittedAt: null,
-    customer: initialData.customer ?? "",
-    repeat: initialData.repeat ?? { type: "none" },
-  };
 
   // Write raw data
   await adminDb.doc(`users/${uid}/requests/${requestId}`).set(draft);
