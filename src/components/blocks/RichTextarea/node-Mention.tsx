@@ -142,7 +142,7 @@ export class MentionNode extends DecoratorNode<React.ReactElement> {
   }
 
   isIsolated(): boolean {
-    return true; // Prevent cursor entering inside mention
+    return false;
   }
 
   canInsertTextBefore(): boolean {

@@ -171,11 +171,19 @@ export async function POST(req: NextRequest) {
 
     try {
       // Skip actual LLM call in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Skipping LLM call in development mode');
+      if (process.env.NODE_ENV === "development") {
+        console.log("Skipping LLM call in development mode");
         const mockSummaryItems = [
-          { question: "What is the main goal?", answer: "Mock answer for development" },
-          { question: "Who is involved?", answer: "Mock stakeholders" },
+          {
+            question:
+              "Clarify Main Goal\nWhat outcome do you want the automation to achieve?\nMention any success metrics if you have them.",
+            answer: "",
+          },
+          {
+            question:
+              "Identify Primary Stakeholders\nWho will use or maintain this workflow day to day?",
+            answer: "",
+          },
         ];
         return NextResponse.json<SummariseResponse>({
           summaryJson: JSON.stringify(mockSummaryItems),
@@ -187,10 +195,16 @@ export async function POST(req: NextRequest) {
       const responseText = await provider.generate(promptText);
       const { summaryJson, summaryItems } =
         normalizeSummaryResponse(responseText);
+      const sanitizedItems =
+        summaryItems.length > 0
+          ? summaryItems.map(({ question }) => ({ question, answer: "" }))
+          : [];
+      const sanitizedJson =
+        sanitizedItems.length > 0 ? JSON.stringify(sanitizedItems) : summaryJson;
 
       if (serverUpdated && uid && requestId) {
         try {
-          await markSummarySuccess(uid, requestId, summaryJson);
+          await markSummarySuccess(uid, requestId, sanitizedJson);
         } catch (err) {
           console.warn("markSummarySuccess failed", err);
           serverUpdated = false;
@@ -198,8 +212,8 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json<SummariseResponse>({
-        summaryJson,
-        summaryItems,
+        summaryJson: sanitizedJson,
+        summaryItems: sanitizedItems,
         serverUpdated,
       });
     } catch (err) {
