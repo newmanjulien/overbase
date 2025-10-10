@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Prompt from "./Prompt";
 
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/requests/store";
+import { useRequest, useRequestActions } from "@/lib/requests/hooks";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
 
@@ -24,14 +24,9 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     useState<SerializedEditorState<SerializedLexicalNode> | null>(null);
   const [customer, setCustomer] = useState<string>("");
 
-  const {
-    requests,
-    loadOne,
-    updateActive,
-    promoteToActive,
-    demoteToDraft,
-    deleteRequest,
-  } = useRequestListStore();
+  const request = useRequest(user?.uid, requestId);
+  const { updateActive, promoteToActive, demoteToDraft, deleteRequest } =
+    useRequestActions();
 
   const [errors, setErrors] = useState<{ prompt?: string; customer?: string }>(
     {}
@@ -39,23 +34,16 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
 
   const didHydrateFromFirestore = React.useRef(false);
 
-  // Load from store
-  useEffect(() => {
-    if (!user) return;
-    loadOne(user.uid, requestId);
-  }, [user, requestId, loadOne]);
-
   // Hydrate from Firestore once
   useEffect(() => {
-    const existing = requests[requestId];
-    if (!existing) return;
-    if (!didHydrateFromFirestore.current) {
-      if (existing.prompt) setPrompt(existing.prompt);
-      if (existing.promptRich) setPromptRich(existing.promptRich);
-      if (existing.customer) setCustomer(existing.customer);
-      didHydrateFromFirestore.current = true;
-    }
-  }, [requests, requestId]);
+    if (!request || didHydrateFromFirestore.current) return;
+
+    if (request.prompt) setPrompt(request.prompt);
+    if (request.promptRich) setPromptRich(request.promptRich);
+    if (request.customer) setCustomer(request.customer);
+
+    didHydrateFromFirestore.current = true;
+  }, [request]);
 
   // Auto-save
   useEffect(() => {
@@ -82,8 +70,7 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     return Object.keys(errs).length === 0;
   };
 
-  const existing = requests[requestId];
-  const status = existing?.status ?? "draft";
+  const status = request?.status ?? "draft";
 
   const handleSubmit = async (): Promise<void> => {
     if (!validate()) return;

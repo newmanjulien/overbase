@@ -64,6 +64,8 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     };
   }, [user?.uid, nextRequestId, maybeCleanupEphemeral]);
 
+  if (loading) return <LoadingScreen />;
+
   const handleRequestData = async (options?: RequestOptions) => {
     if (!user?.uid || !nextRequestId) return;
 
