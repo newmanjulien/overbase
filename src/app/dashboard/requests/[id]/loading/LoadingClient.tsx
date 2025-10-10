@@ -48,7 +48,7 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
   useEffect(() => {
     timeoutRef.current = setTimeout(() => {
       router.push(
-        `/dashboard/requests/${requestId}/confirm?mode=${mode}${
+        `/dashboard/requests/${requestId}/questions?mode=${mode}${
           date ? `&date=${date}` : ""
         }&error=summary_timeout`
       );
@@ -65,7 +65,7 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
     if (target.summary && target.summary.trim().length > 0) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       router.push(
-        `/dashboard/requests/${requestId}/confirm?mode=${mode}${
+        `/dashboard/requests/${requestId}/questions?mode=${mode}${
           date ? `&date=${date}` : ""
         }`
       );
@@ -75,7 +75,7 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
     if (target.summaryStatus === "failed") {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       router.push(
-        `/dashboard/requests/${requestId}/confirm?mode=${mode}${
+        `/dashboard/requests/${requestId}/questions?mode=${mode}${
           date ? `&date=${date}` : ""
         }&error=summary`
       );
