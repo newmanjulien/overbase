@@ -12,7 +12,7 @@ import {
   makeRepeatRule,
 } from "@/lib/requests/Dates";
 import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/requests/store";
+import { useRequest, useRequestActions } from "@/lib/requests/hooks";
 import ScheduleUI from "./Schedule";
 
 interface ScheduleClientProps {
@@ -28,14 +28,10 @@ export default function ScheduleClient({
 }: ScheduleClientProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const {
-    requests,
-    loadOne,
-    updateActive,
-    promoteToActive,
-    demoteToDraft,
-    deleteRequest,
-  } = useRequestListStore();
+  const { updateActive, promoteToActive, demoteToDraft, deleteRequest } =
+    useRequestActions();
+
+  const request = useRequest(user?.uid, requestId);
 
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [repeat, setRepeat] = useState<RepeatRule["type"]>("none");
@@ -49,37 +45,18 @@ export default function ScheduleClient({
     if (prefillDate) setScheduledDate(fromDateKey(prefillDate as DateKey));
   }, [prefillDate]);
 
-  // hydrate from store
   useEffect(() => {
-    if (!user) return;
-    loadOne(user.uid, requestId);
-  }, [user, requestId, loadOne]);
+    if (hydratedRef.current || !request) return;
 
-  // hydrate scheduledDate + repeat once when request loads
-  // hydrate scheduledDate + repeat once when request loads
-  useEffect(() => {
-    if (hydratedRef.current) return;
-    const record = requests[requestId];
-    if (!record) return;
-
-    if (record.scheduledDate) {
-      setScheduledDate(record.scheduledDate);
-    }
-
-    if (
-      record.repeat &&
-      typeof record.repeat === "object" &&
-      "type" in record.repeat
-    ) {
-      setRepeat(record.repeat.type);
+    if (request.scheduledDate) setScheduledDate(request.scheduledDate);
+    if (request.repeat && typeof request.repeat === "object") {
+      setRepeat(request.repeat.type);
     }
 
     hydratedRef.current = true;
-  }, [requests, requestId]);
+  }, [request]);
 
-  // derive status from store
-  const existing = requests[requestId];
-  const status = existing?.status ?? "draft";
+  const status = request?.status ?? "draft";
 
   const handleStatusChange = async (val: "draft" | "active") => {
     if (!user) return;
@@ -88,15 +65,18 @@ export default function ScheduleClient({
   };
 
   const validate = () => {
-    if (!scheduledDate)
-      return setErrors({ scheduledDate: "Date required" }), false;
-    if (!isFutureDate(scheduledDate))
-      return setErrors({ scheduledDate: "Date must be in the future" }), false;
-    if (isBeforeDate(scheduledDate, minSelectable))
-      return (
-        setErrors({ scheduledDate: "Date must be at least 2 days in future" }),
-        false
-      );
+    if (!scheduledDate) {
+      setErrors({ scheduledDate: "Date required" });
+      return false;
+    }
+    if (!isFutureDate(scheduledDate)) {
+      setErrors({ scheduledDate: "Date must be in the future" });
+      return false;
+    }
+    if (isBeforeDate(scheduledDate, minSelectable)) {
+      setErrors({ scheduledDate: "Date must be at least 2 days in future" });
+      return false;
+    }
     setErrors({});
     return true;
   };
