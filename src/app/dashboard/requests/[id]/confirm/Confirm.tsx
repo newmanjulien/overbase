@@ -1,9 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
+import { useMemo } from "react";
 import SetupLayout from "@/components/layouts/SetupLayout";
-import { Button } from "@/components/ui/button"; // Assuming you have a Button component
+import { Questions } from "./Questions";
+
+const CONNECTORS = [
+  { id: "slack", name: "Slack", logo: "/images/slack.png" },
+  { id: "docusign", name: "Docusign", logo: "/images/docusign.png" },
+  { id: "gmail", name: "Gmail", logo: "/images/gmail.png" },
+  { id: "salesforce", name: "Salesforce", logo: "/images/salesforce.png" },
+];
 
 interface ConfirmProps {
   summary: string;
@@ -30,11 +36,8 @@ export default function Confirm({
   mode,
   infoMessage,
 }: ConfirmProps) {
-  const [isEditable, setIsEditable] = useState(false);
-
-  // Temporary display formatting until the structured UI is in place.
-  const displaySummary = useMemo(() => {
-    if (isEditable) return summary;
+  // Parse summary into questions array
+  const questions = useMemo(() => {
     try {
       const parsed = JSON.parse(summary) as Array<{
         question: string;
@@ -42,19 +45,38 @@ export default function Confirm({
       }>;
 
       if (!Array.isArray(parsed) || parsed.length === 0) {
-        return summary;
+        return [];
       }
 
-      return parsed
-        .map(
-          (item, index) =>
-            `Q${index + 1}: ${item.question.trim()}\nA: ${item.answer.trim()}`,
-        )
-        .join("\n\n");
+      return parsed.map((item, index) => ({
+        id: `question-${index}`,
+        question: item.question,
+        answer: item.answer,
+      }));
     } catch {
-      return summary;
+      return [];
     }
-  }, [summary, isEditable]);
+  }, [summary]);
+
+  // Handle answer changes
+  const handleAnswerChange = (questionId: string, newAnswer: string) => {
+    const questionIndex = parseInt(questionId.replace('question-', ''));
+    const updatedQuestions = [...questions];
+
+    if (updatedQuestions[questionIndex]) {
+      updatedQuestions[questionIndex] = {
+        ...updatedQuestions[questionIndex],
+        answer: newAnswer,
+      };
+
+      // Update summary JSON
+      const summaryData = updatedQuestions.map(q => ({
+        question: q.question,
+        answer: q.answer,
+      }));
+      setSummary(JSON.stringify(summaryData, null, 0));
+    }
+  };
 
   return (
     <SetupLayout
@@ -79,31 +101,16 @@ export default function Confirm({
       secondaryButtonText="Restart"
       onSecondaryAction={onBack}
     >
-      <div className="relative">
+      <div>
         {infoMessage && (
           <p className="text-sm text-muted-foreground mb-3">{infoMessage}</p>
         )}
-        <Textarea
-          id="summary"
-          value={displaySummary}
-          onChange={(e) => setSummary(e.target.value)}
-          readOnly={!isEditable}
-          className={`mt-1 min-h-90 ${
-            !isEditable ? "bg-gray-50 text-gray-400" : ""
-          }`}
+        <Questions
+          questions={questions}
+          mentionOptions={CONNECTORS}
+          placeholder="Type your answer here..."
+          onAnswerChange={handleAnswerChange}
         />
-
-        {!isEditable && (
-          <div className="absolute bottom-2 right-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setIsEditable(true)}
-            >
-              Edit
-            </Button>
-          </div>
-        )}
       </div>
     </SetupLayout>
   );
