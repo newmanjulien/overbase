@@ -65,8 +65,15 @@ function LoadStatePlugin({
 }) {
   const [editor] = useLexicalComposerContext();
   const lastAppliedRef = React.useRef<string>("");
+  // const didInit = React.useRef(false);
 
   useEffect(() => {
+    // if (didInit.current && editor.isEditable()) {
+    //   return;
+    // }
+
+    // didInit.current = true;
+
     const serialized =
       initialValueRich != null
         ? JSON.stringify(initialValueRich)

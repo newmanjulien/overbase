@@ -31,6 +31,11 @@ interface SetupLayoutProps {
   toggleValue?: string;
   onToggleChange?: (val: string) => void;
   toggleOptions?: Array<{ value: string; label: string }>;
+
+  // Optional top-right button (alternative to toggle)
+  topRightButtonText?: string;
+  onTopRightButtonClick?: () => void | Promise<void>;
+  topRightButtonVariant?: "default" | "outline" | "ghost";
 }
 
 export default function SetupLayout({
@@ -50,27 +55,41 @@ export default function SetupLayout({
   toggleValue,
   onToggleChange,
   toggleOptions,
+  topRightButtonText,
+  onTopRightButtonClick,
+  topRightButtonVariant,
 }: SetupLayoutProps) {
   return (
     <div className="flex h-full w-full">
-      {/* Toggle */}
-      {toggleOptions && onToggleChange && (
-        <div className="absolute top-25 right-14">
-          <ToggleGroup
-            type="single"
-            value={toggleValue}
-            onValueChange={(val) => val && onToggleChange(val)}
-            variant="outline"
-            size="sm"
-          >
-            {toggleOptions.map((opt) => (
-              <ToggleGroupItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+      {/* Top-right control: Toggle OR Button */}
+      {(toggleOptions && onToggleChange) ||
+      (topRightButtonText && onTopRightButtonClick) ? (
+        <div className="absolute top-24 right-14">
+          {toggleOptions && onToggleChange ? (
+            <ToggleGroup
+              type="single"
+              value={toggleValue}
+              onValueChange={(val) => val && onToggleChange(val)}
+              variant="outline"
+              size="sm"
+            >
+              {toggleOptions.map((opt) => (
+                <ToggleGroupItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          ) : (
+            <Button
+              size="sm"
+              variant={topRightButtonVariant ?? "default"}
+              onClick={onTopRightButtonClick}
+            >
+              {topRightButtonText}
+            </Button>
+          )}
         </div>
-      )}
+      ) : null}
 
       {/* Sidebar */}
       <aside className="sticky top-14 h-[calc(100vh-56px)] flex flex-col w-96 bg-gray-100 border-r border-gray-200 px-12 pt-10 pb-6">
