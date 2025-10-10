@@ -138,7 +138,7 @@ export default function ScheduleClient({
   const handleHome = async (): Promise<void> => {
     if (mode === "create") {
       const confirmed = window.confirm(
-        "Are you sure you want to return to the dashboard? Your changes will be deleted."
+        "Are you sure you want to return to the dashboard? Your request will not be created"
       );
       if (!confirmed) return;
 

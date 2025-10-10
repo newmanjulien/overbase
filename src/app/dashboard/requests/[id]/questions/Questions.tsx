@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import SetupLayout from "@/components/layouts/SetupLayout";
-import { Questions } from "@/components/blocks/Questions";
+import { QuestionBlock } from "@/components/blocks/QuestionBlock";
 
 const CONNECTORS = [
   { id: "slack", name: "Slack", logo: "/images/slack.png" },
@@ -11,7 +11,7 @@ const CONNECTORS = [
   { id: "salesforce", name: "Salesforce", logo: "/images/salesforce.png" },
 ];
 
-interface ConfirmProps {
+interface QuestionsProps {
   summary: string;
   setSummary: (v: string) => void;
   onSubmit: () => void | Promise<void>;
@@ -24,7 +24,7 @@ interface ConfirmProps {
   infoMessage?: string | null;
 }
 
-export default function Confirm({
+export default function Questions({
   summary,
   setSummary,
   onSubmit,
@@ -35,7 +35,7 @@ export default function Confirm({
   setStatus,
   mode,
   infoMessage,
-}: ConfirmProps) {
+}: QuestionsProps) {
   // Parse summary into questions array
   const questions = useMemo(() => {
     try {
@@ -105,7 +105,7 @@ export default function Confirm({
         {infoMessage && (
           <p className="text-sm text-muted-foreground mb-3">{infoMessage}</p>
         )}
-        <Questions
+        <QuestionBlock
           questions={questions}
           mentionOptions={CONNECTORS}
           placeholder="Type your answer here..."
