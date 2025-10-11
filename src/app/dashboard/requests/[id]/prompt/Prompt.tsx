@@ -22,7 +22,7 @@ const CONNECTORS = [
 
 interface PromptProps {
   prompt: string;
-  promptRich: SerializedEditorState<SerializedLexicalNode> | null;
+  promptRich: SerializedEditorState | null;
   customer: string;
   errors: { prompt?: string; customer?: string };
   setPrompt: (val: string) => void;

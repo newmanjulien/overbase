@@ -1,8 +1,3 @@
-// ============================================================================
-// File: components/blocks/RichTextarea/plugins/MentionPlugin.tsx
-// Description: Simple, robust mentions using LexicalTypeaheadMenuPlugin.
-//              No rAF loops; rely on anchorRef positioning from the plugin.
-// ============================================================================
 "use client";
 
 import React, { useMemo } from "react";
@@ -15,6 +10,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { createPortal } from "react-dom";
 import { $createMentionNode } from "../nodes/MentionNode";
 import { $getSelection, $isRangeSelection } from "lexical";
+import { useState, useLayoutEffect } from "react";
 
 export type MentionOption = { id: string; name: string; logo?: string };
 
@@ -31,6 +27,33 @@ class MentionMenuOption extends MenuOption {
   getLabel() {
     return this.name;
   }
+}
+
+function useStableRect(anchorRef: React.RefObject<HTMLElement | null>) {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  useLayoutEffect(() => {
+    const update = () => {
+      const el = anchorRef.current;
+      if (el) setRect(el.getBoundingClientRect());
+    };
+
+    const observer = new ResizeObserver(update);
+    if (anchorRef.current) observer.observe(anchorRef.current);
+
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+
+    update(); // initialize once valid
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("resize", update);
+    };
+  }, [anchorRef]);
+
+  return rect;
 }
 
 function MentionDropdown({
@@ -101,7 +124,10 @@ export default function MentionPlugin({
   const [editor] = useLexicalComposerContext();
 
   const options = useMemo(
-    () => mentionOptions.map((m) => new MentionMenuOption(m)),
+    () =>
+      mentionOptions.map((m) =>
+        Object.assign(new MentionMenuOption(m), { hidden: false as boolean })
+      ),
     [mentionOptions]
   );
 
@@ -123,12 +149,11 @@ export default function MentionPlugin({
       options={options}
       onQueryChange={(q) => {
         const query = (q || "").toLowerCase();
-        options.forEach((o: any) => (o.hidden = false));
-        if (query) {
-          options.forEach((o: any) => {
-            o.hidden = !o.name.toLowerCase().includes(query);
-          });
-        }
+        options.forEach((o) => {
+          (o as MentionMenuOption & { hidden: boolean }).hidden = query
+            ? !o.name.toLowerCase().includes(query)
+            : false;
+        });
       }}
       onSelectOption={(option, nodeToReplace, closeMenu) => {
         if (disabled) return;
@@ -151,15 +176,23 @@ export default function MentionPlugin({
       }}
       menuRenderFn={(anchorRef, menuProps) => {
         const { selectedIndex, selectOptionAndCleanUp, options } = menuProps;
-        // anchorRef.current holds the element; use its DOMRect for positioning
-        const rect = anchorRef.current?.getBoundingClientRect?.() ?? null;
+        const rect = useStableRect(anchorRef);
+        const [ready, setReady] = React.useState(false);
+
+        React.useEffect(() => {
+          if (rect && !ready) {
+            requestAnimationFrame(() => setReady(true));
+          }
+        }, [rect, ready]);
+
+        if (!rect || !ready) return null;
 
         return (
           <MentionDropdown
             options={(options as MentionMenuOption[]).filter(
               (o: any) => !o.hidden
             )}
-            selectedIndex={selectedIndex ?? -1} // ✅ safe default
+            selectedIndex={selectedIndex ?? -1}
             onSelect={selectOptionAndCleanUp}
             anchorRect={rect}
             className={menuClassName}

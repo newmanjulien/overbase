@@ -1,16 +1,12 @@
-// ============================================================================
-// File: components/blocks/RichTextarea/plugins/EditablePlugin.tsx
-// Description: React -> Lexical: editable state, changes only when prop flips.
-// ============================================================================
 "use client";
-
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
 export default function EditablePlugin({ disabled }: { disabled: boolean }) {
   const [editor] = useLexicalComposerContext();
-  useEffect(() => {
-    editor.setEditable(!disabled);
+  useLayoutEffect(() => {
+    const desired = !disabled;
+    if (editor.isEditable() !== desired) editor.setEditable(desired);
   }, [editor, disabled]);
   return null;
 }
