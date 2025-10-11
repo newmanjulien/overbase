@@ -79,32 +79,6 @@ export async function loadOne(
   return snap.exists() ? snap.data() : null;
 }
 
-// --- writes ---
-export async function createDraft(
-  uid: string,
-  id: string,
-  data: RequestPatch = {}
-) {
-  const ref = doc(db, "users", uid, "requests", id);
-
-  const { prompt, promptRich } = derivePromptFields(data);
-
-  const write: WriteRequestClient = {
-    prompt,
-    promptRich,
-    summary: coalesceText(data.summary),
-    summaryStatus: data.summaryStatus ?? "idle",
-    status: "draft",
-    scheduledDate: serializeScheduledDate(data.scheduledDate ?? null),
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    ephemeral: true,
-    customer: data.customer ?? "",
-    repeat: data.repeat ?? { type: "none" },
-  };
-  await setDoc(ref, write, { merge: false });
-}
-
 // --- ensure single draft ---
 export async function ensureDraft(uid: string): Promise<string> {
   const col = collection(db, "users", uid, "requests");
@@ -126,6 +100,7 @@ export async function ensureDraft(uid: string): Promise<string> {
 
   // Otherwise create a new one
   const newRef = doc(col);
+
   const write: WriteRequestClient = {
     prompt: "",
     promptRich: null,
@@ -139,6 +114,7 @@ export async function ensureDraft(uid: string): Promise<string> {
     customer: "",
     repeat: { type: "none" },
   };
+
   await setDoc(newRef, write, { merge: false });
   return newRef.id;
 }
