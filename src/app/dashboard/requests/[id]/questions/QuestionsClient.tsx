@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QuestionsUI from "./Questions";
-import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/requests/store";
+import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useRequestActions } from "@/lib/requests/hooks";
 import { toDateKey } from "@/lib/requests/Dates";
 
 interface QuestionsClientProps {
@@ -17,36 +17,26 @@ export default function QuestionsClient({
   mode,
 }: QuestionsClientProps) {
   const router = useRouter();
-  const { user } = useAuth();
 
   const [summary, setSummary] = useState<string>("");
 
-  // Global list store
-  const {
-    requests,
-    loadOne,
-    updateActive,
-    deleteRequest,
-    promoteToActive,
-    demoteToDraft,
-  } = useRequestListStore();
+  const { uid, requests } = useDashboard();
+  const { updateActive, deleteRequest, promoteToActive, demoteToDraft } =
+    useRequestActions();
 
   const existing = requests[requestId];
 
-  // Hydrate request into global store
   useEffect(() => {
-    if (!user) return;
-    loadOne(user.uid, requestId);
-  }, [user, requestId, loadOne]);
-
-  useEffect(() => {
-    const current = existing;
-    if (!current) {
+    if (!existing) {
       router.push(`/dashboard/requests/${requestId}/prompt`);
       return;
     }
-    if (!summary && current.summary) setSummary(current.summary);
-  }, [existing, requestId, router, summary]);
+
+    // Only hydrate once, when summary is empty but Firestore has data
+    if (!summary && existing.summary) {
+      setSummary(existing.summary);
+    }
+  }, [existing, router, requestId]);
 
   const status = existing?.status ?? "draft";
 
@@ -59,7 +49,7 @@ export default function QuestionsClient({
 
   // Submit handler
   const handleSubmit = async (): Promise<void> => {
-    if (!user) {
+    if (!uid) {
       alert("No Firebase user yet — please wait a moment and try again.");
       return;
     }
@@ -69,8 +59,8 @@ export default function QuestionsClient({
         summary,
         summaryStatus: "ready",
       };
-      await updateActive(user.uid, requestId, patch);
-      await promoteToActive(user.uid, requestId);
+      await updateActive(uid, requestId, patch);
+      await promoteToActive(uid, requestId);
       router.push(`/dashboard/requests${dateParam}`);
     } catch (err) {
       console.error("Save failed:", err);
@@ -89,8 +79,8 @@ export default function QuestionsClient({
       "Are you sure you want to permanently delete this request?"
     );
     if (!confirmed) return;
-    if (user) {
-      await deleteRequest(user.uid, requestId);
+    if (uid) {
+      await deleteRequest(uid, requestId);
     }
     router.push(`/dashboard/requests${dateParam}`);
   };
@@ -102,9 +92,9 @@ export default function QuestionsClient({
       );
       if (!confirmed) return;
 
-      if (user) {
+      if (uid) {
         try {
-          await deleteRequest(user.uid, requestId);
+          await deleteRequest(uid, requestId);
         } catch (err) {
           console.error("Failed to delete draft during back navigation", err);
         }
@@ -115,9 +105,9 @@ export default function QuestionsClient({
   };
 
   const handleStatusChange = async (val: "draft" | "active") => {
-    if (!user) return;
-    if (val === "active") await promoteToActive(user.uid, requestId);
-    else await demoteToDraft(user.uid, requestId);
+    if (!uid) return;
+    if (val === "active") await promoteToActive(uid, requestId);
+    else await demoteToDraft(uid, requestId);
   };
 
   const infoMessage =

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Prompt from "./Prompt";
 
-import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/requests/store";
+import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useRequestActions } from "@/lib/requests/hooks";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
 
@@ -17,21 +17,20 @@ interface PromptClientProps {
 
 export default function PromptClient({ requestId, mode }: PromptClientProps) {
   const router = useRouter();
-  const { user } = useAuth();
 
-  const [prompt, setPrompt] = useState<string>("");
+  const [prompt, setPrompt] = useState("");
   const [promptRich, setPromptRich] =
     useState<SerializedEditorState<SerializedLexicalNode> | null>(null);
-  const [customer, setCustomer] = useState<string>("");
+  const [customer, setCustomer] = useState("");
 
-  const {
-    requests,
-    loadOne,
-    updateActive,
-    promoteToActive,
-    demoteToDraft,
-    deleteRequest,
-  } = useRequestListStore();
+  const { uid, getRequest } = useDashboard();
+  const { updateActive, promoteToActive, demoteToDraft, deleteRequest } =
+    useRequestActions();
+  const existing = useMemo(
+    () => getRequest(requestId),
+    [getRequest, requestId]
+  );
+  const status = existing?.status ?? "draft";
 
   const [errors, setErrors] = useState<{ prompt?: string; customer?: string }>(
     {}
@@ -39,15 +38,8 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
 
   const didHydrateFromFirestore = React.useRef(false);
 
-  // Load from store
-  useEffect(() => {
-    if (!user) return;
-    loadOne(user.uid, requestId);
-  }, [user, requestId, loadOne]);
-
   // Hydrate from Firestore once
   useEffect(() => {
-    const existing = requests[requestId];
     if (!existing) return;
     if (!didHydrateFromFirestore.current) {
       if (existing.prompt) setPrompt(existing.prompt);
@@ -55,20 +47,20 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       if (existing.customer) setCustomer(existing.customer);
       didHydrateFromFirestore.current = true;
     }
-  }, [requests, requestId]);
+  }, [existing]);
 
   // Auto-save
   useEffect(() => {
-    if (!user) return;
+    if (!uid) return;
     const timeout = setTimeout(() => {
-      updateActive(user.uid, requestId, {
+      updateActive(uid, requestId, {
         prompt: prompt,
         promptRich: promptRich,
         customer: customer,
       }).catch(() => {});
     }, 800);
     return () => clearTimeout(timeout);
-  }, [prompt, promptRich, customer, user, requestId, updateActive]);
+  }, [prompt, promptRich, customer, uid, requestId, updateActive]);
 
   const validate = () => {
     const errs: typeof errors = {};
@@ -82,16 +74,13 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     return Object.keys(errs).length === 0;
   };
 
-  const existing = requests[requestId];
-  const status = existing?.status ?? "draft";
-
   const handleSubmit = async (): Promise<void> => {
     if (!validate()) return;
-    if (!user) {
+    if (!uid) {
       alert("No Firebase user yet — please wait a moment and try again.");
       return;
     }
-    await updateActive(user.uid, requestId, {
+    await updateActive(uid, requestId, {
       prompt: prompt,
       promptRich: promptRich,
       customer: customer,
@@ -107,7 +96,7 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       body: JSON.stringify({
         text: promptText.trim(),
         requestId,
-        uid: user.uid,
+        uid: uid,
       }),
     })
       .then(async (res) => {
@@ -120,14 +109,14 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
         const summaryJson =
           data.summaryJson ?? JSON.stringify(data.summaryItems ?? [], null, 0);
         if (data.serverUpdated) return; // backend already saved
-        await updateActive(user.uid, requestId, {
+        await updateActive(uid, requestId, {
           summary: summaryJson,
           summaryStatus: "ready",
         });
       })
       .catch(async (err) => {
         console.error("Summarisation request failed", err);
-        await updateActive(user.uid, requestId, { summaryStatus: "failed" });
+        await updateActive(uid, requestId, { summaryStatus: "failed" });
       });
 
     // 👉 Now go to Schedule step
@@ -140,8 +129,8 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
         "Are you sure you want to cancel this draft request? This will delete the draft and cannot be undone"
       );
       if (!confirmed) return;
-      if (user) {
-        await deleteRequest(user.uid, requestId);
+      if (uid) {
+        await deleteRequest(uid, requestId);
       }
     }
     router.push(`/dashboard/requests`);
@@ -152,8 +141,8 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       "Are you sure you want to permanently delete this request?"
     );
     if (!confirmed) return;
-    if (user) {
-      await deleteRequest(user.uid, requestId);
+    if (uid) {
+      await deleteRequest(uid, requestId);
     }
     router.push(`/dashboard/requests`);
   };
@@ -165,9 +154,9 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       );
       if (!confirmed) return;
 
-      if (user) {
+      if (uid) {
         try {
-          await deleteRequest(user.uid, requestId);
+          await deleteRequest(uid, requestId);
         } catch (err) {
           console.error("Failed to delete draft during back navigation", err);
         }
@@ -178,9 +167,9 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
   };
 
   const handleStatusChange = async (val: "draft" | "active") => {
-    if (!user) return;
-    if (val === "active") await promoteToActive(user.uid, requestId);
-    else await demoteToDraft(user.uid, requestId);
+    if (!uid) return;
+    if (val === "active") await promoteToActive(uid, requestId);
+    else await demoteToDraft(uid, requestId);
   };
 
   return (

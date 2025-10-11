@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   today,
   toDateKey,
@@ -8,14 +8,11 @@ import {
   type DateKey,
 } from "@/lib/requests/Dates";
 import { useRouter } from "next/navigation";
-
-import type { CalendarProps } from "../../../components/layouts/CalendarSection";
-import type { DataSectionProps } from "../../../components/layouts/DataSection";
+import type { CalendarProps } from "@/components/layouts/CalendarSection";
+import type { DataSectionProps } from "@/components/layouts/DataSection";
 import { Requests } from "./Requests";
-
-import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/requests/store";
-import LoadingScreen from "@/components/blocks/Loading";
+import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useRequestActions } from "@/lib/requests/hooks";
 
 export interface RequestOptions {
   prefillDate?: Date | null;
@@ -35,100 +32,76 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
   const [nextRequestId, setNextRequestId] = useState<string | null>(null);
   const draftUsedRef = useRef(false);
 
-  const { user, loading } = useAuth();
-  const {
-    requestsByDate,
-    ensureDraft,
-    updateActive,
-    subscribe,
-    maybeCleanupEphemeral,
-  } = useRequestListStore();
+  const { uid, requestsByDate } = useDashboard();
+  const { ensureDraft, updateActive, maybeCleanupEphemeral } =
+    useRequestActions();
 
   useEffect(() => {
-    if (loading) return;
-    if (!user?.uid) {
-      console.warn("RequestsClient: no valid uid after loading", user?.uid);
-      return;
-    }
+    if (!uid) return;
 
-    try {
-      const unsub = subscribe(user.uid);
-
-      // Ensure a single draft exists, set it as nextRequestId
-      (async () => {
-        try {
-          const id = await ensureDraft(user.uid);
-          setNextRequestId(id);
-          router.prefetch(`/dashboard/requests/${id}/prompt`);
-        } catch (err) {
-          console.error("RequestsClient: ensureDraft failed", err);
-        }
-      })();
-
-      return () => unsub();
-    } catch (err) {
-      console.error("RequestsClient: subscribe failed", err);
-    }
-  }, [user?.uid, loading, subscribe, ensureDraft, router]);
-
-  // 🧹 Cleanup unused draft on unmount
-  useEffect(() => {
-    return () => {
-      if (!user?.uid || !nextRequestId) return;
-      if (draftUsedRef.current) return;
-      maybeCleanupEphemeral(user.uid, nextRequestId).catch(() => {});
-    };
-  }, [user?.uid, nextRequestId, maybeCleanupEphemeral]);
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
-  if (!user) {
-    return (
-      <div className="p-6 text-center text-gray-600">
-        ⚠️ No authenticated user. Please check your Firebase setup or try again
-        later.
-      </div>
-    );
-  }
-
-  const handleRequestData = async (options?: RequestOptions) => {
-    if (!user?.uid || !nextRequestId) return;
-
-    const mode = options?.mode ?? "create";
-    let url = `/dashboard/requests/${nextRequestId}/prompt?mode=${mode}`;
-    if (options?.prefillDate) {
-      url += `&date=${toDateKey(options.prefillDate)}`;
+    (async () => {
       try {
-        await updateActive(user.uid, nextRequestId, {
-          scheduledDate: options.prefillDate,
-        });
+        const id = await ensureDraft(uid);
+        setNextRequestId(id);
+        router.prefetch(`/dashboard/requests/${id}/prompt`);
       } catch (err) {
-        console.warn("Failed to assign date to draft", err);
+        console.error("RequestsClient: ensureDraft failed", err);
       }
-    }
+    })();
 
-    try {
-      router.prefetch(url);
-    } catch {}
-    draftUsedRef.current = true;
-    router.push(url);
-  };
+    return () => {
+      if (!uid || !nextRequestId) return;
+      if (draftUsedRef.current) return;
+      maybeCleanupEphemeral(uid, nextRequestId).catch(() => {});
+    };
+  }, [uid, ensureDraft, maybeCleanupEphemeral, router, nextRequestId]);
 
-  const calendarProps: CalendarProps = {
-    selectedDate,
-    setSelectedDate,
-    currentDate,
-    setCurrentDate,
-    requestsByDate,
-  };
+  const handleRequestData = useCallback(
+    async (options?: RequestOptions) => {
+      if (!uid || !nextRequestId) return;
 
-  const dataSectionProps: DataSectionProps = {
-    selectedDate,
-    requestsByDate,
-    onRequestData: handleRequestData,
-  };
+      const mode = options?.mode ?? "create";
+      let url = `/dashboard/requests/${nextRequestId}/prompt?mode=${mode}`;
+
+      if (options?.prefillDate) {
+        url += `&date=${toDateKey(options.prefillDate)}`;
+        try {
+          await updateActive(uid, nextRequestId, {
+            scheduledDate: options.prefillDate,
+          });
+        } catch (err) {
+          console.warn("Failed to assign date to draft", err);
+        }
+      }
+
+      try {
+        router.prefetch(url);
+      } catch {}
+      draftUsedRef.current = true;
+      router.push(url);
+    },
+    [uid, nextRequestId, router, updateActive]
+  );
+
+  const calendarProps = useMemo<CalendarProps>(
+    () => ({
+      selectedDate,
+      setSelectedDate,
+      currentDate,
+      setCurrentDate,
+      requestsByDate,
+    }),
+    [selectedDate, currentDate, requestsByDate]
+  );
+
+  const dataSectionProps = useMemo<DataSectionProps>(
+    () => ({
+      selectedDate,
+      requestsByDate,
+      onRequestData: handleRequestData,
+    }),
+    [selectedDate, requestsByDate, handleRequestData]
+  );
 
   return (
     <Requests

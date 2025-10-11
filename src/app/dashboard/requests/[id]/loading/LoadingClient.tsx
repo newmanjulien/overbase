@@ -3,8 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Loading from "./Loading";
-import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/requests/store";
+import { useDashboard } from "@/lib/dashboard/DashboardProvider";
 
 type Props = {
   requestId: string;
@@ -14,36 +13,10 @@ type Props = {
 
 export default function LoadingClient({ requestId, mode, date }: Props) {
   const router = useRouter();
-  const { user } = useAuth();
-  const { requests, loadOne } = useRequestListStore();
+  const { requests } = useDashboard();
 
   const target = requests[requestId];
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-
-    let cancelled = false;
-
-    const fetchOnce = () => {
-      if (!cancelled) {
-        loadOne(user.uid!, requestId).catch((err) => {
-          console.error(
-            "Failed to load request while waiting for summary",
-            err
-          );
-        });
-      }
-    };
-
-    fetchOnce();
-    const interval = setInterval(fetchOnce, 2000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [user, requestId, loadOne]);
 
   useEffect(() => {
     timeoutRef.current = setTimeout(() => {

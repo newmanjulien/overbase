@@ -4,8 +4,12 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectorProvider } from "@/lib/connectorContext";
-import { FooterProvider, useFooterContext } from "@/lib/footerContext";
+import { ConnectorProvider } from "@/lib//dashboard/connectorContext";
+import {
+  FooterProvider,
+  useFooterContext,
+} from "@/lib/dashboard/footerContext";
+import { DashboardProvider } from "../../lib/dashboard/DashboardProvider";
 
 export default function DashboardLayout({
   children,
@@ -15,7 +19,9 @@ export default function DashboardLayout({
   return (
     <ConnectorProvider>
       <FooterProvider>
-        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+        <DashboardProvider>
+          <DashboardLayoutContent>{children}</DashboardLayoutContent>
+        </DashboardProvider>
       </FooterProvider>
     </ConnectorProvider>
   );
