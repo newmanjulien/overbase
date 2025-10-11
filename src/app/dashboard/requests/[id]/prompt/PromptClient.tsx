@@ -24,13 +24,8 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
   const [customer, setCustomer] = useState("");
 
   const { uid, getRequest } = useDashboard();
-  const {
-    loadOne,
-    updateActive,
-    promoteToActive,
-    demoteToDraft,
-    deleteRequest,
-  } = useRequestActions();
+  const { updateActive, promoteToActive, demoteToDraft, deleteRequest } =
+    useRequestActions();
   const existing = useMemo(
     () => getRequest(requestId),
     [getRequest, requestId]

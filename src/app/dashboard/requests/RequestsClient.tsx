@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   today,
   toDateKey,
@@ -56,42 +56,52 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
     };
   }, [uid, ensureDraft, maybeCleanupEphemeral, router, nextRequestId]);
 
-  const handleRequestData = async (options?: RequestOptions) => {
-    if (!uid || !nextRequestId) return;
+  const handleRequestData = useCallback(
+    async (options?: RequestOptions) => {
+      if (!uid || !nextRequestId) return;
 
-    const mode = options?.mode ?? "create";
-    let url = `/dashboard/requests/${nextRequestId}/prompt?mode=${mode}`;
-    if (options?.prefillDate) {
-      url += `&date=${toDateKey(options.prefillDate)}`;
-      try {
-        await updateActive(uid, nextRequestId, {
-          scheduledDate: options.prefillDate,
-        });
-      } catch (err) {
-        console.warn("Failed to assign date to draft", err);
+      const mode = options?.mode ?? "create";
+      let url = `/dashboard/requests/${nextRequestId}/prompt?mode=${mode}`;
+
+      if (options?.prefillDate) {
+        url += `&date=${toDateKey(options.prefillDate)}`;
+        try {
+          await updateActive(uid, nextRequestId, {
+            scheduledDate: options.prefillDate,
+          });
+        } catch (err) {
+          console.warn("Failed to assign date to draft", err);
+        }
       }
-    }
 
-    try {
-      router.prefetch(url);
-    } catch {}
-    draftUsedRef.current = true;
-    router.push(url);
-  };
+      try {
+        router.prefetch(url);
+      } catch {}
+      draftUsedRef.current = true;
+      router.push(url);
+    },
+    [uid, nextRequestId, router, updateActive]
+  );
 
-  const calendarProps: CalendarProps = {
-    selectedDate,
-    setSelectedDate,
-    currentDate,
-    setCurrentDate,
-    requestsByDate,
-  };
+  const calendarProps = useMemo<CalendarProps>(
+    () => ({
+      selectedDate,
+      setSelectedDate,
+      currentDate,
+      setCurrentDate,
+      requestsByDate,
+    }),
+    [selectedDate, currentDate, requestsByDate]
+  );
 
-  const dataSectionProps: DataSectionProps = {
-    selectedDate,
-    requestsByDate,
-    onRequestData: handleRequestData,
-  };
+  const dataSectionProps = useMemo<DataSectionProps>(
+    () => ({
+      selectedDate,
+      requestsByDate,
+      onRequestData: handleRequestData,
+    }),
+    [selectedDate, requestsByDate, handleRequestData]
+  );
 
   return (
     <Requests
