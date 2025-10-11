@@ -5,10 +5,10 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { db } from "@/lib/firebase/firebase-client";
 import {
   collection,
-  doc,
   onSnapshot,
   query,
   orderBy,
+  doc,
 } from "firebase/firestore";
 import type { Request, RequestPatch } from "./model-Types";
 import { toDateKey, expandRepeatDates } from "./Dates";
@@ -24,17 +24,17 @@ import {
 } from "./service-Client";
 
 /* -------------------------------------------------------------------------- */
-/* 🔹 useRequestList — replaces store.subscribe + store.requestsByDate         */
+/* 🔹 useRequests — unified hook for all requests (list + by-date + hydration) */
 /* -------------------------------------------------------------------------- */
 
-export function useRequestList(uid: string | null) {
+export function useRequests(uid: string | null) {
   const [requests, setRequests] = useState<Record<string, Request>>({});
-  const [requestsByDate, setRequestsByDate] = useState<
-    Record<string, Request[]>
-  >({});
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     if (!uid) return;
+
+    setHydrated(false);
 
     const q = query(
       collection(db, "users", uid, "requests").withConverter(
@@ -43,89 +43,98 @@ export function useRequestList(uid: string | null) {
       orderBy("updatedAt", "desc")
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      const next: Record<string, Request> = {};
-      snap.forEach((doc) => {
-        const data = doc.data();
-        if (data) next[data.id] = data;
-      });
-      setRequests(next);
-
-      // Build requestsByDate (for Calendar + DataSection views)
-      const map: Record<string, Request[]> = {};
-      for (const r of Object.values(next)) {
-        if (!r?.scheduledDate) continue;
-        const allDates = [
-          r.scheduledDate,
-          ...expandRepeatDates(r.scheduledDate, r.repeat, 24),
-        ];
-        for (const d of allDates) {
-          const key = toDateKey(d);
-          (map[key] ??= []).push({ ...r, scheduledDate: d });
-        }
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const next: Record<string, Request> = {};
+        snap.forEach((doc) => {
+          const data = doc.data();
+          if (data) next[data.id] = data;
+        });
+        setRequests(next);
+        setHydrated(true);
+      },
+      (err) => {
+        console.error("useRequests snapshot error:", err);
+        setHydrated(true);
       }
-      setRequestsByDate(map);
-    });
+    );
 
     return () => unsub();
   }, [uid]);
 
-  return { requests, requestsByDate };
+  /* ---------------------------------------------------------------------- */
+  /* 🧠 Memoized computation of requestsByDate                              */
+  /* ---------------------------------------------------------------------- */
+  const requestsByDate = useMemo(() => {
+    // Don't recompute if there are no requests
+    if (!Object.keys(requests).length) return {};
+
+    const map: Record<string, Request[]> = {};
+    for (const r of Object.values(requests)) {
+      if (!r?.scheduledDate) continue;
+
+      // Precompute all occurrence dates (base + repeats)
+      const allDates = [
+        r.scheduledDate,
+        ...expandRepeatDates(r.scheduledDate, r.repeat, 24),
+      ];
+
+      // Group by date key
+      for (const d of allDates) {
+        const key = toDateKey(d);
+        (map[key] ??= []).push({ ...r, scheduledDate: d });
+      }
+    }
+
+    return map;
+  }, [requests]);
+
+  /* ---------------------------------------------------------------------- */
+  /* 🧩 Helper to get one request without creating another listener         */
+  /* ---------------------------------------------------------------------- */
+  const getRequest = useCallback(
+    (id: string | undefined) => (id ? requests[id] ?? null : null),
+    [requests]
+  );
+
+  return { requests, requestsByDate, getRequest, hydrated };
 }
 
 /* -------------------------------------------------------------------------- */
-/* 🔹 useRequest — replaces store.loadOne + store.requests[id]                */
-/* -------------------------------------------------------------------------- */
-
-export function useRequest(uid: string | undefined, id: string | undefined) {
-  const [request, setRequest] = useState<Request | null>(null);
-
-  useEffect(() => {
-    if (!uid || !id) return;
-    const ref = doc(db, "users", uid, "requests", id).withConverter(
-      requestReadConverterClient
-    );
-
-    const unsub = onSnapshot(ref, (snap) => {
-      if (snap.exists()) setRequest(snap.data() as Request);
-      else setRequest(null);
-    });
-
-    return () => unsub();
-  }, [uid, id]);
-
-  return request;
-}
-
-/* -------------------------------------------------------------------------- */
-/* 🔹 useRequestActions — wraps existing service-Client functions             */
+/* 🔹 useRequestActions — Firestore write operations                         */
 /* -------------------------------------------------------------------------- */
 
 export function useRequestActions() {
   const ensureDraftCb = useCallback((uid: string) => ensureDraft(uid), []);
+
   const updateActiveCb = useCallback(
     (uid: string, id: string, patch: RequestPatch) =>
       updateActive(uid, id, patch),
     []
   );
+
   const promoteToActiveCb = useCallback(
     (uid: string, id: string) => promoteToActive(uid, id),
     []
   );
+
   const demoteToDraftCb = useCallback(
     (uid: string, id: string) => demoteToDraft(uid, id),
     []
   );
+
   const deleteRequestCb = useCallback(
     (uid: string, id: string) => deleteRequest(uid, id),
     []
   );
+
   const loadOneCb = useCallback(
     (uid: string, id: string) => svcLoadOne(uid, id),
     []
   );
 
-  // 🧹 New helper: delete ephemeral drafts if they’re empty
+  // 🧹 Deletes ephemeral drafts if empty
   const maybeCleanupEphemeralCb = useCallback(
     async (uid: string, id: string) => {
       try {
@@ -154,7 +163,7 @@ export function useRequestActions() {
       demoteToDraft: demoteToDraftCb,
       deleteRequest: deleteRequestCb,
       loadOne: loadOneCb,
-      maybeCleanupEphemeral: maybeCleanupEphemeralCb, // 👈 new method exported
+      maybeCleanupEphemeral: maybeCleanupEphemeralCb,
     }),
     [
       ensureDraftCb,
