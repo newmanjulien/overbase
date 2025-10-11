@@ -106,12 +106,12 @@ export default function MentionPlugin({
   );
 
   const triggerFn = (text: string) => {
-    const match = /(^|\\s)@([\\p{L}\\p{N}_-]{0,30})$/u.exec(text);
+    const match = /(^|\s)@([\p{L}\p{N}_-]{0,30})$/u.exec(text);
     if (!match) return null;
     return {
       leadOffset: match.index + match[1].length,
       matchingString: match[2],
-      replaceableString: match[0].trim(),
+      replaceableString: match[0].slice(match[1].length),
     };
   };
 
