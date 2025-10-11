@@ -36,7 +36,7 @@ export default function QuestionsClient({
     if (!summary && existing.summary) {
       setSummary(existing.summary);
     }
-  }, [existing, router, requestId]);
+  }, [existing, router, requestId, summary]);
 
   const status = existing?.status ?? "draft";
 
