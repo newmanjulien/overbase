@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import type { Connectors } from "../app/dashboard/connectors/DummyData";
+import type { Connectors } from "@/app/dashboard/connectors/DummyData";
 
 interface ConnectorContextType {
   addedConnectors: Connectors[];

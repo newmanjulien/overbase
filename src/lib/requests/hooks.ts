@@ -3,13 +3,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { db } from "@/lib/firebase/firebase-client";
-import {
-  collection,
-  onSnapshot,
-  query,
-  orderBy,
-  doc,
-} from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import type { Request, RequestPatch } from "./model-Types";
 import { toDateKey, expandRepeatDates } from "./Dates";
 import { requestReadConverterClient } from "./model-Client";
