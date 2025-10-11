@@ -2,13 +2,16 @@
 
 import React, { createContext, useContext } from "react";
 import { useAuth } from "@/lib/auth";
-import { useRequestList } from "@/lib/requests/hooks";
+import { useRequests } from "@/lib/requests/hooks";
 import LoadingScreen from "@/components/blocks/Loading";
+import type { Request } from "@/lib/requests/model-Types";
 
 interface DashboardContextValue {
   uid: string | null;
-  requests: Record<string, any>;
-  requestsByDate: Record<string, any[]>;
+  requests: Record<string, Request>;
+  requestsByDate: Record<string, Request[]>;
+  getRequest: (id: string) => Request | null;
+  hydrated: boolean;
 }
 
 const DashboardContext = createContext<DashboardContextValue | undefined>(
@@ -20,7 +23,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const uid = user?.uid ?? null;
 
   // ✅ Always call the hook, even if uid is null
-  const { requests, requestsByDate } = useRequestList(uid);
+  const { requests, requestsByDate, getRequest, hydrated } = useRequests(uid);
 
   // ✅ 1. While auth is loading, show a global loading screen
   if (loading) {
@@ -40,6 +43,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     uid,
     requests,
     requestsByDate,
+    hydrated,
+    getRequest,
   };
 
   return (
