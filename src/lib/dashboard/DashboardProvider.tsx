@@ -6,7 +6,7 @@ import { useRequestList } from "@/lib/requests/hooks";
 import LoadingScreen from "@/components/blocks/Loading";
 
 interface DashboardContextValue {
-  uid: string;
+  uid: string | null;
   requests: Record<string, any>;
   requestsByDate: Record<string, any[]>;
 }
@@ -17,7 +17,10 @@ const DashboardContext = createContext<DashboardContextValue | undefined>(
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  const uid = user?.uid;
+  const uid = user?.uid ?? null;
+
+  // ✅ Always call the hook, even if uid is null
+  const { requests, requestsByDate } = useRequestList(uid);
 
   // ✅ 1. While auth is loading, show a global loading screen
   if (loading) {
@@ -32,9 +35,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
-  // ✅ 3. Once auth is ready, safely subscribe to Firestore
-  const { requests, requestsByDate } = useRequestList(uid);
 
   const value: DashboardContextValue = {
     uid,

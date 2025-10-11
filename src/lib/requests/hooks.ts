@@ -27,7 +27,7 @@ import {
 /* 🔹 useRequestList — replaces store.subscribe + store.requestsByDate         */
 /* -------------------------------------------------------------------------- */
 
-export function useRequestList(uid: string | undefined) {
+export function useRequestList(uid: string | null) {
   const [requests, setRequests] = useState<Record<string, Request>>({});
   const [requestsByDate, setRequestsByDate] = useState<
     Record<string, Request[]>
