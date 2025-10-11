@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Prompt from "./Prompt";
 
-import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 import { lexicalToPlainText } from "@/lib/lexical/utils";

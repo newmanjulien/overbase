@@ -18,7 +18,11 @@ const DashboardContext = createContext<DashboardContextValue | undefined>(
   undefined
 );
 
-export function DashboardProvider({ children }: { children: React.ReactNode }) {
+export function DashboardAdminProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, loading } = useAuth();
   const uid = user?.uid ?? null;
 
@@ -57,6 +61,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 export function useDashboard(): DashboardContextValue {
   const ctx = useContext(DashboardContext);
   if (!ctx)
-    throw new Error("useDashboard must be used within DashboardProvider");
+    throw new Error("useDashboard must be used within DashboardAdminProvider");
   return ctx;
 }

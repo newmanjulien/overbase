@@ -23,20 +23,6 @@ function coalesceText(s: string | undefined | null): string {
 //
 // Firestore write shapes
 //
-interface WriteRequest {
-  id: string;
-  prompt: string;
-  promptRich?: unknown | null;
-  scheduledDate: string | null;
-  summary: string;
-  summaryStatus: "idle" | "pending" | "ready" | "failed";
-  status: "draft" | "active";
-  createdAt: FieldValue;
-  updatedAt: FieldValue;
-  submittedAt: FieldValue | null;
-  customer?: string;
-  repeat?: RepeatRule | null;
-}
 
 interface WriteUpdate {
   prompt?: string;

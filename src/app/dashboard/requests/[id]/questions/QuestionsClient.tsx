@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QuestionsUI from "./Questions";
-import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
 import { toDateKey } from "@/lib/requests/Dates";
 

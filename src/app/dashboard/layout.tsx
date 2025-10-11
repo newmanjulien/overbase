@@ -6,10 +6,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectorProvider } from "@/lib//dashboard/connectorContext";
 import {
-  FooterProvider,
-  useFooterContext,
-} from "@/lib/dashboard/footerContext";
-import { DashboardProvider } from "../../lib/dashboard/DashboardProvider";
+  DashboardUIProvider,
+  useDashboardUI,
+} from "@/lib/dashboard/UIProvider";
+import { DashboardAdminProvider } from "../../lib/dashboard/AdminProvider";
 
 export default function DashboardLayout({
   children,
@@ -18,18 +18,18 @@ export default function DashboardLayout({
 }) {
   return (
     <ConnectorProvider>
-      <FooterProvider>
-        <DashboardProvider>
+      <DashboardUIProvider>
+        <DashboardAdminProvider>
           <DashboardLayoutContent>{children}</DashboardLayoutContent>
-        </DashboardProvider>
-      </FooterProvider>
+        </DashboardAdminProvider>
+      </DashboardUIProvider>
     </ConnectorProvider>
   );
 }
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { hideFooter } = useFooterContext();
+  const { hideFooter } = useDashboardUI();
 
   const navItems = [
     { href: "/dashboard/requests", label: "Requests" },

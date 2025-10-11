@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import type { CalendarProps } from "@/components/layouts/CalendarSection";
 import type { DataSectionProps } from "@/components/layouts/DataSection";
 import { Requests } from "./Requests";
-import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
 
 export interface RequestOptions {
