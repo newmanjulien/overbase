@@ -43,15 +43,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
 
   const didHydrateFromFirestore = React.useRef(false);
 
-  useEffect(() => {
-    if (!uid) return;
-    if (!existing) {
-      loadOne(uid, requestId).catch((err) =>
-        console.error("loadOne failed", err)
-      );
-    }
-  }, [uid, existing, requestId, loadOne]);
-
   // Hydrate from Firestore once
   useEffect(() => {
     if (!existing) return;

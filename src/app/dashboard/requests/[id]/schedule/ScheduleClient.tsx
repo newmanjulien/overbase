@@ -11,8 +11,8 @@ import {
   type RepeatRule,
   makeRepeatRule,
 } from "@/lib/requests/Dates";
-import { useAuth } from "@/lib/auth";
-import { useRequestListStore } from "@/lib/requests/store";
+import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useRequestActions } from "@/lib/requests/hooks";
 import ScheduleUI from "./Schedule";
 
 interface ScheduleClientProps {
@@ -27,15 +27,9 @@ export default function ScheduleClient({
   mode,
 }: ScheduleClientProps) {
   const router = useRouter();
-  const { user } = useAuth();
-  const {
-    requests,
-    loadOne,
-    updateActive,
-    promoteToActive,
-    demoteToDraft,
-    deleteRequest,
-  } = useRequestListStore();
+  const { uid, requests } = useDashboard();
+  const { updateActive, promoteToActive, demoteToDraft, deleteRequest } =
+    useRequestActions();
 
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [repeat, setRepeat] = useState<RepeatRule["type"]>("none");
@@ -49,13 +43,6 @@ export default function ScheduleClient({
     if (prefillDate) setScheduledDate(fromDateKey(prefillDate as DateKey));
   }, [prefillDate]);
 
-  // hydrate from store
-  useEffect(() => {
-    if (!user) return;
-    loadOne(user.uid, requestId);
-  }, [user, requestId, loadOne]);
-
-  // hydrate scheduledDate + repeat once when request loads
   // hydrate scheduledDate + repeat once when request loads
   useEffect(() => {
     if (hydratedRef.current) return;
@@ -82,9 +69,9 @@ export default function ScheduleClient({
   const status = existing?.status ?? "draft";
 
   const handleStatusChange = async (val: "draft" | "active") => {
-    if (!user) return;
-    if (val === "active") await promoteToActive(user.uid, requestId);
-    else await demoteToDraft(user.uid, requestId);
+    if (!uid) return;
+    if (val === "active") await promoteToActive(uid, requestId);
+    else await demoteToDraft(uid, requestId);
   };
 
   const validate = () => {
@@ -103,12 +90,12 @@ export default function ScheduleClient({
 
   const handleSubmit = async () => {
     if (!validate()) return;
-    if (!user) return;
+    if (!uid) return;
 
     // Build the structured rule from the selected repeat-type and scheduled date
     const rule = makeRepeatRule(repeat, scheduledDate);
 
-    await updateActive(user.uid, requestId, {
+    await updateActive(uid, requestId, {
       scheduledDate,
       repeat: rule,
     });
@@ -125,8 +112,8 @@ export default function ScheduleClient({
       "Are you sure you want to permanently delete this request?"
     );
     if (!confirmed) return;
-    if (user) {
-      await deleteRequest(user.uid, requestId);
+    if (uid) {
+      await deleteRequest(uid, requestId);
     }
     router.push(`/dashboard/requests`);
   };
@@ -142,9 +129,9 @@ export default function ScheduleClient({
       );
       if (!confirmed) return;
 
-      if (user) {
+      if (uid) {
         try {
-          await deleteRequest(user.uid, requestId);
+          await deleteRequest(uid, requestId);
         } catch (err) {
           console.error("Failed to delete draft during back navigation", err);
         }
