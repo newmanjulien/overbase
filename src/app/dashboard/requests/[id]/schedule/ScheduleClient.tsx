@@ -11,7 +11,7 @@ import {
   type RepeatRule,
   makeRepeatRule,
 } from "@/lib/requests/Dates";
-import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
 import ScheduleUI from "./Schedule";
 

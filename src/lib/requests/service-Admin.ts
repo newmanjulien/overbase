@@ -23,20 +23,6 @@ function coalesceText(s: string | undefined | null): string {
 //
 // Firestore write shapes
 //
-interface WriteRequest {
-  id: string;
-  prompt: string;
-  promptRich?: unknown | null;
-  scheduledDate: string | null;
-  summary: string;
-  summaryStatus: "idle" | "pending" | "ready" | "failed";
-  status: "draft" | "active";
-  createdAt: FieldValue;
-  updatedAt: FieldValue;
-  submittedAt: FieldValue | null;
-  customer?: string;
-  repeat?: RepeatRule | null;
-}
 
 interface WriteUpdate {
   prompt?: string;
@@ -98,43 +84,6 @@ function buildUpdateFromData(data: Partial<Request>): WriteUpdate {
   if (data.repeat !== undefined) update.repeat = data.repeat ?? null;
 
   return update;
-}
-
-/** Create a new draft request */
-export async function createDraft(
-  uid: string,
-  initialData: Partial<Request> = {},
-  id?: string
-): Promise<Request> {
-  const requestId = id ?? crypto.randomUUID();
-
-  const draft: WriteRequest = {
-    id: requestId,
-    prompt: initialData.prompt ?? "",
-    promptRich: initialData.promptRich ?? null,
-    scheduledDate: initialData.scheduledDate
-      ? serializeScheduledDate(initialData.scheduledDate)
-      : null,
-    summary: "",
-    summaryStatus: "idle",
-    status: "draft",
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-    submittedAt: null,
-    customer: initialData.customer ?? "",
-    repeat: initialData.repeat ?? { type: "none" },
-  };
-
-  // Write raw data
-  await adminDb.doc(`users/${uid}/requests/${requestId}`).set(draft);
-
-  // Read back with converter
-  const snap = await adminDb
-    .doc(`users/${uid}/requests/${requestId}`)
-    .withConverter(requestReadConverterAdmin)
-    .get();
-
-  return snap.data()!;
 }
 
 /** Submit draft → active */
@@ -264,10 +213,7 @@ export async function markSummaryFailure(uid: string, requestId: string) {
   });
 }
 
-export async function markSummaryPending(
-  uid: string,
-  requestId: string,
-) {
+export async function markSummaryPending(uid: string, requestId: string) {
   await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
     summaryStatus: "pending",
     summary: "",

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Loading from "./Loading";
-import { useDashboard } from "@/lib/dashboard/DashboardProvider";
+import { useDashboard } from "@/lib/dashboard/AdminProvider";
 
 type Props = {
   requestId: string;
