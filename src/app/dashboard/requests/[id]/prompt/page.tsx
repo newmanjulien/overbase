@@ -1,4 +1,4 @@
-import SetupClient from "./PromptClient";
+import PromptClient from "./PromptClient";
 
 interface SetupPageProps {
   params: Promise<{ id: string }>;
@@ -34,7 +34,7 @@ export default async function RequestSetupPage({
       : null) ?? "create";
 
   return (
-    <SetupClient
+    <PromptClient
       requestId={id}
       prefillDate={prefillDate}
       mode={mode as "create" | "edit" | "editDraft"}

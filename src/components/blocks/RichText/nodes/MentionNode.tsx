@@ -2,7 +2,7 @@
 // File: components/blocks/RichTextarea/nodes/MentionNode.tsx
 // Description: Decorator node for mentions with safe import/export.
 // ============================================================================
-("use client");
+"use client";
 
 import React from "react";
 import Image from "next/image";
