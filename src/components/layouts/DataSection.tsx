@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { format } from "date-fns"; // still used for pretty-printing headers
 import { RowCard } from "@/components/blocks/RowCard";
 import { EmptyState } from "@/components/blocks/EmptyState";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -11,6 +10,8 @@ import type { Request } from "@/lib/requests/model-Types";
 import Link from "next/link";
 
 import { analyzeDate } from "@/lib/requests/Dates";
+import { format } from "date-fns";
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 type ViewType = "requests" | "meetings";
 
@@ -134,7 +135,11 @@ export default function DataSection({
           {visibleRequests.map((req) => (
             <RowCard
               key={req.id}
-              contentBoxRich={req.promptRich}
+              contentBoxRich={
+                req.promptRich && typeof req.promptRich === "object"
+                  ? (req.promptRich as SerializedEditorState<SerializedLexicalNode>)
+                  : null
+              }
               title={req.prompt || "No prompt provided"}
               actions={
                 req.status === "draft" ? (
