@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import RichTextarea from "@/components/blocks/RichTextarea/index";
+import RichText from "@/components/blocks/RichText";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 interface MenuItem {
@@ -125,8 +125,13 @@ function Content({
     <div className="flex-1 min-w-0 mr-4">
       {contentBoxRich ? (
         <div className="text-sm leading-tight pointer-events-none select-text caret-transparent richtext-row">
-          <RichTextarea
-            initialValueRich={contentBoxRich}
+          <RichText
+            defaultText=""
+            defaultRichJSON={contentBoxRich}
+            onChangeText={() => {}}
+            onChangeRichJSON={() => {}}
+            placeholder=""
+            mentionOptions={[]} // empty because we’re only displaying
             className="border-0"
           />
         </div>

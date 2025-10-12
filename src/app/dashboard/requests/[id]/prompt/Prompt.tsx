@@ -1,6 +1,6 @@
 "use client";
 
-import RichTextarea from "@/components/blocks/RichTextarea/index";
+import RichText from "@/components/blocks/RichText";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import {
   Select,
@@ -22,7 +22,7 @@ const CONNECTORS = [
 
 interface PromptProps {
   prompt: string;
-  promptRich: SerializedEditorState<SerializedLexicalNode> | null;
+  promptRich: SerializedEditorState | null;
   customer: string;
   errors: { prompt?: string; customer?: string };
   setPrompt: (val: string) => void;
@@ -83,19 +83,14 @@ export default function Prompt({
       onSecondaryAction={onCancel}
     >
       <div>
-        <RichTextarea
-          // Initialize once
-          initialValue={prompt}
-          initialValueRich={promptRich}
-          // Listen for changes (optional; same functions work)
-          onChange={setPrompt}
-          onChangeRich={setPromptRich}
-          // Optional: pass a reset key if promptRich changes meaningfully
-          resetKey={mode + customer}
-          placeholder="@ to tag connectors..."
+        <RichText
+          key={mode + customer}
+          defaultText={prompt}
+          defaultRichJSON={promptRich}
+          onChangeText={setPrompt}
+          onChangeRichJSON={setPromptRich}
+          placeholder="@ to tag connectors."
           mentionOptions={CONNECTORS}
-          mentionMenuClassName="bg-white border border-gray-200 shadow-lg rounded-lg p-1 w-64"
-          mentionMenuStyle={{ zIndex: 200 }}
           className="mt-1 rounded-xl bg-white min-h-70"
         />
 
