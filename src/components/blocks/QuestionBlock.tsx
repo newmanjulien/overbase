@@ -27,6 +27,7 @@ interface QuestionBlockProps {
     answer: string,
     answerRich: SerializedEditorState<SerializedLexicalNode> | null
   ) => void;
+  status?: "draft" | "active";
 }
 
 export function QuestionBlock({
@@ -34,13 +35,15 @@ export function QuestionBlock({
   mentionOptions,
   placeholder,
   onAnswerChange,
+  status,
 }: QuestionBlockProps) {
   const [expandedQuestion, setExpandedQuestion] = useState<Set<string>>(
-    new Set(questions.length > 0 ? [questions[0].id] : [])
+    new Set()
   );
 
   // Store initial values once to prevent re-initialization on every change
   const initialAnswers = React.useRef<Record<string, string>>({});
+  const hasExpandedInitially = React.useRef(false);
 
   React.useEffect(() => {
     questions.forEach((q) => {
@@ -48,6 +51,12 @@ export function QuestionBlock({
         initialAnswers.current[q.id] = q.answer;
       }
     });
+
+    // Expand first question once when questions are first loaded
+    if (questions.length > 0 && !hasExpandedInitially.current) {
+      setExpandedQuestion(new Set([questions[0].id]));
+      hasExpandedInitially.current = true;
+    }
   }, [questions]);
 
   const toggleQuestion = (questionId: string) => {
@@ -127,6 +136,7 @@ export function QuestionBlock({
                         placeholder={placeholder}
                         mentionOptions={mentionOptions}
                         className="text-sm border-gray-200 min-h-24"
+                        disabled={status === "active"}
                       />
                     </div>
                   </div>

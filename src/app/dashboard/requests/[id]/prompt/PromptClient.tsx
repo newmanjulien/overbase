@@ -84,13 +84,12 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       prompt: prompt,
       promptRich: promptRich,
       customer: customer,
-      summary: "",
-      summaryStatus: "pending",
+      refineJson: "",
     });
 
     const promptText = promptRich ? lexicalToPlainText(promptRich) : prompt;
 
-    fetch("/api/summarise", {
+    fetch("/api/refine", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -102,21 +101,19 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as {
-          summaryJson?: string;
-          summaryItems?: { question: string; answer: string }[];
+          refineJson?: string;
+          refineItems?: { question: string; answer: string }[];
           serverUpdated?: boolean;
         };
-        const summaryJson =
-          data.summaryJson ?? JSON.stringify(data.summaryItems ?? [], null, 0);
+        const refineJson =
+          data.refineJson ?? JSON.stringify(data.refineItems ?? [], null, 0);
         if (data.serverUpdated) return; // backend already saved
         await updateActive(uid, requestId, {
-          summary: summaryJson,
-          summaryStatus: "ready",
+          refineJson: refineJson,
         });
       })
       .catch(async (err) => {
-        console.error("Summarisation request failed", err);
-        await updateActive(uid, requestId, { summaryStatus: "failed" });
+        console.error("Refine request failed", err);
       });
 
     // 👉 Now go to Schedule step

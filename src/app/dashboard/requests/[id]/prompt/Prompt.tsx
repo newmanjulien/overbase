@@ -27,7 +27,7 @@ interface PromptProps {
   errors: { prompt?: string; customer?: string };
   setPrompt: (val: string) => void;
   setPromptRich: (
-    val: SerializedEditorState<SerializedLexicalNode> | null
+    val: SerializedEditorState<SerializedLexicalNode> | null,
   ) => void;
   setCustomer: (val: string) => void;
   onSubmit: () => void | Promise<void>;

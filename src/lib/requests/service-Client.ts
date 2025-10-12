@@ -26,8 +26,7 @@ import { RepeatRule } from "@/lib/requests/Dates";
 interface WriteRequestClient {
   prompt: string;
   promptRich?: unknown | null;
-  summary: string;
-  summaryStatus?: "idle" | "pending" | "ready" | "failed";
+  refineJson: string;
   status: "draft" | "active";
   scheduledDate: string | null;
   createdAt: FieldValue;
@@ -104,8 +103,7 @@ export async function ensureDraft(uid: string): Promise<string> {
   const write: WriteRequestClient = {
     prompt: "",
     promptRich: null,
-    summary: "",
-    summaryStatus: "idle",
+    refineJson: "",
     status: "draft",
     scheduledDate: null,
     createdAt: serverTimestamp(),
@@ -136,13 +134,9 @@ export async function updateActive(
     update.ephemeral = false;
   }
 
-  if ("summary" in patch) {
-    update.summary = coalesceText(patch.summary);
+  if ("refineJson" in patch) {
+    update.refineJson = coalesceText(patch.refineJson);
     update.ephemeral = false;
-  }
-
-  if ("summaryStatus" in patch) {
-    update.summaryStatus = patch.summaryStatus ?? "idle";
   }
 
   if ("scheduledDate" in patch) {

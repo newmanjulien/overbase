@@ -1,29 +1,25 @@
 /**
- * Task Summarization API Route
+ * Task Refinement API Route
  *
- * POST /api/summarise
+ * POST /api/refine
  *
- * Accepts task descriptions and returns structured summaries
+ * Accepts task descriptions and returns clarifying questions
  * using OpenAI or Anthropic LLMs
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createLLMProvider, getApiKey } from "@/lib/summarise/providers";
+import { createLLMProvider, getApiKey } from "@/lib/refine/providers";
 import {
   DEFAULT_PROVIDER,
   PROVIDERS,
   type ProviderType,
-} from "@/lib/summarise/config";
-import {
-  markSummaryFailure,
-  markSummaryPending,
-  markSummarySuccess,
-} from "@/lib/requests/service-Admin";
+} from "@/lib/refine/config";
+import { updateActive } from "@/lib/requests/service-Admin";
 
 /**
  * Request body schema
  */
-interface SummariseRequest {
+interface RefineRequest {
   text: string;
   requestId?: string;
   uid?: string;
@@ -31,9 +27,9 @@ interface SummariseRequest {
   model?: string;
 }
 
-interface SummariseResponse {
-  summaryJson: string;
-  summaryItems: SummaryItem[];
+interface RefineResponse {
+  refineJson: string;
+  refineItems: RefineItem[];
   serverUpdated: boolean;
 }
 
@@ -45,14 +41,14 @@ interface ErrorResponse {
   details?: string;
 }
 
-interface SummaryItem {
+interface RefineItem {
   question: string;
   answer: string;
 }
 
-function normalizeSummaryResponse(raw: string): {
-  summaryJson: string;
-  summaryItems: SummaryItem[];
+function normalizeRefineResponse(raw: string): {
+  refineJson: string;
+  refineItems: RefineItem[];
 } {
   const trimmed = raw.trim();
   const withoutCodeFence = trimmed
@@ -64,27 +60,27 @@ function normalizeSummaryResponse(raw: string): {
   const candidate = withoutCodeFence.length > 0 ? withoutCodeFence : trimmed;
 
   if (!candidate) {
-    return { summaryJson: "", summaryItems: [] };
+    return { refineJson: "", refineItems: [] };
   }
 
   try {
-    const summaryItems = JSON.parse(candidate) as SummaryItem[];
-    return { summaryJson: candidate, summaryItems };
+    const refineItems = JSON.parse(candidate) as RefineItem[];
+    return { refineJson: candidate, refineItems };
   } catch (error) {
-    console.warn("Failed to parse summariser response as JSON", error);
-    return { summaryJson: "", summaryItems: [] };
+    console.warn("Failed to parse refine response as JSON", error);
+    return { refineJson: "", refineItems: [] };
   }
 }
 
 /**
  * Validate request body
  */
-function validateRequest(body: unknown): body is SummariseRequest {
+function validateRequest(body: unknown): body is RefineRequest {
   if (!body || typeof body !== "object") {
     return false;
   }
 
-  const { text, provider, model } = body as Partial<SummariseRequest>;
+  const { text, provider, model } = body as Partial<RefineRequest>;
 
   if (!text || typeof text !== "string" || text.trim().length === 0) {
     return false;
@@ -114,7 +110,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json<ErrorResponse>(
         {
           error: "Invalid request",
-          details: "Please provide a valid task description to summarize",
+          details: "Please provide a valid task description to refine",
         },
         { status: 400 },
       );
@@ -156,27 +152,14 @@ export async function POST(req: NextRequest) {
 
     let serverUpdated = false;
 
-    if (uid && requestId) {
-      try {
-        await markSummaryPending(uid, requestId);
-        serverUpdated = true;
-      } catch (err) {
-        console.warn(
-          "markSummaryPending failed, falling back to client update",
-          err,
-        );
-        serverUpdated = false;
-      }
-    }
-
     try {
       // Skip actual LLM call in development
       if (process.env.NODE_ENV === "development") {
         console.log("Skipping LLM call in development mode");
-        const mockSummaryItems = [
+        const mockRefineItems = [
           {
             question:
-              "Clarify Main Goal\nWhat outcome do you want the automation to achieve?\nMention any success metrics if you have them.",
+              "Clarify Main Goal\nWhat outcome do you want the automation to achieve?",
             answer: "",
           },
           {
@@ -185,57 +168,50 @@ export async function POST(req: NextRequest) {
             answer: "",
           },
         ];
-        return NextResponse.json<SummariseResponse>({
-          summaryJson: JSON.stringify(mockSummaryItems),
-          summaryItems: mockSummaryItems,
+        return NextResponse.json<RefineResponse>({
+          refineJson: JSON.stringify(mockRefineItems),
+          refineItems: mockRefineItems,
           serverUpdated,
         });
       }
 
       const responseText = await provider.generate(promptText);
-      const { summaryJson, summaryItems } =
-        normalizeSummaryResponse(responseText);
+      const { refineJson, refineItems } =
+        normalizeRefineResponse(responseText);
       const sanitizedItems =
-        summaryItems.length > 0
-          ? summaryItems.map(({ question }) => ({ question, answer: "" }))
+        refineItems.length > 0
+          ? refineItems.map(({ question }) => ({ question, answer: "" }))
           : [];
       const sanitizedJson =
-        sanitizedItems.length > 0 ? JSON.stringify(sanitizedItems) : summaryJson;
+        sanitizedItems.length > 0 ? JSON.stringify(sanitizedItems) : refineJson;
 
-      if (serverUpdated && uid && requestId) {
+      if (uid && requestId) {
         try {
-          await markSummarySuccess(uid, requestId, sanitizedJson);
+          await updateActive(uid, requestId, { refineJson: sanitizedJson });
+          serverUpdated = true;
         } catch (err) {
-          console.warn("markSummarySuccess failed", err);
+          console.warn("updateActive failed", err);
           serverUpdated = false;
         }
       }
 
-      return NextResponse.json<SummariseResponse>({
-        summaryJson: sanitizedJson,
-        summaryItems: sanitizedItems,
+      return NextResponse.json<RefineResponse>({
+        refineJson: sanitizedJson,
+        refineItems: sanitizedItems,
         serverUpdated,
       });
     } catch (err) {
-      if (serverUpdated && uid && requestId) {
-        try {
-          await markSummaryFailure(uid, requestId);
-        } catch (innerErr) {
-          console.warn("markSummaryFailure failed", innerErr);
-        }
-      }
-
       throw err;
     }
   } catch (error) {
     // Handle unexpected errors
-    console.error("Task summarization error:", error);
+    console.error("Task refine error:", error);
 
     const message =
       error instanceof Error ? error.message : "Unknown error";
     const isFormattingIssue =
       error instanceof Error &&
-      error.message.includes("Summarizer response");
+      error.message.includes("Refine response");
 
     const friendlyFormattingMessage =
       "We couldn't generate clarifying questions right now. Please try again.";

@@ -60,7 +60,7 @@ export default function Schedule({
 }: ScheduleProps) {
   const repeatOptions = useMemo(
     () => getRepeatOptions(scheduledDate),
-    [scheduledDate]
+    [scheduledDate],
   );
 
   return (

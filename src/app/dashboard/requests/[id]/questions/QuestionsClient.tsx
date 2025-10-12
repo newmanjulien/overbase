@@ -6,6 +6,7 @@ import QuestionsUI from "./Questions";
 import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
 import { toDateKey } from "@/lib/requests/Dates";
+import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 interface QuestionsClientProps {
   requestId: string;
@@ -18,7 +19,8 @@ export default function QuestionsClient({
 }: QuestionsClientProps) {
   const router = useRouter();
 
-  const [summary, setSummary] = useState<string>("");
+  const [refineJson, setRefineJson] = useState<string>("");
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const { uid, requests } = useDashboard();
   const { updateActive, deleteRequest, promoteToActive, demoteToDraft } =
@@ -32,11 +34,11 @@ export default function QuestionsClient({
       return;
     }
 
-    // Only hydrate once, when summary is empty but Firestore has data
-    if (!summary && existing.summary) {
-      setSummary(existing.summary);
+    // Only hydrate once, when refineJson is empty but Firestore has data
+    if (!refineJson && existing.refineJson) {
+      setRefineJson(existing.refineJson);
     }
-  }, [existing, router, requestId, summary]);
+  }, [existing, router, requestId, refineJson]);
 
   const status = existing?.status ?? "draft";
 
@@ -56,8 +58,7 @@ export default function QuestionsClient({
     try {
       // Ensure latest answers are saved before promoting
       const patch: Parameters<typeof updateActive>[2] = {
-        summary,
-        summaryStatus: "ready",
+        refineJson,
       };
       await updateActive(uid, requestId, patch);
       await promoteToActive(uid, requestId);
@@ -70,13 +71,13 @@ export default function QuestionsClient({
 
   const handleBack = async (): Promise<void> => {
     router.push(
-      `/dashboard/requests/${requestId}/prompt?mode=${mode}${dateParamWithAmp}`
+      `/dashboard/requests/${requestId}/prompt?mode=${mode}${dateParamWithAmp}`,
     );
   };
 
   const handleDelete = async (): Promise<void> => {
     const confirmed = window.confirm(
-      "Are you sure you want to permanently delete this request?"
+      "Are you sure you want to permanently delete this request?",
     );
     if (!confirmed) return;
     if (uid) {
@@ -88,7 +89,7 @@ export default function QuestionsClient({
   const handleHome = async (): Promise<void> => {
     if (mode === "create") {
       const confirmed = window.confirm(
-        "Are you sure you want to return to the dashboard? Your request will not be created"
+        "Are you sure you want to return to the dashboard? Your request will not be created",
       );
       if (!confirmed) return;
 
@@ -110,23 +111,43 @@ export default function QuestionsClient({
     else await demoteToDraft(uid, requestId);
   };
 
+  const handleRefresh = async (): Promise<void> => {
+    if (!uid || !existing) return;
+    setIsRefreshing(true);
+    try {
+      const promptText = existing.promptRich
+        ? lexicalToPlainText(existing.promptRich)
+        : existing.prompt;
+
+      await fetch("/api/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: promptText.trim(), requestId, uid }),
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const infoMessage =
-    existing?.summaryStatus === "failed"
-      ? "Could not generate summary automatically."
+    !refineJson || refineJson.trim() === ""
+      ? "Could not generate clarifying questions."
       : null;
 
   return (
     <QuestionsUI
-      summary={summary ?? ""}
-      setSummary={setSummary}
+      refineJson={refineJson ?? ""}
+      setRefineJson={setRefineJson}
       onSubmit={handleSubmit}
       onBack={handleBack}
       onHome={handleHome}
       onDelete={handleDelete}
+      onRefresh={handleRefresh}
       status={status}
       setStatus={mode !== "create" ? handleStatusChange : undefined}
       mode={mode}
       infoMessage={infoMessage}
+      isRefreshing={isRefreshing}
     />
   );
 }

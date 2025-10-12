@@ -27,8 +27,7 @@ function coalesceText(s: string | undefined | null): string {
 interface WriteUpdate {
   prompt?: string;
   promptRich?: unknown | null;
-  summary?: string;
-  summaryStatus?: "idle" | "pending" | "ready" | "failed";
+  refineJson?: string;
   scheduledDate?: string | null;
   status?: "draft" | "active";
   updatedAt?: FieldValue;
@@ -67,10 +66,7 @@ function buildUpdateFromData(data: Partial<Request>): WriteUpdate {
     update.promptRich = promptRich;
   }
 
-  if (data.summary !== undefined) update.summary = coalesceText(data.summary);
-
-  if (data.summaryStatus !== undefined)
-    update.summaryStatus = data.summaryStatus;
+  if (data.refineJson !== undefined) update.refineJson = coalesceText(data.refineJson);
 
   if (data.scheduledDate !== undefined) {
     update.scheduledDate = data.scheduledDate
@@ -101,28 +97,6 @@ export async function submitDraft(
     ...buildUpdateFromData(data),
   };
 
-  if ("promptRich" in data || "prompt" in data) {
-    const { prompt, promptRich } = derivePromptFields(data);
-    update.prompt = prompt;
-    update.promptRich = promptRich;
-  }
-
-  if (data.summary !== undefined) update.summary = coalesceText(data.summary);
-
-  if (data.summaryStatus !== undefined)
-    update.summaryStatus = data.summaryStatus;
-
-  if (data.scheduledDate !== undefined) {
-    update.scheduledDate = data.scheduledDate
-      ? serializeScheduledDate(data.scheduledDate)
-      : null;
-  }
-
-  if (data.customer !== undefined)
-    update.customer = coalesceText(data.customer);
-
-  if (data.repeat !== undefined) update.repeat = data.repeat ?? null;
-
   await ref.update(update);
 }
 
@@ -138,28 +112,6 @@ export async function updateActive(
     updatedAt: FieldValue.serverTimestamp(),
     ...buildUpdateFromData(data),
   };
-
-  if ("promptRich" in data || "prompt" in data) {
-    const { prompt, promptRich } = derivePromptFields(data);
-    update.prompt = prompt;
-    update.promptRich = promptRich;
-  }
-
-  if (data.summary !== undefined) update.summary = coalesceText(data.summary);
-
-  if (data.summaryStatus !== undefined)
-    update.summaryStatus = data.summaryStatus;
-
-  if (data.scheduledDate !== undefined) {
-    update.scheduledDate = data.scheduledDate
-      ? serializeScheduledDate(data.scheduledDate)
-      : null;
-  }
-
-  if (data.customer !== undefined)
-    update.customer = coalesceText(data.customer);
-
-  if (data.repeat !== undefined) update.repeat = data.repeat ?? null;
 
   await ref.update(update);
 }
@@ -194,29 +146,3 @@ export async function deleteRequest(uid: string, requestId: string) {
   await adminDb.doc(`users/${uid}/requests/${requestId}`).delete();
 }
 
-export async function markSummarySuccess(
-  uid: string,
-  requestId: string,
-  summary: string
-) {
-  await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
-    summary,
-    summaryStatus: "ready",
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-}
-
-export async function markSummaryFailure(uid: string, requestId: string) {
-  await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
-    summaryStatus: "failed",
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-}
-
-export async function markSummaryPending(uid: string, requestId: string) {
-  await adminDb.doc(`users/${uid}/requests/${requestId}`).update({
-    summaryStatus: "pending",
-    summary: "",
-    updatedAt: FieldValue.serverTimestamp(),
-  });
-}

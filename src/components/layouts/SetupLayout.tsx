@@ -19,6 +19,7 @@ interface SetupLayoutProps {
   // Main content
   title: string; // always required
   subtitle?: string;
+  subtitleAction?: ReactNode; // optional button/element next to subtitle
   children: ReactNode;
 
   // Footer (always 2 buttons, symmetric)
@@ -42,6 +43,7 @@ export default function SetupLayout({
   onSidebarAction,
   title,
   subtitle,
+  subtitleAction,
   children,
   primaryButtonText,
   onPrimaryAction,
@@ -121,7 +123,12 @@ export default function SetupLayout({
               <h1 className="text-2xl font-medium text-gray-900 mb-2 mt-8">
                 {title}
               </h1>
-              {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+              {subtitle && (
+                <div className="flex items-center gap-3">
+                  <p className="text-sm text-gray-600">{subtitle}</p>
+                  {subtitleAction}
+                </div>
+              )}
             </div>
           </header>
 
