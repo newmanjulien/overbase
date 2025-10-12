@@ -1,7 +1,3 @@
-// ============================================================================
-// File: components/blocks/RichTextarea/nodes/MentionNode.tsx
-// Description: Decorator node for mentions with safe import/export.
-// ============================================================================
 "use client";
 
 import React from "react";
@@ -93,8 +89,8 @@ export class MentionNode extends DecoratorNode<React.ReactElement> {
     };
   }
 
-  static importJSON(serialized: any): MentionNode {
-    if (!serialized || serialized.type !== MENTION_TYPE) {
+  static importJSON(serialized: SerializedMentionNode): MentionNode {
+    if (serialized.type !== MENTION_TYPE) {
       throw new Error("Invalid mention node JSON");
     }
     return new MentionNode(serialized.id, serialized.name, serialized.logo);

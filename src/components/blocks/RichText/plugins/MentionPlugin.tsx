@@ -1,18 +1,21 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useLayoutEffect } from "react";
 import Image from "next/image";
 import {
   LexicalTypeaheadMenuPlugin,
   MenuOption,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import type { MenuRenderFn } from "@lexical/react/LexicalTypeaheadMenuPlugin";
+
 import { createPortal } from "react-dom";
 import { $createMentionNode } from "../nodes/MentionNode";
 import { $getSelection, $isRangeSelection } from "lexical";
-import { useState, useLayoutEffect } from "react";
 
-export type MentionOption = { id: string; name: string; logo?: string };
+/* -------------------------------------------------------------------------- */
+/*                              Utility / Classes                             */
+/* -------------------------------------------------------------------------- */
 
 class MentionMenuOption extends MenuOption {
   id: string;
@@ -28,6 +31,18 @@ class MentionMenuOption extends MenuOption {
     return this.name;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                   Types                                    */
+/* -------------------------------------------------------------------------- */
+
+export type MentionOption = { id: string; name: string; logo?: string };
+type MentionMenuOptionWithHidden = MentionMenuOption & { hidden: boolean };
+type MenuRenderProps<T extends MenuOption> = Parameters<MenuRenderFn<T>>[1];
+
+/* -------------------------------------------------------------------------- */
+/*                            Utility React Hooks                             */
+/* -------------------------------------------------------------------------- */
 
 function useStableRect(anchorRef: React.RefObject<HTMLElement | null>) {
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -55,6 +70,10 @@ function useStableRect(anchorRef: React.RefObject<HTMLElement | null>) {
 
   return rect;
 }
+
+/* -------------------------------------------------------------------------- */
+/*                              Dropdown Component                            */
+/* -------------------------------------------------------------------------- */
 
 function MentionDropdown({
   options,
@@ -112,6 +131,47 @@ function MentionDropdown({
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/*                       ✅ New Lexical-Native Menu Wrapper                   */
+/* -------------------------------------------------------------------------- */
+
+function MentionMenuContainer({
+  anchorRef,
+  menuProps,
+  menuClassName,
+}: {
+  anchorRef: React.RefObject<HTMLElement | null>;
+  menuProps: MenuRenderProps<MentionMenuOption>;
+  menuClassName: string;
+}) {
+  const { selectedIndex, selectOptionAndCleanUp, options } = menuProps;
+  const optionsWithHidden = options as MentionMenuOptionWithHidden[];
+  const rect = useStableRect(anchorRef);
+  const [ready, setReady] = React.useState(false);
+
+  React.useEffect(() => {
+    if (rect && !ready) {
+      requestAnimationFrame(() => setReady(true));
+    }
+  }, [rect, ready]);
+
+  if (!rect || !ready) return null;
+
+  return (
+    <MentionDropdown
+      options={optionsWithHidden.filter((o) => !o.hidden)}
+      selectedIndex={selectedIndex ?? -1}
+      onSelect={selectOptionAndCleanUp}
+      anchorRect={rect}
+      className={menuClassName}
+    />
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              Main Plugin Export                            */
+/* -------------------------------------------------------------------------- */
+
 export default function MentionPlugin({
   mentionOptions,
   disabled = false,
@@ -126,7 +186,7 @@ export default function MentionPlugin({
   const options = useMemo(
     () =>
       mentionOptions.map((m) =>
-        Object.assign(new MentionMenuOption(m), { hidden: false as boolean })
+        Object.assign(new MentionMenuOption(m), { hidden: false })
       ),
     [mentionOptions]
   );
@@ -150,9 +210,7 @@ export default function MentionPlugin({
       onQueryChange={(q) => {
         const query = (q || "").toLowerCase();
         options.forEach((o) => {
-          (o as MentionMenuOption & { hidden: boolean }).hidden = query
-            ? !o.name.toLowerCase().includes(query)
-            : false;
+          o.hidden = query ? !o.name.toLowerCase().includes(query) : false;
         });
       }}
       onSelectOption={(option, nodeToReplace, closeMenu) => {
@@ -174,31 +232,14 @@ export default function MentionPlugin({
         });
         closeMenu();
       }}
-      menuRenderFn={(anchorRef, menuProps) => {
-        const { selectedIndex, selectOptionAndCleanUp, options } = menuProps;
-        const rect = useStableRect(anchorRef);
-        const [ready, setReady] = React.useState(false);
-
-        React.useEffect(() => {
-          if (rect && !ready) {
-            requestAnimationFrame(() => setReady(true));
-          }
-        }, [rect, ready]);
-
-        if (!rect || !ready) return null;
-
-        return (
-          <MentionDropdown
-            options={(options as MentionMenuOption[]).filter(
-              (o: any) => !o.hidden
-            )}
-            selectedIndex={selectedIndex ?? -1}
-            onSelect={selectOptionAndCleanUp}
-            anchorRect={rect}
-            className={menuClassName}
-          />
-        );
-      }}
+      /* 👇 This is now React-hooks-safe and Lexical-native */
+      menuRenderFn={(anchorRef, menuProps) => (
+        <MentionMenuContainer
+          anchorRef={anchorRef}
+          menuProps={menuProps}
+          menuClassName={menuClassName}
+        />
+      )}
     />
   );
 }

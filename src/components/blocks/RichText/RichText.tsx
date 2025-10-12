@@ -183,6 +183,8 @@ const RichText = forwardRef<RichTextHandle, RichTextProps>(
   }
 );
 
+RichText.displayName = "RichText";
+
 export default RichText;
 
 /* ---------------------------------- Helper --------------------------------- */
