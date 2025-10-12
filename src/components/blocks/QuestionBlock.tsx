@@ -2,12 +2,14 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import RichTextarea from "@/components/blocks/RichTextarea";
+import RichText from "@/components/blocks/RichText";
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 interface Question {
   id: string;
   question: string;
   answer: string;
+  answerRich: SerializedEditorState<SerializedLexicalNode> | null;
 }
 
 interface MentionOption {
@@ -20,7 +22,11 @@ interface QuestionBlockProps {
   questions: Question[];
   mentionOptions: MentionOption[];
   placeholder: string;
-  onAnswerChange: (questionId: string, answer: string) => void;
+  onAnswerChange: (
+    questionId: string,
+    answer: string,
+    answerRich: SerializedEditorState<SerializedLexicalNode> | null
+  ) => void;
 }
 
 export function QuestionBlock({
@@ -85,7 +91,10 @@ export function QuestionBlock({
                     {details.length > 0 && (
                       <div className="space-y-1">
                         {details.map((line, idx) => (
-                          <p key={idx} className="text-sm text-muted-foreground">
+                          <p
+                            key={idx}
+                            className="text-sm text-muted-foreground"
+                          >
                             {line}
                           </p>
                         ))}
@@ -103,17 +112,21 @@ export function QuestionBlock({
                       onClick={(e) => e.stopPropagation()}
                       onFocus={(e) => e.stopPropagation()}
                     >
-                      <RichTextarea
+                      <RichText
                         key={question.id}
-                        placeholder={placeholder}
-                        className="text-sm border-gray-200 min-h-24"
-                        initialValue={
+                        defaultText={
                           initialAnswers.current[question.id] || question.answer
                         }
-                        onChange={(text) => {
-                          onAnswerChange(question.id, text);
-                        }}
+                        defaultRichJSON={question.answerRich ?? null}
+                        onChangeText={(text) =>
+                          onAnswerChange(question.id, text, null)
+                        }
+                        onChangeRichJSON={(json) =>
+                          onAnswerChange(question.id, "", json)
+                        }
+                        placeholder={placeholder}
                         mentionOptions={mentionOptions}
+                        className="text-sm border-gray-200 min-h-24"
                       />
                     </div>
                   </div>

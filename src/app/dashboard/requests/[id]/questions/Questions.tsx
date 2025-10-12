@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import { QuestionBlock } from "@/components/blocks/QuestionBlock";
+import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 const CONNECTORS = [
   { id: "slack", name: "Slack", logo: "/images/slack.png" },
@@ -42,6 +43,7 @@ export default function Questions({
       const parsed = JSON.parse(summary) as Array<{
         question: string;
         answer: string;
+        answerRich: SerializedEditorState<SerializedLexicalNode> | null;
       }>;
 
       if (!Array.isArray(parsed) || parsed.length === 0) {
@@ -52,6 +54,7 @@ export default function Questions({
         id: `question-${index}`,
         question: item.question,
         answer: item.answer,
+        answerRich: item.answerRich,
       }));
     } catch {
       return [];
@@ -59,21 +62,28 @@ export default function Questions({
   }, [summary]);
 
   // Handle answer changes
-  const handleAnswerChange = (questionId: string, newAnswer: string) => {
+  const handleAnswerChange = (
+    questionId: string,
+    newAnswer: string,
+    newRichJSON: SerializedEditorState<SerializedLexicalNode> | null
+  ) => {
     const questionIndex = parseInt(questionId.replace("question-", ""));
     const updatedQuestions = [...questions];
 
     if (updatedQuestions[questionIndex]) {
       updatedQuestions[questionIndex] = {
         ...updatedQuestions[questionIndex],
-        answer: newAnswer,
+        answer: newAnswer || updatedQuestions[questionIndex].answer,
+        answerRich: newRichJSON ?? updatedQuestions[questionIndex].answerRich,
       };
 
       // Update summary JSON
       const summaryData = updatedQuestions.map((q) => ({
         question: q.question,
         answer: q.answer,
+        answerRich: q.answerRich,
       }));
+
       setSummary(JSON.stringify(summaryData, null, 0));
     }
   };
