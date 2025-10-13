@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import { QuestionBlock } from "@/components/blocks/QuestionBlock";
-import { Button } from "@/components/ui/button";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 const CONNECTORS = [

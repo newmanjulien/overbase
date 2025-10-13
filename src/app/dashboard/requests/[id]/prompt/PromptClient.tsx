@@ -49,19 +49,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     }
   }, [existing]);
 
-  // Auto-save
-  // useEffect(() => {
-  //   if (!uid) return;
-  //   const timeout = setTimeout(() => {
-  //     updateActive(uid, requestId, {
-  //       prompt: prompt,
-  //       promptRich: promptRich,
-  //       customer: customer,
-  //     }).catch(() => {});
-  //   }, 800);
-  //   return () => clearTimeout(timeout);
-  // }, [prompt, promptRich, customer, uid, requestId, updateActive]);
-
   const validate = () => {
     const errs: typeof errors = {};
     if (!prompt?.trim()) {
