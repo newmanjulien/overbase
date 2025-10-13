@@ -94,7 +94,7 @@ export function QuestionBlock({
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="space-y-1">
-                    <p className="text-base font-medium text-foreground">
+                    <p className="text-sm font-medium text-foreground">
                       {title ?? question.question}
                     </p>
                     {details.length > 0 && (
