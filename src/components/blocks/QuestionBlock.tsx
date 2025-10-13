@@ -86,7 +86,7 @@ export function QuestionBlock({
           return (
             <Card
               key={question.id}
-              className="p-4 cursor-pointer hover:border-gray-300 transition-colors"
+              className="p-4 cursor-pointer border-gray-200/80 hover:border-gray-300 transition-colors"
               onClick={() => {
                 toggleQuestion(question.id);
               }}
