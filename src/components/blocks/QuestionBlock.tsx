@@ -86,7 +86,7 @@ export function QuestionBlock({
           return (
             <Card
               key={question.id}
-              className="p-4 cursor-pointer hover:border-gray-300 transition-colors"
+              className="p-4 cursor-pointer border-gray-200/80 hover:border-gray-300 transition-colors"
               onClick={() => {
                 toggleQuestion(question.id);
               }}
@@ -94,7 +94,7 @@ export function QuestionBlock({
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="space-y-1">
-                    <p className="text-base font-medium text-foreground">
+                    <p className="text-sm font-medium text-foreground">
                       {title ?? question.question}
                     </p>
                     {details.length > 0 && (
@@ -136,7 +136,6 @@ export function QuestionBlock({
                         placeholder={placeholder}
                         mentionOptions={mentionOptions}
                         className="text-sm border-gray-200 min-h-24"
-                        disabled={status === "active"}
                       />
                     </div>
                   </div>
