@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface SetupLayoutProps {
@@ -18,8 +18,10 @@ interface SetupLayoutProps {
 
   // Main content
   title: string; // always required
-  subtitle?: string;
-  subtitleAction?: ReactNode; // optional button/element next to subtitle
+  subtitle: string;
+  subtitleActionText?: string;
+  onSubtitleAction?: () => void | Promise<void>;
+  subtitleActionProps?: Partial<ButtonProps>;
   children: ReactNode;
 
   // Footer (always 2 buttons, symmetric)
@@ -41,9 +43,11 @@ export default function SetupLayout({
   sidebarIcon,
   sidebarActionText,
   onSidebarAction,
+  onSubtitleAction,
+  subtitleActionProps,
   title,
   subtitle,
-  subtitleAction,
+  subtitleActionText,
   children,
   primaryButtonText,
   onPrimaryAction,
@@ -124,9 +128,19 @@ export default function SetupLayout({
                 {title}
               </h1>
               {subtitle && (
-                <div className="flex items-center gap-3">
+                <div className="flex justify-between items-center gap-6">
                   <p className="text-sm text-gray-600">{subtitle}</p>
-                  {subtitleAction}
+                  {subtitleActionText && onSubtitleAction && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-shrink-0"
+                      onClick={onSubtitleAction}
+                      {...subtitleActionProps}
+                    >
+                      {subtitleActionText}
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
