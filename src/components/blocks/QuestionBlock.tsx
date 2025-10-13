@@ -136,7 +136,6 @@ export function QuestionBlock({
                         placeholder={placeholder}
                         mentionOptions={mentionOptions}
                         className="text-sm border-gray-200 min-h-24"
-                        disabled={status === "active"}
                       />
                     </div>
                   </div>

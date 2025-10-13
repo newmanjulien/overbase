@@ -132,7 +132,7 @@ export default function Questions({
           mentionOptions={CONNECTORS}
           placeholder="Type your answer here..."
           onAnswerChange={handleAnswerChange}
-          status={status}
+          // status={status}
         />
       </div>
     </SetupLayout>
