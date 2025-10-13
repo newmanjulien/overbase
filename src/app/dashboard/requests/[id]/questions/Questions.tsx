@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import { QuestionBlock } from "@/components/blocks/QuestionBlock";
+import { Button } from "@/components/ui/button";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 const CONNECTORS = [
@@ -13,34 +14,38 @@ const CONNECTORS = [
 ];
 
 interface QuestionsProps {
-  summary: string;
-  setSummary: (v: string) => void;
+  refineJson: string;
+  setRefineJson: (v: string) => void;
   onSubmit: () => void | Promise<void>;
   onBack: () => void | Promise<void>;
   onHome: () => void | Promise<void>;
   onDelete: () => void | Promise<void>;
+  onRefresh?: () => void | Promise<void>;
   status: "draft" | "active";
   setStatus?: (val: "draft" | "active") => void;
   mode: "create" | "edit" | "editDraft";
   infoMessage?: string | null;
+  isRefreshing?: boolean;
 }
 
 export default function Questions({
-  summary,
-  setSummary,
+  refineJson,
+  setRefineJson,
   onSubmit,
   onBack,
   onHome,
   onDelete,
+  onRefresh,
   status,
   setStatus,
   mode,
   infoMessage,
+  isRefreshing,
 }: QuestionsProps) {
-  // Parse summary into questions array
+  // Parse refineJson into questions array
   const questions = useMemo(() => {
     try {
-      const parsed = JSON.parse(summary) as Array<{
+      const parsed = JSON.parse(refineJson) as Array<{
         question: string;
         answer: string;
         answerRich: SerializedEditorState<SerializedLexicalNode> | null;
@@ -59,13 +64,13 @@ export default function Questions({
     } catch {
       return [];
     }
-  }, [summary]);
+  }, [refineJson]);
 
   // Handle answer changes
   const handleAnswerChange = (
     questionId: string,
     newAnswer: string,
-    newRichJSON: SerializedEditorState<SerializedLexicalNode> | null
+    newRichJSON: SerializedEditorState<SerializedLexicalNode> | null,
   ) => {
     const questionIndex = parseInt(questionId.replace("question-", ""));
     const updatedQuestions = [...questions];
@@ -77,14 +82,14 @@ export default function Questions({
         answerRich: newRichJSON ?? updatedQuestions[questionIndex].answerRich,
       };
 
-      // Update summary JSON
-      const summaryData = updatedQuestions.map((q) => ({
+      // Update refineJson
+      const refineData = updatedQuestions.map((q) => ({
         question: q.question,
         answer: q.answer,
         answerRich: q.answerRich,
       }));
 
-      setSummary(JSON.stringify(summaryData, null, 0));
+      setRefineJson(JSON.stringify(refineData, null, 0));
     }
   };
 
@@ -106,6 +111,19 @@ export default function Questions({
         })}
       title="Optional questions"
       subtitle="We did a quick review of your request and these are optional questions which might help us complete it"
+      subtitleAction={
+        status === "draft" && onRefresh ? (
+          <Button
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            variant="outline"
+            size="sm"
+            className="w-28 flex-shrink-0"
+          >
+            {isRefreshing ? "Refreshing..." : "Refresh"}
+          </Button>
+        ) : undefined
+      }
       primaryButtonText="Done"
       onPrimaryAction={onSubmit}
       secondaryButtonText="Restart"
@@ -113,13 +131,16 @@ export default function Questions({
     >
       <div>
         {infoMessage && (
-          <p className="text-sm text-muted-foreground mb-3">{infoMessage}</p>
+          <div className="mb-3">
+            <p className="text-sm text-muted-foreground">{infoMessage}</p>
+          </div>
         )}
         <QuestionBlock
           questions={questions}
           mentionOptions={CONNECTORS}
           placeholder="Type your answer here..."
           onAnswerChange={handleAnswerChange}
+          status={status}
         />
       </div>
     </SetupLayout>

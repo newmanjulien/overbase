@@ -23,7 +23,7 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
       router.push(
         `/dashboard/requests/${requestId}/questions?mode=${mode}${
           date ? `&date=${date}` : ""
-        }&error=summary_timeout`
+        }&error=refine_timeout`
       );
     }, 30_000);
 
@@ -35,7 +35,7 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
   useEffect(() => {
     if (!target) return;
 
-    if (target.summary && target.summary.trim().length > 0) {
+    if (target.refineJson && target.refineJson.trim().length > 0) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       router.push(
         `/dashboard/requests/${requestId}/questions?mode=${mode}${
@@ -43,15 +43,6 @@ export default function LoadingClient({ requestId, mode, date }: Props) {
         }`
       );
       return;
-    }
-
-    if (target.summaryStatus === "failed") {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      router.push(
-        `/dashboard/requests/${requestId}/questions?mode=${mode}${
-          date ? `&date=${date}` : ""
-        }&error=summary`
-      );
     }
   }, [target, router, requestId, mode, date]);
 
