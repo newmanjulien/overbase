@@ -27,7 +27,6 @@ interface QuestionBlockProps {
     answer: string,
     answerRich: SerializedEditorState<SerializedLexicalNode> | null
   ) => void;
-  status?: "draft" | "active";
 }
 
 export function QuestionBlock({
@@ -35,7 +34,6 @@ export function QuestionBlock({
   mentionOptions,
   placeholder,
   onAnswerChange,
-  status,
 }: QuestionBlockProps) {
   const [expandedQuestion, setExpandedQuestion] = useState<Set<string>>(
     new Set()
