@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
           error: "Invalid request",
           details: "Please provide a valid task description to refine",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
           details:
             error instanceof Error ? error.message : "API key not configured",
         },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
       providerType,
       apiKey,
       body.model,
-      baseURL,
+      baseURL
     );
 
     let serverUpdated = false;
@@ -176,8 +176,7 @@ export async function POST(req: NextRequest) {
       }
 
       const responseText = await provider.generate(promptText);
-      const { refineJson, refineItems } =
-        normalizeRefineResponse(responseText);
+      const { refineJson, refineItems } = normalizeRefineResponse(responseText);
       const sanitizedItems =
         refineItems.length > 0
           ? refineItems.map(({ question }) => ({ question, answer: "" }))
@@ -207,11 +206,9 @@ export async function POST(req: NextRequest) {
     // Handle unexpected errors
     console.error("Task refine error:", error);
 
-    const message =
-      error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof Error ? error.message : "Unknown error";
     const isFormattingIssue =
-      error instanceof Error &&
-      error.message.includes("Refine response");
+      error instanceof Error && error.message.includes("Refine response");
 
     const friendlyFormattingMessage =
       "We couldn't generate clarifying questions right now. Please try again.";
@@ -225,7 +222,7 @@ export async function POST(req: NextRequest) {
           : friendlyGenericMessage,
         details: message,
       },
-      { status: isFormattingIssue ? 502 : 500 },
+      { status: isFormattingIssue ? 502 : 500 }
     );
   }
 }
@@ -239,6 +236,6 @@ export async function GET() {
       error: "Method not allowed",
       details: "This endpoint requires a POST request",
     },
-    { status: 405 },
+    { status: 405 }
   );
 }

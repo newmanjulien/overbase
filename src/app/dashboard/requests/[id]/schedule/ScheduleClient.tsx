@@ -88,23 +88,45 @@ export default function ScheduleClient({
     return true;
   };
 
-  const handleSubmit = async () => {
-    if (!validate()) return;
-    if (!uid) return;
+  // const handleSubmit = async () => {
+  //   if (!validate()) return;
+  //   if (!uid) return;
 
-    // Build the structured rule from the selected repeat-type and scheduled date
+  //   // Build the structured rule from the selected repeat-type and scheduled date
+  //   const rule = makeRepeatRule(repeat, scheduledDate);
+
+  //   await updateActive(uid, requestId, {
+  //     scheduledDate,
+  //     repeat: rule,
+  //   });
+
+  //   router.push(
+  //     `/dashboard/requests/${requestId}/loading?mode=${mode}&date=${toDateKey(
+  //       scheduledDate!
+  //     )}`
+  //   );
+  // };
+
+  const handleSubmit = async () => {
+    if (!validate() || !uid) return;
     const rule = makeRepeatRule(repeat, scheduledDate);
 
-    await updateActive(uid, requestId, {
-      scheduledDate,
-      repeat: rule,
-    });
+    await updateActive(uid, requestId, { scheduledDate, repeat: rule });
 
-    router.push(
-      `/dashboard/requests/${requestId}/loading?mode=${mode}&date=${toDateKey(
-        scheduledDate!
-      )}`
-    );
+    if (mode === "create") {
+      router.push(
+        `/dashboard/requests/${requestId}/loading?mode=${mode}&date=${toDateKey(
+          scheduledDate!
+        )}`
+      );
+    } else {
+      // ✅ Go straight to Questions step for edit/editDraft
+      router.push(
+        `/dashboard/requests/${requestId}/questions?mode=${mode}&date=${toDateKey(
+          scheduledDate!
+        )}`
+      );
+    }
   };
 
   const handleDelete = async (): Promise<void> => {

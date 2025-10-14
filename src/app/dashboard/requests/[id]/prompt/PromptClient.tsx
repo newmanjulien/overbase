@@ -61,50 +61,94 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     return Object.keys(errs).length === 0;
   };
 
+  // const handleSubmit = async (): Promise<void> => {
+  //   if (!validate()) return;
+  //   if (!uid) {
+  //     alert("No Firebase user yet — please wait a moment and try again.");
+  //     return;
+  //   }
+  //   await updateActive(uid, requestId, {
+  //     prompt: prompt,
+  //     promptRich: promptRich,
+  //     customer: customer,
+  //     refineJson: "",
+  //   });
+
+  //   const promptText = promptRich ? lexicalToPlainText(promptRich) : prompt;
+
+  //   fetch("/api/refine", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({
+  //       text: promptText.trim(),
+  //       requestId,
+  //       uid: uid,
+  //     }),
+  //   })
+  //     .then(async (res) => {
+  //       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  //       const data = (await res.json()) as {
+  //         refineJson?: string;
+  //         refineItems?: { question: string; answer: string }[];
+  //         serverUpdated?: boolean;
+  //       };
+  //       const refineJson =
+  //         data.refineJson ?? JSON.stringify(data.refineItems ?? [], null, 0);
+  //       if (data.serverUpdated) return; // backend already saved
+  //       await updateActive(uid, requestId, {
+  //         refineJson: refineJson,
+  //       });
+  //     })
+  //     .catch(async (err) => {
+  //       console.error("Refine request failed", err);
+  //     });
+
+  //   // 👉 Now go to Schedule step
+  //   router.push(`/dashboard/requests/${requestId}/schedule?mode=${mode}`);
+  // };
+
   const handleSubmit = async (): Promise<void> => {
     if (!validate()) return;
     if (!uid) {
       alert("No Firebase user yet — please wait a moment and try again.");
       return;
     }
+
     await updateActive(uid, requestId, {
-      prompt: prompt,
-      promptRich: promptRich,
-      customer: customer,
-      refineJson: "",
+      prompt,
+      promptRich,
+      customer,
+      refineJson: mode === "create" ? "" : existing?.refineJson ?? "",
     });
 
-    const promptText = promptRich ? lexicalToPlainText(promptRich) : prompt;
+    if (mode === "create") {
+      const promptText = promptRich ? lexicalToPlainText(promptRich) : prompt;
 
-    fetch("/api/refine", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: promptText.trim(),
-        requestId,
-        uid: uid,
-      }),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as {
-          refineJson?: string;
-          refineItems?: { question: string; answer: string }[];
-          serverUpdated?: boolean;
-        };
-        const refineJson =
-          data.refineJson ?? JSON.stringify(data.refineItems ?? [], null, 0);
-        if (data.serverUpdated) return; // backend already saved
-        await updateActive(uid, requestId, {
-          refineJson: refineJson,
-        });
+      fetch("/api/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: promptText.trim(), requestId, uid }),
       })
-      .catch(async (err) => {
-        console.error("Refine request failed", err);
-      });
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = (await res.json()) as {
+            refineJson?: string;
+            refineItems?: { question: string; answer: string }[];
+            serverUpdated?: boolean;
+          };
+          const refineJson =
+            data.refineJson ?? JSON.stringify(data.refineItems ?? [], null, 0);
+          if (!data.serverUpdated) {
+            await updateActive(uid, requestId, { refineJson });
+          }
+        })
+        .catch((err) => console.error("Refine request failed", err));
 
-    // 👉 Now go to Schedule step
-    router.push(`/dashboard/requests/${requestId}/schedule?mode=${mode}`);
+      router.push(`/dashboard/requests/${requestId}/schedule?mode=${mode}`);
+    } else {
+      // ✅ For edit / editDraft, skip API and go straight to schedule
+      router.push(`/dashboard/requests/${requestId}/schedule?mode=${mode}`);
+    }
   };
 
   const handleCancel = async (): Promise<void> => {
