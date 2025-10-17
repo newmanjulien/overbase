@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import SetupLayout from "@/components/layouts/SetupLayout";
 import { QuestionBlock } from "@/components/blocks/QuestionBlock";
-import { Button } from "@/components/ui/button";
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 const CONNECTORS = [
@@ -70,7 +69,7 @@ export default function Questions({
   const handleAnswerChange = (
     questionId: string,
     newAnswer: string,
-    newRichJSON: SerializedEditorState<SerializedLexicalNode> | null,
+    newRichJSON: SerializedEditorState<SerializedLexicalNode> | null
   ) => {
     const questionIndex = parseInt(questionId.replace("question-", ""));
     const updatedQuestions = [...questions];
@@ -111,19 +110,11 @@ export default function Questions({
         })}
       title="Optional questions"
       subtitle="We did a quick review of your request and these are optional questions which might help us complete it"
-      subtitleAction={
-        status === "draft" && onRefresh ? (
-          <Button
-            onClick={onRefresh}
-            disabled={isRefreshing}
-            variant="outline"
-            size="sm"
-            className="w-28 flex-shrink-0"
-          >
-            {isRefreshing ? "Refreshing..." : "Refresh"}
-          </Button>
-        ) : undefined
-      }
+      subtitleActionText={isRefreshing ? "Refreshing..." : "Refresh"}
+      onSubtitleAction={onRefresh}
+      subtitleActionProps={{
+        disabled: isRefreshing,
+      }}
       primaryButtonText="Done"
       onPrimaryAction={onSubmit}
       secondaryButtonText="Restart"
@@ -140,7 +131,6 @@ export default function Questions({
           mentionOptions={CONNECTORS}
           placeholder="Type your answer here..."
           onAnswerChange={handleAnswerChange}
-          status={status}
         />
       </div>
     </SetupLayout>

@@ -60,7 +60,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     }, 800);
     return () => clearTimeout(timeout);
   }, [prompt, promptRich, customer, uid, requestId, updateActive]);
-
   const validate = () => {
     const errs: typeof errors = {};
     if (!prompt?.trim()) {
