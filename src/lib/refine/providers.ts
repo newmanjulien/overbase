@@ -15,6 +15,23 @@ export interface LLMProvider {
   generate(text: string): Promise<string>;
 }
 
+class DevMockProvider implements LLMProvider {
+  async generate(_text: string): Promise<string> {
+    return JSON.stringify([
+      {
+        question:
+          "Clarify Main Goal\nWhat outcome do you want the automation to achieve?",
+        answer: "",
+      },
+      {
+        question:
+          "Identify Primary Stakeholders\nWho will use or maintain this workflow day to day?",
+        answer: "",
+      },
+    ]);
+  }
+}
+
 /**
  * OpenAI implementation
  */
@@ -75,6 +92,14 @@ export function createLLMProvider(
   model?: string,
   baseURL?: string,
 ): LLMProvider {
+  if (providerType === "dev") {
+    return new DevMockProvider();
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    return new DevMockProvider();
+  }
+
   switch (providerType) {
     case "openai":
       return new OpenAIProvider(apiKey, model);

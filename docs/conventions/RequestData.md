@@ -102,7 +102,7 @@
 
 - Use `/api/summarise` to derive summaries from `prompt` (plain text only).
 - Store results in Firestore as `summary`, `summaryStatus`, and `summarySourcePrompt`.
-- Support both server-side and client-side Firestore updates (via `serverUpdated` flag).
+- Support both server-side and client-side Firestore updates.
 
 ❌ **DON’T**
 

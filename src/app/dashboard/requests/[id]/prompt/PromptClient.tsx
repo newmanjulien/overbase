@@ -103,14 +103,9 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
         const data = (await res.json()) as {
           refineJson?: string;
           refineItems?: { question: string; answer: string }[];
-          serverUpdated?: boolean;
         };
         const refineJson =
           data.refineJson ?? JSON.stringify(data.refineItems ?? [], null, 0);
-        if (data.serverUpdated) return; // backend already saved
-        await updateActive(uid, requestId, {
-          refineJson: refineJson,
-        });
       })
       .catch(async (err) => {
         console.error("Refine request failed", err);

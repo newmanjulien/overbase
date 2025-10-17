@@ -30,7 +30,6 @@ interface RefineRequest {
 interface RefineResponse {
   refineJson: string;
   refineItems: RefineItem[];
-  serverUpdated: boolean;
 }
 
 /**
@@ -150,31 +149,7 @@ export async function POST(req: NextRequest) {
       baseURL,
     );
 
-    let serverUpdated = false;
-
     try {
-      // Skip actual LLM call in development
-      if (process.env.NODE_ENV === "development") {
-        console.log("Skipping LLM call in development mode");
-        const mockRefineItems = [
-          {
-            question:
-              "Clarify Main Goal\nWhat outcome do you want the automation to achieve?",
-            answer: "",
-          },
-          {
-            question:
-              "Identify Primary Stakeholders\nWho will use or maintain this workflow day to day?",
-            answer: "",
-          },
-        ];
-        return NextResponse.json<RefineResponse>({
-          refineJson: JSON.stringify(mockRefineItems),
-          refineItems: mockRefineItems,
-          serverUpdated,
-        });
-      }
-
       const responseText = await provider.generate(promptText);
       const { refineJson, refineItems } =
         normalizeRefineResponse(responseText);
@@ -188,17 +163,14 @@ export async function POST(req: NextRequest) {
       if (uid && requestId) {
         try {
           await updateActive(uid, requestId, { refineJson: sanitizedJson });
-          serverUpdated = true;
         } catch (err) {
           console.warn("updateActive failed", err);
-          serverUpdated = false;
         }
       }
 
       return NextResponse.json<RefineResponse>({
         refineJson: sanitizedJson,
         refineItems: sanitizedItems,
-        serverUpdated,
       });
     } catch (err) {
       throw err;
