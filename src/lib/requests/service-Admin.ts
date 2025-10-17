@@ -5,16 +5,6 @@ import { adminDb } from "@/lib/firebase/firebase-admin";
 import { requestReadConverterAdmin } from "@/lib/requests/model-Admin";
 import type { Request } from "@/lib/requests/model-Types";
 import { serializeScheduledDate, RepeatRule } from "@/lib/requests/Dates";
-import { lexicalToPlainText } from "@/lib/lexical/utils";
-
-//
-// Helpers
-//
-function derivePromptFields(data: Partial<Request>) {
-  const rich = data.promptRich ?? null;
-  const plain = data.prompt ?? (rich ? lexicalToPlainText(rich) : "");
-  return { prompt: plain, promptRich: rich };
-}
 
 function coalesceText(s: string | undefined | null): string {
   return s ?? "";
@@ -25,7 +15,6 @@ function coalesceText(s: string | undefined | null): string {
 //
 
 interface WriteUpdate {
-  prompt?: string;
   promptRich?: unknown | null;
   refineJson?: string;
   scheduledDate?: string | null;
@@ -60,10 +49,8 @@ export async function getRequest(uid: string, requestId: string) {
 function buildUpdateFromData(data: Partial<Request>): WriteUpdate {
   const update: WriteUpdate = {};
 
-  if ("promptRich" in data || "prompt" in data) {
-    const { prompt, promptRich } = derivePromptFields(data);
-    update.prompt = prompt;
-    update.promptRich = promptRich;
+  if ("promptRich" in data) {
+    update.promptRich = data.promptRich ?? null;
   }
 
   if (data.refineJson !== undefined) update.refineJson = coalesceText(data.refineJson);
@@ -145,4 +132,3 @@ export async function demoteToDraft(uid: string, requestId: string) {
 export async function deleteRequest(uid: string, requestId: string) {
   await adminDb.doc(`users/${uid}/requests/${requestId}`).delete();
 }
-

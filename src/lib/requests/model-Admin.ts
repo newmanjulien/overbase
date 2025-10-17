@@ -7,6 +7,7 @@ import {
 import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 import { deserializeScheduledDate, RepeatRule } from "@/lib/requests/Dates";
 import type { Request } from "@/lib/requests/model-Types";
+import { lexicalToPlainText } from "@/lib/lexical/utils";
 
 /**
  * Raw Firestore shape before conversion.
@@ -37,15 +38,17 @@ export const requestReadConverterAdmin: FirestoreDataConverter<Request> = {
   fromFirestore(snap: QueryDocumentSnapshot): Request {
     const d = snap.data() as FirestoreRequestData;
 
+    const promptRich =
+      d.promptRich &&
+      typeof d.promptRich === "object" &&
+      "root" in d.promptRich
+        ? (d.promptRich as SerializedEditorState<SerializedLexicalNode>)
+        : null;
+
     return {
       id: snap.id,
-      prompt: d.prompt ?? "",
-      promptRich:
-        d.promptRich &&
-        typeof d.promptRich === "object" &&
-        "root" in d.promptRich
-          ? (d.promptRich as SerializedEditorState<SerializedLexicalNode>)
-          : null,
+      prompt: lexicalToPlainText(promptRich),
+      promptRich,
       // Read back from "yyyy-MM-dd" into a real Date (local midnight)
       scheduledDate: d.scheduledDate
         ? deserializeScheduledDate(d.scheduledDate)

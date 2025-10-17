@@ -20,11 +20,9 @@ import {
 import { requestReadConverterClient } from "@/lib/requests/model-Client";
 import type { Request, RequestPatch } from "@/lib/requests/model-Types";
 import { format } from "date-fns";
-import { lexicalToPlainText } from "@/lib/lexical/utils";
 import { RepeatRule } from "@/lib/requests/Dates";
 
 interface WriteRequestClient {
-  prompt: string;
   promptRich?: unknown | null;
   refineJson: string;
   status: "draft" | "active";
@@ -44,14 +42,6 @@ function serializeScheduledDate(d: Date | null): string | null {
 function coalesceText(s: string | undefined | null): string {
   return s ?? "";
 }
-function derivePromptFields(data: RequestPatch) {
-  const rich = data.promptRich ?? null;
-  return {
-    promptRich: rich,
-    prompt: data.prompt ?? (rich ? lexicalToPlainText(rich) : ""),
-  };
-}
-
 // --- subscription ---
 export function subscribeToRequestList(
   uid: string,
@@ -101,7 +91,6 @@ export async function ensureDraft(uid: string): Promise<string> {
   const newRef = doc(col);
 
   const write: WriteRequestClient = {
-    prompt: "",
     promptRich: null,
     refineJson: "",
     status: "draft",
@@ -127,10 +116,8 @@ export async function updateActive(
     updatedAt: serverTimestamp(),
   };
 
-  if ("promptRich" in patch || "prompt" in patch) {
-    const { prompt, promptRich } = derivePromptFields(patch);
-    update.prompt = prompt;
-    update.promptRich = promptRich;
+  if ("promptRich" in patch) {
+    update.promptRich = patch.promptRich ?? null;
     update.ephemeral = false;
   }
 

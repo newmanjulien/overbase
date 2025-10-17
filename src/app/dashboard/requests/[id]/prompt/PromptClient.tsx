@@ -54,7 +54,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     if (!uid) return;
     const timeout = setTimeout(() => {
       updateActive(uid, requestId, {
-        prompt: prompt,
         promptRich: promptRich,
         customer: customer,
       }).catch(() => {});
@@ -81,7 +80,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       return;
     }
     await updateActive(uid, requestId, {
-      prompt: prompt,
       promptRich: promptRich,
       customer: customer,
       refineJson: "",
