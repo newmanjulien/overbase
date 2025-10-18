@@ -13,6 +13,7 @@ import {
 } from "@/lib/requests/Dates";
 import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
+import { useRequestNavigation } from "@/lib/requests/useRequestNavigation";
 import ScheduleUI from "./Schedule";
 
 interface ScheduleClientProps {
@@ -28,8 +29,7 @@ export default function ScheduleClient({
 }: ScheduleClientProps) {
   const router = useRouter();
   const { uid, requests } = useDashboard();
-  const { updateActive, promoteToActive, demoteToDraft, deleteRequest } =
-    useRequestActions();
+  const { updateActive } = useRequestActions();
 
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [repeat, setRepeat] = useState<RepeatRule["type"]>("none");
@@ -37,6 +37,17 @@ export default function ScheduleClient({
   const [errors, setErrors] = useState<{ scheduledDate?: string }>({});
   const hydratedRef = useRef(false);
   const minSelectable = useMemo(() => minSelectableDate(2), []);
+
+  // Get the existing request for navigation hook
+  const existing = requests[requestId];
+
+  const { status, handleHome, handleDelete, handleStatusChange } =
+    useRequestNavigation({
+      requestId,
+      mode,
+      uid,
+      existing,
+    });
 
   // prefill
   useEffect(() => {
@@ -63,16 +74,6 @@ export default function ScheduleClient({
 
     hydratedRef.current = true;
   }, [requests, requestId]);
-
-  // derive status from store
-  const existing = requests[requestId];
-  const status = existing?.status ?? "draft";
-
-  const handleStatusChange = async (val: "draft" | "active") => {
-    if (!uid) return;
-    if (val === "active") await promoteToActive(uid, requestId);
-    else await demoteToDraft(uid, requestId);
-  };
 
   const validate = () => {
     if (!scheduledDate)
@@ -107,38 +108,8 @@ export default function ScheduleClient({
     );
   };
 
-  const handleDelete = async (): Promise<void> => {
-    const confirmed = window.confirm(
-      "Are you sure you want to permanently delete this request?"
-    );
-    if (!confirmed) return;
-    if (uid) {
-      await deleteRequest(uid, requestId);
-    }
-    router.push(`/dashboard/requests`);
-  };
-
   const handleBack = () => {
     router.push(`/dashboard/requests/${requestId}/prompt?mode=${mode}`);
-  };
-
-  const handleHome = async (): Promise<void> => {
-    if (mode === "create") {
-      const confirmed = window.confirm(
-        "Are you sure you want to return to the dashboard? Your request will not be created"
-      );
-      if (!confirmed) return;
-
-      if (uid) {
-        try {
-          await deleteRequest(uid, requestId);
-        } catch (err) {
-          console.error("Failed to delete draft during back navigation", err);
-        }
-      }
-    }
-
-    router.push(`/dashboard/requests`);
   };
 
   return (
@@ -154,7 +125,7 @@ export default function ScheduleClient({
       mode={mode}
       minSelectableDate={minSelectable}
       status={status}
-      setStatus={mode !== "create" ? handleStatusChange : undefined}
+      setStatus={handleStatusChange}
       onDelete={handleDelete}
     />
   );

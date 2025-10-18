@@ -6,8 +6,8 @@ import Prompt from "./Prompt";
 
 import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
-import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
-import { lexicalToPlainText } from "@/lib/lexical/utils";
+import { useRequestNavigation } from "@/lib/requests/useRequestNavigation";
+import { useLexicalState } from "@/lib/lexical/useLexicalState";
 
 interface PromptClientProps {
   requestId: string;
@@ -18,51 +18,46 @@ interface PromptClientProps {
 export default function PromptClient({ requestId, mode }: PromptClientProps) {
   const router = useRouter();
 
-  const [prompt, setPrompt] = useState("");
-  const [promptRich, setPromptRich] =
-    useState<SerializedEditorState<SerializedLexicalNode> | null>(null);
   const [customer, setCustomer] = useState("");
 
   const { uid, getRequest } = useDashboard();
-  const { updateActive, promoteToActive, demoteToDraft, deleteRequest } =
-    useRequestActions();
+  const { updateActive, deleteRequest } = useRequestActions();
   const existing = useMemo(
     () => getRequest(requestId),
     [getRequest, requestId]
   );
-  const status = existing?.status ?? "draft";
+
+  const { status, handleHome, handleDelete, handleStatusChange } =
+    useRequestNavigation({
+      requestId,
+      mode,
+      uid,
+      existing,
+    });
+
+  const { promptRich, promptText, setPromptRich, setPromptText } =
+    useLexicalState({
+      initialPromptRich: existing?.promptRich,
+      initialPrompt: existing?.prompt,
+    });
 
   const [errors, setErrors] = useState<{ prompt?: string; customer?: string }>(
     {}
   );
 
-  const didHydrateFromFirestore = React.useRef(false);
-
-  // Hydrate from Firestore once
+  // Hydrate customer from Firestore once
+  const didHydrateCustomer = React.useRef(false);
   useEffect(() => {
-    if (!existing) return;
-    if (!didHydrateFromFirestore.current) {
-      if (existing.prompt) setPrompt(existing.prompt);
-      if (existing.promptRich) setPromptRich(existing.promptRich);
-      if (existing.customer) setCustomer(existing.customer);
-      didHydrateFromFirestore.current = true;
+    if (!existing || didHydrateCustomer.current) return;
+    if (existing.customer) {
+      setCustomer(existing.customer);
     }
+    didHydrateCustomer.current = true;
   }, [existing]);
 
-  // Auto-save
-  useEffect(() => {
-    if (!uid) return;
-    const timeout = setTimeout(() => {
-      updateActive(uid, requestId, {
-        promptRich: promptRich,
-        customer: customer,
-      }).catch(() => {});
-    }, 800);
-    return () => clearTimeout(timeout);
-  }, [prompt, promptRich, customer, uid, requestId, updateActive]);
   const validate = () => {
     const errs: typeof errors = {};
-    if (!prompt?.trim()) {
+    if (!promptText.trim()) {
       errs.prompt = "Prompt is required.";
     }
     if (!customer?.trim()) {
@@ -84,8 +79,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       refineJson: "",
     });
 
-    const promptText = promptRich ? lexicalToPlainText(promptRich) : prompt;
-
     fetch("/api/refine", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -101,8 +94,8 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
           refineJson?: string;
           refineItems?: { question: string; answer: string }[];
         };
-        const refineJson =
-          data.refineJson ?? JSON.stringify(data.refineItems ?? [], null, 0);
+        // API handles the Firestore update, client just logs success
+        console.log("[PromptClient] Refine request successful");
       })
       .catch(async (err) => {
         console.error("Refine request failed", err);
@@ -125,49 +118,13 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     router.push(`/dashboard/requests`);
   };
 
-  const handleDelete = async (): Promise<void> => {
-    const confirmed = window.confirm(
-      "Are you sure you want to permanently delete this request?"
-    );
-    if (!confirmed) return;
-    if (uid) {
-      await deleteRequest(uid, requestId);
-    }
-    router.push(`/dashboard/requests`);
-  };
-
-  const handleHome = async (): Promise<void> => {
-    if (mode === "create") {
-      const confirmed = window.confirm(
-        "Are you sure you want to return to the dashboard? Your request will not be created"
-      );
-      if (!confirmed) return;
-
-      if (uid) {
-        try {
-          await deleteRequest(uid, requestId);
-        } catch (err) {
-          console.error("Failed to delete draft during back navigation", err);
-        }
-      }
-    }
-
-    router.push(`/dashboard/requests`);
-  };
-
-  const handleStatusChange = async (val: "draft" | "active") => {
-    if (!uid) return;
-    if (val === "active") await promoteToActive(uid, requestId);
-    else await demoteToDraft(uid, requestId);
-  };
-
   return (
     <Prompt
-      prompt={prompt}
+      prompt={promptText}
       promptRich={promptRich}
       customer={customer}
       errors={errors}
-      setPrompt={setPrompt}
+      setPrompt={setPromptText}
       setPromptRich={setPromptRich}
       setCustomer={setCustomer}
       onCancel={handleCancel}
@@ -175,7 +132,7 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
       onHome={handleHome}
       onDelete={handleDelete}
       status={status}
-      setStatus={mode !== "create" ? handleStatusChange : undefined}
+      setStatus={handleStatusChange}
       mode={mode}
     />
   );

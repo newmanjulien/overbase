@@ -28,7 +28,7 @@ type FirestoreRequestData = {
   repeat?: RepeatRule | null;
 };
 
-export const requestReadConverterAdmin: FirestoreDataConverter<Request> = {
+export const requestReadConverterServer: FirestoreDataConverter<Request> = {
   toFirestore(): never {
     throw new Error(
       "Writes must go through requestService (services serialize on write)."

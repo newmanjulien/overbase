@@ -96,10 +96,6 @@ export function createLLMProvider(
     return new DevMockProvider();
   }
 
-  if (process.env.NODE_ENV === "development") {
-    return new DevMockProvider();
-  }
-
   switch (providerType) {
     case "openai":
       return new OpenAIProvider(apiKey, model);

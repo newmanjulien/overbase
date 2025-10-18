@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   today,
   toDateKey,
@@ -13,6 +13,7 @@ import type { DataSectionProps } from "@/components/layouts/DataSection";
 import { Requests } from "./Requests";
 import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
+import { useEphemeralDraft } from "@/lib/requests/useEphemeralDraft";
 
 export interface RequestOptions {
   prefillDate?: Date | null;
@@ -29,44 +30,22 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(initialDate);
   const [currentDate, setCurrentDate] = useState<Date>(initialDate);
-  const [nextRequestId, setNextRequestId] = useState<string | null>(null);
-  const draftUsedRef = useRef(false);
 
   const { uid, requestsByDate } = useDashboard();
-  const { ensureDraft, updateActive, maybeCleanupEphemeral } =
-    useRequestActions();
-
-  useEffect(() => {
-    if (!uid) return;
-
-    (async () => {
-      try {
-        const id = await ensureDraft(uid);
-        setNextRequestId(id);
-        router.prefetch(`/dashboard/requests/${id}/prompt`);
-      } catch (err) {
-        console.error("RequestsClient: ensureDraft failed", err);
-      }
-    })();
-
-    return () => {
-      if (!uid || !nextRequestId) return;
-      if (draftUsedRef.current) return;
-      maybeCleanupEphemeral(uid, nextRequestId).catch(() => {});
-    };
-  }, [uid, ensureDraft, maybeCleanupEphemeral, router, nextRequestId]);
+  const { updateActive } = useRequestActions();
+  const { draftId, markDraftUsed } = useEphemeralDraft({ uid });
 
   const handleRequestData = useCallback(
     async (options?: RequestOptions) => {
-      if (!uid || !nextRequestId) return;
+      if (!uid || !draftId) return;
 
       const mode = options?.mode ?? "create";
-      let url = `/dashboard/requests/${nextRequestId}/prompt?mode=${mode}`;
+      let url = `/dashboard/requests/${draftId}/prompt?mode=${mode}`;
 
       if (options?.prefillDate) {
         url += `&date=${toDateKey(options.prefillDate)}`;
         try {
-          await updateActive(uid, nextRequestId, {
+          await updateActive(uid, draftId, {
             scheduledDate: options.prefillDate,
           });
         } catch (err) {
@@ -77,10 +56,10 @@ export default function RequestsClient({ dateParam }: { dateParam?: string }) {
       try {
         router.prefetch(url);
       } catch {}
-      draftUsedRef.current = true;
+      markDraftUsed();
       router.push(url);
     },
-    [uid, nextRequestId, router, updateActive]
+    [uid, draftId, router, updateActive, markDraftUsed]
   );
 
   const calendarProps = useMemo<CalendarProps>(

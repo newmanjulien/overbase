@@ -2,7 +2,7 @@
 
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase/firebase-admin";
-import { requestReadConverterAdmin } from "@/lib/requests/model-Admin";
+import { requestReadConverterServer } from "@/lib/requests/model-server";
 import type { Request } from "@/lib/requests/model-Types";
 import { serializeScheduledDate, RepeatRule } from "@/lib/requests/Dates";
 
@@ -35,7 +35,7 @@ interface WriteUpdate {
 export async function getRequest(uid: string, requestId: string) {
   const ref = adminDb
     .doc(`users/${uid}/requests/${requestId}`)
-    .withConverter(requestReadConverterAdmin);
+    .withConverter(requestReadConverterServer);
 
   const snap = await ref.get();
   return snap.exists ? snap.data() : null;
