@@ -71,13 +71,13 @@ export default function QuestionsClient({
 
   const handleBack = async (): Promise<void> => {
     router.push(
-      `/dashboard/requests/${requestId}/prompt?mode=${mode}${dateParamWithAmp}`,
+      `/dashboard/requests/${requestId}/prompt?mode=${mode}${dateParamWithAmp}`
     );
   };
 
   const handleDelete = async (): Promise<void> => {
     const confirmed = window.confirm(
-      "Are you sure you want to permanently delete this request?",
+      "Are you sure you want to permanently delete this request?"
     );
     if (!confirmed) return;
     if (uid) {
@@ -89,7 +89,7 @@ export default function QuestionsClient({
   const handleHome = async (): Promise<void> => {
     if (mode === "create") {
       const confirmed = window.confirm(
-        "Are you sure you want to return to the dashboard? Your request will not be created",
+        "Are you sure you want to return to the dashboard? Your request will not be created"
       );
       if (!confirmed) return;
 
@@ -111,19 +111,62 @@ export default function QuestionsClient({
     else await demoteToDraft(uid, requestId);
   };
 
+  // const handleRefresh = async (): Promise<void> => {
+  //   if (!uid || !existing) return;
+  //   setIsRefreshing(true);
+  //   try {
+  //     const promptText = existing.promptRich
+  //       ? lexicalToPlainText(existing.promptRich)
+  //       : existing.prompt;
+
+  //     await fetch("/api/refine", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ text: promptText.trim(), requestId, uid }),
+  //     });
+  //   } finally {
+  //     setIsRefreshing(false);
+  //   }
+  // };
+
   const handleRefresh = async (): Promise<void> => {
     if (!uid || !existing) return;
     setIsRefreshing(true);
+
     try {
       const promptText = existing.promptRich
         ? lexicalToPlainText(existing.promptRich)
         : existing.prompt;
 
-      await fetch("/api/refine", {
+      const res = await fetch("/api/refine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: promptText.trim(), requestId, uid }),
       });
+
+      if (!res.ok) throw new Error(`Refine failed with ${res.status}`);
+
+      // Parse the new questions from the response
+      const data = (await res.json()) as {
+        refineJson?: string;
+        refineItems?: { question: string; answer: string }[];
+        serverUpdated?: boolean;
+      };
+
+      // Convert response to refineJson string
+      const newRefineJson =
+        data.refineJson ?? JSON.stringify(data.refineItems ?? [], null, 0);
+
+      // Update UI immediately
+      setRefineJson(newRefineJson);
+
+      // Persist to Firestore if backend didn't already
+      if (!data.serverUpdated) {
+        await updateActive(uid, requestId, { refineJson: newRefineJson });
+      }
+    } catch (err) {
+      console.error("Refresh failed:", err);
+      alert("Failed to refresh questions. Check console for details.");
     } finally {
       setIsRefreshing(false);
     }
