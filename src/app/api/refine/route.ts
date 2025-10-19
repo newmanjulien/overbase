@@ -14,7 +14,8 @@ import {
   PROVIDERS,
   type ProviderType,
 } from "@/lib/refine/config";
-import { updateActive } from "@/lib/requests/service-Admin";
+import { initializeApp, getApps } from "firebase/app";
+import { getFirestore, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 /**
  * Request body schema
@@ -30,7 +31,6 @@ interface RefineRequest {
 interface RefineResponse {
   refineJson: string;
   refineItems: RefineItem[];
-  serverUpdated: boolean;
 }
 
 /**
@@ -126,19 +126,29 @@ export async function POST(req: NextRequest) {
     const requestId = body.requestId;
     const uid = body.uid;
 
-    // Get API key
-    let apiKey: string;
-    try {
-      apiKey = getApiKey();
-    } catch (error) {
-      return NextResponse.json<ErrorResponse>(
-        {
-          error: "Configuration error",
-          details:
-            error instanceof Error ? error.message : "API key not configured",
-        },
-        { status: 500 },
-      );
+    console.log("[/api/refine] process.env.LLM_PROVIDER:", process.env.LLM_PROVIDER);
+    console.log("[/api/refine] envProvider:", envProvider);
+    console.log("[/api/refine] defaultProvider:", defaultProvider);
+    console.log("[/api/refine] body.provider:", body.provider);
+    console.log("[/api/refine] Final provider type:", providerType);
+    console.log("[/api/refine] Request ID:", requestId);
+    console.log("[/api/refine] UID:", uid);
+
+    // Get API key (skip for dev provider)
+    let apiKey = "";
+    if (providerType !== "dev") {
+      try {
+        apiKey = getApiKey();
+      } catch (error) {
+        return NextResponse.json<ErrorResponse>(
+          {
+            error: "Configuration error",
+            details:
+              error instanceof Error ? error.message : "API key not configured",
+          },
+          { status: 500 },
+        );
+      }
     }
 
     // Create provider and generate response
@@ -150,31 +160,7 @@ export async function POST(req: NextRequest) {
       baseURL,
     );
 
-    let serverUpdated = false;
-
     try {
-      // Skip actual LLM call in development
-      if (process.env.NODE_ENV === "development") {
-        console.log("Skipping LLM call in development mode");
-        const mockRefineItems = [
-          {
-            question:
-              "Clarify Main Goal\nWhat outcome do you want the automation to achieve?",
-            answer: "",
-          },
-          {
-            question:
-              "Identify Primary Stakeholders\nWho will use or maintain this workflow day to day?",
-            answer: "",
-          },
-        ];
-        return NextResponse.json<RefineResponse>({
-          refineJson: JSON.stringify(mockRefineItems),
-          refineItems: mockRefineItems,
-          serverUpdated,
-        });
-      }
-
       const responseText = await provider.generate(promptText);
       const { refineJson, refineItems } =
         normalizeRefineResponse(responseText);
@@ -185,20 +171,38 @@ export async function POST(req: NextRequest) {
       const sanitizedJson =
         sanitizedItems.length > 0 ? JSON.stringify(sanitizedItems) : refineJson;
 
+      console.log("[/api/refine] Generated refineJson:", sanitizedJson);
+
+      // Update Firestore with the refined questions
       if (uid && requestId) {
         try {
-          await updateActive(uid, requestId, { refineJson: sanitizedJson });
-          serverUpdated = true;
+          // Initialize Firebase client SDK if needed
+          if (!getApps().length) {
+            initializeApp({
+              apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+              authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+              projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+              storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+              messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+              appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+            });
+          }
+
+          const db = getFirestore();
+          const requestRef = doc(db, `users/${uid}/requests/${requestId}`);
+          await updateDoc(requestRef, {
+            refineJson: sanitizedJson,
+            updatedAt: serverTimestamp(),
+          });
+          console.log("[/api/refine] Successfully updated Firestore");
         } catch (err) {
-          console.warn("updateActive failed", err);
-          serverUpdated = false;
+          console.warn("[/api/refine] Firestore update failed:", err);
         }
       }
 
       return NextResponse.json<RefineResponse>({
         refineJson: sanitizedJson,
         refineItems: sanitizedItems,
-        serverUpdated,
       });
     } catch (err) {
       throw err;

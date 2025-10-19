@@ -16,19 +16,21 @@ Return your response as a valid JSON array of objects:
   {"question": "Title Line\\nClarifying question sentence", "answer": ""}
 ]`;
 
-export const PROVIDERS = ["openai", "openai-compatible", "anthropic"] as const;
+export const PROVIDERS = ["openai", "openai-compatible", "anthropic", "dev"] as const;
 export type ProviderType = (typeof PROVIDERS)[number];
 
 const HARDCODED_DEFAULT_MODELS: Record<ProviderType, string> = {
   openai: "gpt-4o-mini",
   "openai-compatible": "deepseek/deepseek-r1-distill-llama-70b:free",
   anthropic: "claude-3-5-sonnet-20241022",
+  dev: "",
 };
 
 export const DEFAULT_MODELS: Record<ProviderType, string> = {
   openai: process.env.MODEL || HARDCODED_DEFAULT_MODELS.openai,
   "openai-compatible": process.env.MODEL || HARDCODED_DEFAULT_MODELS["openai-compatible"],
   anthropic: process.env.MODEL || HARDCODED_DEFAULT_MODELS.anthropic,
+  dev: process.env.MODEL || HARDCODED_DEFAULT_MODELS.dev,
 };
 
 export const MAX_TOKENS = 1024;

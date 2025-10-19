@@ -102,7 +102,7 @@
 
 - Use `/api/summarise` to derive summaries from `prompt` (plain text only).
 - Store results in Firestore as `summary`, `summaryStatus`, and `summarySourcePrompt`.
-- Support both server-side and client-side Firestore updates (via `serverUpdated` flag).
+- Support both server-side and client-side Firestore updates.
 
 ❌ **DON’T**
 
@@ -115,17 +115,14 @@
 
 ✅ **DO**
 
-- Store both:
-  - `prompt`: the plain text representation (used for summaries, search, and display).
-  - `promptRich`: the serialized Lexical state (used for rehydration and mentions).
-- Treat **`promptRich` as the source of truth**.
-- Derive `prompt` from `promptRich` on change.
-- Persist both fields together in Firestore.
+- Persist only `promptRich` (serialized Lexical state) to Firestore.
+- Derive the plain-text `prompt` from `promptRich` when hydrating in clients or services.
+- Treat **`promptRich` as the source of truth** for all writes.
+- Use the derived `prompt` only for presentation, validation, and AI payloads.
 
 ❌ **DON’T**
 
-- Update one without the other.
-- Send `promptRich` to APIs or use it in AI summaries.
+- Attempt to write the plain-text `prompt` back to Firestore.
 
 ---
 

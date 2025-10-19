@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import QuestionsUI from "./Questions";
 import { useDashboard } from "@/lib/dashboard/AdminProvider";
 import { useRequestActions } from "@/lib/requests/hooks";
+import { useRequestNavigation } from "@/lib/requests/useRequestNavigation";
 import { toDateKey } from "@/lib/requests/Dates";
 import { lexicalToPlainText } from "@/lib/lexical/utils";
 
@@ -23,10 +24,17 @@ export default function QuestionsClient({
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const { uid, requests } = useDashboard();
-  const { updateActive, deleteRequest, promoteToActive, demoteToDraft } =
-    useRequestActions();
+  const { updateActive } = useRequestActions();
 
   const existing = requests[requestId];
+
+  const { status, handleHome, handleDelete, handleStatusChange } =
+    useRequestNavigation({
+      requestId,
+      mode,
+      uid,
+      existing,
+    });
 
   useEffect(() => {
     if (!existing) {
@@ -39,8 +47,6 @@ export default function QuestionsClient({
       setRefineJson(existing.refineJson);
     }
   }, [existing, router, requestId, refineJson]);
-
-  const status = existing?.status ?? "draft";
 
   const dateParam = existing?.scheduledDate
     ? `?date=${toDateKey(existing.scheduledDate)}`
@@ -61,7 +67,10 @@ export default function QuestionsClient({
         refineJson,
       };
       await updateActive(uid, requestId, patch);
-      await promoteToActive(uid, requestId);
+      // Promote to active using the hook's handler
+      if (handleStatusChange) {
+        await handleStatusChange("active");
+      }
       router.push(`/dashboard/requests${dateParam}`);
     } catch (err) {
       console.error("Save failed:", err);
@@ -73,42 +82,6 @@ export default function QuestionsClient({
     router.push(
       `/dashboard/requests/${requestId}/prompt?mode=${mode}${dateParamWithAmp}`,
     );
-  };
-
-  const handleDelete = async (): Promise<void> => {
-    const confirmed = window.confirm(
-      "Are you sure you want to permanently delete this request?",
-    );
-    if (!confirmed) return;
-    if (uid) {
-      await deleteRequest(uid, requestId);
-    }
-    router.push(`/dashboard/requests${dateParam}`);
-  };
-
-  const handleHome = async (): Promise<void> => {
-    if (mode === "create") {
-      const confirmed = window.confirm(
-        "Are you sure you want to return to the dashboard? Your request will not be created",
-      );
-      if (!confirmed) return;
-
-      if (uid) {
-        try {
-          await deleteRequest(uid, requestId);
-        } catch (err) {
-          console.error("Failed to delete draft during back navigation", err);
-        }
-      }
-    }
-
-    router.push(`/dashboard/requests`);
-  };
-
-  const handleStatusChange = async (val: "draft" | "active") => {
-    if (!uid) return;
-    if (val === "active") await promoteToActive(uid, requestId);
-    else await demoteToDraft(uid, requestId);
   };
 
   const handleRefresh = async (): Promise<void> => {
@@ -144,7 +117,7 @@ export default function QuestionsClient({
       onDelete={handleDelete}
       onRefresh={handleRefresh}
       status={status}
-      setStatus={mode !== "create" ? handleStatusChange : undefined}
+      setStatus={handleStatusChange}
       mode={mode}
       infoMessage={infoMessage}
       isRefreshing={isRefreshing}

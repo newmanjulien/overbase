@@ -3,7 +3,7 @@ import { type RepeatRule } from "@/lib/requests/Dates";
 
 export interface Request {
   id: string;
-  prompt: string;
+  prompt: string; // derived from promptRich when hydrating from Firestore
   promptRich: SerializedEditorState<SerializedLexicalNode> | null;
   scheduledDate: Date | null;
   refineJson: string;
@@ -20,7 +20,6 @@ export interface Request {
 export type RequestPatch = Partial<
   Pick<
     Request,
-    | "prompt"
     | "promptRich"
     | "refineJson"
     | "scheduledDate"
