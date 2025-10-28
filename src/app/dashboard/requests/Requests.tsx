@@ -24,7 +24,7 @@ export function Requests({
     <div className="min-h-[calc(100vh-56px)] w-full">
       <Header
         title="Requests"
-        subtitle="Request data about your customers and easily get data from all your sources."
+        subtitle="AI agents will gather the data then human data scientists will review it."
         buttonLabel="Request data"
         onButtonClick={() => void onRequestData({})}
         buttonVariant="default"

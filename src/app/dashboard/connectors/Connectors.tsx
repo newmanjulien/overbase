@@ -21,7 +21,7 @@ export function Connectors({
     <div className="min-h-[calc(100vh-56px)] w-full">
       <Header
         title="Connectors"
-        subtitle="Connect to any and all data sources so we can collect the data you need."
+        subtitle="Easily get any customer data from all your platforms and tools."
         buttonLabel="Add custom connector"
         onButtonClick={() => {}}
         secondButtonLabel="Browse connectors"

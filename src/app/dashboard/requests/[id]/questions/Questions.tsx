@@ -96,7 +96,7 @@ export default function Questions({
     <SetupLayout
       sidebarBackText="Back to requests"
       onSidebarBack={onHome}
-      sidebarTitle="Answer a few optional questions"
+      sidebarTitle="Our AI has a few optional questions"
       {...(mode !== "create" &&
         setStatus && {
           sidebarActionText: "Delete request",
@@ -108,8 +108,8 @@ export default function Questions({
             { value: "active", label: "Active" },
           ],
         })}
-      title="Optional questions"
-      subtitle="We did a quick review of your request and these are optional questions which might help us complete it"
+      title="These questions are optional"
+      subtitle="Answer only questions you feel are relevant. These come from our AI and have not been reviewed by a human"
       subtitleActionText={isRefreshing ? "Refreshing..." : "Refresh"}
       onSubtitleAction={onRefresh}
       subtitleActionProps={{

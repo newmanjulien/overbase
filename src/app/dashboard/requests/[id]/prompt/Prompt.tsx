@@ -27,7 +27,7 @@ interface PromptProps {
   errors: { prompt?: string; customer?: string };
   setPrompt: (val: string) => void;
   setPromptRich: (
-    val: SerializedEditorState<SerializedLexicalNode> | null,
+    val: SerializedEditorState<SerializedLexicalNode> | null
   ) => void;
   setCustomer: (val: string) => void;
   onSubmit: () => void | Promise<void>;
@@ -74,7 +74,7 @@ export default function Prompt({
           ],
         })}
       // Main
-      title="What data do you want us to get for you?"
+      title="What data do you need?"
       subtitle="Explain what data you need with as many details as possible. Use the @ symbol to tag connectors"
       // Footer
       primaryButtonText="Next"
@@ -89,7 +89,7 @@ export default function Prompt({
           defaultRichJSON={promptRich}
           onChangeText={setPrompt}
           onChangeRichJSON={setPromptRich}
-          placeholder="@ to tag connectors."
+          placeholder="Use @ to tag connectors..."
           mentionOptions={CONNECTORS}
           className="mt-1 rounded-xl bg-white min-h-70"
         />
