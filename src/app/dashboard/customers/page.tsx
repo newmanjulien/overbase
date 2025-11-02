@@ -10,13 +10,13 @@ import { Header } from "@/components/blocks/Header";
 interface Customer {
   id: string;
   name: string;
-  company: string;
+  renewal: string;
 }
 
 const mockCustomers: Customer[] = [
-  { id: "101", name: "Acme Corp", company: "$100,000 ACV" },
-  { id: "102", name: "Globex Inc", company: "$150,000 ACV" },
-  { id: "103", name: "Initech", company: "$700,000 ACV" },
+  { id: "101", name: "Acme Corp", renewal: "9 months" },
+  { id: "102", name: "Globex Inc", renewal: "5 months" },
+  { id: "103", name: "Initech", renewal: "3 months" },
 ];
 
 function CustomersLayout() {
@@ -86,7 +86,7 @@ function CustomersLayout() {
             <RowCard
               key={customer.id}
               title={customer.name}
-              subtitle={customer.company}
+              subtitle={`Renews in ${customer.renewal}`}
               image="" // fallback letter
               showAvatar
               leading={
