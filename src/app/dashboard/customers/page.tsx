@@ -117,8 +117,8 @@ function CustomersLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="You can easily request data about customers after having added and set them up here."
-            linkText="Request data"
+            text="You can easily request data about customers after having added and set them up here"
+            linkText="Requests"
             onClick={() => router.push("/dashboard/requests")}
           />
         </div>
