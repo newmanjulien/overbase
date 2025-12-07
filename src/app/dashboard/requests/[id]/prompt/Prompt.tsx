@@ -14,10 +14,13 @@ import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 const CUSTOMERS = ["Acme Corp", "Globex", "Initech", "Soylent", "Umbrella"];
 const CONNECTORS = [
-  { id: "slack", name: "Slack", logo: "/images/slack.png" },
+  { id: "alex", name: "Alex Carp", logo: "/images/alex.png" },
   { id: "docusign", name: "Docusign", logo: "/images/docusign.png" },
+  { id: "gloria", name: "Gloria Incara", logo: "/images/gloria.png" },
   { id: "gmail", name: "Gmail", logo: "/images/gmail.png" },
+  { id: "ingrid", name: "Ingrid Newell", logo: "/images/ingrid.png" },
   { id: "salesforce", name: "Salesforce", logo: "/images/salesforce.png" },
+  { id: "slack", name: "Slack", logo: "/images/slack.png" },
 ];
 
 interface PromptProps {
@@ -75,7 +78,7 @@ export default function Prompt({
         })}
       // Main
       title="What data do you need?"
-      subtitle="Explain what data you need with as many details as possible. Use the @ symbol to tag connectors"
+      subtitle="Explain what data you need with as many details as possible. Use the @ symbol to tag connectors or colleagues you want to gather data from"
       // Footer
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}
@@ -89,7 +92,7 @@ export default function Prompt({
           defaultRichJSON={promptRich}
           onChangeText={setPrompt}
           onChangeRichJSON={setPromptRich}
-          placeholder="Use @ to tag connectors..."
+          placeholder="@ to tag connectors or colleagues..."
           mentionOptions={CONNECTORS}
           className="mt-1 rounded-xl bg-white min-h-70"
         />
