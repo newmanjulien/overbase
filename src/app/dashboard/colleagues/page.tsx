@@ -7,50 +7,54 @@ import { InfoCard } from "@/components/blocks/InfoCard";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/blocks/Header";
 
-interface Customer {
+interface Colleagues {
   id: string;
   name: string;
   renewal: string;
 }
 
-const mockCustomers: Customer[] = [
-  { id: "101", name: "Acme Corp", renewal: "9 months" },
-  { id: "102", name: "Globex Inc", renewal: "5 months" },
-  { id: "103", name: "Initech", renewal: "3 months" },
+const mockColleagues: Colleagues[] = [
+  {
+    id: "101",
+    name: "Alex Carp",
+    renewal: "Ready to request data",
+  },
+  { id: "102", name: "Gloria Incara", renewal: "Waiting for response" },
+  { id: "103", name: "Ingrid Newell", renewal: "Ready to request data" },
 ];
 
-function CustomersLayout() {
-  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+function ColleaguesLayout() {
+  const [selectedColleagues, setSelectedColleagues] = useState<string[]>([]);
   const router = useRouter();
 
   // Derive selectAll state
-  const allSelected = selectedCustomers.length === mockCustomers.length;
+  const allSelected = selectedColleagues.length === mockColleagues.length;
   const someSelected =
-    selectedCustomers.length > 0 &&
-    selectedCustomers.length < mockCustomers.length;
+    selectedColleagues.length > 0 &&
+    selectedColleagues.length < mockColleagues.length;
 
   const handleSelectAll = (checked: boolean | "indeterminate") => {
     if (checked) {
-      setSelectedCustomers(mockCustomers.map((c) => c.id));
+      setSelectedColleagues(mockColleagues.map((c) => c.id));
     } else {
-      setSelectedCustomers([]);
+      setSelectedColleagues([]);
     }
   };
 
-  const handleSelectCustomer = (customerId: string, checked: boolean) => {
+  const handleSelectColleague = (colleagueId: string, checked: boolean) => {
     if (checked) {
-      setSelectedCustomers((prev) => [...prev, customerId]);
+      setSelectedColleagues((prev) => [...prev, colleagueId]);
     } else {
-      setSelectedCustomers((prev) => prev.filter((id) => id !== customerId));
+      setSelectedColleagues((prev) => prev.filter((id) => id !== colleagueId));
     }
   };
 
   return (
     <div className="h-full w-full">
       <Header
-        title="Customers"
-        subtitle="Add customers who you want to request data about."
-        buttonLabel="Add customer"
+        title="Colleagues"
+        subtitle="Add colleagues who you want to request data from."
+        buttonLabel="Add colleague"
         onButtonClick={() => {}}
         buttonVariant="default"
         learnMoreLink="#"
@@ -81,19 +85,19 @@ function CustomersLayout() {
             ]}
           />
 
-          {/* Customer rows */}
-          {mockCustomers.map((customer) => (
+          {/* Colleague rows */}
+          {mockColleagues.map((colleague) => (
             <RowCard
-              key={customer.id}
-              title={customer.name}
-              subtitle={`Renews in ${customer.renewal}`}
+              key={colleague.id}
+              title={colleague.name}
+              subtitle={`${colleague.renewal}`}
               image="" // fallback letter
               showAvatar
               leading={
                 <Checkbox
-                  checked={selectedCustomers.includes(customer.id)}
+                  checked={selectedColleagues.includes(colleague.id)}
                   onCheckedChange={(checked) =>
-                    handleSelectCustomer(customer.id, checked as boolean)
+                    handleSelectColleague(colleague.id, checked as boolean)
                   }
                   className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
                     data-[state=checked]:border-gray-800 rounded-sm"
@@ -102,11 +106,11 @@ function CustomersLayout() {
               menuItems={[
                 {
                   label: "Edit",
-                  onClick: () => console.log("Edit", customer.id),
+                  onClick: () => console.log("Edit", colleague.id),
                 },
                 {
                   label: "Delete",
-                  onClick: () => console.log("Delete", customer.id),
+                  onClick: () => console.log("Delete", colleague.id),
                   destructive: true,
                 },
               ]}
@@ -117,7 +121,7 @@ function CustomersLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="You can easily request data about customers after having added and set them up here"
+            text="You can easily request data from colleaues after having added and set them up here"
             linkText="Requests"
             onClick={() => router.push("/dashboard/requests")}
           />
@@ -127,6 +131,6 @@ function CustomersLayout() {
   );
 }
 
-export default function CustomersPage() {
-  return <CustomersLayout />;
+export default function ColleaguesPage() {
+  return <ColleaguesLayout />;
 }
