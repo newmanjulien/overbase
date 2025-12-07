@@ -118,9 +118,6 @@ export default function Prompt({
           ))}
         </SelectContent>
       </Select>
-      {errors.customer && (
-        <p className="text-red-500 text-sm mt-1">{errors.customer}</p>
-      )}
     </SetupLayout>
   );
 }

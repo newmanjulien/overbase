@@ -54,9 +54,6 @@ export default function PromptClient({ requestId, mode }: PromptClientProps) {
     if (!prompt?.trim()) {
       errs.prompt = "Prompt is required.";
     }
-    if (!customer?.trim()) {
-      errs.customer = "Customer is required.";
-    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
