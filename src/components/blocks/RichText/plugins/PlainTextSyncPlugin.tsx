@@ -1,7 +1,3 @@
-// ============================================================================
-// File: components/blocks/RichTextarea/plugins/PlainTextSyncPlugin.tsx
-// Description: One-way sync from Lexical -> external listeners. No feedback loop.
-// ============================================================================
 "use client";
 
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";

@@ -1,8 +1,3 @@
-// ============================================================================
-// File: components/blocks/RichTextarea/index.tsx
-// Description: Lexical-friendly RichTextarea — uncontrolled by React props,
-//              one-way sync out, imperative control in via ref/editor callbacks.
-// ============================================================================
 "use client";
 
 import React, { useImperativeHandle, useRef, forwardRef, useMemo } from "react";
