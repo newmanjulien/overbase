@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { posts, categories } from "./posts";
-import AddQuestionModal from ".AddQuestionModal";
+import AddQuestionModal from "./AddQuestionModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus } from "lucide-react";
 

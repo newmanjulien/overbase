@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { X, BarChart3 } from "lucide-react";
 
@@ -38,7 +39,7 @@ export default function KpiModal({
             <BarChart3 className="h-5 w-5 text-amber-600" />
             Define a KPI/Metric
           </h3>
-          <button onClick={onClose}>
+          <button type="button" aria-label="Close modal" onClick={onClose}>
             <X className="h-5 w-5" />
           </button>
         </div>

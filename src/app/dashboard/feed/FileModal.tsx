@@ -43,7 +43,7 @@ export default function FileModal({
             <Upload className="h-5 w-5 text-green-600" />
             Attach a File
           </h3>
-          <button onClick={onClose}>
+          <button type="button" aria-label="Close modal" onClick={onClose}>
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -60,6 +60,7 @@ export default function FileModal({
           />
           <input
             type="file"
+            aria-label="Add file"
             onChange={(e) =>
               setTempFile({ ...tempFile, file: e.target.files?.[0] || null })
             }
