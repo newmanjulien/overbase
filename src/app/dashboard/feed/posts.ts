@@ -1,12 +1,8 @@
 export const categories = [
-  { name: "Photography", icon: "📷" },
-  { name: "Writing", icon: "✍️" },
-  { name: "Economics", icon: "📊" },
-  { name: "Health", icon: "🏥" },
-  { name: "Music", icon: "🎵" },
-  { name: "History", icon: "📜" },
-  { name: "Psychology", icon: "🧠" },
-  { name: "Education", icon: "📚" },
+  { name: "Requested this week" },
+  { name: "Requested this month" },
+  { name: "Currently in progress" },
+  { name: "All requests" },
 ];
 
 export const posts = [

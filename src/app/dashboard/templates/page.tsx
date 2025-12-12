@@ -35,7 +35,7 @@ function Templates() {
         learnMoreLink="#"
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-16">
+      <div className="max-w-7xl mx-auto px-2 py-10 flex gap-16">
         {/* Sidebar */}
         <Sidebar
           selectedTag={selectedTag}

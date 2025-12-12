@@ -6,6 +6,7 @@ import { posts, categories } from "./posts";
 import AddQuestionModal from "../../../components/modals/AddQuestionModal";
 import AskBar from "@/components/blocks/AskBar";
 import Sidebar from "@/components/blocks/Sidebar";
+import { Header } from "@/components/blocks/Header";
 
 export default function FeedPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -19,7 +20,13 @@ export default function FeedPage() {
         onClose={() => setShowAddQuestion(false)}
       />
 
-      <div className="flex max-w-6xl mx-auto">
+      <Header
+        title="Feed"
+        subtitle="See what your colleagues are asking and sharing."
+        learnMoreLink="#"
+      />
+
+      <div className="flex max-w-7xl px-2 py-6 mx-auto">
         <aside className="py-4 pr-13 sticky top-16">
           <Sidebar
             selectedTag={activeCategory || categories[0]?.name || ""}
