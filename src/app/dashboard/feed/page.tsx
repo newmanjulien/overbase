@@ -89,7 +89,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { posts, categories } from "./posts";
-import AddQuestionModal from "./AddQuestionModal";
+import AddQuestionModal from "../../../components/modals/AddQuestionModal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus } from "lucide-react";
 
