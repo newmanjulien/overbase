@@ -69,3 +69,8 @@ export const posts = [
     comments: 1,
   },
 ];
+
+export const answerContextTexts = [
+  "I left Reddit back in 2021 as for this app. Qoura neither one is better you can speak the words say whatever you need the proof what became better? The fact of not protecting when you started your app. Next post Right from this site to iMessage telegram phone numbers To my other iMessage and my other phone number should I get into the data and the dark side of these apps? I’m gonna show them Take those rules and regulations exploiting, etc. I said that one before This all happened in a couple days. Same person claiming someone else and they got hit And now who’s gonna answer for this? And other things there’s always good with bad at this point I don’t know which one is better. They’re both bad.",
+  "The second answer provides insights from independent transport analysts.",
+];
