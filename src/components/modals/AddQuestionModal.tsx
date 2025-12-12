@@ -45,9 +45,9 @@ export default function AddQuestionModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="add-question-modal-title"
-      className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-16 overflow-y-auto"
+      className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center pt-16 overflow-y-auto"
     >
-      <div className="bg-white rounded-lg w-full max-w-2xl shadow-xl my-8">
+      <div className="bg-white rounded-lg w-full max-w-3xl shadow-xl my-8">
         {/* Top close button */}
         <div className="p-4 border-b border-gray-200 flex justify-end">
           <button
@@ -92,7 +92,7 @@ export default function AddQuestionModal({
             placeholder='Start your question with "What", "How", "Why", etc.'
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="w-full h-64 text-lg text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
+            className="w-full h-77 text-lg text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
             aria-label="Type your question here"
           />
 
