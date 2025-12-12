@@ -5,6 +5,7 @@ import { useState, use } from "react";
 import { posts as allPosts, answerContextTexts } from "../posts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Paperclip } from "lucide-react";
+import AskBar from "@/components/blocks/AskBar";
 
 function UserActionCard({
   avatar,
@@ -212,17 +213,7 @@ export default function PostDetailPage({
             </div>
           ))}
 
-          <UserActionCard
-            avatar="/user-with-headphones.jpg"
-            avatarFallback="U"
-            ringColor="ring-yellow-400"
-            label="Share your feedback"
-          >
-            <div className="space-y-4">
-              <RatingSelector />
-              <ExpandableCommentInput />
-            </div>
-          </UserActionCard>
+          <AskBar onClick={() => console.log("open modal here")} />
         </div>
       </div>
     </div>
