@@ -35,7 +35,7 @@ export default function FeedPage() {
           />
         </aside>
 
-        <main className="flex-1 py-4 max-w-2xl">
+        <main className="flex-1 py-4 max-w-4xl">
           <AskBar onClick={() => setShowAddQuestion(true)} />
 
           {/* Posts */}
@@ -43,9 +43,9 @@ export default function FeedPage() {
             {posts.map((post) => (
               <a
                 key={post.id}
-                href={`/dashboard/feed/${post.id}`} // <- replaced router.push
-                target="_blank" // <- opens in a new tab
-                rel="noopener noreferrer" // <- security & performance
+                href={`/dashboard/feed/${post.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block bg-white rounded-lg border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
               >
                 <div className="p-4 pb-2">

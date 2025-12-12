@@ -121,7 +121,7 @@ export default function PostDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-3xl mx-auto py-8 px-4">
+      <div className="max-w-4xl mx-auto py-10 px-4">
         <div className="flex items-start gap-4 mb-4">
           <Avatar className="h-12 w-12 ring-2 ring-blue-500 flex-shrink-0">
             <AvatarImage src="/professional-woman-portrait.png" />
