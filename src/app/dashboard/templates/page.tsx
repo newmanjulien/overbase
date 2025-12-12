@@ -3,11 +3,17 @@
 import { useState } from "react";
 import { TemplateCard } from "./TemplateCard";
 import { Header } from "@/components/blocks/Header";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-
+import Sidebar from "@/components/blocks/Sidebar";
 import { tagsConfig, initialTemplates } from "./DummyData";
 
 function Templates() {
+  const categories = [
+    { key: "all", name: "All Templates" },
+    { key: "marketing", name: "Marketing" },
+    { key: "sales", name: "Sales" },
+    { key: "hr", name: "HR" },
+  ];
+
   const [selectedTag, setSelectedTag] = useState(tagsConfig[0].key);
 
   const filteredTemplates = initialTemplates.filter((t) =>
@@ -31,33 +37,11 @@ function Templates() {
 
       <div className="max-w-7xl mx-auto px-6 py-10 flex gap-16">
         {/* Sidebar */}
-        <div className="w-56 flex-shrink-0">
-          <ToggleGroup
-            type="single"
-            value={selectedTag}
-            onValueChange={(val) => {
-              if (val) setSelectedTag(val);
-            }}
-            orientation="vertical"
-            className="flex-col w-full space-y-0.5"
-          >
-            {tagsConfig.map((tag) => (
-              <ToggleGroupItem
-                key={tag.key}
-                value={tag.key}
-                className={`
-                  w-full text-left px-3 py-2 text-sm rounded-xl transition-colors flex items-center justify-between
-                  data-[state=on]:bg-white data-[state=on]:border data-[state=on]:border-gray-200/60
-                  data-[state=on]:font-medium data-[state=on]:text-gray-800
-                  data-[state=off]:text-gray-700 data-[state=off]:hover:text-gray-900
-                  data-[state=off]:hover:bg-white data-[state=off]:border-transparent
-                `}
-              >
-                {tag.name}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
+        <Sidebar
+          selectedTag={selectedTag}
+          setSelectedTag={setSelectedTag}
+          tagsConfig={tagsConfig}
+        />
 
         {/* Content */}
         <div className="flex-1">
