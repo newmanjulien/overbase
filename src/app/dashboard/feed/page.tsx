@@ -41,10 +41,12 @@ export default function FeedPage() {
           {/* Posts */}
           <div className="space-y-4 mb-8">
             {posts.map((post) => (
-              <article
+              <a
                 key={post.id}
-                className="bg-white rounded-lg border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => router.push(`/dashboard/feed/${post.id}`)}
+                href={`/dashboard/feed/${post.id}`} // <- replaced router.push
+                target="_blank" // <- opens in a new tab
+                rel="noopener noreferrer" // <- security & performance
+                className="block bg-white rounded-lg border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
               >
                 <div className="p-4 pb-2">
                   <span className="text-xs text-gray-500">
@@ -96,7 +98,7 @@ export default function FeedPage() {
                     </table>
                   </div>
                 )}
-              </article>
+              </a>
             ))}
           </div>
         </main>
