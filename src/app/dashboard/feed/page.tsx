@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { posts, categories } from "./posts";
 import AddQuestionModal from "../../../components/modals/AddQuestionModal";
-import { Plus } from "lucide-react";
 import AskBar from "@/components/blocks/AskBar";
 
 export default function FeedPage() {
@@ -22,11 +21,6 @@ export default function FeedPage() {
       <div className="flex max-w-6xl mx-auto">
         <aside className="w-48 flex-shrink-0 py-4 pr-4">
           <div className="sticky top-16">
-            <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-lg w-full mb-4">
-              <Plus className="h-4 w-4" />
-              <span>Create Space</span>
-            </button>
-
             <nav className="space-y-1">
               {categories.map((category) => (
                 <button
