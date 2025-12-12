@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { posts, categories } from "./posts";
 import AddQuestionModal from "../../../components/modals/AddQuestionModal";
 import AskBar from "@/components/blocks/AskBar";
+import Sidebar from "@/components/blocks/Sidebar";
 
 export default function FeedPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -19,25 +20,12 @@ export default function FeedPage() {
       />
 
       <div className="flex max-w-6xl mx-auto">
-        <aside className="w-48 flex-shrink-0 py-4 pr-4">
-          <div className="sticky top-16">
-            <nav className="space-y-1">
-              {categories.map((category) => (
-                <button
-                  key={category.name}
-                  onClick={() => setActiveCategory(category.name)}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg w-full text-left hover:bg-gray-200 ${
-                    activeCategory === category.name
-                      ? "bg-gray-200 text-gray-900"
-                      : "text-gray-700"
-                  }`}
-                >
-                  <span className="text-base">{category.icon}</span>
-                  <span>{category.name}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
+        <aside className="py-4 pr-13 sticky top-16">
+          <Sidebar
+            selectedTag={activeCategory || categories[0]?.name || ""}
+            setSelectedTag={setActiveCategory}
+            tagsConfig={categories.map((c) => ({ key: c.name, name: c.name }))}
+          />
         </aside>
 
         <main className="flex-1 py-4 max-w-2xl">
