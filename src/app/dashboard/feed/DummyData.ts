@@ -5,14 +5,14 @@ export const categories = [
   { name: "All requests" },
 ];
 
-export const posts = [
+export const requests = [
   {
     id: 1,
     space: "China - World Leader.",
     spaceIcon: "assets/images/flags/zh.png",
     author: "Aya Shawn",
     authorAvatar: "",
-    postedBy: "EARL 77",
+    requestedBy: "EARL 77",
     timeAgo: "Wed",
     authorTimeAgo: "2y",
     title: "Did China lose money on its bullet train project?",
@@ -52,7 +52,7 @@ export const posts = [
     spaceIcon: "assets/images/flags/zh.png",
     author: "Aya Shawn",
     authorAvatar: "",
-    postedBy: "EARL 77",
+    requestedBy: "EARL 77",
     timeAgo: "Wed",
     authorTimeAgo: "2y",
     title: "Did China lose money on its bullet train project?",
