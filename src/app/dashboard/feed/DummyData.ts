@@ -1,64 +1,38 @@
+import { RequestType } from "./RequestCard";
+
 export const categories = [
+  { name: "Currently in progress" },
   { name: "Requested this week" },
   { name: "Requested this month" },
-  { name: "Currently in progress" },
   { name: "All requests" },
 ];
 
-export const requests = [
+export const requests: RequestType[] = [
   {
     id: 1,
-    space: "China - World Leader.",
-    spaceIcon: "assets/images/flags/zh.png",
-    author: "Aya Shawn",
-    authorAvatar: "",
-    requestedBy: "EARL 77",
-    timeAgo: "Wed",
-    authorTimeAgo: "2y",
     title: "Did China lose money on its bullet train project?",
     content:
       "China's 18 main trunk lines of high-speed railways, only 6 lines are profitable, and the remaining 13 are loss-making. In 2022, China's high-speed rail suffered a total loss of US$15 billion. Therefore, if all high-speed rail in China is reg",
-    status: null,
+    status: "in-progress",
     askedDate: "Dec 15, 2025",
-    tableData: [
+    followUpQuestions: [
       {
-        api_id: "gst-u75qm5FHGEVWFlH",
-        name: "Andy Buchanan",
-        first_name: "Andy",
-        last_name: "Buchanan",
-        email: "andrew.b@eminds.ai",
+        id: "q1",
+        question:
+          "Can you provide the yearly revenue and loss breakdown per line?",
       },
       {
-        api_id: "gst-FwxuJVWLWwsGyUJ",
-        name: "Syed Altamash",
-        first_name: "Syed",
-        last_name: "Altamash",
-        email: "syed.altamash@outlook.c...",
-      },
-      {
-        api_id: "gst-qJDiH8Fh3ygqYzt",
-        name: "Nikole Burke",
-        first_name: "Nikole",
-        last_name: "Burke",
-        email: "nburke@incidentiq.com",
+        id: "q2",
+        question: "Which lines are profitable and which are not?",
       },
     ],
-    upvotes: 16,
-    comments: 1,
   },
   {
     id: 2,
-    space: "China - World Leader.",
-    spaceIcon: "assets/images/flags/zh.png",
-    author: "Aya Shawn",
-    authorAvatar: "",
-    requestedBy: "EARL 77",
-    timeAgo: "Wed",
-    authorTimeAgo: "2y",
     title: "Did China lose money on its bullet train project?",
     content:
       "China's 18 main trunk lines of high-speed railways, only 6 lines are profitable, and the remaining 13 are loss-making. In 2022, China's high-speed rail suffered a total loss of US$15 billion. Therefore, if all high-speed rail in China is reg",
-    status: null,
+    status: "completed",
     askedDate: "Dec 15, 2025",
     tableData: [
       {
@@ -83,8 +57,6 @@ export const requests = [
         email: "nburke@incidentiq.com",
       },
     ],
-    upvotes: 16,
-    comments: 1,
   },
 ];
 

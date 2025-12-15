@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, use } from "react";
-import { posts as allPosts, answerContextTexts } from "../DummyData";
+import { requests as allPosts, answerContextTexts } from "../DummyData";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Paperclip } from "lucide-react";
 import AskBar from "@/components/blocks/AskBar";
