@@ -19,13 +19,13 @@ export interface InfoCardData {
   linkText?: string;
 }
 
-export interface FeedDetailData {
+export interface AnswerDetailData {
   answers: AnswerData[];
   showFollowupBar: boolean;
   infoCard?: InfoCardData;
 }
 
-export const dummyAnswers: Record<number, FeedDetailData> = {
+export const dummyAnswers: Record<number, AnswerDetailData> = {
   1: {
     answers: [
       {

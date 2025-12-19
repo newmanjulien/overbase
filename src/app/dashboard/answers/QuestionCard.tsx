@@ -1,9 +1,9 @@
 "use client";
 
-import DataTable, { TableRow } from "../../../components/blocks/DataTable";
+import DataTable, { TableRow } from "@/components/blocks/DataTable";
 import { Download } from "lucide-react";
 
-export interface RequestType {
+export interface QuestionType {
   id: number;
   askedDate: string;
   title?: string;
@@ -12,13 +12,13 @@ export interface RequestType {
   status: "in-progress" | "completed";
 }
 
-interface RequestCardProps {
-  request: RequestType;
+interface QuestionCardProps {
+  question: QuestionType;
 }
 
-export default function RequestCard({ request }: RequestCardProps) {
+export default function QuestionCard({ question }: QuestionCardProps) {
   const handleCardClick = () => {
-    window.open(`/dashboard/feed/${request.id}`, "_blank");
+    window.open(`/dashboard/answers/${question.id}`, "_blank");
   };
 
   return (
@@ -26,23 +26,23 @@ export default function RequestCard({ request }: RequestCardProps) {
       onClick={handleCardClick}
       className="block bg-white rounded-2xl border border-gray-200 cursor-pointer hover:shadow-md transition-shadow"
     >
-      <CardHeader request={request} />
+      <CardHeader question={question} />
 
-      {request.tableData && <DataTable tableData={request.tableData} />}
+      {question.tableData && <DataTable tableData={question.tableData} />}
     </div>
   );
 }
 
 // -------------------- Subcomponents --------------------
 
-function CardHeader({ request }: { request: RequestType }) {
+function CardHeader({ question }: { question: QuestionType }) {
   return (
     <div className="p-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between">
         <span className="text-xs text-gray-400">
-          Asked on {request.askedDate}
+          Asked on {question.askedDate}
         </span>
-        {request.status === "in-progress" && (
+        {question.status === "in-progress" && (
           <span
             className="px-2 py-1 rounded-lg text-xs text-gray-800"
             style={{ backgroundColor: "#FFFF00" }}
@@ -50,7 +50,7 @@ function CardHeader({ request }: { request: RequestType }) {
             In Progress
           </span>
         )}
-        {request.status === "completed" && (
+        {question.status === "completed" && (
           <button 
             onClick={(e) => {
               e.stopPropagation();
@@ -63,8 +63,8 @@ function CardHeader({ request }: { request: RequestType }) {
           </button>
         )}
       </div>
-      {request.title && <h2 className="text-gray-900 mb-2">{request.title}</h2>}
-      <p className="text-gray-700 text-sm line-clamp-2 overflow-hidden">{request.content}</p>
+      {question.title && <h2 className="text-gray-800 mb-2">{question.title}</h2>}
+      <p className="text-gray-600 text-sm line-clamp-2 overflow-hidden">{question.content}</p>
     </div>
   );
 }

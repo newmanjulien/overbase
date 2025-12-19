@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { requests, categories } from "./DummyData";
-import AddQuestionModal from "../../../components/modals/AddQuestionModal";
+import { questions, categories } from "./DummyData";
+import AddQuestionModal from "@/components/modals/AddQuestionModal";
 import AskBar from "@/components/blocks/AskBar";
 import Sidebar from "@/components/blocks/Sidebar";
 import { Header } from "@/components/blocks/Header";
-import RequestCard, { RequestType } from "./RequestCard";
+import QuestionCard, { QuestionType } from "./QuestionCard";
 
-export default function FeedPage() {
+export default function AnswersPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
 
@@ -39,8 +39,8 @@ export default function FeedPage() {
 
           {/* Posts */}
           <div className="space-y-4 mb-8">
-            {requests.map((request: RequestType) => (
-              <RequestCard key={request.id} request={request} />
+            {questions.map((question: QuestionType) => (
+              <QuestionCard key={question.id} question={question} />
             ))}
           </div>
         </main>

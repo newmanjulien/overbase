@@ -33,7 +33,7 @@ export function EmptyState({
   return (
     <div
       className={`${
-        withBorder ? "border border-gray-200 rounded-2xl" : ""
+        withBorder ? "border border-gray-200/60 rounded-2xl" : ""
       } py-12 px-10 flex flex-col items-center justify-center text-center min-h-[250px] ${className}`}
     >
       {/* Icon bubble */}

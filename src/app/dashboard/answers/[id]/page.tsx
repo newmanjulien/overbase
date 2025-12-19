@@ -1,14 +1,14 @@
 "use client";
 
 import { use } from "react";
-import { requests as allPosts } from "../DummyData";
+import { questions as allPosts } from "../DummyData";
 import { dummyAnswers } from "./DummyData";
 import FollowupBar from "@/components/blocks/FollowupBar";
 import { InfoCard } from "@/components/blocks/InfoCard";
 import AnswerCard from "./AnswerCard";
 
 
-export default function PostDetailPage({
+export default function AnswerPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -29,7 +29,7 @@ export default function PostDetailPage({
       <div className="max-w-4xl mx-auto py-10 px-4">
         <div className="flex items-start gap-4 mb-5">
           <div>
-            <h1 className="text-xl font-medium text-gray-900">{post.title}</h1>
+            <h1 className="text-xl text-gray-800">{post.title}</h1>
           </div>
         </div>
 

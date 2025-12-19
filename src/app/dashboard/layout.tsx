@@ -32,7 +32,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { hideFooter } = useDashboardUI();
 
   const navItems = [
-    { href: "/dashboard/feed", label: "Answers" },
+    { href: "/dashboard/answers", label: "Answers" },
     { href: "/dashboard/templates", label: "Templates" },
     { href: "/dashboard/connectors", label: "Connectors" },
     { href: "/dashboard/colleagues", label: "Colleagues" },
@@ -46,7 +46,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between h-11">
             <div className="flex items-center space-x-8">
               <div className="h-7">
-                <Link href="/dashboard/requests">
+                <Link href="/dashboard/answers">
                   <Image
                     src="/images/logo.png"
                     alt="Logo"

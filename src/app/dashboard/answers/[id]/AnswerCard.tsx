@@ -63,7 +63,7 @@ export default function AnswerCard({
         )}
       </div>
 
-      {/* Table content - used in the same way RequestCard uses DataTable */}
+      {/* Table content - used in the same way QuestionCard uses DataTable */}
       {tableData && <DataTable tableData={tableData} />}
     </div>
   );

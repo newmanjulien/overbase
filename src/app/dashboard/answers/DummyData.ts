@@ -1,4 +1,4 @@
-import { RequestType } from "./RequestCard";
+import { QuestionType } from "./QuestionCard";
 
 export const categories = [
   { name: "Asked this week" },
@@ -8,7 +8,7 @@ export const categories = [
   { name: "Scratchpad" },
 ];
 
-export const requests: RequestType[] = [
+export const questions: QuestionType[] = [
   {
     id: 1,
     title: "Did China lose money on its bullet train project?",
