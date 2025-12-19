@@ -20,7 +20,7 @@ export default function FeedPage() {
       />
 
       <Header
-        title="Feed"
+        title="Answers"
         subtitle="See what your colleagues are asking and sharing."
         learnMoreLink="#"
       />

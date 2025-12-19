@@ -1,10 +1,11 @@
 import { RequestType } from "./RequestCard";
 
 export const categories = [
-  { name: "Currently in progress" },
-  { name: "Requested this week" },
-  { name: "Requested this month" },
-  { name: "All requests" },
+  { name: "Asked this week" },
+  { name: "Asked this month" },
+  { name: "Recurring questions" },
+  { name: "All answers" },
+  { name: "Scratchpad" },
 ];
 
 export const requests: RequestType[] = [
@@ -12,48 +13,73 @@ export const requests: RequestType[] = [
     id: 1,
     title: "Did China lose money on its bullet train project?",
     content:
-      "China's 18 main trunk lines of high-speed railways, only 6 lines are profitable, and the remaining 13 are loss-making. In 2022, China's high-speed rail suffered a total loss of US$15 billion. Therefore, if all high-speed rail in China is reg",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
     status: "in-progress",
     askedDate: "Dec 15, 2025",
-    followUpQuestions: [
-      {
-        id: "q1",
-        question:
-          "Can you provide the yearly revenue and loss breakdown per line?",
-      },
-      {
-        id: "q2",
-        question: "Which lines are profitable and which are not?",
-      },
-    ],
   },
   {
     id: 2,
-    title: "Did China lose money on its bullet train project?",
+    title:
+      "Which deals from next quarter could we pull forward if we gave them a discount?",
     content:
-      "China's 18 main trunk lines of high-speed railways, only 6 lines are profitable, and the remaining 13 are loss-making. In 2022, China's high-speed rail suffered a total loss of US$15 billion. Therefore, if all high-speed rail in China is reg",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
     status: "completed",
     askedDate: "Dec 15, 2025",
     tableData: [
       {
-        api_id: "gst-u75qm5FHGEVWFlH",
-        name: "Andy Buchanan",
-        first_name: "Andy",
-        last_name: "Buchanan",
+        api_id:
+          "Negotiation stage. Champion asked about a potential discount in a call on 10/14 and followed up about a discount by email",
+        name: "Umbrella",
+        first_name: "Gong, Outlook, Salesforce",
+        last_name: "Cindy Li",
         email: "andrew.b@eminds.ai",
       },
       {
-        api_id: "gst-FwxuJVWLWwsGyUJ",
-        name: "Syed Altamash",
-        first_name: "Syed",
-        last_name: "Altamash",
+        api_id:
+          "Negotiation stage. Champion asked about a potential discount in a call on 10/29 and followed up about a discount by email",
+        name: "Initech",
+        first_name: "Gong, Outlook, Salesforce",
+        last_name: "James Randall",
         email: "syed.altamash@outlook.c...",
       },
       {
-        api_id: "gst-qJDiH8Fh3ygqYzt",
-        name: "Nikole Burke",
-        first_name: "Nikole",
-        last_name: "Burke",
+        api_id:
+          "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
+        name: "Globex",
+        first_name: "Gong, Salesforce",
+        last_name: "Raj Sinha",
+        email: "nburke@incidentiq.com",
+      },
+       {
+        api_id:
+          "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
+        name: "Globex",
+        first_name: "Gong, Salesforce",
+        last_name: "Raj Sinha",
+        email: "nburke@incidentiq.com",
+      },
+       {
+        api_id:
+          "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
+        name: "Globex",
+        first_name: "Gong, Salesforce",
+        last_name: "Raj Sinha",
+        email: "nburke@incidentiq.com",
+      },
+       {
+        api_id:
+          "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
+        name: "Globex",
+        first_name: "Gong, Salesforce",
+        last_name: "Raj Sinha",
+        email: "nburke@incidentiq.com",
+      },
+       {
+        api_id:
+          "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
+        name: "Globex",
+        first_name: "Gong, Salesforce",
+        last_name: "Raj Sinha",
         email: "nburke@incidentiq.com",
       },
     ],

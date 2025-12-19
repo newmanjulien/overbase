@@ -47,7 +47,7 @@ export default function AddQuestionModal({
       aria-labelledby="add-question-modal-title"
       className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center pt-16 overflow-y-auto"
     >
-      <div className="bg-white rounded-lg w-full max-w-3xl shadow-xl my-8">
+      <div className="bg-white rounded-2xl w-full max-w-3xl shadow-xl my-8">
         {/* Top close button */}
         <div className="p-4 border-b border-gray-200 flex justify-end">
           <button
@@ -61,27 +61,27 @@ export default function AddQuestionModal({
 
         <div className="p-6 space-y-4">
           {/* Avatar + Visibility */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-2 mb-4">
             <div
-              className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-300 overflow-hidden"
+              className="h-6 w-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-300 overflow-hidden"
               aria-hidden="true"
             >
               <img
-                src="/professional-woman-avatar.png"
+                src="/images/gloria.png"
                 alt="User avatar"
                 className="h-full w-full object-cover"
               />
             </div>
             <Play
-              className="h-4 w-4 text-gray-400 fill-gray-400"
+              className="h-3 w-3 text-gray-600 fill-gray-600"
               aria-hidden="true"
             />
             <button
-              className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-full text-sm text-gray-700 hover:bg-gray-50"
+              className="flex items-center gap-2 px-2 py-1 border border-gray-300 rounded-full text-sm text-gray-700 hover:bg-gray-50"
               aria-label="Select question visibility"
             >
               <Users className="h-4 w-4" aria-hidden="true" />
-              <span>Public</span>
+              <span>Private</span>
               <ChevronDown className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
@@ -92,7 +92,7 @@ export default function AddQuestionModal({
             placeholder='Start your question with "What", "How", "Why", etc.'
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="w-full h-77 text-lg text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
+            className="w-full h-77 text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
             aria-label="Type your question here"
           />
 
@@ -108,7 +108,7 @@ export default function AddQuestionModal({
                   role="group"
                   aria-label={`KPI: ${kpi.metric}`}
                 >
-                  <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" />
+                  <BarChart3 className="h-2 w-2" aria-hidden="true" />
                   <span className="max-w-[200px] truncate">{kpi.metric}</span>
                   <button
                     onClick={() => removeKpi(idx)}
@@ -126,7 +126,7 @@ export default function AddQuestionModal({
                   role="group"
                   aria-label={`Colleague: ${c.name}`}
                 >
-                  <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                  <Users className="h-2 w-2" aria-hidden="true" />
                   <span className="max-w-[200px] truncate">{c.name}</span>
                   <button
                     onClick={() => removeColleague(idx)}
@@ -144,7 +144,7 @@ export default function AddQuestionModal({
                   role="group"
                   aria-label={`Attached file: ${f.fileName}`}
                 >
-                  <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+                  <FileText className="h-2 w-2" aria-hidden="true" />
                   <span className="max-w-[200px] truncate">{f.fileName}</span>
                   <button
                     onClick={() => removeFileAttachment(idx)}
@@ -160,7 +160,7 @@ export default function AddQuestionModal({
         </div>
 
         {/* Bottom action bar */}
-        <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+        <div className="pr-2 pl-1 py-2 border-t border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <button
               onClick={() => setActiveNestedModal("kpi")}
@@ -198,9 +198,9 @@ export default function AddQuestionModal({
           </div>
           <Button
             aria-label="Post question"
-            className="bg-blue-500 text-white hover:bg-blue-600"
+            className="bg-gray-800 text-white hover:bg-blue-600"
           >
-            Post
+            Submit
           </Button>
         </div>
 
