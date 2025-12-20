@@ -19,12 +19,6 @@ export default function AnswersPage() {
         onClose={() => setShowAddQuestion(false)}
       />
 
-      <Header
-        title="Answers"
-        subtitle="See what your colleagues are asking and sharing."
-        learnMoreLink="#"
-      />
-
       <div className="flex max-w-7xl px-2 py-6 mx-auto">
         <aside className="py-4 pr-13 sticky top-16">
           <Sidebar
