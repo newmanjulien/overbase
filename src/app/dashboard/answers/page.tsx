@@ -38,7 +38,7 @@ export default function AnswersPage() {
           <AskBar onClick={() => setShowAddQuestion(true)} />
 
           {/* Posts */}
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3 mb-8">
             {questions.map((question: QuestionType) => (
               <QuestionCard key={question.id} question={question} />
             ))}
