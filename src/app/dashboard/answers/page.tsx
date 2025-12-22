@@ -5,7 +5,6 @@ import { questions, categories } from "./DummyData";
 import AddQuestionModal from "@/components/modals/AddQuestionModal";
 import AskBar from "@/components/blocks/AskBar";
 import Sidebar from "@/components/blocks/Sidebar";
-import { Header } from "@/components/blocks/Header";
 import QuestionCard, { QuestionType } from "./QuestionCard";
 
 export default function AnswersPage() {
@@ -29,7 +28,10 @@ export default function AnswersPage() {
         </aside>
 
         <main className="flex-1 py-4 max-w-4xl">
-          <AskBar onClick={() => setShowAddQuestion(true)} />
+          <AskBar
+            onClick={() => setShowAddQuestion(true)}
+            disabledButtons={["Quick"]}
+          />
 
           {/* Posts */}
           <div className="space-y-3 mb-8">

@@ -1,94 +1,3 @@
-// "use client";
-
-// import { Button } from "@/components/ui/button";
-// import { X, Upload, FileText } from "lucide-react";
-// import { useState } from "react";
-
-// export default function FileModal({
-//   isOpen,
-//   onClose,
-//   fileAttachments,
-//   setFileAttachments,
-// }: {
-//   isOpen: boolean;
-//   onClose: () => void;
-//   fileAttachments: any[];
-//   setFileAttachments: any;
-// }) {
-//   const [tempFile, setTempFile] = useState<{
-//     file: File | null;
-//     fileName: string;
-//     context: string;
-//   }>({
-//     file: null,
-//     fileName: "",
-//     context: "",
-//   });
-
-//   const handleAddFile = () => {
-//     if (tempFile.fileName) {
-//       setFileAttachments([...fileAttachments, tempFile]);
-//       setTempFile({ file: null, fileName: "", context: "" });
-//       onClose();
-//     }
-//   };
-
-//   if (!isOpen) return null;
-
-//   return (
-//     <div className="fixed inset-0 bg-black/30 z-[60] flex items-center justify-center">
-//       <div className="bg-white rounded-xl w-full max-w-md shadow-2xl mx-4 p-4">
-//         <div className="flex items-center justify-between mb-4">
-//           <h3 className="text-lg font-semibold flex items-center gap-2">
-//             <Upload className="h-5 w-5 text-green-600" />
-//             Attach a File
-//           </h3>
-//           <button type="button" aria-label="Close modal" onClick={onClose}>
-//             <X className="h-5 w-5" />
-//           </button>
-//         </div>
-
-//         <div className="space-y-4">
-//           <input
-//             type="text"
-//             placeholder="File Name"
-//             value={tempFile.fileName}
-//             onChange={(e) =>
-//               setTempFile({ ...tempFile, fileName: e.target.value })
-//             }
-//             className="w-full px-3 py-2 border rounded-lg"
-//           />
-//           <input
-//             type="file"
-//             aria-label="Add file"
-//             onChange={(e) =>
-//               setTempFile({ ...tempFile, file: e.target.files?.[0] || null })
-//             }
-//             className="w-full px-3 py-2 border rounded-lg"
-//           />
-//           <textarea
-//             placeholder="Context or Description"
-//             value={tempFile.context}
-//             onChange={(e) =>
-//               setTempFile({ ...tempFile, context: e.target.value })
-//             }
-//             className="w-full px-3 py-2 border rounded-lg"
-//           />
-//         </div>
-
-//         <div className="mt-4 flex justify-end gap-3">
-//           <Button variant="outline" onClick={onClose}>
-//             Cancel
-//           </Button>
-//           <Button onClick={handleAddFile} disabled={!tempFile.fileName}>
-//             Attach
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -143,10 +52,6 @@ export default function FileModal({
       <div className="bg-white rounded-xl w-full max-w-md shadow-2xl mx-4 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Upload className="h-5 w-5 text-emerald-600" />
-            Attach a File
-          </h3>
           <button
             onClick={closeModal}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -174,7 +79,7 @@ export default function FileModal({
                 htmlFor="file-upload-modal"
                 className={`flex items-center justify-center gap-2 w-full px-3 py-4 text-sm border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
                   tempFile.fileName
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                    ? "border-gray-400 bg-gray-100 text-gray-900 font-medium"
                     : "border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:border-gray-400"
                 }`}
               >
@@ -206,7 +111,7 @@ export default function FileModal({
               onChange={(e) =>
                 setTempFile({ ...tempFile, context: e.target.value })
               }
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none h-28"
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50/50 rounded-lg focus:outline-none resize-none h-24"
             />
           </div>
         </div>
@@ -219,7 +124,7 @@ export default function FileModal({
           <Button
             onClick={handleAddFile}
             disabled={!tempFile.fileName}
-            className="bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+            variant="default"
           >
             Add File
           </Button>

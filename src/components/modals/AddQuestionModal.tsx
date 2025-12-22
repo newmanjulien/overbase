@@ -57,7 +57,7 @@ export default function AddQuestionModal({
 
           <button
             onClick={onClose}
-            className="ml-auto text-gray-500 hover:text-gray-700"
+            className="mr-auto text-gray-500 hover:text-gray-700"
           >
             <X className="h-6 w-6" />
           </button>
@@ -203,9 +203,7 @@ export default function AddQuestionModal({
               <Upload className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
             </button>
           </div>
-          <Button className="bg-gray-800 text-white hover:bg-gray-700">
-            Submit
-          </Button>
+          <Button className="default">Submit</Button>
         </div>
 
         {/* Nested Modals */}

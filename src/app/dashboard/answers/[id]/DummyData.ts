@@ -30,11 +30,12 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
     answers: [
       {
         id: 1,
-        avatar: "/images/alex.png",
+        avatar: "/images/kareem.png",
         avatarFallback: "UN",
         topLabel: "You asked",
         subLabel: "Dec 15, 2025",
-        content: "Did China lose money on its bullet train project? I've heard conflicting reports about the profitability vs social benefit.",
+        content:
+          "Did China lose money on its bullet train project? I've heard conflicting reports about the profitability vs social benefit.",
       },
       {
         id: 2,
@@ -42,7 +43,8 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
         avatarFallback: "AI",
         topLabel: "Overbase is answering...",
         rightIcon: EllipsisVertical,
-        onIconClick: () => console.log("Download clicked for bullet train report"),
+        onIconClick: () =>
+          console.log("Download clicked for bullet train report"),
       },
     ],
     showFollowupBar: false,
@@ -56,11 +58,12 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
     answers: [
       {
         id: 1,
-        avatar: "/images/alex.png",
+        avatar: "/images/kareem.png",
         avatarFallback: "UN",
         topLabel: "You asked",
         subLabel: "Dec 15, 2025",
-        content: "Which deals from next quarter could we pull forward if we gave them a discount? Focus on those in advanced negotiation.",
+        content:
+          "Which deals from next quarter could we pull forward if we gave them a discount? Focus on those in advanced negotiation or where there's a strong relationship with the AE or with our business. I'm also mostly interested in deals which don't show up in my CRM dashboard",
       },
       {
         id: 2,
@@ -68,25 +71,52 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
         avatarFallback: "AI",
         topLabel: "Overbase answered",
         subLabel: "Dec 16, 2025",
-        content: "I've analyzed the current pipeline and identified 4 key deals that have expressed interest in potentially accelerating their purchase if provided with a strategic discount. These include Umbrella Corp and Initech, both of which are in the final stages of negotiation.",
+        content:
+          "We identified 68 deals with a projected value of +$18,000,000. 1/2 of them likely show up already in your CRM dashboards. 1/2 are likely not yet on your radar. There are 12 EMEA deals, 16 APAC deals and 40 AMER deals",
         rightIcon: Download,
         onIconClick: () => console.log("Download clicked for deals analysis"),
         tableData: [
           {
-            api_id: "Negotiation stage. Champion asked about a potential discount in a call on 10/14.",
+            api_id: "Description",
+            name: "Account name",
+            first_name: "Data sources",
+            last_name: "AE",
+            email: "Salesforce opportunity",
+          },
+          {
+            api_id:
+              "Champion asked about a potential discount in a call on 10/14.",
             name: "Umbrella",
             first_name: "Gong, Outlook",
             last_name: "Cindy Li",
-            email: "andrew.b@eminds.ai",
+            email: "acme.salesforce.com/0061A00000XyZaQ",
           },
           {
-            api_id: "Negotiation stage. Champion asked about a potential discount in a call on 10/29.",
+            api_id:
+              "Champion asked about a potential discount in a call on 10/29 and followed up about a discount by email",
             name: "Initech",
             first_name: "Gong, Outlook",
             last_name: "James Randall",
-            email: "syed.altamash@outlook.c...",
+            email: "acme.salesforce.com/0062B00001LmNoR",
+          },
+          {
+            api_id:
+              "AE worked with the buyer in a previous job and they have a strong relationship",
+            name: "Globex",
+            first_name: "Gong, Salesforce",
+            last_name: "James Randall",
+            email: "acme.salesforce.com/0067G00006EeFfG",
           },
         ],
+      },
+      {
+        id: 3,
+        avatar: "/images/kareem.png",
+        avatarFallback: "UN",
+        topLabel: "You asked",
+        subLabel: "Dec 16, 2025",
+        content:
+          "Focus only on AMER deals. Net new +$200k or renewals +$100k. And find deals which would be a little harder to close fast. But which I might still be able to pull forward if I called the buyer myself",
       },
     ],
     showFollowupBar: true,
