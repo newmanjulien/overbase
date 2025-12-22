@@ -2,20 +2,29 @@
 
 import { useState } from "react";
 import { questions, categories } from "./DummyData";
-import AddQuestionModal from "@/components/modals/AddQuestionModal";
-import AskBar from "@/components/blocks/AskBar";
+import QuestionModal from "@/components/modals/QuestionModal/QuestionModal";
+import AskBar, { ModalOptions } from "@/components/blocks/AskBar";
 import Sidebar from "@/components/blocks/Sidebar";
 import QuestionCard, { QuestionType } from "./QuestionCard";
 
 export default function AnswersPage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
+  const [modalOptions, setModalOptions] = useState<ModalOptions>({});
+
+  const handleOpenModal = (options?: ModalOptions) => {
+    setModalOptions(options || {});
+    setShowAddQuestion(true);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <AddQuestionModal
+      <QuestionModal
         isOpen={showAddQuestion}
         onClose={() => setShowAddQuestion(false)}
+        initialTab={modalOptions.tab || "one"}
+        showTabs={modalOptions.showTabs}
+        placeholder={modalOptions.placeholder}
       />
 
       <div className="flex max-w-7xl px-2 py-6 mx-auto">
@@ -28,10 +37,7 @@ export default function AnswersPage() {
         </aside>
 
         <main className="flex-1 py-4 max-w-4xl">
-          <AskBar
-            onClick={() => setShowAddQuestion(true)}
-            disabledButtons={["Quick"]}
-          />
+          <AskBar onClick={handleOpenModal} disabledButtons={["Quick"]} />
 
           {/* Posts */}
           <div className="space-y-3 mb-8">

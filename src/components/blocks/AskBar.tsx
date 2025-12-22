@@ -4,20 +4,27 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Clock, Repeat, Zap } from "lucide-react";
 
+export type ModalOptions = {
+  tab?: "one" | "recurring";
+  showTabs?: boolean;
+  placeholder?: string;
+};
+
 type FooterButton = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   label: string;
+  modalOptions?: ModalOptions;
 };
 
 interface AskBarProps {
-  onClick: () => void;
+  onClick: (options?: ModalOptions) => void;
   disabledButtons?: string[]; // labels of buttons to disable
 }
 
 export default function AskBar({ onClick, disabledButtons = [] }: AskBarProps) {
   const footerButtons: FooterButton[] = [
-    { icon: Clock, label: "One time" },
-    { icon: Repeat, label: "Recurring" },
+    { icon: Clock, label: "One time", modalOptions: { tab: "one" } },
+    { icon: Repeat, label: "Recurring", modalOptions: { tab: "recurring" } },
     { icon: Zap, label: "Quick" },
   ];
 
@@ -30,7 +37,7 @@ export default function AskBar({ onClick, disabledButtons = [] }: AskBarProps) {
         </Avatar>
 
         <div
-          onClick={onClick}
+          onClick={() => onClick()}
           className="flex-1 bg-gray-50 border border-gray-200 rounded-full text-sm px-4 py-2 mr-3 text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors"
         >
           What question do you want to ask?
@@ -43,7 +50,9 @@ export default function AskBar({ onClick, disabledButtons = [] }: AskBarProps) {
           return (
             <React.Fragment key={btn.label}>
               <button
-                onClick={isDisabled ? undefined : onClick}
+                onClick={
+                  isDisabled ? undefined : () => onClick(btn.modalOptions)
+                }
                 disabled={isDisabled}
                 className={`flex-1 flex items-center justify-center rounded-full gap-2 px-3 py-2 text-sm transition-colors
                   ${

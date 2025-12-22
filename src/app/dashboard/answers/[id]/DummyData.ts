@@ -1,5 +1,4 @@
 import { TableRow } from "@/components/blocks/DataTable";
-import { LucideIcon, Download, EllipsisVertical } from "lucide-react";
 
 export interface AnswerData {
   id: number;
@@ -9,8 +8,6 @@ export interface AnswerData {
   subLabel?: string;
   content?: string;
   tableData?: TableRow[];
-  rightIcon?: LucideIcon;
-  onIconClick?: () => void;
 }
 
 export interface InfoCardData {
@@ -42,9 +39,6 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
         avatar: "/images/logo_filled.png",
         avatarFallback: "AI",
         topLabel: "Overbase is answering...",
-        rightIcon: EllipsisVertical,
-        onIconClick: () =>
-          console.log("Download clicked for bullet train report"),
       },
     ],
     showFollowupBar: false,
@@ -73,8 +67,6 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
         subLabel: "Dec 16, 2025",
         content:
           "We identified 68 deals with a projected value of +$18,000,000. 1/2 of them likely show up already in your CRM dashboards. 1/2 are likely not yet on your radar. There are 12 EMEA deals, 16 APAC deals and 40 AMER deals",
-        rightIcon: Download,
-        onIconClick: () => console.log("Download clicked for deals analysis"),
         tableData: [
           {
             api_id: "Description",

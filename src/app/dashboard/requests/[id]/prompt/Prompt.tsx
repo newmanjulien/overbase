@@ -78,7 +78,7 @@ export default function Prompt({
         })}
       // Main
       title="What data do you need?"
-      subtitle="Explain what data you need with as many details as possible. Use the @ symbol to tag connectors or colleagues you want to gather data from"
+      subtitle="Explain what data you need with as many details as possible. Use the @ symbol to tag connectors or people you want to gather data from"
       // Footer
       primaryButtonText="Next"
       onPrimaryAction={onSubmit}
@@ -92,7 +92,7 @@ export default function Prompt({
           defaultRichJSON={promptRich}
           onChangeText={setPrompt}
           onChangeRichJSON={setPromptRich}
-          placeholder="@ to tag connectors or colleagues..."
+          placeholder="@ to tag connectors or people..."
           mentionOptions={CONNECTORS}
           className="mt-1 rounded-xl bg-white min-h-70"
         />

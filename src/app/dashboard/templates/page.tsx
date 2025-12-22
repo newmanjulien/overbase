@@ -25,13 +25,13 @@ function Templates() {
   const gridTitle = selectedTagData?.header ?? "Explore Templates";
   const gridSubtitle =
     selectedTagData?.subheader ??
-    "Use templates your colleagues are already using.";
+    "Use templates your people are already using.";
 
   return (
     <div className="h-full w-full">
       <Header
         title="Templates"
-        subtitle="Use templates your colleagues are already using."
+        subtitle="Use templates your people are already using."
         learnMoreLink="#"
       />
 

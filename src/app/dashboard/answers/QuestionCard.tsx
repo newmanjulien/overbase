@@ -1,7 +1,6 @@
 "use client";
 
 import DataTable, { TableRow } from "@/components/blocks/DataTable";
-import { Download } from "lucide-react";
 
 export interface QuestionType {
   id: number;
@@ -50,21 +49,13 @@ function CardHeader({ question }: { question: QuestionType }) {
             In Progress
           </span>
         )}
-        {question.status === "completed" && (
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              // Download logic could go here
-            }}
-            className="p-1.5 hover:bg-gray-50 rounded-lg transition-colors group"
-            aria-label="Download"
-          >
-            <Download className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
-          </button>
-        )}
       </div>
-      {question.title && <h2 className="text-gray-800 mb-2">{question.title}</h2>}
-      <p className="text-gray-600 text-sm line-clamp-2 overflow-hidden">{question.content}</p>
+      {question.title && (
+        <h2 className="text-gray-800 mb-2">{question.title}</h2>
+      )}
+      <p className="text-gray-600 text-sm line-clamp-2 overflow-hidden">
+        {question.content}
+      </p>
     </div>
   );
 }

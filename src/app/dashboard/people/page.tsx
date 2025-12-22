@@ -7,13 +7,13 @@ import { InfoCard } from "@/components/blocks/InfoCard";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/blocks/Header";
 
-interface Colleagues {
+interface Person {
   id: string;
   name: string;
   renewal: string;
 }
 
-const mockColleagues: Colleagues[] = [
+const mockPeople: Person[] = [
   {
     id: "101",
     name: "Alex Carp",
@@ -23,38 +23,37 @@ const mockColleagues: Colleagues[] = [
   { id: "103", name: "Ingrid Newell", renewal: "Ready to request data" },
 ];
 
-function ColleaguesLayout() {
-  const [selectedColleagues, setSelectedColleagues] = useState<string[]>([]);
+function PeopleLayout() {
+  const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
   const router = useRouter();
 
   // Derive selectAll state
-  const allSelected = selectedColleagues.length === mockColleagues.length;
+  const allSelected = selectedPeople.length === mockPeople.length;
   const someSelected =
-    selectedColleagues.length > 0 &&
-    selectedColleagues.length < mockColleagues.length;
+    selectedPeople.length > 0 && selectedPeople.length < mockPeople.length;
 
   const handleSelectAll = (checked: boolean | "indeterminate") => {
     if (checked) {
-      setSelectedColleagues(mockColleagues.map((c) => c.id));
+      setSelectedPeople(mockPeople.map((p) => p.id));
     } else {
-      setSelectedColleagues([]);
+      setSelectedPeople([]);
     }
   };
 
-  const handleSelectColleague = (colleagueId: string, checked: boolean) => {
+  const handleSelectPerson = (personId: string, checked: boolean) => {
     if (checked) {
-      setSelectedColleagues((prev) => [...prev, colleagueId]);
+      setSelectedPeople((prev) => [...prev, personId]);
     } else {
-      setSelectedColleagues((prev) => prev.filter((id) => id !== colleagueId));
+      setSelectedPeople((prev) => prev.filter((id) => id !== personId));
     }
   };
 
   return (
     <div className="h-full w-full">
       <Header
-        title="Colleagues"
-        subtitle="Add colleagues who you want to request data from."
-        buttonLabel="Add colleague"
+        title="People"
+        subtitle="Add people who you want to request data from."
+        buttonLabel="Add person"
         onButtonClick={() => {}}
         buttonVariant="default"
         learnMoreLink="#"
@@ -85,19 +84,19 @@ function ColleaguesLayout() {
             ]}
           />
 
-          {/* Colleague rows */}
-          {mockColleagues.map((colleague) => (
+          {/* Person rows */}
+          {mockPeople.map((person) => (
             <RowCard
-              key={colleague.id}
-              title={colleague.name}
-              subtitle={`${colleague.renewal}`}
+              key={person.id}
+              title={person.name}
+              subtitle={`${person.renewal}`}
               image="" // fallback letter
               showAvatar
               leading={
                 <Checkbox
-                  checked={selectedColleagues.includes(colleague.id)}
+                  checked={selectedPeople.includes(person.id)}
                   onCheckedChange={(checked) =>
-                    handleSelectColleague(colleague.id, checked as boolean)
+                    handleSelectPerson(person.id, checked as boolean)
                   }
                   className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
                     data-[state=checked]:border-gray-800 rounded-sm"
@@ -106,11 +105,11 @@ function ColleaguesLayout() {
               menuItems={[
                 {
                   label: "Edit",
-                  onClick: () => console.log("Edit", colleague.id),
+                  onClick: () => console.log("Edit", person.id),
                 },
                 {
                   label: "Delete",
-                  onClick: () => console.log("Delete", colleague.id),
+                  onClick: () => console.log("Delete", person.id),
                   destructive: true,
                 },
               ]}
@@ -121,7 +120,7 @@ function ColleaguesLayout() {
         {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
           <InfoCard
-            text="You can easily request data from colleaues after having added and set them up here"
+            text="You can easily request data from people after having added and set them up here"
             linkText="Requests"
             onClick={() => router.push("/dashboard/requests")}
           />
@@ -131,6 +130,6 @@ function ColleaguesLayout() {
   );
 }
 
-export default function ColleaguesPage() {
-  return <ColleaguesLayout />;
+export default function PeoplePage() {
+  return <PeopleLayout />;
 }

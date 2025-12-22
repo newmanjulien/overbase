@@ -94,9 +94,6 @@ export default function KpiModal({
         </div>
 
         <div className="p-4 border-t border-gray-200 flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
           <Button
             onClick={handleAddKpi}
             disabled={!tempKpi.metric.trim()}

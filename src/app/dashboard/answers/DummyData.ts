@@ -5,7 +5,6 @@ export const categories = [
   { name: "Asked this month" },
   { name: "Recurring questions" },
   { name: "All answers" },
-  { name: "Scratchpad" },
 ];
 
 export const questions: QuestionType[] = [
@@ -91,7 +90,7 @@ export const answerContextTexts = [
   "The second answer provides insights from independent transport analysts.",
 ];
 
-export const colleagues = [
+export const people = [
   { id: "1", name: "Alex Carp" },
   { id: "2", name: "Gloria Incara" },
   { id: "3", name: "Ingrid Newell" },
