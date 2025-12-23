@@ -1,7 +1,7 @@
 "use client";
 
 import { connectors } from "./DummyData";
-import { useConnectorContext } from "@/lib/dashboard/connectorContext";
+import { useConnectorContext } from "@/lib/connectors/connectorContext";
 import { Connectors } from "./Connectors";
 import type { Connectors as ConnectorType } from "./DummyData";
 

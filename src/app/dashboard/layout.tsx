@@ -4,11 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectorProvider } from "@/lib//dashboard/connectorContext";
-import {
-  DashboardUIProvider,
-  useDashboardUI,
-} from "@/lib/dashboard/UIProvider";
+import { ConnectorProvider } from "@/lib/connectors/connectorContext";
 import { DashboardAdminProvider } from "../../lib/dashboard/AdminProvider";
 
 export default function DashboardLayout({
@@ -18,18 +14,15 @@ export default function DashboardLayout({
 }) {
   return (
     <ConnectorProvider>
-      <DashboardUIProvider>
-        <DashboardAdminProvider>
-          <DashboardLayoutContent>{children}</DashboardLayoutContent>
-        </DashboardAdminProvider>
-      </DashboardUIProvider>
+      <DashboardAdminProvider>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      </DashboardAdminProvider>
     </ConnectorProvider>
   );
 }
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { hideFooter } = useDashboardUI();
 
   const navItems = [
     { href: "/dashboard/answers", label: "Answers" },
@@ -84,32 +77,30 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      {!hideFooter && (
-        <footer className="bg-white">
-          <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="h-4">
-                  <Image src="/images/logo.png" alt="" width={38} height={20} />
-                </div>
+      <footer className="bg-white">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="h-4">
+                <Image src="/images/logo.png" alt="" width={38} height={20} />
               </div>
-              <nav className="flex space-x-8">
-                {["Home", "Docs", "Guides", "Help", "Contact", "Legal"].map(
-                  (label) => (
-                    <a
-                      key={label}
-                      href="#"
-                      className="text-gray-500 hover:text-gray-700 text-sm font-light transition-colors"
-                    >
-                      {label}
-                    </a>
-                  )
-                )}
-              </nav>
             </div>
+            <nav className="flex space-x-8">
+              {["Home", "Docs", "Guides", "Help", "Contact", "Legal"].map(
+                (label) => (
+                  <a
+                    key={label}
+                    href="#"
+                    className="text-gray-500 hover:text-gray-700 text-sm font-light transition-colors"
+                  >
+                    {label}
+                  </a>
+                )
+              )}
+            </nav>
           </div>
-        </footer>
-      )}
+        </div>
+      </footer>
     </div>
   );
 }

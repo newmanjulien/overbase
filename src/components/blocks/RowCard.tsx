@@ -10,8 +10,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import RichText from "@/components/blocks/RichText";
-import type { SerializedEditorState, SerializedLexicalNode } from "lexical";
 
 interface MenuItem {
   id?: string;
@@ -21,33 +19,35 @@ interface MenuItem {
 }
 
 export interface RowCardProps {
+  // Content
   title?: string;
   titleClassName?: string;
   subtitle?: ReactNode;
+
+  // Leading / Avatar
+  leading?: ReactNode;
   image?: string;
   showAvatar?: boolean;
-  leading?: ReactNode;
-  contentBoxRich?: SerializedEditorState<SerializedLexicalNode> | null;
-  actions?: ReactNode;
+
+  // Actions
   buttonLabel?: string;
   buttonOnClick?: () => void;
-  buttonClassName?: string;
   showGreenDot?: boolean;
   menuItems?: MenuItem[];
 }
+
+const buttonClasses =
+  "text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60 whitespace-nowrap flex-shrink-0";
 
 export function RowCard({
   title,
   titleClassName,
   subtitle,
+  leading,
   image,
   showAvatar = false,
-  leading,
-  contentBoxRich,
-  actions,
   buttonLabel,
   buttonOnClick,
-  buttonClassName = defaultButtonClasses,
   showGreenDot = false,
   menuItems,
 }: RowCardProps) {
@@ -63,13 +63,10 @@ export function RowCard({
         title={title}
         titleClassName={titleClassName}
         subtitle={subtitle}
-        contentBoxRich={contentBoxRich}
       />
       <Actions
         buttonLabel={buttonLabel}
         buttonOnClick={buttonOnClick}
-        buttonClassName={buttonClassName}
-        actions={actions}
         showGreenDot={showGreenDot}
         menuItems={menuItems}
       />
@@ -78,9 +75,6 @@ export function RowCard({
 }
 
 // --- Subcomponents ---
-
-const defaultButtonClasses =
-  "text-gray-700 hover:bg-gray-50/80 font-normal text-sm px-3 py-1.5 h-auto border border-gray-200/60 whitespace-nowrap flex-shrink-0";
 
 function Leading({
   image,
@@ -113,40 +107,20 @@ function Content({
   title,
   titleClassName,
   subtitle,
-  contentBoxRich,
-}: Pick<
-  RowCardProps,
-  "title" | "titleClassName" | "subtitle" | "contentBoxRich"
->) {
+}: Pick<RowCardProps, "title" | "titleClassName" | "subtitle">) {
   return (
     <div className="flex-1 min-w-0 mr-4">
-      {contentBoxRich ? (
-        <div className="text-sm leading-tight pointer-events-none select-text caret-transparent richtext-row">
-          <RichText
-            defaultText=""
-            defaultRichJSON={contentBoxRich}
-            onChangeText={() => {}}
-            onChangeRichJSON={() => {}}
-            placeholder=""
-            mentionOptions={[]} // empty because we’re only displaying
-            className="border-0"
-          />
-        </div>
-      ) : (
-        <>
-          <h3
-            className={`text-sm tracking-tight leading-tight truncate ${
-              titleClassName ?? "text-gray-700 font-medium"
-            }`}
-          >
-            {title}
-          </h3>
-          {subtitle && (
-            <p className="text-gray-500 text-sm font-light leading-relaxed truncate">
-              {subtitle}
-            </p>
-          )}
-        </>
+      <h3
+        className={`text-sm tracking-tight leading-tight truncate ${
+          titleClassName ?? "text-gray-700 font-medium"
+        }`}
+      >
+        {title}
+      </h3>
+      {subtitle && (
+        <p className="text-gray-500 text-sm font-light leading-relaxed truncate">
+          {subtitle}
+        </p>
       )}
     </div>
   );
@@ -155,34 +129,23 @@ function Content({
 function Actions({
   buttonLabel,
   buttonOnClick,
-  buttonClassName,
-  actions,
   showGreenDot,
   menuItems,
-}: Omit<
+}: Pick<
   RowCardProps,
-  | "title"
-  | "subtitle"
-  | "image"
-  | "leading"
-  | "contentBoxRich"
-  | "titleClassName"
+  "buttonLabel" | "buttonOnClick" | "showGreenDot" | "menuItems"
 >) {
   return (
     <div className="flex items-center gap-x-3 ml-auto shrink-0">
-      <div className="flex items-center gap-x-2 flex-shrink-0">
-        {buttonLabel && (
-          <Button
-            variant="ghost"
-            className={buttonClassName}
-            onClick={buttonOnClick}
-          >
-            {buttonLabel}
-          </Button>
-        )}
-
-        {actions}
-      </div>
+      {buttonLabel && (
+        <Button
+          variant="ghost"
+          className={buttonClasses}
+          onClick={buttonOnClick}
+        >
+          {buttonLabel}
+        </Button>
+      )}
 
       {showGreenDot && <div className="w-2 h-2 bg-green-500 rounded-full" />}
 

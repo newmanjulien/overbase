@@ -2,7 +2,12 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mic } from "lucide-react";
-import { ModalOptions } from "./AskBar";
+
+type ModalOptions = {
+  tab?: "one" | "recurring";
+  showTabs?: boolean;
+  placeholder?: string;
+};
 
 export default function FollowupBar({
   onClick,

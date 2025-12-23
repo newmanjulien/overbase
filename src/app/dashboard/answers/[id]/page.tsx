@@ -3,12 +3,12 @@
 import { use, useState } from "react";
 
 import { dummyAnswers, AnswerData } from "./DummyData";
-import FollowupBar from "@/components/blocks/FollowupBar";
+import FollowupBar from "@/components/bars/FollowupBar";
 import { InfoCard } from "@/components/blocks/InfoCard";
 import AnswerCard from "./AnswerCard";
 import QuestionModal from "@/components/modals/QuestionModal/QuestionModal";
 import ForwardModal from "@/components/modals/ForwardModal";
-import { ModalOptions } from "@/components/blocks/AskBar";
+import { ModalOptions } from "@/components/bars/AskBar";
 
 export default function AnswerPage({
   params,

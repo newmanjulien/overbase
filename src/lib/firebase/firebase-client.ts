@@ -1,11 +1,6 @@
 "use client";
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import {
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
-} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 // Only expose NEXT_PUBLIC_* variables to the client
@@ -22,12 +17,5 @@ const clientConfig = {
 export const app: FirebaseApp = getApps().length
   ? getApp()
   : initializeApp(clientConfig);
-
-// Enable persistent cache for browser clients
-export const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager(),
-  }),
-});
 
 export const auth = getAuth(app);

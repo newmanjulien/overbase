@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RowCard } from "@/components/blocks/RowCard";
 import { InfoCard } from "@/components/blocks/InfoCard";
-import { useRouter } from "next/navigation";
 import { Header } from "@/components/blocks/Header";
 
 interface Person {
@@ -25,7 +24,6 @@ const mockPeople: Person[] = [
 
 function PeopleLayout() {
   const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
-  const router = useRouter();
 
   // Derive selectAll state
   const allSelected = selectedPeople.length === mockPeople.length;
@@ -117,13 +115,8 @@ function PeopleLayout() {
           ))}
         </div>
 
-        {/* InfoCard at the bottom */}
         <div className="mt-8 w-full">
-          <InfoCard
-            text="You can easily request data from people after having added and set them up here"
-            linkText="Requests"
-            onClick={() => router.push("/dashboard/requests")}
-          />
+          <InfoCard text="Manage the people in your organization and their access levels." />
         </div>
       </div>
     </div>
