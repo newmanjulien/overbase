@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
 interface TemplateCardProps {
-  id: number;
+  id: string;
   title: string;
   description: string;
   gradientFrom?: string;
