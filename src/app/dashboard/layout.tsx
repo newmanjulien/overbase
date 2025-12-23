@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectorProvider } from "@/lib/connectors/connectorContext";
-import { DashboardAdminProvider } from "../../lib/dashboard/AdminProvider";
 
 export default function DashboardLayout({
   children,
@@ -14,9 +13,7 @@ export default function DashboardLayout({
 }) {
   return (
     <ConnectorProvider>
-      <DashboardAdminProvider>
-        <DashboardLayoutContent>{children}</DashboardLayoutContent>
-      </DashboardAdminProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </ConnectorProvider>
   );
 }
