@@ -103,7 +103,8 @@ export default function FileModal({
           {/* Context textarea */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              How should this file be used?
+              How should this file be used?{" "}
+              <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <textarea
               placeholder="Provide context on what this file contains and how it should be used..."

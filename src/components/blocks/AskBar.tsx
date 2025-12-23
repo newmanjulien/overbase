@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Clock, Repeat, Zap } from "lucide-react";
+import { Clock, Mic, Repeat, Zap } from "lucide-react";
 
 export type ModalOptions = {
   tab?: "one" | "recurring";
@@ -18,10 +18,15 @@ type FooterButton = {
 
 interface AskBarProps {
   onClick: (options?: ModalOptions) => void;
+  onMicClick?: () => void;
   disabledButtons?: string[]; // labels of buttons to disable
 }
 
-export default function AskBar({ onClick, disabledButtons = [] }: AskBarProps) {
+export default function AskBar({
+  onClick,
+  onMicClick,
+  disabledButtons = [],
+}: AskBarProps) {
   const footerButtons: FooterButton[] = [
     { icon: Clock, label: "One time", modalOptions: { tab: "one" } },
     { icon: Repeat, label: "Recurring", modalOptions: { tab: "recurring" } },
@@ -38,10 +43,19 @@ export default function AskBar({ onClick, disabledButtons = [] }: AskBarProps) {
 
         <div
           onClick={() => onClick()}
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-full text-sm px-4 py-2 mr-3 text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors"
+          className="flex-1 bg-gray-50 border border-gray-200 rounded-full text-sm px-4 py-2 text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors"
         >
           What question do you want to ask?
         </div>
+
+        <button
+          onClick={onMicClick}
+          disabled
+          className="h-9 w-9 mr-3 flex items-center justify-center rounded-full bg-gray-100 text-gray-300 cursor-not-allowed"
+          title="Dictate"
+        >
+          <Mic className="h-4 w-4" />
+        </button>
       </div>
 
       <div className="flex gap-2 mt-1 items-center">

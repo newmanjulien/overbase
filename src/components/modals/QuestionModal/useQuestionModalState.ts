@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { RecurringFrequency } from "../ScheduleModal";
 
 export interface QuestionModalStateProps {
   isOpen: boolean;
@@ -14,11 +15,12 @@ export function useQuestionModalState({
   const [activeTab, setActiveTab] = useState<"one" | "recurring">(initialTab);
   const [question, setQuestion] = useState("");
   const [activeNestedModal, setActiveNestedModal] = useState<
-    "kpi" | "people" | "file" | null
+    "kpi" | "people" | "file" | "schedule" | null
   >(null);
   const [kpis, setKpis] = useState<any[]>([]);
   const [people, setPeople] = useState<any[]>([]);
   const [fileAttachments, setFileAttachments] = useState<any[]>([]);
+  const [schedule, setSchedule] = useState<RecurringFrequency | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,5 +53,7 @@ export function useQuestionModalState({
     removeKpi,
     removePeople,
     removeFileAttachment,
+    schedule,
+    setSchedule,
   };
 }

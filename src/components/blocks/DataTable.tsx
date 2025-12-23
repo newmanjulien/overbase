@@ -13,9 +13,10 @@ export interface TableRow {
 
 interface DataTableProps {
   tableData: TableRow[];
+  onForward?: () => void;
 }
 
-export default function DataTable({ tableData }: DataTableProps) {
+export default function DataTable({ tableData, onForward }: DataTableProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -27,21 +28,27 @@ export default function DataTable({ tableData }: DataTableProps) {
       >
         {/* Hover Action Bar */}
         <div
-          className={`absolute top-2 right-2 z-10 flex items-center gap-1 bg-white border border-gray-200 rounded-xl px-2 py-1.5 transition-opacity duration-150 ${
+          className={`absolute top-2 right-2 z-10 flex items-center gap-1 bg-white border border-gray-200 rounded-xl px-1.5 py-1 transition-opacity duration-150 ${
             isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
+          onClick={(e) => e.stopPropagation()}
         >
           <button
             className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-            onClick={() => {}}
+            onClick={(e) => {
+              e.stopPropagation();
+              onForward?.();
+            }}
           >
-            <Forward size={16} />
+            <Forward size={17} />
           </button>
           <button
             className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-            onClick={() => {}}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
-            <Download size={16} />
+            <Download size={17} />
           </button>
         </div>
 

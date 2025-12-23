@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Mic } from "lucide-react";
 import { ModalOptions } from "./AskBar";
 
 export default function FollowupBar({
@@ -29,6 +30,14 @@ export default function FollowupBar({
         >
           Do you have follow up questions?
         </div>
+
+        <button
+          disabled
+          className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-300 cursor-not-allowed"
+          title="Dictate"
+        >
+          <Mic className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );

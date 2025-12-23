@@ -22,7 +22,9 @@ export default function KpiModal({
   });
 
   const handleAddKpi = () => {
-    if (tempKpi.metric.trim()) {
+    const hasDescription =
+      tempKpi.definition.trim() || tempKpi.antiDefinition.trim();
+    if (tempKpi.metric.trim() && hasDescription) {
       setKpis([...kpis, { ...tempKpi }]);
       setTempKpi({ metric: "", definition: "", antiDefinition: "" });
       onClose();
@@ -96,7 +98,10 @@ export default function KpiModal({
         <div className="p-4 border-t border-gray-200 flex justify-end gap-3">
           <Button
             onClick={handleAddKpi}
-            disabled={!tempKpi.metric.trim()}
+            disabled={
+              !tempKpi.metric.trim() ||
+              (!tempKpi.definition.trim() && !tempKpi.antiDefinition.trim())
+            }
             variant="default"
           >
             Add KPI

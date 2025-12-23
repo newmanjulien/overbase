@@ -8,6 +8,7 @@ export interface AnswerData {
   subLabel?: string;
   content?: string;
   tableData?: TableRow[];
+  privacy: "private" | "team";
 }
 
 export interface InfoCardData {
@@ -33,12 +34,14 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
         subLabel: "Dec 15, 2025",
         content:
           "Did China lose money on its bullet train project? I've heard conflicting reports about the profitability vs social benefit.",
+        privacy: "private",
       },
       {
         id: 2,
         avatar: "/images/logo_filled.png",
         avatarFallback: "AI",
         topLabel: "Overbase is answering...",
+        privacy: "private",
       },
     ],
     showFollowupBar: false,
@@ -58,6 +61,7 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
         subLabel: "Dec 15, 2025",
         content:
           "Which deals from next quarter could we pull forward if we gave them a discount? Focus on those in advanced negotiation or where there's a strong relationship with the AE or with our business. I'm also mostly interested in deals which don't show up in my CRM dashboard",
+        privacy: "team",
       },
       {
         id: 2,
@@ -100,6 +104,7 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
             email: "acme.salesforce.com/0067G00006EeFfG",
           },
         ],
+        privacy: "team",
       },
       {
         id: 3,
@@ -109,6 +114,7 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
         subLabel: "Dec 16, 2025",
         content:
           "Focus only on AMER deals. Net new +$200k or renewals +$100k. And find deals which would be a little harder to close fast. But which I might still be able to pull forward if I called the buyer myself",
+        privacy: "team",
       },
     ],
     showFollowupBar: true,

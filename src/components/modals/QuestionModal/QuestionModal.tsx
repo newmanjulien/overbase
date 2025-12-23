@@ -4,6 +4,7 @@ import { useQuestionModalState } from "./useQuestionModalState";
 import KpiModal from "../KpiModal";
 import PeopleModal from "../PeopleModal";
 import FileModal from "../FileModal";
+import ScheduleModal from "../ScheduleModal";
 import { useState } from "react";
 import {
   X,
@@ -55,6 +56,8 @@ export default function QuestionModal({
     removeKpi,
     removePeople,
     removeFileAttachment,
+    schedule,
+    setSchedule,
   } = useQuestionModalState({ isOpen, initialTab });
 
   const [visibility, setVisibility] = useState<"Private" | "Team">("Private");
@@ -71,9 +74,16 @@ export default function QuestionModal({
           }`}
         >
           {activeTab === "recurring" && (
-            <button className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 px-2 py-1 rounded-full text-sm text-gray-700 hover:bg-gray-50">
+            <button
+              onClick={() => setActiveNestedModal("schedule")}
+              className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 px-2 py-1 rounded-full text-sm text-gray-700 hover:bg-gray-50"
+            >
               <Repeat className="h-4 w-4" />
-              <span>Schedule</span>
+              <span>
+                {schedule
+                  ? schedule.charAt(0).toUpperCase() + schedule.slice(1)
+                  : "Schedule"}
+              </span>
               <ChevronDown className="h-4 w-4" />
             </button>
           )}
@@ -246,6 +256,11 @@ export default function QuestionModal({
           onClose={closeNestedModal}
           fileAttachments={fileAttachments}
           setFileAttachments={setFileAttachments}
+        />
+        <ScheduleModal
+          isOpen={activeNestedModal === "schedule"}
+          onClose={closeNestedModal}
+          onSave={setSchedule}
         />
       </div>
     </div>

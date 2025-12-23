@@ -2,11 +2,12 @@
 
 import { use, useState, useRef, useEffect } from "react";
 import { questions as allPosts } from "../DummyData";
-import { dummyAnswers } from "./DummyData";
+import { dummyAnswers, AnswerData } from "./DummyData";
 import FollowupBar from "@/components/blocks/FollowupBar";
 import { InfoCard } from "@/components/blocks/InfoCard";
 import AnswerCard from "./AnswerCard";
 import QuestionModal from "@/components/modals/QuestionModal/QuestionModal";
+import ForwardModal from "@/components/modals/ForwardModal";
 import { ModalOptions } from "@/components/blocks/AskBar";
 
 export default function AnswerPage({
@@ -24,6 +25,21 @@ export default function AnswerPage({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState(post?.title || "");
   const titleInputRef = useRef<HTMLInputElement>(null);
+
+  // ForwardModal state
+  const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
+  const [forwardPeople, setForwardPeople] = useState<any[]>([]);
+
+  // State to track privacy values for each answer
+  const [privacyMap, setPrivacyMap] = useState<
+    Record<number, "private" | "team">
+  >(() => {
+    const initial: Record<number, "private" | "team"> = {};
+    detailData?.answers.forEach((answer: AnswerData) => {
+      initial[answer.id] = answer.privacy;
+    });
+    return initial;
+  });
 
   useEffect(() => {
     if (isEditingTitle && titleInputRef.current) {
@@ -54,6 +70,16 @@ export default function AnswerPage({
     }
   };
 
+  const handlePrivacyChange = (
+    answerId: number,
+    newPrivacy: "private" | "team"
+  ) => {
+    setPrivacyMap((prev) => ({
+      ...prev,
+      [answerId]: newPrivacy,
+    }));
+  };
+
   if (!post) return <div>Post not found</div>;
 
   const answers = detailData?.answers || [];
@@ -68,6 +94,13 @@ export default function AnswerPage({
         initialTab={modalOptions.tab || "one"}
         showTabs={modalOptions.showTabs}
         placeholder={modalOptions.placeholder}
+      />
+
+      <ForwardModal
+        isOpen={isForwardModalOpen}
+        onClose={() => setIsForwardModalOpen(false)}
+        people={forwardPeople}
+        setPeople={setForwardPeople}
       />
 
       <div className="max-w-4xl mx-auto py-10 px-4">
@@ -104,6 +137,11 @@ export default function AnswerPage({
               subLabel={answer.subLabel}
               tableData={answer.tableData}
               content={answer.content}
+              privacy={privacyMap[answer.id] || answer.privacy}
+              onPrivacyChange={(newPrivacy) =>
+                handlePrivacyChange(answer.id, newPrivacy)
+              }
+              onForward={() => setIsForwardModalOpen(true)}
             />
           ))}
 

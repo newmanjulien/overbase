@@ -2,12 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Search, Users } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { people as dummyPeople } from "@/app/dashboard/answers/DummyData";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AttachmentChip } from "./QuestionModal/AttachmentChip";
 
-export default function PeopleModal({
+export default function ForwardModal({
   isOpen,
   onClose,
   people,
@@ -77,24 +76,8 @@ export default function PeopleModal({
           {/* People Selection */}
           <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-700">
-              Who do you want to collect data from?
+              Who do you want to send this data to?
             </label>
-
-            {selectedIds.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {dummyPeople
-                  .filter((p) => selectedIds.includes(p.id))
-                  .map((p) => (
-                    <AttachmentChip
-                      key={p.id}
-                      icon={<Users className="h-3.5 w-3.5" />}
-                      label={p.name}
-                      onRemove={() => togglePerson(p.id)}
-                    />
-                  ))}
-              </div>
-            )}
-
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
@@ -130,10 +113,10 @@ export default function PeopleModal({
             </div>
           </div>
 
-          {/* Info Needed */}
+          {/* Note */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              What information do you need from them?{" "}
+              Do you want to add a note?{" "}
               <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <textarea
@@ -152,8 +135,7 @@ export default function PeopleModal({
             disabled={selectedIds.length === 0}
             variant="default"
           >
-            Add {selectedIds.length > 0 ? `${selectedIds.length} ` : ""}
-            {selectedIds.length === 1 ? "Person" : "People"}
+            Send
           </Button>
         </div>
       </div>

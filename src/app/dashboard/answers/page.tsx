@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { questions, categories } from "./DummyData";
 import QuestionModal from "@/components/modals/QuestionModal/QuestionModal";
+import ForwardModal from "@/components/modals/ForwardModal";
 import AskBar, { ModalOptions } from "@/components/blocks/AskBar";
 import Sidebar from "@/components/blocks/Sidebar";
 import QuestionCard, { QuestionType } from "./QuestionCard";
@@ -12,9 +13,34 @@ export default function AnswersPage() {
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [modalOptions, setModalOptions] = useState<ModalOptions>({});
 
+  // ForwardModal state
+  const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
+  const [forwardPeople, setForwardPeople] = useState<any[]>([]);
+
+  // State to track privacy values for each question
+  const [privacyMap, setPrivacyMap] = useState<
+    Record<number, "private" | "team">
+  >(() => {
+    const initial: Record<number, "private" | "team"> = {};
+    questions.forEach((q) => {
+      initial[q.id] = q.privacy;
+    });
+    return initial;
+  });
+
   const handleOpenModal = (options?: ModalOptions) => {
     setModalOptions(options || {});
     setShowAddQuestion(true);
+  };
+
+  const handlePrivacyChange = (
+    questionId: number,
+    newPrivacy: "private" | "team"
+  ) => {
+    setPrivacyMap((prev) => ({
+      ...prev,
+      [questionId]: newPrivacy,
+    }));
   };
 
   return (
@@ -25,6 +51,13 @@ export default function AnswersPage() {
         initialTab={modalOptions.tab || "one"}
         showTabs={modalOptions.showTabs}
         placeholder={modalOptions.placeholder}
+      />
+
+      <ForwardModal
+        isOpen={isForwardModalOpen}
+        onClose={() => setIsForwardModalOpen(false)}
+        people={forwardPeople}
+        setPeople={setForwardPeople}
       />
 
       <div className="flex max-w-7xl px-2 py-6 mx-auto">
@@ -42,7 +75,15 @@ export default function AnswersPage() {
           {/* Posts */}
           <div className="space-y-3 mb-8">
             {questions.map((question: QuestionType) => (
-              <QuestionCard key={question.id} question={question} />
+              <QuestionCard
+                key={question.id}
+                question={{
+                  ...question,
+                  privacy: privacyMap[question.id] || question.privacy,
+                }}
+                onPrivacyChange={handlePrivacyChange}
+                onForward={() => setIsForwardModalOpen(true)}
+              />
             ))}
           </div>
         </main>
