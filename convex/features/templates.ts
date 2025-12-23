@@ -18,21 +18,13 @@ export const getTemplatesByTag = query({
   },
 });
 
-// Get all tag configurations
-export const getAllTags = query({
+// Get unique tags derived from all templates
+export const getUniqueTags = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("tagsConfig").collect();
-  },
-});
-
-// Get a single tag by key
-export const getTagByKey = query({
-  args: { key: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("tagsConfig")
-      .withIndex("by_key", (q) => q.eq("key", args.key))
-      .first();
+    const templates = await ctx.db.query("templates").collect();
+    const allTags = templates.flatMap((t) => t.tags);
+    const uniqueTags = [...new Set(allTags)];
+    return uniqueTags.sort();
   },
 });

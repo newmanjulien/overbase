@@ -1,44 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { TemplateCard } from "./TemplateCard";
 import { Header } from "@/components/blocks/Header";
 import Sidebar from "@/components/blocks/Sidebar";
 
-// Fallback data in case Convex hasn't loaded yet
-const fallbackTags = [
-  {
-    key: "onboarding",
-    name: "Onboarding",
-    header: "Onboarding Tasks",
-    subheader:
-      "Guide new clients to adopt and start using the platform effectively",
-  },
-];
-
 function Templates() {
   const templates = useQuery(api.features.templates.getAllTemplates);
-  const tagsConfig = useQuery(api.features.templates.getAllTags);
+  const uniqueTags = useQuery(api.features.templates.getUniqueTags);
 
-  // Use fallback while loading
-  const tags = tagsConfig ?? fallbackTags;
-  const [selectedTag, setSelectedTag] = useState(tags[0]?.key ?? "onboarding");
+  const [selectedTag, setSelectedTag] = useState<string>("");
+
+  // Set initial selected tag once data loads
+  useEffect(() => {
+    if (uniqueTags && uniqueTags.length > 0 && selectedTag === "") {
+      setSelectedTag(uniqueTags[0]);
+    }
+  }, [uniqueTags, selectedTag]);
+
+  // Convert string tags to the format Sidebar expects
+  const tagsForSidebar = (uniqueTags ?? []).map((tag) => ({
+    key: tag,
+    name: tag,
+  }));
 
   // Filter templates by selected tag
   const filteredTemplates =
-    templates?.filter((t) => t.tags.includes(selectedTag)) ?? [];
-
-  const selectedTagData = tags.find((tag) => tag.key === selectedTag);
-
-  const gridTitle = selectedTagData?.header ?? "Explore Templates";
-  const gridSubtitle =
-    selectedTagData?.subheader ??
-    "Use templates your people are already using.";
+    templates?.filter((t) => selectedTag && t.tags.includes(selectedTag)) ?? [];
 
   // Loading state
-  if (templates === undefined || tagsConfig === undefined) {
+  if (templates === undefined || uniqueTags === undefined) {
     return (
       <div className="h-full w-full">
         <Header
@@ -50,7 +43,7 @@ function Templates() {
         <div className="max-w-7xl mx-auto px-2 py-10 flex gap-16">
           {/* Sidebar skeleton */}
           <div className="w-48 space-y-3">
-            {[...Array(7)].map((_, i) => (
+            {[...Array(5)].map((_, i) => (
               <div
                 key={i}
                 className="h-8 bg-gray-200 rounded-lg animate-pulse"
@@ -94,14 +87,18 @@ function Templates() {
         <Sidebar
           selectedTag={selectedTag}
           setSelectedTag={setSelectedTag}
-          tagsConfig={tags}
+          tagsConfig={tagsForSidebar}
         />
 
         {/* Content */}
         <div className="flex-1">
           <div className="mb-8">
-            <h2 className="text-2xl font-medium text-gray-800">{gridTitle}</h2>
-            <p className="text-gray-500 text-sm mt-1">{gridSubtitle}</p>
+            <h2 className="text-2xl font-medium text-gray-800">
+              {selectedTag || "All Templates"}
+            </h2>
+            <p className="text-gray-500 text-sm mt-1">
+              Browse templates in this category
+            </p>
           </div>
 
           <div className="rounded-3xl p-6 bg-white">

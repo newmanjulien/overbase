@@ -5,22 +5,15 @@ export default defineSchema({
   // ============================================
   // TEMPLATES FEATURE
   // ============================================
-  tagsConfig: defineTable({
-    key: v.string(),
-    name: v.string(),
-    header: v.string(),
-    subheader: v.string(),
-  }).index("by_key", ["key"]),
-
   templates: defineTable({
     title: v.string(),
     description: v.string(),
-    tags: v.array(v.string()),
+    tags: v.array(v.string()), // e.g., ["Onboarding", "Support"]
     gradientFrom: v.string(),
     gradientVia: v.string(),
     gradientTo: v.string(),
     image: v.optional(v.string()),
-  }).index("by_tag", ["tags"]),
+  }),
 
   // ============================================
   // ANSWERS FEATURE (questions + answers)
