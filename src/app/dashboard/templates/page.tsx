@@ -111,7 +111,7 @@ function Templates() {
                   description={template.description}
                   gradientFrom={template.gradientFrom}
                   gradientTo={template.gradientTo}
-                  image={template.image}
+                  imageUrl={template.imageUrl}
                   onUse={() => console.log(`Using ${template.title}`)}
                 />
               ))}

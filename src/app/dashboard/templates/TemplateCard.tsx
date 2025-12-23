@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 
 interface TemplateCardProps {
   id: string;
@@ -9,7 +8,7 @@ interface TemplateCardProps {
   description: string;
   gradientFrom?: string;
   gradientTo?: string;
-  image?: string;
+  imageUrl?: string | null;
   onUse?: () => void;
 }
 
@@ -18,7 +17,7 @@ export function TemplateCard({
   description,
   gradientFrom = "from-emerald-400",
   gradientTo = "to-teal-500",
-  image,
+  imageUrl,
   onUse,
 }: TemplateCardProps) {
   return (
@@ -29,13 +28,14 @@ export function TemplateCard({
       >
         <div className="flex items-center justify-center">
           <div className="flex items-center justify-center w-15 h-15 rounded-full bg-white p-1">
-            {image ? (
-              <Image
-                src={image}
+            {imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
                 alt=""
                 width={54}
                 height={54}
-                className="rounded-full object-cover"
+                className="rounded-full object-cover w-[54px] h-[54px]"
               />
             ) : (
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center font-medium text-gray-800">

@@ -12,7 +12,7 @@ export default defineSchema({
     gradientFrom: v.string(),
     gradientVia: v.string(),
     gradientTo: v.string(),
-    image: v.optional(v.string()),
+    imageId: v.optional(v.id("_storage")), // Convex file storage reference
   }),
 
   // ============================================
