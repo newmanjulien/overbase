@@ -44,7 +44,7 @@ export default function AnswersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="h-full w-full">
       <QuestionModal
         isOpen={showAddQuestion}
         onClose={() => setShowAddQuestion(false)}
@@ -60,8 +60,8 @@ export default function AnswersPage() {
         setPeople={setForwardPeople}
       />
 
-      <div className="flex max-w-7xl px-2 py-6 mx-auto">
-        <aside className="py-4 pr-13 sticky top-16">
+      <div className="flex max-w-7xl py-8 mx-auto">
+        <aside className="pr-13 sticky top-16">
           <Sidebar
             selectedTag={activeCategory || categories[0]?.name || ""}
             setSelectedTag={setActiveCategory}
@@ -69,7 +69,7 @@ export default function AnswersPage() {
           />
         </aside>
 
-        <main className="flex-1 py-4 max-w-4xl">
+        <main className="flex-1 max-w-4xl">
           <AskBar onClick={handleOpenModal} disabledButtons={["Quick"]} />
 
           {/* Posts */}

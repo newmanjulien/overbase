@@ -125,7 +125,7 @@ export default function OrbitalRings() {
         <div className="absolute inset-0 flex items-center justify-center">
           <Image
             src="/images/logo.png"
-            alt="Logo"
+            alt=""
             width={55}
             height={55}
             className="pointer-events-none select-none"

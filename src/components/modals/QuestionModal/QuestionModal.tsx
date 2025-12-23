@@ -1,16 +1,12 @@
 "use client";
 
 import { useQuestionModalState } from "./useQuestionModalState";
-import KpiModal from "../KpiModal";
-import PeopleModal from "../PeopleModal";
-import FileModal from "../FileModal";
-import ScheduleModal from "../ScheduleModal";
+import { QuestionModalActions } from "./QuestionModalActions";
 import { useState } from "react";
 import {
   X,
   BarChart3,
   Users,
-  Upload,
   ChevronDown,
   Play,
   FileText,
@@ -23,7 +19,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { AttachmentChip } from "./AttachmentChip";
 
 export default function QuestionModal({
@@ -65,8 +60,8 @@ export default function QuestionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center pt-16 overflow-y-auto">
-      <div className="bg-white rounded-2xl w-full max-w-3xl shadow-xl my-8">
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center pt-22 overflow-y-auto">
+      <div className="bg-white rounded-2xl w-full max-w-3xl min-h-[calc(100vh-11rem)] flex flex-col">
         {/* Top header */}
         <div
           className={`relative py-4 px-4 flex items-center justify-center${
@@ -136,12 +131,12 @@ export default function QuestionModal({
         )}
 
         {/* Main content */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 flex-1 flex flex-col min-h-0">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-6 w-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-300 overflow-hidden">
               <img
                 src="/images/gloria.png"
-                alt="User avatar"
+                alt=""
                 className="h-full w-full object-cover"
               />
             </div>
@@ -175,13 +170,13 @@ export default function QuestionModal({
             placeholder={placeholder}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="w-full h-[19rem] text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
+            className="w-full flex-1 text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
           />
 
           {(kpis.length > 0 ||
             people.length > 0 ||
             fileAttachments.length > 0) && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mt-4 max-h-20 overflow-y-auto">
               {kpis.map((kpi, idx) => (
                 <AttachmentChip
                   key={`kpi-${idx}`}
@@ -210,57 +205,19 @@ export default function QuestionModal({
           )}
         </div>
 
-        {/* Bottom action bar */}
-        <div className="pr-2 pl-1 py-2 border-t border-gray-200 flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setActiveNestedModal("kpi")}
-              title="Define KPIs/Metrics"
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <BarChart3 className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
-            </button>
-            <button
-              onClick={() => setActiveNestedModal("people")}
-              title="Link People"
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <Users className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
-            </button>
-            <button
-              onClick={() => setActiveNestedModal("file")}
-              title="Attach File"
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <Upload className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
-            </button>
-          </div>
-          <Button className="default">Submit</Button>
-        </div>
-
-        {/* Nested Modals */}
-        <KpiModal
-          isOpen={activeNestedModal === "kpi"}
-          onClose={closeNestedModal}
+        {/* Bottom action bar and nested modals */}
+        <QuestionModalActions
+          activeNestedModal={activeNestedModal}
+          setActiveNestedModal={setActiveNestedModal}
+          closeNestedModal={closeNestedModal}
           kpis={kpis}
           setKpis={setKpis}
-        />
-        <PeopleModal
-          isOpen={activeNestedModal === "people"}
-          onClose={closeNestedModal}
           people={people}
           setPeople={setPeople}
-        />
-        <FileModal
-          isOpen={activeNestedModal === "file"}
-          onClose={closeNestedModal}
           fileAttachments={fileAttachments}
           setFileAttachments={setFileAttachments}
-        />
-        <ScheduleModal
-          isOpen={activeNestedModal === "schedule"}
-          onClose={closeNestedModal}
-          onSave={setSchedule}
+          setSchedule={setSchedule}
+          isQuestionEmpty={!question.trim()}
         />
       </div>
     </div>

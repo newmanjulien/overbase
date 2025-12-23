@@ -19,7 +19,7 @@ export default function FollowupBar({
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-4">
       <div className="flex items-center gap-3">
-        <Avatar className="h-9 w-9">
+        <Avatar className="h-10 w-10">
           <AvatarImage src="/images/kareem.png" />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>

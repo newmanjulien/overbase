@@ -62,7 +62,7 @@ function CardHeader({
 }) {
   return (
     <div className="p-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-2 min-h-[22px]">
         <span className="text-xs text-gray-400 flex items-center gap-1.5">
           Asked on {question.askedDate}
           <span className="text-gray-400">·</span>
@@ -81,16 +81,13 @@ function CardHeader({
         </span>
         {question.status === "in-progress" && (
           <span
-            className="px-2 py-1 rounded-lg text-xs text-gray-800"
+            className="px-1.5 py-0.75 rounded-lg text-xs text-gray-800"
             style={{ backgroundColor: "#FFFF00" }}
           >
             In Progress
           </span>
         )}
       </div>
-      {question.title && (
-        <h2 className="text-gray-800 mb-2">{question.title}</h2>
-      )}
       <p className="text-gray-600 text-sm line-clamp-2 overflow-hidden">
         {question.content}
       </p>

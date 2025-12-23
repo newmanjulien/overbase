@@ -55,7 +55,6 @@ export default function FileModal({
           <button
             onClick={closeModal}
             className="text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close modal"
           >
             <X className="h-5 w-5" />
           </button>
@@ -118,7 +117,7 @@ export default function FileModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 flex justify-end gap-3">
+        <div className="p-2 border-t border-gray-200 flex justify-end gap-3">
           <Button
             onClick={handleAddFile}
             disabled={!tempFile.fileName}

@@ -70,7 +70,7 @@ function MentionMenu({
           {option.logo && (
             <Image
               src={option.logo}
-              alt={option.name}
+              alt=""
               width={20}
               height={20}
               className="rounded-full object-cover"

@@ -117,7 +117,7 @@ function MentionDropdown({
           {opt.logo && (
             <Image
               src={opt.logo}
-              alt={opt.name}
+              alt=""
               width={18}
               height={18}
               className="rounded"

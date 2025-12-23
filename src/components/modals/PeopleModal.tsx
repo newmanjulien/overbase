@@ -64,7 +64,6 @@ export default function PeopleModal({
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <button
             type="button"
-            aria-label="Close modal"
             onClick={closeModal}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
@@ -146,7 +145,7 @@ export default function PeopleModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 flex justify-end gap-3">
+        <div className="p-2 border-t border-gray-200 flex justify-end gap-3">
           <Button
             onClick={handleAddPeople}
             disabled={selectedIds.length === 0}

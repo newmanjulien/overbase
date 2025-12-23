@@ -38,7 +38,7 @@ export default function AnswerCard({
         {/* Header: avatar + labels + optional icon */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 flex-shrink-0">
+            <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage src={avatar || "/placeholder.svg"} />
               <AvatarFallback>{avatarFallback}</AvatarFallback>
             </Avatar>

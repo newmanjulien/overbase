@@ -46,8 +46,8 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
     ],
     showFollowupBar: false,
     infoCard: {
-      text: "Understanding social benefit vs. direct profitability in large infrastructure projects.",
-      linkText: "View internal memo",
+      text: "It can take up to 48h for our AI agents to answer in depth and accurately",
+      linkText: "See how our AI agents work",
       href: "#",
     },
   },

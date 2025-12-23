@@ -49,7 +49,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <Link href="/dashboard/answers">
                   <Image
                     src="/images/logo.png"
-                    alt="Logo"
+                    alt=""
                     width={42}
                     height={30}
                     priority
@@ -90,12 +90,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="h-4">
-                  <Image
-                    src="/images/logo.png"
-                    alt="Logo small"
-                    width={38}
-                    height={20}
-                  />
+                  <Image src="/images/logo.png" alt="" width={38} height={20} />
                 </div>
               </div>
               <nav className="flex space-x-8">

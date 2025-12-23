@@ -20,6 +20,7 @@ export default function ForwardModal({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [infoNeeded, setInfoNeeded] = useState("");
+  const [selectionType, setSelectionType] = useState("only dataset");
 
   const filteredPeople = useMemo(() => {
     return dummyPeople.filter((p) =>
@@ -41,6 +42,7 @@ export default function ForwardModal({
       const newEntries = selectedPeopleObjects.map((p) => ({
         name: p.name,
         infoNeeded: infoNeeded,
+        selectionType: selectionType,
       }));
       setPeople([...people, ...newEntries]);
       closeModal();
@@ -51,6 +53,7 @@ export default function ForwardModal({
     setSelectedIds([]);
     setSearchQuery("");
     setInfoNeeded("");
+    setSelectionType("only dataset");
     onClose();
   };
 
@@ -63,7 +66,6 @@ export default function ForwardModal({
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <button
             type="button"
-            aria-label="Close modal"
             onClick={closeModal}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
@@ -126,10 +128,31 @@ export default function ForwardModal({
               className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50/50 rounded-lg focus:outline-none resize-none h-24"
             />
           </div>
+
+          {/* Dataset Selection */}
+          <div className="flex gap-2">
+            {[
+              { label: "Send only this dataset", value: "only dataset" },
+              { label: "Send the full Q&A", value: "full qa" },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setSelectionType(option.value)}
+                className={`flex-1 py-2 px-3 text-sm rounded-lg transition-all duration-150 ${
+                  selectionType === option.value
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 flex justify-end gap-3">
+        <div className="p-2 border-t border-gray-200 flex justify-end gap-3">
           <Button
             onClick={handleAddPeople}
             disabled={selectedIds.length === 0}

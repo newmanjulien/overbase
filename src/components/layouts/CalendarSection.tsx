@@ -89,7 +89,6 @@ export default function Calendar({
             size="icon"
             onClick={() => navigateMonth("prev")}
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
-            aria-label="Previous month"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -98,7 +97,6 @@ export default function Calendar({
             size="icon"
             onClick={() => navigateMonth("next")}
             className="h-10 w-10 text-muted-foreground hover:text-foreground"
-            aria-label="Next month"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
@@ -152,13 +150,6 @@ export default function Calendar({
               {hasRequests && (
                 <span
                   className={getRequestIndicatorClasses(hasActive, hasDraft)}
-                  aria-label={
-                    hasActive
-                      ? "Active requests"
-                      : hasDraft
-                      ? "Draft requests"
-                      : undefined
-                  }
                 />
               )}
             </button>

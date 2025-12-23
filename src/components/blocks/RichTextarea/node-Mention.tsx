@@ -46,7 +46,7 @@ function MentionComponent({ name, logo }: MentionPayload) {
       {logo && (
         <Image
           src={logo}
-          alt={name}
+          alt=""
           width={14}
           height={14}
           className="rounded-full object-cover"

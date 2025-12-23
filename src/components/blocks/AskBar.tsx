@@ -36,7 +36,7 @@ export default function AskBar({
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-1 pt-4 mb-4">
       <div className="flex items-center gap-2">
-        <Avatar className="h-9 w-9 ml-3">
+        <Avatar className="h-10 w-10 ml-3">
           <AvatarImage src="/images/kareem.png" />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>

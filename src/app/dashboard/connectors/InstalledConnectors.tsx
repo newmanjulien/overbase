@@ -16,12 +16,7 @@ export function InstalledConnectors({
   onSeeAllClick,
 }: InstalledConnectorsProps) {
   return (
-    <div
-      id="popular-connectors"
-      tabIndex={-1}
-      className="w-80"
-      aria-label="Popular connectors"
-    >
+    <div id="popular-connectors" className="w-80">
       <div className="border border-gray-200/60 rounded-2xl p-7">
         <div className="mb-6 flex flex-col items-center text-center">
           <Layers className="w-4 h-4 text-gray-600" />
@@ -54,11 +49,10 @@ export function InstalledConnectors({
                     <div className="w-11 h-11 rounded-full flex items-center justify-center relative overflow-hidden border border-gray-200/60 bg-white flex-shrink-0">
                       <Image
                         src={connector.logo}
-                        alt={`${connector.title} logo`}
+                        alt=""
                         width={30}
                         height={30}
                         className="object-contain"
-                        aria-hidden
                       />
                     </div>
                     <div className="min-w-0 flex flex-col text-left">

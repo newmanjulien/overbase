@@ -32,7 +32,7 @@ export function TemplateCard({
             {image ? (
               <Image
                 src={image}
-                alt={`${title} logo`}
+                alt=""
                 width={54}
                 height={54}
                 className="rounded-full object-cover"
