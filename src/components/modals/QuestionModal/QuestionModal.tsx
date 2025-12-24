@@ -19,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { AttachmentChip } from "./AttachmentChip";
+import { AttachmentChip } from "../shared/AttachmentChip";
 
 export default function QuestionModal({
   isOpen,

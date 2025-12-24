@@ -2,7 +2,7 @@ import FollowupBar from "@/components/bars/FollowupBar";
 import { InfoCard } from "@/components/blocks/InfoCard";
 import AnswerCard from "./AnswerCard";
 import QuestionModal from "@/components/modals/QuestionModal/QuestionModal";
-import ForwardModal from "@/components/modals/ForwardModal";
+import ForwardModal from "@/components/modals/ForwardModal/ForwardModal";
 import { ModalOptions } from "@/components/bars/AskBar";
 import { AnswerData } from "./DummyData";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RecurringFrequency } from "../ScheduleModal";
+import { RecurringFrequency } from "../ScheduleModal/ScheduleModal";
 
 export interface QuestionModalStateProps {
   isOpen: boolean;

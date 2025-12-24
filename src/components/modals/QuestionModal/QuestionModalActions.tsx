@@ -1,9 +1,11 @@
 "use client";
 
-import KpiModal from "../KpiModal";
-import PeopleModal from "../PeopleModal";
-import FileModal from "../FileModal";
-import ScheduleModal, { RecurringFrequency } from "../ScheduleModal";
+import KpiModal from "../KpiModal/KpiModal";
+import PeopleModal from "../PeopleModal/PeopleModal";
+import FileModal from "../FileModal/FileModal";
+import ScheduleModal, {
+  RecurringFrequency,
+} from "../ScheduleModal/ScheduleModal";
 import { BarChart3, Users, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dispatch, SetStateAction } from "react";

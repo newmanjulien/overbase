@@ -1,5 +1,5 @@
 import QuestionModal from "@/components/modals/QuestionModal/QuestionModal";
-import ForwardModal from "@/components/modals/ForwardModal";
+import ForwardModal from "@/components/modals/ForwardModal/ForwardModal";
 import AskBar, { ModalOptions } from "@/components/bars/AskBar";
 import Sidebar from "@/components/blocks/Sidebar";
 import QuestionCard, { QuestionType } from "./QuestionCard";
