@@ -73,35 +73,28 @@ export const dummyAnswers: Record<number, AnswerDetailData> = {
           "We identified 68 deals with a projected value of +$18,000,000. 1/2 of them likely show up already in your CRM dashboards. 1/2 are likely not yet on your radar. There are 12 EMEA deals, 16 APAC deals and 40 AMER deals",
         tableData: [
           {
-            api_id: "Description",
-            name: "Account name",
-            first_name: "Data sources",
-            last_name: "AE",
-            email: "Salesforce opportunity",
-          },
-          {
-            api_id:
+            column1:
               "Champion asked about a potential discount in a call on 10/14.",
-            name: "Umbrella",
-            first_name: "Gong, Outlook",
-            last_name: "Cindy Li",
-            email: "acme.salesforce.com/0061A00000XyZaQ",
+            column2: "Umbrella",
+            column3: "Gong, Outlook",
+            column4: "Cindy Li",
+            column5: "acme.salesforce.com/0061A00000XyZaQ",
           },
           {
-            api_id:
+            column1:
               "Champion asked about a potential discount in a call on 10/29 and followed up about a discount by email",
-            name: "Initech",
-            first_name: "Gong, Outlook",
-            last_name: "James Randall",
-            email: "acme.salesforce.com/0062B00001LmNoR",
+            column2: "Initech",
+            column3: "Gong, Outlook",
+            column4: "James Randall",
+            column5: "acme.salesforce.com/0062B00001LmNoR",
           },
           {
-            api_id:
+            column1:
               "AE worked with the buyer in a previous job and they have a strong relationship",
-            name: "Globex",
-            first_name: "Gong, Salesforce",
-            last_name: "James Randall",
-            email: "acme.salesforce.com/0067G00006EeFfG",
+            column2: "Globex",
+            column3: "Gong, Salesforce",
+            column4: "James Randall",
+            column5: "acme.salesforce.com/0067G00006EeFfG",
           },
         ],
         privacy: "team",

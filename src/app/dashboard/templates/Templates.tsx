@@ -1,16 +1,7 @@
 import { TemplateCard } from "./TemplateCard";
 import { Header } from "@/components/blocks/Header";
 import Sidebar from "@/components/blocks/Sidebar";
-import type { GradientKey } from "./gradients";
-
-interface Template {
-  _id: string;
-  title: string;
-  description: string;
-  gradient: string;
-  imageUrl: string | null;
-  tags: string[];
-}
+import type { Template } from "./types";
 
 interface TemplatesProps {
   templates: Template[];
@@ -106,7 +97,7 @@ export function Templates({
                   id={template._id}
                   title={template.title}
                   description={template.description}
-                  gradient={template.gradient as GradientKey}
+                  gradient={template.gradient}
                   imageUrl={template.imageUrl}
                   onUse={() => console.log(`Using ${template.title}`)}
                 />

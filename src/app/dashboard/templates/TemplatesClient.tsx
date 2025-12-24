@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Templates } from "./Templates";
+import { normalizeTemplate, type Template } from "./types";
 
 export default function TemplatesClient() {
-  const templates = useQuery(api.features.templates.getAllTemplates);
+  const rawTemplates = useQuery(api.features.templates.getAllTemplates);
   const uniqueTags = useQuery(api.features.templates.getUniqueTags);
 
   const [selectedTag, setSelectedTag] = useState<string>("");
@@ -24,11 +25,12 @@ export default function TemplatesClient() {
     name: tag,
   }));
 
-  // Filter templates by selected tag
-  const filteredTemplates =
-    templates?.filter((t) => selectedTag && t.tags.includes(selectedTag)) ?? [];
+  // Filter templates by selected tag and normalize (validate gradients)
+  const filteredTemplates: Template[] = (rawTemplates ?? [])
+    .filter((t) => selectedTag && t.tags.includes(selectedTag))
+    .map(normalizeTemplate);
 
-  const isLoading = templates === undefined || uniqueTags === undefined;
+  const isLoading = rawTemplates === undefined || uniqueTags === undefined;
 
   return (
     <Templates

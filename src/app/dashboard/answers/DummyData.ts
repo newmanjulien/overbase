@@ -28,60 +28,60 @@ export const questions: QuestionType[] = [
     privacy: "team",
     tableData: [
       {
-        api_id:
+        column1:
           "Negotiation stage. Champion asked about a potential discount in a call on 10/14 and followed up about a discount by email",
-        name: "Umbrella",
-        first_name: "Gong, Outlook, Salesforce",
-        last_name: "Cindy Li",
-        email: "andrew.b@eminds.ai",
+        column2: "Umbrella",
+        column3: "Gong, Outlook, Salesforce",
+        column4: "Cindy Li",
+        column5: "andrew.b@eminds.ai",
       },
       {
-        api_id:
+        column1:
           "Negotiation stage. Champion asked about a potential discount in a call on 10/29 and followed up about a discount by email",
-        name: "Initech",
-        first_name: "Gong, Outlook, Salesforce",
-        last_name: "James Randall",
-        email: "syed.altamash@outlook.c...",
+        column2: "Initech",
+        column3: "Gong, Outlook, Salesforce",
+        column4: "James Randall",
+        column5: "syed.altamash@outlook.c...",
       },
       {
-        api_id:
+        column1:
           "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
-        name: "Globex",
-        first_name: "Gong, Salesforce",
-        last_name: "Raj Sinha",
-        email: "nburke@incidentiq.com",
+        column2: "Globex",
+        column3: "Gong, Salesforce",
+        column4: "Raj Sinha",
+        column5: "nburke@incidentiq.com",
       },
       {
-        api_id:
+        column1:
           "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
-        name: "Globex",
-        first_name: "Gong, Salesforce",
-        last_name: "Raj Sinha",
-        email: "nburke@incidentiq.com",
+        column2: "Globex",
+        column3: "Gong, Salesforce",
+        column4: "Raj Sinha",
+        column5: "nburke@incidentiq.com",
       },
       {
-        api_id:
+        column1:
           "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
-        name: "Globex",
-        first_name: "Gong, Salesforce",
-        last_name: "Raj Sinha",
-        email: "nburke@incidentiq.com",
+        column2: "Globex",
+        column3: "Gong, Salesforce",
+        column4: "Raj Sinha",
+        column5: "nburke@incidentiq.com",
       },
       {
-        api_id:
+        column1:
           "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
-        name: "Globex",
-        first_name: "Gong, Salesforce",
-        last_name: "Raj Sinha",
-        email: "nburke@incidentiq.com",
+        column2: "Globex",
+        column3: "Gong, Salesforce",
+        column4: "Raj Sinha",
+        column5: "nburke@incidentiq.com",
       },
       {
-        api_id:
+        column1:
           "Negotiation stage. Champion asked about a potential discount in a call on 10/2",
-        name: "Globex",
-        first_name: "Gong, Salesforce",
-        last_name: "Raj Sinha",
-        email: "nburke@incidentiq.com",
+        column2: "Globex",
+        column3: "Gong, Salesforce",
+        column4: "Raj Sinha",
+        column5: "nburke@incidentiq.com",
       },
     ],
   },
