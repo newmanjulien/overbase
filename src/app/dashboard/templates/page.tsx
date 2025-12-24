@@ -109,8 +109,9 @@ function Templates() {
                   id={template._id}
                   title={template.title}
                   description={template.description}
-                  gradientFrom={template.gradientFrom}
-                  gradientTo={template.gradientTo}
+                  gradient={
+                    template.gradient as import("./gradients").GradientKey
+                  }
                   imageUrl={template.imageUrl}
                   onUse={() => console.log(`Using ${template.title}`)}
                 />

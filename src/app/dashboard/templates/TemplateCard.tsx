@@ -1,13 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { GRADIENTS, DEFAULT_GRADIENT, type GradientKey } from "./gradients";
 
 interface TemplateCardProps {
   id: string;
   title: string;
   description: string;
-  gradientFrom?: string;
-  gradientTo?: string;
+  gradient?: GradientKey;
   imageUrl?: string | null;
   onUse?: () => void;
 }
@@ -15,16 +15,17 @@ interface TemplateCardProps {
 export function TemplateCard({
   title,
   description,
-  gradientFrom = "from-emerald-400",
-  gradientTo = "to-teal-500",
+  gradient = DEFAULT_GRADIENT,
   imageUrl,
   onUse,
 }: TemplateCardProps) {
+  const gradientClasses = GRADIENTS[gradient] ?? GRADIENTS[DEFAULT_GRADIENT];
+
   return (
     <div className="rounded-3xl border border-gray-200/60 overflow-hidden cursor-pointer hover:shadow-md transform transition-all duration-200">
       {/* Top gradient + image/logo */}
       <div
-        className={`relative h-56 flex items-center justify-center bg-gradient-to-r ${gradientFrom} ${gradientTo}`}
+        className={`relative h-56 flex items-center justify-center bg-gradient-to-r ${gradientClasses}`}
       >
         <div className="flex items-center justify-center">
           <div className="flex items-center justify-center w-15 h-15 rounded-full bg-white p-1">

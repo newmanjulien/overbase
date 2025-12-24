@@ -9,9 +9,7 @@ export default defineSchema({
     title: v.string(),
     description: v.string(),
     tags: v.array(v.string()), // e.g., ["Onboarding", "Support"]
-    gradientFrom: v.string(),
-    gradientVia: v.string(),
-    gradientTo: v.string(),
+    gradient: v.string(), // Key from src/config/gradients.ts (e.g., "sunset", "ocean")
     imageId: v.optional(v.id("_storage")), // Convex file storage reference
   }),
 
