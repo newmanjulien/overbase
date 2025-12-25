@@ -3,6 +3,9 @@
 import { useQuestionModalState } from "./useQuestionModalState";
 import { QuestionModalActions } from "./QuestionModalActions";
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { BASE_QUESTION_TAGS } from "@convex/shared/constants";
 import {
   X,
   BarChart3,
@@ -20,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AttachmentChip } from "../shared/AttachmentChip";
+import Image from "next/image";
 
 export default function QuestionModal({
   isOpen,
@@ -56,6 +60,56 @@ export default function QuestionModal({
   } = useQuestionModalState({ isOpen, initialTab });
 
   const [visibility, setVisibility] = useState<"Private" | "Team">("Private");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const createQuestion = useMutation(api.features.answers.createQuestion);
+
+  const handleSubmit = async () => {
+    if (!question.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await createQuestion({
+        content: question.trim(),
+        privacy: visibility.toLowerCase() as "private" | "team",
+        tags:
+          activeTab === "recurring"
+            ? BASE_QUESTION_TAGS.map((t) => t.key) // All tags including "Recurring questions"
+            : BASE_QUESTION_TAGS.filter(
+                (t) => t.key !== "Recurring questions"
+              ).map((t) => t.key),
+        questionType: activeTab === "one" ? "one-time" : "recurring",
+        schedule:
+          activeTab === "recurring" && schedule
+            ? {
+                frequency: schedule,
+                deliveryDate: Date.now(), // TODO: Use actual selected date
+              }
+            : undefined,
+        attachedKpis: kpis.length > 0 ? kpis : undefined,
+        attachedPeople:
+          people.length > 0
+            ? people.map((p) => ({ id: p.name, name: p.name })) // Map PersonAttachment to schema format
+            : undefined,
+        attachedFiles:
+          fileAttachments.length > 0
+            ? fileAttachments.map((f) => ({
+                fileName: f.fileName,
+                context: f.context || undefined,
+              }))
+            : undefined,
+      });
+
+      // Reset state and close modal
+      setQuestion("");
+      setVisibility("Private");
+      onClose();
+    } catch (error) {
+      console.error("Failed to create question:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -133,11 +187,12 @@ export default function QuestionModal({
         {/* Main content */}
         <div className="p-6 flex-1 flex flex-col min-h-0">
           <div className="flex items-center gap-2 mb-4">
-            <div className="h-6 w-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-300 overflow-hidden">
-              <img
+            <div className="h-6 w-6 rounded-full bg-gradient-to-br from-purple-400 to-pink-300 overflow-hidden relative">
+              <Image
                 src="/images/gloria.png"
                 alt=""
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
             <Play className="h-4 w-4 text-gray-600 fill-gray-600" />
@@ -185,7 +240,7 @@ export default function QuestionModal({
                   onRemove={() => removeKpi(idx)}
                 />
               ))}
-              {people.map((p: any, idx: number) => (
+              {people.map((p, idx) => (
                 <AttachmentChip
                   key={`people-${idx}`}
                   icon={<Users className="h-3.5 w-3.5" />}
@@ -218,6 +273,8 @@ export default function QuestionModal({
           setFileAttachments={setFileAttachments}
           setSchedule={setSchedule}
           isQuestionEmpty={!question.trim()}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
         />
       </div>
     </div>

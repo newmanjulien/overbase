@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { people as dummyPeople } from "@/app/dashboard/answers/DummyData";
+import {
+  dummyPeople,
+  type PersonAttachmentWithInfo,
+} from "../shared/modalTypes";
 
 export function usePeopleModalState(
-  people: any[],
-  setPeople: (p: any[]) => void,
+  people: PersonAttachmentWithInfo[],
+  setPeople: (p: PersonAttachmentWithInfo[]) => void,
   onClose: () => void
 ) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

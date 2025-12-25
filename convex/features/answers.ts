@@ -1,6 +1,8 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
+import { BASE_QUESTION_TAGS } from "../shared/constants";
+import { computeDisplayPrivacy, type PrivacyValue } from "../shared/privacy";
 
 // ============================================
 // ANSWERS FEATURE
@@ -11,10 +13,60 @@ import type { Doc } from "../_generated/dataModel";
 // TYPES
 // --------------------------------------------
 
-/** Question with resolved creation timestamp as date string */
-export type QuestionWithDate = Doc<"questions"> & {
-  askedDate: string;
+/** Table row structure for answered questions */
+export type TableRow = {
+  column1: string;
+  column2: string;
+  column3: string;
+  column4: string;
+  column5: string;
 };
+
+/**
+ * Base question with resolved creation timestamp and computed display privacy.
+ * displayPrivacy = "team" if ANY answer is "team", else "private"
+ */
+type QuestionBase = Doc<"questions"> & {
+  askedDate: string;
+  displayPrivacy: PrivacyValue;
+};
+
+/**
+ * Answered question variant - has table data from first answer, no pill
+ */
+export type AnsweredQuestion = QuestionBase & {
+  variant: "answered";
+  tableData: TableRow[];
+};
+
+/**
+ * In-progress question variant - shows yellow pill, no table
+ */
+export type InProgressQuestion = QuestionBase & {
+  variant: "in-progress";
+};
+
+/**
+ * Recurring question variant - shows red frequency pill, scheduled date
+ */
+export type RecurringQuestion = QuestionBase & {
+  variant: "recurring";
+  frequency: "weekly" | "monthly" | "quarterly";
+  scheduledDate: string;
+};
+
+/**
+ * Discriminated union of all question card variants
+ */
+export type QuestionVariant =
+  | AnsweredQuestion
+  | InProgressQuestion
+  | RecurringQuestion;
+
+/**
+ * @deprecated Use QuestionVariant instead - kept for backward compatibility
+ */
+export type QuestionWithDate = QuestionBase;
 
 /** Answer in a thread */
 export type AnswerInThread = Doc<"answers">;
@@ -23,65 +75,202 @@ export type AnswerInThread = Doc<"answers">;
 // QUERIES
 // --------------------------------------------
 
-// Get all questions (sorted newest first)
+// Get all questions (sorted newest first) with computed variant
 export const getAllQuestions = query({
   args: {},
-  handler: async (ctx): Promise<QuestionWithDate[]> => {
+  handler: async (ctx): Promise<QuestionVariant[]> => {
     const questions = await ctx.db.query("questions").order("desc").collect();
 
-    return questions.map((q) => ({
-      ...q,
-      askedDate: new Date(q._creationTime).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-    }));
+    // For each question, compute variant and get associated data
+    const questionsWithVariants = await Promise.all(
+      questions.map(async (q) => {
+        const answers = await ctx.db
+          .query("answers")
+          .withIndex("by_questionId", (idx) => idx.eq("questionId", q._id))
+          .collect();
+
+        const answerPrivacies = answers.map((a) => a.privacy);
+        const displayPrivacy = computeDisplayPrivacy(
+          q.privacy,
+          answerPrivacies
+        );
+
+        const askedDate = new Date(q._creationTime).toLocaleDateString(
+          "en-US",
+          { month: "short", day: "numeric", year: "numeric" }
+        );
+
+        const base = { ...q, askedDate, displayPrivacy };
+
+        // Determine variant based on questionType and status
+        if (q.questionType === "recurring" && q.schedule) {
+          return {
+            ...base,
+            variant: "recurring" as const,
+            frequency: q.schedule.frequency,
+            scheduledDate: new Date(q.schedule.deliveryDate).toLocaleDateString(
+              "en-US",
+              { month: "short", day: "numeric", year: "numeric" }
+            ),
+          };
+        }
+
+        if (q.status === "in-progress") {
+          return {
+            ...base,
+            variant: "in-progress" as const,
+          };
+        }
+
+        // Completed (answered) - get tableData from first answer
+        const firstAnswerWithTable = answers.find((a) => a.tableData);
+        return {
+          ...base,
+          variant: "answered" as const,
+          tableData: (firstAnswerWithTable?.tableData ?? []) as TableRow[],
+        };
+      })
+    );
+
+    return questionsWithVariants;
   },
 });
 
-// Get questions filtered by tag
+// Get questions filtered by tag with computed variant
 export const getQuestionsByTag = query({
   args: { tag: v.string() },
-  handler: async (ctx, args): Promise<QuestionWithDate[]> => {
+  handler: async (ctx, args): Promise<QuestionVariant[]> => {
     const questions = await ctx.db.query("questions").order("desc").collect();
     const filtered = questions.filter((q) => q.tags.includes(args.tag));
 
-    return filtered.map((q) => ({
-      ...q,
-      askedDate: new Date(q._creationTime).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-    }));
+    // For each question, compute variant and get associated data
+    const questionsWithVariants = await Promise.all(
+      filtered.map(async (q) => {
+        const answers = await ctx.db
+          .query("answers")
+          .withIndex("by_questionId", (idx) => idx.eq("questionId", q._id))
+          .collect();
+
+        const answerPrivacies = answers.map((a) => a.privacy);
+        const displayPrivacy = computeDisplayPrivacy(
+          q.privacy,
+          answerPrivacies
+        );
+
+        const askedDate = new Date(q._creationTime).toLocaleDateString(
+          "en-US",
+          { month: "short", day: "numeric", year: "numeric" }
+        );
+
+        const base = { ...q, askedDate, displayPrivacy };
+
+        // Determine variant based on questionType and status
+        if (q.questionType === "recurring" && q.schedule) {
+          return {
+            ...base,
+            variant: "recurring" as const,
+            frequency: q.schedule.frequency,
+            scheduledDate: new Date(q.schedule.deliveryDate).toLocaleDateString(
+              "en-US",
+              { month: "short", day: "numeric", year: "numeric" }
+            ),
+          };
+        }
+
+        if (q.status === "in-progress") {
+          return {
+            ...base,
+            variant: "in-progress" as const,
+          };
+        }
+
+        // Completed (answered) - get tableData from first answer
+        const firstAnswerWithTable = answers.find((a) => a.tableData);
+        return {
+          ...base,
+          variant: "answered" as const,
+          tableData: (firstAnswerWithTable?.tableData ?? []) as TableRow[],
+        };
+      })
+    );
+
+    return questionsWithVariants;
   },
 });
 
-// Get unique tags derived from all questions
+// Get unique tags (always includes base tags + any additional from questions)
+// Preserves the order defined in BASE_QUESTION_TAGS, with additional tags appended
 export const getUniqueTags = query({
   args: {},
   handler: async (ctx): Promise<string[]> => {
     const questions = await ctx.db.query("questions").collect();
-    const allTags = questions.flatMap((q) => q.tags);
-    return [...new Set(allTags)].sort();
+    const dynamicTags = questions.flatMap((q) => q.tags);
+    // Start with base tags in their defined order
+    const baseTagKeys: string[] = BASE_QUESTION_TAGS.map((t) => t.key);
+    // Find any additional tags not in base tags
+    const additionalTags = [...new Set(dynamicTags)].filter(
+      (tag) => !baseTagKeys.includes(tag)
+    );
+    // Base tags first (in order), then any additional tags
+    return [...baseTagKeys, ...additionalTags];
   },
 });
 
-// Get a single question by ID
+// Get a single question by ID with computed variant
 export const getQuestionById = query({
   args: { id: v.id("questions") },
-  handler: async (ctx, args): Promise<QuestionWithDate | null> => {
+  handler: async (ctx, args): Promise<QuestionVariant | null> => {
     const question = await ctx.db.get(args.id);
     if (!question) return null;
 
+    // Get answers to compute displayPrivacy
+    const answers = await ctx.db
+      .query("answers")
+      .withIndex("by_questionId", (idx) => idx.eq("questionId", question._id))
+      .collect();
+
+    const answerPrivacies = answers.map((a) => a.privacy);
+    const displayPrivacy = computeDisplayPrivacy(
+      question.privacy,
+      answerPrivacies
+    );
+
+    const askedDate = new Date(question._creationTime).toLocaleDateString(
+      "en-US",
+      { month: "short", day: "numeric", year: "numeric" }
+    );
+
+    const base = { ...question, askedDate, displayPrivacy };
+
+    // Determine variant based on questionType and status
+    if (question.questionType === "recurring" && question.schedule) {
+      return {
+        ...base,
+        variant: "recurring" as const,
+        frequency: question.schedule.frequency,
+        scheduledDate: new Date(
+          question.schedule.deliveryDate
+        ).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+      };
+    }
+
+    if (question.status === "in-progress") {
+      return {
+        ...base,
+        variant: "in-progress" as const,
+      };
+    }
+
+    // Completed (answered) - get tableData from first answer
+    const firstAnswerWithTable = answers.find((a) => a.tableData);
     return {
-      ...question,
-      askedDate: new Date(question._creationTime).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
+      ...base,
+      variant: "answered" as const,
+      tableData: (firstAnswerWithTable?.tableData ?? []) as TableRow[],
     };
   },
 });
@@ -196,14 +385,31 @@ export const createAnswer = mutation({
   },
 });
 
-// Update privacy on a question
+/**
+ * Update privacy on a question AND cascade to all child answers.
+ * This is the ONLY way to update question privacy - ensures consistency.
+ */
 export const updateQuestionPrivacy = mutation({
   args: {
     id: v.id("questions"),
     privacy: v.union(v.literal("private"), v.literal("team")),
   },
   handler: async (ctx, args) => {
+    // Update the question
     await ctx.db.patch(args.id, { privacy: args.privacy });
+
+    // Cascade to all child answers
+    const answers = await ctx.db
+      .query("answers")
+      .withIndex("by_questionId", (idx) => idx.eq("questionId", args.id))
+      .collect();
+
+    // Update each answer atomically
+    await Promise.all(
+      answers.map((answer) =>
+        ctx.db.patch(answer._id, { privacy: args.privacy })
+      )
+    );
   },
 });
 

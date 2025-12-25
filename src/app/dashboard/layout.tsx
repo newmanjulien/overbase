@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectorProvider } from "@/lib/connectors/connectorContext";
+import { useOverbaseLogo } from "@/lib/hooks/useAssets";
 
 export default function DashboardLayout({
   children,
@@ -20,6 +21,7 @@ export default function DashboardLayout({
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const logoUrl = useOverbaseLogo();
 
   const navItems = [
     { href: "/dashboard/answers", label: "Answers" },
@@ -37,13 +39,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="flex items-center space-x-8">
               <div className="h-7">
                 <Link href="/dashboard/answers">
-                  <Image
-                    src="/images/logo.png"
-                    alt=""
-                    width={42}
-                    height={30}
-                    priority
-                  />
+                  {logoUrl ? (
+                    <Image
+                      src={logoUrl}
+                      alt=""
+                      width={42}
+                      height={30}
+                      priority
+                    />
+                  ) : (
+                    <div className="w-[42px] h-[30px] bg-gray-100 rounded animate-pulse" />
+                  )}
                 </Link>
               </div>
 
@@ -79,7 +85,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="h-4">
-                <Image src="/images/logo.png" alt="" width={38} height={20} />
+                {logoUrl ? (
+                  <Image src={logoUrl} alt="" width={38} height={20} />
+                ) : (
+                  <div className="w-[38px] h-[20px] bg-gray-100 rounded animate-pulse" />
+                )}
               </div>
             </div>
             <nav className="flex space-x-8">

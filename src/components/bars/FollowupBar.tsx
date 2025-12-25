@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mic } from "lucide-react";
+import { useCurrentUserAvatar } from "@/lib/hooks/useAssets";
 
 type ModalOptions = {
   tab?: "one" | "recurring";
@@ -14,6 +15,8 @@ export default function FollowupBar({
 }: {
   onClick: (options: ModalOptions) => void;
 }) {
+  const userAvatar = useCurrentUserAvatar();
+
   const handleClick = () => {
     onClick({
       showTabs: false,
@@ -25,7 +28,7 @@ export default function FollowupBar({
     <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-4">
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src="/images/kareem.png" />
+          <AvatarImage src={userAvatar ?? undefined} />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>
 

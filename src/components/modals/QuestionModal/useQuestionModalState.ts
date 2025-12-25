@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { RecurringFrequency } from "../ScheduleModal/ScheduleModal";
+import type {
+  KpiAttachment,
+  PersonAttachmentWithInfo,
+  FileAttachmentForUpload,
+} from "../shared/modalTypes";
 
 export interface QuestionModalStateProps {
   isOpen: boolean;
@@ -17,9 +22,11 @@ export function useQuestionModalState({
   const [activeNestedModal, setActiveNestedModal] = useState<
     "kpi" | "people" | "file" | "schedule" | null
   >(null);
-  const [kpis, setKpis] = useState<any[]>([]);
-  const [people, setPeople] = useState<any[]>([]);
-  const [fileAttachments, setFileAttachments] = useState<any[]>([]);
+  const [kpis, setKpis] = useState<KpiAttachment[]>([]);
+  const [people, setPeople] = useState<PersonAttachmentWithInfo[]>([]);
+  const [fileAttachments, setFileAttachments] = useState<
+    FileAttachmentForUpload[]
+  >([]);
   const [schedule, setSchedule] = useState<RecurringFrequency | null>(null);
 
   useEffect(() => {

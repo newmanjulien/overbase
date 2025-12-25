@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ModalShell } from "../shared/ModalShell";
+import type { KpiAttachment } from "../shared/modalTypes";
 
 export default function KpiModal({
   isOpen,
@@ -12,8 +13,8 @@ export default function KpiModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  kpis: Array<{ metric: string; definition: string; antiDefinition: string }>;
-  setKpis: any;
+  kpis: KpiAttachment[];
+  setKpis: (kpis: KpiAttachment[]) => void;
 }) {
   const [tempKpi, setTempKpi] = useState({
     metric: "",

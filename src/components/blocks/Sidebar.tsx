@@ -32,7 +32,7 @@ export default function Sidebar({
             key={tag.key}
             value={tag.key}
             className={`
-              w-full text-left px-3 py-2 text-sm rounded-xl transition-colors flex items-center justify-between
+              w-full text-left px-3 py-2 text-sm font-normal rounded-xl transition-colors flex items-center justify-between
               data-[state=on]:bg-white data-[state=on]:border data-[state=on]:border-gray-200/60
               data-[state=on]:font-medium data-[state=on]:text-gray-800
               data-[state=off]:text-gray-700 data-[state=off]:hover:text-gray-900

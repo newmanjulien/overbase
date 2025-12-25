@@ -9,6 +9,11 @@ import ScheduleModal, {
 import { BarChart3, Users, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dispatch, SetStateAction } from "react";
+import type {
+  KpiAttachment,
+  PersonAttachmentWithInfo,
+  FileAttachmentForUpload,
+} from "../shared/modalTypes";
 
 interface QuestionModalActionsProps {
   activeNestedModal: "kpi" | "people" | "file" | "schedule" | null;
@@ -16,14 +21,16 @@ interface QuestionModalActionsProps {
     modal: "kpi" | "people" | "file" | "schedule" | null
   ) => void;
   closeNestedModal: () => void;
-  kpis: any[];
-  setKpis: (kpis: any[]) => void;
-  people: any[];
-  setPeople: (people: any[]) => void;
-  fileAttachments: any[];
-  setFileAttachments: (files: any[]) => void;
+  kpis: KpiAttachment[];
+  setKpis: (kpis: KpiAttachment[]) => void;
+  people: PersonAttachmentWithInfo[];
+  setPeople: (people: PersonAttachmentWithInfo[]) => void;
+  fileAttachments: FileAttachmentForUpload[];
+  setFileAttachments: (files: FileAttachmentForUpload[]) => void;
   setSchedule: Dispatch<SetStateAction<RecurringFrequency | null>>;
   isQuestionEmpty: boolean;
+  onSubmit: () => void;
+  isSubmitting: boolean;
 }
 
 export function QuestionModalActions({
@@ -38,6 +45,8 @@ export function QuestionModalActions({
   setFileAttachments,
   setSchedule,
   isQuestionEmpty,
+  onSubmit,
+  isSubmitting,
 }: QuestionModalActionsProps) {
   return (
     <>
@@ -66,8 +75,8 @@ export function QuestionModalActions({
             <Upload className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
           </button>
         </div>
-        <Button className="default" disabled={isQuestionEmpty}>
-          Submit
+        <Button onClick={onSubmit} disabled={isQuestionEmpty || isSubmitting}>
+          {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </div>
 

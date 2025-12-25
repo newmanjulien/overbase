@@ -1,62 +1,98 @@
 "use client";
 
 import { useState } from "react";
-import { dummyAnswers, AnswerData } from "./DummyData";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
 import { ModalOptions } from "@/components/bars/AskBar";
 import { AnswerDetail } from "./AnswerDetail";
+import { normalizeAnswer } from "../types";
+import type { Id } from "@convex/_generated/dataModel";
+import type { ForwardEntry } from "@/components/modals/shared/modalTypes";
 
 interface AnswerDetailClientProps {
   id: string;
 }
 
 export default function AnswerDetailClient({ id }: AnswerDetailClientProps) {
-  const postId = Number(id);
-  const detailData = dummyAnswers[postId];
+  // The id from the URL is now a Convex ID string
+  const questionId = id as Id<"questions">;
+
+  const question = useQuery(api.features.answers.getQuestionById, {
+    id: questionId,
+  });
+  const rawAnswers = useQuery(api.features.answers.getAnswersByQuestionId, {
+    questionId,
+  });
+
+  const updateAnswerPrivacy = useMutation(
+    api.features.answers.updateAnswerPrivacy
+  );
+  const updateQuestionPrivacy = useMutation(
+    api.features.answers.updateQuestionPrivacy
+  );
 
   const [showModal, setShowModal] = useState(false);
   const [modalOptions, setModalOptions] = useState<ModalOptions>({});
 
   // ForwardModal state
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
-  const [forwardPeople, setForwardPeople] = useState<any[]>([]);
-
-  // State to track privacy values for each answer
-  const [privacyMap, setPrivacyMap] = useState<
-    Record<number, "private" | "team">
-  >(() => {
-    const initial: Record<number, "private" | "team"> = {};
-    detailData?.answers.forEach((answer: AnswerData) => {
-      initial[answer.id] = answer.privacy;
-    });
-    return initial;
-  });
+  const [forwardPeople, setForwardPeople] = useState<ForwardEntry[]>([]);
 
   const handleOpenModal = (options: ModalOptions) => {
     setModalOptions(options);
     setShowModal(true);
   };
 
-  const handlePrivacyChange = (
-    answerId: number,
+  const handlePrivacyChange = async (
+    answerId: Id<"answers">,
     newPrivacy: "private" | "team"
   ) => {
-    setPrivacyMap((prev) => ({
-      ...prev,
-      [answerId]: newPrivacy,
-    }));
+    await updateAnswerPrivacy({ id: answerId, privacy: newPrivacy });
   };
 
-  if (!detailData) return <div>Post not found</div>;
+  const handleQuestionPrivacyChange = async (
+    newPrivacy: "private" | "team"
+  ) => {
+    await updateQuestionPrivacy({ id: questionId, privacy: newPrivacy });
+  };
 
-  const answers = detailData?.answers || [];
-  const showFollowupBar = detailData?.showFollowupBar ?? true;
-  const infoCard = detailData?.infoCard;
+  // Loading state
+  const isLoading = question === undefined || rawAnswers === undefined;
+
+  // Not found state
+  if (question === null) {
+    return (
+      <div className="max-w-5xl mx-auto py-8">
+        <div className="text-center py-16">
+          <p className="text-gray-500 text-lg">Question not found</p>
+        </div>
+      </div>
+    );
+  }
+
+  const answers = (rawAnswers ?? []).map(normalizeAnswer);
+
+  // Determine if we should show the followup bar
+  // Show it if the question is completed (has answers)
+  const showFollowupBar = question?.status === "completed";
+
+  // Show info card if question is in progress
+  const infoCard =
+    question?.status === "in-progress"
+      ? {
+          text: "It can take up to 48h for our AI agents to answer in depth and accurately",
+          linkText: "See how our AI agents work",
+          href: "#",
+        }
+      : undefined;
 
   return (
     <AnswerDetail
+      question={question ?? undefined}
       answers={answers}
       showFollowupBar={showFollowupBar}
       infoCard={infoCard}
+      isLoading={isLoading}
       showModal={showModal}
       onCloseModal={() => setShowModal(false)}
       modalOptions={modalOptions}
@@ -65,8 +101,8 @@ export default function AnswerDetailClient({ id }: AnswerDetailClientProps) {
       onCloseForwardModal={() => setIsForwardModalOpen(false)}
       forwardPeople={forwardPeople}
       setForwardPeople={setForwardPeople}
-      privacyMap={privacyMap}
       onPrivacyChange={handlePrivacyChange}
+      onQuestionPrivacyChange={handleQuestionPrivacyChange}
       onForward={() => setIsForwardModalOpen(true)}
     />
   );

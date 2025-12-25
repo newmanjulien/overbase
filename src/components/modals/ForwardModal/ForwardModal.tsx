@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ModalShell } from "../shared/ModalShell";
 import { useForwardModalState } from "./useForwardModalState";
+import type { ForwardEntry } from "../shared/modalTypes";
 
 export default function ForwardModal({
   isOpen,
@@ -14,8 +15,8 @@ export default function ForwardModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  people: any[];
-  setPeople: any;
+  people: ForwardEntry[];
+  setPeople: (people: ForwardEntry[]) => void;
 }) {
   const {
     selectedIds,

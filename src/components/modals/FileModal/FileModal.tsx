@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, FileText } from "lucide-react";
 import { useState } from "react";
 import { ModalShell } from "../shared/ModalShell";
+import type { FileAttachmentForUpload } from "../shared/modalTypes";
 
 export default function FileModal({
   isOpen,
@@ -13,8 +14,8 @@ export default function FileModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  fileAttachments: any[];
-  setFileAttachments: any;
+  fileAttachments: FileAttachmentForUpload[];
+  setFileAttachments: (files: FileAttachmentForUpload[]) => void;
 }) {
   const [tempFile, setTempFile] = useState<{
     file: File | null;

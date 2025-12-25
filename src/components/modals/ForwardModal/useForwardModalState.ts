@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { people as dummyPeople } from "@/app/dashboard/answers/DummyData";
+import { dummyPeople, type ForwardEntry } from "../shared/modalTypes";
 
 export function useForwardModalState(
-  people: any[],
-  setPeople: (p: any[]) => void,
+  people: ForwardEntry[],
+  setPeople: (p: ForwardEntry[]) => void,
   onClose: () => void
 ) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

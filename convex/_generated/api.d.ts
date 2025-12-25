@@ -9,9 +9,13 @@
  */
 
 import type * as features_answers from "../features/answers.js";
+import type * as features_assets from "../features/assets.js";
 import type * as features_connectors from "../features/connectors.js";
 import type * as features_people from "../features/people.js";
 import type * as features_templates from "../features/templates.js";
+import type * as shared_attachmentTypes from "../shared/attachmentTypes.js";
+import type * as shared_constants from "../shared/constants.js";
+import type * as shared_privacy from "../shared/privacy.js";
 
 import type {
   ApiFromModules,
@@ -21,9 +25,13 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "features/answers": typeof features_answers;
+  "features/assets": typeof features_assets;
   "features/connectors": typeof features_connectors;
   "features/people": typeof features_people;
   "features/templates": typeof features_templates;
+  "shared/attachmentTypes": typeof shared_attachmentTypes;
+  "shared/constants": typeof shared_constants;
+  "shared/privacy": typeof shared_privacy;
 }>;
 
 /**

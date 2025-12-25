@@ -3,6 +3,24 @@ import { v } from "convex/values";
 
 export default defineSchema({
   // ============================================
+  // APP ASSETS (branding images stored in Convex)
+  // ============================================
+  appAssets: defineTable({
+    key: v.string(), // Unique identifier, e.g., "overbase-logo", "overbase-icon"
+    name: v.string(), // Human-readable name
+    imageId: v.id("_storage"), // Convex file storage reference
+  }).index("by_key", ["key"]),
+
+  // ============================================
+  // CURRENT USER (singleton for now - will expand with auth)
+  // ============================================
+  currentUser: defineTable({
+    name: v.string(),
+    email: v.optional(v.string()),
+    avatarId: v.optional(v.id("_storage")), // Convex file storage reference
+  }),
+
+  // ============================================
   // TEMPLATES FEATURE
   // ============================================
   templates: defineTable({

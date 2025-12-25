@@ -3,21 +3,22 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Lock, Users } from "lucide-react";
 import DataTable, { TableRow } from "@/components/blocks/DataTable";
+import type { Id } from "@convex/_generated/dataModel";
+import { useAvatars } from "@/lib/hooks/useAssets";
+
 interface AnswerCardProps {
-  avatar?: string;
-  avatarFallback: string;
+  answerId?: Id<"answers">;
   topLabel: string;
   subLabel?: string;
   content?: string;
   tableData?: TableRow[];
-  privacy: "private" | "team";
+  privacy?: "private" | "team";
   onPrivacyChange?: (newPrivacy: "private" | "team") => void;
   onForward?: () => void;
+  isQuestion?: boolean; // If true, this is the original question, not an answer
 }
 
 export default function AnswerCard({
-  avatar,
-  avatarFallback,
   topLabel,
   subLabel,
   content,
@@ -25,11 +26,22 @@ export default function AnswerCard({
   privacy,
   onPrivacyChange,
   onForward,
+  isQuestion = false,
 }: AnswerCardProps) {
+  const { userAvatar, overbaseIcon } = useAvatars();
+
   const handlePrivacyClick = () => {
     const newPrivacy = privacy === "private" ? "team" : "private";
     onPrivacyChange?.(newPrivacy);
   };
+
+  // Determine avatar based on topLabel
+  const isUserCard =
+    topLabel === "You asked" || topLabel.includes("You") || isQuestion;
+
+  // Use Convex-stored avatars, fallback gracefully
+  const avatar = isUserCard ? userAvatar : overbaseIcon;
+  const avatarFallback = isUserCard ? "U" : "AI";
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200">
@@ -39,7 +51,7 @@ export default function AnswerCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 flex-shrink-0">
-              <AvatarImage src={avatar || "/placeholder.svg"} />
+              <AvatarImage src={avatar ?? undefined} />
               <AvatarFallback>{avatarFallback}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
@@ -51,18 +63,20 @@ export default function AnswerCard({
                 {subLabel && (
                   <span className="text-gray-300 text-[10px]">·</span>
                 )}
-                <button
-                  type="button"
-                  onClick={handlePrivacyClick}
-                  className="text-gray-400 text-xs capitalize hover:underline cursor-pointer flex items-center gap-1"
-                >
-                  {privacy === "private" ? (
-                    <Lock size={11} className="shrink-0" />
-                  ) : (
-                    <Users size={11} className="shrink-0" />
-                  )}
-                  {privacy}
-                </button>
+                {privacy && (
+                  <button
+                    type="button"
+                    onClick={handlePrivacyClick}
+                    className="text-gray-400 text-xs capitalize hover:underline cursor-pointer flex items-center gap-1"
+                  >
+                    {privacy === "private" ? (
+                      <Lock size={11} className="shrink-0" />
+                    ) : (
+                      <Users size={11} className="shrink-0" />
+                    )}
+                    {privacy}
+                  </button>
+                )}
               </div>
             </div>
           </div>

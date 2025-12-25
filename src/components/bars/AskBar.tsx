@@ -3,6 +3,7 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Clock, Mic, Repeat, Zap } from "lucide-react";
+import { useCurrentUserAvatar } from "@/lib/hooks/useAssets";
 
 export type ModalOptions = {
   tab?: "one" | "recurring";
@@ -27,6 +28,8 @@ export default function AskBar({
   onMicClick,
   disabledButtons = [],
 }: AskBarProps) {
+  const userAvatar = useCurrentUserAvatar();
+
   const footerButtons: FooterButton[] = [
     { icon: Clock, label: "One time", modalOptions: { tab: "one" } },
     { icon: Repeat, label: "Recurring", modalOptions: { tab: "recurring" } },
@@ -37,7 +40,7 @@ export default function AskBar({
     <div className="bg-white rounded-2xl border border-gray-200 p-1 pt-4 mb-4">
       <div className="flex items-center gap-2">
         <Avatar className="h-10 w-10 ml-3">
-          <AvatarImage src="/images/kareem.png" />
+          <AvatarImage src={userAvatar ?? undefined} />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>
 

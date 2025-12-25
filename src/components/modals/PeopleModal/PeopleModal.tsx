@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AttachmentChip } from "../shared/AttachmentChip";
 import { ModalShell } from "../shared/ModalShell";
 import { usePeopleModalState } from "./usePeopleModalState";
+import type { PersonAttachmentWithInfo } from "../shared/modalTypes";
 
 export default function PeopleModal({
   isOpen,
@@ -15,8 +16,8 @@ export default function PeopleModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  people: any[];
-  setPeople: any;
+  people: PersonAttachmentWithInfo[];
+  setPeople: (people: PersonAttachmentWithInfo[]) => void;
 }) {
   const {
     selectedIds,

@@ -4,6 +4,7 @@ import { Header } from "@/components/blocks/Header";
 import { RowCard } from "@/components/blocks/RowCard";
 import { EmptyState } from "@/components/blocks/EmptyState";
 import { InstalledConnectors } from "./InstalledConnectors";
+import { Plug } from "lucide-react";
 import type { Connectors } from "./DummyData";
 
 interface ConnectorsProps {
@@ -42,7 +43,7 @@ export function Connectors({
                 onButtonClick={() => {}}
                 className="py-32 min-h-[600px]"
                 withBorder={true}
-                iconType="plug"
+                icon={Plug}
               />
             ) : (
               addedConnectors.map((connector) => (

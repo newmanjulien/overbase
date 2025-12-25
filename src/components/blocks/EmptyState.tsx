@@ -1,22 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Database, Plug } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface EmptyStateProps {
   title: string;
   description: string;
   buttonLabel?: string;
-  onButtonClick?: () => void; // 👈 no args anymore
+  onButtonClick?: () => void;
   className?: string;
   buttonVariant?: "default" | "outline";
-  iconType: "calendar" | "database" | "plug";
+  icon: LucideIcon;
   withBorder?: boolean;
 }
-
-const iconMap = {
-  calendar: Calendar,
-  database: Database,
-  plug: Plug,
-};
 
 export function EmptyState({
   title,
@@ -25,11 +19,9 @@ export function EmptyState({
   onButtonClick,
   className = "",
   buttonVariant = "outline",
-  iconType,
+  icon: Icon,
   withBorder = false,
 }: EmptyStateProps) {
-  const Icon = iconMap[iconType];
-
   return (
     <div
       className={`${

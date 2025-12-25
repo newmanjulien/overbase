@@ -1,56 +1,69 @@
 "use client";
 
-import { useState } from "react";
-import { questions, categories } from "./DummyData";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
 import { ModalOptions } from "@/components/bars/AskBar";
 import { Answers } from "./Answers";
+import type { QuestionVariant } from "./types";
+import type { Id } from "@convex/_generated/dataModel";
+import type { ForwardEntry } from "@/components/modals/shared/modalTypes";
 
 export default function AnswersClient() {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const rawQuestions = useQuery(api.features.answers.getAllQuestions);
+  const uniqueTags = useQuery(api.features.answers.getUniqueTags);
+
+  const updateQuestionPrivacy = useMutation(
+    api.features.answers.updateQuestionPrivacy
+  );
+
+  const [selectedTag, setSelectedTag] = useState<string>("");
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [modalOptions, setModalOptions] = useState<ModalOptions>({});
 
   // ForwardModal state
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
-  const [forwardPeople, setForwardPeople] = useState<any[]>([]);
+  const [forwardPeople, setForwardPeople] = useState<ForwardEntry[]>([]);
 
-  // State to track privacy values for each question
-  const [privacyMap, setPrivacyMap] = useState<
-    Record<number, "private" | "team">
-  >(() => {
-    const initial: Record<number, "private" | "team"> = {};
-    questions.forEach((q) => {
-      initial[q.id] = q.privacy;
-    });
-    return initial;
-  });
+  // Set initial selected tag once data loads
+  useEffect(() => {
+    if (uniqueTags && uniqueTags.length > 0 && selectedTag === "") {
+      setSelectedTag(uniqueTags[0]);
+    }
+  }, [uniqueTags, selectedTag]);
 
   const handleOpenModal = (options?: ModalOptions) => {
     setModalOptions(options || {});
     setShowAddQuestion(true);
   };
 
-  const handlePrivacyChange = (
-    questionId: number,
+  const handlePrivacyChange = async (
+    questionId: Id<"questions">,
     newPrivacy: "private" | "team"
   ) => {
-    setPrivacyMap((prev) => ({
-      ...prev,
-      [questionId]: newPrivacy,
-    }));
+    await updateQuestionPrivacy({ id: questionId, privacy: newPrivacy });
   };
 
-  // Format categories for Sidebar
-  const formattedCategories = categories.map((c) => ({
-    key: c.name,
-    name: c.name,
+  // Convert tags to Sidebar format
+  const tagsForSidebar = (uniqueTags ?? []).map((tag) => ({
+    key: tag,
+    name: tag,
   }));
+
+  // Filter by tag - rawQuestions already typed as QuestionVariant[]
+  const filteredQuestions: QuestionVariant[] = (rawQuestions ?? []).filter(
+    (q) => selectedTag === "" || q.tags.includes(selectedTag)
+  );
+
+  const isLoading = rawQuestions === undefined || uniqueTags === undefined;
 
   return (
     <Answers
-      activeCategory={activeCategory}
-      setActiveCategory={setActiveCategory}
-      categories={formattedCategories}
+      questions={filteredQuestions}
+      selectedTag={selectedTag}
+      setSelectedTag={setSelectedTag}
+      tagsForSidebar={tagsForSidebar}
+      isLoading={isLoading}
       showAddQuestion={showAddQuestion}
       onCloseAddQuestion={() => setShowAddQuestion(false)}
       modalOptions={modalOptions}
@@ -59,10 +72,7 @@ export default function AnswersClient() {
       onCloseForwardModal={() => setIsForwardModalOpen(false)}
       forwardPeople={forwardPeople}
       setForwardPeople={setForwardPeople}
-      questions={questions}
-      privacyMap={privacyMap}
       onPrivacyChange={handlePrivacyChange}
-      onForward={() => setIsForwardModalOpen(true)}
     />
   );
 }
