@@ -1,25 +1,24 @@
 /**
- * Modal types - combines Convex types with UI-specific extensions.
+ * Modal types - UI-specific extensions for question-related modals.
  *
- * Core attachment types are re-exported from convex/shared/attachmentTypes.ts.
- * UI-specific types that depend on browser APIs (like File) or modal-specific
- * logic are defined here.
+ * Core types are imported from the shared types library.
+ * UI-specific types that depend on browser APIs (like File) or
+ * modal-specific logic are defined here.
  */
 
-// Re-export core attachment types from Convex shared
+// Re-export core types from shared library for convenience
 export type {
   KpiAttachment,
-  PersonAttachment,
-  PersonEntry,
+  PersonReference,
   FileAttachment,
-} from "@convex/shared/attachmentTypes";
+} from "@/lib/questions";
 
 // ============================================
 // UI-SPECIFIC TYPES
 // ============================================
 
 /**
- * Extended person attachment with additional modal context.
+ * Extended person reference with additional modal context.
  * Used in PeopleModal for tracking what info is needed from each person.
  */
 export interface PersonAttachmentWithInfo {

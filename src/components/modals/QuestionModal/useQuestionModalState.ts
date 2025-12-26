@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RecurringFrequency } from "../ScheduleModal/ScheduleModal";
+import type { SchedulePattern } from "@/lib/questions";
 import type {
   KpiAttachment,
   PersonAttachmentWithInfo,
@@ -27,11 +27,21 @@ export function useQuestionModalState({
   const [fileAttachments, setFileAttachments] = useState<
     FileAttachmentForUpload[]
   >([]);
-  const [schedule, setSchedule] = useState<RecurringFrequency | null>(null);
+  // Now stores the full SchedulePattern instead of just frequency
+  const [schedule, setSchedule] = useState<SchedulePattern | null>(null);
+  const [visibility, setVisibility] = useState<"Private" | "Team">("Private");
 
   useEffect(() => {
     if (isOpen) {
+      // Reset all state when modal opens
       setActiveTab(initialTab);
+      setQuestion("");
+      setActiveNestedModal(null);
+      setKpis([]);
+      setPeople([]);
+      setFileAttachments([]);
+      setSchedule(null);
+      setVisibility("Private");
     }
   }, [isOpen, initialTab]);
 
@@ -62,5 +72,7 @@ export function useQuestionModalState({
     removeFileAttachment,
     schedule,
     setSchedule,
+    visibility,
+    setVisibility,
   };
 }

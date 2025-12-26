@@ -3,9 +3,9 @@
  * TODO: Replace with Convex query when people feature is implemented.
  */
 
-import type { PersonEntry } from "@convex/shared/attachmentTypes";
+import type { PersonReference } from "@/lib/questions";
 
-export const dummyPeople: PersonEntry[] = [
+export const dummyPeople: PersonReference[] = [
   { id: "1", name: "Alex Carp" },
   { id: "2", name: "Gloria Incara" },
   { id: "3", name: "Ingrid Newell" },

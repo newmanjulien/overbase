@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Connectors } from "../../DummyData";
-import { useConnectorContext } from "@/lib/connectors/connectorContext";
+import { useConnectorContext } from "../../connectorContext";
 import Setup from "./Setup";
 
 interface SetupClientProps {

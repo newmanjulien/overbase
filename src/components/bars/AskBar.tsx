@@ -1,9 +1,11 @@
 "use client";
 
 import React from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { ASSET_KEYS } from "@/lib/assets";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Clock, Mic, Repeat, Zap } from "lucide-react";
-import { useCurrentUserAvatar } from "@/lib/hooks/useAssets";
 
 export type ModalOptions = {
   tab?: "one" | "recurring";
@@ -28,7 +30,10 @@ export default function AskBar({
   onMicClick,
   disabledButtons = [],
 }: AskBarProps) {
-  const userAvatar = useCurrentUserAvatar();
+  const userAvatarAsset = useQuery(api.features.assets.getAssetByKey, {
+    key: ASSET_KEYS.USER_AVATAR,
+  });
+  const userAvatar = userAvatarAsset?.imageUrl ?? null;
 
   const footerButtons: FooterButton[] = [
     { icon: Clock, label: "One time", modalOptions: { tab: "one" } },

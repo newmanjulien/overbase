@@ -113,6 +113,11 @@ export default function PeopleModal({
           onChange={(e) => setInfoNeeded(e.target.value)}
           className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50/50 rounded-lg focus:outline-none resize-none h-24"
         />
+        <p className="mt-3 text-xs text-gray-500 leading-relaxed">
+          Overbase will send a personalized email to the people you select,
+          requesting the information you've described. Their responses will be
+          automatically incorporated into your answer.
+        </p>
       </div>
     </ModalShell>
   );

@@ -4,8 +4,10 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectorProvider } from "@/lib/connectors/connectorContext";
-import { useOverbaseLogo } from "@/lib/hooks/useAssets";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { ASSET_KEYS } from "@/lib/assets";
+import { ConnectorProvider } from "@/app/dashboard/connectors/connectorContext";
 
 export default function DashboardLayout({
   children,
@@ -21,10 +23,13 @@ export default function DashboardLayout({
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const logoUrl = useOverbaseLogo();
+  const logoAsset = useQuery(api.features.assets.getAssetByKey, {
+    key: ASSET_KEYS.OVERBASE_LOGO,
+  });
+  const logoUrl = logoAsset?.imageUrl ?? null;
 
   const navItems = [
-    { href: "/dashboard/answers", label: "Answers" },
+    { href: "/dashboard/questions", label: "Questions" },
     { href: "/dashboard/templates", label: "Templates" },
     { href: "/dashboard/connectors", label: "Connectors" },
     { href: "/dashboard/people", label: "People" },
@@ -38,7 +43,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between h-11">
             <div className="flex items-center space-x-8">
               <div className="h-7">
-                <Link href="/dashboard/answers">
+                <Link href="/dashboard/questions">
                   {logoUrl ? (
                     <Image
                       src={logoUrl}

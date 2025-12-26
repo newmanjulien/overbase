@@ -5,7 +5,7 @@ import { QuestionModalActions } from "./QuestionModalActions";
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { BASE_QUESTION_TAGS } from "@convex/shared/constants";
+import { formatScheduleDisplay } from "@/lib/questions";
 import {
   X,
   BarChart3,
@@ -57,12 +57,15 @@ export default function QuestionModal({
     removeFileAttachment,
     schedule,
     setSchedule,
+    visibility,
+    setVisibility,
   } = useQuestionModalState({ isOpen, initialTab });
 
-  const [visibility, setVisibility] = useState<"Private" | "Team">("Private");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const createQuestion = useMutation(api.features.answers.createQuestion);
+  const createQuestion = useMutation(
+    api.features.questions.mutations.createQuestion
+  );
 
   const handleSubmit = async () => {
     if (!question.trim() || isSubmitting) return;
@@ -72,24 +75,11 @@ export default function QuestionModal({
       await createQuestion({
         content: question.trim(),
         privacy: visibility.toLowerCase() as "private" | "team",
-        tags:
-          activeTab === "recurring"
-            ? BASE_QUESTION_TAGS.map((t) => t.key) // All tags including "Recurring questions"
-            : BASE_QUESTION_TAGS.filter(
-                (t) => t.key !== "Recurring questions"
-              ).map((t) => t.key),
-        questionType: activeTab === "one" ? "one-time" : "recurring",
-        schedule:
-          activeTab === "recurring" && schedule
-            ? {
-                frequency: schedule,
-                deliveryDate: Date.now(), // TODO: Use actual selected date
-              }
-            : undefined,
+        schedule: activeTab === "recurring" && schedule ? schedule : undefined,
         attachedKpis: kpis.length > 0 ? kpis : undefined,
         attachedPeople:
           people.length > 0
-            ? people.map((p) => ({ id: p.name, name: p.name })) // Map PersonAttachment to schema format
+            ? people.map((p) => ({ id: p.name, name: p.name })) // Map PersonAttachmentWithInfo to schema format
             : undefined,
         attachedFiles:
           fileAttachments.length > 0
@@ -100,9 +90,6 @@ export default function QuestionModal({
             : undefined,
       });
 
-      // Reset state and close modal
-      setQuestion("");
-      setVisibility("Private");
       onClose();
     } catch (error) {
       console.error("Failed to create question:", error);
@@ -129,9 +116,7 @@ export default function QuestionModal({
             >
               <Repeat className="h-4 w-4" />
               <span>
-                {schedule
-                  ? schedule.charAt(0).toUpperCase() + schedule.slice(1)
-                  : "Schedule"}
+                {schedule ? formatScheduleDisplay(schedule) : "Schedule"}
               </span>
               <ChevronDown className="h-4 w-4" />
             </button>
@@ -222,6 +207,7 @@ export default function QuestionModal({
           </div>
 
           <textarea
+            autoFocus
             placeholder={placeholder}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -275,6 +261,8 @@ export default function QuestionModal({
           isQuestionEmpty={!question.trim()}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
+          activeTab={activeTab}
+          schedule={schedule}
         />
       </div>
     </div>

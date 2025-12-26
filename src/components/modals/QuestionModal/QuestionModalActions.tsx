@@ -3,12 +3,11 @@
 import KpiModal from "../KpiModal/KpiModal";
 import PeopleModal from "../PeopleModal/PeopleModal";
 import FileModal from "../FileModal/FileModal";
-import ScheduleModal, {
-  RecurringFrequency,
-} from "../ScheduleModal/ScheduleModal";
+import ScheduleModal from "../ScheduleModal/ScheduleModal";
 import { BarChart3, Users, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dispatch, SetStateAction } from "react";
+import type { SchedulePattern } from "@/lib/questions";
 import type {
   KpiAttachment,
   PersonAttachmentWithInfo,
@@ -27,10 +26,12 @@ interface QuestionModalActionsProps {
   setPeople: (people: PersonAttachmentWithInfo[]) => void;
   fileAttachments: FileAttachmentForUpload[];
   setFileAttachments: (files: FileAttachmentForUpload[]) => void;
-  setSchedule: Dispatch<SetStateAction<RecurringFrequency | null>>;
+  setSchedule: Dispatch<SetStateAction<SchedulePattern | null>>;
   isQuestionEmpty: boolean;
   onSubmit: () => void;
   isSubmitting: boolean;
+  activeTab: "one" | "recurring";
+  schedule: SchedulePattern | null;
 }
 
 export function QuestionModalActions({
@@ -47,6 +48,8 @@ export function QuestionModalActions({
   isQuestionEmpty,
   onSubmit,
   isSubmitting,
+  activeTab,
+  schedule,
 }: QuestionModalActionsProps) {
   return (
     <>
@@ -75,7 +78,14 @@ export function QuestionModalActions({
             <Upload className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
           </button>
         </div>
-        <Button onClick={onSubmit} disabled={isQuestionEmpty || isSubmitting}>
+        <Button
+          onClick={onSubmit}
+          disabled={
+            isQuestionEmpty ||
+            isSubmitting ||
+            (activeTab === "recurring" && !schedule)
+          }
+        >
           {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </div>

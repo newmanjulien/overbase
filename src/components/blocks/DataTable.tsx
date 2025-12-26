@@ -2,14 +2,10 @@
 
 import React, { useState } from "react";
 import { Download, Forward } from "lucide-react";
+import type { TableRow } from "@/lib/questions";
 
-export interface TableRow {
-  column1: string;
-  column2: string;
-  column3: string;
-  column4: string;
-  column5: string;
-}
+// Re-export for backward compatibility
+export type { TableRow };
 
 interface DataTableProps {
   tableData: TableRow[];
@@ -57,31 +53,11 @@ export default function DataTable({ tableData, onForward }: DataTableProps) {
             className="w-full text-left border-collapse table-fixed
           [&_td]:p-1.5 [&_td]:text-xs [&_td]:font-mono 
           [&_td]:overflow-hidden [&_td]:whitespace-nowrap 
-          [&_td]:border-r [&_td]:border-gray-200 [&_td]:max-w-[200px]
+          [&_td]:border-r [&_td]:border-gray-200
           [&_td:last-child]:border-r-0
           [&_tr]:border-b [&_tr]:border-gray-200 [&_tr:last-child]:border-0
           [&_tr]:text-gray-900"
           >
-            <thead>
-              <tr className="bg-gray-50/50">
-                <th className="p-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                  column1
-                </th>
-                <th className="p-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                  column2
-                </th>
-                <th className="p-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                  column3
-                </th>
-                <th className="p-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                  column4
-                </th>
-                <th className="p-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
-                  column5
-                </th>
-                <th className="w-12"></th>
-              </tr>
-            </thead>
             <tbody>
               {tableData.map((row, i) => {
                 const isLastRow = i === tableData.length - 1;
@@ -105,7 +81,6 @@ export default function DataTable({ tableData, onForward }: DataTableProps) {
                     <td title={row.column3}>{row.column3}</td>
                     <td title={row.column4}>{row.column4}</td>
                     <td title={row.column5}>{row.column5}</td>
-                    <td className="w-12"></td>
                   </tr>
                 );
               })}

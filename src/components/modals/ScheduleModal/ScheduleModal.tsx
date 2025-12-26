@@ -1,27 +1,102 @@
 "use client";
 
-import { CalendarDays } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ModalShell } from "../shared/ModalShell";
-import {
-  useScheduleModalState,
-  RecurringFrequency,
-} from "./useScheduleModalState";
+import type { SchedulePattern } from "@/lib/questions";
+import { getNextDeliveryDate } from "@/lib/questions";
+import { format } from "date-fns";
 
-// Re-export for consumers
-export type { RecurringFrequency } from "./useScheduleModalState";
+// Dropdown option types
+interface DeliveryOption {
+  label: string;
+  value: Partial<SchedulePattern>;
+}
+
+interface DataRangeOption {
+  label: string;
+  days: number;
+}
+
+// Weekly options
+const WEEKLY_OPTIONS: DeliveryOption[] = [
+  { label: "Sundays", value: { dayOfWeek: 0 } },
+  { label: "Mondays", value: { dayOfWeek: 1 } },
+  { label: "Tuesdays", value: { dayOfWeek: 2 } },
+  { label: "Wednesdays", value: { dayOfWeek: 3 } },
+  { label: "Thursdays", value: { dayOfWeek: 4 } },
+  { label: "Fridays", value: { dayOfWeek: 5 } },
+  { label: "Saturdays", value: { dayOfWeek: 6 } },
+];
+
+// Monthly options
+const MONTHLY_OPTIONS: DeliveryOption[] = [
+  { label: "First day of the month", value: { dayOfMonth: 1 } },
+  { label: "First Monday of the month", value: { nthWeek: 1, dayOfWeek: 1 } },
+  { label: "Second Monday of the month", value: { nthWeek: 2, dayOfWeek: 1 } },
+  { label: "Third Monday of the month", value: { nthWeek: 3, dayOfWeek: 1 } },
+  { label: "Fourth Monday of the month", value: { nthWeek: 4, dayOfWeek: 1 } },
+  { label: "Last day of the month", value: { dayOfMonth: -1 } },
+];
+
+// Quarterly options
+const QUARTERLY_OPTIONS: DeliveryOption[] = [
+  { label: "First day of the quarter", value: { quarterDay: "first" } },
+  {
+    label: "First Monday of the quarter",
+    value: { quarterWeekday: "first-monday" },
+  },
+  {
+    label: "First day of the second month",
+    value: { quarterDay: "second-month-first" },
+  },
+  {
+    label: "First day of the third month",
+    value: { quarterDay: "third-month-first" },
+  },
+  {
+    label: "Last Monday of the quarter",
+    value: { quarterWeekday: "last-monday" },
+  },
+  { label: "Last day of the quarter", value: { quarterDay: "last" } },
+];
+
+// Data range options
+const DATA_RANGE_OPTIONS: DataRangeOption[] = [
+  { label: "Data from the previous week", days: 7 },
+  { label: "Data from the previous month", days: 30 },
+  { label: "Data from the previous 2 months", days: 60 },
+  { label: "Data from the previous quarter", days: 90 },
+  { label: "Data from the previous 2 quarters", days: 180 },
+  { label: "Data from the previous year", days: 365 },
+];
+
+function getDeliveryOptions(
+  frequency: "weekly" | "monthly" | "quarterly"
+): DeliveryOption[] {
+  switch (frequency) {
+    case "weekly":
+      return WEEKLY_OPTIONS;
+    case "monthly":
+      return MONTHLY_OPTIONS;
+    case "quarterly":
+      return QUARTERLY_OPTIONS;
+  }
+}
+
+export type RecurringFrequency = "weekly" | "monthly" | "quarterly";
 
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave?: (frequency: RecurringFrequency) => void;
+  onSave?: (schedule: SchedulePattern) => void;
 }
 
 export default function ScheduleModal({
@@ -29,31 +104,49 @@ export default function ScheduleModal({
   onClose,
   onSave,
 }: ScheduleModalProps) {
-  const {
+  const [frequency, setFrequency] = useState<RecurringFrequency>("quarterly");
+  const [deliveryIndex, setDeliveryIndex] = useState(1); // Default: First Monday of the quarter
+  const [dataRangeIndex, setDataRangeIndex] = useState(3); // Default: previous quarter
+
+  const deliveryOptions = getDeliveryOptions(frequency);
+  const selectedDelivery = deliveryOptions[deliveryIndex];
+  const selectedDataRange = DATA_RANGE_OPTIONS[dataRangeIndex];
+
+  // Build schedule pattern from selections
+  const buildSchedule = (): SchedulePattern => ({
     frequency,
-    setFrequency,
-    deliveryDate,
-    setDeliveryDate,
-    dataRangeFrom,
-    setDataRangeFrom,
-    dataRangeTo,
-    setDataRangeTo,
-    isReady,
-    handleSave,
-    handleCancel,
-  } = useScheduleModalState(onSave, onClose);
+    ...selectedDelivery.value,
+    dataRangeDays: selectedDataRange.days,
+  });
+
+  // Calculate next delivery date for helper text
+  const schedule = buildSchedule();
+  const nextDelivery = getNextDeliveryDate(schedule);
+
+  const handleFrequencyChange = (newFrequency: RecurringFrequency) => {
+    setFrequency(newFrequency);
+    setDeliveryIndex(0); // Reset delivery selection
+  };
+
+  const handleSave = () => {
+    onSave?.(buildSchedule());
+    onClose();
+  };
+
+  const handleCancel = () => {
+    setFrequency("quarterly");
+    setDeliveryIndex(1);
+    setDataRangeIndex(3);
+    onClose();
+  };
 
   return (
     <ModalShell
       isOpen={isOpen}
       onClose={handleCancel}
-      footer={
-        <Button onClick={handleSave} disabled={!isReady}>
-          Done
-        </Button>
-      }
+      footer={<Button onClick={handleSave}>Done</Button>}
     >
-      {/* Recurring Frequency */}
+      {/* Frequency Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1.5">
           How often?
@@ -64,7 +157,7 @@ export default function ScheduleModal({
               <button
                 key={freq}
                 type="button"
-                onClick={() => setFrequency(freq)}
+                onClick={() => handleFrequencyChange(freq)}
                 className={`flex-1 py-2.5 px-3 text-sm rounded-lg transition-all duration-150 ${
                   frequency === freq
                     ? "bg-gray-900 text-white"
@@ -78,99 +171,54 @@ export default function ScheduleModal({
         </div>
       </div>
 
-      {/* Delivery Date */}
+      {/* Delivery Pattern Dropdown */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1.5">
-          Receive the first answer on
+          When should we deliver?
         </label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50/50 hover:bg-gray-100/50 transition-colors text-left"
-            >
-              <CalendarDays className="h-4 w-4 text-gray-400" />
-              <span
-                className={deliveryDate ? "text-gray-900" : "text-gray-400"}
-              >
-                {deliveryDate
-                  ? format(deliveryDate, "MMMM d, yyyy")
-                  : "Select date"}
-              </span>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={deliveryDate}
-              onSelect={setDeliveryDate}
-            />
-          </PopoverContent>
-        </Popover>
+        <Select
+          value={String(deliveryIndex)}
+          onValueChange={(value) => setDeliveryIndex(Number(value))}
+        >
+          <SelectTrigger className="w-full bg-gray-50/50 border-gray-200">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {deliveryOptions.map((option, idx) => (
+              <SelectItem key={idx} value={String(idx)}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="mt-2 text-sm text-gray-500">
+          Your first answer will arrive on{" "}
+          <span className="font-medium text-gray-700">
+            {format(nextDelivery, "EEEE, MMMM d")}
+          </span>
+        </p>
       </div>
 
-      {/* Data Range */}
-      <div className={!deliveryDate ? "opacity-40 select-none" : ""}>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Data we use to answer{" "}
-          <span className="text-gray-400 font-normal">(optional)</span>
+      {/* Data Range Dropdown */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          What data should we use?
         </label>
-        <p className="text-sm text-gray-500 mb-3">
-          Choose the time period of data we&apos;ll use to answer your question
-          the first time. We&apos;ll use the equivalent time period for future
-          answers
-        </p>
-        <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                disabled={!deliveryDate}
-                className="flex-1 flex items-center gap-3 px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50/50 hover:bg-gray-100/50 disabled:hover:bg-gray-50/50 disabled:cursor-not-allowed transition-colors text-left"
-              >
-                <CalendarDays className="h-4 w-4 text-gray-400" />
-                <span
-                  className={dataRangeFrom ? "text-gray-900" : "text-gray-400"}
-                >
-                  {dataRangeFrom
-                    ? format(dataRangeFrom, "MMM d, yyyy")
-                    : "From"}
-                </span>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={dataRangeFrom}
-                onSelect={setDataRangeFrom}
-              />
-            </PopoverContent>
-          </Popover>
-          <span className="text-gray-400 text-sm">→</span>
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                disabled={!deliveryDate}
-                className="flex-1 flex items-center gap-3 px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50/50 hover:bg-gray-100/50 disabled:hover:bg-gray-50/50 disabled:cursor-not-allowed transition-colors text-left"
-              >
-                <CalendarDays className="h-4 w-4 text-gray-400" />
-                <span
-                  className={dataRangeTo ? "text-gray-900" : "text-gray-400"}
-                >
-                  {dataRangeTo ? format(dataRangeTo, "MMM d, yyyy") : "To"}
-                </span>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                selected={dataRangeTo}
-                onSelect={setDataRangeTo}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        <Select
+          value={String(dataRangeIndex)}
+          onValueChange={(value) => setDataRangeIndex(Number(value))}
+        >
+          <SelectTrigger className="w-full bg-gray-50/50 border-gray-200">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {DATA_RANGE_OPTIONS.map((option, idx) => (
+              <SelectItem key={idx} value={String(idx)}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </ModalShell>
   );

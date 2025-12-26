@@ -12,15 +12,6 @@ export default defineSchema({
   }).index("by_key", ["key"]),
 
   // ============================================
-  // CURRENT USER (singleton for now - will expand with auth)
-  // ============================================
-  currentUser: defineTable({
-    name: v.string(),
-    email: v.optional(v.string()),
-    avatarId: v.optional(v.id("_storage")), // Convex file storage reference
-  }),
-
-  // ============================================
   // TEMPLATES FEATURE
   // ============================================
   templates: defineTable({
@@ -32,19 +23,21 @@ export default defineSchema({
   }),
 
   // ============================================
-  // ANSWERS FEATURE (questions + answers)
+  // QUESTIONS FEATURE (thread metadata + answers)
   // ============================================
+
+  /**
+   * Questions table - Thread metadata container (minimal fields)
+   *
+   * Content, attachments, and all messages are stored in `answers`.
+   * Status is derived from the last answer's sender.
+   * questionType is derived from schedule presence (undefined = one-time).
+   */
   questions: defineTable({
-    // Core content
-    content: v.string(),
-    status: v.union(v.literal("in-progress"), v.literal("completed")),
+    // Thread-level privacy (can be toggled for entire thread)
     privacy: v.union(v.literal("private"), v.literal("team")),
-    tags: v.array(v.string()),
 
-    // Question type
-    questionType: v.union(v.literal("one-time"), v.literal("recurring")),
-
-    // Recurring schedule (only if questionType === "recurring")
+    // Recurring schedule (undefined = one-time question)
     schedule: v.optional(
       v.object({
         frequency: v.union(
@@ -52,13 +45,78 @@ export default defineSchema({
           v.literal("monthly"),
           v.literal("quarterly")
         ),
-        deliveryDate: v.number(), // timestamp
-        dataRangeFrom: v.optional(v.number()), // timestamp
-        dataRangeTo: v.optional(v.number()), // timestamp
+
+        // Weekly: which day (0=Sun, 1=Mon, ..., 6=Sat)
+        dayOfWeek: v.optional(v.number()),
+
+        // Monthly: specific day of month (1-31, or -1 for last day)
+        dayOfMonth: v.optional(v.number()),
+
+        // Monthly: nth weekday pattern (1=first, 2=second, 3=third, 4=fourth)
+        // Used with dayOfWeek for patterns like "first Monday"
+        nthWeek: v.optional(v.number()),
+
+        // Quarterly: predefined day patterns
+        quarterDay: v.optional(
+          v.union(
+            v.literal("first"),
+            v.literal("last"),
+            v.literal("second-month-first"),
+            v.literal("third-month-first")
+          )
+        ),
+
+        // Quarterly: predefined weekday patterns
+        quarterWeekday: v.optional(
+          v.union(v.literal("first-monday"), v.literal("last-monday"))
+        ),
+
+        // Data range: how many days of data to analyze before delivery
+        dataRangeDays: v.number(),
       })
     ),
 
-    // Attachments
+    // Soft delete - if present, question was cancelled at this timestamp
+    // Can only cancel when there's exactly 1 answer (initial question)
+    cancelledAt: v.optional(v.number()),
+
+    // Future: userId: v.id("users"),
+  }),
+
+  /**
+   * Answers table - All messages in a question thread
+   *
+   * Includes the original question (sender: "user", first entry),
+   * Overbase responses (sender: "overbase"), and follow-up questions.
+   * Attachments are stored on the message they were added with.
+   */
+  answers: defineTable({
+    // Links to parent question thread
+    questionThreadId: v.id("questions"),
+
+    // Who sent this message
+    sender: v.union(v.literal("user"), v.literal("overbase")),
+
+    // Message content
+    content: v.optional(v.string()),
+
+    // Per-message privacy (usually matches thread, but can differ)
+    privacy: v.union(v.literal("private"), v.literal("team")),
+
+    // Data table (only on Overbase responses)
+    tableData: v.optional(
+      v.array(
+        v.object({
+          column1: v.string(),
+          column2: v.string(),
+          column3: v.string(),
+          column4: v.string(),
+          column5: v.string(),
+        })
+      )
+    ),
+
+    // Attachments (typically on user's "You asked" messages)
     attachedKpis: v.optional(
       v.array(
         v.object({
@@ -81,35 +139,12 @@ export default defineSchema({
         v.object({
           fileName: v.string(),
           context: v.optional(v.string()),
-          // fileId: v.optional(v.id("_storage")), // Future: Convex file storage
-        })
-      )
-    ),
-
-    // Future: userId: v.id("users"),
-  }),
-
-  answers: defineTable({
-    questionId: v.id("questions"),
-    topLabel: v.string(), // "You asked" or "Overbase answered"
-    content: v.optional(v.string()),
-    privacy: v.union(v.literal("private"), v.literal("team")),
-
-    // Generic table data (matches current DataTable)
-    tableData: v.optional(
-      v.array(
-        v.object({
-          column1: v.string(),
-          column2: v.string(),
-          column3: v.string(),
-          column4: v.string(),
-          column5: v.string(),
         })
       )
     ),
 
     // Future: avatarId: v.optional(v.id("_storage")),
-  }).index("by_questionId", ["questionId"]),
+  }).index("by_questionThreadId", ["questionThreadId"]),
 
   // ============================================
   // PEOPLE FEATURE

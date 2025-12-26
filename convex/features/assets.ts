@@ -1,6 +1,19 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Doc } from "../_generated/dataModel";
+
+// ============================================
+// ASSET KEYS
+// Keep these in sync with the seeded data in Convex.
+// ============================================
+
+export const ASSET_KEYS = {
+  OVERBASE_ICON: "overbase-icon",
+  OVERBASE_LOGO: "overbase-logo",
+  USER_AVATAR: "user-avatar",
+} as const;
+
+export type AssetKey = (typeof ASSET_KEYS)[keyof typeof ASSET_KEYS];
 
 // ============================================
 // APP ASSETS FEATURE
@@ -14,11 +27,6 @@ import type { Doc, Id } from "../_generated/dataModel";
 /** App asset with resolved image URL */
 export type AppAssetWithUrl = Doc<"appAssets"> & {
   imageUrl: string | null;
-};
-
-/** Current user with resolved avatar URL */
-export type CurrentUserWithAvatar = Doc<"currentUser"> & {
-  avatarUrl: string | null;
 };
 
 // --------------------------------------------
@@ -63,28 +71,6 @@ export const getAllAssets = query({
     );
 
     return assetsWithUrls;
-  },
-});
-
-/**
- * Get the current user with resolved avatar URL.
- * For now, returns the first user in the table (singleton pattern).
- */
-export const getCurrentUser = query({
-  args: {},
-  handler: async (ctx): Promise<CurrentUserWithAvatar | null> => {
-    const user = await ctx.db.query("currentUser").first();
-    if (!user) return null;
-
-    let avatarUrl: string | null = null;
-    if (user.avatarId) {
-      avatarUrl = await ctx.storage.getUrl(user.avatarId);
-    }
-
-    return {
-      ...user,
-      avatarUrl,
-    };
   },
 });
 
@@ -136,72 +122,6 @@ export const upsertAppAsset = mutation({
         key: args.key,
         name: args.name,
         imageId: args.imageId,
-      });
-    }
-  },
-});
-
-/**
- * Create or update the current user profile.
- */
-export const upsertCurrentUser = mutation({
-  args: {
-    name: v.string(),
-    email: v.optional(v.string()),
-    avatarId: v.optional(v.id("_storage")),
-  },
-  handler: async (ctx, args) => {
-    const existing = await ctx.db.query("currentUser").first();
-
-    if (existing) {
-      // Delete old avatar from storage if different and new one provided
-      if (
-        args.avatarId &&
-        existing.avatarId &&
-        existing.avatarId !== args.avatarId
-      ) {
-        await ctx.storage.delete(existing.avatarId);
-      }
-      // Update existing user
-      await ctx.db.patch(existing._id, {
-        name: args.name,
-        email: args.email,
-        avatarId: args.avatarId,
-      });
-      return existing._id;
-    } else {
-      // Create new user
-      return await ctx.db.insert("currentUser", {
-        name: args.name,
-        email: args.email,
-        avatarId: args.avatarId,
-      });
-    }
-  },
-});
-
-/**
- * Update just the current user's avatar.
- */
-export const updateCurrentUserAvatar = mutation({
-  args: {
-    avatarId: v.id("_storage"),
-  },
-  handler: async (ctx, args) => {
-    const existing = await ctx.db.query("currentUser").first();
-
-    if (existing) {
-      // Delete old avatar if exists
-      if (existing.avatarId) {
-        await ctx.storage.delete(existing.avatarId);
-      }
-      await ctx.db.patch(existing._id, { avatarId: args.avatarId });
-      return existing._id;
-    } else {
-      // Create user with just avatar (requires name though)
-      return await ctx.db.insert("currentUser", {
-        name: "User",
-        avatarId: args.avatarId,
       });
     }
   },
