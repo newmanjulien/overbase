@@ -28,67 +28,18 @@ export type TableRow = {
 
 /**
  * Schedule pattern for recurring questions.
- * Matches dropdown options directly - no date processing needed.
- *
- * Validation rules (enforced by validateSchedulePattern):
- * - weekly: requires dayOfWeek
- * - monthly: requires dayOfMonth OR (nthWeek + dayOfWeek)
- * - quarterly: requires quarterDay OR quarterWeekday
+ * Uses RFC 5545 recurrence rules via the rrule library.
+ * The rrule string is the source of truth for recurrence logic.
  */
 export interface SchedulePattern {
+  /** RFC 5545 recurrence rule string (e.g., "FREQ=WEEKLY;BYDAY=MO") */
+  rrule: string;
+
+  /** Human-friendly frequency for UI grouping */
   frequency: Frequency;
 
-  // Weekly: which day (0=Sun, 1=Mon, ..., 6=Sat)
-  dayOfWeek?: number;
-
-  // Monthly: specific day of month (1-31, or -1 for last day)
-  dayOfMonth?: number;
-
-  // Monthly: nth weekday pattern (1=first, 2=second, 3=third, 4=fourth)
-  // Used with dayOfWeek for patterns like "first Monday"
-  nthWeek?: number;
-
-  // Quarterly: predefined day patterns
-  quarterDay?: "first" | "last" | "second-month-first" | "third-month-first";
-
-  // Quarterly: predefined weekday patterns
-  quarterWeekday?: "first-monday" | "last-monday";
-
-  // Data range: how many days of data to analyze before delivery
+  /** How many days of data to analyze before delivery */
   dataRangeDays: number;
-}
-
-/**
- * Validates that a SchedulePattern has the required fields for its frequency.
- * Returns an error message if invalid, null if valid.
- */
-export function validateSchedulePattern(
-  schedule: SchedulePattern
-): string | null {
-  switch (schedule.frequency) {
-    case "weekly":
-      if (schedule.dayOfWeek === undefined) {
-        return "Weekly schedule requires dayOfWeek";
-      }
-      break;
-    case "monthly":
-      const hasMonthDay = schedule.dayOfMonth !== undefined;
-      const hasNthWeekday =
-        schedule.nthWeek !== undefined && schedule.dayOfWeek !== undefined;
-      if (!hasMonthDay && !hasNthWeekday) {
-        return "Monthly schedule requires dayOfMonth or (nthWeek + dayOfWeek)";
-      }
-      break;
-    case "quarterly":
-      if (
-        schedule.quarterDay === undefined &&
-        schedule.quarterWeekday === undefined
-      ) {
-        return "Quarterly schedule requires quarterDay or quarterWeekday";
-      }
-      break;
-  }
-  return null;
 }
 
 // ============================================
@@ -121,6 +72,15 @@ export interface FileAttachment {
   fileName: string;
   context?: string;
   // Future: fileId?: Id<"_storage">;
+}
+
+/**
+ * Connector reference - used for attaching connectors to questions/answers.
+ */
+export interface ConnectorReference {
+  id: string;
+  title: string;
+  logo: string;
 }
 
 // ============================================
@@ -158,7 +118,6 @@ export type QuestionBase = {
   displayContent: string;
   askedDate: string;
   askedTimestamp: number;
-  status: "in-progress" | "completed";
   displayPrivacy: Privacy;
   isRecurring: boolean;
 };

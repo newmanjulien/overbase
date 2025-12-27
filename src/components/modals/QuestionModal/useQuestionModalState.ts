@@ -6,27 +6,31 @@ import type {
   KpiAttachment,
   PersonAttachmentWithInfo,
   FileAttachmentForUpload,
+  ConnectorAttachment,
 } from "../shared/modalTypes";
 
 export interface QuestionModalStateProps {
   isOpen: boolean;
   initialTab?: "one" | "recurring";
+  initialQuestion?: string;
 }
 
 export function useQuestionModalState({
   isOpen,
   initialTab = "one",
+  initialQuestion = "",
 }: QuestionModalStateProps) {
   const [activeTab, setActiveTab] = useState<"one" | "recurring">(initialTab);
-  const [question, setQuestion] = useState("");
+  const [question, setQuestion] = useState(initialQuestion);
   const [activeNestedModal, setActiveNestedModal] = useState<
-    "kpi" | "people" | "file" | "schedule" | null
+    "kpi" | "people" | "file" | "schedule" | "connector" | null
   >(null);
   const [kpis, setKpis] = useState<KpiAttachment[]>([]);
   const [people, setPeople] = useState<PersonAttachmentWithInfo[]>([]);
   const [fileAttachments, setFileAttachments] = useState<
     FileAttachmentForUpload[]
   >([]);
+  const [connectors, setConnectors] = useState<ConnectorAttachment[]>([]);
   // Now stores the full SchedulePattern instead of just frequency
   const [schedule, setSchedule] = useState<SchedulePattern | null>(null);
   const [visibility, setVisibility] = useState<"Private" | "Team">("Private");
@@ -35,15 +39,16 @@ export function useQuestionModalState({
     if (isOpen) {
       // Reset all state when modal opens
       setActiveTab(initialTab);
-      setQuestion("");
+      setQuestion(initialQuestion);
       setActiveNestedModal(null);
       setKpis([]);
       setPeople([]);
       setFileAttachments([]);
+      setConnectors([]);
       setSchedule(null);
       setVisibility("Private");
     }
-  }, [isOpen, initialTab]);
+  }, [isOpen, initialTab, initialQuestion]);
 
   const closeNestedModal = () => setActiveNestedModal(null);
 
@@ -52,6 +57,8 @@ export function useQuestionModalState({
     setPeople(people.filter((_, idx) => idx !== i));
   const removeFileAttachment = (i: number) =>
     setFileAttachments(fileAttachments.filter((_, idx) => idx !== i));
+  const removeConnector = (i: number) =>
+    setConnectors(connectors.filter((_, idx) => idx !== i));
 
   return {
     activeTab,
@@ -70,6 +77,9 @@ export function useQuestionModalState({
     removeKpi,
     removePeople,
     removeFileAttachment,
+    removeConnector,
+    connectors,
+    setConnectors,
     schedule,
     setSchedule,
     visibility,

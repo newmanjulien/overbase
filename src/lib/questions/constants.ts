@@ -53,10 +53,10 @@ export const FILTER = {
 export type FilterKey = (typeof FILTER)[keyof typeof FILTER];
 
 export const FILTER_OPTIONS: { key: FilterKey; name: string }[] = [
-  { key: FILTER.ALL, name: "All questions" },
   { key: FILTER.THIS_WEEK, name: "Asked this week" },
   { key: FILTER.THIS_MONTH, name: "Asked this month" },
   { key: FILTER.RECURRING, name: "Recurring questions" },
+  { key: FILTER.ALL, name: "All questions" },
 ];
 
 /** Type guard to validate a string is a valid FilterKey */
@@ -75,3 +75,10 @@ export const FREQUENCY = {
 } as const;
 
 export type Frequency = (typeof FREQUENCY)[keyof typeof FREQUENCY];
+
+/** Display labels for frequency (capitalized for UI) */
+export const FREQUENCY_LABEL: Record<Frequency, string> = {
+  weekly: "Weekly",
+  monthly: "Monthly",
+  quarterly: "Quarterly",
+};

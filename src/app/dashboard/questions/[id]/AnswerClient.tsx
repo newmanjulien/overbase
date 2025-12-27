@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { ModalOptions } from "@/components/bars/AskBar";
 import { Answer } from "./Answer";
 import type { Id } from "@convex/_generated/dataModel";
 import type { ForwardEntry } from "@/components/modals/shared/modalTypes";
+import type { Privacy } from "@/lib/questions";
 
 interface AnswerClientProps {
   id: string;
@@ -33,28 +33,21 @@ export default function AnswerClient({ id }: AnswerClientProps) {
     api.features.questions.mutations.updateQuestionPrivacy
   );
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalOptions, setModalOptions] = useState<ModalOptions>({});
+  // FollowupModal state
+  const [isFollowupModalOpen, setIsFollowupModalOpen] = useState(false);
 
   // ForwardModal state
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
   const [forwardPeople, setForwardPeople] = useState<ForwardEntry[]>([]);
 
-  const handleOpenModal = (options: ModalOptions) => {
-    setModalOptions(options);
-    setShowModal(true);
-  };
-
   const handlePrivacyChange = async (
     answerId: Id<"answers">,
-    newPrivacy: "private" | "team"
+    newPrivacy: Privacy
   ) => {
     await updateAnswerPrivacy({ id: answerId, privacy: newPrivacy });
   };
 
-  const handleQuestionPrivacyChange = async (
-    newPrivacy: "private" | "team"
-  ) => {
+  const handleQuestionPrivacyChange = async (newPrivacy: Privacy) => {
     await updateQuestionPrivacy({ id: questionId, privacy: newPrivacy });
   };
 
@@ -75,30 +68,19 @@ export default function AnswerClient({ id }: AnswerClientProps) {
   const answers = rawAnswers ?? [];
 
   // Determine if we should show the followup bar
-  // Show it if the question is completed (has answers)
-  const showFollowupBar = question?.status === "completed";
-
-  // Show info card if question is in progress
-  const infoCard =
-    question?.status === "in-progress"
-      ? {
-          text: "It can take up to 48h for our AI agents to answer in depth and accurately",
-          linkText: "See how our AI agents work",
-          href: "#",
-        }
-      : undefined;
+  // Show it if the question is answered (completed)
+  const showFollowupBar = question?.variant === "answered";
 
   return (
     <Answer
       question={question ?? undefined}
       answers={answers}
+      threadId={questionId}
       showFollowupBar={showFollowupBar}
-      infoCard={infoCard}
       isLoading={isLoading}
-      showModal={showModal}
-      onCloseModal={() => setShowModal(false)}
-      modalOptions={modalOptions}
-      onOpenModal={handleOpenModal}
+      isFollowupModalOpen={isFollowupModalOpen}
+      onOpenFollowupModal={() => setIsFollowupModalOpen(true)}
+      onCloseFollowupModal={() => setIsFollowupModalOpen(false)}
       isForwardModalOpen={isForwardModalOpen}
       onCloseForwardModal={() => setIsForwardModalOpen(false)}
       forwardPeople={forwardPeople}

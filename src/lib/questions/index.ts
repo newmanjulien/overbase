@@ -12,6 +12,7 @@ export type {
   KpiAttachment,
   PersonReference,
   FileAttachment,
+  ConnectorReference,
   AnswerDoc,
   QuestionBase,
   AnsweredQuestion,
@@ -19,9 +20,6 @@ export type {
   RecurringQuestion,
   QuestionVariant,
 } from "./types";
-
-// Validation
-export { validateSchedulePattern } from "./types";
 
 // Constants (single source of truth for all string literals)
 export {
@@ -32,6 +30,7 @@ export {
   FILTER,
   FILTER_OPTIONS,
   FREQUENCY,
+  FREQUENCY_LABEL,
   isValidFilter,
   type Sender,
   type Privacy,
@@ -39,8 +38,16 @@ export {
   type Frequency,
 } from "./constants";
 
-// Helpers
-export { computeDisplayPrivacy } from "./helpers";
+// Schedule Helpers
+export { formatScheduleDisplay, getNextDeliveryDate } from "./helpers";
 
-// Schedule Utilities
-export { formatScheduleDisplay, getNextDeliveryDate } from "./scheduleUtils";
+// Thread Derivation
+export { deriveThread } from "./thread";
+export type {
+  ThreadCard,
+  QuestionCard,
+  AnswerCard,
+  StatusCard,
+  InfoCard,
+  ThreadAnswer,
+} from "./thread";

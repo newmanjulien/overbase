@@ -2,15 +2,12 @@
 
 import { QuestionCardShell } from "./QuestionCardShell";
 import { StatusPill } from "./StatusPill";
-import type { InProgressQuestion } from "@/lib/questions";
+import type { InProgressQuestion, Privacy } from "@/lib/questions";
 import type { Id } from "@convex/_generated/dataModel";
 
 interface InProgressQuestionCardProps {
   question: InProgressQuestion;
-  onPrivacyChange?: (
-    questionId: Id<"questions">,
-    newPrivacy: "private" | "team"
-  ) => void;
+  onPrivacyChange?: (questionId: Id<"questions">, newPrivacy: Privacy) => void;
 }
 
 export function InProgressQuestionCard({

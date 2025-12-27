@@ -8,10 +8,8 @@
 import type { QueryCtx } from "@convex/_generated/server";
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import {
-  computeDisplayPrivacy,
   getNextDeliveryDate,
   SENDER,
-  type Privacy,
   type QuestionVariant,
   type TableRow,
 } from "@/lib/questions";
@@ -28,33 +26,29 @@ export function formatAskedDate(timestamp: number): string {
 }
 
 /**
- * Fetch all answers for multiple questions in a single query.
+ * Fetch answers for multiple questions using parallel indexed queries.
  * Returns a Map for O(1) lookup by questionThreadId.
  */
 export async function fetchAnswersForQuestions(
   ctx: QueryCtx,
   questionIds: Id<"questions">[]
 ): Promise<Map<Id<"questions">, Doc<"answers">[]>> {
-  // Fetch ALL answers in one query (ordered by creation time)
-  const allAnswers = await ctx.db.query("answers").order("asc").collect();
+  // Parallel indexed queries - only fetches answers we need
+  const results = await Promise.all(
+    questionIds.map(async (questionId) => {
+      const answers = await ctx.db
+        .query("answers")
+        .withIndex("by_questionThreadId", (q) =>
+          q.eq("questionThreadId", questionId)
+        )
+        .order("asc")
+        .collect();
+      return [questionId, answers] as const;
+    })
+  );
 
-  // Group by questionThreadId
-  const answersByQuestion = new Map<Id<"questions">, Doc<"answers">[]>();
-
-  // Initialize empty arrays for all question IDs
-  for (const id of questionIds) {
-    answersByQuestion.set(id, []);
-  }
-
-  // Distribute answers to their questions
-  for (const answer of allAnswers) {
-    const existing = answersByQuestion.get(answer.questionThreadId);
-    if (existing) {
-      existing.push(answer);
-    }
-  }
-
-  return answersByQuestion;
+  // Convert to Map for O(1) lookup
+  return new Map(results);
 }
 
 /**
@@ -65,14 +59,16 @@ export function enrichQuestionWithAnswers(
   question: Doc<"questions">,
   answers: Doc<"answers">[]
 ): QuestionVariant {
-  // If no answers, return minimal data
-  if (answers.length === 0) {
+  // Filter out cancelled answers
+  const activeAnswers = answers.filter((a) => !a.cancelledAt);
+
+  // If no active answers, return minimal data
+  if (activeAnswers.length === 0) {
     return {
       ...question,
       displayContent: "",
       askedDate: formatAskedDate(question._creationTime),
       askedTimestamp: question._creationTime,
-      status: "in-progress",
       displayPrivacy: question.privacy,
       isRecurring: question.schedule !== undefined,
       variant: "in-progress" as const,
@@ -80,24 +76,20 @@ export function enrichQuestionWithAnswers(
   }
 
   // First answer = original question from user
-  const firstAnswer = answers[0];
+  const firstAnswer = activeAnswers[0];
 
-  // Last answer determines status
-  const lastAnswer = answers[answers.length - 1];
+  // Last active answer determines status
+  const lastAnswer = activeAnswers[activeAnswers.length - 1];
   const status: "in-progress" | "completed" =
     lastAnswer.sender === SENDER.USER ? "in-progress" : "completed";
 
   // Find last Overbase answer for tableData
-  const lastOverbaseAnswer = [...answers]
+  const lastOverbaseAnswer = [...activeAnswers]
     .reverse()
     .find((a) => a.sender === SENDER.OVERBASE);
 
-  // Compute display privacy from question + all answers
-  const answerPrivacies = answers.map((a) => a.privacy) as Privacy[];
-  const displayPrivacy = computeDisplayPrivacy(
-    question.privacy,
-    answerPrivacies
-  );
+  // Question.privacy is now authoritative (server maintains the invariant)
+  const displayPrivacy = question.privacy;
 
   // Format dates from first answer (the original question)
   const askedDate = formatAskedDate(firstAnswer._creationTime);
@@ -112,7 +104,6 @@ export function enrichQuestionWithAnswers(
     displayContent: firstAnswer.content ?? "",
     askedDate,
     askedTimestamp,
-    status,
     displayPrivacy,
     isRecurring,
   };

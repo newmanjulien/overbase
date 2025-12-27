@@ -1,31 +1,29 @@
 import FollowupBar from "@/components/bars/FollowupBar";
 import { InfoCard } from "@/components/blocks/InfoCard";
 import AnswerCard from "./AnswerCard";
-import QuestionModal from "@/components/modals/QuestionModal/QuestionModal";
+import FollowupModal from "@/components/modals/FollowupModal/FollowupModal";
 import ForwardModal from "@/components/modals/ForwardModal/ForwardModal";
-import { ModalOptions } from "@/components/bars/AskBar";
-import { SENDER, SENDER_LABEL, type QuestionVariant } from "@/lib/questions";
-import type { Answer } from "../types";
+import {
+  deriveThread,
+  type QuestionVariant,
+  type Privacy,
+} from "@/lib/questions";
+import type { Answer as AnswerType } from "../types";
 import type { Id } from "@convex/_generated/dataModel";
 import type { ForwardEntry } from "@/components/modals/shared/modalTypes";
 
 interface AnswerProps {
   // Data
   question?: QuestionVariant;
-  answers: Answer[];
+  answers: AnswerType[];
+  threadId: Id<"questions">;
   showFollowupBar: boolean;
-  infoCard?: {
-    text: string;
-    href?: string;
-    linkText?: string;
-  };
   isLoading: boolean;
 
-  // Question modal state
-  showModal: boolean;
-  onCloseModal: () => void;
-  modalOptions: ModalOptions;
-  onOpenModal: (options: ModalOptions) => void;
+  // Followup modal state
+  isFollowupModalOpen: boolean;
+  onOpenFollowupModal: () => void;
+  onCloseFollowupModal: () => void;
 
   // Forward modal state
   isForwardModalOpen: boolean;
@@ -34,11 +32,8 @@ interface AnswerProps {
   setForwardPeople: (people: ForwardEntry[]) => void;
 
   // Actions
-  onPrivacyChange: (
-    answerId: Id<"answers">,
-    newPrivacy: "private" | "team"
-  ) => void;
-  onQuestionPrivacyChange: (newPrivacy: "private" | "team") => void;
+  onPrivacyChange: (answerId: Id<"answers">, newPrivacy: Privacy) => void;
+  onQuestionPrivacyChange: (newPrivacy: Privacy) => void;
   onForward: () => void;
 }
 
@@ -69,13 +64,12 @@ function LoadingSkeleton() {
 export function Answer({
   question,
   answers,
+  threadId,
   showFollowupBar,
-  infoCard,
   isLoading,
-  showModal,
-  onCloseModal,
-  modalOptions,
-  onOpenModal,
+  isFollowupModalOpen,
+  onOpenFollowupModal,
+  onCloseFollowupModal,
   isForwardModalOpen,
   onCloseForwardModal,
   forwardPeople,
@@ -88,14 +82,15 @@ export function Answer({
     return <LoadingSkeleton />;
   }
 
+  // Derive the unified thread of cards
+  const thread = deriveThread(question, answers);
+
   return (
     <div className="h-full w-full">
-      <QuestionModal
-        isOpen={showModal}
-        onClose={onCloseModal}
-        initialTab={modalOptions.tab || "one"}
-        showTabs={modalOptions.showTabs}
-        placeholder={modalOptions.placeholder}
+      <FollowupModal
+        isOpen={isFollowupModalOpen}
+        onClose={onCloseFollowupModal}
+        threadId={threadId}
       />
 
       <ForwardModal
@@ -107,56 +102,76 @@ export function Answer({
 
       <div className="max-w-5xl mx-auto py-8">
         <div className="space-y-2">
-          {/* Original question as first card */}
-          {question && (
-            <AnswerCard
-              topLabel="You asked"
-              subLabel={question.askedDate}
-              content={question.displayContent}
-              privacy={question.displayPrivacy}
-              onPrivacyChange={(newPrivacy) =>
-                onQuestionPrivacyChange(newPrivacy)
-              }
-              onForward={onForward}
-              isQuestion
-            />
-          )}
+          {/* Render thread using deriveThread - all logic centralized */}
+          {thread.map((card, index) => {
+            switch (card.type) {
+              case "question":
+                return (
+                  <AnswerCard
+                    key="question"
+                    type="question"
+                    content={card.content}
+                    date={card.date}
+                    privacy={card.privacy}
+                    onPrivacyChange={onQuestionPrivacyChange}
+                    onForward={onForward}
+                    attachedKpis={card.attachedKpis}
+                    attachedPeople={card.attachedPeople}
+                    attachedFiles={card.attachedFiles}
+                    attachedConnectors={card.attachedConnectors}
+                  />
+                );
 
-          {/* Answer thread - skip first answer since it's shown above as the question */}
-          {answers.slice(1).map((answer) => (
-            <AnswerCard
-              key={answer._id}
-              answerId={answer._id}
-              topLabel={SENDER_LABEL[answer.sender]}
-              content={answer.content}
-              tableData={answer.tableData}
-              privacy={answer.privacy}
-              onPrivacyChange={(newPrivacy) =>
-                onPrivacyChange(answer._id, newPrivacy)
-              }
-              onForward={onForward}
-            />
-          ))}
+              case "response":
+                return (
+                  <AnswerCard
+                    key={card.answerId}
+                    type="response"
+                    answerId={card.answerId}
+                    sender={card.sender}
+                    content={card.content}
+                    privacy={card.privacy}
+                    tableData={card.tableData}
+                    onPrivacyChange={(newPrivacy) =>
+                      onPrivacyChange(
+                        card.answerId as Id<"answers">,
+                        newPrivacy
+                      )
+                    }
+                    onForward={onForward}
+                    showMenu={card.showMenu}
+                    attachedKpis={card.attachedKpis}
+                    attachedPeople={card.attachedPeople}
+                    attachedFiles={card.attachedFiles}
+                    attachedConnectors={card.attachedConnectors}
+                  />
+                );
 
-          {/* Placeholder card when Overbase is working on an answer */}
-          {question?.status === "in-progress" && answers.length <= 1 && (
-            <AnswerCard
-              topLabel="Overbase is answering..."
-              onForward={onForward}
-            />
-          )}
+              case "status":
+                return (
+                  <AnswerCard
+                    key={`status-${index}`}
+                    type="status"
+                    label={card.label}
+                    subLabel={card.subLabel}
+                    avatar={card.avatar}
+                  />
+                );
 
-          {showFollowupBar && <FollowupBar onClick={onOpenModal} />}
+              case "info":
+                return (
+                  <div key={`info-${index}`} className="pt-1">
+                    <InfoCard
+                      text={card.text}
+                      href={card.href}
+                      linkText={card.linkText}
+                    />
+                  </div>
+                );
+            }
+          })}
 
-          {infoCard && (
-            <div className="pt-1">
-              <InfoCard
-                text={infoCard.text}
-                href={infoCard.href}
-                linkText={infoCard.linkText}
-              />
-            </div>
-          )}
+          {showFollowupBar && <FollowupBar onClick={onOpenFollowupModal} />}
         </div>
       </div>
     </div>

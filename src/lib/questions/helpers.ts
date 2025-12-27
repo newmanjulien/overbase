@@ -1,36 +1,39 @@
 /**
  * Question Helpers
  *
- * Pure functions for computing question-related values.
- * These can be used by both client and server code.
+ * Runtime utilities for formatting and calculating schedules.
+ * Uses the rrule library for RFC 5545 compliant recurrence rules.
  */
-
-import { PRIVACY, type Privacy } from "./constants";
+import { RRule } from "rrule";
+import type { SchedulePattern } from "./types";
 
 /**
- * Compute the display privacy for a question based on its answers.
- *
- * Rule: If ANY answer is "team", display "team". Otherwise, display "private".
- *
- * @param questionPrivacy - The stored privacy value of the question
- * @param answerPrivacies - Array of privacy values from all child answers
- * @returns The privacy value to display on the question card
+ * Format a schedule pattern for display in UI (pills, cards, etc.)
+ * Uses rrule's built-in natural language generation.
  */
-export function computeDisplayPrivacy(
-  questionPrivacy: Privacy,
-  answerPrivacies: Privacy[]
-): Privacy {
-  // If the question itself is "team", display is "team"
-  if (questionPrivacy === PRIVACY.TEAM) {
-    return PRIVACY.TEAM;
+export function formatScheduleDisplay(schedule: SchedulePattern): string {
+  try {
+    return capitalize(RRule.fromString(schedule.rrule).toText());
+  } catch {
+    return capitalize(schedule.frequency);
   }
+}
 
-  // If any answer is "team", display is "team"
-  const hasTeamAnswer = answerPrivacies.some((p) => p === PRIVACY.TEAM);
-  if (hasTeamAnswer) {
-    return PRIVACY.TEAM;
+/**
+ * Calculate the next delivery date from a schedule pattern.
+ * Used for helper text: "Your first answer will arrive on..."
+ */
+export function getNextDeliveryDate(
+  schedule: SchedulePattern,
+  from: Date = new Date()
+): Date {
+  try {
+    return RRule.fromString(schedule.rrule).after(from, true) ?? from;
+  } catch {
+    return from;
   }
+}
 
-  // All are private
-  return PRIVACY.PRIVATE;
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

@@ -115,8 +115,8 @@ export default function PeopleModal({
         />
         <p className="mt-3 text-xs text-gray-500 leading-relaxed">
           Overbase will send a personalized email to the people you select,
-          requesting the information you've described. Their responses will be
-          automatically incorporated into your answer.
+          requesting the information you&apos;ve described. Their responses will
+          be automatically incorporated into your answer.
         </p>
       </div>
     </ModalShell>

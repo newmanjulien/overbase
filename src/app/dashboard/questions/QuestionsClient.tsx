@@ -50,7 +50,9 @@ export default function QuestionsClient() {
     api.features.questions.mutations.updateQuestionPrivacy
   );
 
-  const [selectedFilter, setSelectedFilter] = useState<FilterKey>(FILTER.ALL);
+  const [selectedFilter, setSelectedFilter] = useState<FilterKey>(
+    FILTER_OPTIONS[0].key
+  );
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [modalOptions, setModalOptions] = useState<ModalOptions>({});
 

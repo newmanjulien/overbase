@@ -5,7 +5,8 @@
 
 import { mutation } from "@convex/_generated/server";
 import { v } from "convex/values";
-import { validateSchedulePattern, SENDER } from "@/lib/questions";
+import { SENDER } from "@/lib/questions";
+import { setQuestionPrivacy, setAnswerPrivacy } from "./privacy";
 
 // ============================================
 // QUESTION MUTATIONS
@@ -27,24 +28,11 @@ export const createQuestion = mutation({
     // Schedule: undefined = one-time, present = recurring
     schedule: v.optional(
       v.object({
+        rrule: v.string(),
         frequency: v.union(
           v.literal("weekly"),
           v.literal("monthly"),
           v.literal("quarterly")
-        ),
-        dayOfWeek: v.optional(v.number()),
-        dayOfMonth: v.optional(v.number()),
-        nthWeek: v.optional(v.number()),
-        quarterDay: v.optional(
-          v.union(
-            v.literal("first"),
-            v.literal("last"),
-            v.literal("second-month-first"),
-            v.literal("third-month-first")
-          )
-        ),
-        quarterWeekday: v.optional(
-          v.union(v.literal("first-monday"), v.literal("last-monday"))
         ),
         dataRangeDays: v.number(),
       })
@@ -76,15 +64,18 @@ export const createQuestion = mutation({
         })
       )
     ),
+    attachedConnectors: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          title: v.string(),
+          logo: v.string(),
+        })
+      )
+    ),
   },
   handler: async (ctx, args) => {
-    // Validate schedule if provided
-    if (args.schedule) {
-      const validationError = validateSchedulePattern(args.schedule);
-      if (validationError) {
-        throw new Error(validationError);
-      }
-    }
+    // Validation happens client-side via rrule parse
 
     // 1. Create the question (thread metadata only)
     const questionId = await ctx.db.insert("questions", {
@@ -101,6 +92,7 @@ export const createQuestion = mutation({
       attachedKpis: args.attachedKpis,
       attachedPeople: args.attachedPeople,
       attachedFiles: args.attachedFiles,
+      attachedConnectors: args.attachedConnectors,
     });
 
     return questionId;
@@ -108,33 +100,15 @@ export const createQuestion = mutation({
 });
 
 /**
- * Update privacy on a question AND cascade to all child answers.
- * This is the ONLY way to update question privacy - ensures consistency.
+ * Update privacy on a question.
+ * Delegates to privacy module which handles cascading to answers.
  */
 export const updateQuestionPrivacy = mutation({
   args: {
     id: v.id("questions"),
     privacy: v.union(v.literal("private"), v.literal("team")),
   },
-  handler: async (ctx, args) => {
-    // Update the question
-    await ctx.db.patch(args.id, { privacy: args.privacy });
-
-    // Cascade to all child answers
-    const answers = await ctx.db
-      .query("answers")
-      .withIndex("by_questionThreadId", (idx) =>
-        idx.eq("questionThreadId", args.id)
-      )
-      .collect();
-
-    // Update each answer atomically
-    await Promise.all(
-      answers.map((answer) =>
-        ctx.db.patch(answer._id, { privacy: args.privacy })
-      )
-    );
-  },
+  handler: (ctx, args) => setQuestionPrivacy(ctx, args.id, args.privacy),
 });
 
 /**
@@ -213,6 +187,15 @@ export const createAnswer = mutation({
         })
       )
     ),
+    attachedConnectors: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          title: v.string(),
+          logo: v.string(),
+        })
+      )
+    ),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("answers", {
@@ -224,19 +207,33 @@ export const createAnswer = mutation({
       attachedKpis: args.attachedKpis,
       attachedPeople: args.attachedPeople,
       attachedFiles: args.attachedFiles,
+      attachedConnectors: args.attachedConnectors,
     });
   },
 });
 
 /**
  * Update privacy on an answer.
+ * Delegates to privacy module which handles recomputing question privacy.
  */
 export const updateAnswerPrivacy = mutation({
   args: {
     id: v.id("answers"),
     privacy: v.union(v.literal("private"), v.literal("team")),
   },
+  handler: (ctx, args) => setAnswerPrivacy(ctx, args.id, args.privacy),
+});
+
+/**
+ * Cancel an answer (soft delete).
+ * Sets cancelledAt timestamp - answer remains in DB but won't appear in UI.
+ * Used for cancelling pending follow-up questions from the user.
+ */
+export const cancelAnswer = mutation({
+  args: {
+    id: v.id("answers"),
+  },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, { privacy: args.privacy });
+    await ctx.db.patch(args.id, { cancelledAt: Date.now() });
   },
 });

@@ -17,6 +17,7 @@ export default defineSchema({
   templates: defineTable({
     title: v.string(),
     description: v.string(),
+    content: v.string(),
     tags: v.array(v.string()), // e.g., ["Onboarding", "Support"]
     gradient: v.string(), // Key from src/config/gradients.ts (e.g., "sunset", "ocean")
     imageId: v.optional(v.id("_storage")), // Convex file storage reference
@@ -40,37 +41,14 @@ export default defineSchema({
     // Recurring schedule (undefined = one-time question)
     schedule: v.optional(
       v.object({
+        // RFC 5545 recurrence rule string (e.g., "FREQ=WEEKLY;BYDAY=MO")
+        rrule: v.string(),
+        // Human-friendly frequency for UI grouping
         frequency: v.union(
           v.literal("weekly"),
           v.literal("monthly"),
           v.literal("quarterly")
         ),
-
-        // Weekly: which day (0=Sun, 1=Mon, ..., 6=Sat)
-        dayOfWeek: v.optional(v.number()),
-
-        // Monthly: specific day of month (1-31, or -1 for last day)
-        dayOfMonth: v.optional(v.number()),
-
-        // Monthly: nth weekday pattern (1=first, 2=second, 3=third, 4=fourth)
-        // Used with dayOfWeek for patterns like "first Monday"
-        nthWeek: v.optional(v.number()),
-
-        // Quarterly: predefined day patterns
-        quarterDay: v.optional(
-          v.union(
-            v.literal("first"),
-            v.literal("last"),
-            v.literal("second-month-first"),
-            v.literal("third-month-first")
-          )
-        ),
-
-        // Quarterly: predefined weekday patterns
-        quarterWeekday: v.optional(
-          v.union(v.literal("first-monday"), v.literal("last-monday"))
-        ),
-
         // Data range: how many days of data to analyze before delivery
         dataRangeDays: v.number(),
       })
@@ -142,6 +120,18 @@ export default defineSchema({
         })
       )
     ),
+    attachedConnectors: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          title: v.string(),
+          logo: v.string(),
+        })
+      )
+    ),
+
+    // Soft delete - if present, this answer was cancelled at this timestamp
+    cancelledAt: v.optional(v.number()),
 
     // Future: avatarId: v.optional(v.id("_storage")),
   }).index("by_questionThreadId", ["questionThreadId"]),

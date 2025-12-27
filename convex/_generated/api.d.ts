@@ -13,6 +13,7 @@ import type * as features_connectors from "../features/connectors.js";
 import type * as features_people from "../features/people.js";
 import type * as features_questions_enrichment from "../features/questions/enrichment.js";
 import type * as features_questions_mutations from "../features/questions/mutations.js";
+import type * as features_questions_privacy from "../features/questions/privacy.js";
 import type * as features_questions_queries from "../features/questions/queries.js";
 import type * as features_templates from "../features/templates.js";
 
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   "features/people": typeof features_people;
   "features/questions/enrichment": typeof features_questions_enrichment;
   "features/questions/mutations": typeof features_questions_mutations;
+  "features/questions/privacy": typeof features_questions_privacy;
   "features/questions/queries": typeof features_questions_queries;
   "features/templates": typeof features_templates;
 }>;

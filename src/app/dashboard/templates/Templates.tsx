@@ -9,6 +9,7 @@ interface TemplatesProps {
   setSelectedTag: (tag: string) => void;
   tagsForSidebar: { key: string; name: string }[];
   isLoading: boolean;
+  onUseTemplate: (content: string) => void;
 }
 
 function LoadingSkeleton() {
@@ -57,6 +58,7 @@ export function Templates({
   setSelectedTag,
   tagsForSidebar,
   isLoading,
+  onUseTemplate,
 }: TemplatesProps) {
   if (isLoading) {
     return <LoadingSkeleton />;
@@ -99,7 +101,7 @@ export function Templates({
                   description={template.description}
                   gradient={template.gradient}
                   imageUrl={template.imageUrl}
-                  onUse={() => console.log(`Using ${template.title}`)}
+                  onUse={() => onUseTemplate(template.content)}
                 />
               ))}
             </div>

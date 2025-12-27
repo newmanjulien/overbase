@@ -1,20 +1,19 @@
 "use client";
 
-import { useQuestionModalState } from "./useQuestionModalState";
-import { QuestionModalActions } from "./QuestionModalActions";
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { formatScheduleDisplay, type Privacy } from "@/lib/questions";
+import type { Id } from "@convex/_generated/dataModel";
+import type { Privacy } from "@/lib/questions";
 import { ASSET_KEYS } from "@/lib/assets";
 import {
   X,
   BarChart3,
   Users,
+  Upload,
   ChevronDown,
   Play,
   FileText,
-  Repeat,
   Lock,
   Plug,
 } from "lucide-react";
@@ -25,57 +24,59 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { AttachmentChip } from "../shared/AttachmentChip";
+import KpiModal from "../KpiModal/KpiModal";
+import PeopleModal from "../PeopleModal/PeopleModal";
+import FileModal from "../FileModal/FileModal";
+import ConnectorModal from "../ConnectorModal/ConnectorModal";
+import type {
+  KpiAttachment,
+  PersonAttachmentWithInfo,
+  FileAttachmentForUpload,
+  ConnectorAttachment,
+} from "../shared/modalTypes";
 
-export default function QuestionModal({
-  isOpen,
-  onClose,
-  initialTab = "one",
-  initialQuestion = "",
-  onQuestionCreated,
-}: {
+interface FollowupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: "one" | "recurring";
-  initialQuestion?: string;
-  onQuestionCreated?: () => void;
-}) {
-  const {
-    activeTab,
-    setActiveTab,
-    question,
-    setQuestion,
-    activeNestedModal,
-    setActiveNestedModal,
-    kpis,
-    setKpis,
-    people,
-    setPeople,
-    fileAttachments,
-    setFileAttachments,
-    closeNestedModal,
-    removeKpi,
-    removePeople,
-    removeFileAttachment,
-    removeConnector,
-    connectors,
-    setConnectors,
-    schedule,
-    setSchedule,
-    visibility,
-    setVisibility,
-  } = useQuestionModalState({ isOpen, initialTab, initialQuestion });
+  threadId: Id<"questions">;
+}
 
+export default function FollowupModal({
+  isOpen,
+  onClose,
+  threadId,
+}: FollowupModalProps) {
   // User avatar
   const userAvatarAsset = useQuery(api.features.assets.getAssetByKey, {
     key: ASSET_KEYS.USER_AVATAR,
   });
   const userAvatar = userAvatarAsset?.imageUrl ?? null;
 
+  // Form state
+  const [question, setQuestion] = useState("");
+  const [visibility, setVisibility] = useState<"Private" | "Team">("Private");
+
+  // Attachment state
+  const [kpis, setKpis] = useState<KpiAttachment[]>([]);
+  const [people, setPeople] = useState<PersonAttachmentWithInfo[]>([]);
+  const [fileAttachments, setFileAttachments] = useState<
+    FileAttachmentForUpload[]
+  >([]);
+
+  // Nested modal state
+  const [activeNestedModal, setActiveNestedModal] = useState<
+    "kpi" | "people" | "file" | "connector" | null
+  >(null);
+
+  // Connector state
+  const [connectors, setConnectors] = useState<ConnectorAttachment[]>([]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const createQuestion = useMutation(
-    api.features.questions.mutations.createQuestion
+  const createAnswer = useMutation(
+    api.features.questions.mutations.createAnswer
   );
 
   const handleSubmit = async () => {
@@ -83,14 +84,15 @@ export default function QuestionModal({
 
     setIsSubmitting(true);
     try {
-      await createQuestion({
+      await createAnswer({
+        questionThreadId: threadId,
+        sender: "user",
         content: question.trim(),
         privacy: visibility.toLowerCase() as Privacy,
-        schedule: activeTab === "recurring" && schedule ? schedule : undefined,
         attachedKpis: kpis.length > 0 ? kpis : undefined,
         attachedPeople:
           people.length > 0
-            ? people.map((p) => ({ id: p.name, name: p.name })) // Map PersonAttachmentWithInfo to schema format
+            ? people.map((p) => ({ id: p.name, name: p.name }))
             : undefined,
         attachedFiles:
           fileAttachments.length > 0
@@ -109,14 +111,36 @@ export default function QuestionModal({
             : undefined,
       });
 
+      // Reset form and close
+      setQuestion("");
+      setKpis([]);
+      setPeople([]);
+      setFileAttachments([]);
+      setConnectors([]);
       onClose();
-      // If parent component provided a success callback (e.g., to redirect), call it now
-      onQuestionCreated?.();
     } catch (error) {
-      console.error("Failed to create question:", error);
+      console.error("Failed to create follow-up:", error);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const closeNestedModal = () => setActiveNestedModal(null);
+
+  const removeKpi = (index: number) => {
+    setKpis((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removePeople = (index: number) => {
+    setPeople((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeFileAttachment = (index: number) => {
+    setFileAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeConnector = (index: number) => {
+    setConnectors((prev) => prev.filter((_, i) => i !== index));
   };
 
   if (!isOpen) return null;
@@ -124,64 +148,14 @@ export default function QuestionModal({
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-start justify-center pt-22 overflow-y-auto">
       <div className="bg-white rounded-2xl w-full max-w-3xl min-h-[calc(100vh-11rem)] flex flex-col">
-        {/* Top header */}
-        <div className="relative py-4 px-4 flex items-center justify-center">
-          {activeTab === "recurring" && (
-            <button
-              onClick={() => setActiveNestedModal("schedule")}
-              className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 px-2 py-1 rounded-full text-sm text-gray-700 hover:bg-gray-50"
-            >
-              <Repeat className="h-4 w-4" />
-              <span>
-                {schedule ? formatScheduleDisplay(schedule) : "Schedule"}
-              </span>
-              <ChevronDown className="h-4 w-4" />
-            </button>
-          )}
-
+        {/* Header */}
+        <div className="relative py-4 px-4 flex items-center border-b border-gray-200">
           <button
             onClick={onClose}
-            className="mr-auto text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700"
           >
             <X className="h-6 w-6" />
           </button>
-        </div>
-
-        {/* Tabs */}
-        <div className="relative flex">
-          <button
-            onClick={() => setActiveTab("one")}
-            className={`flex-1 py-3 text-center text-sm font-medium transition-colors
-      ${
-        activeTab === "one"
-          ? "text-gray-900"
-          : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-      }`}
-          >
-            One Time
-          </button>
-
-          <button
-            onClick={() => setActiveTab("recurring")}
-            className={`flex-1 py-3 text-center text-sm font-medium transition-colors
-      ${
-        activeTab === "recurring"
-          ? "text-gray-900"
-          : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-      }`}
-          >
-            Recurring
-          </button>
-
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-200" />
-
-          <div
-            className="absolute bottom-0 h-0.5 bg-gray-600 transition-all duration-300"
-            style={{
-              left: activeTab === "one" ? "0%" : "50%",
-              width: "50%",
-            }}
-          />
         </div>
 
         {/* Main content */}
@@ -219,12 +193,13 @@ export default function QuestionModal({
 
           <textarea
             autoFocus
-            placeholder='Start your question with "What", "How", "Why", etc.'
+            placeholder="Ask a follow up question..."
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             className="w-full flex-1 text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
           />
 
+          {/* Attachment chips */}
           {(kpis.length > 0 ||
             people.length > 0 ||
             fileAttachments.length > 0 ||
@@ -272,25 +247,70 @@ export default function QuestionModal({
           )}
         </div>
 
-        {/* Bottom action bar and nested modals */}
-        <QuestionModalActions
-          activeNestedModal={activeNestedModal}
-          setActiveNestedModal={setActiveNestedModal}
-          closeNestedModal={closeNestedModal}
+        {/* Bottom action bar */}
+        <div className="p-2 border-t border-gray-200 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setActiveNestedModal("kpi")}
+              title="Define KPIs/Metrics"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <BarChart3 className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
+            </button>
+            <button
+              onClick={() => setActiveNestedModal("people")}
+              title="Link People"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Users className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
+            </button>
+            <button
+              onClick={() => setActiveNestedModal("file")}
+              title="Attach File"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Upload className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
+            </button>
+            <button
+              onClick={() => setActiveNestedModal("connector")}
+              title="Add Connectors"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Plug className="h-4.5 w-4.5 text-gray-700 hover:text-gray-900" />
+            </button>
+          </div>
+          <Button
+            onClick={handleSubmit}
+            disabled={!question.trim() || isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
+        </div>
+
+        {/* Nested Modals */}
+        <KpiModal
+          isOpen={activeNestedModal === "kpi"}
+          onClose={closeNestedModal}
           kpis={kpis}
           setKpis={setKpis}
+        />
+        <PeopleModal
+          isOpen={activeNestedModal === "people"}
+          onClose={closeNestedModal}
           people={people}
           setPeople={setPeople}
+        />
+        <FileModal
+          isOpen={activeNestedModal === "file"}
+          onClose={closeNestedModal}
           fileAttachments={fileAttachments}
           setFileAttachments={setFileAttachments}
+        />
+        <ConnectorModal
+          isOpen={activeNestedModal === "connector"}
+          onClose={closeNestedModal}
           connectors={connectors}
           setConnectors={setConnectors}
-          setSchedule={setSchedule}
-          isQuestionEmpty={!question.trim()}
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          activeTab={activeTab}
-          schedule={schedule}
         />
       </div>
     </div>

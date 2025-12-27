@@ -11,14 +11,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import type { Privacy } from "@/lib/questions";
 
 interface QuestionCardShellProps {
   questionId: Id<"questions">;
-  displayPrivacy: "private" | "team";
-  onPrivacyChange?: (
-    questionId: Id<"questions">,
-    newPrivacy: "private" | "team"
-  ) => void;
+  displayPrivacy: Privacy;
+  onPrivacyChange?: (questionId: Id<"questions">, newPrivacy: Privacy) => void;
   headerRight?: React.ReactNode; // Optional pill slot
   dateLabel: string; // "Asked on {date}" or "Scheduled for {date}"
   children: React.ReactNode; // Question content
@@ -52,7 +50,8 @@ export function QuestionCardShell({
     e.stopPropagation();
   };
 
-  const handleCancelQuestion = () => {
+  const handleCancelQuestion = (e: React.MouseEvent) => {
+    e.stopPropagation();
     cancelQuestion({ id: questionId });
   };
 
@@ -99,7 +98,7 @@ export function QuestionCardShell({
                     onClick={handleCancelQuestion}
                     className="text-red-600 focus:text-red-600 focus:bg-red-100"
                   >
-                    Cancel question
+                    Cancel
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

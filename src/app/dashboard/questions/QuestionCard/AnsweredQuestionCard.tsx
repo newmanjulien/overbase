@@ -2,15 +2,12 @@
 
 import { QuestionCardShell } from "./QuestionCardShell";
 import DataTable from "@/components/blocks/DataTable";
-import type { AnsweredQuestion } from "@/lib/questions";
+import type { AnsweredQuestion, Privacy } from "@/lib/questions";
 import type { Id } from "@convex/_generated/dataModel";
 
 interface AnsweredQuestionCardProps {
   question: AnsweredQuestion;
-  onPrivacyChange?: (
-    questionId: Id<"questions">,
-    newPrivacy: "private" | "team"
-  ) => void;
+  onPrivacyChange?: (questionId: Id<"questions">, newPrivacy: Privacy) => void;
 }
 
 export function AnsweredQuestionCard({

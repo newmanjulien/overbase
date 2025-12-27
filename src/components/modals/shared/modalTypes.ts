@@ -46,5 +46,15 @@ export interface FileAttachmentForUpload {
   context: string;
 }
 
+/**
+ * Connector attachment for questions/answers.
+ * References a connector the user wants Overbase to query.
+ */
+export interface ConnectorAttachment {
+  id: string;
+  title: string;
+  logo: string;
+}
+
 // Re-export dummy data for convenience
 export { dummyPeople } from "./dummyPeople";

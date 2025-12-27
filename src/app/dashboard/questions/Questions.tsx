@@ -101,8 +101,6 @@ export function Questions({
         isOpen={showAddQuestion}
         onClose={onCloseAddQuestion}
         initialTab={modalOptions.tab || "one"}
-        showTabs={modalOptions.showTabs}
-        placeholder={modalOptions.placeholder}
       />
 
       <ForwardModal

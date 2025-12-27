@@ -9,8 +9,6 @@ import { Clock, Mic, Repeat, Zap } from "lucide-react";
 
 export type ModalOptions = {
   tab?: "one" | "recurring";
-  showTabs?: boolean;
-  placeholder?: string;
 };
 
 type FooterButton = {

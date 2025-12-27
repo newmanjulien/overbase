@@ -19,6 +19,7 @@ export interface Template {
   _id: TemplateFromConvex["_id"];
   title: string;
   description: string;
+  content: string;
   gradient: GradientKey;
   imageUrl: string | null;
   tags: string[];
@@ -43,6 +44,7 @@ export function normalizeTemplate(template: TemplateFromConvex): Template {
     _id: template._id,
     title: template.title,
     description: template.description,
+    content: template.content,
     gradient: validateGradient(template.gradient),
     imageUrl: template.imageUrl,
     tags: template.tags,
