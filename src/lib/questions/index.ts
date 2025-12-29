@@ -10,7 +10,6 @@ export type {
   TableRow,
   SchedulePattern,
   KpiAttachment,
-  PersonReference,
   FileAttachment,
   ConnectorReference,
   AnsweredQuestion,

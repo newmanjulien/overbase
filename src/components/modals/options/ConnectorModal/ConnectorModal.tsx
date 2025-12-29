@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -52,9 +54,11 @@ export default function ConnectorModal({
                 <AttachmentChip
                   key={c.id}
                   icon={
-                    <img
+                    <Image
                       src={c.logo}
                       alt=""
+                      width={14}
+                      height={14}
                       className="h-3.5 w-3.5 rounded-sm object-contain"
                     />
                   }
@@ -71,9 +75,11 @@ export default function ConnectorModal({
                 id: c.id,
                 label: c.title,
                 icon: (
-                  <img
+                  <Image
                     src={c.logo}
                     alt=""
+                    width={20}
+                    height={20}
                     className="h-5 w-5 rounded-sm object-contain"
                   />
                 ),

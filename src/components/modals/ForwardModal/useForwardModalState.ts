@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { ForwardEntry } from "../types";
-import type { PersonReference } from "@/lib/questions";
+import { toPersonReferences } from "@/lib/people";
 
 export function useForwardModalState(
   people: ForwardEntry[],
@@ -12,16 +12,8 @@ export function useForwardModalState(
   onClose: () => void
 ) {
   // Fetch people from database
-  const dbPeople = useQuery(api.features.people.getAllPeople) ?? [];
-  const allPeople = useMemo(
-    (): PersonReference[] =>
-      dbPeople.map((p) => ({
-        id: p._id,
-        name: p.name,
-        photo: p.photo,
-      })),
-    [dbPeople]
-  );
+  const dbPeople = useQuery(api.features.people.getAllPeople);
+  const allPeople = useMemo(() => toPersonReferences(dbPeople), [dbPeople]);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");

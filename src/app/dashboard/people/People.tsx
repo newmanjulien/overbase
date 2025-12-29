@@ -8,6 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RowCard } from "@/components/cards/RowCard";
 import { InfoCard } from "@/components/cards/InfoCard";
 import { Header } from "@/components/blocks/Header";
+import { EmptyState } from "@/components/blocks/EmptyState";
+import { Users } from "lucide-react";
 import { getRandomName } from "./namesDictionary";
 
 export default function People() {
@@ -72,62 +74,80 @@ export default function People() {
       />
 
       <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="w-full flex flex-col gap-3">
-          {/* Select All row */}
-          <RowCard
-            title="Select all"
-            titleClassName="text-gray-500 font-normal"
-            leading={
-              <Checkbox
-                checked={
-                  allSelected ? true : someSelected ? "indeterminate" : false
-                }
-                onCheckedChange={handleSelectAll}
-                className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
-                  data-[state=checked]:border-gray-800 rounded-sm"
-              />
-            }
-            menuItems={[
-              {
-                label: "Delete",
-                onClick: handleDeleteSelected,
-                destructive: true,
-              },
-            ]}
+        {people.length === 0 ? (
+          <EmptyState
+            title="No people yet"
+            description="Add people who you want to request data from."
+            buttonLabel="Add person"
+            onButtonClick={handleAddPerson}
+            icon={Users}
+            withBorder
+            className="py-32 min-h-[600px]"
           />
+        ) : (
+          <>
+            <div className="w-full flex flex-col gap-3">
+              {/* Select All row */}
+              <RowCard
+                title="Select all"
+                titleClassName="text-gray-500 font-normal"
+                leading={
+                  <Checkbox
+                    checked={
+                      allSelected
+                        ? true
+                        : someSelected
+                          ? "indeterminate"
+                          : false
+                    }
+                    onCheckedChange={handleSelectAll}
+                    className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
+                      data-[state=checked]:border-gray-800 rounded-sm"
+                  />
+                }
+                menuItems={[
+                  {
+                    label: "Delete",
+                    onClick: handleDeleteSelected,
+                    destructive: true,
+                  },
+                ]}
+              />
 
-          {/* Person rows */}
-          {people.map((person) => (
-            <RowCard
-              key={person._id}
-              title={person.name}
-              subtitle={getStatusText(person.status)}
-              image="" // fallback letter
-              showAvatar
-              leading={
-                <Checkbox
-                  checked={selectedPeople.includes(person._id)}
-                  onCheckedChange={(checked) =>
-                    handleSelectPerson(person._id, checked as boolean)
+              {/* Person rows */}
+              {people.map((person) => (
+                <RowCard
+                  key={person._id}
+                  title={person.name}
+                  subtitle={getStatusText(person.status)}
+                  image="" // fallback letter
+                  showAvatar
+                  leading={
+                    <Checkbox
+                      checked={selectedPeople.includes(person._id)}
+                      onCheckedChange={(checked) =>
+                        handleSelectPerson(person._id, checked as boolean)
+                      }
+                      className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
+                        data-[state=checked]:border-gray-800 rounded-sm"
+                    />
                   }
-                  className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
-                    data-[state=checked]:border-gray-800 rounded-sm"
+                  menuItems={[
+                    {
+                      label: "Edit",
+                      onClick: () => console.log("Edit", person._id),
+                    },
+                    {
+                      label: "Delete",
+                      onClick: () => handleDeletePerson(person._id),
+                      destructive: true,
+                    },
+                  ]}
                 />
-              }
-              menuItems={[
-                {
-                  label: "Edit",
-                  onClick: () => console.log("Edit", person._id),
-                },
-                {
-                  label: "Delete",
-                  onClick: () => handleDeletePerson(person._id),
-                  destructive: true,
-                },
-              ]}
-            />
-          ))}
-        </div>
+              ))}
+            </div>
+          </>
+        )}
 
         <div className="mt-8 w-full">
           <InfoCard text="Manage the people in your organization and their access levels." />

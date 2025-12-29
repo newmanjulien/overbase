@@ -19,12 +19,12 @@ import {
   type Privacy,
   type Sender,
   type KpiAttachment,
-  type PersonReference,
   type FileAttachment,
   type ConnectorReference,
   type TableRow,
   type Id,
 } from "@/lib/questions";
+import type { PersonReference } from "@/lib/people";
 
 // ============================================
 // PROP TYPES (discriminated union)

@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect, ReactNode } from "react";
+import Image from "next/image";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 import {
   KpiAttachment,
   FileAttachment,
   ConnectorReference,
-  PersonReference,
 } from "@/lib/questions";
+import type { PersonReference } from "@/lib/people";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // ============================================
@@ -115,11 +116,14 @@ function buildChipData(props: AttachmentChipListProps): ChipData[] {
     chips.push({
       key: `connector-${idx}`,
       icon: (
-        <img
-          src={c.logo}
-          alt=""
-          className="h-3.5 w-3.5 rounded-sm object-contain"
-        />
+        <span className="relative h-3.5 w-3.5 inline-block">
+          <Image
+            src={c.logo}
+            alt=""
+            fill
+            className="rounded-sm object-contain"
+          />
+        </span>
       ),
       label: c.title,
       onRemove: props.onRemoveConnector

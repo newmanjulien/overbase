@@ -12,10 +12,10 @@ import type {
   QuestionVariant,
   TableRow,
   KpiAttachment,
-  PersonReference,
   FileAttachment,
   ConnectorReference,
 } from "./types";
+import type { PersonReference } from "@/lib/people";
 
 // ============================================
 // THREAD CARD TYPES

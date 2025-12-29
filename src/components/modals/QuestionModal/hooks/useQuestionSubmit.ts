@@ -3,7 +3,7 @@
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useState } from "react";
-import type { Privacy, SchedulePattern } from "@/lib/questions";
+import type { SchedulePattern } from "@/lib/questions";
 import type {
   KpiAttachment,
   PersonAttachmentWithInfo,

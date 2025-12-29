@@ -23,20 +23,6 @@ export type {
 export type { ConnectorAttachment as ConnectorReference } from "@convex/shared/types";
 
 // ============================================
-// UI-EXTENDED TYPES
-// ============================================
-
-/**
- * Person reference - extends storage type with UI-only fields.
- * `photo` is resolved client-side, not stored in the database.
- */
-import type { PersonAttachment } from "@convex/shared/types";
-
-export interface PersonReference extends PersonAttachment {
-  photo?: string;
-}
-
-// ============================================
 // QUESTION VARIANT TYPES
 // ============================================
 

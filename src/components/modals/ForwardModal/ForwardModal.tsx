@@ -39,7 +39,6 @@ export default function ForwardModal({
     filteredPeople,
     togglePerson,
     handleAddPeople,
-    closeModal,
   } = useForwardModalState(people, setPeople, onClose);
 
   return (

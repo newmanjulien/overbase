@@ -9,10 +9,10 @@
 // Re-export core types from shared library for convenience
 export type {
   KpiAttachment,
-  PersonReference,
   FileAttachment,
   ConnectorReference,
 } from "@/lib/questions";
+export type { PersonReference } from "@/lib/people";
 
 // ============================================
 // UI-SPECIFIC TYPES
