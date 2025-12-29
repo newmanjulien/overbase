@@ -7,11 +7,10 @@ import {
   AnsweredQuestionCard,
   InProgressQuestionCard,
   RecurringQuestionCard,
-} from "./QuestionCard";
+} from "@/components/cards/QuestionCard";
 import { MessageCircle } from "lucide-react";
-import type { QuestionVariant, Privacy, FilterKey } from "@/lib/questions";
-import type { Id } from "@convex/_generated/dataModel";
-import type { ForwardEntry } from "@/components/modals/shared/modalTypes";
+import type { QuestionVariant, Privacy, FilterKey, Id } from "@/lib/questions";
+import type { ForwardEntry } from "@/components/modals/types";
 
 interface QuestionsProps {
   // Data

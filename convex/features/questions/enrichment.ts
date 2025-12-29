@@ -88,7 +88,7 @@ export function enrichQuestionWithAnswers(
     .reverse()
     .find((a) => a.sender === SENDER.OVERBASE);
 
-  // Question.privacy is now authoritative (server maintains the invariant)
+  // Privacy: undefined = private, "team" = team
   const displayPrivacy = question.privacy;
 
   // Format dates from first answer (the original question)

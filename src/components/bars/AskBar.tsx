@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { Fragment, type ComponentType, type SVGProps } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { ASSET_KEYS } from "@/lib/assets";
@@ -12,7 +12,7 @@ export type ModalOptions = {
 };
 
 type FooterButton = {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
   label: string;
   modalOptions?: ModalOptions;
 };
@@ -68,7 +68,7 @@ export default function AskBar({
         {footerButtons.map((btn, index) => {
           const isDisabled = disabledButtons.includes(btn.label);
           return (
-            <React.Fragment key={btn.label}>
+            <Fragment key={btn.label}>
               <button
                 onClick={
                   isDisabled ? undefined : () => onClick(btn.modalOptions)
@@ -87,7 +87,7 @@ export default function AskBar({
               {index < footerButtons.length - 1 && (
                 <div className="w-px h-6 bg-gray-200"></div>
               )}
-            </React.Fragment>
+            </Fragment>
           );
         })}
       </div>

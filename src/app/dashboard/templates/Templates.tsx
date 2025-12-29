@@ -1,4 +1,4 @@
-import { TemplateCard } from "./TemplateCard";
+import { TemplateCard } from "@/components/cards/TemplateCard";
 import { Header } from "@/components/blocks/Header";
 import Sidebar from "@/components/blocks/Sidebar";
 import type { Template } from "./types";

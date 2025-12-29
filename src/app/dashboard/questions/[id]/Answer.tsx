@@ -1,16 +1,17 @@
 import FollowupBar from "@/components/bars/FollowupBar";
-import { InfoCard } from "@/components/blocks/InfoCard";
-import AnswerCard from "./AnswerCard";
-import FollowupModal from "@/components/modals/FollowupModal/FollowupModal";
+import { InfoCard } from "@/components/cards/InfoCard";
+import AnswerCard from "@/components/cards/AnswerCard";
+import StatusCard from "@/components/cards/StatusCard";
+import FollowupModal from "@/components/modals/QuestionModal/FollowupModal";
 import ForwardModal from "@/components/modals/ForwardModal/ForwardModal";
 import {
   deriveThread,
   type QuestionVariant,
   type Privacy,
+  type Id,
 } from "@/lib/questions";
 import type { Answer as AnswerType } from "../types";
-import type { Id } from "@convex/_generated/dataModel";
-import type { ForwardEntry } from "@/components/modals/shared/modalTypes";
+import type { ForwardEntry } from "@/components/modals/types";
 
 interface AnswerProps {
   // Data
@@ -149,12 +150,10 @@ export function Answer({
 
               case "status":
                 return (
-                  <AnswerCard
+                  <StatusCard
                     key={`status-${index}`}
-                    type="status"
                     label={card.label}
                     subLabel={card.subLabel}
-                    avatar={card.avatar}
                   />
                 );
 

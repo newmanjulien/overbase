@@ -26,18 +26,8 @@ export const SENDER_LABEL: Record<Sender, string> = {
 // PRIVACY
 // ============================================
 
-export const PRIVACY = {
-  PRIVATE: "private",
-  TEAM: "team",
-} as const;
-
-export type Privacy = (typeof PRIVACY)[keyof typeof PRIVACY];
-
-/** Display labels for privacy (capitalized for UI) */
-export const PRIVACY_LABEL: Record<Privacy, string> = {
-  private: "Private",
-  team: "Team",
-};
+/** Privacy type: undefined = private (default), "team" = shared */
+export type Privacy = "team" | undefined;
 
 // ============================================
 // QUESTION FILTERS (for sidebar)

@@ -1,34 +1,63 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RowCard } from "@/components/blocks/RowCard";
-import { InfoCard } from "@/components/blocks/InfoCard";
+import { RowCard } from "@/components/cards/RowCard";
+import { InfoCard } from "@/components/cards/InfoCard";
 import { Header } from "@/components/blocks/Header";
-import { mockPeople } from "./DummyData";
+import { getRandomName } from "./namesDictionary";
 
 export default function People() {
-  const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
+  const people = useQuery(api.features.people.getAllPeople) ?? [];
+  const addPerson = useMutation(api.features.people.addPerson);
+  const deletePerson = useMutation(api.features.people.deletePerson);
+  const deleteMultiplePeople = useMutation(api.features.people.deletePeople);
+
+  const [selectedPeople, setSelectedPeople] = useState<Id<"people">[]>([]);
 
   // Derive selectAll state
-  const allSelected = selectedPeople.length === mockPeople.length;
+  const allSelected =
+    people.length > 0 && selectedPeople.length === people.length;
   const someSelected =
-    selectedPeople.length > 0 && selectedPeople.length < mockPeople.length;
+    selectedPeople.length > 0 && selectedPeople.length < people.length;
 
   const handleSelectAll = (checked: boolean | "indeterminate") => {
     if (checked) {
-      setSelectedPeople(mockPeople.map((p) => p.id));
+      setSelectedPeople(people.map((p) => p._id));
     } else {
       setSelectedPeople([]);
     }
   };
 
-  const handleSelectPerson = (personId: string, checked: boolean) => {
+  const handleSelectPerson = (personId: Id<"people">, checked: boolean) => {
     if (checked) {
       setSelectedPeople((prev) => [...prev, personId]);
     } else {
       setSelectedPeople((prev) => prev.filter((id) => id !== personId));
     }
+  };
+
+  const handleAddPerson = async () => {
+    await addPerson({ name: getRandomName() });
+  };
+
+  const handleDeletePerson = async (id: Id<"people">) => {
+    await deletePerson({ id });
+    setSelectedPeople((prev) => prev.filter((pid) => pid !== id));
+  };
+
+  const handleDeleteSelected = async () => {
+    await deleteMultiplePeople({ ids: selectedPeople });
+    setSelectedPeople([]);
+  };
+
+  // Map status to display text
+  const getStatusText = (status?: "ready" | "waiting") => {
+    if (status === "waiting") return "Waiting for response";
+    return "Ready to request data";
   };
 
   return (
@@ -37,7 +66,7 @@ export default function People() {
         title="People"
         subtitle="Add people who you want to request data from."
         buttonLabel="Add person"
-        onButtonClick={() => {}}
+        onButtonClick={handleAddPerson}
         buttonVariant="default"
         learnMoreLink="#"
       />
@@ -61,25 +90,25 @@ export default function People() {
             menuItems={[
               {
                 label: "Delete",
-                onClick: () => console.log("Delete all selected"),
+                onClick: handleDeleteSelected,
                 destructive: true,
               },
             ]}
           />
 
           {/* Person rows */}
-          {mockPeople.map((person) => (
+          {people.map((person) => (
             <RowCard
-              key={person.id}
+              key={person._id}
               title={person.name}
-              subtitle={`${person.renewal}`}
+              subtitle={getStatusText(person.status)}
               image="" // fallback letter
               showAvatar
               leading={
                 <Checkbox
-                  checked={selectedPeople.includes(person.id)}
+                  checked={selectedPeople.includes(person._id)}
                   onCheckedChange={(checked) =>
-                    handleSelectPerson(person.id, checked as boolean)
+                    handleSelectPerson(person._id, checked as boolean)
                   }
                   className="w-4 h-4 border-gray-300 data-[state=checked]:bg-gray-800 
                     data-[state=checked]:border-gray-800 rounded-sm"
@@ -88,11 +117,11 @@ export default function People() {
               menuItems={[
                 {
                   label: "Edit",
-                  onClick: () => console.log("Edit", person.id),
+                  onClick: () => console.log("Edit", person._id),
                 },
                 {
                   label: "Delete",
-                  onClick: () => console.log("Delete", person.id),
+                  onClick: () => handleDeletePerson(person._id),
                   destructive: true,
                 },
               ]}

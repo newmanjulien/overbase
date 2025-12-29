@@ -1,14 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Download, Forward } from "lucide-react";
-import type { TableRow } from "@/lib/questions";
+import type { TableRow as TableRowType } from "@/lib/questions";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  // TableHeader,
+  // TableHead,
+} from "@/components/ui/table";
 
 // Re-export for backward compatibility
-export type { TableRow };
+export type { TableRowType as TableRow };
 
 interface DataTableProps {
-  tableData: TableRow[];
+  tableData: TableRowType[];
   onForward?: () => void;
 }
 
@@ -49,22 +57,22 @@ export default function DataTable({ tableData, onForward }: DataTableProps) {
         </div>
 
         <div className="overflow-x-auto">
-          <table
+          <Table
             className="w-full text-left border-collapse table-fixed
-          [&_td]:p-1.5 [&_td]:text-xs [&_td]:font-mono 
+          [&_td]:!p-1.5 [&_td]:text-xs [&_td]:font-mono 
           [&_td]:overflow-hidden [&_td]:whitespace-nowrap 
           [&_td]:border-r [&_td]:border-gray-200
           [&_td:last-child]:border-r-0
           [&_tr]:border-b [&_tr]:border-gray-200 [&_tr:last-child]:border-0
           [&_tr]:text-gray-900"
           >
-            <tbody>
+            <TableBody>
               {tableData.map((row, i) => {
                 const isLastRow = i === tableData.length - 1;
                 return (
-                  <tr
+                  <TableRow
                     key={i}
-                    className={isLastRow ? "relative" : ""}
+                    className={`hover:bg-transparent ${isLastRow ? "relative" : ""}`}
                     style={
                       isLastRow
                         ? {
@@ -76,16 +84,16 @@ export default function DataTable({ tableData, onForward }: DataTableProps) {
                         : undefined
                     }
                   >
-                    <td title={row.column1}>{row.column1}</td>
-                    <td title={row.column2}>{row.column2}</td>
-                    <td title={row.column3}>{row.column3}</td>
-                    <td title={row.column4}>{row.column4}</td>
-                    <td title={row.column5}>{row.column5}</td>
-                  </tr>
+                    <TableCell title={row.column1}>{row.column1}</TableCell>
+                    <TableCell title={row.column2}>{row.column2}</TableCell>
+                    <TableCell title={row.column3}>{row.column3}</TableCell>
+                    <TableCell title={row.column4}>{row.column4}</TableCell>
+                    <TableCell title={row.column5}>{row.column5}</TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>

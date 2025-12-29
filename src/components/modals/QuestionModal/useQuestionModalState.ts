@@ -6,8 +6,8 @@ import type {
   KpiAttachment,
   PersonAttachmentWithInfo,
   FileAttachmentForUpload,
-  ConnectorAttachment,
-} from "../shared/modalTypes";
+  ConnectorReference,
+} from "../types";
 
 export interface QuestionModalStateProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ export function useQuestionModalState({
   const [fileAttachments, setFileAttachments] = useState<
     FileAttachmentForUpload[]
   >([]);
-  const [connectors, setConnectors] = useState<ConnectorAttachment[]>([]);
+  const [connectors, setConnectors] = useState<ConnectorReference[]>([]);
   // Now stores the full SchedulePattern instead of just frequency
   const [schedule, setSchedule] = useState<SchedulePattern | null>(null);
   const [visibility, setVisibility] = useState<"Private" | "Team">("Private");

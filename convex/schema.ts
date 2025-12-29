@@ -35,8 +35,8 @@ export default defineSchema({
    * questionType is derived from schedule presence (undefined = one-time).
    */
   questions: defineTable({
-    // Thread-level privacy (can be toggled for entire thread)
-    privacy: v.union(v.literal("private"), v.literal("team")),
+    // Thread-level privacy: undefined = private (default), "team" = shared
+    privacy: v.optional(v.literal("team")),
 
     // Recurring schedule (undefined = one-time question)
     schedule: v.optional(
@@ -78,8 +78,8 @@ export default defineSchema({
     // Message content
     content: v.optional(v.string()),
 
-    // Per-message privacy (usually matches thread, but can differ)
-    privacy: v.union(v.literal("private"), v.literal("team")),
+    // Per-message privacy: undefined = inherit from thread, "team" = shared
+    privacy: v.optional(v.literal("team")),
 
     // Data table (only on Overbase responses)
     tableData: v.optional(
@@ -140,7 +140,9 @@ export default defineSchema({
   // PEOPLE FEATURE
   // ============================================
   people: defineTable({
-    // TODO: Define fields when implementing
+    name: v.string(),
+    photo: v.optional(v.string()),
+    status: v.optional(v.union(v.literal("ready"), v.literal("waiting"))),
   }),
 
   // ============================================

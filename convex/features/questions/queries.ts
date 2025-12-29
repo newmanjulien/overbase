@@ -5,11 +5,12 @@
 
 import { query } from "@convex/_generated/server";
 import { v } from "convex/values";
+import type { Doc } from "@convex/_generated/dataModel";
 import {
   enrichQuestionsWithVariants,
   enrichQuestionWithVariant,
 } from "./enrichment";
-import type { QuestionVariant, AnswerDoc } from "@/lib/questions";
+import type { QuestionVariant } from "@/lib/questions";
 
 // ============================================
 // QUESTION QUERIES
@@ -54,7 +55,7 @@ export const getQuestionById = query({
  */
 export const getAnswersByThreadId = query({
   args: { questionThreadId: v.id("questions") },
-  handler: async (ctx, args): Promise<AnswerDoc[]> => {
+  handler: async (ctx, args): Promise<Doc<"answers">[]> => {
     return await ctx.db
       .query("answers")
       .withIndex("by_questionThreadId", (q) =>

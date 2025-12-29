@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Answer } from "./Answer";
-import type { Id } from "@convex/_generated/dataModel";
-import type { ForwardEntry } from "@/components/modals/shared/modalTypes";
-import type { Privacy } from "@/lib/questions";
+import type { ForwardEntry } from "@/components/modals/types";
+import type { Privacy, Id } from "@/lib/questions";
 
 interface AnswerClientProps {
   id: string;

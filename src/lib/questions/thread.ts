@@ -55,7 +55,6 @@ export type StatusCard = {
   type: "status";
   label: string;
   subLabel?: string;
-  avatar: "overbase";
 };
 
 /** An informational card (e.g., "48h wait time") */
@@ -82,7 +81,7 @@ export interface ThreadAnswer {
   _id: string;
   sender: Sender;
   content?: string;
-  privacy: Privacy;
+  privacy?: Privacy; // Optional: undefined = private
   tableData?: TableRow[];
   cancelledAt?: number;
   // Attachments (from answers table)
@@ -173,7 +172,6 @@ export function deriveThread(
     thread.push({
       type: "status",
       label: "Overbase is answering...",
-      avatar: "overbase",
     });
   }
 
@@ -182,7 +180,6 @@ export function deriveThread(
     thread.push({
       type: "status",
       label: `Next answer will be on ${question.scheduledDate}`,
-      avatar: "overbase",
     });
   }
 

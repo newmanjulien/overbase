@@ -1,7 +1,7 @@
 "use client";
 
 import { Header } from "@/components/blocks/Header";
-import { RowCard } from "@/components/blocks/RowCard";
+import { RowCard } from "@/components/cards/RowCard";
 import { EmptyState } from "@/components/blocks/EmptyState";
 import { InstalledConnectors } from "./InstalledConnectors";
 import { Plug } from "lucide-react";

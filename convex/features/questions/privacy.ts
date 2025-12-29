@@ -8,12 +8,18 @@
  * 1. Question privacy change → cascades to ALL answers
  * 2. Answer privacy change → ONLY that answer changes
  * 3. After any answer change, question privacy = MAX(all answers)
- *    where team > private
+ *    where team > private (undefined)
+ *
+ * PRIVACY MODEL:
+ * - undefined = private (default)
+ * - "team" = shared with team
  */
 
 import type { MutationCtx } from "@convex/_generated/server";
 import type { Id } from "@convex/_generated/dataModel";
-import type { Privacy } from "@/lib/questions";
+
+/** Privacy value type: undefined = private, "team" = shared */
+type PrivacyValue = "team" | undefined;
 
 // ============================================
 // PUBLIC API — Use these in mutations
@@ -27,7 +33,7 @@ import type { Privacy } from "@/lib/questions";
 export async function setQuestionPrivacy(
   ctx: MutationCtx,
   questionId: Id<"questions">,
-  privacy: Privacy
+  privacy: PrivacyValue
 ): Promise<void> {
   // Update the question
   await ctx.db.patch(questionId, { privacy });
@@ -45,7 +51,7 @@ export async function setQuestionPrivacy(
 export async function setAnswerPrivacy(
   ctx: MutationCtx,
   answerId: Id<"answers">,
-  privacy: Privacy
+  privacy: PrivacyValue
 ): Promise<void> {
   // Get the answer to find its parent question
   const answer = await ctx.db.get(answerId);
@@ -69,7 +75,7 @@ export async function setAnswerPrivacy(
 async function _cascadeToAnswers(
   ctx: MutationCtx,
   questionId: Id<"questions">,
-  privacy: Privacy
+  privacy: PrivacyValue
 ): Promise<void> {
   const answers = await ctx.db
     .query("answers")
@@ -83,7 +89,7 @@ async function _cascadeToAnswers(
 
 /**
  * Recompute question privacy as MAX(all answer privacies).
- * team > private, so if ANY answer is team, question is team.
+ * team > private (undefined), so if ANY answer is team, question is team.
  */
 async function _recomputeQuestionFromAnswers(
   ctx: MutationCtx,
@@ -98,6 +104,6 @@ async function _recomputeQuestionFromAnswers(
 
   const hasTeamAnswer = answers.some((a) => a.privacy === "team");
   await ctx.db.patch(questionId, {
-    privacy: hasTeamAnswer ? "team" : "private",
+    privacy: hasTeamAnswer ? "team" : undefined,
   });
 }

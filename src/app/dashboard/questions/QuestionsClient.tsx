@@ -12,9 +12,9 @@ import {
   type FilterKey,
   type QuestionVariant,
   type Privacy,
+  type Id,
 } from "@/lib/questions";
-import type { Id } from "@convex/_generated/dataModel";
-import type { ForwardEntry } from "@/components/modals/shared/modalTypes";
+import type { ForwardEntry } from "@/components/modals/types";
 
 /**
  * Filter questions client-side based on the selected filter.

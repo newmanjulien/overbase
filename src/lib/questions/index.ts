@@ -13,20 +13,17 @@ export type {
   PersonReference,
   FileAttachment,
   ConnectorReference,
-  AnswerDoc,
-  QuestionBase,
   AnsweredQuestion,
   InProgressQuestion,
   RecurringQuestion,
   QuestionVariant,
+  Id,
 } from "./types";
 
 // Constants (single source of truth for all string literals)
 export {
   SENDER,
   SENDER_LABEL,
-  PRIVACY,
-  PRIVACY_LABEL,
   FILTER,
   FILTER_OPTIONS,
   FREQUENCY,

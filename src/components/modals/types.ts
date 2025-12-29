@@ -1,0 +1,51 @@
+/**
+ * Modal types - UI-specific extensions for question-related modals.
+ *
+ * Core types are imported from the shared types library.
+ * UI-specific types that depend on browser APIs (like File) or
+ * modal-specific logic are defined here.
+ */
+
+// Re-export core types from shared library for convenience
+export type {
+  KpiAttachment,
+  PersonReference,
+  FileAttachment,
+  ConnectorReference,
+} from "@/lib/questions";
+
+// ============================================
+// UI-SPECIFIC TYPES
+// ============================================
+
+/**
+ * Extended person reference with additional modal context.
+ * Used in PeopleModal for tracking what info is needed from each person.
+ * Extends PersonReference shape (id, name, photo?) with infoNeeded.
+ */
+export interface PersonAttachmentWithInfo {
+  id: string;
+  name: string;
+  infoNeeded: string;
+  photo?: string;
+}
+
+/**
+ * Forward entry with additional forward-specific fields.
+ * Used in ForwardModal for tracking forward options.
+ */
+export interface ForwardEntry {
+  name: string;
+  infoNeeded: string;
+  selectionType: string;
+}
+
+/**
+ * Extended file attachment with the actual File object for upload.
+ * Used in FileModal before the file is uploaded to storage.
+ */
+export interface FileAttachmentForUpload {
+  file: File | null;
+  fileName: string;
+  context: string;
+}

@@ -1,23 +1,38 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { dummyPeople, type ForwardEntry } from "../shared/modalTypes";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import type { ForwardEntry } from "../types";
+import type { PersonReference } from "@/lib/questions";
 
 export function useForwardModalState(
   people: ForwardEntry[],
   setPeople: (p: ForwardEntry[]) => void,
   onClose: () => void
 ) {
+  // Fetch people from database
+  const dbPeople = useQuery(api.features.people.getAllPeople) ?? [];
+  const allPeople = useMemo(
+    (): PersonReference[] =>
+      dbPeople.map((p) => ({
+        id: p._id,
+        name: p.name,
+        photo: p.photo,
+      })),
+    [dbPeople]
+  );
+
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [infoNeeded, setInfoNeeded] = useState("");
   const [selectionType, setSelectionType] = useState("only dataset");
 
   const filteredPeople = useMemo(() => {
-    return dummyPeople.filter((p) =>
+    return allPeople.filter((p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [allPeople, searchQuery]);
 
   const togglePerson = (id: string) => {
     setSelectedIds((prev) =>
@@ -27,7 +42,7 @@ export function useForwardModalState(
 
   const handleAddPeople = () => {
     if (selectedIds.length > 0) {
-      const selectedPeopleObjects = dummyPeople.filter((p) =>
+      const selectedPeopleObjects = allPeople.filter((p) =>
         selectedIds.includes(p.id)
       );
       const newEntries = selectedPeopleObjects.map((p) => ({
@@ -59,6 +74,5 @@ export function useForwardModalState(
     filteredPeople,
     togglePerson,
     handleAddPeople,
-    closeModal,
   };
 }

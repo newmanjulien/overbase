@@ -1,101 +1,48 @@
 /**
  * Shared Question Types
  *
- * These types are used by both client components and can be imported
- * by Convex server code. This is the single source of truth for
- * question-related types.
+ * Re-exports storage types from convex/shared and defines UI-specific extensions.
+ * This is the client-side import point - never import from @convex directly in components.
  */
 
-import type { Doc, Id } from "@convex/_generated/dataModel";
-import type { Privacy, Sender, Frequency } from "./constants";
+import type { Privacy, Frequency } from "./constants";
 
 // ============================================
-// TABLE DATA TYPES
+// RE-EXPORT STORAGE TYPES FROM CONVEX
 // ============================================
 
-/** Table row structure for answered questions */
-export type TableRow = {
-  column1: string;
-  column2: string;
-  column3: string;
-  column4: string;
-  column5: string;
-};
+export type {
+  TableRow,
+  SchedulePattern,
+  KpiAttachment,
+  FileAttachment,
+  Id,
+} from "@convex/shared/types";
+
+// Re-export ConnectorAttachment as ConnectorReference for backwards compatibility
+export type { ConnectorAttachment as ConnectorReference } from "@convex/shared/types";
 
 // ============================================
-// SCHEDULE TYPES (for recurring questions)
+// UI-EXTENDED TYPES
 // ============================================
 
 /**
- * Schedule pattern for recurring questions.
- * Uses RFC 5545 recurrence rules via the rrule library.
- * The rrule string is the source of truth for recurrence logic.
+ * Person reference - extends storage type with UI-only fields.
+ * `photo` is resolved client-side, not stored in the database.
  */
-export interface SchedulePattern {
-  /** RFC 5545 recurrence rule string (e.g., "FREQ=WEEKLY;BYDAY=MO") */
-  rrule: string;
+import type { PersonAttachment } from "@convex/shared/types";
 
-  /** Human-friendly frequency for UI grouping */
-  frequency: Frequency;
-
-  /** How many days of data to analyze before delivery */
-  dataRangeDays: number;
+export interface PersonReference extends PersonAttachment {
+  photo?: string;
 }
-
-// ============================================
-// ATTACHMENT TYPES (match schema.ts)
-// ============================================
-
-/**
- * KPI attachment shape as stored in Convex.
- */
-export interface KpiAttachment {
-  metric: string;
-  definition: string;
-  antiDefinition: string;
-}
-
-/**
- * Person reference - used for both:
- * - Attaching people to a question (stored in Convex)
- * - Displaying people in selection modals
- */
-export interface PersonReference {
-  id: string;
-  name: string;
-}
-
-/**
- * File attachment shape as stored in Convex.
- */
-export interface FileAttachment {
-  fileName: string;
-  context?: string;
-  // Future: fileId?: Id<"_storage">;
-}
-
-/**
- * Connector reference - used for attaching connectors to questions/answers.
- */
-export interface ConnectorReference {
-  id: string;
-  title: string;
-  logo: string;
-}
-
-// ============================================
-// ANSWER TYPES
-// ============================================
-
-/**
- * Raw answer document from Convex.
- * Used for typing query return values.
- */
-export type AnswerDoc = Doc<"answers">;
 
 // ============================================
 // QUESTION VARIANT TYPES
 // ============================================
+
+// Import Id for QuestionBase (already re-exported above)
+import type { Id, SchedulePattern } from "@convex/shared/types";
+import type { TableRow } from "@convex/shared/types";
 
 /**
  * Base question with computed/derived fields.
@@ -110,7 +57,7 @@ export type QuestionBase = {
   // From questions table
   _id: Id<"questions">;
   _creationTime: number;
-  privacy: Privacy;
+  privacy?: Privacy; // undefined = private (default)
   schedule?: SchedulePattern;
   cancelledAt?: number;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,11 +9,7 @@ import { api } from "@convex/_generated/api";
 import { ASSET_KEYS } from "@/lib/assets";
 import { ConnectorProvider } from "@/app/dashboard/connectors/connectorContext";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <ConnectorProvider>
       <DashboardLayoutContent>{children}</DashboardLayoutContent>
@@ -21,7 +17,7 @@ export default function DashboardLayout({
   );
 }
 
-function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
+function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const logoAsset = useQuery(api.features.assets.getAssetByKey, {
     key: ASSET_KEYS.OVERBASE_LOGO,

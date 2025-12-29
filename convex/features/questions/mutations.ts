@@ -23,7 +23,7 @@ export const createQuestion = mutation({
   args: {
     // Content goes into first answer, not the question itself
     content: v.string(),
-    privacy: v.union(v.literal("private"), v.literal("team")),
+    privacy: v.optional(v.literal("team")),
 
     // Schedule: undefined = one-time, present = recurring
     schedule: v.optional(
@@ -106,7 +106,7 @@ export const createQuestion = mutation({
 export const updateQuestionPrivacy = mutation({
   args: {
     id: v.id("questions"),
-    privacy: v.union(v.literal("private"), v.literal("team")),
+    privacy: v.optional(v.literal("team")),
   },
   handler: (ctx, args) => setQuestionPrivacy(ctx, args.id, args.privacy),
 });
@@ -149,7 +149,7 @@ export const createAnswer = mutation({
     questionThreadId: v.id("questions"),
     sender: v.union(v.literal("user"), v.literal("overbase")),
     content: v.optional(v.string()),
-    privacy: v.union(v.literal("private"), v.literal("team")),
+    privacy: v.optional(v.literal("team")),
     tableData: v.optional(
       v.array(
         v.object({
@@ -219,7 +219,7 @@ export const createAnswer = mutation({
 export const updateAnswerPrivacy = mutation({
   args: {
     id: v.id("answers"),
-    privacy: v.union(v.literal("private"), v.literal("team")),
+    privacy: v.optional(v.literal("team")),
   },
   handler: (ctx, args) => setAnswerPrivacy(ctx, args.id, args.privacy),
 });
