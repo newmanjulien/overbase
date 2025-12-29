@@ -146,12 +146,12 @@ export default function People() {
                 />
               ))}
             </div>
+
+            <div className="mt-8 w-full">
+              <InfoCard text="Manage the people in your organization and their access levels." />
+            </div>
           </>
         )}
-
-        <div className="mt-8 w-full">
-          <InfoCard text="Manage the people in your organization and their access levels." />
-        </div>
       </div>
     </div>
   );
