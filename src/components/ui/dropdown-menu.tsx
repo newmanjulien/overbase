@@ -4,7 +4,11 @@ import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import clsx from "clsx";
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+// modal={false} prevents scroll locking when dropdown opens (fixes page shift issue)
+// To revert: remove the wrapper and use DropdownMenuPrimitive.Root directly
+const DropdownMenu = (
+  props: React.ComponentProps<typeof DropdownMenuPrimitive.Root>
+) => <DropdownMenuPrimitive.Root modal={false} {...props} />;
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 

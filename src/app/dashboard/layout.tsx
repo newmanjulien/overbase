@@ -1,41 +1,34 @@
 "use client";
 
-import React from "react";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectorProvider } from "@/lib//dashboard/connectorContext";
-import {
-  DashboardUIProvider,
-  useDashboardUI,
-} from "@/lib/dashboard/UIProvider";
-import { DashboardAdminProvider } from "../../lib/dashboard/AdminProvider";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { ASSET_KEYS } from "@/lib/assets";
+import { ConnectorProvider } from "@/app/dashboard/connectors/connectorContext";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <ConnectorProvider>
-      <DashboardUIProvider>
-        <DashboardAdminProvider>
-          <DashboardLayoutContent>{children}</DashboardLayoutContent>
-        </DashboardAdminProvider>
-      </DashboardUIProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </ConnectorProvider>
   );
 }
 
-function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
+function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { hideFooter } = useDashboardUI();
+  const logoAsset = useQuery(api.features.assets.getAssetByKey, {
+    key: ASSET_KEYS.OVERBASE_LOGO,
+  });
+  const logoUrl = logoAsset?.imageUrl ?? null;
 
   const navItems = [
-    { href: "/dashboard/requests", label: "Requests" },
+    { href: "/dashboard/questions", label: "Questions" },
     { href: "/dashboard/templates", label: "Templates" },
     { href: "/dashboard/connectors", label: "Connectors" },
-    { href: "/dashboard/customers", label: "Customers" },
+    { href: "/dashboard/people", label: "People" },
   ];
 
   return (
@@ -46,14 +39,18 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between h-11">
             <div className="flex items-center space-x-8">
               <div className="h-7">
-                <Link href="/dashboard/requests">
-                  <Image
-                    src="/images/logo.png"
-                    alt="Logo"
-                    width={42}
-                    height={30}
-                    priority
-                  />
+                <Link href="/dashboard/questions">
+                  {logoUrl ? (
+                    <Image
+                      src={logoUrl}
+                      alt=""
+                      width={42}
+                      height={30}
+                      priority
+                    />
+                  ) : (
+                    <div className="w-[42px] h-[30px] bg-gray-100 rounded animate-pulse" />
+                  )}
                 </Link>
               </div>
 
@@ -84,37 +81,34 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      {!hideFooter && (
-        <footer className="bg-white">
-          <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="h-4">
-                  <Image
-                    src="/images/logo.png"
-                    alt="Logo small"
-                    width={38}
-                    height={20}
-                  />
-                </div>
-              </div>
-              <nav className="flex space-x-8">
-                {["Home", "Docs", "Guides", "Help", "Contact", "Legal"].map(
-                  (label) => (
-                    <a
-                      key={label}
-                      href="#"
-                      className="text-gray-500 hover:text-gray-700 text-sm font-light transition-colors"
-                    >
-                      {label}
-                    </a>
-                  )
+      <footer className="bg-white">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="h-4">
+                {logoUrl ? (
+                  <Image src={logoUrl} alt="" width={38} height={20} />
+                ) : (
+                  <div className="w-[38px] h-[20px] bg-gray-100 rounded animate-pulse" />
                 )}
-              </nav>
+              </div>
             </div>
+            <nav className="flex space-x-8">
+              {["Home", "Docs", "Guides", "Help", "Contact", "Legal"].map(
+                (label) => (
+                  <a
+                    key={label}
+                    href="#"
+                    className="text-gray-500 hover:text-gray-700 text-sm font-light transition-colors"
+                  >
+                    {label}
+                  </a>
+                )
+              )}
+            </nav>
           </div>
-        </footer>
-      )}
+        </div>
+      </footer>
     </div>
   );
 }

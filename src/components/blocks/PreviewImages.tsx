@@ -99,7 +99,7 @@ export function PreviewImages({ images }: PreviewImagesProps) {
         >
           <Image
             src={images[currentIndex].src}
-            alt={images[currentIndex].alt}
+            alt=""
             fill
             className="object-cover"
             priority
@@ -132,21 +132,8 @@ export function PreviewImages({ images }: PreviewImagesProps) {
                   flexShrink: 0,
                 }}
                 onClick={() => setCurrentIndex(index)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ")
-                    setCurrentIndex(index);
-                }}
-                aria-label={`Preview image ${index + 1}: ${image.alt}`}
-                aria-current={index === currentIndex ? "true" : undefined}
               >
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={image.src} alt="" fill className="object-cover" />
 
                 {index === currentIndex && (
                   <div
@@ -163,7 +150,6 @@ export function PreviewImages({ images }: PreviewImagesProps) {
           {/* Glow overlay at bottom if needed */}
           {showGlow && (
             <div
-              aria-hidden="true"
               className="pointer-events-none absolute bottom-0 left-0 w-full h-8 rounded-b-md"
               style={{
                 background:

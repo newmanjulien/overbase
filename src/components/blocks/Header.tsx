@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="size-12 rounded-full overflow-hidden border border-gray-200 bg-white flex items-center justify-center">
                   <Image
                     src={logo}
-                    alt={title}
+                    alt=""
                     width={35}
                     height={35}
                     className="object-contain"

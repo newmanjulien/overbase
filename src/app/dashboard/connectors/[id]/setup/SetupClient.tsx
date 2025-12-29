@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Connectors } from "../../DummyData";
-import { useConnectorContext } from "@/lib/dashboard/connectorContext";
+import { useConnectorContext } from "../../connectorContext";
 import Setup from "./Setup";
 
 interface SetupClientProps {

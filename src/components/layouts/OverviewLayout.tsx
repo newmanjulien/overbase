@@ -33,7 +33,7 @@ export default function OverviewLayout({
             {status === "active" ? (
               <span className="font-semibold">Added</span>
             ) : (
-              <span>{adds ?? "Added by <10 colleagues"}</span>
+              <span>{adds ?? "Added by <10 people"}</span>
             )}
           </div>
         </div>

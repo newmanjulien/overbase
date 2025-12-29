@@ -1,11 +1,7 @@
-"use client";
-
-import React from "react";
-
 export default function Loading() {
   return (
-    <div className="flex items-center justify-center h-full w-full bg-muted">
-      <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-gray-500"></div>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
     </div>
   );
 }

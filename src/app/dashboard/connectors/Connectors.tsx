@@ -1,9 +1,10 @@
 "use client";
 
 import { Header } from "@/components/blocks/Header";
-import { RowCard } from "@/components/blocks/RowCard";
+import { RowCard } from "@/components/cards/RowCard";
 import { EmptyState } from "@/components/blocks/EmptyState";
 import { InstalledConnectors } from "./InstalledConnectors";
+import { Plug } from "lucide-react";
 import type { Connectors } from "./DummyData";
 
 interface ConnectorsProps {
@@ -21,7 +22,7 @@ export function Connectors({
     <div className="min-h-[calc(100vh-56px)] w-full">
       <Header
         title="Connectors"
-        subtitle="Easily get any customer data from all your platforms and tools."
+        subtitle="Add connectors to internal datasources you want to request data from."
         buttonLabel="Add custom connector"
         onButtonClick={() => {}}
         secondButtonLabel="Browse connectors"
@@ -42,7 +43,7 @@ export function Connectors({
                 onButtonClick={() => {}}
                 className="py-32 min-h-[600px]"
                 withBorder={true}
-                iconType="plug"
+                icon={Plug}
               />
             ) : (
               addedConnectors.map((connector) => (

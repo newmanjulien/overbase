@@ -1,7 +1,7 @@
 "use client";
 
 import type { Connectors } from "../DummyData";
-import { PreviewImages } from "../../../../components/blocks/PreviewImages";
+import { PreviewImages } from "@/components/blocks/PreviewImages";
 import { Header } from "@/components/blocks/Header";
 import OverviewLayout from "@/components//layouts/OverviewLayout";
 
