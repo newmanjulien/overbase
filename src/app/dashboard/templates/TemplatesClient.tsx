@@ -12,6 +12,7 @@ export default function TemplatesClient() {
   const router = useRouter();
   const rawTemplates = useQuery(api.features.templates.getAllTemplates);
   const uniqueTags = useQuery(api.features.templates.getUniqueTags);
+  const templateTags = useQuery(api.features.templates.getAllTemplateTags);
 
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,18 +25,29 @@ export default function TemplatesClient() {
     }
   }, [uniqueTags, selectedTag]);
 
-  // Convert string tags to the format Sidebar expects
-  const tagsForSidebar = (uniqueTags ?? []).map((tag) => ({
-    key: tag,
-    name: tag,
-  }));
+  // Convert string tags to the format Sidebar expects, with descriptions from templateTags
+  const tagsForSidebar = (uniqueTags ?? []).map((tagKey) => {
+    const tagMeta = templateTags?.find((t) => t.key === tagKey);
+    return {
+      key: tagKey,
+      name: tagMeta?.name ?? tagKey,
+    };
+  });
+
+  // Get description for the currently selected tag
+  const selectedTagMeta = templateTags?.find((t) => t.key === selectedTag);
+  const selectedTagDescription =
+    selectedTagMeta?.description ?? "Browse templates in this category";
 
   // Filter templates by selected tag and normalize (validate gradients)
   const filteredTemplates: Template[] = (rawTemplates ?? [])
     .filter((t) => selectedTag && t.tags.includes(selectedTag))
     .map(normalizeTemplate);
 
-  const isLoading = rawTemplates === undefined || uniqueTags === undefined;
+  const isLoading =
+    rawTemplates === undefined ||
+    uniqueTags === undefined ||
+    templateTags === undefined;
 
   const handleUseTemplate = (content: string) => {
     setInitialQuestion(content);
@@ -53,6 +65,7 @@ export default function TemplatesClient() {
         selectedTag={selectedTag}
         setSelectedTag={setSelectedTag}
         tagsForSidebar={tagsForSidebar}
+        selectedTagDescription={selectedTagDescription}
         isLoading={isLoading}
         onUseTemplate={handleUseTemplate}
       />

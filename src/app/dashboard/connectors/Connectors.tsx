@@ -22,7 +22,7 @@ export function Connectors({
     <div className="min-h-[calc(100vh-56px)] w-full">
       <Header
         title="Connectors"
-        subtitle="Add connectors to internal datasources you want to request data from."
+        subtitle="Connect to your internal systems so we can answer your questions."
         buttonLabel="Add custom connector"
         onButtonClick={() => {}}
         secondButtonLabel="Browse connectors"
