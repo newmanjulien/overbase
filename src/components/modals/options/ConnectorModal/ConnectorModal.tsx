@@ -91,9 +91,6 @@ export default function ConnectorModal({
               placeholder="Search connectors..."
               emptyMessage="No connectors found"
             />
-            <p className="mt-2 text-sm text-gray-500">
-              Overbase will query the selected connectors.
-            </p>
           </div>
         </div>
         <DialogFooter>
