@@ -17,11 +17,18 @@ export default defineSchema({
   templates: defineTable({
     title: v.string(),
     description: v.string(),
-    content: v.string(),
-    tags: v.array(v.string()), // e.g., ["Onboarding", "Support"]
     gradient: v.string(), // Key from src/config/gradients.ts (e.g., "sunset", "ocean")
+    tags: v.array(v.string()), // e.g., ["Onboarding", "Support"]
+    content: v.string(),
     imageId: v.optional(v.id("_storage")), // Convex file storage reference
   }),
+
+  // Template tag metadata (name + description for sidebar display)
+  templateTags: defineTable({
+    key: v.string(), // Matches tag strings used in templates.tags
+    name: v.string(), // Display name (usually same as key)
+    description: v.string(), // Shown when tag is selected, e.g., "Templates for onboarding"
+  }).index("by_key", ["key"]),
 
   // ============================================
   // QUESTIONS FEATURE (thread metadata + answers)

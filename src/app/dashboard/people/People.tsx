@@ -66,7 +66,7 @@ export default function People() {
     <div className="h-full w-full">
       <Header
         title="People"
-        subtitle="Add people who you want to request data from."
+        subtitle="Add people you want to request data from."
         buttonLabel="Add person"
         onButtonClick={handleAddPerson}
         buttonVariant="default"
@@ -77,7 +77,7 @@ export default function People() {
         {people.length === 0 ? (
           <EmptyState
             title="No people yet"
-            description="Add people who you want to request data from."
+            description="Add people you want to request data from"
             buttonLabel="Add person"
             onButtonClick={handleAddPerson}
             icon={Users}
@@ -148,7 +148,7 @@ export default function People() {
             </div>
 
             <div className="mt-8 w-full">
-              <InfoCard text="Manage the people in your organization and their access levels." />
+              <InfoCard text="Add people to your questions so we know what data to ask them for" />
             </div>
           </>
         )}

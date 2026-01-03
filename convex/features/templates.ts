@@ -16,9 +16,9 @@ export const getAllTemplates = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      content: v.string(),
-      tags: v.array(v.string()),
       gradient: v.string(),
+      tags: v.array(v.string()),
+      content: v.string(),
       imageId: v.optional(v.id("_storage")),
       imageUrl: v.union(v.string(), v.null()),
     })
@@ -53,9 +53,9 @@ export const getTemplatesByTag = query({
       _creationTime: v.number(),
       title: v.string(),
       description: v.string(),
-      content: v.string(),
-      tags: v.array(v.string()),
       gradient: v.string(),
+      tags: v.array(v.string()),
+      content: v.string(),
       imageId: v.optional(v.id("_storage")),
       imageUrl: v.union(v.string(), v.null()),
     })
@@ -93,5 +93,22 @@ export const getUniqueTags = query({
     const allTags = templates.flatMap((t) => t.tags);
     const uniqueTags = [...new Set(allTags)];
     return uniqueTags.sort();
+  },
+});
+
+// Get all template tag metadata (for sidebar with descriptions)
+export const getAllTemplateTags = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("templateTags"),
+      _creationTime: v.number(),
+      key: v.string(),
+      name: v.string(),
+      description: v.string(),
+    })
+  ),
+  handler: async (ctx) => {
+    return await ctx.db.query("templateTags").collect();
   },
 });

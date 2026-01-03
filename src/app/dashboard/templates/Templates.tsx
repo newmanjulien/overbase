@@ -8,6 +8,7 @@ interface TemplatesProps {
   selectedTag: string;
   setSelectedTag: (tag: string) => void;
   tagsForSidebar: { key: string; name: string }[];
+  selectedTagDescription: string;
   isLoading: boolean;
   onUseTemplate: (content: string) => void;
 }
@@ -17,7 +18,7 @@ function LoadingSkeleton() {
     <div className="h-full w-full">
       <Header
         title="Templates"
-        subtitle="Use templates your people are already using."
+        subtitle="Get ideas for your next question."
         learnMoreLink="#"
       />
 
@@ -57,6 +58,7 @@ export function Templates({
   selectedTag,
   setSelectedTag,
   tagsForSidebar,
+  selectedTagDescription,
   isLoading,
   onUseTemplate,
 }: TemplatesProps) {
@@ -68,7 +70,7 @@ export function Templates({
     <div className="h-full w-full">
       <Header
         title="Templates"
-        subtitle="Use templates your people are already using."
+        subtitle="Get ideas for your next question."
         learnMoreLink="#"
       />
 
@@ -87,7 +89,7 @@ export function Templates({
               {selectedTag || "All Templates"}
             </h2>
             <p className="text-gray-500 text-sm mt-1">
-              Browse templates in this category
+              {selectedTagDescription}
             </p>
           </div>
 

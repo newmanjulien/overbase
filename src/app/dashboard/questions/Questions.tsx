@@ -124,7 +124,7 @@ export function Questions({
           {questions.length === 0 ? (
             <EmptyState
               title="No questions found"
-              description="Ask your first question to get started."
+              description="Ask your first question to get started"
               icon={MessageCircle}
               withBorder
               className="py-32 min-h-[600px]"
