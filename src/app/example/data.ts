@@ -1,9 +1,9 @@
-import { SENDER, type Privacy } from "@/lib/questions/constants";
-import type { QuestionVariant, ThreadAnswer } from "@/lib/questions";
+import { SENDER } from "@/lib/questions/constants";
+import type { QuestionVariant, ThreadAnswer, Id } from "@/lib/questions";
 
 // Mock Data
 export const mockQuestion: QuestionVariant = {
-  _id: "mock_question_id" as any,
+  _id: "mock_question_id" as Id<"questions">,
   _creationTime: Date.now(),
   privacy: "team",
 
@@ -21,7 +21,7 @@ export const mockQuestion: QuestionVariant = {
 export const mockAnswers: ThreadAnswer[] = [
   // First abstract answer = the question itself
   {
-    _id: "mock_q_answer_id" as any,
+    _id: "mock_q_answer_id",
     sender: SENDER.USER,
     content:
       "Can you analyze the Q3 customer retention metrics compared to last year?",
@@ -36,7 +36,7 @@ export const mockAnswers: ThreadAnswer[] = [
   },
   // The response
   {
-    _id: "mock_response_id" as any,
+    _id: "mock_response_id",
     sender: SENDER.OVERBASE,
     content:
       "Here is the comparison of Q3 customer retention metrics between 2024 and 2025. We observed a 5% increase in retention year-over-year, primarily driven by the new onboarding initiatives.",
