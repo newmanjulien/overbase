@@ -110,7 +110,8 @@ export default function PeopleModal({
               className="w-full px-3 py-2.5 text-sm border border-gray-200 bg-gray-50/50 rounded-lg focus:outline-none resize-none h-24"
             />
             <p className="mt-1 text-sm text-gray-500">
-              Selected people will receive email requests for this information.
+              We will contact each person politely, individually, and using the
+              preferred method they provided
             </p>
           </div>
         </div>

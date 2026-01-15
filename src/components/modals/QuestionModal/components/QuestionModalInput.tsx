@@ -49,7 +49,7 @@ export function QuestionModalInput({
   removePeople,
   removeFileAttachment,
   removeConnector,
-  placeholder = 'Start your question with "What", "How", "Why", etc.',
+  placeholder = "Be as specific and detailed as possible",
   autoFocus = true,
 }: QuestionModalInputProps) {
   // User avatar
