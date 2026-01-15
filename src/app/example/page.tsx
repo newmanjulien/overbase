@@ -1,4 +1,4 @@
-import StaticAnswer from "@/components/blocks/StaticAnswer";
+import StaticAnswer from "@/app/example";
 import StaticHeader from "@/components/blocks/StaticHeader";
 import StaticFooter from "@/components/blocks/StaticFooter";
 
