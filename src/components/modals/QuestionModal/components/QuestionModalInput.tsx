@@ -99,13 +99,20 @@ export function QuestionModalInput({
         )}
       </div>
 
-      <textarea
-        autoFocus={autoFocus}
-        placeholder={placeholder}
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-        className="w-full flex-1 text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
-      />
+      <div className="relative flex-1 w-full">
+        <div
+          id="question-modal-highlight-target"
+          className="absolute top-0 left-0 w-full h-80 pointer-events-none"
+        />
+        <textarea
+          id="question-modal-input"
+          autoFocus={autoFocus}
+          placeholder={placeholder}
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          className="w-full h-full text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
+        />
+      </div>
 
       <AttachmentChipList
         kpis={kpis}

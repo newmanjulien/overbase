@@ -21,7 +21,7 @@ interface QuestionModalActionsProps {
     | "connector"
     | null;
   setActiveNestedModal: (
-    modal: "kpi" | "people" | "file" | "schedule" | "connector" | null
+    modal: "kpi" | "people" | "file" | "schedule" | "connector" | null,
   ) => void;
   closeNestedModal: () => void;
   kpis: KpiAttachment[];

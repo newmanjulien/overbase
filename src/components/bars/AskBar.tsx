@@ -40,7 +40,10 @@ export default function AskBar({
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-1 pt-4 mb-4">
+    <div
+      id="askbar"
+      className="bg-white rounded-2xl border border-gray-200 p-1 pt-4 mb-4"
+    >
       <div className="flex items-center gap-2">
         <Avatar className="h-10 w-10 ml-3">
           <AvatarImage src={userAvatar ?? undefined} />
@@ -48,6 +51,7 @@ export default function AskBar({
         </Avatar>
 
         <div
+          id="askbar-input"
           onClick={() => onClick()}
           className="flex-1 bg-gray-50 border border-gray-200 rounded-full text-sm px-4 py-2 text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors"
         >

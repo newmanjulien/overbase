@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,6 +19,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
 function DashboardLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+
   const logoAsset = useQuery(api.features.assets.getAssetByKey, {
     key: ASSET_KEYS.OVERBASE_LOGO,
   });
@@ -32,7 +33,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="flex flex-1 flex-col bg-muted">
+    <div className="flex flex-col min-h-screen bg-muted">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200/60">
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,13 +77,11 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
       </header>
 
       {/* Main content */}
-      <main className="pt-14 flex-grow min-h-[calc(100vh-56px)]">
-        {children}
-      </main>
+      <main className="pt-14 flex-grow overflow-y-auto">{children}</main>
 
       {/* Footer */}
       <footer className="bg-white">
-        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="h-4">
@@ -103,7 +102,7 @@ function DashboardLayoutContent({ children }: { children: ReactNode }) {
                   >
                     {label}
                   </a>
-                )
+                ),
               )}
             </nav>
           </div>

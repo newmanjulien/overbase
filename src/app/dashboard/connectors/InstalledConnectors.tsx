@@ -24,7 +24,7 @@ export function InstalledConnectors({
             Installed connectors
           </h2>
           <p className="text-sm text-gray-500 font-light leading-relaxed mt-1 max-w-xs">
-            Easily add connectors your people have already installed
+            Add connectors your colleagues have already installed
           </p>
         </div>
 

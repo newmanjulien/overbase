@@ -22,7 +22,7 @@ import type { ForwardEntry } from "@/components/modals/types";
  */
 function filterQuestions(
   questions: QuestionVariant[],
-  filter: FilterKey
+  filter: FilterKey,
 ): QuestionVariant[] {
   const now = Date.now();
   const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
@@ -47,11 +47,11 @@ export default function QuestionsClient() {
   const allQuestions = useQuery(api.features.questions.queries.getAllQuestions);
 
   const updateQuestionPrivacy = useMutation(
-    api.features.questions.mutations.updateQuestionPrivacy
+    api.features.questions.mutations.updateQuestionPrivacy,
   );
 
   const [selectedFilter, setSelectedFilter] = useState<FilterKey>(
-    FILTER_OPTIONS[0].key
+    FILTER_OPTIONS[0].key,
   );
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [modalOptions, setModalOptions] = useState<ModalOptions>({});
@@ -67,7 +67,7 @@ export default function QuestionsClient() {
 
   const handlePrivacyChange = async (
     questionId: Id<"questions">,
-    newPrivacy: Privacy
+    newPrivacy: Privacy,
   ) => {
     await updateQuestionPrivacy({ id: questionId, privacy: newPrivacy });
   };
@@ -75,7 +75,7 @@ export default function QuestionsClient() {
   // Filter client-side (memoized for performance)
   const filteredQuestions = useMemo(
     () => filterQuestions(allQuestions ?? [], selectedFilter),
-    [allQuestions, selectedFilter]
+    [allQuestions, selectedFilter],
   );
 
   const isLoading = allQuestions === undefined;

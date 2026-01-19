@@ -1,5 +1,5 @@
 {
-  "name": "Overbase",
+  "name": "overbase",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.65.0",
     "@lexical/react": "^0.36.2",
     "@lexical/text": "^0.36.2",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -28,9 +27,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "convex": "^1.31.2",
-    "draft-js": "^0.11.7",
-    "lexical": "^0.36.2",
     "lucide-react": "^0.525.0",
+    "motion": "^12.26.2",
     "next": "^15.5.9",
     "openai": "^6.1.0",
     "react": "19.1.0",
@@ -41,7 +39,6 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/draft-js": "^0.11.18",
     "@types/node": "^20.19.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",

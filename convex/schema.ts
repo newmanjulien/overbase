@@ -54,11 +54,11 @@ export default defineSchema({
         frequency: v.union(
           v.literal("weekly"),
           v.literal("monthly"),
-          v.literal("quarterly")
+          v.literal("quarterly"),
         ),
         // Data range: how many days of data to analyze before delivery
         dataRangeDays: v.number(),
-      })
+      }),
     ),
 
     // Soft delete - if present, question was cancelled at this timestamp
@@ -97,8 +97,8 @@ export default defineSchema({
           column3: v.string(),
           column4: v.string(),
           column5: v.string(),
-        })
-      )
+        }),
+      ),
     ),
 
     // Attachments (typically on user's "You asked" messages)
@@ -108,24 +108,24 @@ export default defineSchema({
           metric: v.string(),
           definition: v.string(),
           antiDefinition: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     attachedPeople: v.optional(
       v.array(
         v.object({
           id: v.string(),
           name: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     attachedFiles: v.optional(
       v.array(
         v.object({
           fileName: v.string(),
           context: v.optional(v.string()),
-        })
-      )
+        }),
+      ),
     ),
     attachedConnectors: v.optional(
       v.array(
@@ -133,8 +133,8 @@ export default defineSchema({
           id: v.string(),
           title: v.string(),
           logo: v.string(),
-        })
-      )
+        }),
+      ),
     ),
 
     // Soft delete - if present, this answer was cancelled at this timestamp
