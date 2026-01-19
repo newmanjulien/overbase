@@ -7,7 +7,7 @@
  * This is the single source of truth for data shape types.
  */
 
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 
 // ============================================
 // DOCUMENT TYPES

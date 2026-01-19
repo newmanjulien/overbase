@@ -6,7 +6,6 @@ import { api } from "@convex/_generated/api";
 import { ModalOptions } from "@/components/bars/AskBar";
 import { Questions } from "./Questions";
 import {
-  FILTER,
   FILTER_OPTIONS,
   isValidFilter,
   type FilterKey,

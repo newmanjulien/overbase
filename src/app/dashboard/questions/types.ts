@@ -18,7 +18,7 @@ import type { api } from "@convex/_generated/api";
  */
 export type QuestionFromConvex = FunctionReturnType<
   typeof api.features.questions.queries.getAllQuestions
->[number];
+>["page"][number];
 
 /**
  * Answer type as returned from Convex query.

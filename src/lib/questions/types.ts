@@ -17,18 +17,18 @@ export type {
   KpiAttachment,
   FileAttachment,
   Id,
-} from "@convex/shared/types";
+} from "@convex/types";
 
 // Re-export ConnectorAttachment as ConnectorReference for backwards compatibility
-export type { ConnectorAttachment as ConnectorReference } from "@convex/shared/types";
+export type { ConnectorAttachment as ConnectorReference } from "@convex/types";
 
 // ============================================
 // QUESTION VARIANT TYPES
 // ============================================
 
 // Import Id for QuestionBase (already re-exported above)
-import type { Id, SchedulePattern } from "@convex/shared/types";
-import type { TableRow } from "@convex/shared/types";
+import type { Id, SchedulePattern } from "@convex/types";
+import type { TableRow } from "@convex/types";
 
 /**
  * Base question with computed/derived fields.
