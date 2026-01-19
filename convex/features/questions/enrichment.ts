@@ -31,7 +31,7 @@ export function formatAskedDate(timestamp: number): string {
  */
 export async function fetchAnswersForQuestions(
   ctx: QueryCtx,
-  questionIds: Id<"questions">[]
+  questionIds: Id<"questions">[],
 ): Promise<Map<Id<"questions">, Doc<"answers">[]>> {
   // Parallel indexed queries - only fetches answers we need
   const results = await Promise.all(
@@ -39,12 +39,12 @@ export async function fetchAnswersForQuestions(
       const answers = await ctx.db
         .query("answers")
         .withIndex("by_questionThreadId", (q) =>
-          q.eq("questionThreadId", questionId)
+          q.eq("questionThreadId", questionId),
         )
         .order("asc")
         .collect();
       return [questionId, answers] as const;
-    })
+    }),
   );
 
   // Convert to Map for O(1) lookup
@@ -57,7 +57,7 @@ export async function fetchAnswersForQuestions(
  */
 export function enrichQuestionWithAnswers(
   question: Doc<"questions">,
-  answers: Doc<"answers">[]
+  answers: Doc<"answers">[],
 ): QuestionVariant {
   // Filter out cancelled answers
   const activeAnswers = answers.filter((a) => !a.cancelledAt);
@@ -140,7 +140,7 @@ export function enrichQuestionWithAnswers(
  */
 export async function enrichQuestionsWithVariants(
   ctx: QueryCtx,
-  questions: Doc<"questions">[]
+  questions: Doc<"questions">[],
 ): Promise<QuestionVariant[]> {
   if (questions.length === 0) return [];
 
@@ -161,12 +161,12 @@ export async function enrichQuestionsWithVariants(
  */
 export async function enrichQuestionWithVariant(
   ctx: QueryCtx,
-  question: Doc<"questions">
+  question: Doc<"questions">,
 ): Promise<QuestionVariant> {
   const answers = await ctx.db
     .query("answers")
     .withIndex("by_questionThreadId", (idx) =>
-      idx.eq("questionThreadId", question._id)
+      idx.eq("questionThreadId", question._id),
     )
     .order("asc")
     .collect();

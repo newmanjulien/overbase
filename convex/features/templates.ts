@@ -21,7 +21,7 @@ export const getAllTemplates = query({
       content: v.string(),
       imageId: v.optional(v.id("_storage")),
       imageUrl: v.union(v.string(), v.null()),
-    })
+    }),
   ),
   handler: async (ctx): Promise<TemplateWithImage[]> => {
     const templates = await ctx.db.query("templates").collect();
@@ -37,7 +37,7 @@ export const getAllTemplates = query({
           ...template,
           imageUrl,
         };
-      })
+      }),
     );
 
     return templatesWithImages;
@@ -58,12 +58,12 @@ export const getTemplatesByTag = query({
       content: v.string(),
       imageId: v.optional(v.id("_storage")),
       imageUrl: v.union(v.string(), v.null()),
-    })
+    }),
   ),
   handler: async (ctx, args): Promise<TemplateWithImage[]> => {
     const templates = await ctx.db.query("templates").collect();
     const filtered = templates.filter((template) =>
-      template.tags.includes(args.tag)
+      template.tags.includes(args.tag),
     );
 
     // Resolve image URLs from storage IDs
@@ -77,7 +77,7 @@ export const getTemplatesByTag = query({
           ...template,
           imageUrl,
         };
-      })
+      }),
     );
 
     return templatesWithImages;
@@ -106,7 +106,7 @@ export const getAllTemplateTags = query({
       key: v.string(),
       name: v.string(),
       description: v.string(),
-    })
+    }),
   ),
   handler: async (ctx) => {
     return await ctx.db.query("templateTags").collect();

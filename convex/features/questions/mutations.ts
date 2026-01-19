@@ -32,10 +32,10 @@ export const createQuestion = mutation({
         frequency: v.union(
           v.literal("weekly"),
           v.literal("monthly"),
-          v.literal("quarterly")
+          v.literal("quarterly"),
         ),
         dataRangeDays: v.number(),
-      })
+      }),
     ),
 
     // Attachments go on the first answer
@@ -45,24 +45,24 @@ export const createQuestion = mutation({
           metric: v.string(),
           definition: v.string(),
           antiDefinition: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     attachedPeople: v.optional(
       v.array(
         v.object({
           id: v.string(),
           name: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     attachedFiles: v.optional(
       v.array(
         v.object({
           fileName: v.string(),
           context: v.optional(v.string()),
-        })
-      )
+        }),
+      ),
     ),
     attachedConnectors: v.optional(
       v.array(
@@ -70,8 +70,8 @@ export const createQuestion = mutation({
           id: v.string(),
           title: v.string(),
           logo: v.string(),
-        })
-      )
+        }),
+      ),
     ),
   },
   handler: async (ctx, args) => {
@@ -125,7 +125,7 @@ export const cancelQuestion = mutation({
     const answers = await ctx.db
       .query("answers")
       .withIndex("by_questionThreadId", (idx) =>
-        idx.eq("questionThreadId", args.id)
+        idx.eq("questionThreadId", args.id),
       )
       .collect();
 
@@ -158,8 +158,8 @@ export const createAnswer = mutation({
           column3: v.string(),
           column4: v.string(),
           column5: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     // Attachments (for follow-up questions from user)
     attachedKpis: v.optional(
@@ -168,24 +168,24 @@ export const createAnswer = mutation({
           metric: v.string(),
           definition: v.string(),
           antiDefinition: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     attachedPeople: v.optional(
       v.array(
         v.object({
           id: v.string(),
           name: v.string(),
-        })
-      )
+        }),
+      ),
     ),
     attachedFiles: v.optional(
       v.array(
         v.object({
           fileName: v.string(),
           context: v.optional(v.string()),
-        })
-      )
+        }),
+      ),
     ),
     attachedConnectors: v.optional(
       v.array(
@@ -193,8 +193,8 @@ export const createAnswer = mutation({
           id: v.string(),
           title: v.string(),
           logo: v.string(),
-        })
-      )
+        }),
+      ),
     ),
   },
   handler: async (ctx, args) => {

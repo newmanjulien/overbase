@@ -28,7 +28,7 @@ export function useFollowupSubmit() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createAnswer = useMutation(
-    api.features.questions.mutations.createAnswer
+    api.features.questions.mutations.createAnswer,
   );
 
   const submitFollowup = async ({

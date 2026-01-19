@@ -36,6 +36,12 @@ interface QuestionsProps {
 
   // Actions
   onPrivacyChange: (questionId: Id<"questions">, newPrivacy: Privacy) => void;
+  onLoadMore?: () => void;
+  loadMoreStatus:
+    | "LoadingFirstPage"
+    | "CanLoadMore"
+    | "LoadingMore"
+    | "Exhausted";
 }
 
 function LoadingSkeleton() {
@@ -89,6 +95,8 @@ export function Questions({
   forwardPeople,
   setForwardPeople,
   onPrivacyChange,
+  onLoadMore,
+  loadMoreStatus,
 }: QuestionsProps) {
   if (isLoading) {
     return <LoadingSkeleton />;
@@ -165,6 +173,21 @@ export function Questions({
                   }
                 }
               })}
+
+              {/* Load More Button */}
+              {loadMoreStatus !== "Exhausted" && (
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={onLoadMore}
+                    disabled={loadMoreStatus === "LoadingMore"}
+                    className="px-6 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {loadMoreStatus === "LoadingMore"
+                      ? "Loading..."
+                      : "Load more questions"}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </main>

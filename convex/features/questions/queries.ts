@@ -5,6 +5,7 @@
 
 import { query } from "@convex/_generated/server";
 import { v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import type { Doc } from "@convex/_generated/dataModel";
 import {
   enrichQuestionsWithVariants,
@@ -17,20 +18,48 @@ import type { QuestionVariant } from "@/lib/questions";
 // ============================================
 
 /**
- * Get all questions (sorted newest first) with computed variant.
+ * Get questions with computed variant using pagination.
  * Excludes cancelled questions.
  *
- * Uses batch enrichment to avoid N+1 queries.
- * Client can filter this result for performance.
+ * Uses batch enrichment for the current page to avoid N+1 queries.
  */
 export const getAllQuestions = query({
-  args: {},
-  handler: async (ctx): Promise<QuestionVariant[]> => {
-    const questions = await ctx.db.query("questions").order("desc").collect();
-    const activeQuestions = questions.filter((q) => !q.cancelledAt);
+  args: {
+    paginationOpts: paginationOptsValidator,
+    /** Filter key: "all", "this-week", "this-month", "recurring" */
+    filter: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let q = ctx.db.query("questions").order("desc");
 
-    // Batch enrich - fetches all answers in ONE query
-    return enrichQuestionsWithVariants(ctx, activeQuestions);
+    // Always exclude cancelled questions in the query to ensure accurate pagination
+    q = q.filter((q) => q.eq(q.field("cancelledAt"), undefined));
+
+    // Apply specific logic for each filter type
+    if (args.filter === "this-week") {
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      q = q.filter((q) => q.gte(q.field("_creationTime"), weekAgo));
+    } else if (args.filter === "this-month") {
+      const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      q = q.filter((q) => q.gte(q.field("_creationTime"), monthAgo));
+    } else if (args.filter === "recurring") {
+      // Filter for questions that have a schedule defined
+      q = q.filter((q) => q.neq(q.field("schedule"), undefined));
+    }
+
+    const paginatedQuestions = await q.paginate(args.paginationOpts);
+
+    // Batch enrich only the items on this page
+    // Since we filtered in the query, paginatedQuestions.page has only active questions
+    const enrichedPage = await enrichQuestionsWithVariants(
+      ctx,
+      paginatedQuestions.page,
+    );
+
+    return {
+      ...paginatedQuestions,
+      page: enrichedPage,
+    };
   },
 });
 
@@ -59,7 +88,7 @@ export const getAnswersByThreadId = query({
     return await ctx.db
       .query("answers")
       .withIndex("by_questionThreadId", (q) =>
-        q.eq("questionThreadId", args.questionThreadId)
+        q.eq("questionThreadId", args.questionThreadId),
       )
       .order("asc")
       .collect();

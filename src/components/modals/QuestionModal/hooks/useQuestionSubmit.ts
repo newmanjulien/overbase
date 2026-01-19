@@ -28,7 +28,7 @@ export function useQuestionSubmit() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createQuestion = useMutation(
-    api.features.questions.mutations.createQuestion
+    api.features.questions.mutations.createQuestion,
   );
 
   const submitQuestion = async ({

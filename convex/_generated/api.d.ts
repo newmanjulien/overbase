@@ -15,9 +15,8 @@ import type * as features_questions_enrichment from "../features/questions/enric
 import type * as features_questions_mutations from "../features/questions/mutations.js";
 import type * as features_questions_privacy from "../features/questions/privacy.js";
 import type * as features_questions_queries from "../features/questions/queries.js";
-import type * as features_signups from "../features/signups.js";
 import type * as features_templates from "../features/templates.js";
-import type * as shared_types from "../shared/types.js";
+import type * as types from "../types.js";
 
 import type {
   ApiFromModules,
@@ -33,9 +32,8 @@ declare const fullApi: ApiFromModules<{
   "features/questions/mutations": typeof features_questions_mutations;
   "features/questions/privacy": typeof features_questions_privacy;
   "features/questions/queries": typeof features_questions_queries;
-  "features/signups": typeof features_signups;
   "features/templates": typeof features_templates;
-  "shared/types": typeof shared_types;
+  types: typeof types;
 }>;
 
 /**
