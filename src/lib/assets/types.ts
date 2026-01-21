@@ -6,13 +6,5 @@
  * issues when imported in the browser.
  */
 
-import type { Doc } from "@convex/_generated/dataModel";
-
-// ============================================
-// ASSET TYPES
-// ============================================
-
-/** App asset with resolved image URL */
-export type AppAssetWithUrl = Doc<"appAssets"> & {
-  imageUrl: string | null;
-};
+// Re-export from single source of truth
+export type { AppAssetWithUrl } from "@convex/types";

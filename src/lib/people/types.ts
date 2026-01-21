@@ -5,14 +5,14 @@
  * Safe to import in both client and server code.
  */
 
-import type { Doc } from "@convex/_generated/dataModel";
+import type { PersonDoc } from "@convex/types";
 
 // ============================================
 // RE-EXPORT STORAGE TYPES FROM CONVEX
 // ============================================
 
 /** Database person document */
-export type DbPerson = Doc<"people">;
+export type DbPerson = PersonDoc;
 
 // ============================================
 // UI-EXTENDED TYPES

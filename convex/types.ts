@@ -17,6 +17,21 @@ export type QuestionDoc = Doc<"questions">;
 export type AnswerDoc = Doc<"answers">;
 export type TemplateDoc = Doc<"templates">;
 export type AppAssetDoc = Doc<"appAssets">;
+export type PersonDoc = Doc<"people">;
+
+// ============================================
+// EXTENDED DOCUMENT TYPES (with resolved URLs)
+// ============================================
+
+/** Template with resolved image URL */
+export type TemplateWithImage = TemplateDoc & {
+  imageUrl: string | null;
+};
+
+/** App asset with resolved image URL */
+export type AppAssetWithUrl = AppAssetDoc & {
+  imageUrl: string | null;
+};
 
 // ============================================
 // ATTACHMENT ARRAY TYPES
@@ -61,4 +76,4 @@ export type TableRow = TableData[number];
 // ID TYPE RE-EXPORT
 // ============================================
 
-export type { Id };
+export type { Id, Doc };

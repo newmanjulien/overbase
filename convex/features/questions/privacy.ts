@@ -16,7 +16,7 @@
  */
 
 import type { MutationCtx } from "@convex/_generated/server";
-import type { Id } from "@convex/_generated/dataModel";
+import type { Id } from "@convex/types";
 
 /** Privacy value type: undefined = private, "team" = shared */
 type PrivacyValue = "team" | undefined;

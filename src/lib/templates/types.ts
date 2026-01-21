@@ -5,13 +5,5 @@
  * This file contains only types - no runtime code.
  */
 
-import type { Doc } from "@convex/_generated/dataModel";
-
-// ============================================
-// TEMPLATE TYPES
-// ============================================
-
-/** Template with resolved image URL */
-export type TemplateWithImage = Doc<"templates"> & {
-  imageUrl: string | null;
-};
+// Re-export from single source of truth
+export type { TemplateWithImage } from "@convex/types";

@@ -7,6 +7,11 @@ import { mutation } from "@convex/_generated/server";
 import { v } from "convex/values";
 import { SENDER } from "@/lib/questions";
 import { setQuestionPrivacy, setAnswerPrivacy } from "./privacy";
+import {
+  attachmentArgs,
+  scheduleValidator,
+  tableRowValidator,
+} from "@convex/validators";
 
 // ============================================
 // QUESTION MUTATIONS
@@ -26,53 +31,10 @@ export const createQuestion = mutation({
     privacy: v.optional(v.literal("team")),
 
     // Schedule: undefined = one-time, present = recurring
-    schedule: v.optional(
-      v.object({
-        rrule: v.string(),
-        frequency: v.union(
-          v.literal("weekly"),
-          v.literal("monthly"),
-          v.literal("quarterly"),
-        ),
-        dataRangeDays: v.number(),
-      }),
-    ),
+    schedule: v.optional(scheduleValidator),
 
     // Attachments go on the first answer
-    attachedKpis: v.optional(
-      v.array(
-        v.object({
-          metric: v.string(),
-          definition: v.string(),
-          antiDefinition: v.string(),
-        }),
-      ),
-    ),
-    attachedPeople: v.optional(
-      v.array(
-        v.object({
-          id: v.string(),
-          name: v.string(),
-        }),
-      ),
-    ),
-    attachedFiles: v.optional(
-      v.array(
-        v.object({
-          fileName: v.string(),
-          context: v.optional(v.string()),
-        }),
-      ),
-    ),
-    attachedConnectors: v.optional(
-      v.array(
-        v.object({
-          id: v.string(),
-          title: v.string(),
-          logo: v.string(),
-        }),
-      ),
-    ),
+    ...attachmentArgs,
   },
   handler: async (ctx, args) => {
     // Validation happens client-side via rrule parse
@@ -150,52 +112,9 @@ export const createAnswer = mutation({
     sender: v.union(v.literal("user"), v.literal("overbase")),
     content: v.optional(v.string()),
     privacy: v.optional(v.literal("team")),
-    tableData: v.optional(
-      v.array(
-        v.object({
-          column1: v.string(),
-          column2: v.string(),
-          column3: v.string(),
-          column4: v.string(),
-          column5: v.string(),
-        }),
-      ),
-    ),
+    tableData: v.optional(v.array(tableRowValidator)),
     // Attachments (for follow-up questions from user)
-    attachedKpis: v.optional(
-      v.array(
-        v.object({
-          metric: v.string(),
-          definition: v.string(),
-          antiDefinition: v.string(),
-        }),
-      ),
-    ),
-    attachedPeople: v.optional(
-      v.array(
-        v.object({
-          id: v.string(),
-          name: v.string(),
-        }),
-      ),
-    ),
-    attachedFiles: v.optional(
-      v.array(
-        v.object({
-          fileName: v.string(),
-          context: v.optional(v.string()),
-        }),
-      ),
-    ),
-    attachedConnectors: v.optional(
-      v.array(
-        v.object({
-          id: v.string(),
-          title: v.string(),
-          logo: v.string(),
-        }),
-      ),
-    ),
+    ...attachmentArgs,
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("answers", {

@@ -1,6 +1,6 @@
 import { query, mutation } from "../_generated/server";
 import { v } from "convex/values";
-import type { Doc } from "../_generated/dataModel";
+import type { AppAssetWithUrl } from "@convex/types";
 
 // ============================================
 // ASSET KEYS
@@ -19,15 +19,6 @@ export type AssetKey = (typeof ASSET_KEYS)[keyof typeof ASSET_KEYS];
 // APP ASSETS FEATURE
 // Handles branding images stored in Convex file storage
 // ============================================
-
-// --------------------------------------------
-// TYPES
-// --------------------------------------------
-
-/** App asset with resolved image URL */
-export type AppAssetWithUrl = Doc<"appAssets"> & {
-  imageUrl: string | null;
-};
 
 // --------------------------------------------
 // QUERIES
@@ -67,7 +58,7 @@ export const getAllAssets = query({
       assets.map(async (asset) => {
         const imageUrl = await ctx.storage.getUrl(asset.imageId);
         return { ...asset, imageUrl };
-      })
+      }),
     );
 
     return assetsWithUrls;

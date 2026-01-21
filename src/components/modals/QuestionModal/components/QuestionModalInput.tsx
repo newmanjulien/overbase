@@ -99,10 +99,10 @@ export function QuestionModalInput({
         )}
       </div>
 
-      <div className="relative flex-1 w-full">
+      <div className="relative flex-1 min-h-0 w-full flex flex-col">
         <div
           id="question-modal-highlight-target"
-          className="absolute top-0 left-0 w-full h-80 pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
         />
         <textarea
           id="question-modal-input"
@@ -110,7 +110,7 @@ export function QuestionModalInput({
           placeholder={placeholder}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          className="w-full h-full text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
+          className="w-full flex-1 min-h-0 text-gray-700 placeholder:text-gray-400 border-0 resize-none focus:outline-none focus:ring-0"
         />
       </div>
 

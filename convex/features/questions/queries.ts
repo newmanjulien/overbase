@@ -6,7 +6,7 @@
 import { query } from "@convex/_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
-import type { Doc } from "@convex/_generated/dataModel";
+import type { Doc } from "@convex/types";
 import {
   enrichQuestionsWithVariants,
   enrichQuestionWithVariant,
