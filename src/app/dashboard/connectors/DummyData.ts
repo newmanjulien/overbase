@@ -14,7 +14,7 @@ export interface Connectors {
   title: string;
   subtitle: string;
   logo: string;
-  status: "active" | "inactive"; // ✅ strict type
+  status: "active" | "inactive";
   badge?: string;
   lastUpdated?: string;
   previewImages?: PreviewImage[];
@@ -27,7 +27,7 @@ export interface Connectors {
 export const connectors: Connectors[] = [
   {
     id: "docs",
-    title: "Google Docs",
+    title: "Google Docs (training off)",
     subtitle: "Get data from your docs",
     logo: "/images/docs.png",
     status: "inactive",
@@ -48,7 +48,7 @@ export const connectors: Connectors[] = [
   },
   {
     id: "gmail",
-    title: "Gmail single",
+    title: "Gmail single (training on)",
     subtitle: "Pull data from your inbox (not from people)",
     logo: "/images/gmail.png",
     status: "inactive",
@@ -65,7 +65,7 @@ export const connectors: Connectors[] = [
   },
   {
     id: "slack",
-    title: "Slack public",
+    title: "Slack public (training on)",
     subtitle: "Access public channels (not DMs)",
     logo: "/images/slack.png",
     status: "active",
@@ -79,7 +79,7 @@ export const connectors: Connectors[] = [
   },
   {
     id: "gong",
-    title: "Gong",
+    title: "Gong (training on)",
     subtitle: "Get recordings and transcripts",
     logo: "/images/gong.png",
     status: "inactive",
@@ -90,7 +90,7 @@ export const connectors: Connectors[] = [
   },
   {
     id: "docusign",
-    title: "Docusign",
+    title: "Docusign (training on)",
     subtitle: "Search customer agreements",
     logo: "/images/docusign.png",
     status: "inactive",
@@ -101,7 +101,7 @@ export const connectors: Connectors[] = [
   },
   {
     id: "notion",
-    title: "Notion",
+    title: "Notion (training off)",
     subtitle: "Access data from Notion",
     logo: "/images/notion.png",
     status: "inactive",
@@ -112,7 +112,7 @@ export const connectors: Connectors[] = [
   },
   {
     id: "salesforce",
-    title: "Salesforce",
+    title: "Salesforce (training off)",
     subtitle: "Access data from your CRM",
     logo: "/images/salesforce.png",
     status: "inactive",
