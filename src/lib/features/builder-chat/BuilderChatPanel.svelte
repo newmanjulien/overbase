@@ -9,15 +9,21 @@
 	type Props = {
 		card: BuilderCardRecord;
 		initialMessage: string;
+		builderMode?: 'chat' | 'customEmail';
+		onSessionChange?: (session: {
+			builderSessionId: Id<'builderSessions'> | null;
+			conversationId: Id<'conversations'> | null;
+		}) => void;
 	};
 
 	const COMPOSER_TEXTAREA_MIN_HEIGHT = 20;
 	const COMPOSER_TEXTAREA_MAX_HEIGHT = 96;
 
-	let { card, initialMessage }: Props = $props();
+	let { card, initialMessage, builderMode = 'chat', onSessionChange }: Props = $props();
 
 	const client = useConvexClient();
 	let conversationId = $state<Id<'conversations'> | null>(null);
+	let builderSessionId = $state<Id<'builderSessions'> | null>(null);
 	let startupKey = '';
 	let startupVersion = 0;
 	let isInitializing = $state(false);
@@ -78,18 +84,33 @@
 		initializationError = null;
 		sendError = null;
 		conversationId = null;
+		builderSessionId = null;
+		onSessionChange?.({ builderSessionId: null, conversationId: null });
 
 		try {
-			const result = await client.mutation(api.chat.startConversation, {
-				cardSlug: cardContext.id,
-				initialMessage: firstMessage
-			});
+			const result =
+				builderMode === 'customEmail'
+					? await client.mutation(api.builderSessions.startCustomEmailSession, {
+							initialMessage: firstMessage
+						})
+					: await client.mutation(api.chat.startConversation, {
+							cardSlug: cardContext.id,
+							initialMessage: firstMessage
+						});
 
 			if (version !== startupVersion) {
 				return;
 			}
 
 			conversationId = result.conversationId;
+			builderSessionId =
+				'builderSessionId' in result
+					? (result.builderSessionId as Id<'builderSessions'>)
+					: null;
+			onSessionChange?.({
+				builderSessionId,
+				conversationId: result.conversationId
+			});
 		} catch (error) {
 			if (version !== startupVersion) {
 				return;
@@ -115,10 +136,21 @@
 		sendError = null;
 
 		try {
-			await client.mutation(api.chat.sendMessage, {
-				conversationId,
-				text: message
-			});
+			if (builderMode === 'customEmail') {
+				if (!builderSessionId) {
+					throw new Error('Builder session not found.');
+				}
+
+				await client.mutation(api.builderSessions.sendCustomEmailMessage, {
+					builderSessionId,
+					text: message
+				});
+			} else {
+				await client.mutation(api.chat.sendMessage, {
+					conversationId,
+					text: message
+				});
+			}
 		} catch (error) {
 			composerValue = message;
 			sendError = getErrorMessage(error);

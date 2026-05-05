@@ -2,7 +2,7 @@
 	import MobileNavList from '$lib/chrome/mobile/MobileNavList.svelte';
 	import { X } from 'lucide-svelte';
 	import HomeLink from '$lib/chrome/shared/HomeLink.svelte';
-	import { NAV_FOOTER_ITEMS, NAV_SECTIONS } from '$lib/chrome/shared/nav';
+	import { MOBILE_NAV_SECTIONS, NAV_FOOTER_ITEMS } from '$lib/chrome/shared/nav';
 	import { useChromeShellState } from '$lib/chrome/shared/shell.svelte';
 
 	type Props = {
@@ -37,7 +37,7 @@
 			<div class="flex-1 overflow-y-auto px-(--shell-gutter-mobile) py-4">
 				<nav aria-label="Dashboard navigation" class="relative mt-2 min-h-full">
 					<MobileNavList
-						sections={NAV_SECTIONS}
+						sections={MOBILE_NAV_SECTIONS}
 						footerItems={NAV_FOOTER_ITEMS}
 						{currentPathname}
 						onRouteSelect={() => {

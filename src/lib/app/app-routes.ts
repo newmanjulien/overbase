@@ -30,6 +30,7 @@ export type AppRouteDefinition = {
   href: NavPath;
   navLabel: string;
   icon: NavIcon;
+  hideOnMobile?: boolean;
 };
 
 export const APP_ROUTE_REGISTRY = {
@@ -42,6 +43,7 @@ export const APP_ROUTE_REGISTRY = {
     href: "/builder",
     navLabel: "Notification builder",
     icon: Workflow,
+    hideOnMobile: true,
   },
   "data-sources": {
     href: "/data-sources",

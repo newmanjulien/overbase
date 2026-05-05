@@ -10,38 +10,16 @@ import {
 } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { streamChatReply } from './model';
+import {
+	createGenerationId,
+	getConversationExpiresAt,
+	isConversationExpired,
+	normalizeUserText
+} from './conversationCore';
 
-const MAX_MESSAGE_LENGTH = 8_000;
-const CONVERSATION_RETENTION_MS = 24 * 60 * 60 * 1000;
 const EXPIRED_CONVERSATION_CLEANUP_LIMIT = 50;
 const ASSISTANT_STREAM_FLUSH_INTERVAL_MS = 150;
 const ASSISTANT_STREAM_FLUSH_MIN_CHARS = 120;
-
-function createGenerationId() {
-	return crypto.randomUUID();
-}
-
-function normalizeUserText(text: string) {
-	const normalized = text.trim();
-
-	if (!normalized) {
-		throw new Error('Message text is required.');
-	}
-
-	if (normalized.length > MAX_MESSAGE_LENGTH) {
-		throw new Error(`Message text must be ${MAX_MESSAGE_LENGTH} characters or fewer.`);
-	}
-
-	return normalized;
-}
-
-function getConversationExpiresAt(createdAt: number) {
-	return createdAt + CONVERSATION_RETENTION_MS;
-}
-
-function isConversationExpired(conversation: { expiresAt: number }, now = Date.now()) {
-	return conversation.expiresAt <= now;
-}
 
 async function getActiveAssistantTurn(
 	ctx: MutationCtx,
@@ -344,11 +322,16 @@ export const deleteExpiredConversations = internalMutation({
 			.withIndex('by_expiresAt', (q) => q.lte('expiresAt', now))
 			.take(EXPIRED_CONVERSATION_CLEANUP_LIMIT);
 		let deletedMessages = 0;
+		let deletedBuilderSessions = 0;
 
 		for (const conversation of conversations) {
 			const messages = await ctx.db
 				.query('messages')
 				.withIndex('by_conversation_createdAt', (q) => q.eq('conversationId', conversation._id))
+				.collect();
+			const builderSessions = await ctx.db
+				.query('builderSessions')
+				.withIndex('by_conversationId', (q) => q.eq('conversationId', conversation._id))
 				.collect();
 
 			for (const message of messages) {
@@ -356,12 +339,18 @@ export const deleteExpiredConversations = internalMutation({
 				deletedMessages += 1;
 			}
 
+			for (const builderSession of builderSessions) {
+				await ctx.db.delete(builderSession._id);
+				deletedBuilderSessions += 1;
+			}
+
 			await ctx.db.delete(conversation._id);
 		}
 
 		return {
 			deletedConversations: conversations.length,
-			deletedMessages
+			deletedMessages,
+			deletedBuilderSessions
 		};
 	}
 });

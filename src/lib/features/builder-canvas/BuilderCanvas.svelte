@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import type { Id } from '$convex/_generated/dataModel';
+	import { CUSTOM_EMAIL_BUILDER_CARD_ID } from '$convex/builderEmailContract';
 	import type { BuilderCardRecord } from '$lib/features/builder-data';
 	import BuilderBlueprintPanel from '$lib/features/builder-canvas/BuilderBlueprintPanel.svelte';
 	import BuilderChatPanel from '$lib/features/builder-chat/BuilderChatPanel.svelte';
+	import BuilderEmailPreviewPanel from '$lib/features/builder-email/BuilderEmailPreviewPanel.svelte';
 	import BuilderSetupFlow from '$lib/features/builder-setup/BuilderSetupFlow.svelte';
 	import type { BuilderGuideDefinition } from '$lib/features/builder-guide/guide-types';
 	import SplitPane from '$lib/features/builder-canvas/SplitPane.svelte';
@@ -19,6 +22,8 @@
 	let activeInitialMessageKey = $state('');
 	let mode = $state<'setup' | 'chat'>('setup');
 	let chatInitialMessage = $state<string | null>(null);
+	let builderSessionId = $state<Id<'builderSessions'> | null>(null);
+	const isCustomEmailBuilder = $derived(card.id === CUSTOM_EMAIL_BUILDER_CARD_ID);
 
 	function startChat(initialMessage: string) {
 		chatInitialMessage = initialMessage;
@@ -36,6 +41,7 @@
 
 			activeCardId = card.id;
 			activeInitialMessageKey = nextInitialMessageKey;
+			builderSessionId = null;
 			startChat(nextInitialMessage);
 			return;
 		}
@@ -47,6 +53,7 @@
 		activeCardId = card.id;
 		activeInitialMessageKey = `${card.id}:`;
 		chatInitialMessage = null;
+		builderSessionId = null;
 		mode = 'setup';
 	});
 </script>
@@ -65,6 +72,10 @@
 			<BuilderChatPanel
 				{card}
 				initialMessage={chatInitialMessage}
+				builderMode={isCustomEmailBuilder ? 'customEmail' : 'chat'}
+				onSessionChange={(session) => {
+					builderSessionId = session.builderSessionId;
+				}}
 			/>
 		{:else if guide}
 			<BuilderSetupFlow {card} {guide} onComplete={startChat} />
@@ -87,6 +98,10 @@
 	{/snippet}
 
 	{#snippet secondary()}
-		<BuilderBlueprintPanel {card} />
+		{#if isCustomEmailBuilder}
+			<BuilderEmailPreviewPanel {builderSessionId} />
+		{:else}
+			<BuilderBlueprintPanel {card} />
+		{/if}
 	{/snippet}
 </SplitPane>

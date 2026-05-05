@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+import { emailDraft, emailDraftStatus } from './builderEmailValidators';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 export const messageStatus = v.union(v.literal('complete'), v.literal('pending'), v.literal('failed'));
@@ -64,6 +65,7 @@ export default defineSchema({
 		cardSlug: v.string(),
 		cardTitle: v.string(),
 		cardDescription: v.string(),
+			builderSessionId: v.optional(v.id('builderSessions')),
 			ownerUserId: v.optional(v.string()),
 			organizationId: v.optional(v.string()),
 			pendingAssistantMessageId: v.optional(v.id('messages')),
@@ -75,6 +77,21 @@ export default defineSchema({
 		.index('by_updatedAt', ['updatedAt'])
 		.index('by_expiresAt', ['expiresAt'])
 		.index('by_organization_updatedAt', ['organizationId', 'updatedAt']),
+	builderSessions: defineTable({
+		conversationId: v.id('conversations'),
+		cardId: v.id('builderCards'),
+		cardSlug: v.string(),
+		builderKind: v.union(v.literal('custom'), v.literal('template')),
+		artifactKind: v.literal('email'),
+		artifactVersion: v.number(),
+		status: emailDraftStatus,
+		emailDraft,
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		expiresAt: v.number()
+	})
+		.index('by_conversationId', ['conversationId'])
+		.index('by_expiresAt', ['expiresAt']),
 	messages: defineTable({
 		conversationId: v.id('conversations'),
 		role: messageRole,

@@ -6,6 +6,7 @@ import {
 	Scale,
 	ShieldCheck
 } from 'lucide-svelte';
+import { CUSTOM_EMAIL_BUILDER_CARD_ID } from '$convex/builderEmailContract';
 import type { Doc } from '$convex/_generated/dataModel';
 import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
 
@@ -18,7 +19,7 @@ type BuilderCardView = {
 	artwork: Doc<'builderArtworkPresets'>;
 };
 
-export const CUSTOM_NOTIFICATION_CARD_ID = 'custom-notification';
+export const CUSTOM_NOTIFICATION_CARD_ID = CUSTOM_EMAIL_BUILDER_CARD_ID;
 
 export type BuilderCardCategoryId = string;
 export type BuilderCardFilterId = BuilderCardCategoryId | 'all';

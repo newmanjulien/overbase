@@ -11,8 +11,14 @@
 import type * as builder from "../builder.js";
 import type * as builderAdmin from "../builderAdmin.js";
 import type * as builderContent from "../builderContent.js";
+import type * as builderEmailContract from "../builderEmailContract.js";
+import type * as builderEmailValidators from "../builderEmailValidators.js";
+import type * as builderSessions from "../builderSessions.js";
+import type * as builderTurns from "../builderTurns.js";
 import type * as chat from "../chat.js";
+import type * as conversationCore from "../conversationCore.js";
 import type * as crons from "../crons.js";
+import type * as emailDrafts from "../emailDrafts.js";
 import type * as health from "../health.js";
 import type * as model from "../model.js";
 
@@ -26,8 +32,14 @@ declare const fullApi: ApiFromModules<{
   builder: typeof builder;
   builderAdmin: typeof builderAdmin;
   builderContent: typeof builderContent;
+  builderEmailContract: typeof builderEmailContract;
+  builderEmailValidators: typeof builderEmailValidators;
+  builderSessions: typeof builderSessions;
+  builderTurns: typeof builderTurns;
   chat: typeof chat;
+  conversationCore: typeof conversationCore;
   crons: typeof crons;
+  emailDrafts: typeof emailDrafts;
   health: typeof health;
   model: typeof model;
 }>;

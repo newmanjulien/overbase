@@ -17,6 +17,7 @@ export type NavRouteItem = {
 	label: string;
 	href: NavPath;
 	icon: NavIcon;
+	hideOnMobile: boolean;
 };
 
 export type NavDisabledItem = {
@@ -44,7 +45,8 @@ export const NAV_ROUTE_ITEMS: readonly NavRouteItem[] = (
 	id,
 	label: route.navLabel,
 	href: route.href as NavPath,
-	icon: route.icon
+	icon: route.icon,
+	hideOnMobile: Boolean(route.hideOnMobile)
 }));
 
 const NAV_ROUTE_ITEM_REGISTRY = Object.fromEntries(
@@ -57,6 +59,11 @@ export const NAV_SECTIONS: readonly NavSection[] = [
 		items: routeIds.map((routeId) => NAV_ROUTE_ITEM_REGISTRY[routeId])
 	}))
 ] as const;
+
+export const MOBILE_NAV_SECTIONS: readonly NavSection[] = NAV_SECTIONS.map((section) => ({
+	...section,
+	items: section.items.filter((item) => !item.hideOnMobile)
+})).filter((section) => section.items.length > 0);
 
 export const NAV_FOOTER_ITEMS: readonly NavFooterItem[] = [
 	{
