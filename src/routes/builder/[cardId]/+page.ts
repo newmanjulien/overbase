@@ -1,11 +1,26 @@
-import { BUILDER_CARDS } from '$lib/features/builder-data';
+import { env } from '$env/dynamic/public';
+import { api } from '$convex/_generated/api';
+import { ConvexHttpClient } from 'convex/browser';
+import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = ({ params }) => {
-	const card = BUILDER_CARDS.find((candidate) => candidate.id === params.cardId);
+export const load: PageLoad = async ({ params }) => {
+	const convexUrl = env.PUBLIC_CONVEX_URL;
+
+	if (!convexUrl) {
+		error(503, 'PUBLIC_CONVEX_URL is required to load builder templates.');
+	}
+
+	const convex = new ConvexHttpClient(convexUrl);
+	const template = await convex.query(api.builder.getActiveBuilderTemplateBySlug, {
+		slug: params.cardId
+	});
+	const card = template?.card ?? null;
 
 	return {
-		headerTitle: card ? card.title : 'Notification builder',
+		card,
+		guide: template?.guide ?? null,
+		headerTitle: card?.title ?? 'Notification builder',
 		headerTitleEditable: Boolean(card)
 	};
 };

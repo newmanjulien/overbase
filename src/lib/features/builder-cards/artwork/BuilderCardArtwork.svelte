@@ -1,18 +1,16 @@
 <script lang="ts">
 	import { cn } from '$lib/chrome/shared/cn';
 	import {
-		BUILDER_CARD_ARTWORK_PRESETS,
-		type BuilderCardArtworkId,
+		type BuilderCardArtworkPreset,
 		type BuilderCardArtworkSymbolSize,
 		type BuilderCardArtworkTone
 	} from '$lib/features/builder-data';
 
 	type Props = {
-		artworkId: BuilderCardArtworkId;
+		artwork: BuilderCardArtworkPreset;
 	};
 
-	let { artworkId }: Props = $props();
-	const artwork = $derived(BUILDER_CARD_ARTWORK_PRESETS[artworkId]);
+	let { artwork }: Props = $props();
 	const Icon = $derived(artwork.icon);
 
 	const toneClass = {

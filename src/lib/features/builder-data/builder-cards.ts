@@ -6,100 +6,68 @@ import {
 	Scale,
 	ShieldCheck
 } from 'lucide-svelte';
-import type { BuilderCardArtworkId } from '$lib/features/builder-data/builder-card-artwork-presets';
+import type { Doc } from '$convex/_generated/dataModel';
 
-type CardIcon = typeof Flag;
+type CategoryIcon = typeof Flag;
 
-export type BuilderCardCategoryId = 'consulting' | 'insurance' | 'law' | 'manufacturing';
+export const CUSTOM_NOTIFICATION_CARD_ID = 'custom-notification';
+
+export type BuilderCardCategoryId = string;
 export type BuilderCardFilterId = BuilderCardCategoryId | 'all';
 
 export type BuilderCardFilter = {
 	id: BuilderCardFilterId;
 	label: string;
-	icon: CardIcon;
+	iconId: string;
+	icon: CategoryIcon;
+	sortOrder: number;
 };
 
-type BuilderCardDefinition = {
+export type BuilderCardRecord = {
 	id: string;
-	categoryIds: readonly BuilderCardCategoryId[];
+	categoryIds: string[];
 	title: string;
 	description: string;
-	artworkId: BuilderCardArtworkId;
+	artworkId: string;
+	blueprintArtwork: {
+		backColor: string;
+		frontColor: string;
+		iconId: string;
+		iconCenterX: string;
+		iconCenterY: string;
+	};
 };
 
-export const CUSTOM_NOTIFICATION_CARD_ID = 'custom-notification';
-
-export const BUILDER_CARD_FILTERS = [
-	{
-		id: 'all',
-		label: 'All',
-		icon: LoaderCircle
-	},
-	{
-		id: 'consulting',
-		label: 'Consulting',
-		icon: BriefcaseBusiness
-	},
-	{
-		id: 'insurance',
-		label: 'Insurance',
-		icon: ShieldCheck
-	},
-	{
-		id: 'law',
-		label: 'Law',
-		icon: Scale
-	},
-	{
-		id: 'manufacturing',
-		label: 'Manufacturing',
-		icon: Factory
-	}
-] as const satisfies readonly BuilderCardFilter[];
-
-export const BUILDER_CARDS = [
-	{
-		id: 'bring-the-firm',
-		categoryIds: ['consulting', 'law'],
-		title: 'Bring the firm',
-		description: 'Receive recommendations of colleagues to bring to meetings',
-		artworkId: 'team-violet'
-	},
-	{
-		id: 'whitespace-finder',
-		categoryIds: ['insurance'],
-		title: 'Whitespace finder',
-		description: 'Receive a report 3 months before renewals with new policies each client could buy',
-		artworkId: 'search-aqua'
-	},
-	{
-		id: 'reasons-to-connect',
-		categoryIds: ['law'],
-		title: 'Reasons to connect',
-		description: 'Receive an email when a client might have a legal issue they need your help with',
-		artworkId: 'alert-coral'
-	},
-	{
-		id: 'cross-selling',
-		categoryIds: ['consulting', 'insurance', 'law', 'manufacturing'],
-		title: 'Cross-selling',
-		description: 'Receive an email when your partner has a client you could be selling to',
-		artworkId: 'network-zinc'
-	},
-	{
-		id: CUSTOM_NOTIFICATION_CARD_ID,
-		categoryIds: [],
-		title: 'Custom notification',
-		description: 'Build a notification from a plain-language request',
-		artworkId: 'spark-coral'
-	}
-] as const satisfies readonly BuilderCardDefinition[];
-
-export const BUILDER_TEMPLATE_CARDS = BUILDER_CARDS.filter(
-	(card) => card.id !== CUSTOM_NOTIFICATION_CARD_ID
-);
-
-export type BuilderCardId = (typeof BUILDER_CARDS)[number]['id'];
-export type BuilderCardRecord = Omit<BuilderCardDefinition, 'id'> & {
-	id: BuilderCardId;
+const CATEGORY_ICONS: Record<string, CategoryIcon> = {
+	'briefcase-business': BriefcaseBusiness,
+	factory: Factory,
+	flag: Flag,
+	'loader-circle': LoaderCircle,
+	scale: Scale,
+	'shield-check': ShieldCheck
 };
+
+function getCategoryIcon(iconId: string) {
+	return CATEGORY_ICONS[iconId] ?? Flag;
+}
+
+export function toBuilderCardFilter(category: Doc<'builderCategories'>): BuilderCardFilter {
+	return {
+		id: category.slug,
+		label: category.label,
+		iconId: category.iconId,
+		icon: getCategoryIcon(category.iconId),
+		sortOrder: category.sortOrder
+	};
+}
+
+export function toBuilderCardRecord(card: Doc<'builderCards'>): BuilderCardRecord {
+	return {
+		id: card.slug,
+		categoryIds: card.categoryIds,
+		title: card.title,
+		description: card.description,
+		artworkId: card.artworkId,
+		blueprintArtwork: card.blueprintArtwork
+	};
+}

@@ -81,9 +81,7 @@
 
 		try {
 			const result = await client.mutation(api.chat.startConversation, {
-				cardId: cardContext.id,
-				cardTitle: cardContext.title,
-				cardDescription: cardContext.description,
+				cardSlug: cardContext.id,
 				initialMessage: firstMessage
 			});
 

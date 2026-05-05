@@ -1,26 +1,24 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import {
-		getBuilderGuideDefinition,
-		type BuilderCardRecord
-	} from '$lib/features/builder-data';
+	import type { BuilderCardRecord } from '$lib/features/builder-data';
 	import BuilderBlueprintPanel from '$lib/features/builder-canvas/BuilderBlueprintPanel.svelte';
 	import BuilderChatPanel from '$lib/features/builder-chat/BuilderChatPanel.svelte';
 	import BuilderSetupFlow from '$lib/features/builder-setup/BuilderSetupFlow.svelte';
+	import type { BuilderGuideDefinition } from '$lib/features/builder-guide/guide-types';
 	import SplitPane from '$lib/features/builder-canvas/SplitPane.svelte';
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder-canvas/split-pane';
 
 	type Props = {
 		card: BuilderCardRecord;
+		guide: BuilderGuideDefinition | null;
 		initialMessage?: string | null;
 	};
 
-	let { card, initialMessage = null }: Props = $props();
-	let activeChatSourceKey = $state('');
+	let { card, guide, initialMessage = null }: Props = $props();
+	let activeCardId = $state('');
+	let activeInitialMessageKey = $state('');
 	let mode = $state<'setup' | 'chat'>('setup');
 	let chatInitialMessage = $state<string | null>(null);
-
-	const guide = $derived(getBuilderGuideDefinition(card.id));
 
 	function startChat(initialMessage: string) {
 		chatInitialMessage = initialMessage;
@@ -29,20 +27,27 @@
 
 	$effect(() => {
 		const nextInitialMessage = initialMessage?.trim() ?? '';
-		const nextChatSourceKey = `${card.id}:${nextInitialMessage}`;
+		const nextInitialMessageKey = `${card.id}:${nextInitialMessage}`;
 
-		if (activeChatSourceKey === nextChatSourceKey) {
+		if (nextInitialMessage) {
+			if (activeInitialMessageKey === nextInitialMessageKey) {
+				return;
+			}
+
+			activeCardId = card.id;
+			activeInitialMessageKey = nextInitialMessageKey;
+			startChat(nextInitialMessage);
 			return;
 		}
 
-		activeChatSourceKey = nextChatSourceKey;
-
-		if (nextInitialMessage) {
-			startChat(nextInitialMessage);
-		} else {
-			chatInitialMessage = null;
-			mode = 'setup';
+		if (activeCardId === card.id) {
+			return;
 		}
+
+		activeCardId = card.id;
+		activeInitialMessageKey = `${card.id}:`;
+		chatInitialMessage = null;
+		mode = 'setup';
 	});
 </script>
 

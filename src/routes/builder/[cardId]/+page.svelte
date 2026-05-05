@@ -4,11 +4,12 @@
 	import { resolve } from '$app/paths';
 	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
 	import BuilderCanvas from '$lib/features/builder-canvas/BuilderCanvas.svelte';
-	import { BUILDER_CARDS } from '$lib/features/builder-data';
+	import { toBuilderCardRecord, toBuilderGuideDefinition } from '$lib/features/builder-data';
+	import type { PageProps } from './$types';
 
-	const card = $derived(
-		BUILDER_CARDS.find((candidate) => candidate.id === page.params.cardId) ?? null
-	);
+	let { data }: PageProps = $props();
+	const card = $derived(data.card ? toBuilderCardRecord(data.card) : null);
+	const guide = $derived(toBuilderGuideDefinition(data.guide));
 	const initialMessage = $derived(page.state.initialMessage ?? null);
 
 	$effect(() => {
@@ -20,7 +21,7 @@
 
 <SurfaceShell class="px-0 py-0 md:px-0 md:py-0">
 	{#if card}
-		<BuilderCanvas {card} {initialMessage} />
+		<BuilderCanvas {card} {guide} {initialMessage} />
 	{:else}
 		<div class="flex h-full min-h-full items-center justify-center bg-white px-6 py-12">
 			<div class="w-full max-w-sm rounded-sm border border-zinc-200 bg-white p-5 text-center shadow-sm">

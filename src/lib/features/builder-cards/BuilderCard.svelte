@@ -1,13 +1,14 @@
 <script lang="ts">
 	import BuilderCardArtwork from '$lib/features/builder-cards/artwork/BuilderCardArtwork.svelte';
-	import type { BuilderCardRecord } from '$lib/features/builder-data';
+	import type { BuilderCardArtworkPreset, BuilderCardRecord } from '$lib/features/builder-data';
 	import { submitBuilderCard } from '$lib/features/builder-cards/builder-card-submit';
 
 	type Props = {
 		card: BuilderCardRecord;
+		artwork: BuilderCardArtworkPreset;
 	};
 
-	let { card }: Props = $props();
+	let { card, artwork }: Props = $props();
 
 	async function handleSelect() {
 		await submitBuilderCard(card);
@@ -22,7 +23,7 @@
 		void handleSelect();
 	}}
 >
-	<BuilderCardArtwork artworkId={card.artworkId} />
+	<BuilderCardArtwork {artwork} />
 
 	<div class="px-0.5 pt-1.5">
 		<h3 class="truncate text-[0.76rem] font-medium tracking-normal text-zinc-950 md:text-[0.78rem]">

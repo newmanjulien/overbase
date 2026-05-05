@@ -1,4 +1,3 @@
-import { browser, dev } from '$app/environment';
 import { env } from '$env/dynamic/public';
 import { setupConvex } from 'convex-svelte';
 
@@ -8,13 +7,9 @@ export function setupAppConvex() {
 	const convexUrl = env.PUBLIC_CONVEX_URL;
 
 	if (!convexUrl) {
-		if (browser && dev) {
-			console.warn(
-				`Convex is disabled because ${CONVEX_URL_ENV_VAR} is not set. Run npx convex dev to configure it.`
-			);
-		}
-
-		return;
+		throw new Error(
+			`${CONVEX_URL_ENV_VAR} is required. Run npx convex dev to configure Convex before starting the app.`
+		);
 	}
 
 	setupConvex(convexUrl);
