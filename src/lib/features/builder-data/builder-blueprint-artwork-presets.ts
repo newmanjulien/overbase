@@ -1,4 +1,4 @@
-import { BellRing, Network, ScanSearch, UsersRound } from 'lucide-svelte';
+import { BellRing, Network, ScanSearch, Sparkles, UsersRound } from 'lucide-svelte';
 import type { BuilderCardId } from '$lib/features/builder-data/builder-cards';
 
 export type BuilderBlueprintArtworkIcon = typeof UsersRound;
@@ -45,6 +45,13 @@ export const BUILDER_BLUEPRINT_ARTWORK_PRESETS = {
 		backColor: '#9DE5F3',
 		frontColor: '#DFA0F4',
 		icon: Network,
+		iconCenterX: '60%',
+		iconCenterY: '46%'
+	},
+	'custom-notification': {
+		backColor: '#DDFB93',
+		frontColor: '#9DE5F3',
+		icon: Sparkles,
 		iconCenterX: '60%',
 		iconCenterY: '46%'
 	}

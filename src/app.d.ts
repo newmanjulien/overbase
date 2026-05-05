@@ -4,6 +4,10 @@ declare global {
 			headerTitle?: string;
 			headerTitleEditable?: boolean;
 		}
+
+		interface PageState {
+			initialMessage?: string;
+		}
 	}
 }
 

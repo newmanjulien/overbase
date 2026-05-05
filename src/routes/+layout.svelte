@@ -10,6 +10,7 @@
 		provideChromeShellState,
 		type ChromeShellState
 	} from '$lib/chrome/shared/shell.svelte';
+	import { setupAppConvex } from '$lib/convex/setup.svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 
@@ -40,6 +41,7 @@
 	});
 
 	provideChromeShellState(shellState);
+	setupAppConvex();
 </script>
 
 <svelte:head>

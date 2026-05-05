@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
 	import BuilderCanvas from '$lib/features/builder-canvas/BuilderCanvas.svelte';
@@ -8,11 +9,18 @@
 	const card = $derived(
 		BUILDER_CARDS.find((candidate) => candidate.id === page.params.cardId) ?? null
 	);
+	const initialMessage = $derived(page.state.initialMessage ?? null);
+
+	$effect(() => {
+		if (initialMessage && card) {
+			replaceState(resolve('/builder/[cardId]', { cardId: card.id }), {});
+		}
+	});
 </script>
 
 <SurfaceShell class="px-0 py-0 md:px-0 md:py-0">
 	{#if card}
-		<BuilderCanvas {card} />
+		<BuilderCanvas {card} {initialMessage} />
 	{:else}
 		<div class="flex h-full min-h-full items-center justify-center bg-white px-6 py-12">
 			<div class="w-full max-w-sm rounded-sm border border-zinc-200 bg-white p-5 text-center shadow-sm">

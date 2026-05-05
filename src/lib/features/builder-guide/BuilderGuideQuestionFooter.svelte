@@ -10,10 +10,11 @@
 		answer: BuilderGuideAnswer;
 		canGoNext: boolean;
 		onNext: () => void;
+		onSubmit: () => void;
 		onAnswerChange: (answer: BuilderGuideAnswer) => void;
 	};
 
-	let { question, answer, canGoNext, onNext, onAnswerChange }: Props = $props();
+	let { question, answer, canGoNext, onNext, onSubmit, onAnswerChange }: Props = $props();
 	const emptyChoiceAnswer = {
 		type: 'choice',
 		selectedOption: '',
@@ -39,5 +40,5 @@
 		/>
 	{/if}
 
-	<BuilderGuideActions {canGoNext} {onNext} />
+	<BuilderGuideActions {canGoNext} {onNext} {onSubmit} />
 </div>

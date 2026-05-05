@@ -1,7 +1,7 @@
 import type { BuilderCardId } from '$lib/features/builder-data/builder-cards';
 import type { BuilderGuideDefinition } from '$lib/features/builder-guide/guide-types';
 
-export const BUILDER_GUIDE_DEFINITIONS = {
+export const BUILDER_GUIDE_DEFINITIONS: Partial<Record<BuilderCardId, BuilderGuideDefinition>> = {
 	'bring-the-firm': {
 		intro: 'Let’s build your Bring the firm notification. I just have a few quick questions.',
 		questions: [
@@ -142,8 +142,8 @@ export const BUILDER_GUIDE_DEFINITIONS = {
 			}
 		]
 	}
-} satisfies Record<BuilderCardId, BuilderGuideDefinition>;
+} satisfies Partial<Record<BuilderCardId, BuilderGuideDefinition>>;
 
 export function getBuilderGuideDefinition(cardId: BuilderCardId) {
-	return BUILDER_GUIDE_DEFINITIONS[cardId];
+	return BUILDER_GUIDE_DEFINITIONS[cardId] ?? null;
 }

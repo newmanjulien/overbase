@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
 		BUILDER_CARD_FILTERS,
-		BUILDER_CARDS,
+		BUILDER_TEMPLATE_CARDS,
 		type BuilderCardFilterId,
 		type BuilderCardRecord
 	} from '$lib/features/builder-data';
@@ -14,7 +14,9 @@
 		return filterId === 'all' || card.categoryIds.includes(filterId);
 	}
 
-	const visibleCards = $derived(BUILDER_CARDS.filter((card) => cardMatchesFilter(card, selectedFilterId)));
+	const visibleCards = $derived(
+		BUILDER_TEMPLATE_CARDS.filter((card) => cardMatchesFilter(card, selectedFilterId))
+	);
 </script>
 
 <section class="w-full" aria-labelledby="builder-card-section-title">

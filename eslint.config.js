@@ -5,7 +5,7 @@ import svelte from 'eslint-plugin-svelte';
 
 export default tseslint.config(
 	{
-		ignores: ['.svelte-kit/', 'build/', 'node_modules/']
+		ignores: ['.svelte-kit/', 'build/', 'node_modules/', 'src/convex/_generated/']
 	},
 	js.configs.recommended,
 	...tseslint.configs.recommended,

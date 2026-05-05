@@ -27,6 +27,8 @@ type BuilderCardDefinition = {
 	artworkId: BuilderCardArtworkId;
 };
 
+export const CUSTOM_NOTIFICATION_CARD_ID = 'custom-notification';
+
 export const BUILDER_CARD_FILTERS = [
 	{
 		id: 'all',
@@ -83,8 +85,19 @@ export const BUILDER_CARDS = [
 		title: 'Cross-selling',
 		description: 'Receive an email when your partner has a client you could be selling to',
 		artworkId: 'network-zinc'
+	},
+	{
+		id: CUSTOM_NOTIFICATION_CARD_ID,
+		categoryIds: [],
+		title: 'Custom notification',
+		description: 'Build a notification from a plain-language request',
+		artworkId: 'spark-coral'
 	}
 ] as const satisfies readonly BuilderCardDefinition[];
+
+export const BUILDER_TEMPLATE_CARDS = BUILDER_CARDS.filter(
+	(card) => card.id !== CUSTOM_NOTIFICATION_CARD_ID
+);
 
 export type BuilderCardId = (typeof BUILDER_CARDS)[number]['id'];
 export type BuilderCardRecord = Omit<BuilderCardDefinition, 'id'> & {

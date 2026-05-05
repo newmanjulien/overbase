@@ -14,6 +14,7 @@
 		canGoNext: boolean;
 		onPrevious: () => void;
 		onNext: () => void;
+		onSubmit: () => void;
 		onAnswerChange: (answer: BuilderGuideAnswer) => void;
 	};
 
@@ -26,6 +27,7 @@
 		canGoNext,
 		onPrevious,
 		onNext,
+		onSubmit,
 		onAnswerChange
 	}: Props = $props();
 </script>
@@ -56,7 +58,14 @@
 			<legend class="sr-only">{question.title}</legend>
 
 			<BuilderGuideQuestionBody {question} {answer} {onAnswerChange} />
-			<BuilderGuideQuestionFooter {question} {answer} {canGoNext} {onNext} {onAnswerChange} />
+			<BuilderGuideQuestionFooter
+				{question}
+				{answer}
+				{canGoNext}
+				{onNext}
+				{onSubmit}
+				{onAnswerChange}
+			/>
 		</fieldset>
 	</form>
 </div>

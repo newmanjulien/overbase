@@ -4,9 +4,10 @@
 	type Props = {
 		canGoNext: boolean;
 		onNext: () => void;
+		onSubmit: () => void;
 	};
 
-	let { canGoNext, onNext }: Props = $props();
+	let { canGoNext, onNext, onSubmit }: Props = $props();
 	const primaryActionLabel = $derived(canGoNext ? 'Next' : 'Submit');
 </script>
 
@@ -24,6 +25,8 @@
 		onclick={() => {
 			if (canGoNext) {
 				onNext();
+			} else {
+				onSubmit();
 			}
 		}}
 	>

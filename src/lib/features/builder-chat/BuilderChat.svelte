@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
+	import { CUSTOM_NOTIFICATION_CARD_ID } from '$lib/features/builder-data';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 
 	const CHAT_HEADING = 'Build notifications that fit the way you work';
@@ -35,12 +38,17 @@
 			maxHeight !== null && textareaElement.scrollHeight > maxHeight ? 'auto' : 'hidden';
 	}
 
-	function handleSubmit() {
+	async function handleSubmit() {
 		if (!canSubmit) {
 			return;
 		}
 
+		const prompt = value.trim();
 		value = '';
+
+		await goto(resolve('/builder/[cardId]', { cardId: CUSTOM_NOTIFICATION_CARD_ID }), {
+			state: { initialMessage: prompt }
+		});
 	}
 
 	$effect(() => {
@@ -62,7 +70,7 @@
 				class="mb-2 w-full rounded-[1.8rem] border border-zinc-200/90 bg-white px-3.5 pt-2.5 pb-2 md:mb-2.5 md:px-4.5 md:pt-3 md:pb-2"
 				onsubmit={(event) => {
 					event.preventDefault();
-					handleSubmit();
+					void handleSubmit();
 				}}
 			>
 				<div class="relative">
