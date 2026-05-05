@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { cn } from '$lib/chrome/shared/cn';
 	import {
-		type BuilderCardArtworkPreset,
-		type BuilderCardArtworkSymbolSize,
-		type BuilderCardArtworkTone
+		type BuilderArtworkCardSymbolSize,
+		type BuilderArtworkCardTone,
+		type BuilderArtworkPreset
 	} from '$lib/features/builder-data';
 
 	type Props = {
-		artwork: BuilderCardArtworkPreset;
+		artwork: BuilderArtworkPreset['card'];
 	};
 
 	let { artwork }: Props = $props();
@@ -18,12 +18,12 @@
 		violet: 'bg-[#a64df0]',
 		aqua: 'bg-[#8bddeb]',
 		zinc: 'bg-zinc-200'
-	} as const satisfies Record<BuilderCardArtworkTone, string>;
+	} as const satisfies Record<BuilderArtworkCardTone, string>;
 
 	const symbolSizeClass = {
 		sm: 'size-6 md:size-7',
 		md: 'size-7 md:size-8'
-	} as const satisfies Record<BuilderCardArtworkSymbolSize, string>;
+	} as const satisfies Record<BuilderArtworkCardSymbolSize, string>;
 </script>
 
 <div

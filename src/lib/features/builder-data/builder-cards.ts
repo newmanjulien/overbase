@@ -7,8 +7,16 @@ import {
 	ShieldCheck
 } from 'lucide-svelte';
 import type { Doc } from '$convex/_generated/dataModel';
+import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
 
 type CategoryIcon = typeof Flag;
+type BuilderCardView = {
+	slug: string;
+	categoryIds: string[];
+	title: string;
+	description: string;
+	artwork: Doc<'builderArtworkPresets'>;
+};
 
 export const CUSTOM_NOTIFICATION_CARD_ID = 'custom-notification';
 
@@ -28,24 +36,24 @@ export type BuilderCardRecord = {
 	categoryIds: string[];
 	title: string;
 	description: string;
-	artworkId: string;
-	blueprintArtwork: {
-		backColor: string;
-		frontColor: string;
-		iconId: string;
-		iconCenterX: string;
-		iconCenterY: string;
-	};
+	artwork: BuilderArtworkPreset;
 };
 
 const CATEGORY_ICONS: Record<string, CategoryIcon> = {
 	'briefcase-business': BriefcaseBusiness,
 	factory: Factory,
 	flag: Flag,
-	'loader-circle': LoaderCircle,
 	scale: Scale,
 	'shield-check': ShieldCheck
 };
+
+export const ALL_BUILDER_CARD_FILTER = {
+	id: 'all',
+	label: 'All',
+	iconId: 'loader-circle',
+	icon: LoaderCircle,
+	sortOrder: -1
+} satisfies BuilderCardFilter;
 
 function getCategoryIcon(iconId: string) {
 	return CATEGORY_ICONS[iconId] ?? Flag;
@@ -61,13 +69,12 @@ export function toBuilderCardFilter(category: Doc<'builderCategories'>): Builder
 	};
 }
 
-export function toBuilderCardRecord(card: Doc<'builderCards'>): BuilderCardRecord {
+export function toBuilderCardRecord(card: BuilderCardView): BuilderCardRecord {
 	return {
 		id: card.slug,
 		categoryIds: card.categoryIds,
 		title: card.title,
 		description: card.description,
-		artworkId: card.artworkId,
-		blueprintArtwork: card.blueprintArtwork
+		artwork: toBuilderArtworkPreset(card.artwork)
 	};
 }

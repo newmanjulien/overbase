@@ -1,127 +1,115 @@
-import { internalMutation, type MutationCtx } from './_generated/server';
-
-const builderCategories = [
-	{
-		slug: 'all',
-		label: 'All',
-		iconId: 'loader-circle',
-		sortOrder: 0
-	},
+export const builderCategories = [
 	{
 		slug: 'consulting',
 		label: 'Consulting',
 		iconId: 'briefcase-business',
-		sortOrder: 10
+		sortOrder: 0
 	},
 	{
 		slug: 'insurance',
 		label: 'Insurance',
 		iconId: 'shield-check',
-		sortOrder: 20
+		sortOrder: 10
 	},
 	{
 		slug: 'law',
 		label: 'Law',
 		iconId: 'scale',
-		sortOrder: 30
+		sortOrder: 20
 	},
 	{
 		slug: 'manufacturing',
 		label: 'Manufacturing',
 		iconId: 'factory',
-		sortOrder: 40
+		sortOrder: 30
 	}
 ] as const;
 
-const builderCardArtworkPresets = [
-	{
-		slug: 'flag-coral',
-		tone: 'coral',
-		iconId: 'flag',
-		symbolSize: 'sm'
-	},
-	{
-		slug: 'zap-violet',
-		tone: 'violet',
-		iconId: 'zap',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'arrow-coral',
-		tone: 'coral',
-		iconId: 'arrow-right',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'quote-aqua',
-		tone: 'aqua',
-		iconId: 'message-square-quote',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'club-coral',
-		tone: 'coral',
-		iconId: 'club',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'spark-coral',
-		tone: 'coral',
-		iconId: 'sparkles',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'target-zinc',
-		tone: 'zinc',
-		iconId: 'target',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'handshake-violet',
-		tone: 'violet',
-		iconId: 'handshake',
-		symbolSize: 'md'
-	},
+export const builderArtworkPresets = [
 	{
 		slug: 'team-violet',
-		tone: 'violet',
-		iconId: 'users-round',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'search-aqua',
-		tone: 'aqua',
-		iconId: 'scan-search',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'alert-coral',
-		tone: 'coral',
-		iconId: 'bell-ring',
-		symbolSize: 'md'
-	},
-	{
-		slug: 'network-zinc',
-		tone: 'zinc',
-		iconId: 'network',
-		symbolSize: 'md'
-	}
-] as const;
-
-const builderCards = [
-	{
-		slug: 'bring-the-firm',
-		categoryIds: ['consulting', 'law'],
-		title: 'Bring the firm',
-		description: 'Receive recommendations of colleagues to bring to meetings',
-		artworkId: 'team-violet',
-		blueprintArtwork: {
+		card: {
+			tone: 'violet',
+			iconId: 'users-round',
+			symbolSize: 'md'
+		},
+		blueprint: {
 			backColor: '#9DE5F3',
 			frontColor: '#DFA0F4',
 			iconId: 'users-round',
 			iconCenterX: '60%',
 			iconCenterY: '46%'
+		}
+	},
+	{
+		slug: 'search-aqua',
+		card: {
+			tone: 'aqua',
+			iconId: 'scan-search',
+			symbolSize: 'md'
 		},
+		blueprint: {
+			backColor: '#FFA0A1',
+			frontColor: '#DDFB93',
+			iconId: 'scan-search',
+			iconCenterX: '60%',
+			iconCenterY: '46%'
+		}
+	},
+	{
+		slug: 'alert-coral',
+		card: {
+			tone: 'coral',
+			iconId: 'bell-ring',
+			symbolSize: 'md'
+		},
+		blueprint: {
+			backColor: '#DDFB93',
+			frontColor: '#FFA0A1',
+			iconId: 'bell-ring',
+			iconCenterX: '60%',
+			iconCenterY: '46%'
+		}
+	},
+	{
+		slug: 'network-zinc',
+		card: {
+			tone: 'zinc',
+			iconId: 'network',
+			symbolSize: 'md'
+		},
+		blueprint: {
+			backColor: '#9DE5F3',
+			frontColor: '#DFA0F4',
+			iconId: 'network',
+			iconCenterX: '60%',
+			iconCenterY: '46%'
+		}
+	},
+	{
+		slug: 'spark-coral',
+		card: {
+			tone: 'coral',
+			iconId: 'sparkles',
+			symbolSize: 'md'
+		},
+		blueprint: {
+			backColor: '#DDFB93',
+			frontColor: '#9DE5F3',
+			iconId: 'sparkles',
+			iconCenterX: '60%',
+			iconCenterY: '46%'
+		}
+	}
+] as const;
+
+export const builderCards = [
+	{
+		slug: 'bring-the-firm',
+		categoryIds: ['consulting', 'law'],
+		title: 'Bring the firm',
+		description: 'Receive recommendations of colleagues to bring to meetings',
+		artworkPresetSlug: 'team-violet',
 		isTemplate: true,
 		sortOrder: 10,
 		status: 'active'
@@ -131,14 +119,7 @@ const builderCards = [
 		categoryIds: ['insurance'],
 		title: 'Whitespace finder',
 		description: 'Receive a report 3 months before renewals with new policies each client could buy',
-		artworkId: 'search-aqua',
-		blueprintArtwork: {
-			backColor: '#FFA0A1',
-			frontColor: '#DDFB93',
-			iconId: 'scan-search',
-			iconCenterX: '60%',
-			iconCenterY: '46%'
-		},
+		artworkPresetSlug: 'search-aqua',
 		isTemplate: true,
 		sortOrder: 20,
 		status: 'active'
@@ -148,14 +129,7 @@ const builderCards = [
 		categoryIds: ['law'],
 		title: 'Reasons to connect',
 		description: 'Receive an email when a client might have a legal issue they need your help with',
-		artworkId: 'alert-coral',
-		blueprintArtwork: {
-			backColor: '#DDFB93',
-			frontColor: '#FFA0A1',
-			iconId: 'bell-ring',
-			iconCenterX: '60%',
-			iconCenterY: '46%'
-		},
+		artworkPresetSlug: 'alert-coral',
 		isTemplate: true,
 		sortOrder: 30,
 		status: 'active'
@@ -165,14 +139,7 @@ const builderCards = [
 		categoryIds: ['consulting', 'insurance', 'law', 'manufacturing'],
 		title: 'Cross-selling',
 		description: 'Receive an email when your partner has a client you could be selling to',
-		artworkId: 'network-zinc',
-		blueprintArtwork: {
-			backColor: '#9DE5F3',
-			frontColor: '#DFA0F4',
-			iconId: 'network',
-			iconCenterX: '60%',
-			iconCenterY: '46%'
-		},
+		artworkPresetSlug: 'network-zinc',
 		isTemplate: true,
 		sortOrder: 40,
 		status: 'active'
@@ -182,21 +149,14 @@ const builderCards = [
 		categoryIds: [],
 		title: 'Custom notification',
 		description: 'Build a notification from a plain-language request',
-		artworkId: 'spark-coral',
-		blueprintArtwork: {
-			backColor: '#DDFB93',
-			frontColor: '#9DE5F3',
-			iconId: 'sparkles',
-			iconCenterX: '60%',
-			iconCenterY: '46%'
-		},
+		artworkPresetSlug: 'spark-coral',
 		isTemplate: false,
 		sortOrder: 50,
 		status: 'active'
 	}
 ] as const;
 
-const builderGuides = [
+export const builderGuides = [
 	{
 		cardSlug: 'bring-the-firm',
 		intro: "Let's build your Bring the firm notification. I just have a few quick questions.",
@@ -345,75 +305,3 @@ const builderGuides = [
 		]
 	}
 ] as const;
-
-async function deleteAllFromTable(
-	ctx: MutationCtx,
-	table:
-		| 'messages'
-		| 'conversations'
-		| 'builderGuides'
-		| 'builderCards'
-		| 'builderCardArtworkPresets'
-		| 'builderCategories'
-) {
-	const documents = await ctx.db.query(table).collect();
-
-	for (const document of documents) {
-		await ctx.db.delete(document._id);
-	}
-
-	return documents.length;
-}
-
-export const reset = internalMutation({
-	args: {},
-	handler: async (ctx) => {
-		const deleted = {
-			messages: await deleteAllFromTable(ctx, 'messages'),
-			conversations: await deleteAllFromTable(ctx, 'conversations'),
-			builderGuides: await deleteAllFromTable(ctx, 'builderGuides'),
-			builderCards: await deleteAllFromTable(ctx, 'builderCards'),
-			builderCardArtworkPresets: await deleteAllFromTable(ctx, 'builderCardArtworkPresets'),
-			builderCategories: await deleteAllFromTable(ctx, 'builderCategories')
-		};
-
-		for (const category of builderCategories) {
-			await ctx.db.insert('builderCategories', category);
-		}
-
-		for (const preset of builderCardArtworkPresets) {
-			await ctx.db.insert('builderCardArtworkPresets', preset);
-		}
-
-		for (const card of builderCards) {
-			await ctx.db.insert('builderCards', {
-				...card,
-				categoryIds: [...card.categoryIds]
-			});
-		}
-
-		for (const guide of builderGuides) {
-			await ctx.db.insert('builderGuides', {
-				...guide,
-				questions: guide.questions.map((question) =>
-					question.type === 'choice'
-						? {
-								...question,
-								options: [...question.options]
-							}
-						: question
-				)
-			});
-		}
-
-		return {
-			deleted,
-			inserted: {
-				builderCategories: builderCategories.length,
-				builderCardArtworkPresets: builderCardArtworkPresets.length,
-				builderCards: builderCards.length,
-				builderGuides: builderGuides.length
-			}
-		};
-	}
-});

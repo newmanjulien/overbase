@@ -8,7 +8,6 @@
 		"build": "vite build",
 		"convex:deploy": "convex deploy",
 		"convex:dev": "convex dev",
-		"convex:seed": "convex run seed:reset",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

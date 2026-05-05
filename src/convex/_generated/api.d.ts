@@ -9,11 +9,12 @@
  */
 
 import type * as builder from "../builder.js";
+import type * as builderAdmin from "../builderAdmin.js";
+import type * as builderContent from "../builderContent.js";
 import type * as chat from "../chat.js";
 import type * as crons from "../crons.js";
 import type * as health from "../health.js";
 import type * as model from "../model.js";
-import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -23,11 +24,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   builder: typeof builder;
+  builderAdmin: typeof builderAdmin;
+  builderContent: typeof builderContent;
   chat: typeof chat;
   crons: typeof crons;
   health: typeof health;
   model: typeof model;
-  seed: typeof seed;
 }>;
 
 /**

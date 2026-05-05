@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { BuilderBlueprintArtworkIcon } from '$lib/features/builder-data';
+	import type { BuilderArtworkPreset } from '$lib/features/builder-data';
 
 	type Props = {
 		backColor: string;
 		frontColor: string;
-		icon: BuilderBlueprintArtworkIcon;
+		icon: BuilderArtworkPreset['blueprint']['icon'];
 		iconCenterX: string;
 		iconCenterY: string;
 	};

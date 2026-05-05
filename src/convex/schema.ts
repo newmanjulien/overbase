@@ -26,28 +26,30 @@ export default defineSchema({
 		iconId: v.string(),
 		sortOrder: v.number()
 	}).index('by_slug', ['slug']).index('by_sortOrder', ['sortOrder']),
-	builderCardArtworkPresets: defineTable({
-		slug: v.string(),
-		tone: v.union(v.literal('coral'), v.literal('violet'), v.literal('aqua'), v.literal('zinc')),
-		iconId: v.string(),
-		symbolSize: v.union(v.literal('sm'), v.literal('md'))
-	}).index('by_slug', ['slug']),
-	builderCards: defineTable({
-		slug: v.string(),
-		categoryIds: v.array(v.string()),
-		title: v.string(),
-		description: v.string(),
-		artworkId: v.string(),
-		blueprintArtwork: v.object({
-			backColor: v.string(),
-			frontColor: v.string(),
-			iconId: v.string(),
-			iconCenterX: v.string(),
-			iconCenterY: v.string()
-		}),
-		isTemplate: v.boolean(),
-		sortOrder: v.number(),
-		status: v.union(v.literal('active'), v.literal('hidden'))
+		builderArtworkPresets: defineTable({
+			slug: v.string(),
+			card: v.object({
+				tone: v.union(v.literal('coral'), v.literal('violet'), v.literal('aqua'), v.literal('zinc')),
+				iconId: v.string(),
+				symbolSize: v.union(v.literal('sm'), v.literal('md'))
+			}),
+			blueprint: v.object({
+				backColor: v.string(),
+				frontColor: v.string(),
+				iconId: v.string(),
+				iconCenterX: v.string(),
+				iconCenterY: v.string()
+			})
+		}).index('by_slug', ['slug']),
+		builderCards: defineTable({
+			slug: v.string(),
+			categoryIds: v.array(v.string()),
+			title: v.string(),
+			description: v.string(),
+			artworkPresetSlug: v.string(),
+			isTemplate: v.boolean(),
+			sortOrder: v.number(),
+			status: v.union(v.literal('active'), v.literal('hidden'))
 	})
 		.index('by_slug', ['slug'])
 		.index('by_slug_status', ['slug', 'status'])

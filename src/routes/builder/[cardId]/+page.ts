@@ -12,7 +12,7 @@ export const load: PageLoad = async ({ params }) => {
 	}
 
 	const convex = new ConvexHttpClient(convexUrl);
-	const template = await convex.query(api.builder.getActiveBuilderTemplateBySlug, {
+	const template = await convex.query(api.builder.getActiveBuilderCardBySlug, {
 		slug: params.cardId
 	});
 	const card = template?.card ?? null;

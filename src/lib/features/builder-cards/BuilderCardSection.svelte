@@ -2,7 +2,7 @@
 	import { api } from '$convex/_generated/api';
 	import { useQuery } from 'convex-svelte';
 	import {
-		toBuilderCardArtworkPreset,
+		ALL_BUILDER_CARD_FILTER,
 		toBuilderCardFilter,
 		toBuilderCardRecord,
 		type BuilderCardFilterId,
@@ -14,27 +14,14 @@
 	let selectedFilterId = $state<BuilderCardFilterId>('all');
 
 	const loadingCardPlaceholders = [0, 1, 2, 3];
-	const categoriesQuery = useQuery(api.builder.listCategories);
-	const cardsQuery = useQuery(api.builder.listActiveTemplateCards);
-	const artworkPresetsQuery = useQuery(api.builder.listCardArtworkPresets);
-	const queryError = $derived(
-		categoriesQuery.error ?? cardsQuery.error ?? artworkPresetsQuery.error ?? null
-	);
-	const filters = $derived((categoriesQuery.data ?? []).map(toBuilderCardFilter));
-	const cards = $derived((cardsQuery.data ?? []).map(toBuilderCardRecord));
-	const artworkPresetsById = $derived(
-		Object.fromEntries(
-			(artworkPresetsQuery.data ?? []).map((preset) => {
-				const artwork = toBuilderCardArtworkPreset(preset);
-				return [artwork.id, artwork];
-			})
-		)
-	);
-	const isLoading = $derived(
-		categoriesQuery.data === undefined ||
-			cardsQuery.data === undefined ||
-			artworkPresetsQuery.data === undefined
-	);
+	const builderHomeQuery = useQuery(api.builder.listBuilderHome);
+	const queryError = $derived(builderHomeQuery.error ?? null);
+	const filters = $derived([
+		ALL_BUILDER_CARD_FILTER,
+		...(builderHomeQuery.data?.categories ?? []).map(toBuilderCardFilter)
+	]);
+	const cards = $derived((builderHomeQuery.data?.cards ?? []).map(toBuilderCardRecord));
+	const isLoading = $derived(builderHomeQuery.data === undefined);
 
 	function cardMatchesFilter(card: BuilderCardRecord, filterId: BuilderCardFilterId) {
 		return filterId === 'all' || card.categoryIds.includes(filterId);
@@ -81,15 +68,12 @@
 					<div class="h-36 animate-pulse rounded-sm bg-zinc-100"></div>
 				{/each}
 			</div>
-		{:else}
-			<div class="mt-4 grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-3">
-				{#each visibleCards as card (card.id)}
-					{@const artwork = artworkPresetsById[card.artworkId]}
-					{#if artwork}
-						<BuilderCard {card} {artwork} />
-					{/if}
-				{/each}
-			</div>
-		{/if}
+			{:else}
+				<div class="mt-4 grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-3">
+					{#each visibleCards as card (card.id)}
+						<BuilderCard {card} />
+					{/each}
+				</div>
+			{/if}
 	</div>
 </section>

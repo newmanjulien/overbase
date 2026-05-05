@@ -1,14 +1,13 @@
 <script lang="ts">
 	import type { BuilderCardRecord } from '$lib/features/builder-data';
 	import BuilderBlueprintArtwork from '$lib/features/builder-canvas/BuilderBlueprintArtwork.svelte';
-	import { toBuilderBlueprintArtworkPreset } from '$lib/features/builder-data';
 
 	type Props = {
 		card: BuilderCardRecord;
 	};
 
 	let { card }: Props = $props();
-	const artwork = $derived(toBuilderBlueprintArtworkPreset(card.blueprintArtwork));
+	const artwork = $derived(card.artwork.blueprint);
 </script>
 
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-zinc-50/50 text-zinc-950">

@@ -1,0 +1,78 @@
+import { internalMutation, type MutationCtx } from './_generated/server';
+import {
+	builderArtworkPresets,
+	builderCards,
+	builderCategories,
+	builderGuides
+} from './builderContent';
+
+type ResetTable =
+	| 'messages'
+	| 'conversations'
+	| 'builderGuides'
+	| 'builderCards'
+	| 'builderArtworkPresets'
+	| 'builderCategories';
+
+async function deleteAllFromTable(ctx: MutationCtx, table: ResetTable) {
+	const documents = await ctx.db.query(table).collect();
+
+	for (const document of documents) {
+		await ctx.db.delete(document._id);
+	}
+
+	return documents.length;
+}
+
+export const resetBuilderContent = internalMutation({
+	args: {},
+	handler: async (ctx) => {
+		const deleted = {
+			messages: await deleteAllFromTable(ctx, 'messages'),
+			conversations: await deleteAllFromTable(ctx, 'conversations'),
+			builderGuides: await deleteAllFromTable(ctx, 'builderGuides'),
+			builderCards: await deleteAllFromTable(ctx, 'builderCards'),
+			builderArtworkPresets: await deleteAllFromTable(ctx, 'builderArtworkPresets'),
+			builderCategories: await deleteAllFromTable(ctx, 'builderCategories')
+		};
+
+		for (const category of builderCategories) {
+			await ctx.db.insert('builderCategories', category);
+		}
+
+		for (const artworkPreset of builderArtworkPresets) {
+			await ctx.db.insert('builderArtworkPresets', artworkPreset);
+		}
+
+		for (const card of builderCards) {
+			await ctx.db.insert('builderCards', {
+				...card,
+				categoryIds: [...card.categoryIds]
+			});
+		}
+
+		for (const guide of builderGuides) {
+			await ctx.db.insert('builderGuides', {
+				...guide,
+				questions: guide.questions.map((question) =>
+					question.type === 'choice'
+						? {
+								...question,
+								options: [...question.options]
+							}
+						: question
+				)
+			});
+		}
+
+		return {
+			deleted,
+			inserted: {
+				builderCategories: builderCategories.length,
+				builderArtworkPresets: builderArtworkPresets.length,
+				builderCards: builderCards.length,
+				builderGuides: builderGuides.length
+			}
+		};
+	}
+});
