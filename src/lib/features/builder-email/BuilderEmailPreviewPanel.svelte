@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
+	import { createDefaultEmailDraft, type EmailDraft } from '$convex/emailArtifact';
 	import {
-		createDefaultEmailDraft,
-		type EmailBodyBlock,
-		type EmailDraft
-	} from '$convex/builderEmailContract';
-	import { useQuery } from 'convex-svelte';
+		fromEditableEmailDraft,
+		toEditableEmailDraft,
+		type EditableEmailDraft
+	} from '$lib/features/builder-email/email-editable-draft';
+	import EmailComposeEditor from '$lib/features/builder-email/EmailComposeEditor.svelte';
+	import EmailComposePreview from '$lib/features/builder-email/EmailComposePreview.svelte';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 
 	type Props = {
 		builderSessionId: Id<'builderSessions'> | null;
@@ -14,22 +17,50 @@
 
 	let { builderSessionId }: Props = $props();
 
+	const client = useConvexClient();
 	const artifactQuery = useQuery(api.builderSessions.getSessionArtifact, () =>
 		builderSessionId ? { builderSessionId } : 'skip'
 	);
 	const artifact = $derived(artifactQuery.data ?? null);
 	const hasArtifactResponse = $derived(artifactQuery.data !== undefined);
 	const draft = $derived((artifact?.emailDraft as EmailDraft | undefined) ?? createDefaultEmailDraft());
-	const toLine = $derived(formatRecipients(draft.to));
-	const ccLine = $derived(formatRecipients(draft.cc));
-	const hasBody = $derived(draft.body.length > 0);
+	const canEdit = $derived(Boolean(builderSessionId) && artifact !== null && !artifactQuery.error);
 
-	function formatRecipients(recipients: string[]) {
-		return recipients.join('; ');
+	let isEditing = $state(false);
+	let isSaving = $state(false);
+	let saveError = $state<string | null>(null);
+	let editableDraft = $state<EditableEmailDraft>(toEditableEmailDraft(createDefaultEmailDraft()));
+
+	function beginEdit() {
+		editableDraft = toEditableEmailDraft(draft);
+		saveError = null;
+		isEditing = true;
 	}
 
-	function isParagraphBlock(block: EmailBodyBlock): block is Extract<EmailBodyBlock, { type: 'paragraph' }> {
-		return block.type === 'paragraph';
+	function cancelEdit() {
+		saveError = null;
+		isEditing = false;
+	}
+
+	async function saveAndPolish() {
+		if (!builderSessionId || isSaving) {
+			return;
+		}
+
+		isSaving = true;
+		saveError = null;
+
+		try {
+			await client.mutation(api.builderSessions.saveUserEditedEmailDraft, {
+				builderSessionId,
+				emailDraft: fromEditableEmailDraft(editableDraft)
+			});
+			isEditing = false;
+		} catch (error) {
+			saveError = error instanceof Error ? error.message : 'Could not save draft edits.';
+		} finally {
+			isSaving = false;
+		}
 	}
 </script>
 
@@ -48,75 +79,52 @@
 					<p class="font-medium text-zinc-800">Email preview unavailable.</p>
 					<p class="mt-1">This builder session no longer has an active preview artifact.</p>
 				</div>
+			{:else if isEditing}
+				<EmailComposeEditor
+					{editableDraft}
+					disabled={isSaving}
+					onDraftChange={(nextDraft) => {
+						editableDraft = nextDraft;
+					}}
+				/>
 			{:else}
-			<div class="flex min-h-8 items-stretch gap-2.5">
-				<div
-					class="flex h-8 w-12 shrink-0 items-center justify-center rounded-sm border border-zinc-200 bg-white text-[0.68rem] font-semibold text-zinc-950"
+				<EmailComposePreview {draft} />
+			{/if}
+		</div>
+	</div>
+
+	<div class="shrink-0 border-t border-zinc-100 px-4 py-3 md:px-5">
+		{#if saveError}
+			<p class="mb-2 text-[0.72rem] leading-snug text-red-600">{saveError}</p>
+		{/if}
+
+		<div class="flex justify-end gap-2">
+			{#if isEditing}
+				<button
+					type="button"
+					class="inline-flex h-8 items-center justify-center rounded-sm border border-zinc-200 bg-white px-3 text-[0.74rem] font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-default disabled:opacity-55"
+					disabled={isSaving}
+					onclick={cancelEdit}
 				>
-					To
-				</div>
-				<div class="flex min-w-0 flex-1 items-center border-b border-zinc-200">
-					{#if toLine}
-						<p class="truncate text-[0.78rem] text-zinc-800">{toLine}</p>
-					{/if}
-				</div>
-			</div>
-
-			<div class="mt-3 flex min-h-8 items-stretch gap-2.5">
-				<div
-					class="flex h-8 w-12 shrink-0 items-center justify-center rounded-sm border border-zinc-200 bg-white text-[0.68rem] font-semibold text-zinc-950"
+					Cancel
+				</button>
+				<button
+					type="button"
+					class="inline-flex h-8 items-center justify-center rounded-sm bg-zinc-950 px-3 text-[0.74rem] font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-default disabled:bg-zinc-300 disabled:text-zinc-500"
+					disabled={!builderSessionId || isSaving}
+					onclick={() => void saveAndPolish()}
 				>
-					Cc
-				</div>
-				<div class="flex min-w-0 flex-1 items-center border-b border-zinc-200">
-					{#if ccLine}
-						<p class="truncate text-[0.78rem] text-zinc-800">{ccLine}</p>
-					{/if}
-				</div>
-			</div>
-
-			<div
-				class={[
-					'mt-5 flex min-h-8.5 items-center border-b border-zinc-200 text-[0.82rem] leading-snug',
-					draft.subject ? 'font-medium text-zinc-950' : 'font-normal text-zinc-500'
-				]}
-			>
-				{draft.subject || 'Add a subject'}
-			</div>
-
-			<div
-				class={[
-					'min-h-[24rem] flex-1 pt-5 text-[0.82rem] leading-[1.52]',
-					hasBody ? 'text-zinc-900' : 'text-zinc-500'
-				]}
-			>
-				{#if hasBody}
-					<div class="space-y-3.5">
-						{#each draft.body as block, blockIndex (`${block.type}:${blockIndex}`)}
-							{#if isParagraphBlock(block)}
-								<p class="whitespace-pre-wrap">{block.text}</p>
-							{:else if block.type === 'bullets'}
-								<ul class="list-disc space-y-1.5 pl-5">
-									{#each block.items as item, itemIndex (`${item}:${itemIndex}`)}
-										<li class="pl-1">{item}</li>
-									{/each}
-								</ul>
-							{:else if block.type === 'link'}
-								<p>
-									<span
-										class="cursor-default font-medium text-blue-600 underline decoration-blue-600/70 underline-offset-2"
-										title={block.href}
-									>
-										{block.label}
-									</span>
-								</p>
-							{/if}
-						{/each}
-					</div>
-				{:else}
-					<p>Type / to insert files and more</p>
-				{/if}
-			</div>
+					{isSaving ? 'Saving...' : 'Save and polish'}
+				</button>
+			{:else}
+				<button
+					type="button"
+					class="inline-flex h-8 items-center justify-center rounded-sm border border-zinc-200 bg-white px-3 text-[0.74rem] font-medium text-zinc-800 transition-colors hover:bg-zinc-50 disabled:cursor-default disabled:opacity-55"
+					disabled={!canEdit}
+					onclick={beginEdit}
+				>
+					Edit draft
+				</button>
 			{/if}
 		</div>
 	</div>

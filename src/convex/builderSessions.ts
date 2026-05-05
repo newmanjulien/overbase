@@ -2,15 +2,25 @@ import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { internalMutation, internalQuery, mutation, query, type MutationCtx } from './_generated/server';
 import type { Doc, Id } from './_generated/dataModel';
-import { CUSTOM_EMAIL_BUILDER_CARD_ID, createDefaultEmailDraft } from './builderEmailContract';
-import { builderTurnResult } from './builderEmailValidators';
+import {
+	applyEmailDraftPatch,
+	buildBuilderAssistantText,
+	buildPolishAssistantText,
+	CUSTOM_EMAIL_BUILDER_CARD_ID,
+	createDefaultEmailDraft,
+	normalizeEmailDraft
+} from './emailArtifact';
+import {
+	builderTurnResult,
+	emailDraft as emailDraftValidator,
+	emailPolishTurnResult
+} from './builderEmailValidators';
 import {
 	createGenerationId,
 	getConversationExpiresAt,
 	isConversationExpired,
 	normalizeUserText
 } from './conversationCore';
-import { applyEmailDraftPatch, buildBuilderAssistantText, normalizeEmailDraft } from './emailDrafts';
 
 async function insertPendingBuilderTurn(
 	ctx: MutationCtx,
@@ -35,6 +45,37 @@ async function insertPendingBuilderTurn(
 	});
 
 	await ctx.scheduler.runAfter(0, internal.builderTurns.generateEmailBuilderTurn, {
+		conversationId,
+		assistantMessageId,
+		generationId
+	});
+
+	return assistantMessageId;
+}
+
+async function insertPendingPolishTurn(
+	ctx: MutationCtx,
+	conversationId: Id<'conversations'>,
+	createdAt: number
+) {
+	const generationId = createGenerationId();
+	const assistantMessageId = await ctx.db.insert('messages', {
+		conversationId,
+		role: 'assistant',
+		text: '',
+		status: 'pending',
+		generationId,
+		createdAt,
+		updatedAt: createdAt
+	});
+
+	await ctx.db.patch(conversationId, {
+		pendingAssistantMessageId: assistantMessageId,
+		pendingAssistantGenerationId: generationId,
+		updatedAt: createdAt
+	});
+
+	await ctx.scheduler.runAfter(0, internal.builderTurns.generateEmailPolishTurn, {
 		conversationId,
 		assistantMessageId,
 		generationId
@@ -192,13 +233,66 @@ export const sendCustomEmailMessage = mutation({
 			createdAt: now,
 			updatedAt: now
 		});
-		const assistantMessageId = await insertPendingBuilderTurn(ctx, conversation._id, now + 1);
+		const assistantMessageId = await insertPendingPolishTurn(ctx, conversation._id, now + 1);
 
 		return {
 			builderSessionId,
 			conversationId: conversation._id,
 			userMessageId,
 			assistantMessageId
+		};
+	}
+});
+
+export const saveUserEditedEmailDraft = mutation({
+	args: {
+		builderSessionId: v.id('builderSessions'),
+		emailDraft: emailDraftValidator
+	},
+	handler: async (ctx, { builderSessionId, emailDraft: editedEmailDraft }) => {
+		const now = Date.now();
+		const session = await ctx.db.get(builderSessionId);
+
+		if (!session || isConversationExpired(session, now)) {
+			throw new Error('Builder session not found.');
+		}
+
+		const conversation = await ctx.db.get(session.conversationId);
+
+		if (!conversation || isConversationExpired(conversation, now)) {
+			throw new Error('Conversation not found.');
+		}
+
+		if (conversation.pendingAssistantMessageId) {
+			throw new Error('Please wait for the assistant response to finish before editing the draft.');
+		}
+
+		const normalizedEmailDraft = normalizeEmailDraft(editedEmailDraft);
+		const nextArtifactVersion = session.artifactVersion + 1;
+
+		await ctx.db.patch(session._id, {
+			artifactVersion: nextArtifactVersion,
+			status: 'drafting',
+			emailDraft: normalizedEmailDraft,
+			updatedAt: now
+		});
+
+		const userMessageId = await ctx.db.insert('messages', {
+			conversationId: conversation._id,
+			role: 'user',
+			text: 'I edited the email draft. Please polish typos, formatting, and light wording only. Preserve the meaning and do not add new facts.',
+			status: 'complete',
+			createdAt: now,
+			updatedAt: now
+		});
+		const assistantMessageId = await insertPendingBuilderTurn(ctx, conversation._id, now + 1);
+
+		return {
+			builderSessionId,
+			conversationId: conversation._id,
+			userMessageId,
+			assistantMessageId,
+			artifactVersion: nextArtifactVersion
 		};
 	}
 });
@@ -284,6 +378,47 @@ export const completeBuilderTurn = internalMutation({
 
 		await ctx.db.patch(assistantMessageId, {
 			text: buildBuilderAssistantText(turn),
+			status: 'complete',
+			updatedAt: now
+		});
+
+		await ctx.db.patch(activeTurn.conversation._id, {
+			pendingAssistantMessageId: undefined,
+			pendingAssistantGenerationId: undefined,
+			updatedAt: now
+		});
+	}
+});
+
+export const completePolishTurn = internalMutation({
+	args: {
+		assistantMessageId: v.id('messages'),
+		generationId: v.string(),
+		turn: emailPolishTurnResult
+	},
+	handler: async (ctx, { assistantMessageId, generationId, turn }) => {
+		const now = Date.now();
+		const activeTurn = await getActiveBuilderTurn(ctx, assistantMessageId, generationId, now);
+
+		if (!activeTurn) {
+			return;
+		}
+
+		if (turn.baseArtifactVersion !== activeTurn.session.artifactVersion) {
+			throw new Error('Builder draft changed before the polish response was applied.');
+		}
+
+		const emailDraft = normalizeEmailDraft(turn.draft);
+		const nextArtifactVersion = activeTurn.session.artifactVersion + 1;
+
+		await ctx.db.patch(activeTurn.session._id, {
+			artifactVersion: nextArtifactVersion,
+			emailDraft,
+			updatedAt: now
+		});
+
+		await ctx.db.patch(assistantMessageId, {
+			text: buildPolishAssistantText(turn),
 			status: 'complete',
 			updatedAt: now
 		});

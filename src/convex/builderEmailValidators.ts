@@ -59,3 +59,9 @@ export const builderTurnResult = v.object({
 	baseArtifactVersion: v.number(),
 	patch: emailDraftPatch
 });
+
+export const emailPolishTurnResult = v.object({
+	assistantMessage: v.string(),
+	baseArtifactVersion: v.number(),
+	draft: emailDraft
+});

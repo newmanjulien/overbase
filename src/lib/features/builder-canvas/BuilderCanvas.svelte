@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import type { Id } from '$convex/_generated/dataModel';
-	import { CUSTOM_EMAIL_BUILDER_CARD_ID } from '$convex/builderEmailContract';
+	import { CUSTOM_EMAIL_BUILDER_CARD_ID } from '$convex/emailArtifact';
 	import type { BuilderCardRecord } from '$lib/features/builder-data';
 	import BuilderBlueprintPanel from '$lib/features/builder-canvas/BuilderBlueprintPanel.svelte';
 	import BuilderChatPanel from '$lib/features/builder-chat/BuilderChatPanel.svelte';

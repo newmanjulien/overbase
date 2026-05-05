@@ -5,9 +5,11 @@ type TranscriptMessage = {
 
 import {
 	builderTurnResultJsonSchema,
+	emailPolishTurnResultJsonSchema,
 	type BuilderTurnResult,
+	type EmailPolishTurnResult,
 	type EmailDraft
-} from './builderEmailContract';
+} from './emailArtifact';
 
 type OpenAIErrorResponse = {
 	error?: {
@@ -61,9 +63,20 @@ const CUSTOM_BUILDER_SYSTEM_PROMPT = [
 	'The preview artifact has only these fields: to, cc, subject, and body.',
 	'Body content may use paragraphs, bullet lists, and links. Prefer concise real email copy over placeholders when the user has supplied enough context.',
 	'If nextQuestion is not null, do not repeat that same question in assistantMessage.',
+	'When the user says they edited the email draft, treat the current draft JSON as source material and only fix typos, formatting, and light wording. Preserve meaning, recipients, links, and claims.',
 	'Do not invent business-critical facts. If required information is missing, ask the next best question.',
 	'The required information is: goal, trigger, recipient, data sources, cadence, subject, body content, and any relevant links or next steps.',
 	'Use status "collecting" while key requirements are unknown, "drafting" once the email preview is useful but incomplete, and "ready" only when the email preview is coherent.',
+	'Return JSON that matches the schema.'
+].join('\n');
+
+const EMAIL_POLISH_SYSTEM_PROMPT = [
+	'You are polishing a user-edited Outlook-style email compose preview for Overbase.',
+	'The current draft JSON is the source of truth.',
+	'Only fix typos, formatting, and light wording.',
+	'Preserve meaning, recipients, links, claims, cadence, and all business-critical facts.',
+	'Do not add new facts, recipients, links, sections, or recommendations.',
+	'Return a complete polished draft JSON, not a patch.',
 	'Return JSON that matches the schema.'
 ].join('\n');
 
@@ -127,6 +140,49 @@ function createBuilderTurnRequestBody(params: {
 				description: 'The assistant reply plus a versioned constrained patch for the email UI draft.',
 				strict: true,
 				schema: builderTurnResultJsonSchema
+			}
+		},
+		max_output_tokens: STRUCTURED_MAX_OUTPUT_TOKENS,
+		store: false
+	};
+}
+
+function createPolishTurnRequestBody(params: {
+	transcript: TranscriptMessage[];
+	draft: EmailDraft;
+	artifactVersion: number;
+	model: string;
+}) {
+	const { transcript, draft, artifactVersion, model } = params;
+
+	return {
+		model,
+		input: [
+			{
+				role: 'system',
+				content: EMAIL_POLISH_SYSTEM_PROMPT
+			},
+			...transcript.map((message) => ({
+				role: message.role,
+				content: message.text
+			})),
+			{
+				role: 'user',
+				content: [
+					`Current artifact version: ${artifactVersion}`,
+					'Current user-edited email draft JSON:',
+					JSON.stringify(draft),
+					'Return the polished email draft as JSON. baseArtifactVersion must equal the current artifact version.'
+				].join('\n')
+			}
+		],
+		text: {
+			format: {
+				type: 'json_schema',
+				name: 'email_polish_turn_result',
+				description: 'A lightly polished full email draft preserving the user-edited meaning.',
+				strict: true,
+				schema: emailPolishTurnResultJsonSchema
 			}
 		},
 		max_output_tokens: STRUCTURED_MAX_OUTPUT_TOKENS,
@@ -352,4 +408,34 @@ export async function generateBuilderTurnResult(params: {
 	}
 
 	return JSON.parse(text) as BuilderTurnResult;
+}
+
+export async function generateEmailPolishTurnResult(params: {
+	transcript: TranscriptMessage[];
+	draft: EmailDraft;
+	artifactVersion: number;
+}): Promise<EmailPolishTurnResult> {
+	const { apiKey, model } = getOpenAIConfig();
+
+	const response = await fetch(OPENAI_RESPONSES_URL, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(createPolishTurnRequestBody({ ...params, model }))
+	});
+
+	if (!response.ok) {
+		throw new Error(await getOpenAIErrorMessage(response));
+	}
+
+	const responseBody = await response.json();
+	const text = getResponseOutputText(responseBody);
+
+	if (!text) {
+		throw new Error('OpenAI returned an empty polish response.');
+	}
+
+	return JSON.parse(text) as EmailPolishTurnResult;
 }

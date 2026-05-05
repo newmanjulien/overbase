@@ -6,7 +6,7 @@ import {
 	Scale,
 	ShieldCheck
 } from 'lucide-svelte';
-import { CUSTOM_EMAIL_BUILDER_CARD_ID } from '$convex/builderEmailContract';
+import { CUSTOM_EMAIL_BUILDER_CARD_ID } from '$convex/emailArtifact';
 import type { Doc } from '$convex/_generated/dataModel';
 import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
 
