@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Users } from 'lucide-svelte';
+	import { ContactRound } from 'lucide-svelte';
 	import { ResourceEmptyIndex } from '$lib/resource-index';
 	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
 </script>
@@ -13,7 +13,7 @@
 			actionLabel: 'Invite member'
 		}}
 		empty={{
-			icon: Users,
+			icon: ContactRound,
 			title: 'No team members found',
 			description: 'Invite teammates to build and manage notifications together.',
 			details:

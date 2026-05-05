@@ -1,4 +1,4 @@
-import { Bell, Database, UserPlus, Users, UsersRound, Workflow } from "lucide-svelte";
+import { Bell, ContactRound, Database, Globe2, KeyRound, UserPlus, UsersRound, Workflow } from "lucide-svelte";
 
 type NavIcon = typeof Workflow;
 
@@ -6,9 +6,11 @@ export const APP_ROUTE_IDS = [
   "my-notifications",
   "builder",
   "data-sources",
+  "external-data",
   "team-members",
   "invite-partners",
   "manage-partners",
+  "data-access",
 ] as const;
 
 export type NavRouteId = (typeof APP_ROUTE_IDS)[number];
@@ -46,10 +48,15 @@ export const APP_ROUTE_REGISTRY = {
     navLabel: "Data sources",
     icon: Database,
   },
+  "external-data": {
+    href: "/external-data",
+    navLabel: "External data",
+    icon: Globe2,
+  },
   "team-members": {
     href: "/team-members",
     navLabel: "Team members",
-    icon: Users,
+    icon: ContactRound,
   },
   "invite-partners": {
     href: "/invite-partners",
@@ -60,6 +67,11 @@ export const APP_ROUTE_REGISTRY = {
     href: "/manage-partners",
     navLabel: "Manage partners",
     icon: UsersRound,
+  },
+  "data-access": {
+    href: "/data-access",
+    navLabel: "Data access",
+    icon: KeyRound,
   },
 } as const satisfies Record<NavRouteId, AppRouteDefinition>;
 
@@ -73,7 +85,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
   {
     id: "main",
     heading: "My team",
-    routeIds: ["data-sources", "team-members"],
+    routeIds: ["data-sources", "external-data", "team-members"],
     desktopSectionClass: "pt-6",
     mobileSectionClass: "pt-6",
     showCollapsedDivider: true,
@@ -81,7 +93,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
   {
     id: "ecosystem",
     heading: "Ecosystem",
-    routeIds: ["invite-partners", "manage-partners"],
+    routeIds: ["invite-partners", "manage-partners", "data-access"],
     desktopSectionClass: "pt-6",
     mobileSectionClass: "pt-6",
     showCollapsedDivider: true,
