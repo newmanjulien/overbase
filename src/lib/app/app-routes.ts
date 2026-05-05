@@ -1,8 +1,9 @@
-import { Database, UserPlus, Users, UsersRound, Workflow } from "lucide-svelte";
+import { Bell, Database, UserPlus, Users, UsersRound, Workflow } from "lucide-svelte";
 
 type NavIcon = typeof Workflow;
 
 export const APP_ROUTE_IDS = [
+  "my-notifications",
   "builder",
   "data-sources",
   "team-members",
@@ -12,7 +13,7 @@ export const APP_ROUTE_IDS = [
 
 export type NavRouteId = (typeof APP_ROUTE_IDS)[number];
 export type NavPath = `/${NavRouteId}`;
-export type NavSectionId = "main" | "ecosystem";
+export type NavSectionId = "notifications" | "main" | "ecosystem";
 
 type NavSectionDefinition = {
   id: NavSectionId;
@@ -30,6 +31,11 @@ export type AppRouteDefinition = {
 };
 
 export const APP_ROUTE_REGISTRY = {
+  "my-notifications": {
+    href: "/my-notifications",
+    navLabel: "My notifications",
+    icon: Bell,
+  },
   builder: {
     href: "/builder",
     navLabel: "Notification builder",
@@ -59,10 +65,18 @@ export const APP_ROUTE_REGISTRY = {
 
 export const APP_NAV_SECTION_DEFINITIONS = [
   {
+    id: "notifications",
+    heading: "Notifications",
+    routeIds: ["builder", "my-notifications"],
+    desktopSectionClass: "pt-2",
+  },
+  {
     id: "main",
     heading: "My team",
-    routeIds: ["builder", "data-sources", "team-members"],
-    desktopSectionClass: "pt-2",
+    routeIds: ["data-sources", "team-members"],
+    desktopSectionClass: "pt-6",
+    mobileSectionClass: "pt-6",
+    showCollapsedDivider: true,
   },
   {
     id: "ecosystem",

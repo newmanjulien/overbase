@@ -13,6 +13,7 @@ import type * as chat from "../chat.js";
 import type * as crons from "../crons.js";
 import type * as health from "../health.js";
 import type * as model from "../model.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   health: typeof health;
   model: typeof model;
+  seed: typeof seed;
 }>;
 
 /**
