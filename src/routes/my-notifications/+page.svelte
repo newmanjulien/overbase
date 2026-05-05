@@ -9,17 +9,15 @@
 		toolbar={{
 			searchPlaceholder: 'Search notifications...',
 			searchAriaLabel: 'Search notifications',
-			filterLabel: 'All notifications',
-			actionLabel: 'Create notification'
+			filterLabel: 'All notifications'
 		}}
 		empty={{
 			icon: Bell,
 			title: 'No notifications found',
-			description: 'Create notifications to track the updates that matter to you.',
+			description: 'Build notifications to track the updates that matter to you.',
 			details:
 				'My notifications is where your active notification workflows will appear. Build notifications that monitor the data sources and partner activity your team relies on, then manage the updates you receive from this view.',
-			learnMoreLabel: 'Learn more',
-			actionLabel: 'Create notification'
+			learnMoreLabel: 'Learn more'
 		}}
 	/>
 </SurfaceShell>
