@@ -3,6 +3,7 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import {
 		createDefaultEmailDraft,
+		type EmailBodyBlock,
 		type EmailDraft
 	} from '$convex/builderEmailContract';
 	import { useQuery } from 'convex-svelte';
@@ -17,121 +18,106 @@
 		builderSessionId ? { builderSessionId } : 'skip'
 	);
 	const artifact = $derived(artifactQuery.data ?? null);
+	const hasArtifactResponse = $derived(artifactQuery.data !== undefined);
 	const draft = $derived((artifact?.emailDraft as EmailDraft | undefined) ?? createDefaultEmailDraft());
-	const subject = $derived(draft.subject || 'Subject line will appear here');
-	const previewText = $derived(draft.previewText || 'Preview text will appear here.');
-	const status = $derived(artifact?.status ?? 'collecting');
-	const previewStyle = $derived(
-		[
-			`--email-accent: ${getSafeColor(draft.theme.accentColor, '#18181b')}`,
-			`--email-bg: ${getSafeColor(draft.theme.backgroundColor, '#f4f4f5')}`,
-			`--email-surface: ${getSafeColor(draft.theme.surfaceColor, '#ffffff')}`,
-			`--email-text: ${getSafeColor(draft.theme.textColor, '#18181b')}`
-		].join('; ')
-	);
+	const toLine = $derived(formatRecipients(draft.to));
+	const ccLine = $derived(formatRecipients(draft.cc));
+	const hasBody = $derived(draft.body.length > 0);
 
-	function getSafeColor(value: string, fallback: string) {
-		return /^#[0-9a-fA-F]{3,8}$/.test(value.trim()) ? value.trim() : fallback;
+	function formatRecipients(recipients: string[]) {
+		return recipients.join('; ');
+	}
+
+	function isParagraphBlock(block: EmailBodyBlock): block is Extract<EmailBodyBlock, { type: 'paragraph' }> {
+		return block.type === 'paragraph';
 	}
 </script>
 
-<aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-zinc-50 text-zinc-950">
-	<div class="flex h-11 shrink-0 items-center border-b border-zinc-200/70 bg-white px-4">
-		<div class="min-w-0">
-			<p class="truncate text-[0.74rem] font-medium text-zinc-950">Email preview</p>
-			<p class="truncate text-[0.66rem] text-zinc-500">
-				{status === 'ready' ? 'Ready draft' : status === 'drafting' ? 'Drafting' : 'Collecting details'}
-			</p>
-		</div>
-	</div>
-
-	<div class="min-h-0 flex-1 overflow-y-auto px-5 py-6 md:px-7 md:py-8">
-		<div class="mx-auto w-full max-w-[640px]" style={previewStyle}>
-			<div class="mb-4 rounded-sm border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-				<div class="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 text-[0.7rem] leading-relaxed">
-					<span class="text-zinc-400">From</span>
-					<span class="truncate text-zinc-700">Overbase</span>
-					<span class="text-zinc-400">Subject</span>
-					<span class="truncate font-medium text-zinc-950">{subject}</span>
-					<span class="text-zinc-400">Preview</span>
-					<span class="truncate text-zinc-600">{previewText}</span>
+<aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-zinc-950">
+	<div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5 md:py-5">
+		<div class="mx-auto flex min-h-full w-full max-w-[820px] flex-col">
+			{#if artifactQuery.error}
+				<div class="rounded-sm border border-red-200 bg-red-50 p-3 text-[0.76rem] leading-relaxed text-red-700">
+					<p class="font-medium">Email preview could not load.</p>
+					<p class="mt-1 text-red-600">{artifactQuery.error.message}</p>
+				</div>
+			{:else if builderSessionId && !hasArtifactResponse}
+				<div class="text-[0.76rem] text-zinc-500">Loading email preview...</div>
+			{:else if builderSessionId && artifact === null}
+				<div class="rounded-sm border border-zinc-200 bg-zinc-50 p-3 text-[0.76rem] leading-relaxed text-zinc-600">
+					<p class="font-medium text-zinc-800">Email preview unavailable.</p>
+					<p class="mt-1">This builder session no longer has an active preview artifact.</p>
+				</div>
+			{:else}
+			<div class="flex min-h-8 items-stretch gap-2.5">
+				<div
+					class="flex h-8 w-12 shrink-0 items-center justify-center rounded-sm border border-zinc-200 bg-white text-[0.68rem] font-semibold text-zinc-950"
+				>
+					To
+				</div>
+				<div class="flex min-w-0 flex-1 items-center border-b border-zinc-200">
+					{#if toLine}
+						<p class="truncate text-[0.78rem] text-zinc-800">{toLine}</p>
+					{/if}
 				</div>
 			</div>
 
-			<article
-				class="overflow-hidden rounded-sm border border-zinc-200 bg-[var(--email-surface)] text-[var(--email-text)] shadow-sm"
-			>
-				<div class="bg-[var(--email-bg)] px-6 py-7">
-					{#each draft.blocks as block (block.id)}
-						{#if block.type === 'header'}
-							<section class="border-b border-black/10 pb-6">
-								<p class="text-[0.68rem] font-medium tracking-wide text-[var(--email-accent)] uppercase">
-									{block.eyebrow}
-								</p>
-								<h2 class="mt-2 text-[1.45rem] leading-tight font-semibold tracking-normal text-[var(--email-text)]">
-									{block.title}
-								</h2>
-								<p class="mt-3 text-[0.86rem] leading-relaxed text-zinc-600">{block.body}</p>
-							</section>
-						{:else if block.type === 'summary'}
-							<section class="border-b border-black/10 py-5">
-								<h3 class="text-[0.92rem] font-semibold text-[var(--email-text)]">{block.title}</h3>
-								<p class="mt-2 text-[0.82rem] leading-relaxed text-zinc-600">{block.body}</p>
-							</section>
-						{:else if block.type === 'details'}
-							<section class="border-b border-black/10 py-5">
-								<h3 class="text-[0.92rem] font-semibold text-[var(--email-text)]">{block.title}</h3>
-								<dl class="mt-3 divide-y divide-black/10">
-									{#each block.items as item, itemIndex (`${item.label}:${itemIndex}`)}
-										<div class="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-2.5 text-[0.78rem] leading-snug">
-											<dt class="text-zinc-500">{item.label}</dt>
-											<dd class="min-w-0 text-zinc-800">{item.value}</dd>
-										</div>
-									{/each}
-								</dl>
-							</section>
-						{:else if block.type === 'table'}
-							<section class="border-b border-black/10 py-5">
-								<h3 class="text-[0.92rem] font-semibold text-[var(--email-text)]">{block.title}</h3>
-								<div class="mt-3 overflow-hidden rounded-sm border border-black/10 bg-white">
-									<table class="w-full border-collapse text-left text-[0.72rem]">
-										<thead class="bg-zinc-50 text-zinc-500">
-											<tr>
-												{#each block.columns as column, columnIndex (`${column}:${columnIndex}`)}
-													<th class="border-b border-black/10 px-3 py-2 font-medium">{column}</th>
-												{/each}
-											</tr>
-										</thead>
-										<tbody class="text-zinc-800">
-											{#each block.rows as row, rowIndex (rowIndex)}
-												<tr>
-													{#each row as cell, cellIndex (cellIndex)}
-														<td class="border-b border-black/5 px-3 py-2 align-top">{cell}</td>
-													{/each}
-												</tr>
-											{/each}
-										</tbody>
-									</table>
-								</div>
-							</section>
-						{:else if block.type === 'cta'}
-							<section class="border-b border-black/10 py-5">
-								<p class="text-[0.9rem] font-semibold text-[var(--email-text)]">{block.label}</p>
-								<p class="mt-2 text-[0.8rem] leading-relaxed text-zinc-600">{block.description}</p>
-								<div
-									class="mt-4 inline-flex min-h-9 items-center rounded-sm bg-[var(--email-accent)] px-4 text-[0.76rem] font-medium text-white"
-								>
-									{block.buttonLabel}
-								</div>
-							</section>
-						{:else if block.type === 'footer'}
-							<footer class="pt-5 text-[0.7rem] leading-relaxed text-zinc-500">
-								{block.body}
-							</footer>
-						{/if}
-					{/each}
+			<div class="mt-3 flex min-h-8 items-stretch gap-2.5">
+				<div
+					class="flex h-8 w-12 shrink-0 items-center justify-center rounded-sm border border-zinc-200 bg-white text-[0.68rem] font-semibold text-zinc-950"
+				>
+					Cc
 				</div>
-			</article>
+				<div class="flex min-w-0 flex-1 items-center border-b border-zinc-200">
+					{#if ccLine}
+						<p class="truncate text-[0.78rem] text-zinc-800">{ccLine}</p>
+					{/if}
+				</div>
+			</div>
+
+			<div
+				class={[
+					'mt-5 flex min-h-8.5 items-center border-b border-zinc-200 text-[0.82rem] leading-snug',
+					draft.subject ? 'font-medium text-zinc-950' : 'font-normal text-zinc-500'
+				]}
+			>
+				{draft.subject || 'Add a subject'}
+			</div>
+
+			<div
+				class={[
+					'min-h-[24rem] flex-1 pt-5 text-[0.82rem] leading-[1.52]',
+					hasBody ? 'text-zinc-900' : 'text-zinc-500'
+				]}
+			>
+				{#if hasBody}
+					<div class="space-y-3.5">
+						{#each draft.body as block, blockIndex (`${block.type}:${blockIndex}`)}
+							{#if isParagraphBlock(block)}
+								<p class="whitespace-pre-wrap">{block.text}</p>
+							{:else if block.type === 'bullets'}
+								<ul class="list-disc space-y-1.5 pl-5">
+									{#each block.items as item, itemIndex (`${item}:${itemIndex}`)}
+										<li class="pl-1">{item}</li>
+									{/each}
+								</ul>
+							{:else if block.type === 'link'}
+								<p>
+									<span
+										class="cursor-default font-medium text-blue-600 underline decoration-blue-600/70 underline-offset-2"
+										title={block.href}
+									>
+										{block.label}
+									</span>
+								</p>
+							{/if}
+						{/each}
+					</div>
+				{:else}
+					<p>Type / to insert files and more</p>
+				{/if}
+			</div>
+			{/if}
 		</div>
 	</div>
 </aside>

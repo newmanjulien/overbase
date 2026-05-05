@@ -9,6 +9,7 @@ import {
 type ResetTable =
 	| 'messages'
 	| 'conversations'
+	| 'builderSessions'
 	| 'builderGuides'
 	| 'builderCards'
 	| 'builderArtworkPresets'
@@ -30,6 +31,7 @@ export const resetBuilderContent = internalMutation({
 		const deleted = {
 			messages: await deleteAllFromTable(ctx, 'messages'),
 			conversations: await deleteAllFromTable(ctx, 'conversations'),
+			builderSessions: await deleteAllFromTable(ctx, 'builderSessions'),
 			builderGuides: await deleteAllFromTable(ctx, 'builderGuides'),
 			builderCards: await deleteAllFromTable(ctx, 'builderCards'),
 			builderArtworkPresets: await deleteAllFromTable(ctx, 'builderArtworkPresets'),

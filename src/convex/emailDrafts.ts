@@ -1,7 +1,7 @@
 import {
 	EMAIL_DRAFT_LIMITS,
 	type BuilderTurnResult,
-	type EmailBlock,
+	type EmailBodyBlock,
 	type EmailDraft,
 	type EmailDraftPatch
 } from './builderEmailContract';
@@ -19,131 +19,76 @@ function clampMultilineText(value: string, maxLength: number) {
 	return normalized.length > maxLength ? normalized.slice(0, maxLength).trim() : normalized;
 }
 
-function normalizeBlockId(value: string, fallback: string) {
-	const normalized = value
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9-]+/g, '-')
-		.replace(/^-+|-+$/g, '');
+function normalizeRecipients(recipients: string[]) {
+	const normalizedRecipients = recipients
+		.slice(0, EMAIL_DRAFT_LIMITS.recipients)
+		.map((recipient) => clampText(recipient, EMAIL_DRAFT_LIMITS.recipient))
+		.filter(Boolean);
 
-	return normalized || fallback;
+	return Array.from(new Set(normalizedRecipients));
 }
 
-function normalizeColor(value: string, fallback: string) {
-	const normalized = clampText(value, EMAIL_DRAFT_LIMITS.color);
-
-	return /^#[0-9a-fA-F]{3,8}$/.test(normalized) ? normalized : fallback;
-}
-
-export function normalizeEmailBlock(block: EmailBlock): EmailBlock {
+export function normalizeEmailBodyBlock(block: EmailBodyBlock): EmailBodyBlock | null {
 	switch (block.type) {
-		case 'header':
-			return {
-				id: normalizeBlockId(block.id, 'header'),
-				type: 'header',
-				eyebrow: clampText(block.eyebrow, EMAIL_DRAFT_LIMITS.label),
-				title: clampText(block.title, EMAIL_DRAFT_LIMITS.title),
-				body: clampMultilineText(block.body, EMAIL_DRAFT_LIMITS.blockText)
-			};
-		case 'summary':
-			return {
-				id: normalizeBlockId(block.id, 'summary'),
-				type: 'summary',
-				title: clampText(block.title, EMAIL_DRAFT_LIMITS.title),
-				body: clampMultilineText(block.body, EMAIL_DRAFT_LIMITS.blockText)
-			};
-		case 'details':
-			return {
-				id: normalizeBlockId(block.id, 'details'),
-				type: 'details',
-				title: clampText(block.title, EMAIL_DRAFT_LIMITS.title),
-				items: block.items.slice(0, EMAIL_DRAFT_LIMITS.detailItems).map((item) => ({
-					label: clampText(item.label, EMAIL_DRAFT_LIMITS.label),
-					value: clampText(item.value, EMAIL_DRAFT_LIMITS.blockText)
-				}))
-			};
-		case 'table':
-			return {
-				id: normalizeBlockId(block.id, 'table'),
-				type: 'table',
-				title: clampText(block.title, EMAIL_DRAFT_LIMITS.title),
-				columns: block.columns
-					.slice(0, EMAIL_DRAFT_LIMITS.tableColumns)
-					.map((column) => clampText(column, EMAIL_DRAFT_LIMITS.label)),
-				rows: block.rows.slice(0, EMAIL_DRAFT_LIMITS.tableRows).map((row) =>
-					row
-						.slice(0, EMAIL_DRAFT_LIMITS.tableColumns)
-						.map((cell) => clampText(cell, EMAIL_DRAFT_LIMITS.blockText))
-				)
-			};
-		case 'cta':
-			return {
-				id: normalizeBlockId(block.id, 'cta'),
-				type: 'cta',
-				label: clampText(block.label, EMAIL_DRAFT_LIMITS.title),
-				description: clampMultilineText(block.description, EMAIL_DRAFT_LIMITS.blockText),
-				buttonLabel: clampText(block.buttonLabel, EMAIL_DRAFT_LIMITS.label)
-			};
-		case 'footer':
-			return {
-				id: normalizeBlockId(block.id, 'footer'),
-				type: 'footer',
-				body: clampMultilineText(block.body, EMAIL_DRAFT_LIMITS.blockText)
-			};
+		case 'paragraph': {
+			const text = clampMultilineText(block.text, EMAIL_DRAFT_LIMITS.bodyText);
+
+			return text ? { type: 'paragraph', text } : null;
+		}
+		case 'bullets': {
+			const items = block.items
+				.slice(0, EMAIL_DRAFT_LIMITS.bulletItems)
+				.map((item) => clampMultilineText(item, EMAIL_DRAFT_LIMITS.bodyText))
+				.filter(Boolean);
+
+			return items.length > 0 ? { type: 'bullets', items } : null;
+		}
+		case 'link': {
+			const label = clampText(block.label, EMAIL_DRAFT_LIMITS.linkLabel);
+			const href = clampText(block.href, EMAIL_DRAFT_LIMITS.linkHref);
+
+			return label && href ? { type: 'link', label, href } : null;
+		}
 	}
+}
+
+function normalizeEmailBody(body: EmailBodyBlock[]) {
+	return body
+		.slice(0, EMAIL_DRAFT_LIMITS.bodyBlocks)
+		.map(normalizeEmailBodyBlock)
+		.filter((block): block is EmailBodyBlock => block !== null);
 }
 
 export function normalizeEmailDraft(draft: EmailDraft): EmailDraft {
 	return {
-		title: clampText(draft.title, EMAIL_DRAFT_LIMITS.title),
+		to: normalizeRecipients(draft.to),
+		cc: normalizeRecipients(draft.cc),
 		subject: clampText(draft.subject, EMAIL_DRAFT_LIMITS.subject),
-		previewText: clampText(draft.previewText, EMAIL_DRAFT_LIMITS.previewText),
-		theme: {
-			accentColor: normalizeColor(draft.theme.accentColor, '#18181b'),
-			backgroundColor: normalizeColor(draft.theme.backgroundColor, '#f4f4f5'),
-			surfaceColor: normalizeColor(draft.theme.surfaceColor, '#ffffff'),
-			textColor: normalizeColor(draft.theme.textColor, '#18181b')
-		},
-		blocks: draft.blocks.slice(0, EMAIL_DRAFT_LIMITS.blocks).map(normalizeEmailBlock)
+		body: normalizeEmailBody(draft.body)
 	};
 }
 
 export function applyEmailDraftPatch(draft: EmailDraft, patch: EmailDraftPatch): EmailDraft {
 	const nextDraft: EmailDraft = {
-		...draft,
-		theme: { ...draft.theme },
-		blocks: [...draft.blocks]
+		to: [...draft.to],
+		cc: [...draft.cc],
+		subject: draft.subject,
+		body: [...draft.body]
 	};
 
 	for (const operation of patch.operations) {
 		switch (operation.type) {
-			case 'setTitle':
-				nextDraft.title = operation.title;
+			case 'setTo':
+				nextDraft.to = operation.to;
+				break;
+			case 'setCc':
+				nextDraft.cc = operation.cc;
 				break;
 			case 'setSubject':
 				nextDraft.subject = operation.subject;
 				break;
-			case 'setPreviewText':
-				nextDraft.previewText = operation.previewText;
-				break;
-			case 'setTheme':
-				nextDraft.theme = { ...operation.theme };
-				break;
-			case 'upsertBlock': {
-				const block = normalizeEmailBlock(operation.block);
-				const blockIndex = nextDraft.blocks.findIndex((existingBlock) => existingBlock.id === block.id);
-
-				if (blockIndex >= 0) {
-					nextDraft.blocks[blockIndex] = block;
-				} else if (nextDraft.blocks.length < EMAIL_DRAFT_LIMITS.blocks) {
-					nextDraft.blocks = [...nextDraft.blocks, block];
-				}
-				break;
-			}
-			case 'removeBlock':
-				nextDraft.blocks = nextDraft.blocks.filter(
-					(block) => block.id !== normalizeBlockId(operation.blockId, '')
-				);
+			case 'setBody':
+				nextDraft.body = operation.body;
 				break;
 		}
 	}
@@ -151,11 +96,24 @@ export function applyEmailDraftPatch(draft: EmailDraft, patch: EmailDraftPatch):
 	return normalizeEmailDraft(nextDraft);
 }
 
+function normalizeQuestionForComparison(value: string) {
+	return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function shouldAppendNextQuestion(assistantMessage: string, nextQuestion: string) {
+	const normalizedAssistantMessage = normalizeQuestionForComparison(assistantMessage);
+	const normalizedNextQuestion = normalizeQuestionForComparison(nextQuestion);
+
+	return normalizedNextQuestion.length > 0 && !normalizedAssistantMessage.includes(normalizedNextQuestion);
+}
+
 export function buildBuilderAssistantText(turn: BuilderTurnResult) {
-	return clampMultilineText(
-		turn.nextQuestion
-			? `${turn.assistantMessage.trim()}\n\n${turn.nextQuestion.trim()}`
-			: turn.assistantMessage,
-		MAX_MESSAGE_LENGTH
-	);
+	const assistantMessage = turn.assistantMessage.trim();
+	const nextQuestion = turn.nextQuestion?.trim() ?? '';
+	const text =
+		nextQuestion && shouldAppendNextQuestion(assistantMessage, nextQuestion)
+			? `${assistantMessage}\n\n${nextQuestion}`
+			: assistantMessage;
+
+	return clampMultilineText(text, MAX_MESSAGE_LENGTH);
 }

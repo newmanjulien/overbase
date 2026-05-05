@@ -6,91 +6,45 @@ export const emailDraftStatus = v.union(
 	v.literal('ready')
 );
 
-export const emailTheme = v.object({
-	accentColor: v.string(),
-	backgroundColor: v.string(),
-	surfaceColor: v.string(),
-	textColor: v.string()
-});
-
-export const emailBlock = v.union(
+export const emailBodyBlock = v.union(
 	v.object({
-		id: v.string(),
-		type: v.literal('header'),
-		eyebrow: v.string(),
-		title: v.string(),
-		body: v.string()
+		type: v.literal('paragraph'),
+		text: v.string()
 	}),
 	v.object({
-		id: v.string(),
-		type: v.literal('summary'),
-		title: v.string(),
-		body: v.string()
+		type: v.literal('bullets'),
+		items: v.array(v.string())
 	}),
 	v.object({
-		id: v.string(),
-		type: v.literal('details'),
-		title: v.string(),
-		items: v.array(
-			v.object({
-				label: v.string(),
-				value: v.string()
-			})
-		)
-	}),
-	v.object({
-		id: v.string(),
-		type: v.literal('table'),
-		title: v.string(),
-		columns: v.array(v.string()),
-		rows: v.array(v.array(v.string()))
-	}),
-	v.object({
-		id: v.string(),
-		type: v.literal('cta'),
+		type: v.literal('link'),
 		label: v.string(),
-		description: v.string(),
-		buttonLabel: v.string()
-	}),
-	v.object({
-		id: v.string(),
-		type: v.literal('footer'),
-		body: v.string()
+		href: v.string()
 	})
 );
 
 export const emailDraft = v.object({
-	title: v.string(),
+	to: v.array(v.string()),
+	cc: v.array(v.string()),
 	subject: v.string(),
-	previewText: v.string(),
-	theme: emailTheme,
-	blocks: v.array(emailBlock)
+	body: v.array(emailBodyBlock)
 });
 
 export const emailDraftPatchOperation = v.union(
 	v.object({
-		type: v.literal('setTitle'),
-		title: v.string()
+		type: v.literal('setTo'),
+		to: v.array(v.string())
+	}),
+	v.object({
+		type: v.literal('setCc'),
+		cc: v.array(v.string())
 	}),
 	v.object({
 		type: v.literal('setSubject'),
 		subject: v.string()
 	}),
 	v.object({
-		type: v.literal('setPreviewText'),
-		previewText: v.string()
-	}),
-	v.object({
-		type: v.literal('setTheme'),
-		theme: emailTheme
-	}),
-	v.object({
-		type: v.literal('upsertBlock'),
-		block: emailBlock
-	}),
-	v.object({
-		type: v.literal('removeBlock'),
-		blockId: v.string()
+		type: v.literal('setBody'),
+		body: v.array(emailBodyBlock)
 	})
 );
 

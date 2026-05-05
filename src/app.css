@@ -79,8 +79,10 @@ body {
 	min-height: 100%;
 }
 
-a {
-	color: inherit;
+@layer base {
+	a {
+		color: inherit;
+	}
 }
 
 button {
