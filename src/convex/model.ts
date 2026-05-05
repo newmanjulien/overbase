@@ -3,23 +3,44 @@ type TranscriptMessage = {
 	text: string;
 };
 
-type OpenAIResponseContent = {
-	type?: string;
-	text?: string;
-};
-
-type OpenAIResponseOutput = {
-	type?: string;
-	content?: OpenAIResponseContent[];
-};
-
-type OpenAIResponseBody = {
+type OpenAIErrorResponse = {
 	error?: {
 		message?: string;
 	};
-	output_text?: string;
-	output?: OpenAIResponseOutput[];
 };
+
+type OpenAIStreamEvent = {
+	type?: string;
+	delta?: string;
+	text?: string;
+	error?: {
+		message?: string;
+	};
+	response?: {
+		error?: {
+			message?: string;
+		};
+	};
+};
+
+type ChatReplyDeltaHandler = (delta: string) => void | Promise<void>;
+
+type ChatReplyStreamHandlers = {
+	onDelta?: ChatReplyDeltaHandler;
+};
+
+type ParsedStreamEvent =
+	| {
+			type: 'delta';
+			text: string;
+	  }
+	| {
+			type: 'done';
+			text: string;
+	  }
+	| {
+			type: 'ignored';
+	  };
 
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 const DEFAULT_OPENAI_MODEL = 'gpt-5-mini';
@@ -36,26 +57,146 @@ function getOpenAIConfig() {
 	return { apiKey, model };
 }
 
-function extractOutputText(responseBody: OpenAIResponseBody) {
-	if (responseBody.output_text?.trim()) {
-		return responseBody.output_text.trim();
+function createChatResponseRequestBody(transcript: TranscriptMessage[], model: string) {
+	return {
+		model,
+		input: transcript.map((message) => ({
+			role: message.role,
+			content: message.text
+		})),
+		max_output_tokens: MAX_OUTPUT_TOKENS,
+		store: false,
+		stream: true
+	};
+}
+
+async function getOpenAIErrorMessage(response: Response) {
+	try {
+		const responseBody = (await response.json()) as OpenAIErrorResponse;
+		return responseBody.error?.message ?? `OpenAI request failed with ${response.status}.`;
+	} catch {
+		return `OpenAI request failed with ${response.status}.`;
+	}
+}
+
+function parseStreamEvent(event: OpenAIStreamEvent): ParsedStreamEvent {
+	if (event.type === 'response.output_text.delta' && typeof event.delta === 'string') {
+		return {
+			type: 'delta',
+			text: event.delta
+		};
 	}
 
-	const text = responseBody.output
-		?.flatMap((output) => output.content ?? [])
-		.filter((content) => content.type === 'output_text' && content.text)
-		.map((content) => content.text)
-		.join('')
-		.trim();
+	if (event.type === 'response.output_text.done' && typeof event.text === 'string') {
+		return {
+			type: 'done',
+			text: event.text
+		};
+	}
 
-	if (!text) {
+	const errorMessage = event.error?.message ?? event.response?.error?.message;
+
+	if (event.type === 'error' || event.type === 'response.failed' || errorMessage) {
+		throw new Error(errorMessage ?? 'OpenAI stream failed.');
+	}
+
+	return {
+		type: 'ignored'
+	};
+}
+
+async function processSseChunk(
+	chunk: string,
+	onEvent: (event: OpenAIStreamEvent) => Promise<void>
+) {
+	const dataLines = chunk
+		.split('\n')
+		.map((line) => line.trimEnd())
+		.filter((line) => line.startsWith('data:'))
+		.map((line) => line.slice('data:'.length).trimStart());
+
+	if (dataLines.length === 0) {
+		return;
+	}
+
+	const data = dataLines.join('\n');
+
+	if (data === '[DONE]') {
+		return;
+	}
+
+	await onEvent(JSON.parse(data) as OpenAIStreamEvent);
+}
+
+async function readOpenAIStream(response: Response, handlers: ChatReplyStreamHandlers) {
+	const reader = response.body?.getReader();
+
+	if (!reader) {
+		throw new Error('OpenAI returned an empty stream.');
+	}
+
+	const decoder = new TextDecoder();
+	let buffer = '';
+	let streamedText = '';
+	let finalText = '';
+
+	async function handleEvent(event: OpenAIStreamEvent) {
+		const parsed = parseStreamEvent(event);
+
+		if (parsed.type === 'delta') {
+			streamedText += parsed.text;
+			await handlers.onDelta?.(parsed.text);
+			return;
+		}
+
+		if (parsed.type === 'done') {
+			finalText = parsed.text;
+		}
+	}
+
+	async function processCompleteChunks() {
+		const chunks = buffer.split(/\r?\n\r?\n/);
+		buffer = chunks.pop() ?? '';
+
+		for (const chunk of chunks) {
+			await processSseChunk(chunk, handleEvent);
+		}
+	}
+
+	try {
+		while (true) {
+			const { done, value } = await reader.read();
+
+			if (done) {
+				break;
+			}
+
+			buffer += decoder.decode(value, { stream: true });
+			await processCompleteChunks();
+		}
+
+		buffer += decoder.decode();
+
+		if (buffer.trim()) {
+			await processSseChunk(buffer, handleEvent);
+		}
+	} finally {
+		reader.releaseLock();
+	}
+
+	const text = finalText || streamedText;
+
+	if (!text.trim()) {
 		throw new Error('OpenAI returned an empty response.');
 	}
 
 	return text;
 }
 
-export async function generateChatReply(transcript: TranscriptMessage[]) {
+export async function streamChatReply(
+	transcript: TranscriptMessage[],
+	handlers: ChatReplyStreamHandlers
+) {
 	const { apiKey, model } = getOpenAIConfig();
 
 	const response = await fetch(OPENAI_RESPONSES_URL, {
@@ -64,22 +205,12 @@ export async function generateChatReply(transcript: TranscriptMessage[]) {
 			Authorization: `Bearer ${apiKey}`,
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify({
-			model,
-			input: transcript.map((message) => ({
-				role: message.role,
-				content: message.text
-			})),
-			max_output_tokens: MAX_OUTPUT_TOKENS,
-			store: false
-		})
+		body: JSON.stringify(createChatResponseRequestBody(transcript, model))
 	});
 
-	const responseBody = (await response.json()) as OpenAIResponseBody;
-
 	if (!response.ok) {
-		throw new Error(responseBody.error?.message ?? `OpenAI request failed with ${response.status}.`);
+		throw new Error(await getOpenAIErrorMessage(response));
 	}
 
-	return extractOutputText(responseBody);
+	return await readOpenAIStream(response, handlers);
 }

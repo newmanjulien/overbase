@@ -150,19 +150,19 @@
 	<div bind:this={scrollElement} class="relative min-h-0 flex-1 overflow-y-auto px-3 py-6 md:px-5">
 		<div bind:this={contentElement} class="mx-auto flex w-full max-w-3xl flex-col gap-4">
 			{#if isInitializing}
-				<div class="max-w-xl rounded-sm border border-zinc-200 bg-white p-4 text-sm text-zinc-500">
+				<div class="max-w-xl rounded-sm border border-zinc-200 bg-white p-4 text-[0.82rem] text-zinc-500">
 					Starting chat...
 				</div>
 			{:else if initializationError}
-				<div class="max-w-xl rounded-sm border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+				<div class="max-w-xl rounded-sm border border-red-200 bg-red-50 p-4 text-[0.82rem] text-red-700">
 					{initializationError}
 				</div>
 			{:else if messagesQuery.error}
-				<div class="max-w-xl rounded-sm border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+				<div class="max-w-xl rounded-sm border border-red-200 bg-red-50 p-4 text-[0.82rem] text-red-700">
 					{messagesQuery.error.message}
 				</div>
 			{:else if messages.length === 0}
-				<div class="max-w-xl rounded-sm border border-zinc-200 bg-white p-4 text-sm text-zinc-500">
+				<div class="max-w-xl rounded-sm border border-zinc-200 bg-white p-4 text-[0.82rem] text-zinc-500">
 					Starting chat...
 				</div>
 			{/if}
@@ -170,7 +170,7 @@
 			{#each messages as message (message._id)}
 				{#if message.role === 'user'}
 					<div
-						class="ml-auto w-fit max-w-[82%] rounded-2xl bg-zinc-100 px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap text-zinc-800"
+						class="ml-auto w-fit max-w-[82%] rounded-2xl bg-zinc-100 px-4 py-2.5 text-[0.82rem] leading-[1.55] whitespace-pre-wrap text-zinc-800"
 					>
 						{message.text}
 					</div>
@@ -178,13 +178,13 @@
 					<div class="mr-auto max-w-[86%]">
 						<div
 							class={[
-								'rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap',
+								'rounded-2xl px-4 py-2.5 text-[0.82rem] leading-[1.55] whitespace-pre-wrap',
 								message.status === 'failed'
 									? 'border border-red-200 bg-red-50 text-red-700'
 									: 'bg-white text-zinc-800'
 							]}
 						>
-							{#if message.status === 'pending'}
+							{#if message.status === 'pending' && !message.text}
 								<span class="inline-flex items-center gap-1 text-zinc-500">
 									<span class="size-1.5 rounded-full bg-zinc-400"></span>
 									<span class="size-1.5 rounded-full bg-zinc-300"></span>
@@ -192,6 +192,14 @@
 								</span>
 							{:else}
 								{message.text}
+								{#if message.status === 'pending'}
+									<span class="ml-0.5 inline-block h-4 w-px translate-y-0.5 bg-zinc-400"></span>
+								{/if}
+							{/if}
+							{#if message.status === 'failed' && message.errorText}
+								<p class="mt-2 border-t border-red-200 pt-2 text-xs leading-snug text-red-600">
+									{message.errorText}
+								</p>
 							{/if}
 						</div>
 					</div>
@@ -199,7 +207,7 @@
 			{/each}
 
 			{#if sendError}
-				<div class="ml-auto max-w-[82%] rounded-sm border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+				<div class="ml-auto max-w-[82%] rounded-sm border border-red-200 bg-red-50 p-3 text-[0.72rem] text-red-700">
 					{sendError}
 				</div>
 			{/if}
@@ -244,7 +252,7 @@
 				placeholder="Message the AI..."
 				disabled={composerDisabled}
 				style={`height: ${COMPOSER_TEXTAREA_MIN_HEIGHT}px;`}
-				class="min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.84rem] leading-5 font-normal text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default md:text-[0.9rem]"
+				class="min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.8rem] leading-[1.2rem] font-normal text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default md:text-[0.84rem]"
 				onkeydown={(event) => {
 					if (event.key === 'Enter' && !event.shiftKey) {
 						event.preventDefault();

@@ -9,11 +9,17 @@ import {
 	type MutationCtx
 } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { generateChatReply } from './model';
+import { streamChatReply } from './model';
 
 const MAX_MESSAGE_LENGTH = 8_000;
 const CONVERSATION_RETENTION_MS = 24 * 60 * 60 * 1000;
 const EXPIRED_CONVERSATION_CLEANUP_LIMIT = 50;
+const ASSISTANT_STREAM_FLUSH_INTERVAL_MS = 150;
+const ASSISTANT_STREAM_FLUSH_MIN_CHARS = 120;
+
+function createGenerationId() {
+	return crypto.randomUUID();
+}
 
 function normalizeUserText(text: string) {
 	const normalized = text.trim();
@@ -37,23 +43,71 @@ function isConversationExpired(conversation: { expiresAt: number }, now = Date.n
 	return conversation.expiresAt <= now;
 }
 
+async function getActiveAssistantTurn(
+	ctx: MutationCtx,
+	assistantMessageId: Id<'messages'>,
+	generationId: string,
+	now: number
+) {
+	const assistantMessage = await ctx.db.get(assistantMessageId);
+
+	if (!assistantMessage) {
+		return null;
+	}
+
+	if (assistantMessage.role !== 'assistant') {
+		throw new Error('Assistant message not found.');
+	}
+
+	if (assistantMessage.generationId !== generationId || assistantMessage.status !== 'pending') {
+		return null;
+	}
+
+	const conversation = await ctx.db.get(assistantMessage.conversationId);
+
+	if (!conversation || isConversationExpired(conversation, now)) {
+		return null;
+	}
+
+	if (
+		conversation.pendingAssistantMessageId !== assistantMessage._id ||
+		conversation.pendingAssistantGenerationId !== generationId
+	) {
+		return null;
+	}
+
+	return {
+		assistantMessage,
+		conversation
+	};
+}
+
 async function insertPendingAssistantTurn(
 	ctx: MutationCtx,
 	conversationId: Id<'conversations'>,
 	createdAt: number
 ) {
+	const generationId = createGenerationId();
 	const assistantMessageId = await ctx.db.insert('messages', {
 		conversationId,
 		role: 'assistant',
 		text: '',
 		status: 'pending',
+		generationId,
 		createdAt,
+		updatedAt: createdAt
+	});
+
+	await ctx.db.patch(conversationId, {
+		pendingAssistantMessageId: assistantMessageId,
+		pendingAssistantGenerationId: generationId,
 		updatedAt: createdAt
 	});
 
 	await ctx.scheduler.runAfter(0, internal.chat.generateAssistantReply, {
 		conversationId,
-		assistantMessageId
+		assistantMessageId,
+		generationId
 	});
 
 	return assistantMessageId;
@@ -141,6 +195,10 @@ export const sendMessage = mutation({
 			throw new Error('Conversation expired.');
 		}
 
+		if (conversation.pendingAssistantMessageId) {
+			throw new Error('Please wait for the assistant response to finish before sending another message.');
+		}
+
 		const userMessageId = await ctx.db.insert('messages', {
 			conversationId,
 			role: 'user',
@@ -151,10 +209,6 @@ export const sendMessage = mutation({
 		});
 
 		const assistantMessageId = await insertPendingAssistantTurn(ctx, conversationId, now + 1);
-
-		await ctx.db.patch(conversationId, {
-			updatedAt: now
-		});
 
 		return {
 			conversationId,
@@ -192,23 +246,14 @@ export const getTranscript = internalQuery({
 export const completeAssistantMessage = internalMutation({
 	args: {
 		assistantMessageId: v.id('messages'),
+		generationId: v.string(),
 		text: v.string()
 	},
-	handler: async (ctx, { assistantMessageId, text }) => {
-		const assistantMessage = await ctx.db.get(assistantMessageId);
-
-		if (!assistantMessage) {
-			return;
-		}
-
-		if (assistantMessage.role !== 'assistant') {
-			throw new Error('Assistant message not found.');
-		}
-
+	handler: async (ctx, { assistantMessageId, generationId, text }) => {
 		const now = Date.now();
-		const conversation = await ctx.db.get(assistantMessage.conversationId);
+		const activeTurn = await getActiveAssistantTurn(ctx, assistantMessageId, generationId, now);
 
-		if (!conversation || isConversationExpired(conversation, now)) {
+		if (!activeTurn) {
 			return;
 		}
 
@@ -218,7 +263,34 @@ export const completeAssistantMessage = internalMutation({
 			updatedAt: now
 		});
 
-		await ctx.db.patch(assistantMessage.conversationId, {
+		await ctx.db.patch(activeTurn.conversation._id, {
+			pendingAssistantMessageId: undefined,
+			pendingAssistantGenerationId: undefined,
+			updatedAt: now
+		});
+	}
+});
+
+export const updateAssistantMessageDraft = internalMutation({
+	args: {
+		assistantMessageId: v.id('messages'),
+		generationId: v.string(),
+		text: v.string()
+	},
+	handler: async (ctx, { assistantMessageId, generationId, text }) => {
+		const now = Date.now();
+		const activeTurn = await getActiveAssistantTurn(ctx, assistantMessageId, generationId, now);
+
+		if (!activeTurn) {
+			return;
+		}
+
+		await ctx.db.patch(assistantMessageId, {
+			text,
+			updatedAt: now
+		});
+
+		await ctx.db.patch(activeTurn.conversation._id, {
 			updatedAt: now
 		});
 	}
@@ -227,33 +299,37 @@ export const completeAssistantMessage = internalMutation({
 export const failAssistantMessage = internalMutation({
 	args: {
 		assistantMessageId: v.id('messages'),
-		text: v.string()
+		generationId: v.string(),
+		text: v.string(),
+		errorText: v.optional(v.string())
 	},
-	handler: async (ctx, { assistantMessageId, text }) => {
-		const assistantMessage = await ctx.db.get(assistantMessageId);
-
-		if (!assistantMessage) {
-			return;
-		}
-
-		if (assistantMessage.role !== 'assistant') {
-			throw new Error('Assistant message not found.');
-		}
-
+	handler: async (ctx, { assistantMessageId, generationId, text, errorText }) => {
 		const now = Date.now();
-		const conversation = await ctx.db.get(assistantMessage.conversationId);
+		const activeTurn = await getActiveAssistantTurn(ctx, assistantMessageId, generationId, now);
 
-		if (!conversation || isConversationExpired(conversation, now)) {
+		if (!activeTurn) {
 			return;
 		}
 
-		await ctx.db.patch(assistantMessageId, {
-			text,
-			status: 'failed',
-			updatedAt: now
-		});
+		await ctx.db.patch(
+			assistantMessageId,
+			errorText
+				? {
+						text,
+						errorText,
+						status: 'failed',
+						updatedAt: now
+					}
+				: {
+						text,
+						status: 'failed',
+						updatedAt: now
+					}
+		);
 
-		await ctx.db.patch(assistantMessage.conversationId, {
+		await ctx.db.patch(activeTurn.conversation._id, {
+			pendingAssistantMessageId: undefined,
+			pendingAssistantGenerationId: undefined,
 			updatedAt: now
 		});
 	}
@@ -293,28 +369,113 @@ export const deleteExpiredConversations = internalMutation({
 export const generateAssistantReply = internalAction({
 	args: {
 		conversationId: v.id('conversations'),
-		assistantMessageId: v.id('messages')
+		assistantMessageId: v.id('messages'),
+		generationId: v.string()
 	},
-	handler: async (ctx, { conversationId, assistantMessageId }) => {
+	handler: async (ctx, { conversationId, assistantMessageId, generationId }) => {
+		const startedAt = Date.now();
+		let firstTokenAt: number | null = null;
+		let draftText = '';
+		let flushedText = '';
+		let lastFlushAt = 0;
+		let flushCount = 0;
+
+		async function flushDraft(force = false) {
+			if (draftText === flushedText) {
+				return;
+			}
+
+			const now = Date.now();
+			const hasEnoughText = draftText.length - flushedText.length >= ASSISTANT_STREAM_FLUSH_MIN_CHARS;
+			const hasWaited = now - lastFlushAt >= ASSISTANT_STREAM_FLUSH_INTERVAL_MS;
+
+			if (!force && !hasEnoughText && !hasWaited) {
+				return;
+			}
+
+			flushedText = draftText;
+			lastFlushAt = now;
+			flushCount += 1;
+
+			await ctx.runMutation(internal.chat.updateAssistantMessageDraft, {
+				assistantMessageId,
+				generationId,
+				text: flushedText
+			});
+		}
+
 		try {
 			const transcript = await ctx.runQuery(internal.chat.getTranscript, { conversationId });
 
 			if (transcript.length === 0) {
+				await ctx.runMutation(internal.chat.failAssistantMessage, {
+					assistantMessageId,
+					generationId,
+					text: 'No conversation transcript was available.'
+				});
 				return;
 			}
 
-			const reply = await generateChatReply(transcript);
+			const reply = await streamChatReply(transcript, {
+				onDelta: async (delta) => {
+					if (firstTokenAt === null) {
+						firstTokenAt = Date.now();
+					}
+
+					draftText += delta;
+					await flushDraft();
+				}
+			});
+
+			await flushDraft(true);
 
 			await ctx.runMutation(internal.chat.completeAssistantMessage, {
 				assistantMessageId,
+				generationId,
 				text: reply
+			});
+
+			const completedAt = Date.now();
+			console.log('chat.generateAssistantReply completed', {
+				conversationId,
+				assistantMessageId,
+				generationId,
+				timeToFirstTokenMs: firstTokenAt === null ? null : firstTokenAt - startedAt,
+				totalDurationMs: completedAt - startedAt,
+				flushCount,
+				finalCharacterCount: reply.length
 			});
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'AI reply generation failed.';
+			const hasPartialText = draftText.trim().length > 0;
+			const failedText = hasPartialText ? draftText : message;
 
-			await ctx.runMutation(internal.chat.failAssistantMessage, {
+			await ctx.runMutation(
+				internal.chat.failAssistantMessage,
+				hasPartialText
+					? {
+							assistantMessageId,
+							generationId,
+							text: failedText,
+							errorText: message
+						}
+					: {
+							assistantMessageId,
+							generationId,
+							text: failedText
+						}
+			);
+
+			const failedAt = Date.now();
+			console.error('chat.generateAssistantReply failed', {
+				conversationId,
 				assistantMessageId,
-				text: message
+				generationId,
+				timeToFirstTokenMs: firstTokenAt === null ? null : firstTokenAt - startedAt,
+				totalDurationMs: failedAt - startedAt,
+				flushCount,
+				partialCharacterCount: draftText.length,
+				error: message
 			});
 		}
 	}

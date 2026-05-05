@@ -17,16 +17,16 @@
 <div class="divide-y divide-zinc-100">
 	{#each question.options as option (option)}
 		<label
-			class="flex min-h-11 cursor-pointer items-center gap-3 py-2 text-[0.8rem] text-zinc-800 md:text-[0.84rem]"
+			class="flex min-h-11 cursor-pointer items-center gap-3 py-2 text-[0.76rem] text-zinc-800 md:text-[0.8rem]"
 		>
 			<input
-					type="radio"
-					name={question.id}
-					value={option}
-					checked={answer.selectedOption === option}
-					onchange={() => {
-						onAnswerChange({ ...answer, selectedOption: option });
-					}}
+				type="radio"
+				name={question.id}
+				value={option}
+				checked={answer.selectedOption === option}
+				onchange={() => {
+					onAnswerChange({ ...answer, selectedOption: option });
+				}}
 				class="peer sr-only"
 			/>
 			<span

@@ -16,7 +16,7 @@
 </script>
 
 {#if showPager}
-	<div class="flex shrink-0 items-center gap-1 text-xs text-zinc-500">
+	<div class="flex shrink-0 items-center gap-1 text-[0.72rem] text-zinc-500">
 		<button
 			type="button"
 			aria-label="Previous question"
@@ -27,7 +27,7 @@
 			disabled={!canGoPrevious}
 			onclick={onPrevious}
 		>
-			<span class="text-lg leading-none">‹</span>
+			<span class="text-[1rem] leading-none">‹</span>
 		</button>
 		<span>{pageLabel}</span>
 		<button
@@ -40,7 +40,7 @@
 			disabled={!canGoNext}
 			onclick={onNext}
 		>
-			<span class="text-lg leading-none">›</span>
+			<span class="text-[1rem] leading-none">›</span>
 		</button>
 	</div>
 {/if}

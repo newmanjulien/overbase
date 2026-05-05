@@ -34,7 +34,7 @@
 
 <div class="mt-6 rounded-sm border border-zinc-100 bg-white p-4 md:mt-8 md:p-6">
 	<div class="flex items-center justify-between gap-4">
-		<h2 class="text-[0.8rem] font-medium text-zinc-950 md:text-[0.84rem]">
+		<h2 class="text-[0.76rem] font-medium text-zinc-950 md:text-[0.8rem]">
 			{question.title}
 		</h2>
 

@@ -71,13 +71,13 @@
 		{:else}
 			<div class="flex h-full min-h-0 min-w-0 flex-col justify-center bg-white px-6">
 				<div class="mx-auto max-w-sm text-center">
-					<p class="text-sm font-medium text-zinc-950">Start from the builder</p>
-					<p class="mt-2 text-xs leading-relaxed text-zinc-500">
+					<p class="text-[0.82rem] font-medium text-zinc-950">Start from the builder</p>
+					<p class="mt-2 text-[0.72rem] leading-[1.5] text-zinc-500">
 						Describe the notification you want from the builder screen to start a fresh chat.
 					</p>
 					<a
 						href={resolve('/builder')}
-						class="mt-4 inline-flex h-8 items-center justify-center rounded-full bg-zinc-950 px-3.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
+						class="mt-4 inline-flex h-8 items-center justify-center rounded-full bg-zinc-950 px-3.5 text-[0.72rem] font-medium text-white transition-colors hover:bg-zinc-800"
 					>
 						Back to builder
 					</a>

@@ -64,11 +64,13 @@ export default defineSchema({
 		cardSlug: v.string(),
 		cardTitle: v.string(),
 		cardDescription: v.string(),
-		ownerUserId: v.optional(v.string()),
-		organizationId: v.optional(v.string()),
-		createdAt: v.number(),
-		updatedAt: v.number(),
-		expiresAt: v.number()
+			ownerUserId: v.optional(v.string()),
+			organizationId: v.optional(v.string()),
+			pendingAssistantMessageId: v.optional(v.id('messages')),
+			pendingAssistantGenerationId: v.optional(v.string()),
+			createdAt: v.number(),
+			updatedAt: v.number(),
+			expiresAt: v.number()
 	})
 		.index('by_updatedAt', ['updatedAt'])
 		.index('by_expiresAt', ['expiresAt'])
@@ -78,6 +80,8 @@ export default defineSchema({
 		role: messageRole,
 		text: v.string(),
 		status: messageStatus,
+		generationId: v.optional(v.string()),
+		errorText: v.optional(v.string()),
 		createdAt: v.number(),
 		updatedAt: v.optional(v.number())
 	}).index('by_conversation_createdAt', ['conversationId', 'createdAt'])
