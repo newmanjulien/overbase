@@ -217,10 +217,10 @@
 							]}
 						>
 							{#if message.status === 'pending' && !message.text}
-								<span class="inline-flex items-center gap-1 text-zinc-500">
-									<span class="size-1.5 rounded-full bg-zinc-400"></span>
-									<span class="size-1.5 rounded-full bg-zinc-300"></span>
-									<span class="size-1.5 rounded-full bg-zinc-200"></span>
+								<span class="inline-flex items-center gap-0.5 text-zinc-500">
+									<span class="typing-dot size-1 rounded-full bg-zinc-400"></span>
+									<span class="typing-dot size-1 rounded-full bg-zinc-400"></span>
+									<span class="typing-dot size-1 rounded-full bg-zinc-400"></span>
 								</span>
 							{:else}
 								{message.text}
@@ -304,3 +304,37 @@
 		</div>
 	</form>
 </section>
+
+<style>
+	.typing-dot {
+		animation: typing-dot-fade 1.15s ease-in-out infinite;
+		opacity: 0.28;
+	}
+
+	.typing-dot:nth-child(2) {
+		animation-delay: 0.18s;
+	}
+
+	.typing-dot:nth-child(3) {
+		animation-delay: 0.36s;
+	}
+
+	@keyframes typing-dot-fade {
+		0%,
+		80%,
+		100% {
+			opacity: 0.28;
+		}
+
+		35% {
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.typing-dot {
+			animation: none;
+			opacity: 0.55;
+		}
+	}
+</style>
