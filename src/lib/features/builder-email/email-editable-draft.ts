@@ -1,4 +1,8 @@
-import { normalizePdfAttachmentName, type EmailBodyBlock, type EmailDraft } from '$convex/emailArtifact';
+import {
+	normalizePdfAttachmentName,
+	type EmailBodyBlock,
+	type EmailDraft
+} from '$lib/builder-domain/email';
 
 export type EditableEmailDraft = {
 	toText: string;
@@ -6,6 +10,7 @@ export type EditableEmailDraft = {
 	attachmentInputText: string;
 	attachments: string[];
 	bodyText: string;
+	fireReasonText: string;
 };
 
 export function formatRecipients(recipients: string[]) {
@@ -18,7 +23,8 @@ export function toEditableEmailDraft(draft: EmailDraft): EditableEmailDraft {
 		ccText: formatRecipients(draft.cc),
 		attachmentInputText: '',
 		attachments: [...draft.attachments],
-		bodyText: serializeEmailBodyText(draft.body)
+		bodyText: serializeEmailBodyText(draft.body),
+		fireReasonText: draft.fireReason
 	};
 }
 
@@ -27,7 +33,8 @@ export function fromEditableEmailDraft(editableDraft: EditableEmailDraft): Email
 		to: parseRecipients(editableDraft.toText),
 		cc: parseRecipients(editableDraft.ccText),
 		attachments: editableDraft.attachments,
-		body: parseEmailBodyText(editableDraft.bodyText)
+		body: parseEmailBodyText(editableDraft.bodyText),
+		fireReason: editableDraft.fireReasonText
 	};
 }
 

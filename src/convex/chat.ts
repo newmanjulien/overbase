@@ -76,7 +76,7 @@ async function getResumeAuthorizedConversation(
 		conversationId: Id<'conversations'>;
 		resumeToken: string;
 		cardSlug?: string;
-		builderMode?: 'chat' | 'customEmail';
+		builderMode?: 'chat';
 	},
 	now = Date.now()
 ) {
@@ -106,24 +106,15 @@ async function deleteConversationTree(ctx: MutationCtx, conversationId: Id<'conv
 		.query('messages')
 		.withIndex('by_conversation_createdAt', (q) => q.eq('conversationId', conversationId))
 		.collect();
-	const builderSessions = await ctx.db
-		.query('builderSessions')
-		.withIndex('by_conversationId', (q) => q.eq('conversationId', conversationId))
-		.collect();
 
 	for (const message of messages) {
 		await ctx.db.delete(message._id);
 	}
 
-	for (const builderSession of builderSessions) {
-		await ctx.db.delete(builderSession._id);
-	}
-
 	await ctx.db.delete(conversationId);
 
 	return {
-		deletedMessages: messages.length,
-		deletedBuilderSessions: builderSessions.length
+		deletedMessages: messages.length
 	};
 }
 
@@ -203,7 +194,6 @@ export const startConversation = mutation({
 
 		return {
 			conversationId,
-			builderSessionId: null,
 			builderMode: 'chat' as const,
 			resumeToken,
 			expiresAt,
@@ -257,37 +247,14 @@ export const resumeConversation = mutation({
 		}
 
 		const expiresAt = getConversationExpiresAt(now);
-		let builderSessionId = conversation.builderSessionId ?? null;
-
-		if (builderMode === 'customEmail') {
-			const session = builderSessionId
-				? await ctx.db.get(builderSessionId)
-				: await ctx.db
-						.query('builderSessions')
-						.withIndex('by_conversationId', (q) => q.eq('conversationId', conversation._id))
-						.unique();
-
-			if (!session || !isConversationActive(session, now)) {
-				return null;
-			}
-
-			builderSessionId = session._id;
-
-			await ctx.db.patch(session._id, {
-				expiresAt,
-				updatedAt: now
-			});
-		}
 
 		await ctx.db.patch(conversation._id, {
-			builderSessionId: builderSessionId ?? undefined,
 			expiresAt,
 			updatedAt: now
 		});
 
 		return {
 			conversationId: conversation._id,
-			builderSessionId,
 			builderMode,
 			resumeToken,
 			expiresAt
@@ -306,8 +273,7 @@ export const disposeConversation = mutation({
 		if (!conversation || !(await verifyResumeToken(conversation, resumeToken))) {
 			return {
 				disposed: false,
-				deletedMessages: 0,
-				deletedBuilderSessions: 0
+				deletedMessages: 0
 			};
 		}
 
@@ -498,18 +464,15 @@ export const deleteExpiredConversations = internalMutation({
 			.withIndex('by_expiresAt', (q) => q.lte('expiresAt', now))
 			.take(EXPIRED_CONVERSATION_CLEANUP_LIMIT);
 		let deletedMessages = 0;
-		let deletedBuilderSessions = 0;
 
 		for (const conversation of conversations) {
 			const deleted = await deleteConversationTree(ctx, conversation._id);
 			deletedMessages += deleted.deletedMessages;
-			deletedBuilderSessions += deleted.deletedBuilderSessions;
 		}
 
 		return {
 			deletedConversations: conversations.length,
-			deletedMessages,
-			deletedBuilderSessions
+			deletedMessages
 		};
 	}
 });
@@ -521,12 +484,9 @@ export const generateAssistantReply = internalAction({
 		generationId: v.string()
 	},
 	handler: async (ctx, { conversationId, assistantMessageId, generationId }) => {
-		const startedAt = Date.now();
-		let firstTokenAt: number | null = null;
 		let draftText = '';
 		let flushedText = '';
 		let lastFlushAt = 0;
-		let flushCount = 0;
 
 		async function flushDraft(force = false) {
 			if (draftText === flushedText) {
@@ -543,7 +503,6 @@ export const generateAssistantReply = internalAction({
 
 			flushedText = draftText;
 			lastFlushAt = now;
-			flushCount += 1;
 
 			await ctx.runMutation(internal.chat.updateAssistantMessageDraft, {
 				assistantMessageId,
@@ -566,10 +525,6 @@ export const generateAssistantReply = internalAction({
 
 			const reply = await streamChatReply(transcript, {
 				onDelta: async (delta) => {
-					if (firstTokenAt === null) {
-						firstTokenAt = Date.now();
-					}
-
 					draftText += delta;
 					await flushDraft();
 				}
@@ -581,17 +536,6 @@ export const generateAssistantReply = internalAction({
 				assistantMessageId,
 				generationId,
 				text: reply
-			});
-
-			const completedAt = Date.now();
-			console.log('chat.generateAssistantReply completed', {
-				conversationId,
-				assistantMessageId,
-				generationId,
-				timeToFirstTokenMs: firstTokenAt === null ? null : firstTokenAt - startedAt,
-				totalDurationMs: completedAt - startedAt,
-				flushCount,
-				finalCharacterCount: reply.length
 			});
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'AI reply generation failed.';
@@ -613,18 +557,6 @@ export const generateAssistantReply = internalAction({
 							text: failedText
 						}
 			);
-
-			const failedAt = Date.now();
-			console.error('chat.generateAssistantReply failed', {
-				conversationId,
-				assistantMessageId,
-				generationId,
-				timeToFirstTokenMs: firstTokenAt === null ? null : firstTokenAt - startedAt,
-				totalDurationMs: failedAt - startedAt,
-				flushCount,
-				partialCharacterCount: draftText.length,
-				error: message
-			});
 		}
 	}
 });

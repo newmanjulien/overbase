@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { EmailBodyBlock, EmailDraft } from '$convex/emailArtifact';
+	import type { EmailBodyBlock, EmailDraft } from '$lib/builder-domain/email';
 	import { formatRecipients } from '$lib/features/builder-email/email-editable-draft';
 	import EmailAttachmentCard from '$lib/features/builder-email/EmailAttachmentCard.svelte';
 
@@ -88,4 +88,11 @@
 	{:else}
 		<p>Add email body</p>
 	{/if}
+</div>
+
+<div class="mt-5 rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+	<p class="text-[0.68rem] font-medium tracking-normal text-zinc-500">Why this email fires</p>
+	<p class="mt-1 text-[0.76rem] leading-relaxed text-zinc-800">
+		{draft.fireReason || 'Add the trigger rule this notification should use.'}
+	</p>
 </div>

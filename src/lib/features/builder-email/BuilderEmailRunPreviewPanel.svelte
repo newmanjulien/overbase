@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { api } from '$convex/_generated/api';
-	import type { Id } from '$convex/_generated/dataModel';
-	import { createDefaultEmailDraft, type EmailDraft } from '$convex/emailArtifact';
+	import { createDefaultEmailDraft, type EmailDraft } from '$lib/builder-domain/email';
 	import {
 		fromEditableEmailDraft,
 		toEditableEmailDraft,
@@ -9,38 +7,25 @@
 	} from '$lib/features/builder-email/email-editable-draft';
 	import EmailComposeEditor from '$lib/features/builder-email/EmailComposeEditor.svelte';
 	import EmailComposePreview from '$lib/features/builder-email/EmailComposePreview.svelte';
-	import { useConvexClient, useQuery } from 'convex-svelte';
 
 	type Props = {
-		builderSessionId: Id<'builderSessions'> | null;
-		resumeToken: string | null;
-		onSessionExtended?: (expiresAt: number) => void;
+		draft: EmailDraft;
+		artifactVersion: number;
+		canEdit?: boolean;
+		onSave: (draft: EmailDraft, baseArtifactVersion: number) => Promise<void>;
 	};
 
-	let { builderSessionId, resumeToken, onSessionExtended }: Props = $props();
-
-	const client = useConvexClient();
-	const artifactQuery = useQuery(api.builderSessions.getSessionArtifact, () =>
-		builderSessionId && resumeToken ? { builderSessionId, resumeToken } : 'skip'
-	);
-	const artifact = $derived(artifactQuery.data ?? null);
-	const hasArtifactResponse = $derived(artifactQuery.data !== undefined);
-	const draft = $derived((artifact?.emailDraft as EmailDraft | undefined) ?? createDefaultEmailDraft());
-	const canEdit = $derived(
-		Boolean(builderSessionId) &&
-			Boolean(resumeToken) &&
-			artifact !== null &&
-			!artifactQuery.error &&
-			!artifact.hasPendingAssistant
-	);
+	let { draft, artifactVersion, canEdit = true, onSave }: Props = $props();
 
 	let isEditing = $state(false);
 	let isSaving = $state(false);
 	let saveError = $state<string | null>(null);
 	let editableDraft = $state<EditableEmailDraft>(toEditableEmailDraft(createDefaultEmailDraft()));
+	let editingBaseArtifactVersion = $state(0);
 
 	function beginEdit() {
 		editableDraft = toEditableEmailDraft(draft);
+		editingBaseArtifactVersion = artifactVersion;
 		saveError = null;
 		isEditing = true;
 	}
@@ -50,8 +35,8 @@
 		isEditing = false;
 	}
 
-	async function saveAndPolish() {
-		if (!builderSessionId || !resumeToken || isSaving) {
+	async function saveDraft() {
+		if (isSaving) {
 			return;
 		}
 
@@ -59,13 +44,7 @@
 		saveError = null;
 
 		try {
-			const result = await client.mutation(api.builderSessions.saveUserEditedEmailDraft, {
-				builderSessionId,
-				resumeToken,
-				emailDraft: fromEditableEmailDraft(editableDraft)
-			});
-
-			onSessionExtended?.(result.expiresAt);
+			await onSave(fromEditableEmailDraft(editableDraft), editingBaseArtifactVersion);
 			isEditing = false;
 		} catch (error) {
 			saveError = error instanceof Error ? error.message : 'Could not save draft edits.';
@@ -78,19 +57,7 @@
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-zinc-950">
 	<div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5 md:py-5">
 		<div class="mx-auto flex min-h-full w-full max-w-[820px] flex-col">
-			{#if artifactQuery.error}
-				<div class="rounded-sm border border-red-200 bg-red-50 p-3 text-[0.76rem] leading-relaxed text-red-700">
-					<p class="font-medium">Email preview could not load.</p>
-					<p class="mt-1 text-red-600">{artifactQuery.error.message}</p>
-				</div>
-			{:else if builderSessionId && !hasArtifactResponse}
-				<div></div>
-			{:else if builderSessionId && artifact === null}
-				<div class="rounded-sm border border-zinc-200 bg-zinc-50 p-3 text-[0.76rem] leading-relaxed text-zinc-600">
-					<p class="font-medium text-zinc-800">Email preview unavailable.</p>
-					<p class="mt-1">This builder session no longer has an active preview artifact.</p>
-				</div>
-			{:else if isEditing}
+			{#if isEditing}
 				<EmailComposeEditor
 					{editableDraft}
 					disabled={isSaving}
@@ -122,10 +89,10 @@
 				<button
 					type="button"
 					class="inline-flex h-8 items-center justify-center rounded-sm bg-zinc-950 px-3 text-[0.74rem] font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-default disabled:bg-zinc-300 disabled:text-zinc-500"
-					disabled={!builderSessionId || isSaving}
-					onclick={() => void saveAndPolish()}
+					disabled={isSaving}
+					onclick={() => void saveDraft()}
 				>
-					{isSaving ? 'Saving...' : 'Save and polish'}
+					{isSaving ? 'Saving...' : 'Save changes'}
 				</button>
 			{:else}
 				<button

@@ -1,13 +1,48 @@
+import {
+	applyEmailDraftPatch,
+	emailDraftJsonSchema,
+	emailDraftPatchJsonSchema,
+	normalizeEmailDraft,
+	type EmailDraft,
+	type EmailDraftPatch
+} from './emailArtifact';
+
 type TranscriptMessage = {
 	role: 'user' | 'assistant';
 	text: string;
 };
 
-import {
-	emailPreviewUpdateJsonSchema,
-	type EmailPreviewUpdate,
-	type EmailDraft
-} from './emailArtifact';
+export type EmailTemplateGroupCandidate = {
+	slug: string;
+	label: string;
+	description: string;
+	questionGuidance: string;
+};
+
+export type EmailTemplateCandidate = {
+	slug: string;
+	groupSlug: string;
+	label: string;
+	description: string;
+	matchSignals: string[];
+	emailDraft: EmailDraft;
+};
+
+export type EmailRouteResult = {
+	groupSlug: string;
+	question: string;
+};
+
+export type EmailAdaptedTemplateResult = {
+	templateSlug: string;
+	emailDraft: EmailDraft;
+};
+
+export type EmailBuilderEventContext = {
+	summary: string;
+	changedFields: string[];
+	createdAt: number;
+};
 
 type OpenAIErrorResponse = {
 	error?: {
@@ -43,19 +78,36 @@ type OpenAIStreamEvent = {
 	};
 };
 
+type OpenAIResponseBody = {
+	output_text?: string;
+	output?: Array<{
+		type?: string;
+		name?: string;
+		arguments?: string;
+		content?: Array<{
+			type?: string;
+			text?: string;
+		}>;
+	}>;
+	error?: {
+		message?: string;
+	};
+};
+
 type ChatReplyDeltaHandler = (delta: string) => void | Promise<void>;
 
 type ChatReplyStreamHandlers = {
 	onDelta?: ChatReplyDeltaHandler;
 };
 
-type BuilderTurnStreamHandlers = {
+type EmailBuilderTurnStreamHandlers = {
 	onTextDelta?: ChatReplyDeltaHandler;
 };
 
-type BuilderTurnStreamResult = {
+export type EmailBuilderTurnStreamResult = {
 	text: string;
-	previewUpdate: EmailPreviewUpdate | null;
+	patch: EmailDraftPatch | null;
+	patchIntent: 'none' | 'noop' | 'meaningful';
 };
 
 type ToolCallAccumulator = {
@@ -80,28 +132,25 @@ const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 const DEFAULT_OPENAI_MODEL = 'gpt-5-mini';
 const MAX_OUTPUT_TOKENS = 1_200;
 const STRUCTURED_MAX_OUTPUT_TOKENS = 8_000;
-const UPDATE_EMAIL_PREVIEW_TOOL_NAME = 'update_email_preview';
+const UPDATE_EMAIL_DRAFT_TOOL_NAME = 'update_email_draft';
 
-const EMAIL_BUILDER_SYSTEM_PROMPT = [
-	'You are Overbase\'s email notification builder.',
-	'Speak to the user in concise plain text. This text is streamed directly into the chat UI.',
-	'Ask exactly one focused follow-up question at a time unless the preview is ready or you can make a useful update.',
-	'Change the email preview only by calling update_email_preview. Never describe JSON, tool arguments, or patch operations to the user.',
-	'Call update_email_preview at most once per turn, only when the preview should contain actual notification email content.',
-	'If the user request is too vague to draft real email content, ask one follow-up question in chat text and do not call update_email_preview.',
-	'Never put assistant questions, setup guidance, or conversational text inside the email preview body.',
-	'When you call update_email_preview, send the smallest patch that achieves the visible preview change.',
-	'The tool payload must use the current artifact version as baseArtifactVersion.',
-	'The preview artifact has only these fields: to, cc, attachments, and body.',
-	'The artifact has no subject or heading field between recipients and attachments.',
-	'Attachments are PDF placeholder filenames only. You may add or remove attachment filenames when the user asks. Attachment names must end in .pdf.',
-	'Body content may use paragraphs, bullet lists, and links. Prefer concise real email copy over placeholders when the user has supplied enough context.',
-	'Keep the preview compact: at most four body blocks, at most five bullets, and roughly 150 visible words.',
-	'Do not write full reports, repeated sections, long tables, or historical transcript summaries into the preview.',
-	'When the user says they edited the email draft, treat the current draft JSON as source material and only fix typos, formatting, and light wording. Preserve meaning, recipients, attachments, links, claims, cadence, and all business-critical facts.',
-	'Do not invent business-critical facts. If required information is missing, ask the next best question in the chat text.',
-	'The required information is: goal, trigger, recipient, data sources, cadence, body content, PDF attachments if needed, and any relevant links or next steps.',
-	'Use status "collecting" while key requirements are unknown, "drafting" once the email preview is useful but incomplete, and "ready" only when the email preview is coherent.'
+const EMAIL_ROUTE_TOOL_NAME = 'select_email_template_group';
+const EMAIL_ADAPT_TOOL_NAME = 'adapt_email_template';
+const EMAIL_INITIAL_ANSWER_TOOL_NAME = 'apply_initial_email_answer';
+
+const EMAIL_BUILDER_REFINEMENT_SYSTEM_PROMPT = [
+	'You are Overbase\'s custom email notification builder.',
+	'The user is iterating on a visible email notification draft.',
+	'Speak in concise plain text. This text is streamed directly into the chat UI.',
+	'Change the email draft only by calling update_email_draft. Never describe JSON or patch operations to the user.',
+	'Call update_email_draft at most once per turn, only when the visible email draft should change.',
+	'When changing the draft, send the smallest patch that achieves the requested change.',
+	'The draft fields are to, cc, attachments, body, and fireReason.',
+	'fireReason explains exactly why the email notification fires; keep it short and operational.',
+	'Attachments are PDF placeholder filenames only. Attachment names must end in .pdf.',
+	'Keep the email compact: at most four body blocks, at most five bullets, and roughly 150 visible words.',
+	'Do not invent business-critical facts. If required information is missing, ask one focused question in chat text.',
+	'When recent internal artifact events are present, treat them as source material for future chat context without mentioning them unless useful.'
 ].join('\n');
 
 function getOpenAIConfig() {
@@ -132,49 +181,10 @@ function createChatResponseRequestBody(transcript: TranscriptMessage[], model: s
 	};
 }
 
-function createBuilderTurnRequestBody(params: {
-	transcript: TranscriptMessage[];
-	draft: EmailDraft;
-	artifactVersion: number;
-	model: string;
-}) {
-	const { transcript, draft, artifactVersion, model } = params;
-
+function getOpenAIHeaders(apiKey: string) {
 	return {
-		model,
-		input: [
-			{
-				role: 'system',
-				content: EMAIL_BUILDER_SYSTEM_PROMPT
-			},
-			...transcript.map((message) => ({
-				role: message.role,
-				content: message.text
-			})),
-			{
-				role: 'user',
-				content: [
-					`Current artifact version: ${artifactVersion}`,
-					'Current structured email draft JSON:',
-					JSON.stringify(draft),
-					'Respond to the user in normal text. If the email preview should change, call update_email_preview with baseArtifactVersion equal to the current artifact version.'
-				].join('\n')
-			}
-		],
-		tools: [
-			{
-				type: 'function',
-				name: UPDATE_EMAIL_PREVIEW_TOOL_NAME,
-				description: 'Commit a versioned patch to the Outlook-style email preview artifact.',
-				parameters: emailPreviewUpdateJsonSchema,
-				strict: true
-			}
-		],
-		parallel_tool_calls: false,
-		...(supportsReasoningOptions(model) ? { reasoning: { effort: 'low' } } : {}),
-		max_output_tokens: STRUCTURED_MAX_OUTPUT_TOKENS,
-		store: false,
-		stream: true
+		Authorization: `Bearer ${apiKey}`,
+		'Content-Type': 'application/json'
 	};
 }
 
@@ -362,22 +372,22 @@ function getOrCreateToolCall(
 	return toolCall;
 }
 
-function parseEmailPreviewUpdate(argumentsText: string) {
+function parseEmailDraftPatch(argumentsText: string) {
 	if (!argumentsText.trim()) {
-		throw new Error('OpenAI called update_email_preview without arguments.');
+		throw new Error('OpenAI called update_email_draft without arguments.');
 	}
 
-	return JSON.parse(argumentsText) as EmailPreviewUpdate;
+	return JSON.parse(argumentsText) as EmailDraftPatch;
 }
 
-async function readBuilderTurnStream(
+async function readEmailBuilderTurnStream(
 	response: Response,
-	handlers: BuilderTurnStreamHandlers
-): Promise<BuilderTurnStreamResult> {
+	handlers: EmailBuilderTurnStreamHandlers
+): Promise<EmailBuilderTurnStreamResult> {
 	const toolCalls = new Map<string, ToolCallAccumulator>();
 	let streamedText = '';
 	let finalText = '';
-	let previewUpdate: EmailPreviewUpdate | null = null;
+	let patch: EmailDraftPatch | null = null;
 
 	await readSseResponse(response, async (event) => {
 		throwIfStreamFailed(event);
@@ -420,32 +430,110 @@ async function readBuilderTurnStream(
 		}
 	});
 
-	const previewToolCalls = Array.from(toolCalls.values()).filter((toolCall) => {
-		if (toolCall.name && toolCall.name !== UPDATE_EMAIL_PREVIEW_TOOL_NAME) {
+	const draftToolCalls = Array.from(toolCalls.values()).filter((toolCall) => {
+		if (toolCall.name && toolCall.name !== UPDATE_EMAIL_DRAFT_TOOL_NAME) {
 			throw new Error(`OpenAI called an unsupported tool: ${toolCall.name}.`);
 		}
 
 		return toolCall.arguments.trim().length > 0;
 	});
 
-	if (previewToolCalls.length > 1) {
-		throw new Error('OpenAI called update_email_preview more than once.');
+	if (draftToolCalls.length > 1) {
+		throw new Error('OpenAI called update_email_draft more than once.');
 	}
 
-	if (previewToolCalls[0]) {
-		previewUpdate = parseEmailPreviewUpdate(previewToolCalls[0].arguments);
+	if (draftToolCalls[0]) {
+		patch = parseEmailDraftPatch(draftToolCalls[0].arguments);
 	}
 
 	const text = finalText || streamedText;
 
-	if (!text.trim() && !previewUpdate) {
+	if (!text.trim() && !patch) {
 		throw new Error('OpenAI returned an empty builder response.');
 	}
 
 	return {
 		text,
-		previewUpdate
+		patch,
+		patchIntent: patch ? 'meaningful' : 'none'
 	};
+}
+
+function getFunctionCallArguments(responseBody: OpenAIResponseBody, toolName: string) {
+	for (const outputItem of responseBody.output ?? []) {
+		if (outputItem.type === 'function_call' && outputItem.name === toolName) {
+			if (!outputItem.arguments) {
+				throw new Error(`OpenAI called ${toolName} without arguments.`);
+			}
+
+			return outputItem.arguments;
+		}
+	}
+
+	throw new Error(`OpenAI did not call ${toolName}.`);
+}
+
+async function callStructuredTool<T>(params: {
+	systemPrompt: string;
+	userPrompt: string;
+	toolName: string;
+	toolDescription: string;
+	toolParameters: unknown;
+}) {
+	const { apiKey, model } = getOpenAIConfig();
+	const body = {
+		model,
+		input: [
+			{
+				role: 'system',
+				content: params.systemPrompt
+			},
+			{
+				role: 'user',
+				content: params.userPrompt
+			}
+		],
+		tools: [
+			{
+				type: 'function',
+				name: params.toolName,
+				description: params.toolDescription,
+				parameters: params.toolParameters,
+				strict: true
+			}
+		],
+		tool_choice: {
+			type: 'function',
+			name: params.toolName
+		},
+		parallel_tool_calls: false,
+		...(supportsReasoningOptions(model) ? { reasoning: { effort: 'low' } } : {}),
+		max_output_tokens: STRUCTURED_MAX_OUTPUT_TOKENS,
+		store: false,
+		stream: false
+	};
+
+	const response = await fetch(OPENAI_RESPONSES_URL, {
+		method: 'POST',
+		headers: getOpenAIHeaders(apiKey),
+		body: JSON.stringify(body)
+	});
+
+	if (!response.ok) {
+		throw new Error(await getOpenAIErrorMessage(response));
+	}
+
+	const responseBody = (await response.json()) as OpenAIResponseBody;
+
+	if (responseBody.error?.message) {
+		throw new Error(responseBody.error.message);
+	}
+
+	return JSON.parse(getFunctionCallArguments(responseBody, params.toolName)) as T;
+}
+
+function stringifyCandidates(candidates: unknown) {
+	return JSON.stringify(candidates, null, 2);
 }
 
 export async function streamChatReply(
@@ -456,10 +544,7 @@ export async function streamChatReply(
 
 	const response = await fetch(OPENAI_RESPONSES_URL, {
 		method: 'POST',
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
-			'Content-Type': 'application/json'
-		},
+		headers: getOpenAIHeaders(apiKey),
 		body: JSON.stringify(createChatResponseRequestBody(transcript, model))
 	});
 
@@ -470,27 +555,246 @@ export async function streamChatReply(
 	return await readOpenAIStream(response, handlers);
 }
 
-export async function streamBuilderTurn(params: {
-	transcript: TranscriptMessage[];
-	draft: EmailDraft;
-	artifactVersion: number;
-	handlers: BuilderTurnStreamHandlers;
-}): Promise<BuilderTurnStreamResult> {
-	const { apiKey, model } = getOpenAIConfig();
-	const { handlers, ...requestParams } = params;
+export async function routeEmailBuilderRequest(params: {
+	initialMessage: string;
+	groups: EmailTemplateGroupCandidate[];
+}) {
+	return await callStructuredTool<EmailRouteResult>({
+		systemPrompt: [
+			'You route a custom email notification request to the closest template group.',
+			'Pick exactly one group from the provided list.',
+			'Also write the one follow-up question that would resolve the most important uncertainty.',
+			'The user must never know templates or groups exist.'
+		].join('\n'),
+		userPrompt: [
+			'User request:',
+			params.initialMessage,
+			'Available groups:',
+			stringifyCandidates(params.groups)
+		].join('\n\n'),
+		toolName: EMAIL_ROUTE_TOOL_NAME,
+		toolDescription: 'Select the closest email template group and the first follow-up question.',
+		toolParameters: {
+			type: 'object',
+			additionalProperties: false,
+			properties: {
+				groupSlug: {
+					type: 'string',
+					enum: params.groups.map((group) => group.slug)
+				},
+				question: {
+					type: 'string',
+					description: 'One concise question about the least certain important detail.'
+				}
+			},
+			required: ['groupSlug', 'question']
+		}
+	});
+}
 
+export async function streamEmailInitialQuestion(params: {
+	initialMessage: string;
+	group: EmailTemplateGroupCandidate;
+	proposedQuestion: string;
+	handlers: ChatReplyStreamHandlers;
+}) {
+	const { apiKey, model } = getOpenAIConfig();
 	const response = await fetch(OPENAI_RESPONSES_URL, {
 		method: 'POST',
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(createBuilderTurnRequestBody({ ...requestParams, model }))
+		headers: getOpenAIHeaders(apiKey),
+		body: JSON.stringify({
+			model,
+			input: [
+				{
+					role: 'system',
+					content: [
+						'You are Overbase\'s custom email notification builder.',
+						'Ask exactly one concise follow-up question.',
+						'Do not mention templates, groups, routing, hidden drafts, or internal process.',
+						'The question should feel natural and should ask about the least certain important detail.'
+					].join('\n')
+				},
+				{
+					role: 'user',
+					content: [
+						`User request: ${params.initialMessage}`,
+						`Question guidance: ${params.group.questionGuidance}`,
+						`Proposed question: ${params.proposedQuestion}`
+					].join('\n')
+				}
+			],
+			...(supportsReasoningOptions(model) ? { reasoning: { effort: 'low' } } : {}),
+			max_output_tokens: 220,
+			store: false,
+			stream: true
+		})
 	});
 
 	if (!response.ok) {
 		throw new Error(await getOpenAIErrorMessage(response));
 	}
 
-	return await readBuilderTurnStream(response, handlers);
+	return await readOpenAIStream(response, params.handlers);
+}
+
+export async function adaptEmailBuilderTemplate(params: {
+	initialMessage: string;
+	group: EmailTemplateGroupCandidate;
+	templates: EmailTemplateCandidate[];
+}) {
+	const result = await callStructuredTool<EmailAdaptedTemplateResult>({
+		systemPrompt: [
+			'You adapt the closest hidden email notification template into a strong first draft.',
+			'Pick exactly one template from the provided list.',
+			'Adapt the draft to the user request without inventing unsupported business-critical facts.',
+			'The draft is hidden until the user answers the first follow-up question.',
+			'Keep copy compact and specific. Include a fireReason that explains the trigger.'
+		].join('\n'),
+		userPrompt: [
+			'User request:',
+			params.initialMessage,
+			'Selected group:',
+			stringifyCandidates(params.group),
+			'Candidate templates:',
+			stringifyCandidates(params.templates)
+		].join('\n\n'),
+		toolName: EMAIL_ADAPT_TOOL_NAME,
+		toolDescription: 'Pick the closest template and return the adapted email draft.',
+		toolParameters: {
+			type: 'object',
+			additionalProperties: false,
+			properties: {
+				templateSlug: {
+					type: 'string',
+					enum: params.templates.map((template) => template.slug)
+				},
+				emailDraft: emailDraftJsonSchema
+			},
+			required: ['templateSlug', 'emailDraft']
+		}
+	});
+
+	return {
+		...result,
+		emailDraft: normalizeEmailDraft(result.emailDraft)
+	};
+}
+
+export async function applyEmailInitialAnswer(params: {
+	initialMessage: string;
+	initialQuestion: string;
+	initialAnswer: string;
+	draft: EmailDraft;
+}) {
+	const result = await callStructuredTool<{ emailDraft: EmailDraft }>({
+		systemPrompt: [
+			'You make the first minor adjustment to a hidden email notification draft after the user answers one follow-up question.',
+			'Return the complete updated draft.',
+			'Preserve useful structure from the draft. Only change fields affected by the answer or obvious fit improvements.',
+			'Keep the draft concise and operational.'
+		].join('\n'),
+		userPrompt: [
+			'Original user request:',
+			params.initialMessage,
+			'Follow-up question:',
+			params.initialQuestion,
+			'User answer:',
+			params.initialAnswer,
+			'Hidden draft JSON:',
+			JSON.stringify(params.draft, null, 2)
+		].join('\n\n'),
+		toolName: EMAIL_INITIAL_ANSWER_TOOL_NAME,
+		toolDescription: 'Return the hidden email draft after applying the initial answer.',
+		toolParameters: {
+			type: 'object',
+			additionalProperties: false,
+			properties: {
+				emailDraft: emailDraftJsonSchema
+			},
+			required: ['emailDraft']
+		}
+	});
+
+	return normalizeEmailDraft(result.emailDraft);
+}
+
+export async function streamCustomEmailBuilderTurn(params: {
+	transcript: TranscriptMessage[];
+	draft: EmailDraft;
+	recentEvents: EmailBuilderEventContext[];
+	handlers: EmailBuilderTurnStreamHandlers;
+}): Promise<EmailBuilderTurnStreamResult> {
+	const { apiKey, model } = getOpenAIConfig();
+	const response = await fetch(OPENAI_RESPONSES_URL, {
+		method: 'POST',
+		headers: getOpenAIHeaders(apiKey),
+		body: JSON.stringify({
+			model,
+			input: [
+				{
+					role: 'system',
+					content: EMAIL_BUILDER_REFINEMENT_SYSTEM_PROMPT
+				},
+				...params.transcript.map((message) => ({
+					role: message.role,
+					content: message.text
+				})),
+				{
+					role: 'user',
+					content: [
+						'Current visible email draft JSON:',
+						JSON.stringify(params.draft),
+						params.recentEvents.length > 0
+							? [
+									'Recent internal artifact events:',
+									JSON.stringify(params.recentEvents)
+								].join('\n')
+							: 'Recent internal artifact events: []',
+						'Respond to the user in normal text. If the draft should change, call update_email_draft.'
+					].join('\n')
+				}
+			],
+			tools: [
+				{
+					type: 'function',
+					name: UPDATE_EMAIL_DRAFT_TOOL_NAME,
+					description: 'Patch the visible email notification draft.',
+					parameters: emailDraftPatchJsonSchema,
+					strict: true
+				}
+			],
+			parallel_tool_calls: false,
+			...(supportsReasoningOptions(model) ? { reasoning: { effort: 'low' } } : {}),
+			max_output_tokens: STRUCTURED_MAX_OUTPUT_TOKENS,
+			store: false,
+			stream: true
+		})
+	});
+
+	if (!response.ok) {
+		throw new Error(await getOpenAIErrorMessage(response));
+	}
+
+	const result = await readEmailBuilderTurnStream(response, params.handlers);
+	const meaningfulOperations =
+		result.patch?.operations.filter((operation) => {
+			const nextDraft = applyEmailDraftPatch(params.draft, { operations: [operation] });
+			return JSON.stringify(nextDraft) !== JSON.stringify(normalizeEmailDraft(params.draft));
+		}) ?? null;
+	const patchIntent = result.patch
+		? meaningfulOperations && meaningfulOperations.length > 0
+			? 'meaningful'
+			: 'noop'
+		: 'none';
+
+	return {
+		...result,
+		patch:
+			patchIntent === 'meaningful' && meaningfulOperations
+				? {
+						operations: meaningfulOperations
+					}
+				: null,
+		patchIntent
+	};
 }

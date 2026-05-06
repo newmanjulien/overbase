@@ -305,3 +305,224 @@ export const builderGuides = [
 		]
 	}
 ] as const;
+
+export const builderTemplateGroups = [
+	{
+		slug: 'client-follow-up',
+		label: 'Client follow-up',
+		description: 'Notifications that help a relationship owner follow up with clients or prospects.',
+		questionGuidance:
+			'Ask what specific relationship owner, client segment, or follow-up timing should be used.',
+		sortOrder: 10,
+		status: 'active'
+	},
+	{
+		slug: 'pipeline-risk',
+		label: 'Pipeline risk',
+		description: 'Notifications that surface stalled, risky, or changing commercial opportunities.',
+		questionGuidance:
+			'Ask which deal stage, account owner, or risk threshold should control when the email fires.',
+		sortOrder: 20,
+		status: 'active'
+	},
+	{
+		slug: 'market-signal',
+		label: 'Market signal',
+		description: 'Notifications triggered by outside events that create a timely reason to connect.',
+		questionGuidance:
+			'Ask which clients or markets should be monitored so the alert does not become too broad.',
+		sortOrder: 30,
+		status: 'active'
+	},
+	{
+		slug: 'team-operations',
+		label: 'Team operations',
+		description: 'Notifications that summarize exceptions, misses, or recurring team workflow changes.',
+		questionGuidance:
+			'Ask which team, cadence, or exception threshold matters most for the workflow.',
+		sortOrder: 40,
+		status: 'active'
+	}
+] as const;
+
+export const builderTemplates = [
+	{
+		slug: 'weekly-missing-follow-up',
+		groupSlug: 'client-follow-up',
+		label: 'Weekly missing follow-up',
+		description: 'A weekly email listing clients who have not received a promised follow-up.',
+		matchSignals: [
+			'follow up after meetings',
+			'missing next steps',
+			'weekly relationship owner reminders',
+			'client promises not completed'
+		],
+		emailDraft: {
+			to: ['Relationship owner'],
+			cc: ['Practice lead'],
+			attachments: ['Missing Follow Ups.pdf'],
+			body: [
+				{
+					type: 'paragraph',
+					text: 'Here are the client conversations from last week that still need a confirmed follow-up.'
+				},
+				{
+					type: 'bullets',
+					items: [
+						'Client and meeting date',
+						'Promised next step',
+						'Owner and days since meeting'
+					]
+				},
+				{
+					type: 'paragraph',
+					text: 'Please reply once the follow-up has been sent or update the owner if this should be reassigned.'
+				}
+			],
+			fireReason:
+				'The email fires when a completed client meeting has an unresolved promised next step after the follow-up window has passed.'
+		},
+		sortOrder: 10,
+		status: 'active'
+	},
+	{
+		slug: 'stalled-opportunity',
+		groupSlug: 'pipeline-risk',
+		label: 'Stalled opportunity',
+		description: 'A pipeline alert when an opportunity has not moved for a defined number of days.',
+		matchSignals: [
+			'stalled deals',
+			'opportunity has not advanced',
+			'pipeline risk',
+			'proposal stuck'
+		],
+		emailDraft: {
+			to: ['Opportunity owner'],
+			cc: ['Sales manager'],
+			attachments: ['Stalled Opportunity Detail.pdf'],
+			body: [
+				{
+					type: 'paragraph',
+					text: 'This opportunity appears stalled and may need manager attention before the next forecast review.'
+				},
+				{
+					type: 'bullets',
+					items: ['Current stage and value', 'Days without stage movement', 'Last client interaction']
+				},
+				{
+					type: 'paragraph',
+					text: 'Confirm whether the next step is still active, and update the close plan if the opportunity should stay in forecast.'
+				}
+			],
+			fireReason:
+				'The email fires when an active opportunity remains in the same stage longer than the configured stall threshold.'
+		},
+		sortOrder: 20,
+		status: 'active'
+	},
+	{
+		slug: 'leadership-change',
+		groupSlug: 'market-signal',
+		label: 'Leadership change',
+		description: 'A timely reason-to-connect email when a watched company announces a leadership change.',
+		matchSignals: [
+			'leadership change',
+			'new executive',
+			'client news',
+			'reason to connect'
+		],
+		emailDraft: {
+			to: ['Client relationship partner'],
+			cc: [],
+			attachments: ['Leadership Change Brief.pdf'],
+			body: [
+				{
+					type: 'paragraph',
+					text: 'A watched client or prospect announced a leadership change that may create a timely reason to connect.'
+				},
+				{
+					type: 'bullets',
+					items: ['Company and new leader', 'Role and effective date', 'Relevant relationship context']
+				},
+				{
+					type: 'paragraph',
+					text: 'Consider sending a short note and checking whether this creates any new priorities for the account.'
+				}
+			],
+			fireReason:
+				'The email fires when a monitored client or prospect has a new senior leader announced in a trusted external source.'
+		},
+		sortOrder: 30,
+		status: 'active'
+	},
+	{
+		slug: 'regulatory-watch',
+		groupSlug: 'market-signal',
+		label: 'Regulatory watch',
+		description: 'An alert when a new regulatory update affects watched clients or industries.',
+		matchSignals: [
+			'regulatory update',
+			'compliance change',
+			'industry alert',
+			'legal issue'
+		],
+		emailDraft: {
+			to: ['Account partner'],
+			cc: ['Subject matter expert'],
+			attachments: ['Regulatory Watch Summary.pdf'],
+			body: [
+				{
+					type: 'paragraph',
+					text: 'A new regulatory update may affect clients in your watched portfolio.'
+				},
+				{
+					type: 'bullets',
+					items: ['Affected industry or jurisdiction', 'Relevant clients', 'Suggested talking point']
+				},
+				{
+					type: 'paragraph',
+					text: 'Review the attached summary before reaching out so the message is specific to the client context.'
+				}
+			],
+			fireReason:
+				'The email fires when a trusted source publishes a regulatory update that matches the monitored client industry, location, or service need.'
+		},
+		sortOrder: 40,
+		status: 'active'
+	},
+	{
+		slug: 'team-exception-digest',
+		groupSlug: 'team-operations',
+		label: 'Team exception digest',
+		description: 'A digest of workflow exceptions that need team attention.',
+		matchSignals: [
+			'team digest',
+			'workflow exceptions',
+			'operations summary',
+			'missed tasks'
+		],
+		emailDraft: {
+			to: ['Team manager'],
+			cc: [],
+			attachments: ['Team Exception Digest.pdf'],
+			body: [
+				{
+					type: 'paragraph',
+					text: 'Here are the workflow exceptions that need review before the next team checkpoint.'
+				},
+				{
+					type: 'bullets',
+					items: ['Exception type', 'Owner', 'Age and next action']
+				},
+				{
+					type: 'paragraph',
+					text: 'Please assign owners for unresolved items or mark exceptions that no longer require action.'
+				}
+			],
+			fireReason:
+				'The email fires on the configured cadence when one or more team workflow exceptions are still unresolved.'
+		},
+		sortOrder: 50,
+		status: 'active'
+	}
+] as const;

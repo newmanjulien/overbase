@@ -3,11 +3,10 @@ import type { Id } from '$convex/_generated/dataModel';
 import type { BuilderCardRecord } from '$lib/features/builder-data';
 import { useConvexClient } from 'convex-svelte';
 
-export type BuilderConversationMode = 'chat' | 'customEmail';
+export type BuilderConversationMode = 'chat';
 
 export type BuilderConversationHandle = {
 	conversationId: Id<'conversations'>;
-	builderSessionId: Id<'builderSessions'> | null;
 	builderMode: BuilderConversationMode;
 	resumeToken: string;
 	cardSlug: string;
@@ -16,10 +15,9 @@ export type BuilderConversationHandle = {
 
 type StoredBuilderConversationHandle = Omit<
 	BuilderConversationHandle,
-	'conversationId' | 'builderSessionId'
+	'conversationId'
 > & {
 	conversationId: string;
-	builderSessionId: string | null;
 };
 
 type ConversationStatus = 'idle' | 'starting' | 'resuming' | 'ready' | 'error';
@@ -29,7 +27,7 @@ function getErrorMessage(error: unknown) {
 }
 
 function isBuilderConversationMode(value: unknown): value is BuilderConversationMode {
-	return value === 'chat' || value === 'customEmail';
+	return value === 'chat';
 }
 
 function isStoredBuilderConversationHandle(
@@ -56,9 +54,7 @@ function isStoredBuilderConversationHandle(
 		return false;
 	}
 
-	return candidate.builderMode === 'customEmail'
-		? typeof candidate.builderSessionId === 'string' && candidate.builderSessionId.length > 0
-		: candidate.builderSessionId === null;
+	return true;
 }
 
 export function parseBuilderConversationHandle(value: unknown) {
@@ -72,8 +68,7 @@ export function parseBuilderConversationHandle(value: unknown) {
 
 	return {
 		...value,
-		conversationId: value.conversationId as Id<'conversations'>,
-		builderSessionId: value.builderSessionId as Id<'builderSessions'> | null
+		conversationId: value.conversationId as Id<'conversations'>
 	};
 }
 
@@ -146,11 +141,7 @@ export function createBuilderConversationController() {
 		}
 	}
 
-	async function start(
-		initialMessage: string,
-		card: BuilderCardRecord,
-		builderMode: BuilderConversationMode
-	) {
+	async function start(initialMessage: string, card: BuilderCardRecord) {
 		const normalizedInitialMessage = initialMessage.trim();
 
 		if (!normalizedInitialMessage) {
@@ -167,19 +158,13 @@ export function createBuilderConversationController() {
 		}
 
 		try {
-			const result =
-				builderMode === 'customEmail'
-					? await client.mutation(api.builderSessions.startCustomEmailSession, {
-							initialMessage: normalizedInitialMessage
-						})
-					: await client.mutation(api.chat.startConversation, {
-							cardSlug: card.id,
-							initialMessage: normalizedInitialMessage
-						});
+			const result = await client.mutation(api.chat.startConversation, {
+				cardSlug: card.id,
+				initialMessage: normalizedInitialMessage
+			});
 
 			const nextHandle: BuilderConversationHandle = {
 				conversationId: result.conversationId,
-				builderSessionId: result.builderSessionId,
 				builderMode: result.builderMode,
 				resumeToken: result.resumeToken,
 				cardSlug: card.id,
@@ -239,7 +224,6 @@ export function createBuilderConversationController() {
 
 			const nextHandle: BuilderConversationHandle = {
 				conversationId: result.conversationId,
-				builderSessionId: result.builderSessionId,
 				builderMode: result.builderMode,
 				resumeToken: result.resumeToken,
 				cardSlug: card.id,
@@ -274,31 +258,13 @@ export function createBuilderConversationController() {
 			return currentHandle;
 		}
 
-		const result =
-			currentHandle.builderMode === 'customEmail'
-				? await sendCustomEmailMessage(currentHandle, normalizedText)
-				: await client.mutation(api.chat.sendMessage, {
-						conversationId: currentHandle.conversationId,
-						resumeToken: currentHandle.resumeToken,
-						text: normalizedText
-					});
-
-		return extendHandle(currentHandle, result.expiresAt);
-	}
-
-	async function sendCustomEmailMessage(
-		currentHandle: BuilderConversationHandle,
-		normalizedText: string
-	) {
-		if (!currentHandle.builderSessionId) {
-			throw new Error('Builder session not found.');
-		}
-
-		return await client.mutation(api.builderSessions.sendCustomEmailMessage, {
-			builderSessionId: currentHandle.builderSessionId,
+		const result = await client.mutation(api.chat.sendMessage, {
+			conversationId: currentHandle.conversationId,
 			resumeToken: currentHandle.resumeToken,
 			text: normalizedText
 		});
+
+		return extendHandle(currentHandle, result.expiresAt);
 	}
 
 	function extend(expiresAt: number) {
