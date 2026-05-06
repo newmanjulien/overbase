@@ -1,33 +1,21 @@
 <script lang="ts">
-	import type { BuilderCardRecord } from '$lib/features/builder-data';
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
-	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 	import { StickToBottom } from 'stick-to-bottom-svelte';
 
 	type Props = {
-		card: BuilderCardRecord;
-		initialMessage: string;
-		builderMode?: 'chat' | 'customEmail';
-		onSessionChange?: (session: {
-			builderSessionId: Id<'builderSessions'> | null;
-			conversationId: Id<'conversations'> | null;
-		}) => void;
+		conversationId: Id<'conversations'>;
+		resumeToken: string;
+		onSend: (text: string) => Promise<void>;
 	};
 
 	const COMPOSER_TEXTAREA_MIN_HEIGHT = 20;
 	const COMPOSER_TEXTAREA_MAX_HEIGHT = 96;
 
-	let { card, initialMessage, builderMode = 'chat', onSessionChange }: Props = $props();
+	let { conversationId, resumeToken, onSend }: Props = $props();
 
-	const client = useConvexClient();
-	let conversationId = $state<Id<'conversations'> | null>(null);
-	let builderSessionId = $state<Id<'builderSessions'> | null>(null);
-	let startupKey = '';
-	let startupVersion = 0;
-	let isInitializing = $state(false);
-	let initializationError = $state<string | null>(null);
 	let sendError = $state<string | null>(null);
 	let composerValue = $state('');
 	let isSending = $state(false);
@@ -35,16 +23,12 @@
 	let scrollElement = $state<HTMLElement | null>(null);
 	let contentElement = $state<HTMLElement | null>(null);
 
-	const messagesQuery = useQuery(api.chat.listMessages, () =>
-		conversationId ? { conversationId } : 'skip'
-	);
+	const messagesQuery = useQuery(api.chat.listMessages, () => ({ conversationId, resumeToken }));
 	const messages = $derived(messagesQuery.data ?? []);
 	const hasPendingAssistant = $derived(
 		messages.some((message) => message.role === 'assistant' && message.status === 'pending')
 	);
-	const composerDisabled = $derived(
-		isInitializing || isSending || hasPendingAssistant || Boolean(initializationError)
-	);
+	const composerDisabled = $derived(isSending || hasPendingAssistant || Boolean(messagesQuery.error));
 	const canSend = $derived(!composerDisabled && composerValue.trim().length > 0);
 
 	const stickToBottom = new StickToBottom({
@@ -78,56 +62,10 @@
 			textareaElement.scrollHeight > COMPOSER_TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden';
 	}
 
-	async function startConversation(firstMessage: string, cardContext: BuilderCardRecord) {
-		const version = (startupVersion += 1);
-		isInitializing = true;
-		initializationError = null;
-		sendError = null;
-		conversationId = null;
-		builderSessionId = null;
-		onSessionChange?.({ builderSessionId: null, conversationId: null });
-
-		try {
-			const result =
-				builderMode === 'customEmail'
-					? await client.mutation(api.builderSessions.startCustomEmailSession, {
-							initialMessage: firstMessage
-						})
-					: await client.mutation(api.chat.startConversation, {
-							cardSlug: cardContext.id,
-							initialMessage: firstMessage
-						});
-
-			if (version !== startupVersion) {
-				return;
-			}
-
-			conversationId = result.conversationId;
-			builderSessionId =
-				'builderSessionId' in result
-					? (result.builderSessionId as Id<'builderSessions'>)
-					: null;
-			onSessionChange?.({
-				builderSessionId,
-				conversationId: result.conversationId
-			});
-		} catch (error) {
-			if (version !== startupVersion) {
-				return;
-			}
-
-			initializationError = getErrorMessage(error);
-		} finally {
-			if (version === startupVersion) {
-				isInitializing = false;
-			}
-		}
-	}
-
 	async function handleSend() {
 		const message = composerValue.trim();
 
-		if (!canSend || !message || !conversationId) {
+		if (!canSend || !message) {
 			return;
 		}
 
@@ -136,21 +74,7 @@
 		sendError = null;
 
 		try {
-			if (builderMode === 'customEmail') {
-				if (!builderSessionId) {
-					throw new Error('Builder session not found.');
-				}
-
-				await client.mutation(api.builderSessions.sendCustomEmailMessage, {
-					builderSessionId,
-					text: message
-				});
-			} else {
-				await client.mutation(api.chat.sendMessage, {
-					conversationId,
-					text: message
-				});
-			}
+			await onSend(message);
 		} catch (error) {
 			composerValue = message;
 			sendError = getErrorMessage(error);
@@ -158,18 +82,6 @@
 			isSending = false;
 		}
 	}
-
-	$effect(() => {
-		const nextInitialMessage = initialMessage.trim();
-		const nextStartupKey = `${card.id}:${nextInitialMessage}`;
-
-		if (!nextInitialMessage || startupKey === nextStartupKey) {
-			return;
-		}
-
-		startupKey = nextStartupKey;
-		void startConversation(nextInitialMessage, card);
-	});
 
 	$effect(() => {
 		void textareaElement;
@@ -181,21 +93,9 @@
 <section class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white p-2">
 	<div bind:this={scrollElement} class="relative min-h-0 flex-1 overflow-y-auto px-3 py-6 md:px-5">
 		<div bind:this={contentElement} class="mx-auto flex w-full max-w-3xl flex-col gap-4">
-			{#if isInitializing}
-				<div class="max-w-xl rounded-sm border border-zinc-200 bg-white p-4 text-[0.82rem] text-zinc-500">
-					Starting chat...
-				</div>
-			{:else if initializationError}
-				<div class="max-w-xl rounded-sm border border-red-200 bg-red-50 p-4 text-[0.82rem] text-red-700">
-					{initializationError}
-				</div>
-			{:else if messagesQuery.error}
+			{#if messagesQuery.error}
 				<div class="max-w-xl rounded-sm border border-red-200 bg-red-50 p-4 text-[0.82rem] text-red-700">
 					{messagesQuery.error.message}
-				</div>
-			{:else if messages.length === 0}
-				<div class="max-w-xl rounded-sm border border-zinc-200 bg-white p-4 text-[0.82rem] text-zinc-500">
-					Starting chat...
 				</div>
 			{/if}
 

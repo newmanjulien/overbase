@@ -1,6 +1,13 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import { internalMutation, internalQuery, mutation, query, type MutationCtx } from './_generated/server';
+import {
+	internalMutation,
+	internalQuery,
+	mutation,
+	query,
+	type MutationCtx,
+	type QueryCtx
+} from './_generated/server';
 import type { Doc, Id } from './_generated/dataModel';
 import {
 	applyEmailDraftPatch,
@@ -11,10 +18,14 @@ import {
 import { emailDraft as emailDraftValidator, emailPreviewUpdate } from './builderEmailValidators';
 import {
 	MAX_MESSAGE_LENGTH,
+	createResumeToken,
 	createGenerationId,
 	getConversationExpiresAt,
+	hashResumeToken,
+	isConversationActive,
 	isConversationExpired,
-	normalizeUserText
+	normalizeUserText,
+	verifyResumeToken
 } from './conversationCore';
 
 async function insertPendingBuilderTurn(
@@ -78,7 +89,7 @@ async function getActiveBuilderTurn(
 
 	const conversation = await ctx.db.get(assistantMessage.conversationId);
 
-	if (!conversation || isConversationExpired(conversation, now)) {
+	if (!conversation || !isConversationActive(conversation, now)) {
 		return null;
 	}
 
@@ -107,6 +118,35 @@ async function getActiveBuilderTurn(
 	};
 }
 
+async function getResumeAuthorizedBuilderSession(
+	ctx: QueryCtx | MutationCtx,
+	builderSessionId: Id<'builderSessions'>,
+	resumeToken: string,
+	now = Date.now()
+) {
+	const session = await ctx.db.get(builderSessionId);
+
+	if (!session || isConversationExpired(session, now)) {
+		return null;
+	}
+
+	const conversation = await ctx.db.get(session.conversationId);
+
+	if (
+		!conversation ||
+		!isConversationActive(conversation, now) ||
+		conversation.builderMode !== 'customEmail' ||
+		!(await verifyResumeToken(conversation, resumeToken))
+	) {
+		return null;
+	}
+
+	return {
+		session,
+		conversation
+	};
+}
+
 export const startCustomEmailSession = mutation({
 	args: {
 		initialMessage: v.string()
@@ -114,6 +154,8 @@ export const startCustomEmailSession = mutation({
 	handler: async (ctx, { initialMessage }) => {
 		const now = Date.now();
 		const normalizedInitialMessage = normalizeUserText(initialMessage);
+		const resumeToken = createResumeToken();
+		const resumeTokenHash = await hashResumeToken(resumeToken);
 		const card = await ctx.db
 			.query('builderCards')
 			.withIndex('by_slug_status', (q) =>
@@ -131,6 +173,8 @@ export const startCustomEmailSession = mutation({
 			cardSlug: card.slug,
 			cardTitle: card.title,
 			cardDescription: card.description,
+			builderMode: 'customEmail',
+			resumeTokenHash,
 			createdAt: now,
 			updatedAt: now,
 			expiresAt
@@ -167,6 +211,9 @@ export const startCustomEmailSession = mutation({
 		return {
 			builderSessionId,
 			conversationId,
+			builderMode: 'customEmail' as const,
+			resumeToken,
+			expiresAt,
 			userMessageId,
 			assistantMessageId
 		};
@@ -176,22 +223,24 @@ export const startCustomEmailSession = mutation({
 export const sendCustomEmailMessage = mutation({
 	args: {
 		builderSessionId: v.id('builderSessions'),
+		resumeToken: v.string(),
 		text: v.string()
 	},
-	handler: async (ctx, { builderSessionId, text }) => {
+	handler: async (ctx, { builderSessionId, resumeToken, text }) => {
 		const now = Date.now();
 		const normalizedText = normalizeUserText(text);
-		const session = await ctx.db.get(builderSessionId);
+		const authorizedSession = await getResumeAuthorizedBuilderSession(
+			ctx,
+			builderSessionId,
+			resumeToken,
+			now
+		);
 
-		if (!session || isConversationExpired(session, now)) {
+		if (!authorizedSession) {
 			throw new Error('Builder session not found.');
 		}
 
-		const conversation = await ctx.db.get(session.conversationId);
-
-		if (!conversation || isConversationExpired(conversation, now)) {
-			throw new Error('Conversation not found.');
-		}
+		const { conversation } = authorizedSession;
 
 		if (conversation.pendingAssistantMessageId) {
 			throw new Error('Please wait for the assistant response to finish before sending another message.');
@@ -206,10 +255,19 @@ export const sendCustomEmailMessage = mutation({
 			updatedAt: now
 		});
 		const assistantMessageId = await insertPendingBuilderTurn(ctx, conversation._id, now + 1);
+		const expiresAt = getConversationExpiresAt(now);
+
+		await ctx.db.patch(builderSessionId, {
+			expiresAt,
+			updatedAt: now
+		});
+		await ctx.db.patch(conversation._id, {
+			expiresAt,
+			updatedAt: now + 1
+		});
 
 		return {
-			builderSessionId,
-			conversationId: conversation._id,
+			expiresAt,
 			userMessageId,
 			assistantMessageId
 		};
@@ -219,21 +277,23 @@ export const sendCustomEmailMessage = mutation({
 export const saveUserEditedEmailDraft = mutation({
 	args: {
 		builderSessionId: v.id('builderSessions'),
+		resumeToken: v.string(),
 		emailDraft: emailDraftValidator
 	},
-	handler: async (ctx, { builderSessionId, emailDraft: editedEmailDraft }) => {
+	handler: async (ctx, { builderSessionId, resumeToken, emailDraft: editedEmailDraft }) => {
 		const now = Date.now();
-		const session = await ctx.db.get(builderSessionId);
+		const authorizedSession = await getResumeAuthorizedBuilderSession(
+			ctx,
+			builderSessionId,
+			resumeToken,
+			now
+		);
 
-		if (!session || isConversationExpired(session, now)) {
+		if (!authorizedSession) {
 			throw new Error('Builder session not found.');
 		}
 
-		const conversation = await ctx.db.get(session.conversationId);
-
-		if (!conversation || isConversationExpired(conversation, now)) {
-			throw new Error('Conversation not found.');
-		}
+		const { session, conversation } = authorizedSession;
 
 		if (conversation.pendingAssistantMessageId) {
 			throw new Error('Please wait for the assistant response to finish before editing the draft.');
@@ -241,12 +301,14 @@ export const saveUserEditedEmailDraft = mutation({
 
 		const normalizedEmailDraft = normalizeEmailDraft(editedEmailDraft);
 		const nextArtifactVersion = session.artifactVersion + 1;
+		const expiresAt = getConversationExpiresAt(now);
 
 		await ctx.db.patch(session._id, {
 			artifactVersion: nextArtifactVersion,
 			status: 'drafting',
 			emailDraft: normalizedEmailDraft,
-			updatedAt: now
+			updatedAt: now,
+			expiresAt
 		});
 
 		const userMessageId = await ctx.db.insert('messages', {
@@ -259,9 +321,13 @@ export const saveUserEditedEmailDraft = mutation({
 		});
 		const assistantMessageId = await insertPendingBuilderTurn(ctx, conversation._id, now + 1);
 
+		await ctx.db.patch(conversation._id, {
+			expiresAt,
+			updatedAt: now + 1
+		});
+
 		return {
-			builderSessionId,
-			conversationId: conversation._id,
+			expiresAt,
 			userMessageId,
 			assistantMessageId,
 			artifactVersion: nextArtifactVersion
@@ -271,16 +337,21 @@ export const saveUserEditedEmailDraft = mutation({
 
 export const getSessionArtifact = query({
 	args: {
-		builderSessionId: v.id('builderSessions')
+		builderSessionId: v.id('builderSessions'),
+		resumeToken: v.string()
 	},
-	handler: async (ctx, { builderSessionId }) => {
-		const session = await ctx.db.get(builderSessionId);
+	handler: async (ctx, { builderSessionId, resumeToken }) => {
+		const authorizedSession = await getResumeAuthorizedBuilderSession(
+			ctx,
+			builderSessionId,
+			resumeToken
+		);
 
-		if (!session || isConversationExpired(session)) {
+		if (!authorizedSession) {
 			return null;
 		}
 
-		const conversation = await ctx.db.get(session.conversationId);
+		const { session, conversation } = authorizedSession;
 
 		return {
 			builderSessionId: session._id,
@@ -300,7 +371,7 @@ export const getBuilderTurnContext = internalQuery({
 	handler: async (ctx, { conversationId }) => {
 		const conversation = await ctx.db.get(conversationId);
 
-		if (!conversation || isConversationExpired(conversation)) {
+		if (!conversation || !isConversationActive(conversation)) {
 			return null;
 		}
 
@@ -338,6 +409,8 @@ export const completeStreamingBuilderTurn = internalMutation({
 			return;
 		}
 
+		const expiresAt = getConversationExpiresAt(now);
+
 		if (previewUpdate) {
 			if (previewUpdate.baseArtifactVersion !== activeTurn.session.artifactVersion) {
 				throw new Error('Builder draft changed before the assistant response was applied.');
@@ -350,7 +423,13 @@ export const completeStreamingBuilderTurn = internalMutation({
 				artifactVersion: nextArtifactVersion,
 				status: previewUpdate.status,
 				emailDraft,
-				updatedAt: now
+				updatedAt: now,
+				expiresAt
+			});
+		} else {
+			await ctx.db.patch(activeTurn.session._id, {
+				updatedAt: now,
+				expiresAt
 			});
 		}
 
@@ -369,7 +448,8 @@ export const completeStreamingBuilderTurn = internalMutation({
 		await ctx.db.patch(activeTurn.conversation._id, {
 			pendingAssistantMessageId: undefined,
 			pendingAssistantGenerationId: undefined,
-			updatedAt: now
+			updatedAt: now,
+			expiresAt
 		});
 	}
 });

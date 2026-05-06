@@ -9,7 +9,7 @@
 	</div>
 
 	<p class="mt-0 max-w-164 text-center text-[0.76rem] leading-relaxed text-zinc-500 md:text-[0.8rem]">
-		We analyze data from your business and from your ecosystem partners then we send you notifications by email. Build custom notifications that tell you what you need to know and fits how you already work
+		Build a custom email notification that tells you what you need to know and fits how you already work. Then connect the data sources we need to power those notifications
 	</p>
 
 	<div class="mt-16 w-full">

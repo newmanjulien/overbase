@@ -13,19 +13,22 @@
 
 	type Props = {
 		builderSessionId: Id<'builderSessions'> | null;
+		resumeToken: string | null;
+		onSessionExtended?: (expiresAt: number) => void;
 	};
 
-	let { builderSessionId }: Props = $props();
+	let { builderSessionId, resumeToken, onSessionExtended }: Props = $props();
 
 	const client = useConvexClient();
 	const artifactQuery = useQuery(api.builderSessions.getSessionArtifact, () =>
-		builderSessionId ? { builderSessionId } : 'skip'
+		builderSessionId && resumeToken ? { builderSessionId, resumeToken } : 'skip'
 	);
 	const artifact = $derived(artifactQuery.data ?? null);
 	const hasArtifactResponse = $derived(artifactQuery.data !== undefined);
 	const draft = $derived((artifact?.emailDraft as EmailDraft | undefined) ?? createDefaultEmailDraft());
 	const canEdit = $derived(
 		Boolean(builderSessionId) &&
+			Boolean(resumeToken) &&
 			artifact !== null &&
 			!artifactQuery.error &&
 			!artifact.hasPendingAssistant
@@ -48,7 +51,7 @@
 	}
 
 	async function saveAndPolish() {
-		if (!builderSessionId || isSaving) {
+		if (!builderSessionId || !resumeToken || isSaving) {
 			return;
 		}
 
@@ -56,10 +59,13 @@
 		saveError = null;
 
 		try {
-			await client.mutation(api.builderSessions.saveUserEditedEmailDraft, {
+			const result = await client.mutation(api.builderSessions.saveUserEditedEmailDraft, {
 				builderSessionId,
+				resumeToken,
 				emailDraft: fromEditableEmailDraft(editableDraft)
 			});
+
+			onSessionExtended?.(result.expiresAt);
 			isEditing = false;
 		} catch (error) {
 			saveError = error instanceof Error ? error.message : 'Could not save draft edits.';
@@ -78,7 +84,7 @@
 					<p class="mt-1 text-red-600">{artifactQuery.error.message}</p>
 				</div>
 			{:else if builderSessionId && !hasArtifactResponse}
-				<div class="text-[0.76rem] text-zinc-500">Loading email preview...</div>
+				<div></div>
 			{:else if builderSessionId && artifact === null}
 				<div class="rounded-sm border border-zinc-200 bg-zinc-50 p-3 text-[0.76rem] leading-relaxed text-zinc-600">
 					<p class="font-medium text-zinc-800">Email preview unavailable.</p>

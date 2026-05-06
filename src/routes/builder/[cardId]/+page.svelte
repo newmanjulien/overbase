@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
 	import BuilderCanvas from '$lib/features/builder-canvas/BuilderCanvas.svelte';
@@ -12,18 +11,13 @@
 	const card = $derived(data.card ? toBuilderCardRecord(data.card) : null);
 	const guide = $derived(toBuilderGuideDefinition(data.guide));
 	const initialMessage = $derived(page.state.initialMessage ?? null);
-
-	$effect(() => {
-		if (initialMessage && card) {
-			replaceState(resolve('/builder/[cardId]', { cardId: card.id }), {});
-		}
-	});
+	const activeConversation = $derived(page.state.activeConversation ?? null);
 </script>
 
 <SurfaceShell class="px-0 py-0 md:px-0 md:py-0">
 	<BuilderDesktopOnly>
 		{#if card}
-			<BuilderCanvas {card} {guide} {initialMessage} />
+			<BuilderCanvas {card} {guide} {initialMessage} {activeConversation} />
 		{:else}
 			<div class="flex h-full min-h-full items-center justify-center bg-white px-6 py-12">
 				<div class="w-full max-w-sm rounded-sm border border-zinc-200 bg-white p-5 text-center shadow-sm">

@@ -6,15 +6,20 @@ import {
 	internalQuery,
 	mutation,
 	query,
-	type MutationCtx
+	type MutationCtx,
+	type QueryCtx
 } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { builderMode } from './schema';
 import { streamChatReply } from './model';
 import {
+	createResumeToken,
 	createGenerationId,
 	getConversationExpiresAt,
-	isConversationExpired,
-	normalizeUserText
+	hashResumeToken,
+	isConversationActive,
+	normalizeUserText,
+	verifyResumeToken
 } from './conversationCore';
 
 const EXPIRED_CONVERSATION_CLEANUP_LIMIT = 50;
@@ -43,7 +48,7 @@ async function getActiveAssistantTurn(
 
 	const conversation = await ctx.db.get(assistantMessage.conversationId);
 
-	if (!conversation || isConversationExpired(conversation, now)) {
+	if (!conversation || !isConversationActive(conversation, now)) {
 		return null;
 	}
 
@@ -57,6 +62,68 @@ async function getActiveAssistantTurn(
 	return {
 		assistantMessage,
 		conversation
+	};
+}
+
+async function getResumeAuthorizedConversation(
+	ctx: QueryCtx | MutationCtx,
+	{
+		conversationId,
+		resumeToken,
+		cardSlug,
+		builderMode: expectedBuilderMode
+	}: {
+		conversationId: Id<'conversations'>;
+		resumeToken: string;
+		cardSlug?: string;
+		builderMode?: 'chat' | 'customEmail';
+	},
+	now = Date.now()
+) {
+	const conversation = await ctx.db.get(conversationId);
+
+	if (!conversation || !isConversationActive(conversation, now)) {
+		return null;
+	}
+
+	if (cardSlug !== undefined && conversation.cardSlug !== cardSlug) {
+		return null;
+	}
+
+	if (expectedBuilderMode !== undefined && conversation.builderMode !== expectedBuilderMode) {
+		return null;
+	}
+
+	if (!(await verifyResumeToken(conversation, resumeToken))) {
+		return null;
+	}
+
+	return conversation;
+}
+
+async function deleteConversationTree(ctx: MutationCtx, conversationId: Id<'conversations'>) {
+	const messages = await ctx.db
+		.query('messages')
+		.withIndex('by_conversation_createdAt', (q) => q.eq('conversationId', conversationId))
+		.collect();
+	const builderSessions = await ctx.db
+		.query('builderSessions')
+		.withIndex('by_conversationId', (q) => q.eq('conversationId', conversationId))
+		.collect();
+
+	for (const message of messages) {
+		await ctx.db.delete(message._id);
+	}
+
+	for (const builderSession of builderSessions) {
+		await ctx.db.delete(builderSession._id);
+	}
+
+	await ctx.db.delete(conversationId);
+
+	return {
+		deletedMessages: messages.length,
+		deletedBuilderSessions: builderSessions.length
 	};
 }
 
@@ -99,6 +166,9 @@ export const startConversation = mutation({
 	handler: async (ctx, { cardSlug, initialMessage }) => {
 		const now = Date.now();
 		const normalizedInitialMessage = normalizeUserText(initialMessage);
+		const resumeToken = createResumeToken();
+		const resumeTokenHash = await hashResumeToken(resumeToken);
+		const expiresAt = getConversationExpiresAt(now);
 		const card = await ctx.db
 			.query('builderCards')
 			.withIndex('by_slug_status', (q) => q.eq('slug', cardSlug).eq('status', 'active'))
@@ -113,9 +183,11 @@ export const startConversation = mutation({
 			cardSlug: card.slug,
 			cardTitle: card.title,
 			cardDescription: card.description,
+			builderMode: 'chat',
+			resumeTokenHash,
 			createdAt: now,
 			updatedAt: now,
-			expiresAt: getConversationExpiresAt(now)
+			expiresAt
 		});
 
 		const userMessageId = await ctx.db.insert('messages', {
@@ -131,6 +203,10 @@ export const startConversation = mutation({
 
 		return {
 			conversationId,
+			builderSessionId: null,
+			builderMode: 'chat' as const,
+			resumeToken,
+			expiresAt,
 			userMessageId,
 			assistantMessageId
 		};
@@ -139,12 +215,13 @@ export const startConversation = mutation({
 
 export const listMessages = query({
 	args: {
-		conversationId: v.id('conversations')
+		conversationId: v.id('conversations'),
+		resumeToken: v.string()
 	},
-	handler: async (ctx, { conversationId }) => {
-		const conversation = await ctx.db.get(conversationId);
+	handler: async (ctx, { conversationId, resumeToken }) => {
+		const conversation = await getResumeAuthorizedConversation(ctx, { conversationId, resumeToken });
 
-		if (!conversation || isConversationExpired(conversation)) {
+		if (!conversation) {
 			return [];
 		}
 
@@ -155,22 +232,111 @@ export const listMessages = query({
 	}
 });
 
+export const resumeConversation = mutation({
+	args: {
+		conversationId: v.id('conversations'),
+		resumeToken: v.string(),
+		cardSlug: v.string(),
+		builderMode
+	},
+	handler: async (ctx, { conversationId, resumeToken, cardSlug, builderMode }) => {
+		const now = Date.now();
+		const conversation = await getResumeAuthorizedConversation(
+			ctx,
+			{
+				conversationId,
+				resumeToken,
+				cardSlug,
+				builderMode
+			},
+			now
+		);
+
+		if (!conversation) {
+			return null;
+		}
+
+		const expiresAt = getConversationExpiresAt(now);
+		let builderSessionId = conversation.builderSessionId ?? null;
+
+		if (builderMode === 'customEmail') {
+			const session = builderSessionId
+				? await ctx.db.get(builderSessionId)
+				: await ctx.db
+						.query('builderSessions')
+						.withIndex('by_conversationId', (q) => q.eq('conversationId', conversation._id))
+						.unique();
+
+			if (!session || !isConversationActive(session, now)) {
+				return null;
+			}
+
+			builderSessionId = session._id;
+
+			await ctx.db.patch(session._id, {
+				expiresAt,
+				updatedAt: now
+			});
+		}
+
+		await ctx.db.patch(conversation._id, {
+			builderSessionId: builderSessionId ?? undefined,
+			expiresAt,
+			updatedAt: now
+		});
+
+		return {
+			conversationId: conversation._id,
+			builderSessionId,
+			builderMode,
+			resumeToken,
+			expiresAt
+		};
+	}
+});
+
+export const disposeConversation = mutation({
+	args: {
+		conversationId: v.id('conversations'),
+		resumeToken: v.string()
+	},
+	handler: async (ctx, { conversationId, resumeToken }) => {
+		const conversation = await ctx.db.get(conversationId);
+
+		if (!conversation || !(await verifyResumeToken(conversation, resumeToken))) {
+			return {
+				disposed: false,
+				deletedMessages: 0,
+				deletedBuilderSessions: 0
+			};
+		}
+
+		const deleted = await deleteConversationTree(ctx, conversation._id);
+
+		return {
+			disposed: true,
+			...deleted
+		};
+	}
+});
+
 export const sendMessage = mutation({
 	args: {
 		conversationId: v.id('conversations'),
+		resumeToken: v.string(),
 		text: v.string()
 	},
-	handler: async (ctx, { conversationId, text }) => {
+	handler: async (ctx, { conversationId, resumeToken, text }) => {
 		const now = Date.now();
 		const normalizedText = normalizeUserText(text);
-		const conversation = await ctx.db.get(conversationId);
+		const conversation = await getResumeAuthorizedConversation(ctx, {
+			conversationId,
+			resumeToken,
+			builderMode: 'chat'
+		});
 
 		if (!conversation) {
 			throw new Error('Conversation not found.');
-		}
-
-		if (isConversationExpired(conversation, now)) {
-			throw new Error('Conversation expired.');
 		}
 
 		if (conversation.pendingAssistantMessageId) {
@@ -187,8 +353,15 @@ export const sendMessage = mutation({
 		});
 
 		const assistantMessageId = await insertPendingAssistantTurn(ctx, conversationId, now + 1);
+		const expiresAt = getConversationExpiresAt(now);
+
+		await ctx.db.patch(conversationId, {
+			expiresAt,
+			updatedAt: now + 1
+		});
 
 		return {
+			expiresAt,
 			conversationId,
 			userMessageId,
 			assistantMessageId
@@ -203,7 +376,7 @@ export const getTranscript = internalQuery({
 	handler: async (ctx, { conversationId }) => {
 		const conversation = await ctx.db.get(conversationId);
 
-		if (!conversation || isConversationExpired(conversation)) {
+		if (!conversation || !isConversationActive(conversation)) {
 			return [];
 		}
 
@@ -244,7 +417,8 @@ export const completeAssistantMessage = internalMutation({
 		await ctx.db.patch(activeTurn.conversation._id, {
 			pendingAssistantMessageId: undefined,
 			pendingAssistantGenerationId: undefined,
-			updatedAt: now
+			updatedAt: now,
+			expiresAt: getConversationExpiresAt(now)
 		});
 	}
 });
@@ -269,7 +443,8 @@ export const updateAssistantMessageDraft = internalMutation({
 		});
 
 		await ctx.db.patch(activeTurn.conversation._id, {
-			updatedAt: now
+			updatedAt: now,
+			expiresAt: getConversationExpiresAt(now)
 		});
 	}
 });
@@ -308,7 +483,8 @@ export const failAssistantMessage = internalMutation({
 		await ctx.db.patch(activeTurn.conversation._id, {
 			pendingAssistantMessageId: undefined,
 			pendingAssistantGenerationId: undefined,
-			updatedAt: now
+			updatedAt: now,
+			expiresAt: getConversationExpiresAt(now)
 		});
 	}
 });
@@ -325,26 +501,9 @@ export const deleteExpiredConversations = internalMutation({
 		let deletedBuilderSessions = 0;
 
 		for (const conversation of conversations) {
-			const messages = await ctx.db
-				.query('messages')
-				.withIndex('by_conversation_createdAt', (q) => q.eq('conversationId', conversation._id))
-				.collect();
-			const builderSessions = await ctx.db
-				.query('builderSessions')
-				.withIndex('by_conversationId', (q) => q.eq('conversationId', conversation._id))
-				.collect();
-
-			for (const message of messages) {
-				await ctx.db.delete(message._id);
-				deletedMessages += 1;
-			}
-
-			for (const builderSession of builderSessions) {
-				await ctx.db.delete(builderSession._id);
-				deletedBuilderSessions += 1;
-			}
-
-			await ctx.db.delete(conversation._id);
+			const deleted = await deleteConversationTree(ctx, conversation._id);
+			deletedMessages += deleted.deletedMessages;
+			deletedBuilderSessions += deleted.deletedBuilderSessions;
 		}
 
 		return {

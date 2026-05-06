@@ -4,6 +4,7 @@ import { emailDraft, emailDraftStatus } from './builderEmailValidators';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 export const messageStatus = v.union(v.literal('complete'), v.literal('pending'), v.literal('failed'));
+export const builderMode = v.union(v.literal('chat'), v.literal('customEmail'));
 export const builderGuideQuestion = v.union(
 	v.object({
 		id: v.string(),
@@ -26,31 +27,33 @@ export default defineSchema({
 		label: v.string(),
 		iconId: v.string(),
 		sortOrder: v.number()
-	}).index('by_slug', ['slug']).index('by_sortOrder', ['sortOrder']),
-		builderArtworkPresets: defineTable({
-			slug: v.string(),
-			card: v.object({
-				tone: v.union(v.literal('coral'), v.literal('violet'), v.literal('aqua'), v.literal('zinc')),
-				iconId: v.string(),
-				symbolSize: v.union(v.literal('sm'), v.literal('md'))
-			}),
-			blueprint: v.object({
-				backColor: v.string(),
-				frontColor: v.string(),
-				iconId: v.string(),
-				iconCenterX: v.string(),
-				iconCenterY: v.string()
-			})
-		}).index('by_slug', ['slug']),
-		builderCards: defineTable({
-			slug: v.string(),
-			categoryIds: v.array(v.string()),
-			title: v.string(),
-			description: v.string(),
-			artworkPresetSlug: v.string(),
-			isTemplate: v.boolean(),
-			sortOrder: v.number(),
-			status: v.union(v.literal('active'), v.literal('hidden'))
+	})
+		.index('by_slug', ['slug'])
+		.index('by_sortOrder', ['sortOrder']),
+	builderArtworkPresets: defineTable({
+		slug: v.string(),
+		card: v.object({
+			tone: v.union(v.literal('coral'), v.literal('violet'), v.literal('aqua'), v.literal('zinc')),
+			iconId: v.string(),
+			symbolSize: v.union(v.literal('sm'), v.literal('md'))
+		}),
+		blueprint: v.object({
+			backColor: v.string(),
+			frontColor: v.string(),
+			iconId: v.string(),
+			iconCenterX: v.string(),
+			iconCenterY: v.string()
+		})
+	}).index('by_slug', ['slug']),
+	builderCards: defineTable({
+		slug: v.string(),
+		categoryIds: v.array(v.string()),
+		title: v.string(),
+		description: v.string(),
+		artworkPresetSlug: v.string(),
+		isTemplate: v.boolean(),
+		sortOrder: v.number(),
+		status: v.union(v.literal('active'), v.literal('hidden'))
 	})
 		.index('by_slug', ['slug'])
 		.index('by_slug_status', ['slug', 'status'])
@@ -65,14 +68,16 @@ export default defineSchema({
 		cardSlug: v.string(),
 		cardTitle: v.string(),
 		cardDescription: v.string(),
-			builderSessionId: v.optional(v.id('builderSessions')),
-			ownerUserId: v.optional(v.string()),
-			organizationId: v.optional(v.string()),
-			pendingAssistantMessageId: v.optional(v.id('messages')),
-			pendingAssistantGenerationId: v.optional(v.string()),
-			createdAt: v.number(),
-			updatedAt: v.number(),
-			expiresAt: v.number()
+		builderMode,
+		resumeTokenHash: v.string(),
+		builderSessionId: v.optional(v.id('builderSessions')),
+		ownerUserId: v.optional(v.string()),
+		organizationId: v.optional(v.string()),
+		pendingAssistantMessageId: v.optional(v.id('messages')),
+		pendingAssistantGenerationId: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		expiresAt: v.number()
 	})
 		.index('by_updatedAt', ['updatedAt'])
 		.index('by_expiresAt', ['expiresAt'])
