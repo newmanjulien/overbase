@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 	import { StickToBottom } from 'stick-to-bottom-svelte';
 
@@ -27,6 +28,7 @@
 	let sendError = $state<string | null>(null);
 	let composerValue = $state('');
 	let isSending = $state(false);
+	let shouldFocusComposer = $state(true);
 	let textareaElement = $state<HTMLTextAreaElement | null>(null);
 	let scrollElement = $state<HTMLElement | null>(null);
 	let contentElement = $state<HTMLElement | null>(null);
@@ -74,6 +76,20 @@
 			textareaElement.scrollHeight > COMPOSER_TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden';
 	}
 
+	async function focusComposer() {
+		if (!textareaElement || composerDisabled) {
+			return;
+		}
+
+		await tick();
+
+		if (!textareaElement || composerDisabled) {
+			return;
+		}
+
+		textareaElement.focus({ preventScroll: true });
+	}
+
 	async function handleSend() {
 		const message = composerValue.trim();
 
@@ -92,6 +108,7 @@
 			sendError = getErrorMessage(error);
 		} finally {
 			isSending = false;
+			shouldFocusComposer = true;
 		}
 	}
 
@@ -99,6 +116,16 @@
 		void textareaElement;
 		void composerValue;
 		syncTextareaHeight();
+	});
+
+	$effect(() => {
+		void textareaElement;
+		void composerDisabled;
+
+		if (shouldFocusComposer && textareaElement && !composerDisabled) {
+			shouldFocusComposer = false;
+			void focusComposer();
+		}
 	});
 </script>
 

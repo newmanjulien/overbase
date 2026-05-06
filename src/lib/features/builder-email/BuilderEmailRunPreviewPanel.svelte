@@ -71,7 +71,7 @@
 		</div>
 	</div>
 
-	<div class="shrink-0 border-t border-zinc-100 px-4 py-3 md:px-5">
+	<div class="shrink-0 border-t border-zinc-100 bg-white px-4 py-3 md:px-5">
 		{#if saveError}
 			<p class="mb-2 text-[0.72rem] leading-snug text-red-600">{saveError}</p>
 		{/if}
