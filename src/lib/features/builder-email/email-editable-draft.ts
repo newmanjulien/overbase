@@ -1,9 +1,10 @@
-import type { EmailBodyBlock, EmailDraft } from '$convex/emailArtifact';
+import { normalizePdfAttachmentName, type EmailBodyBlock, type EmailDraft } from '$convex/emailArtifact';
 
 export type EditableEmailDraft = {
 	toText: string;
 	ccText: string;
-	subjectText: string;
+	attachmentInputText: string;
+	attachments: string[];
 	bodyText: string;
 };
 
@@ -15,7 +16,8 @@ export function toEditableEmailDraft(draft: EmailDraft): EditableEmailDraft {
 	return {
 		toText: formatRecipients(draft.to),
 		ccText: formatRecipients(draft.cc),
-		subjectText: draft.subject,
+		attachmentInputText: '',
+		attachments: [...draft.attachments],
 		bodyText: serializeEmailBodyText(draft.body)
 	};
 }
@@ -24,8 +26,35 @@ export function fromEditableEmailDraft(editableDraft: EditableEmailDraft): Email
 	return {
 		to: parseRecipients(editableDraft.toText),
 		cc: parseRecipients(editableDraft.ccText),
-		subject: editableDraft.subjectText,
+		attachments: editableDraft.attachments,
 		body: parseEmailBodyText(editableDraft.bodyText)
+	};
+}
+
+export function addEditableAttachment(
+	editableDraft: EditableEmailDraft,
+	attachmentName: string
+): EditableEmailDraft {
+	const normalizedAttachmentName = normalizePdfAttachmentName(attachmentName);
+
+	if (!normalizedAttachmentName) {
+		return editableDraft;
+	}
+
+	return {
+		...editableDraft,
+		attachmentInputText: '',
+		attachments: [...editableDraft.attachments, normalizedAttachmentName]
+	};
+}
+
+export function removeEditableAttachment(
+	editableDraft: EditableEmailDraft,
+	attachmentIndex: number
+): EditableEmailDraft {
+	return {
+		...editableDraft,
+		attachments: editableDraft.attachments.filter((_, index) => index !== attachmentIndex)
 	};
 }
 

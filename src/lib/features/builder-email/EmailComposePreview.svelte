@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { EmailBodyBlock, EmailDraft } from '$convex/emailArtifact';
 	import { formatRecipients } from '$lib/features/builder-email/email-editable-draft';
+	import EmailAttachmentCard from '$lib/features/builder-email/EmailAttachmentCard.svelte';
 
 	type Props = {
 		draft: EmailDraft;
@@ -43,13 +44,16 @@
 	</div>
 </div>
 
-<div
-	class={[
-		'mt-5 flex min-h-8.5 items-center border-b border-zinc-200 text-[0.82rem] leading-snug',
-		draft.subject ? 'font-medium text-zinc-950' : 'font-normal text-zinc-500'
-	]}
->
-	{draft.subject || 'Add a subject'}
+<div class="mt-5 border-b border-zinc-200 pb-2 text-[0.82rem] leading-snug">
+	{#if draft.attachments.length > 0}
+		<div class="flex flex-wrap gap-2">
+			{#each draft.attachments as attachment, attachmentIndex (`${attachment}:${attachmentIndex}`)}
+				<EmailAttachmentCard filename={attachment} />
+			{/each}
+		</div>
+	{:else}
+		<p class="text-zinc-500">Attach a PDF</p>
+	{/if}
 </div>
 
 <div
@@ -82,6 +86,6 @@
 			{/each}
 		</div>
 	{:else}
-		<p>Type / to insert files and more</p>
+		<p>Add email body</p>
 	{/if}
 </div>

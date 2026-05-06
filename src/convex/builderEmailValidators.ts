@@ -25,7 +25,7 @@ export const emailBodyBlock = v.union(
 export const emailDraft = v.object({
 	to: v.array(v.string()),
 	cc: v.array(v.string()),
-	subject: v.string(),
+	attachments: v.array(v.string()),
 	body: v.array(emailBodyBlock)
 });
 
@@ -39,8 +39,8 @@ export const emailDraftPatchOperation = v.union(
 		cc: v.array(v.string())
 	}),
 	v.object({
-		type: v.literal('setSubject'),
-		subject: v.string()
+		type: v.literal('setAttachments'),
+		attachments: v.array(v.string())
 	}),
 	v.object({
 		type: v.literal('setBody'),

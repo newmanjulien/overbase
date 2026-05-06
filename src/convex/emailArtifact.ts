@@ -8,7 +8,8 @@ export const EMAIL_BODY_BLOCK_TYPES = ['paragraph', 'bullets', 'link'] as const;
 export const EMAIL_DRAFT_LIMITS = {
 	recipient: 140,
 	recipients: 12,
-	subject: 120,
+	attachment: 160,
+	attachments: 12,
 	bodyBlocks: 12,
 	bodyText: 1_000,
 	bulletItems: 8,
@@ -39,7 +40,7 @@ export type EmailBodyBlock = EmailParagraphBlock | EmailBulletsBlock | EmailLink
 export type EmailDraft = {
 	to: string[];
 	cc: string[];
-	subject: string;
+	attachments: string[];
 	body: EmailBodyBlock[];
 };
 
@@ -53,8 +54,8 @@ export type EmailDraftPatchOperation =
 			cc: string[];
 	  }
 	| {
-			type: 'setSubject';
-			subject: string;
+			type: 'setAttachments';
+			attachments: string[];
 	  }
 	| {
 			type: 'setBody';
@@ -83,7 +84,7 @@ export function createDefaultEmailDraft(): EmailDraft {
 	return {
 		to: [],
 		cc: [],
-		subject: '',
+		attachments: [],
 		body: []
 	};
 }
@@ -107,6 +108,27 @@ function normalizeRecipients(recipients: string[]) {
 		.filter(Boolean);
 
 	return Array.from(new Set(normalizedRecipients));
+}
+
+export function normalizePdfAttachmentName(value: string) {
+	const filename = value.trim().split(/[\\/]/).pop() ?? '';
+	const withoutQueryOrHash = filename.split(/[?#]/)[0] ?? '';
+	const sanitizedBaseName = withoutQueryOrHash
+		.replace(/\.[a-z0-9]+$/i, '')
+		.replace(/[^a-zA-Z0-9 ._()-]+/g, '_')
+		.replace(/\s+/g, ' ')
+		.replace(/\.+$/g, '')
+		.trim();
+	const normalized = clampText(sanitizedBaseName, EMAIL_DRAFT_LIMITS.attachment);
+
+	return normalized ? `${normalized}.pdf` : '';
+}
+
+function normalizeAttachments(attachments: string[]) {
+	return attachments
+		.slice(0, EMAIL_DRAFT_LIMITS.attachments)
+		.map(normalizePdfAttachmentName)
+		.filter(Boolean);
 }
 
 export function normalizeEmailBodyBlock(block: EmailBodyBlock): EmailBodyBlock | null {
@@ -144,7 +166,7 @@ export function normalizeEmailDraft(draft: EmailDraft): EmailDraft {
 	return {
 		to: normalizeRecipients(draft.to),
 		cc: normalizeRecipients(draft.cc),
-		subject: clampText(draft.subject, EMAIL_DRAFT_LIMITS.subject),
+		attachments: normalizeAttachments(draft.attachments),
 		body: normalizeEmailBody(draft.body)
 	};
 }
@@ -153,7 +175,7 @@ export function applyEmailDraftPatch(draft: EmailDraft, patch: EmailDraftPatch):
 	const nextDraft: EmailDraft = {
 		to: [...draft.to],
 		cc: [...draft.cc],
-		subject: draft.subject,
+		attachments: [...draft.attachments],
 		body: [...draft.body]
 	};
 
@@ -165,8 +187,8 @@ export function applyEmailDraftPatch(draft: EmailDraft, patch: EmailDraftPatch):
 			case 'setCc':
 				nextDraft.cc = operation.cc;
 				break;
-			case 'setSubject':
-				nextDraft.subject = operation.subject;
+			case 'setAttachments':
+				nextDraft.attachments = operation.attachments;
 				break;
 			case 'setBody':
 				nextDraft.body = operation.body;
@@ -242,10 +264,10 @@ export const emailDraftJsonSchema = {
 	properties: {
 		to: { type: 'array', items: { type: 'string' } },
 		cc: { type: 'array', items: { type: 'string' } },
-		subject: { type: 'string' },
+		attachments: { type: 'array', items: { type: 'string' } },
 		body: { type: 'array', items: emailBodyBlockJsonSchema }
 	},
-	required: ['to', 'cc', 'subject', 'body']
+	required: ['to', 'cc', 'attachments', 'body']
 } as const;
 
 export const builderTurnResultJsonSchema = {
@@ -291,10 +313,10 @@ export const builderTurnResultJsonSchema = {
 								type: 'object',
 								additionalProperties: false,
 								properties: {
-									type: { type: 'string', enum: ['setSubject'] },
-									subject: { type: 'string' }
+									type: { type: 'string', enum: ['setAttachments'] },
+									attachments: { type: 'array', items: { type: 'string' } }
 								},
-								required: ['type', 'subject']
+								required: ['type', 'attachments']
 							},
 							{
 								type: 'object',

@@ -60,12 +60,14 @@ const CUSTOM_BUILDER_SYSTEM_PROMPT = [
 	'The user is describing an email notification they want to receive.',
 	'Ask exactly one focused follow-up question at a time unless the draft is ready.',
 	'Update the email preview only through the provided patch operations.',
-	'The preview artifact has only these fields: to, cc, subject, and body.',
+	'The preview artifact has only these fields: to, cc, attachments, and body.',
+	'The artifact has no heading field between recipients and attachments.',
+	'Attachments are PDF placeholder filenames only. You may add or remove attachment filenames when the user asks. Attachment names must end in .pdf.',
 	'Body content may use paragraphs, bullet lists, and links. Prefer concise real email copy over placeholders when the user has supplied enough context.',
 	'If nextQuestion is not null, do not repeat that same question in assistantMessage.',
-	'When the user says they edited the email draft, treat the current draft JSON as source material and only fix typos, formatting, and light wording. Preserve meaning, recipients, links, and claims.',
+	'When the user says they edited the email draft, treat the current draft JSON as source material and only fix typos, formatting, and light wording. Preserve meaning, recipients, attachments, links, and claims.',
 	'Do not invent business-critical facts. If required information is missing, ask the next best question.',
-	'The required information is: goal, trigger, recipient, data sources, cadence, subject, body content, and any relevant links or next steps.',
+	'The required information is: goal, trigger, recipient, data sources, cadence, body content, PDF attachments if needed, and any relevant links or next steps.',
 	'Use status "collecting" while key requirements are unknown, "drafting" once the email preview is useful but incomplete, and "ready" only when the email preview is coherent.',
 	'Return JSON that matches the schema.'
 ].join('\n');
@@ -74,8 +76,10 @@ const EMAIL_POLISH_SYSTEM_PROMPT = [
 	'You are polishing a user-edited Outlook-style email compose preview for Overbase.',
 	'The current draft JSON is the source of truth.',
 	'Only fix typos, formatting, and light wording.',
-	'Preserve meaning, recipients, links, claims, cadence, and all business-critical facts.',
-	'Do not add new facts, recipients, links, sections, or recommendations.',
+	'Preserve meaning, recipients, attachments, links, claims, cadence, and all business-critical facts.',
+	'Do not add new facts, recipients, attachments, links, sections, or recommendations.',
+	'The artifact has no heading field between recipients and attachments.',
+	'Attachments are PDF placeholder filenames only. Attachment names must end in .pdf.',
 	'Return a complete polished draft JSON, not a patch.',
 	'Return JSON that matches the schema.'
 ].join('\n');

@@ -1,5 +1,10 @@
 <script lang="ts">
-	import type { EditableEmailDraft } from '$lib/features/builder-email/email-editable-draft';
+	import {
+		addEditableAttachment,
+		removeEditableAttachment,
+		type EditableEmailDraft
+	} from '$lib/features/builder-email/email-editable-draft';
+	import EmailAttachmentCard from '$lib/features/builder-email/EmailAttachmentCard.svelte';
 
 	type Props = {
 		editableDraft: EditableEmailDraft;
@@ -14,6 +19,10 @@
 			...editableDraft,
 			...patch
 		});
+	}
+
+	function addAttachment() {
+		onDraftChange(addEditableAttachment(editableDraft, editableDraft.attachmentInputText));
 	}
 </script>
 
@@ -53,22 +62,40 @@
 	</div>
 </div>
 
-<div class="mt-5 flex min-h-8.5 items-center border-b border-zinc-200 text-[0.82rem] leading-snug">
+<div class="mt-5 border-b border-zinc-200 pb-2 text-[0.82rem] leading-snug">
 	<input
-		value={editableDraft.subjectText}
-		aria-label="Email subject"
-		placeholder="Add a subject"
+		value={editableDraft.attachmentInputText}
+		aria-label="PDF attachment"
+		placeholder="Attach a PDF"
 		{disabled}
-		class="h-8 min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.82rem] font-medium text-zinc-950 outline-none placeholder:font-normal placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
-		oninput={(event) => updateDraft({ subjectText: event.currentTarget.value })}
+		class="h-8 w-full min-w-0 border-0 bg-transparent p-0 text-[0.82rem] text-zinc-950 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
+		oninput={(event) => updateDraft({ attachmentInputText: event.currentTarget.value })}
+		onkeydown={(event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				addAttachment();
+			}
+		}}
 	/>
+
+	{#if editableDraft.attachments.length > 0}
+		<div class="mt-2 flex flex-wrap gap-2">
+			{#each editableDraft.attachments as attachment, attachmentIndex (`${attachment}:${attachmentIndex}`)}
+				<EmailAttachmentCard
+					filename={attachment}
+					removable
+					onRemove={() => onDraftChange(removeEditableAttachment(editableDraft, attachmentIndex))}
+				/>
+			{/each}
+		</div>
+	{/if}
 </div>
 
 <div class="min-h-[24rem] flex-1 pt-5 text-[0.82rem] leading-[1.52] text-zinc-900">
 	<textarea
 		value={editableDraft.bodyText}
 		aria-label="Email body"
-		placeholder="Type / to insert files and more"
+		placeholder="Add email body"
 		{disabled}
 		class="min-h-[22rem] w-full resize-none border-0 bg-transparent p-0 text-[0.82rem] leading-[1.52] text-zinc-900 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
 		oninput={(event) => updateDraft({ bodyText: event.currentTarget.value })}
