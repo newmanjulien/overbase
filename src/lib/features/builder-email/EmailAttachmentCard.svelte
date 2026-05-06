@@ -11,9 +11,9 @@
 </script>
 
 <div
-	class="inline-flex h-9 max-w-full items-center gap-2 rounded-[3px] border border-zinc-200 bg-white px-2 pr-1.5 text-zinc-800"
+	class="inline-flex h-9 max-w-full items-center gap-2 rounded-sm border border-zinc-200 bg-white px-2 pr-1.5 text-zinc-800"
 >
-	<div class="relative flex h-6 w-5 shrink-0 items-end justify-center rounded-[3px] border border-zinc-200 bg-zinc-50">
+	<div class="relative flex h-6 w-5 shrink-0 items-end justify-center rounded-sm border border-zinc-200 bg-zinc-50">
 		<div class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-zinc-200 bg-white"></div>
 		<div class="mb-1 rounded-[2px] bg-red-500/90 px-0.5 py-px text-[0.38rem] leading-none font-semibold text-white">
 			PDF

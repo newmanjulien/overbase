@@ -81,6 +81,12 @@
 						aria-label="Prompt input"
 						placeholder="Describe the notification you want to receive by email..."
 						class="prompt-input w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.8rem] leading-[1.34] text-zinc-800 outline-none placeholder:text-zinc-400 md:text-[0.84rem]"
+						onkeydown={(event) => {
+							if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+								event.preventDefault();
+								void handleSubmit();
+							}
+						}}
 					></textarea>
 				</div>
 

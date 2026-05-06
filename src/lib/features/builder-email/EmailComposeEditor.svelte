@@ -102,17 +102,14 @@
 	></textarea>
 </div>
 
-<div class="mt-5 rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2.5">
-	<label for="email-fire-reason" class="text-[0.68rem] font-medium tracking-normal text-zinc-500">
-		Why this email fires
-	</label>
+<div class="mt-5 rounded-sm border border-zinc-200 bg-zinc-50/50 px-3 py-2.5">
 	<textarea
 		id="email-fire-reason"
 		value={editableDraft.fireReasonText}
 		aria-label="Why this email fires"
 		placeholder="Describe the trigger rule"
 		{disabled}
-		class="mt-1 min-h-16 w-full resize-none border-0 bg-transparent p-0 text-[0.76rem] leading-relaxed text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
+		class="min-h-16 w-full resize-none border-0 bg-transparent p-0 text-[0.76rem] leading-relaxed text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
 		oninput={(event) => updateDraft({ fireReasonText: event.currentTarget.value })}
 	></textarea>
 </div>
