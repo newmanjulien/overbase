@@ -52,16 +52,8 @@ export const emailDraftPatch = v.object({
 	operations: v.array(emailDraftPatchOperation)
 });
 
-export const builderTurnResult = v.object({
-	assistantMessage: v.string(),
-	nextQuestion: v.union(v.string(), v.null()),
+export const emailPreviewUpdate = v.object({
+	baseArtifactVersion: v.number(),
 	status: emailDraftStatus,
-	baseArtifactVersion: v.number(),
 	patch: emailDraftPatch
-});
-
-export const emailPolishTurnResult = v.object({
-	assistantMessage: v.string(),
-	baseArtifactVersion: v.number(),
-	draft: emailDraft
 });

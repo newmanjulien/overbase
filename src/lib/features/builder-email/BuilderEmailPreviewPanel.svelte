@@ -24,7 +24,12 @@
 	const artifact = $derived(artifactQuery.data ?? null);
 	const hasArtifactResponse = $derived(artifactQuery.data !== undefined);
 	const draft = $derived((artifact?.emailDraft as EmailDraft | undefined) ?? createDefaultEmailDraft());
-	const canEdit = $derived(Boolean(builderSessionId) && artifact !== null && !artifactQuery.error);
+	const canEdit = $derived(
+		Boolean(builderSessionId) &&
+			artifact !== null &&
+			!artifactQuery.error &&
+			!artifact.hasPendingAssistant
+	);
 
 	let isEditing = $state(false);
 	let isSaving = $state(false);

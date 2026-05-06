@@ -1,5 +1,3 @@
-import { MAX_MESSAGE_LENGTH } from './conversationCore';
-
 export const CUSTOM_EMAIL_BUILDER_CARD_ID = 'custom-notification';
 
 export const EMAIL_DRAFT_STATUSES = ['collecting', 'drafting', 'ready'] as const;
@@ -66,18 +64,10 @@ export type EmailDraftPatch = {
 	operations: EmailDraftPatchOperation[];
 };
 
-export type BuilderTurnResult = {
-	assistantMessage: string;
-	nextQuestion: string | null;
+export type EmailPreviewUpdate = {
+	baseArtifactVersion: number;
 	status: EmailDraftStatus;
-	baseArtifactVersion: number;
 	patch: EmailDraftPatch;
-};
-
-export type EmailPolishTurnResult = {
-	assistantMessage: string;
-	baseArtifactVersion: number;
-	draft: EmailDraft;
 };
 
 export function createDefaultEmailDraft(): EmailDraft {
@@ -199,32 +189,6 @@ export function applyEmailDraftPatch(draft: EmailDraft, patch: EmailDraftPatch):
 	return normalizeEmailDraft(nextDraft);
 }
 
-function normalizeQuestionForComparison(value: string) {
-	return value.trim().replace(/\s+/g, ' ').toLowerCase();
-}
-
-function shouldAppendNextQuestion(assistantMessage: string, nextQuestion: string) {
-	const normalizedAssistantMessage = normalizeQuestionForComparison(assistantMessage);
-	const normalizedNextQuestion = normalizeQuestionForComparison(nextQuestion);
-
-	return normalizedNextQuestion.length > 0 && !normalizedAssistantMessage.includes(normalizedNextQuestion);
-}
-
-export function buildBuilderAssistantText(turn: BuilderTurnResult) {
-	const assistantMessage = turn.assistantMessage.trim();
-	const nextQuestion = turn.nextQuestion?.trim() ?? '';
-	const text =
-		nextQuestion && shouldAppendNextQuestion(assistantMessage, nextQuestion)
-			? `${assistantMessage}\n\n${nextQuestion}`
-			: assistantMessage;
-
-	return clampMultilineText(text, MAX_MESSAGE_LENGTH);
-}
-
-export function buildPolishAssistantText(turn: EmailPolishTurnResult) {
-	return clampMultilineText(turn.assistantMessage, MAX_MESSAGE_LENGTH);
-}
-
 export const emailBodyBlockJsonSchema = {
 	anyOf: [
 		{
@@ -232,7 +196,10 @@ export const emailBodyBlockJsonSchema = {
 			additionalProperties: false,
 			properties: {
 				type: { type: 'string', enum: ['paragraph'] },
-				text: { type: 'string' }
+				text: {
+					type: 'string',
+					description: 'A concise email paragraph. Prefer one or two sentences.'
+				}
 			},
 			required: ['type', 'text']
 		},
@@ -241,7 +208,14 @@ export const emailBodyBlockJsonSchema = {
 			additionalProperties: false,
 			properties: {
 				type: { type: 'string', enum: ['bullets'] },
-				items: { type: 'array', items: { type: 'string' } }
+				items: {
+					type: 'array',
+					items: {
+						type: 'string',
+						description: 'A concise email bullet.'
+					},
+					maxItems: EMAIL_DRAFT_LIMITS.bulletItems
+				}
 			},
 			required: ['type', 'items']
 		},
@@ -262,88 +236,100 @@ export const emailDraftJsonSchema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
-		to: { type: 'array', items: { type: 'string' } },
-		cc: { type: 'array', items: { type: 'string' } },
-		attachments: { type: 'array', items: { type: 'string' } },
-		body: { type: 'array', items: emailBodyBlockJsonSchema }
+		to: { type: 'array', items: { type: 'string' }, maxItems: EMAIL_DRAFT_LIMITS.recipients },
+		cc: { type: 'array', items: { type: 'string' }, maxItems: EMAIL_DRAFT_LIMITS.recipients },
+		attachments: {
+			type: 'array',
+			items: { type: 'string' },
+			maxItems: EMAIL_DRAFT_LIMITS.attachments
+		},
+		body: {
+			type: 'array',
+			items: emailBodyBlockJsonSchema,
+			maxItems: EMAIL_DRAFT_LIMITS.bodyBlocks
+		}
 	},
 	required: ['to', 'cc', 'attachments', 'body']
 } as const;
 
-export const builderTurnResultJsonSchema = {
+export const emailDraftPatchJsonSchema = {
 	type: 'object',
 	additionalProperties: false,
 	properties: {
-		assistantMessage: { type: 'string' },
-		nextQuestion: {
-			anyOf: [{ type: 'string' }, { type: 'null' }]
-		},
+		operations: {
+			type: 'array',
+			items: {
+				anyOf: [
+					{
+						type: 'object',
+							additionalProperties: false,
+							properties: {
+								type: { type: 'string', enum: ['setTo'] },
+								to: {
+									type: 'array',
+									items: { type: 'string' },
+									maxItems: EMAIL_DRAFT_LIMITS.recipients
+								}
+							},
+							required: ['type', 'to']
+						},
+					{
+						type: 'object',
+							additionalProperties: false,
+							properties: {
+								type: { type: 'string', enum: ['setCc'] },
+								cc: {
+									type: 'array',
+									items: { type: 'string' },
+									maxItems: EMAIL_DRAFT_LIMITS.recipients
+								}
+							},
+							required: ['type', 'cc']
+						},
+					{
+						type: 'object',
+							additionalProperties: false,
+							properties: {
+								type: { type: 'string', enum: ['setAttachments'] },
+								attachments: {
+									type: 'array',
+									items: { type: 'string' },
+									maxItems: EMAIL_DRAFT_LIMITS.attachments
+								}
+							},
+							required: ['type', 'attachments']
+						},
+					{
+						type: 'object',
+							additionalProperties: false,
+							properties: {
+								type: { type: 'string', enum: ['setBody'] },
+								body: {
+									type: 'array',
+									items: emailBodyBlockJsonSchema,
+									maxItems: EMAIL_DRAFT_LIMITS.bodyBlocks
+								}
+							},
+							required: ['type', 'body']
+						}
+				]
+			},
+			maxItems: 4
+		}
+	},
+	required: ['operations']
+} as const;
+
+export const emailPreviewUpdateJsonSchema = {
+	type: 'object',
+	additionalProperties: false,
+	properties: {
+		baseArtifactVersion: { type: 'number' },
 		status: {
 			type: 'string',
 			enum: EMAIL_DRAFT_STATUSES
 		},
-		baseArtifactVersion: { type: 'number' },
-		patch: {
-			type: 'object',
-			additionalProperties: false,
-			properties: {
-				operations: {
-					type: 'array',
-					items: {
-						anyOf: [
-							{
-								type: 'object',
-								additionalProperties: false,
-								properties: {
-									type: { type: 'string', enum: ['setTo'] },
-									to: { type: 'array', items: { type: 'string' } }
-								},
-								required: ['type', 'to']
-							},
-							{
-								type: 'object',
-								additionalProperties: false,
-								properties: {
-									type: { type: 'string', enum: ['setCc'] },
-									cc: { type: 'array', items: { type: 'string' } }
-								},
-								required: ['type', 'cc']
-							},
-							{
-								type: 'object',
-								additionalProperties: false,
-								properties: {
-									type: { type: 'string', enum: ['setAttachments'] },
-									attachments: { type: 'array', items: { type: 'string' } }
-								},
-								required: ['type', 'attachments']
-							},
-							{
-								type: 'object',
-								additionalProperties: false,
-								properties: {
-									type: { type: 'string', enum: ['setBody'] },
-									body: { type: 'array', items: emailBodyBlockJsonSchema }
-								},
-								required: ['type', 'body']
-							}
-						]
-					}
-				}
-			},
-			required: ['operations']
-		}
+		patch: emailDraftPatchJsonSchema
 	},
-	required: ['assistantMessage', 'nextQuestion', 'status', 'baseArtifactVersion', 'patch']
-} as const;
-
-export const emailPolishTurnResultJsonSchema = {
-	type: 'object',
-	additionalProperties: false,
-	properties: {
-		assistantMessage: { type: 'string' },
-		baseArtifactVersion: { type: 'number' },
-		draft: emailDraftJsonSchema
-	},
-	required: ['assistantMessage', 'baseArtifactVersion', 'draft']
+	required: ['baseArtifactVersion', 'status', 'patch']
 } as const;

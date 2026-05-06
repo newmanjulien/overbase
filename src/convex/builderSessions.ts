@@ -4,18 +4,13 @@ import { internalMutation, internalQuery, mutation, query, type MutationCtx } fr
 import type { Doc, Id } from './_generated/dataModel';
 import {
 	applyEmailDraftPatch,
-	buildBuilderAssistantText,
-	buildPolishAssistantText,
 	CUSTOM_EMAIL_BUILDER_CARD_ID,
 	createDefaultEmailDraft,
 	normalizeEmailDraft
 } from './emailArtifact';
+import { emailDraft as emailDraftValidator, emailPreviewUpdate } from './builderEmailValidators';
 import {
-	builderTurnResult,
-	emailDraft as emailDraftValidator,
-	emailPolishTurnResult
-} from './builderEmailValidators';
-import {
+	MAX_MESSAGE_LENGTH,
 	createGenerationId,
 	getConversationExpiresAt,
 	isConversationExpired,
@@ -53,35 +48,12 @@ async function insertPendingBuilderTurn(
 	return assistantMessageId;
 }
 
-async function insertPendingPolishTurn(
-	ctx: MutationCtx,
-	conversationId: Id<'conversations'>,
-	createdAt: number
-) {
-	const generationId = createGenerationId();
-	const assistantMessageId = await ctx.db.insert('messages', {
-		conversationId,
-		role: 'assistant',
-		text: '',
-		status: 'pending',
-		generationId,
-		createdAt,
-		updatedAt: createdAt
-	});
+function normalizeAssistantText(text: string) {
+	const normalized = text.trim();
 
-	await ctx.db.patch(conversationId, {
-		pendingAssistantMessageId: assistantMessageId,
-		pendingAssistantGenerationId: generationId,
-		updatedAt: createdAt
-	});
-
-	await ctx.scheduler.runAfter(0, internal.builderTurns.generateEmailPolishTurn, {
-		conversationId,
-		assistantMessageId,
-		generationId
-	});
-
-	return assistantMessageId;
+	return normalized.length > MAX_MESSAGE_LENGTH
+		? normalized.slice(0, MAX_MESSAGE_LENGTH).trim()
+		: normalized;
 }
 
 async function getActiveBuilderTurn(
@@ -233,7 +205,7 @@ export const sendCustomEmailMessage = mutation({
 			createdAt: now,
 			updatedAt: now
 		});
-		const assistantMessageId = await insertPendingPolishTurn(ctx, conversation._id, now + 1);
+		const assistantMessageId = await insertPendingBuilderTurn(ctx, conversation._id, now + 1);
 
 		return {
 			builderSessionId,
@@ -308,12 +280,15 @@ export const getSessionArtifact = query({
 			return null;
 		}
 
+		const conversation = await ctx.db.get(session.conversationId);
+
 		return {
 			builderSessionId: session._id,
 			conversationId: session.conversationId,
 			artifactVersion: session.artifactVersion,
 			status: session.status,
-			emailDraft: session.emailDraft
+			emailDraft: session.emailDraft,
+			hasPendingAssistant: Boolean(conversation?.pendingAssistantMessageId)
 		};
 	}
 });
@@ -348,13 +323,14 @@ export const getBuilderTurnContext = internalQuery({
 	}
 });
 
-export const completeBuilderTurn = internalMutation({
+export const completeStreamingBuilderTurn = internalMutation({
 	args: {
 		assistantMessageId: v.id('messages'),
 		generationId: v.string(),
-		turn: builderTurnResult
+		text: v.string(),
+		previewUpdate: v.union(emailPreviewUpdate, v.null())
 	},
-	handler: async (ctx, { assistantMessageId, generationId, turn }) => {
+	handler: async (ctx, { assistantMessageId, generationId, text, previewUpdate }) => {
 		const now = Date.now();
 		const activeTurn = await getActiveBuilderTurn(ctx, assistantMessageId, generationId, now);
 
@@ -362,63 +338,30 @@ export const completeBuilderTurn = internalMutation({
 			return;
 		}
 
-		if (turn.baseArtifactVersion !== activeTurn.session.artifactVersion) {
-			throw new Error('Builder draft changed before the assistant response was applied.');
+		if (previewUpdate) {
+			if (previewUpdate.baseArtifactVersion !== activeTurn.session.artifactVersion) {
+				throw new Error('Builder draft changed before the assistant response was applied.');
+			}
+
+			const emailDraft = applyEmailDraftPatch(activeTurn.session.emailDraft, previewUpdate.patch);
+			const nextArtifactVersion = activeTurn.session.artifactVersion + 1;
+
+			await ctx.db.patch(activeTurn.session._id, {
+				artifactVersion: nextArtifactVersion,
+				status: previewUpdate.status,
+				emailDraft,
+				updatedAt: now
+			});
 		}
 
-		const emailDraft = applyEmailDraftPatch(activeTurn.session.emailDraft, turn.patch);
-		const nextArtifactVersion = activeTurn.session.artifactVersion + 1;
+		const assistantText = normalizeAssistantText(text);
 
-		await ctx.db.patch(activeTurn.session._id, {
-			artifactVersion: nextArtifactVersion,
-			status: turn.status,
-			emailDraft,
-			updatedAt: now
-		});
+		if (!assistantText) {
+			throw new Error('Assistant response was empty.');
+		}
 
 		await ctx.db.patch(assistantMessageId, {
-			text: buildBuilderAssistantText(turn),
-			status: 'complete',
-			updatedAt: now
-		});
-
-		await ctx.db.patch(activeTurn.conversation._id, {
-			pendingAssistantMessageId: undefined,
-			pendingAssistantGenerationId: undefined,
-			updatedAt: now
-		});
-	}
-});
-
-export const completePolishTurn = internalMutation({
-	args: {
-		assistantMessageId: v.id('messages'),
-		generationId: v.string(),
-		turn: emailPolishTurnResult
-	},
-	handler: async (ctx, { assistantMessageId, generationId, turn }) => {
-		const now = Date.now();
-		const activeTurn = await getActiveBuilderTurn(ctx, assistantMessageId, generationId, now);
-
-		if (!activeTurn) {
-			return;
-		}
-
-		if (turn.baseArtifactVersion !== activeTurn.session.artifactVersion) {
-			throw new Error('Builder draft changed before the polish response was applied.');
-		}
-
-		const emailDraft = normalizeEmailDraft(turn.draft);
-		const nextArtifactVersion = activeTurn.session.artifactVersion + 1;
-
-		await ctx.db.patch(activeTurn.session._id, {
-			artifactVersion: nextArtifactVersion,
-			emailDraft,
-			updatedAt: now
-		});
-
-		await ctx.db.patch(assistantMessageId, {
-			text: buildPolishAssistantText(turn),
+			text: assistantText,
 			status: 'complete',
 			updatedAt: now
 		});
