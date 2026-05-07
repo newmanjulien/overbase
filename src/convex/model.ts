@@ -129,9 +129,12 @@ type ParsedStreamEvent =
 	  };
 
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
-const DEFAULT_OPENAI_MODEL = 'gpt-5-mini';
+const DEFAULT_OPENAI_MODEL = 'gpt-5.5';
+const DEFAULT_OPENAI_FAST_MODEL = 'gpt-5-nano';
+const DEFAULT_OPENAI_REASONING_EFFORT = 'medium';
+const DEFAULT_OPENAI_FAST_REASONING_EFFORT = 'low';
 const MAX_OUTPUT_TOKENS = 1_200;
-const INITIAL_QUESTION_MAX_OUTPUT_TOKENS = 1_200;
+const INITIAL_QUESTION_MAX_OUTPUT_TOKENS = 150;
 const STRUCTURED_MAX_OUTPUT_TOKENS = 8_000;
 const UPDATE_EMAIL_DRAFT_TOOL_NAME = 'update_email_draft';
 
@@ -154,28 +157,54 @@ const EMAIL_BUILDER_REFINEMENT_SYSTEM_PROMPT = [
 	'When recent internal artifact events are present, treat them as source material for future chat context without mentioning them unless useful.'
 ].join('\n');
 
-function getOpenAIConfig() {
+type OpenAIModelProfile = 'default' | 'fast';
+type OpenAIReasoningEffort = 'minimal' | 'low' | 'medium' | 'high';
+
+function isOpenAIReasoningEffort(value: string | undefined): value is OpenAIReasoningEffort {
+	return value === 'minimal' || value === 'low' || value === 'medium' || value === 'high';
+}
+
+function getReasoningEffort(value: string | undefined, fallback: OpenAIReasoningEffort) {
+	return isOpenAIReasoningEffort(value) ? value : fallback;
+}
+
+function getOpenAIConfig(profile: OpenAIModelProfile = 'default') {
 	const apiKey = process.env.OPENAI_API_KEY;
-	const model = process.env.OPENAI_CHAT_MODEL ?? DEFAULT_OPENAI_MODEL;
+	const model =
+		profile === 'fast'
+			? (process.env.OPENAI_FAST_CHAT_MODEL ?? DEFAULT_OPENAI_FAST_MODEL)
+			: (process.env.OPENAI_CHAT_MODEL ?? DEFAULT_OPENAI_MODEL);
+	const reasoningEffort =
+		profile === 'fast'
+			? getReasoningEffort(
+					process.env.OPENAI_FAST_REASONING_EFFORT,
+					DEFAULT_OPENAI_FAST_REASONING_EFFORT
+				)
+			: getReasoningEffort(process.env.OPENAI_REASONING_EFFORT, DEFAULT_OPENAI_REASONING_EFFORT);
 
 	if (!apiKey) {
 		throw new Error('OPENAI_API_KEY is not configured.');
 	}
 
-	return { apiKey, model };
+	return { apiKey, model, reasoningEffort };
 }
 
 function supportsReasoningOptions(model: string) {
 	return model.startsWith('gpt-5') || model.startsWith('o');
 }
 
-function createChatResponseRequestBody(transcript: TranscriptMessage[], model: string) {
+function createChatResponseRequestBody(
+	transcript: TranscriptMessage[],
+	model: string,
+	reasoningEffort: OpenAIReasoningEffort
+) {
 	return {
 		model,
 		input: transcript.map((message) => ({
 			role: message.role,
 			content: message.text
 		})),
+		...(supportsReasoningOptions(model) ? { reasoning: { effort: reasoningEffort } } : {}),
 		max_output_tokens: MAX_OUTPUT_TOKENS,
 		store: false,
 		stream: true
@@ -480,8 +509,9 @@ async function callStructuredTool<T>(params: {
 	toolName: string;
 	toolDescription: string;
 	toolParameters: unknown;
+	profile?: OpenAIModelProfile;
 }) {
-	const { apiKey, model } = getOpenAIConfig();
+	const { apiKey, model, reasoningEffort } = getOpenAIConfig(params.profile);
 	const body = {
 		model,
 		input: [
@@ -508,7 +538,7 @@ async function callStructuredTool<T>(params: {
 			name: params.toolName
 		},
 		parallel_tool_calls: false,
-		...(supportsReasoningOptions(model) ? { reasoning: { effort: 'low' } } : {}),
+		...(supportsReasoningOptions(model) ? { reasoning: { effort: reasoningEffort } } : {}),
 		max_output_tokens: STRUCTURED_MAX_OUTPUT_TOKENS,
 		store: false,
 		stream: false
@@ -541,12 +571,12 @@ export async function streamChatReply(
 	transcript: TranscriptMessage[],
 	handlers: ChatReplyStreamHandlers
 ) {
-	const { apiKey, model } = getOpenAIConfig();
+	const { apiKey, model, reasoningEffort } = getOpenAIConfig();
 
 	const response = await fetch(OPENAI_RESPONSES_URL, {
 		method: 'POST',
 		headers: getOpenAIHeaders(apiKey),
-		body: JSON.stringify(createChatResponseRequestBody(transcript, model))
+		body: JSON.stringify(createChatResponseRequestBody(transcript, model, reasoningEffort))
 	});
 
 	if (!response.ok) {
@@ -561,6 +591,7 @@ export async function routeEmailBuilderRequest(params: {
 	groups: EmailTemplateGroupCandidate[];
 }) {
 	return await callStructuredTool<EmailRouteResult>({
+		profile: 'fast',
 		systemPrompt: [
 			'You route a custom email notification request to the closest template group.',
 			'Pick exactly one group from the provided list.',
@@ -599,7 +630,7 @@ export async function streamEmailInitialQuestion(params: {
 	proposedQuestion: string;
 	handlers: ChatReplyStreamHandlers;
 }) {
-	const { apiKey, model } = getOpenAIConfig();
+	const { apiKey, model, reasoningEffort } = getOpenAIConfig('fast');
 	const response = await fetch(OPENAI_RESPONSES_URL, {
 		method: 'POST',
 		headers: getOpenAIHeaders(apiKey),
@@ -625,7 +656,7 @@ export async function streamEmailInitialQuestion(params: {
 					].join('\n')
 				}
 			],
-			...(supportsReasoningOptions(model) ? { reasoning: { effort: 'low' } } : {}),
+			...(supportsReasoningOptions(model) ? { reasoning: { effort: reasoningEffort } } : {}),
 			max_output_tokens: INITIAL_QUESTION_MAX_OUTPUT_TOKENS,
 			store: false,
 			stream: true
@@ -726,7 +757,7 @@ export async function streamCustomEmailBuilderTurn(params: {
 	recentEvents: EmailBuilderEventContext[];
 	handlers: EmailBuilderTurnStreamHandlers;
 }): Promise<EmailBuilderTurnStreamResult> {
-	const { apiKey, model } = getOpenAIConfig();
+	const { apiKey, model, reasoningEffort } = getOpenAIConfig();
 	const response = await fetch(OPENAI_RESPONSES_URL, {
 		method: 'POST',
 		headers: getOpenAIHeaders(apiKey),
@@ -766,7 +797,7 @@ export async function streamCustomEmailBuilderTurn(params: {
 				}
 			],
 			parallel_tool_calls: false,
-			...(supportsReasoningOptions(model) ? { reasoning: { effort: 'low' } } : {}),
+			...(supportsReasoningOptions(model) ? { reasoning: { effort: reasoningEffort } } : {}),
 			max_output_tokens: STRUCTURED_MAX_OUTPUT_TOKENS,
 			store: false,
 			stream: true

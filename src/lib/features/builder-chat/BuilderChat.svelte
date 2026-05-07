@@ -4,7 +4,7 @@
 	import { CUSTOM_NOTIFICATION_BLUEPRINT_ID } from '$lib/features/builder-data';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 
-	const CHAT_HEADING = 'Build notifications that fit the way you work';
+	const CHAT_HEADING = 'Build a notification that fits the way you work';
 	const MAX_TEXTAREA_LINES = 11;
 
 	let value = $state('');
