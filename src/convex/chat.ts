@@ -11,7 +11,8 @@ import {
 } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { builderMode } from './schema';
-import { streamChatReply } from './model';
+import { streamChatReply } from '../external/custom';
+import { getActiveNotificationProduct } from '../external/blueprints/content';
 import {
 	createResumeToken,
 	createGenerationId,
@@ -160,20 +161,16 @@ export const startConversation = mutation({
 		const resumeToken = createResumeToken();
 		const resumeTokenHash = await hashResumeToken(resumeToken);
 		const expiresAt = getConversationExpiresAt(now);
-		const blueprint = await ctx.db
-			.query('builderBlueprints')
-			.withIndex('by_slug_status', (q) => q.eq('slug', blueprintSlug).eq('status', 'active'))
-			.unique();
+		const product = getActiveNotificationProduct(blueprintSlug);
 
-		if (!blueprint) {
-			throw new Error('Builder blueprint not found.');
+		if (!product) {
+			throw new Error('Notification product not found.');
 		}
 
 		const conversationId = await ctx.db.insert('conversations', {
-			blueprintId: blueprint._id,
-			blueprintSlug: blueprint.slug,
-			blueprintTitle: blueprint.title,
-			blueprintDescription: blueprint.description,
+			blueprintSlug: product.slug,
+			blueprintTitle: product.title,
+			blueprintDescription: product.description,
 			builderMode: 'chat',
 			resumeTokenHash,
 			createdAt: now,

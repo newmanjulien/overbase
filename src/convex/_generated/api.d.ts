@@ -9,19 +9,16 @@
  */
 
 import type * as builder from "../builder.js";
-import type * as builderAdmin from "../builderAdmin.js";
-import type * as builderContent from "../builderContent.js";
-import type * as builderEmailValidators from "../builderEmailValidators.js";
+import type * as builderSessionCore from "../builderSessionCore.js";
+import type * as builderSessionJobs from "../builderSessionJobs.js";
+import type * as builderSessionMaintenance from "../builderSessionMaintenance.js";
+import type * as builderSessions from "../builderSessions.js";
 import type * as chat from "../chat.js";
 import type * as conversationCore from "../conversationCore.js";
 import type * as crons from "../crons.js";
-import type * as customEmailBuilder from "../customEmailBuilder.js";
-import type * as customEmailCore from "../customEmailCore.js";
-import type * as customEmailMaintenance from "../customEmailMaintenance.js";
-import type * as customEmailOperations from "../customEmailOperations.js";
-import type * as emailArtifact from "../emailArtifact.js";
+import type * as emailDesign from "../emailDesign.js";
+import type * as emailDesignValidators from "../emailDesignValidators.js";
 import type * as health from "../health.js";
-import type * as model from "../model.js";
 
 import type {
   ApiFromModules,
@@ -31,19 +28,16 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   builder: typeof builder;
-  builderAdmin: typeof builderAdmin;
-  builderContent: typeof builderContent;
-  builderEmailValidators: typeof builderEmailValidators;
+  builderSessionCore: typeof builderSessionCore;
+  builderSessionJobs: typeof builderSessionJobs;
+  builderSessionMaintenance: typeof builderSessionMaintenance;
+  builderSessions: typeof builderSessions;
   chat: typeof chat;
   conversationCore: typeof conversationCore;
   crons: typeof crons;
-  customEmailBuilder: typeof customEmailBuilder;
-  customEmailCore: typeof customEmailCore;
-  customEmailMaintenance: typeof customEmailMaintenance;
-  customEmailOperations: typeof customEmailOperations;
-  emailArtifact: typeof emailArtifact;
+  emailDesign: typeof emailDesign;
+  emailDesignValidators: typeof emailDesignValidators;
   health: typeof health;
-  model: typeof model;
 }>;
 
 /**

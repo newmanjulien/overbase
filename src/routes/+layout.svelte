@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { APP_CONFIG } from '$lib/app/app-config';
-	import DesktopHeader from '$lib/chrome/desktop/DesktopHeader.svelte';
-	import DesktopSidebar from '$lib/chrome/desktop/DesktopSidebar.svelte';
-	import MobileDrawer from '$lib/chrome/mobile/MobileDrawer.svelte';
-	import MobileHeader from '$lib/chrome/mobile/MobileHeader.svelte';
-	import { getActiveNavRoute } from '$lib/chrome/shared/nav';
+	import DesktopHeader from '$lib/components/chrome/desktop/DesktopHeader.svelte';
+	import DesktopSidebar from '$lib/components/chrome/desktop/DesktopSidebar.svelte';
+	import MobileDrawer from '$lib/components/chrome/mobile/MobileDrawer.svelte';
+	import MobileHeader from '$lib/components/chrome/mobile/MobileHeader.svelte';
+	import { getActiveNavRoute } from '$lib/components/chrome/shared/nav';
 	import {
 		provideChromeShellState,
 		type ChromeShellState
-	} from '$lib/chrome/shared/shell.svelte';
-	import { setupAppConvex } from '$lib/convex/setup.svelte';
+	} from '$lib/components/chrome/shared/shell.svelte';
+	import { setupAppConvex } from '$lib/backend/convex/setup.svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 

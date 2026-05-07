@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Bell } from 'lucide-svelte';
-	import { ResourceEmptyIndex } from '$lib/resource-index';
-	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
+	import { EmptyListPage } from '$lib/components/list-page';
+	import PageShell from '$lib/components/layout/PageShell.svelte';
 </script>
 
-<SurfaceShell>
-	<ResourceEmptyIndex
+<PageShell>
+	<EmptyListPage
 		toolbar={{
 			searchPlaceholder: 'Search notifications...',
 			searchAriaLabel: 'Search notifications',
@@ -20,4 +20,4 @@
 			learnMoreLabel: 'Learn more'
 		}}
 	/>
-</SurfaceShell>
+</PageShell>

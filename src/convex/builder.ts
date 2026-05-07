@@ -1,33 +1,27 @@
 import { v } from 'convex/values';
-import { query, type QueryCtx } from './_generated/server';
-import type { Doc } from './_generated/dataModel';
+import { query } from './_generated/server';
+import {
+	getActiveNotificationProduct,
+	getNotificationArtworkPreset,
+	getNotificationGuide,
+	listNotificationHomeProducts,
+	type NotificationProduct
+} from '../external/blueprints/content';
 
-async function getArtworkPreset(ctx: QueryCtx, slug: string) {
-	const artwork = await ctx.db
-		.query('builderArtworkPresets')
-		.withIndex('by_slug', (q) => q.eq('slug', slug))
-		.unique();
+function toNotificationProductView(product: NotificationProduct) {
+	const artwork = getNotificationArtworkPreset(product.artworkPresetSlug);
 
 	if (!artwork) {
-		throw new Error(`Builder artwork preset not found: ${slug}`);
+		throw new Error(`Notification artwork preset not found: ${product.artworkPresetSlug}`);
 	}
-
-	return artwork;
-}
-
-async function toBuilderBlueprintView(ctx: QueryCtx, blueprint: Doc<'builderBlueprints'>) {
-	if (!blueprint.artworkPresetSlug) {
-		throw new Error(`Builder blueprint artwork preset slug is missing: ${blueprint.slug}`);
-	}
-
-	const artwork = await getArtworkPreset(ctx, blueprint.artworkPresetSlug);
 
 	return {
-		id: blueprint.slug,
-		slug: blueprint.slug,
-		categoryIds: blueprint.categoryIds,
-		title: blueprint.title,
-		description: blueprint.description,
+		id: product.slug,
+		slug: product.slug,
+		categoryIds: [...product.categoryIds],
+		title: product.title,
+		description: product.description,
+		mode: product.mode,
 		artwork
 	};
 }
@@ -35,47 +29,31 @@ async function toBuilderBlueprintView(ctx: QueryCtx, blueprint: Doc<'builderBlue
 export const listBuilderHome = query({
 	args: {},
 	handler: async (ctx) => {
-			const [categories, blueprints] = await Promise.all([
-				ctx.db.query('builderCategories').withIndex('by_sortOrder').collect(),
-				ctx.db
-					.query('builderBlueprints')
-				.withIndex('by_gallery_status_sortOrder', (q) =>
-					q.eq('showInGallery', true).eq('status', 'active')
-				)
-				.collect()
-		]);
+		void ctx;
+		const { categories, products } = listNotificationHomeProducts();
 
-			return {
-				categories,
-				blueprints: await Promise.all(
-					blueprints.map((blueprint) => toBuilderBlueprintView(ctx, blueprint))
-				)
-			};
-		}
-	});
+		return {
+			categories,
+			blueprints: products.map(toNotificationProductView)
+		};
+	}
+});
 
 export const getActiveBuilderBlueprintBySlug = query({
 	args: {
 		slug: v.string()
 	},
 	handler: async (ctx, { slug }) => {
-		const blueprint = await ctx.db
-			.query('builderBlueprints')
-			.withIndex('by_slug_status', (q) => q.eq('slug', slug).eq('status', 'active'))
-			.unique();
+		void ctx;
+		const product = getActiveNotificationProduct(slug);
 
-		if (!blueprint) {
+		if (!product) {
 			return null;
 		}
 
-		const guide = await ctx.db
-			.query('builderGuides')
-			.withIndex('by_blueprintSlug', (q) => q.eq('blueprintSlug', blueprint.slug))
-			.unique();
-
 		return {
-			blueprint: await toBuilderBlueprintView(ctx, blueprint),
-			guide
+			blueprint: toNotificationProductView(product),
+			guide: getNotificationGuide(product.slug)
 		};
 	}
 });

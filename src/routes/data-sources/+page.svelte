@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Database } from 'lucide-svelte';
-	import { ResourceEmptyIndex } from '$lib/resource-index';
-	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
+	import { EmptyListPage } from '$lib/components/list-page';
+	import PageShell from '$lib/components/layout/PageShell.svelte';
 </script>
 
-<SurfaceShell>
-	<ResourceEmptyIndex
+<PageShell>
+	<EmptyListPage
 		toolbar={{
 			searchPlaceholder: 'Search data sources...',
 			searchAriaLabel: 'Search data sources',
@@ -22,4 +22,4 @@
 			actionLabel: 'Add data source'
 		}}
 	/>
-</SurfaceShell>
+</PageShell>

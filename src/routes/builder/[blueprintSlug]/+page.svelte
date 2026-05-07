@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
-	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
-	import BuilderCanvas from '$lib/features/builder-canvas/BuilderCanvas.svelte';
-	import BuilderDesktopOnly from '$lib/features/builder-canvas/BuilderDesktopOnly.svelte';
-	import { toBuilderBlueprintRecord, toBuilderGuideDefinition } from '$lib/features/builder-data';
+	import PageShell from '$lib/components/layout/PageShell.svelte';
+	import BuilderCanvas from '$lib/features/builder/canvas/BuilderCanvas.svelte';
+	import BuilderDesktopOnly from '$lib/features/builder/canvas/BuilderDesktopOnly.svelte';
+	import { toBuilderBlueprintRecord, toBuilderGuideDefinition } from '$lib/features/builder/data';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -14,7 +14,7 @@
 	const activeConversation = $derived(page.state.activeConversation ?? null);
 </script>
 
-<SurfaceShell class="px-0 py-0 md:px-0 md:py-0">
+<PageShell class="px-0 py-0 md:px-0 md:py-0">
 		<BuilderDesktopOnly>
 			{#if blueprint}
 				<BuilderCanvas {blueprint} {guide} {initialMessage} {activeConversation} />
@@ -35,4 +35,4 @@
 			</div>
 		{/if}
 	</BuilderDesktopOnly>
-</SurfaceShell>
+</PageShell>

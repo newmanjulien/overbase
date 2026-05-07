@@ -5,9 +5,9 @@ const crons = cronJobs();
 
 crons.interval('delete expired conversations', { minutes: 15 }, internal.chat.deleteExpiredConversations);
 crons.interval(
-	'delete expired custom email runs',
+	'delete expired builder sessions',
 	{ minutes: 15 },
-	internal.customEmailMaintenance.deleteExpiredRuns
+	internal.builderSessionMaintenance.deleteExpiredSessions
 );
 
 export default crons;

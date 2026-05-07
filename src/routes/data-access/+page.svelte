@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { KeyRound } from 'lucide-svelte';
-	import { ResourceEmptyIndex } from '$lib/resource-index';
-	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
+	import { EmptyListPage } from '$lib/components/list-page';
+	import PageShell from '$lib/components/layout/PageShell.svelte';
 </script>
 
-<SurfaceShell>
-	<ResourceEmptyIndex
+<PageShell>
+	<EmptyListPage
 		toolbar={{
 			searchPlaceholder: 'Search data access...',
 			searchAriaLabel: 'Search data access',
@@ -20,4 +20,4 @@
 			learnMoreLabel: 'Learn more'
 		}}
 	/>
-</SurfaceShell>
+</PageShell>

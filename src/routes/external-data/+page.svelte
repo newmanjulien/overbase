@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Globe2 } from 'lucide-svelte';
-	import { ResourceEmptyIndex } from '$lib/resource-index';
-	import SurfaceShell from '$lib/surface/SurfaceShell.svelte';
+	import { EmptyListPage } from '$lib/components/list-page';
+	import PageShell from '$lib/components/layout/PageShell.svelte';
 </script>
 
-<SurfaceShell>
-	<ResourceEmptyIndex
+<PageShell>
+	<EmptyListPage
 		toolbar={{
 			searchPlaceholder: 'Search external data...',
 			searchAriaLabel: 'Search external data',
@@ -22,4 +22,4 @@
 			actionLabel: 'Add external data'
 		}}
 	/>
-</SurfaceShell>
+</PageShell>
