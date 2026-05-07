@@ -8,6 +8,7 @@ import {
 } from './emailDesignValidators';
 import {
 	applyEmailDraftPatch,
+	CUSTOM_EMAIL_BUILDER_APP_ID,
 	hasEmailDraftChanged,
 	normalizeEmailDraft,
 	type EmailDraft
@@ -24,7 +25,8 @@ import {
 	type EmailExampleCandidate,
 	type EmailExamplesCandidate
 } from '../external/custom';
-import { isConversationActive } from './conversationCore';
+import { getEmailExternalApp } from '../lib/features/builder/external/operations';
+import { isBuilderSessionActive } from './builderSessionAccess';
 import {
 	ASSISTANT_STREAM_FLUSH_INTERVAL_MS,
 	ASSISTANT_STREAM_FLUSH_MIN_CHARS,
@@ -120,6 +122,19 @@ async function failHiddenDraftState(
 	});
 }
 
+async function failInitialDraftState(
+	ctx: MutationCtx,
+	operationId: string,
+	errorText: string,
+	now: number
+) {
+	await failOperation(ctx, operationId, errorText, now, {
+		artifactVisibility: 'hidden',
+		workingArtifactStatus: 'failed',
+		visibleArtifactStatus: 'failed'
+	});
+}
+
 export const appendAssistantMessageDelta = internalMutation({
 	args: {
 		operationId: v.string(),
@@ -162,8 +177,13 @@ export const claimRouteAndAskOperation = internalMutation({
 
 		const session = await ctx.db.get(operation.sessionId);
 
-		if (!session || !isConversationActive(session, now)) {
-			await failOperation(ctx, operationId, 'This builder session is no longer active.', now);
+		if (!session || !isBuilderSessionActive(session, now)) {
+			await failInitialDraftState(ctx, operationId, 'This builder session is no longer active.', now);
+			return null;
+		}
+
+		if (session.appSlug !== CUSTOM_EMAIL_BUILDER_APP_ID) {
+			await completeOperation(ctx, operation, now);
 			return null;
 		}
 
@@ -271,6 +291,152 @@ export const failRefinementOperation = internalMutation({
 	}
 });
 
+export const claimPrepareInitialDraftOperation = internalMutation({
+	args: {
+		operationId: v.string()
+	},
+	handler: async (ctx, { operationId }) => {
+		const now = Date.now();
+		const operation = await getOperationById(ctx, operationId);
+
+		if (!operation || operation.kind !== 'prepareInitialDraft' || operation.status !== 'pending') {
+			return null;
+		}
+
+		const session = await ctx.db.get(operation.sessionId);
+
+		if (!session || !isBuilderSessionActive(session, now)) {
+			await failOperation(ctx, operationId, 'This builder session is no longer active.', now);
+			return null;
+		}
+
+		if (
+			session.appSlug === CUSTOM_EMAIL_BUILDER_APP_ID ||
+			session.activeMessageOperationId !== operationId
+		) {
+			await completeOperation(ctx, operation, now);
+			return null;
+		}
+
+		const app = getEmailExternalApp(session.appSlug);
+
+		if (!app) {
+			await failInitialDraftState(ctx, operationId, 'This app is unavailable.', now);
+			return null;
+		}
+
+		const firstMessage = await ctx.db
+			.query('builderSessionMessages')
+			.withIndex('by_session_createdAt', (q) => q.eq('sessionId', session._id))
+			.first();
+
+		await ctx.db.patch(operation._id, {
+			status: 'running',
+			updatedAt: now
+		});
+
+		return {
+			appSlug: session.appSlug,
+			initialMessage: firstMessage?.text ?? ''
+		};
+	}
+});
+
+export const completeInitialDraft = internalMutation({
+	args: {
+		operationId: v.string(),
+		emailDraft: emailDraftValidator
+	},
+	handler: async (ctx, { operationId, emailDraft }) => {
+		const now = Date.now();
+		const operation = await getOperationById(ctx, operationId);
+
+		if (!operation || operation.kind !== 'prepareInitialDraft' || operation.status !== 'running') {
+			return;
+		}
+
+		const session = await ctx.db.get(operation.sessionId);
+
+		if (!session || session.activeMessageOperationId !== operationId) {
+			await completeOperation(ctx, operation, now);
+			return;
+		}
+
+		const assistantText = 'I built the first draft and put it in the panel.';
+		const nextDraft = normalizeEmailDraft(emailDraft);
+
+		if (operation.assistantMessageId) {
+			await ctx.db.patch(operation.assistantMessageId, {
+				text: assistantText,
+				status: 'complete',
+				updatedAt: now
+			});
+		}
+
+		await completeOperation(ctx, operation, now);
+		await ctx.db.patch(operation.sessionId, {
+			phase: 'ready',
+			artifactVersion: 1,
+			artifactVisibility: 'visible',
+			visibleArtifactStatus: 'ready',
+			workingArtifactStatus: 'ready',
+			workingEmailDraft: nextDraft,
+			visibleEmailDraft: nextDraft,
+			activeMessageOperationId: undefined,
+			errorText: undefined,
+			updatedAt: now
+		});
+	}
+});
+
+export const failInitialDraftOperation = internalMutation({
+	args: {
+		operationId: v.string(),
+		errorText: v.string()
+	},
+	handler: async (ctx, { operationId, errorText }) => {
+		await failInitialDraftState(ctx, operationId, errorText, Date.now());
+	}
+});
+
+export const prepareInitialDraftOperation = internalAction({
+	args: {
+		operationId: v.string()
+	},
+	handler: async (ctx, { operationId }) => {
+		try {
+			const context = await ctx.runMutation(
+				internal.builderSessionJobs.claimPrepareInitialDraftOperation,
+				{ operationId }
+			);
+
+			if (!context) {
+				return;
+			}
+
+			const app = getEmailExternalApp(context.appSlug);
+
+			if (!app) {
+				throw new Error('This app is unavailable.');
+			}
+
+			const emailDraft = await app.createInitialDraft({
+				initialMessage: context.initialMessage
+			});
+
+			await ctx.runMutation(internal.builderSessionJobs.completeInitialDraft, {
+				operationId,
+				emailDraft
+			});
+		} catch (error) {
+			await ctx.runMutation(internal.builderSessionJobs.failInitialDraftOperation, {
+				operationId,
+				errorText: getErrorMessage(error)
+			});
+		}
+	}
+});
+
 export const routeAndAsk = internalAction({
 	args: {
 		operationId: v.string()
@@ -301,7 +467,7 @@ export const routeAndAsk = internalAction({
 				examples,
 				proposedQuestion: routeResult.question,
 				handlers: {
-					onDelta: async (delta) => {
+					onDelta: async (delta: string) => {
 						pendingText += delta;
 						const now = Date.now();
 
@@ -356,7 +522,7 @@ export const claimPrepareHiddenDraftOperation = internalMutation({
 
 		const session = await ctx.db.get(operation.sessionId);
 
-		if (!session || !isConversationActive(session, now)) {
+		if (!session || !isBuilderSessionActive(session, now)) {
 			await failHiddenDraftState(ctx, operation, 'This builder session is no longer active.', now);
 			return null;
 		}
@@ -511,7 +677,7 @@ export const claimApplyInitialAnswerOperation = internalMutation({
 
 		const session = await ctx.db.get(operation.sessionId);
 
-		if (!session || !isConversationActive(session, now)) {
+		if (!session || !isBuilderSessionActive(session, now)) {
 			await failOperation(ctx, operationId, 'This builder session is no longer active.', now);
 			return {
 				state: 'terminal' as const
@@ -692,7 +858,7 @@ export const claimRefinementOperation = internalMutation({
 
 		const session = await ctx.db.get(operation.sessionId);
 
-		if (!session || !isConversationActive(session, now)) {
+		if (!session || !isBuilderSessionActive(session, now)) {
 			await failOperation(ctx, operationId, 'This builder session is no longer active.', now, {
 				phase: 'ready',
 				clearActiveArtifactOperation: false,
@@ -726,6 +892,7 @@ export const claimRefinementOperation = internalMutation({
 		});
 
 		return {
+			appSlug: session.appSlug,
 			draft: session.visibleEmailDraft,
 			transcript: messages
 				.filter((message) => message.status === 'complete' && message.text.trim())
@@ -829,30 +996,47 @@ export const refineOperation = internalAction({
 
 			let pendingText = '';
 			let lastFlushAt = Date.now();
-			const result = await streamCustomEmailBuilderTurn({
-				transcript: context.transcript,
-				draft: context.draft,
-				recentEvents: context.recentEvents,
-				handlers: {
-					onTextDelta: async (delta) => {
-						pendingText += delta;
-						const now = Date.now();
+			const handlers = {
+				onTextDelta: async (delta: string) => {
+					pendingText += delta;
+					const now = Date.now();
 
-						if (
-							pendingText.length >= ASSISTANT_STREAM_FLUSH_MIN_CHARS ||
-							now - lastFlushAt >= ASSISTANT_STREAM_FLUSH_INTERVAL_MS
-						) {
-							const deltaToFlush = pendingText;
-							pendingText = '';
-							lastFlushAt = now;
-							await ctx.runMutation(internal.builderSessionJobs.appendAssistantMessageDelta, {
-								operationId,
-								delta: deltaToFlush
-							});
-						}
+					if (
+						pendingText.length >= ASSISTANT_STREAM_FLUSH_MIN_CHARS ||
+						now - lastFlushAt >= ASSISTANT_STREAM_FLUSH_INTERVAL_MS
+					) {
+						const deltaToFlush = pendingText;
+						pendingText = '';
+						lastFlushAt = now;
+						await ctx.runMutation(internal.builderSessionJobs.appendAssistantMessageDelta, {
+							operationId,
+							delta: deltaToFlush
+						});
 					}
 				}
-			});
+			};
+			const result =
+				context.appSlug === CUSTOM_EMAIL_BUILDER_APP_ID
+					? await streamCustomEmailBuilderTurn({
+							transcript: context.transcript,
+							draft: context.draft,
+							recentEvents: context.recentEvents,
+							handlers
+						})
+					: await (async () => {
+							const app = getEmailExternalApp(context.appSlug);
+
+							if (!app) {
+								throw new Error('This app is unavailable.');
+							}
+
+							return await app.streamRefinementTurn({
+								transcript: context.transcript,
+								draft: context.draft,
+								recentEvents: context.recentEvents,
+								handlers
+							});
+						})();
 
 			if (pendingText) {
 				await ctx.runMutation(internal.builderSessionJobs.appendAssistantMessageDelta, {

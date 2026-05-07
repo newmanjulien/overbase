@@ -1,28 +1,21 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
 import {
-	getActiveNotificationProduct,
-	getNotificationArtworkPreset,
-	getNotificationGuide,
-	listNotificationHomeProducts,
-	type NotificationProduct
-} from '../external/blueprints/content';
+	getActiveExternalApp,
+	getExternalAppGuide,
+	listBuilderHomeExternalApps
+} from '../lib/features/builder/external/registry';
+import type { ExternalAppCatalogDefinition } from '../lib/features/builder/external/types';
 
-function toNotificationProductView(product: NotificationProduct) {
-	const artwork = getNotificationArtworkPreset(product.artworkPresetSlug);
-
-	if (!artwork) {
-		throw new Error(`Notification artwork preset not found: ${product.artworkPresetSlug}`);
-	}
-
+function toBuilderAppView(app: ExternalAppCatalogDefinition) {
 	return {
-		id: product.slug,
-		slug: product.slug,
-		categoryIds: [...product.categoryIds],
-		title: product.title,
-		description: product.description,
-		mode: product.mode,
-		artwork
+		id: app.slug,
+		slug: app.slug,
+		categoryIds: [...app.categoryIds],
+		title: app.title,
+		description: app.description,
+		mode: app.mode,
+		artwork: app.artwork
 	};
 }
 
@@ -30,30 +23,30 @@ export const listBuilderHome = query({
 	args: {},
 	handler: async (ctx) => {
 		void ctx;
-		const { categories, products } = listNotificationHomeProducts();
+		const { categories, apps } = listBuilderHomeExternalApps();
 
 		return {
 			categories,
-			blueprints: products.map(toNotificationProductView)
+			apps: apps.map(toBuilderAppView)
 		};
 	}
 });
 
-export const getActiveBuilderBlueprintBySlug = query({
+export const getActiveBuilderAppBySlug = query({
 	args: {
 		slug: v.string()
 	},
 	handler: async (ctx, { slug }) => {
 		void ctx;
-		const product = getActiveNotificationProduct(slug);
+		const app = getActiveExternalApp(slug);
 
-		if (!product) {
+		if (!app) {
 			return null;
 		}
 
 		return {
-			blueprint: toNotificationProductView(product),
-			guide: getNotificationGuide(product.slug)
+			app: toBuilderAppView(app),
+			guide: getExternalAppGuide(app.slug)
 		};
 	}
 });

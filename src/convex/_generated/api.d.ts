@@ -9,12 +9,11 @@
  */
 
 import type * as builder from "../builder.js";
+import type * as builderSessionAccess from "../builderSessionAccess.js";
 import type * as builderSessionCore from "../builderSessionCore.js";
 import type * as builderSessionJobs from "../builderSessionJobs.js";
 import type * as builderSessionMaintenance from "../builderSessionMaintenance.js";
 import type * as builderSessions from "../builderSessions.js";
-import type * as chat from "../chat.js";
-import type * as conversationCore from "../conversationCore.js";
 import type * as crons from "../crons.js";
 import type * as emailDesign from "../emailDesign.js";
 import type * as emailDesignValidators from "../emailDesignValidators.js";
@@ -28,12 +27,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   builder: typeof builder;
+  builderSessionAccess: typeof builderSessionAccess;
   builderSessionCore: typeof builderSessionCore;
   builderSessionJobs: typeof builderSessionJobs;
   builderSessionMaintenance: typeof builderSessionMaintenance;
   builderSessions: typeof builderSessions;
-  chat: typeof chat;
-  conversationCore: typeof conversationCore;
   crons: typeof crons;
   emailDesign: typeof emailDesign;
   emailDesignValidators: typeof emailDesignValidators;

@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID, type EmailDraft } from '$lib/features/builder/domain/email-design';
-	import type { BuilderBlueprintRecord } from '$lib/features/builder/data';
+	import {
+		CUSTOM_EMAIL_BUILDER_APP_ID,
+		type EmailDraft
+	} from '$lib/features/builder/domain/email-design';
+	import type { BuilderAppRecord } from '$lib/features/builder/data';
 	import CustomEmailRightPanel from '$lib/features/builder/canvas/CustomEmailRightPanel.svelte';
 	import SplitPane from '$lib/features/builder/canvas/SplitPane.svelte';
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder/canvas/split-pane';
@@ -10,15 +13,15 @@
 	import { createBuilderSessionController } from '$lib/features/builder/session/builder-session.svelte';
 
 	type Props = {
-		blueprint: BuilderBlueprintRecord;
+		app: BuilderAppRecord;
 		initialMessage?: string | null;
 	};
 
-	let { blueprint, initialMessage = null }: Props = $props();
-	let bootedBlueprintId = $state('');
+	let { app, initialMessage = null }: Props = $props();
+	let bootedAppId = $state('');
 
 	const builderSession = createBuilderSessionController(
-		CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID,
+		CUSTOM_EMAIL_BUILDER_APP_ID,
 		() => initialMessage?.trim() ?? ''
 	);
 	const runError = $derived(
@@ -27,10 +30,10 @@
 	);
 
 	function clearInitialMessageState() {
-			replaceState(
-				resolve('/builder/[blueprintSlug]', {
-					blueprintSlug: blueprint.id
-				}),
+		replaceState(
+			resolve('/builder/[appSlug]', {
+				appSlug: app.id
+			}),
 			{}
 		);
 	}
@@ -56,12 +59,12 @@
 	}
 
 	$effect(() => {
-			if (bootedBlueprintId === blueprint.id) {
-				return;
-			}
+		if (bootedAppId === app.id) {
+			return;
+		}
 
-			bootedBlueprintId = blueprint.id;
-			void boot();
+		bootedAppId = app.id;
+		void boot().catch(() => undefined);
 	});
 </script>
 
@@ -112,10 +115,10 @@
 	{/snippet}
 
 	{#snippet secondary()}
-			<CustomEmailRightPanel
-				{blueprint}
-				session={builderSession.session}
-				onSaveDraft={saveDraft}
-			/>
+		<CustomEmailRightPanel
+			{app}
+			session={builderSession.session}
+			onSaveDraft={saveDraft}
+		/>
 	{/snippet}
 </SplitPane>

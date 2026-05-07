@@ -1,9 +1,9 @@
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import {
-	isConversationActive,
+	isBuilderSessionActive,
 	verifyResumeToken
-} from './conversationCore';
+} from './builderSessionAccess';
 
 export const ASSISTANT_STREAM_FLUSH_INTERVAL_MS = 150;
 export const ASSISTANT_STREAM_FLUSH_MIN_CHARS = 120;
@@ -32,7 +32,7 @@ export async function getAuthorizedSession(
 ) {
 	const session = await ctx.db.get(sessionId);
 
-	if (!session || !isConversationActive(session, now)) {
+	if (!session || !isBuilderSessionActive(session, now)) {
 		return null;
 	}
 
@@ -57,7 +57,7 @@ export async function buildSessionSnapshot(
 		handle: {
 			sessionId: session._id,
 			resumeToken,
-			productSlug: session.productSlug,
+			appSlug: session.appSlug,
 			expiresAt: session.expiresAt
 		},
 		session,

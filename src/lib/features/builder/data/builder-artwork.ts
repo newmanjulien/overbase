@@ -12,7 +12,7 @@ import {
 	UsersRound,
 	Zap
 } from 'lucide-svelte';
-import type { NotificationArtworkPreset as NotificationArtworkPresetRecord } from '../../../../external/blueprints/content';
+import type { ExternalArtwork } from '$lib/features/builder/external';
 
 type ArtworkIcon = typeof Flag;
 
@@ -56,9 +56,9 @@ function getArtworkIcon(iconId: string) {
 	return ARTWORK_ICONS[iconId] ?? Flag;
 }
 
-export function toBuilderArtworkPreset(artwork: NotificationArtworkPresetRecord): BuilderArtworkPreset {
+export function toBuilderArtworkPreset(artwork: ExternalArtwork): BuilderArtworkPreset {
 	return {
-		id: artwork.slug,
+		id: artwork.id,
 		card: {
 			tone: artwork.card.tone,
 			iconId: artwork.card.iconId,

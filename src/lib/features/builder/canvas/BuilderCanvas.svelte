@@ -1,23 +1,24 @@
 <script lang="ts">
-	import { CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID } from '$lib/features/builder/domain/email-design';
-	import type { BuilderBlueprintRecord } from '$lib/features/builder/data';
+	import { CUSTOM_EMAIL_BUILDER_APP_ID } from '$lib/features/builder/domain/email-design';
+	import type { BuilderAppRecord } from '$lib/features/builder/data';
 	import CustomEmailBuilderWorkbench from '$lib/features/builder/canvas/CustomEmailBuilderWorkbench.svelte';
-	import BlueprintBuilderWorkbench from '$lib/features/builder/canvas/BlueprintBuilderWorkbench.svelte';
+	import GuidedBuilderWorkbench from '$lib/features/builder/canvas/GuidedBuilderWorkbench.svelte';
 	import type { BuilderGuideDefinition } from '$lib/features/builder/guide/guide-types';
 
 	type Props = {
-		blueprint: BuilderBlueprintRecord;
+		app: BuilderAppRecord;
 		guide: BuilderGuideDefinition | null;
 		initialMessage?: string | null;
-		activeConversation?: unknown;
 	};
 
-	let { blueprint, guide, initialMessage = null, activeConversation = null }: Props = $props();
-	const isCustomEmailBuilder = $derived(blueprint.id === CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID);
+	let { app, guide, initialMessage = null }: Props = $props();
+	const isCustomEmailBuilder = $derived(app.id === CUSTOM_EMAIL_BUILDER_APP_ID);
 </script>
 
-{#if isCustomEmailBuilder}
-	<CustomEmailBuilderWorkbench {blueprint} {initialMessage} />
-{:else}
-	<BlueprintBuilderWorkbench {blueprint} {guide} {initialMessage} {activeConversation} />
-{/if}
+{#key app.id}
+	{#if isCustomEmailBuilder}
+		<CustomEmailBuilderWorkbench {app} {initialMessage} />
+	{:else}
+		<GuidedBuilderWorkbench {app} {guide} {initialMessage} />
+	{/if}
+{/key}

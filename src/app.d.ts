@@ -7,7 +7,6 @@ declare global {
 
 		interface PageState {
 			initialMessage?: string;
-			activeConversation?: unknown;
 		}
 	}
 }

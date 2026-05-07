@@ -1,5 +1,5 @@
 <script lang="ts">
-	import BuilderBlueprintGallery from '$lib/features/builder/blueprints/BuilderBlueprintGallery.svelte';
+	import BuilderAppGallery from '$lib/features/builder/apps/BuilderAppGallery.svelte';
 	import BuilderChat from '$lib/features/builder/chat/BuilderChat.svelte';
 </script>
 
@@ -13,6 +13,6 @@
 	</p>
 
 	<div class="mt-16 w-full">
-		<BuilderBlueprintGallery />
+		<BuilderAppGallery />
 	</div>
 </div>

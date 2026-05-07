@@ -10,7 +10,7 @@
 		answer: BuilderGuideAnswer;
 		canGoNext: boolean;
 		onNext: () => void;
-		onSubmit: () => void;
+		onSubmit: () => void | Promise<void>;
 		onAnswerChange: (answer: BuilderGuideAnswer) => void;
 	};
 

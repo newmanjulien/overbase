@@ -1,4 +1,4 @@
-import type { EmailDraft } from '../../shared/email';
+import type { EmailDraft } from '@overbase/builder-sdk/email';
 
 export type CustomEmailExamples = {
 	slug: string;

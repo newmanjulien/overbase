@@ -14,7 +14,7 @@
 		canGoNext: boolean;
 		onPrevious: () => void;
 		onNext: () => void;
-		onSubmit: () => void;
+		onSubmit: () => void | Promise<void>;
 		onAnswerChange: (answer: BuilderGuideAnswer) => void;
 	};
 

@@ -5,7 +5,7 @@ import {
 	emailDraft as emailDraftValidator
 } from './emailDesignValidators';
 import {
-	CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID,
+	CUSTOM_EMAIL_BUILDER_APP_ID,
 	getEmailDraftChangedFields,
 	hasEmailDraftChanged,
 	normalizeEmailDraft,
@@ -13,42 +13,46 @@ import {
 } from './emailDesign';
 import {
 	createResumeToken,
-	getConversationExpiresAt,
+	getBuilderSessionExpiresAt,
 	hashResumeToken,
 	normalizeUserText
-} from './conversationCore';
+} from './builderSessionAccess';
 import {
 	buildSessionSnapshot,
 	createOperationId,
 	getAuthorizedSession,
 	insertOperation
 } from './builderSessionCore';
-import { getActiveNotificationProduct } from '../external/blueprints/content';
+import { getActiveExternalApp } from '../lib/features/builder/external/registry';
 
 export const startSession = mutation({
 	args: {
+		appSlug: v.string(),
 		initialMessage: v.string()
 	},
-	handler: async (ctx, { initialMessage }) => {
+	handler: async (ctx, { appSlug, initialMessage }) => {
 		const now = Date.now();
 		const normalizedInitialMessage = normalizeUserText(initialMessage);
 		const resumeToken = createResumeToken();
 		const resumeTokenHash = await hashResumeToken(resumeToken);
-		const expiresAt = getConversationExpiresAt(now);
-		const product = getActiveNotificationProduct(CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID);
+		const expiresAt = getBuilderSessionExpiresAt(now);
+		const app = getActiveExternalApp(appSlug);
 
-		if (!product) {
-			throw new Error('Custom notification product not found.');
+		if (!app) {
+			throw new Error('Builder app not found.');
 		}
 
+		const isCustomEmailBuilder = app.slug === CUSTOM_EMAIL_BUILDER_APP_ID;
+		const operationId = createOperationId();
+		const initialOperationKind = isCustomEmailBuilder ? 'routeAndAsk' : 'prepareInitialDraft';
 		const sessionId = await ctx.db.insert('builderSessions', {
-			productSlug: product.slug,
-			productTitle: product.title,
+			appSlug: app.slug,
+			appTitle: app.title,
 			artifactKind: 'email',
 			artifactVersion: 0,
-			phase: 'routing',
+			phase: isCustomEmailBuilder ? 'routing' : 'preparingInitialDraft',
 			artifactVisibility: 'hidden',
-			workingArtifactStatus: 'none',
+			workingArtifactStatus: isCustomEmailBuilder ? 'none' : 'preparing',
 			visibleArtifactStatus: 'notReleased',
 			resumeTokenHash,
 			createdAt: now,
@@ -64,7 +68,6 @@ export const startSession = mutation({
 			createdAt: now,
 			updatedAt: now
 		});
-		const operationId = createOperationId();
 		const assistantMessageId = await ctx.db.insert('builderSessionMessages', {
 			sessionId,
 			role: 'assistant',
@@ -77,7 +80,7 @@ export const startSession = mutation({
 
 		await insertOperation(ctx, {
 			sessionId,
-			kind: 'routeAndAsk',
+			kind: initialOperationKind,
 			operationId,
 			assistantMessageId,
 			createdAt: now
@@ -86,9 +89,13 @@ export const startSession = mutation({
 			activeMessageOperationId: operationId,
 			updatedAt: now
 		});
-		await ctx.scheduler.runAfter(0, internal.builderSessionJobs.routeAndAsk, {
-			operationId
-		});
+		await ctx.scheduler.runAfter(
+			0,
+			isCustomEmailBuilder
+				? internal.builderSessionJobs.routeAndAsk
+				: internal.builderSessionJobs.prepareInitialDraftOperation,
+			{ operationId }
+		);
 
 		const session = await ctx.db.get(sessionId);
 
@@ -117,7 +124,7 @@ export const resumeSession = mutation({
 			return null;
 		}
 
-		const expiresAt = getConversationExpiresAt(now);
+		const expiresAt = getBuilderSessionExpiresAt(now);
 
 		await ctx.db.patch(session._id, {
 			expiresAt,
@@ -169,7 +176,7 @@ export const sendMessage = mutation({
 			throw new Error('This builder is not ready for another message yet.');
 		}
 
-		const expiresAt = getConversationExpiresAt(now);
+		const expiresAt = getBuilderSessionExpiresAt(now);
 		const userMessageId = await ctx.db.insert('builderSessionMessages', {
 			sessionId: session._id,
 			role: 'user',
@@ -253,7 +260,7 @@ export const saveVisibleEmailDraft = mutation({
 
 		const normalizedDraft = normalizeEmailDraft(emailDraft);
 		const previousDraft = normalizeEmailDraft(session.visibleEmailDraft);
-		const expiresAt = getConversationExpiresAt(now);
+		const expiresAt = getBuilderSessionExpiresAt(now);
 
 		if (!hasEmailDraftChanged(previousDraft, normalizedDraft)) {
 			await ctx.db.patch(session._id, {

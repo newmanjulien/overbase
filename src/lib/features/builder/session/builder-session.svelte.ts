@@ -6,7 +6,7 @@ import { useConvexClient, useQuery } from 'convex-svelte';
 export type BuilderSessionHandle = {
 	sessionId: Id<'builderSessions'>;
 	resumeToken: string;
-	productSlug: string;
+	appSlug: string;
 	expiresAt: number;
 };
 
@@ -35,8 +35,8 @@ type StoredBuilderSessionHandle = Omit<BuilderSessionHandle, 'sessionId'> & {
 	sessionId: string;
 };
 
-function getStorageKey(productSlug: string) {
-	return `overbase:builder-session:${productSlug}`;
+function getStorageKey(appSlug: string) {
+	return `overbase:builder-session:${appSlug}`;
 }
 
 function getErrorMessage(error: unknown) {
@@ -53,11 +53,11 @@ function parseStoredHandle(value: unknown): BuilderSessionHandle | null {
 	if (
 		typeof candidate.sessionId !== 'string' ||
 		typeof candidate.resumeToken !== 'string' ||
-		typeof candidate.productSlug !== 'string' ||
+		typeof candidate.appSlug !== 'string' ||
 		typeof candidate.expiresAt !== 'number' ||
 		!candidate.sessionId ||
 		!candidate.resumeToken ||
-		!candidate.productSlug ||
+		!candidate.appSlug ||
 		candidate.expiresAt <= Date.now()
 	) {
 		return null;
@@ -66,13 +66,13 @@ function parseStoredHandle(value: unknown): BuilderSessionHandle | null {
 	return candidate as StoredBuilderSessionHandle as BuilderSessionHandle;
 }
 
-function readStoredHandle(productSlug: string) {
+function readStoredHandle(appSlug: string) {
 	if (typeof sessionStorage === 'undefined') {
 		return null;
 	}
 
 	try {
-		return parseStoredHandle(JSON.parse(sessionStorage.getItem(getStorageKey(productSlug)) ?? 'null'));
+		return parseStoredHandle(JSON.parse(sessionStorage.getItem(getStorageKey(appSlug)) ?? 'null'));
 	} catch {
 		return null;
 	}
@@ -80,13 +80,13 @@ function readStoredHandle(productSlug: string) {
 
 function writeStoredHandle(handle: BuilderSessionHandle) {
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.setItem(getStorageKey(handle.productSlug), JSON.stringify(handle));
+		sessionStorage.setItem(getStorageKey(handle.appSlug), JSON.stringify(handle));
 	}
 }
 
-function clearStoredHandle(productSlug: string) {
+function clearStoredHandle(appSlug: string) {
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.removeItem(getStorageKey(productSlug));
+		sessionStorage.removeItem(getStorageKey(appSlug));
 	}
 }
 
@@ -157,7 +157,7 @@ function chooseSnapshot(
 }
 
 export function createBuilderSessionController(
-	productSlug: string,
+	appSlug: string,
 	readInitialMessage: () => string = () => ''
 ) {
 	const client = useConvexClient();
@@ -197,7 +197,7 @@ export function createBuilderSessionController(
 		handle = null;
 		localSnapshot = null;
 		error = null;
-		clearStoredHandle(productSlug);
+		clearStoredHandle(appSlug);
 	}
 
 	async function start(message?: string) {
@@ -214,6 +214,7 @@ export function createBuilderSessionController(
 
 		try {
 			const result = await client.mutation(api.builderSessions.startSession, {
+				appSlug,
 				initialMessage: normalizedInitialMessage
 			});
 
@@ -232,9 +233,9 @@ export function createBuilderSessionController(
 	}
 
 	async function resumeStored() {
-		const storedHandle = readStoredHandle(productSlug);
+		const storedHandle = readStoredHandle(appSlug);
 
-		if (!storedHandle || storedHandle.productSlug !== productSlug) {
+		if (!storedHandle || storedHandle.appSlug !== appSlug) {
 			clearLocal();
 			return null;
 		}

@@ -4,14 +4,16 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"convex:deploy": "convex deploy",
-		"convex:dev": "convex dev",
+		"builder-sdk:build": "npm --prefix packages/builder-sdk run build",
+		"builder-sdk:check": "npm run builder-sdk:build && git diff --exit-code -- packages/builder-sdk/dist",
+		"dev": "npm run builder-sdk:build && vite dev",
+		"build": "npm run builder-sdk:build && vite build",
+		"convex:deploy": "npm run builder-sdk:build && convex deploy",
+		"convex:dev": "npm run builder-sdk:build && convex dev",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"lint": "eslint ."
+		"check": "npm run builder-sdk:check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"lint": "npm run builder-sdk:build && eslint ."
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.2",
@@ -31,6 +33,7 @@
 		"vite": "^7.3.1"
 	},
 	"dependencies": {
+		"@overbase/builder-sdk": "file:packages/builder-sdk",
 		"clsx": "^2.1.1",
 		"convex": "^1.37.0",
 		"convex-svelte": "^0.0.12",

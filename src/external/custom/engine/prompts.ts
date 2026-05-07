@@ -1,8 +1,4 @@
-import type { EmailDraft } from '../../shared/email';
-import {
-	EXAMPLE_FIDELITY_RULES,
-	EXECUTIVE_WRITING_RULES
-} from '../../shared/writing/executive-style';
+import type { EmailDraft } from '@overbase/builder-sdk/email';
 import {
 	CUSTOM_EMAIL_EXAMPLE_ADAPTATION_DRAFT_RULES,
 	CUSTOM_EMAIL_EXAMPLE_ADAPTATION_OPENING_RULES,
@@ -11,9 +7,11 @@ import {
 	CUSTOM_EMAIL_INITIAL_QUESTION_RULES,
 	CUSTOM_EMAIL_REFINEMENT_CHAT_RULES,
 	CUSTOM_EMAIL_REFINEMENT_DRAFT_RULES,
-	CUSTOM_EMAIL_ROUTING_RULES
+	CUSTOM_EMAIL_ROUTING_RULES,
+	EXAMPLE_FIDELITY_RULES,
+	EXECUTIVE_WRITING_RULES
 } from '../rules';
-import type { EmailExampleCandidate, EmailExamplesCandidate } from './types';
+import type { EmailExampleCandidate, EmailExamplesCandidate } from '../types';
 
 function stringifyPromptData(value: unknown) {
 	return JSON.stringify(value, null, 2);

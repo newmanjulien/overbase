@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BuilderBlueprintRecord } from '$lib/features/builder/data';
+	import type { BuilderAppRecord } from '$lib/features/builder/data';
 	import BuilderGuideQuestionCard from '$lib/features/builder/guide/BuilderGuideQuestionCard.svelte';
 	import {
 		getGuideAnswer,
@@ -12,14 +12,16 @@
 	} from '$lib/features/builder/guide/guide-types';
 
 	type Props = {
-		blueprint: BuilderBlueprintRecord;
+		app: BuilderAppRecord;
 		guide: BuilderGuideDefinition;
-		onComplete: (initialMessage: string) => void;
+		onComplete: (initialMessage: string) => Promise<void>;
 	};
 
-	let { blueprint, guide, onComplete }: Props = $props();
+	let { app, guide, onComplete }: Props = $props();
 	let currentQuestionIndex = $state(0);
 	let answersByQuestionId = $state<BuilderGuideAnswersByQuestionId>({});
+	let submitError = $state<string | null>(null);
+	let isSubmitting = $state(false);
 
 	const currentQuestion = $derived(guide.questions[currentQuestionIndex]);
 	const currentAnswer = $derived(getGuideAnswer(answersByQuestionId, currentQuestion));
@@ -64,11 +66,11 @@
 			return `${question.title}\n${getAnswerText(question)}`;
 		});
 
-			return [
-				`I want to build this notification: ${blueprint.title}`,
-				'',
-				'Description:',
-				blueprint.description,
+		return [
+			`I want to build this notification: ${app.title}`,
+			'',
+			'Description:',
+			app.description,
 			'',
 			'Answers:',
 			...answers.flatMap((answer) => ['', answer])
@@ -77,8 +79,25 @@
 			.trim();
 	}
 
-	function completeSetup() {
-		onComplete(buildInitialMessage());
+	function getErrorMessage(error: unknown) {
+		return error instanceof Error ? error.message : 'Something went wrong.';
+	}
+
+	async function completeSetup() {
+		if (isSubmitting) {
+			return;
+		}
+
+		isSubmitting = true;
+		submitError = null;
+
+		try {
+			await onComplete(buildInitialMessage());
+		} catch (error) {
+			submitError = getErrorMessage(error);
+		} finally {
+			isSubmitting = false;
+		}
 	}
 </script>
 
@@ -106,5 +125,11 @@
 			onSubmit={completeSetup}
 			onAnswerChange={updateAnswer}
 		/>
+
+		{#if submitError}
+			<div class="mt-4 max-w-3xl rounded-sm border border-red-200 bg-red-50 p-3 text-[0.78rem] text-red-700">
+				{submitError}
+			</div>
+		{/if}
 	</div>
 </section>

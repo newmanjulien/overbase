@@ -4,7 +4,7 @@
 	type Props = {
 		canGoNext: boolean;
 		onNext: () => void;
-		onSubmit: () => void;
+		onSubmit: () => void | Promise<void>;
 	};
 
 	let { canGoNext, onNext, onSubmit }: Props = $props();
@@ -26,7 +26,7 @@
 			if (canGoNext) {
 				onNext();
 			} else {
-				onSubmit();
+				void onSubmit();
 			}
 		}}
 	>
