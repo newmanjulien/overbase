@@ -1,5 +1,5 @@
 <script lang="ts">
-	import BuilderCardSection from '$lib/features/builder-cards/BuilderCardSection.svelte';
+	import BuilderBlueprintGallery from '$lib/features/builder-blueprints/BuilderBlueprintGallery.svelte';
 	import BuilderChat from '$lib/features/builder-chat/BuilderChat.svelte';
 </script>
 
@@ -9,10 +9,10 @@
 	</div>
 
 	<p class="mt-0 max-w-164 text-center text-[0.76rem] leading-relaxed text-zinc-500 md:text-[0.8rem]">
-		Build a custom email notification that tells you what you need to know and fits how you already work. Then connect the data sources we need to power those notifications
+		Build a custom email notification that tells you what you need to know at just the right time and that perfectly fits into how your team already works
 	</p>
 
 	<div class="mt-16 w-full">
-		<BuilderCardSection />
+		<BuilderBlueprintGallery />
 	</div>
 </div>

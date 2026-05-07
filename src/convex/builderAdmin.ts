@@ -1,11 +1,11 @@
 import { internalMutation, type MutationCtx } from './_generated/server';
 import {
 	builderArtworkPresets,
-	builderCards,
+	builderBlueprints,
 	builderCategories,
 	builderGuides,
-	builderTemplateGroups,
-	builderTemplates
+	emailTemplateGroups,
+	emailTemplates
 } from './builderContent';
 
 type ResetTable =
@@ -13,12 +13,12 @@ type ResetTable =
 	| 'customEmailMessages'
 	| 'customEmailOperations'
 	| 'customEmailRuns'
-	| 'builderTemplates'
-	| 'builderTemplateGroups'
+	| 'emailTemplates'
+	| 'emailTemplateGroups'
 	| 'messages'
 	| 'conversations'
 	| 'builderGuides'
-	| 'builderCards'
+	| 'builderBlueprints'
 	| 'builderArtworkPresets'
 	| 'builderCategories';
 
@@ -40,12 +40,12 @@ export const resetBuilderContent = internalMutation({
 			customEmailMessages: await deleteAllFromTable(ctx, 'customEmailMessages'),
 			customEmailOperations: await deleteAllFromTable(ctx, 'customEmailOperations'),
 			customEmailRuns: await deleteAllFromTable(ctx, 'customEmailRuns'),
-			builderTemplates: await deleteAllFromTable(ctx, 'builderTemplates'),
-			builderTemplateGroups: await deleteAllFromTable(ctx, 'builderTemplateGroups'),
+			emailTemplates: await deleteAllFromTable(ctx, 'emailTemplates'),
+			emailTemplateGroups: await deleteAllFromTable(ctx, 'emailTemplateGroups'),
 			messages: await deleteAllFromTable(ctx, 'messages'),
 			conversations: await deleteAllFromTable(ctx, 'conversations'),
 			builderGuides: await deleteAllFromTable(ctx, 'builderGuides'),
-			builderCards: await deleteAllFromTable(ctx, 'builderCards'),
+			builderBlueprints: await deleteAllFromTable(ctx, 'builderBlueprints'),
 			builderArtworkPresets: await deleteAllFromTable(ctx, 'builderArtworkPresets'),
 			builderCategories: await deleteAllFromTable(ctx, 'builderCategories')
 		};
@@ -58,10 +58,10 @@ export const resetBuilderContent = internalMutation({
 			await ctx.db.insert('builderArtworkPresets', artworkPreset);
 		}
 
-		for (const card of builderCards) {
-			await ctx.db.insert('builderCards', {
-				...card,
-				categoryIds: [...card.categoryIds]
+		for (const blueprint of builderBlueprints) {
+			await ctx.db.insert('builderBlueprints', {
+				...blueprint,
+				categoryIds: [...blueprint.categoryIds]
 			});
 		}
 
@@ -79,12 +79,12 @@ export const resetBuilderContent = internalMutation({
 			});
 		}
 
-		for (const templateGroup of builderTemplateGroups) {
-			await ctx.db.insert('builderTemplateGroups', templateGroup);
+		for (const templateGroup of emailTemplateGroups) {
+			await ctx.db.insert('emailTemplateGroups', templateGroup);
 		}
 
-		for (const template of builderTemplates) {
-			await ctx.db.insert('builderTemplates', {
+		for (const template of emailTemplates) {
+			await ctx.db.insert('emailTemplates', {
 				...template,
 				matchSignals: [...template.matchSignals],
 				emailDraft: {
@@ -104,10 +104,10 @@ export const resetBuilderContent = internalMutation({
 			inserted: {
 				builderCategories: builderCategories.length,
 				builderArtworkPresets: builderArtworkPresets.length,
-				builderCards: builderCards.length,
+				builderBlueprints: builderBlueprints.length,
 				builderGuides: builderGuides.length,
-				builderTemplateGroups: builderTemplateGroups.length,
-				builderTemplates: builderTemplates.length
+				emailTemplateGroups: emailTemplateGroups.length,
+				emailTemplates: emailTemplates.length
 			}
 		};
 	}

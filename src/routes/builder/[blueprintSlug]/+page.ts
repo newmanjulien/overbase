@@ -8,19 +8,19 @@ export const load: PageLoad = async ({ params }) => {
 	const convexUrl = env.PUBLIC_CONVEX_URL;
 
 	if (!convexUrl) {
-		error(503, 'PUBLIC_CONVEX_URL is required to load builder templates.');
+		error(503, 'PUBLIC_CONVEX_URL is required to load builder blueprints.');
 	}
 
 	const convex = new ConvexHttpClient(convexUrl);
-	const template = await convex.query(api.builder.getActiveBuilderCardBySlug, {
-		slug: params.cardId
+	const blueprintResult = await convex.query(api.builder.getActiveBuilderBlueprintBySlug, {
+		slug: params.blueprintSlug
 	});
-	const card = template?.card ?? null;
+	const blueprint = blueprintResult?.blueprint ?? null;
 
 	return {
-		card,
-		guide: template?.guide ?? null,
-		headerTitle: card?.title ?? 'Notification builder',
-		headerTitleEditable: Boolean(card)
+		blueprint,
+		guide: blueprintResult?.guide ?? null,
+		headerTitle: blueprint?.title ?? 'Notification builder',
+		headerTitleEditable: Boolean(blueprint)
 	};
 };

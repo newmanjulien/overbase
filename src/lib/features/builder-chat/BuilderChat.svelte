@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
-	import { CUSTOM_NOTIFICATION_CARD_ID } from '$lib/features/builder-data';
+	import { CUSTOM_NOTIFICATION_BLUEPRINT_ID } from '$lib/features/builder-data';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 
 	const CHAT_HEADING = 'Build notifications that fit the way you work';
@@ -46,7 +46,7 @@
 		const prompt = value.trim();
 		value = '';
 
-		await goto(resolve('/builder/[cardId]', { cardId: CUSTOM_NOTIFICATION_CARD_ID }), {
+		await goto(resolve('/builder/[blueprintSlug]', { blueprintSlug: CUSTOM_NOTIFICATION_BLUEPRINT_ID }), {
 			state: { initialMessage: prompt }
 		});
 	}

@@ -1,6 +1,6 @@
 import { api } from '$convex/_generated/api';
 import type { Id } from '$convex/_generated/dataModel';
-import type { BuilderCardRecord } from '$lib/features/builder-data';
+import type { BuilderBlueprintRecord } from '$lib/features/builder-data';
 import { useConvexClient } from 'convex-svelte';
 
 export type BuilderConversationMode = 'chat';
@@ -9,7 +9,7 @@ export type BuilderConversationHandle = {
 	conversationId: Id<'conversations'>;
 	builderMode: BuilderConversationMode;
 	resumeToken: string;
-	cardSlug: string;
+	blueprintSlug: string;
 	expiresAt: number;
 };
 
@@ -43,14 +43,14 @@ function isStoredBuilderConversationHandle(
 		typeof candidate.conversationId !== 'string' ||
 		!isBuilderConversationMode(candidate.builderMode) ||
 		typeof candidate.resumeToken !== 'string' ||
-		typeof candidate.cardSlug !== 'string' ||
+			typeof candidate.blueprintSlug !== 'string' ||
 		typeof candidate.expiresAt !== 'number' ||
 		!Number.isFinite(candidate.expiresAt)
 	) {
 		return false;
 	}
 
-	if (!candidate.conversationId || !candidate.resumeToken || !candidate.cardSlug) {
+	if (!candidate.conversationId || !candidate.resumeToken || !candidate.blueprintSlug) {
 		return false;
 	}
 
@@ -141,7 +141,7 @@ export function createBuilderConversationController() {
 		}
 	}
 
-	async function start(initialMessage: string, card: BuilderCardRecord) {
+	async function start(initialMessage: string, blueprint: BuilderBlueprintRecord) {
 		const normalizedInitialMessage = initialMessage.trim();
 
 		if (!normalizedInitialMessage) {
@@ -158,18 +158,18 @@ export function createBuilderConversationController() {
 		}
 
 		try {
-			const result = await client.mutation(api.chat.startConversation, {
-				cardSlug: card.id,
-				initialMessage: normalizedInitialMessage
-			});
+				const result = await client.mutation(api.chat.startConversation, {
+					blueprintSlug: blueprint.id,
+					initialMessage: normalizedInitialMessage
+				});
 
 			const nextHandle: BuilderConversationHandle = {
-				conversationId: result.conversationId,
-				builderMode: result.builderMode,
-				resumeToken: result.resumeToken,
-				cardSlug: card.id,
-				expiresAt: result.expiresAt
-			};
+					conversationId: result.conversationId,
+					builderMode: result.builderMode,
+					resumeToken: result.resumeToken,
+					blueprintSlug: blueprint.id,
+					expiresAt: result.expiresAt
+				};
 
 			if (isCurrentOperation(operation)) {
 				setHandle(nextHandle);
@@ -188,7 +188,7 @@ export function createBuilderConversationController() {
 	}
 
 	async function resume(
-		card: BuilderCardRecord,
+		blueprint: BuilderBlueprintRecord,
 		builderMode: BuilderConversationMode,
 		resumeHandle: BuilderConversationHandle | null
 	) {
@@ -199,7 +199,7 @@ export function createBuilderConversationController() {
 			return null;
 		}
 
-		if (resumeHandle.cardSlug !== card.id || resumeHandle.builderMode !== builderMode) {
+		if (resumeHandle.blueprintSlug !== blueprint.id || resumeHandle.builderMode !== builderMode) {
 			clearLocal();
 			return null;
 		}
@@ -208,11 +208,11 @@ export function createBuilderConversationController() {
 
 		try {
 			const result = await client.mutation(api.chat.resumeConversation, {
-				conversationId: resumeHandle.conversationId,
-				resumeToken: resumeHandle.resumeToken,
-				cardSlug: card.id,
-				builderMode
-			});
+					conversationId: resumeHandle.conversationId,
+					resumeToken: resumeHandle.resumeToken,
+					blueprintSlug: blueprint.id,
+					builderMode
+				});
 
 			if (!result) {
 				if (isCurrentOperation(operation)) {
@@ -223,12 +223,12 @@ export function createBuilderConversationController() {
 			}
 
 			const nextHandle: BuilderConversationHandle = {
-				conversationId: result.conversationId,
-				builderMode: result.builderMode,
-				resumeToken: result.resumeToken,
-				cardSlug: card.id,
-				expiresAt: result.expiresAt
-			};
+					conversationId: result.conversationId,
+					builderMode: result.builderMode,
+					resumeToken: result.resumeToken,
+					blueprintSlug: blueprint.id,
+					expiresAt: result.expiresAt
+				};
 
 			if (isCurrentOperation(operation)) {
 				setHandle(nextHandle);

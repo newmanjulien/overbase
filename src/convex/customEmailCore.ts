@@ -54,12 +54,12 @@ export async function buildRunSnapshot(
 		.collect();
 
 	return {
-		handle: {
-			runId: run._id,
-			resumeToken,
-			builderSlug: run.builderSlug,
-			expiresAt: run.expiresAt
-		},
+			handle: {
+				runId: run._id,
+				resumeToken,
+				blueprintSlug: run.blueprintSlug,
+				expiresAt: run.expiresAt
+			},
 		run,
 		messages
 	};

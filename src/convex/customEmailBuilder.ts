@@ -5,7 +5,7 @@ import {
 	emailDraft as emailDraftValidator
 } from './builderEmailValidators';
 import {
-	CUSTOM_EMAIL_BUILDER_CARD_ID,
+	CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID,
 	getEmailDraftChangedFields,
 	hasEmailDraftChanged,
 	normalizeEmailDraft,
@@ -34,21 +34,21 @@ export const startRun = mutation({
 		const resumeToken = createResumeToken();
 		const resumeTokenHash = await hashResumeToken(resumeToken);
 		const expiresAt = getConversationExpiresAt(now);
-		const card = await ctx.db
-			.query('builderCards')
+		const blueprint = await ctx.db
+			.query('builderBlueprints')
 			.withIndex('by_slug_status', (q) =>
-				q.eq('slug', CUSTOM_EMAIL_BUILDER_CARD_ID).eq('status', 'active')
+				q.eq('slug', CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID).eq('status', 'active')
 			)
 			.unique();
 
-		if (!card) {
-			throw new Error('Custom builder card not found.');
+		if (!blueprint) {
+			throw new Error('Custom builder blueprint not found.');
 		}
 
 		const runId = await ctx.db.insert('customEmailRuns', {
-			cardId: card._id,
-			builderSlug: card.slug,
-			builderTitle: card.title,
+			blueprintId: blueprint._id,
+			blueprintSlug: blueprint.slug,
+			blueprintTitle: blueprint.title,
 			artifactKind: 'email',
 			artifactVersion: 0,
 			phase: 'routing',

@@ -2,37 +2,42 @@
 	import { api } from '$convex/_generated/api';
 	import { useQuery } from 'convex-svelte';
 	import {
-		ALL_BUILDER_CARD_FILTER,
-		toBuilderCardFilter,
-		toBuilderCardRecord,
-		type BuilderCardFilterId,
-		type BuilderCardRecord
+		ALL_BUILDER_BLUEPRINT_FILTER,
+		toBuilderBlueprintFilter,
+		toBuilderBlueprintRecord,
+		type BuilderBlueprintFilterId,
+		type BuilderBlueprintRecord
 	} from '$lib/features/builder-data';
-	import BuilderCard from '$lib/features/builder-cards/BuilderCard.svelte';
+	import BuilderBlueprintCard from '$lib/features/builder-blueprints/BuilderBlueprintCard.svelte';
 	import { cn } from '$lib/chrome/shared/cn';
 
-	let selectedFilterId = $state<BuilderCardFilterId>('all');
+	let selectedFilterId = $state<BuilderBlueprintFilterId>('all');
 
 	const loadingCardPlaceholders = [0, 1, 2, 3];
 	const builderHomeQuery = useQuery(api.builder.listBuilderHome);
 	const queryError = $derived(builderHomeQuery.error ?? null);
 	const filters = $derived([
-		ALL_BUILDER_CARD_FILTER,
-		...(builderHomeQuery.data?.categories ?? []).map(toBuilderCardFilter)
+		ALL_BUILDER_BLUEPRINT_FILTER,
+		...(builderHomeQuery.data?.categories ?? []).map(toBuilderBlueprintFilter)
 	]);
-	const cards = $derived((builderHomeQuery.data?.cards ?? []).map(toBuilderCardRecord));
+	const blueprints = $derived(
+		(builderHomeQuery.data?.blueprints ?? []).map(toBuilderBlueprintRecord)
+	);
 	const isLoading = $derived(builderHomeQuery.data === undefined);
 
-	function cardMatchesFilter(card: BuilderCardRecord, filterId: BuilderCardFilterId) {
-		return filterId === 'all' || card.categoryIds.includes(filterId);
+	function blueprintMatchesFilter(
+		blueprint: BuilderBlueprintRecord,
+		filterId: BuilderBlueprintFilterId
+	) {
+		return filterId === 'all' || blueprint.categoryIds.includes(filterId);
 	}
 
-	const visibleCards = $derived(
-		cards.filter((card) => cardMatchesFilter(card, selectedFilterId))
+	const visibleBlueprints = $derived(
+		blueprints.filter((blueprint) => blueprintMatchesFilter(blueprint, selectedFilterId))
 	);
 </script>
 
-<section class="w-full" aria-labelledby="builder-card-section-title">
+<section class="w-full" aria-labelledby="builder-blueprint-gallery-title">
 	<div class="-mx-1 overflow-x-auto px-1">
 		<div class="flex min-w-max items-center gap-1.5 md:min-w-0 md:flex-wrap">
 			{#each filters as filter (filter.id)}
@@ -70,8 +75,8 @@
 			</div>
 			{:else}
 				<div class="mt-4 grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-3">
-					{#each visibleCards as card (card.id)}
-						<BuilderCard {card} />
+					{#each visibleBlueprints as blueprint (blueprint.id)}
+						<BuilderBlueprintCard {blueprint} />
 					{/each}
 				</div>
 			{/if}

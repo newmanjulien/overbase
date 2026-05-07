@@ -6,12 +6,12 @@ import {
 	Scale,
 	ShieldCheck
 } from 'lucide-svelte';
-import { CUSTOM_EMAIL_BUILDER_CARD_ID } from '$lib/builder-domain/email';
+import { CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID } from '$lib/builder-domain/email';
 import type { Doc } from '$convex/_generated/dataModel';
 import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
 
 type CategoryIcon = typeof Flag;
-type BuilderCardView = {
+type BuilderBlueprintView = {
 	slug: string;
 	categoryIds: string[];
 	title: string;
@@ -19,20 +19,20 @@ type BuilderCardView = {
 	artwork: Doc<'builderArtworkPresets'>;
 };
 
-export const CUSTOM_NOTIFICATION_CARD_ID = CUSTOM_EMAIL_BUILDER_CARD_ID;
+export const CUSTOM_NOTIFICATION_BLUEPRINT_ID = CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID;
 
-export type BuilderCardCategoryId = string;
-export type BuilderCardFilterId = BuilderCardCategoryId | 'all';
+export type BuilderBlueprintCategoryId = string;
+export type BuilderBlueprintFilterId = BuilderBlueprintCategoryId | 'all';
 
-export type BuilderCardFilter = {
-	id: BuilderCardFilterId;
+export type BuilderBlueprintFilter = {
+	id: BuilderBlueprintFilterId;
 	label: string;
 	iconId: string;
 	icon: CategoryIcon;
 	sortOrder: number;
 };
 
-export type BuilderCardRecord = {
+export type BuilderBlueprintRecord = {
 	id: string;
 	categoryIds: string[];
 	title: string;
@@ -48,19 +48,19 @@ const CATEGORY_ICONS: Record<string, CategoryIcon> = {
 	'shield-check': ShieldCheck
 };
 
-export const ALL_BUILDER_CARD_FILTER = {
+export const ALL_BUILDER_BLUEPRINT_FILTER = {
 	id: 'all',
 	label: 'All',
 	iconId: 'loader-circle',
 	icon: LoaderCircle,
 	sortOrder: -1
-} satisfies BuilderCardFilter;
+} satisfies BuilderBlueprintFilter;
 
 function getCategoryIcon(iconId: string) {
 	return CATEGORY_ICONS[iconId] ?? Flag;
 }
 
-export function toBuilderCardFilter(category: Doc<'builderCategories'>): BuilderCardFilter {
+export function toBuilderBlueprintFilter(category: Doc<'builderCategories'>): BuilderBlueprintFilter {
 	return {
 		id: category.slug,
 		label: category.label,
@@ -70,12 +70,12 @@ export function toBuilderCardFilter(category: Doc<'builderCategories'>): Builder
 	};
 }
 
-export function toBuilderCardRecord(card: BuilderCardView): BuilderCardRecord {
+export function toBuilderBlueprintRecord(blueprint: BuilderBlueprintView): BuilderBlueprintRecord {
 	return {
-		id: card.slug,
-		categoryIds: card.categoryIds,
-		title: card.title,
-		description: card.description,
-		artwork: toBuilderArtworkPreset(card.artwork)
+		id: blueprint.slug,
+		categoryIds: blueprint.categoryIds,
+		title: blueprint.title,
+		description: blueprint.description,
+		artwork: toBuilderArtworkPreset(blueprint.artwork)
 	};
 }

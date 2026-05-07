@@ -70,12 +70,12 @@ async function getResumeAuthorizedConversation(
 	{
 		conversationId,
 		resumeToken,
-		cardSlug,
+		blueprintSlug,
 		builderMode: expectedBuilderMode
 	}: {
 		conversationId: Id<'conversations'>;
 		resumeToken: string;
-		cardSlug?: string;
+		blueprintSlug?: string;
 		builderMode?: 'chat';
 	},
 	now = Date.now()
@@ -86,7 +86,7 @@ async function getResumeAuthorizedConversation(
 		return null;
 	}
 
-	if (cardSlug !== undefined && conversation.cardSlug !== cardSlug) {
+	if (blueprintSlug !== undefined && conversation.blueprintSlug !== blueprintSlug) {
 		return null;
 	}
 
@@ -151,29 +151,29 @@ async function insertPendingAssistantTurn(
 
 export const startConversation = mutation({
 	args: {
-		cardSlug: v.string(),
+		blueprintSlug: v.string(),
 		initialMessage: v.string()
 	},
-	handler: async (ctx, { cardSlug, initialMessage }) => {
+	handler: async (ctx, { blueprintSlug, initialMessage }) => {
 		const now = Date.now();
 		const normalizedInitialMessage = normalizeUserText(initialMessage);
 		const resumeToken = createResumeToken();
 		const resumeTokenHash = await hashResumeToken(resumeToken);
 		const expiresAt = getConversationExpiresAt(now);
-		const card = await ctx.db
-			.query('builderCards')
-			.withIndex('by_slug_status', (q) => q.eq('slug', cardSlug).eq('status', 'active'))
+		const blueprint = await ctx.db
+			.query('builderBlueprints')
+			.withIndex('by_slug_status', (q) => q.eq('slug', blueprintSlug).eq('status', 'active'))
 			.unique();
 
-		if (!card) {
-			throw new Error('Builder card not found.');
+		if (!blueprint) {
+			throw new Error('Builder blueprint not found.');
 		}
 
 		const conversationId = await ctx.db.insert('conversations', {
-			cardId: card._id,
-			cardSlug: card.slug,
-			cardTitle: card.title,
-			cardDescription: card.description,
+			blueprintId: blueprint._id,
+			blueprintSlug: blueprint.slug,
+			blueprintTitle: blueprint.title,
+			blueprintDescription: blueprint.description,
 			builderMode: 'chat',
 			resumeTokenHash,
 			createdAt: now,
@@ -226,17 +226,17 @@ export const resumeConversation = mutation({
 	args: {
 		conversationId: v.id('conversations'),
 		resumeToken: v.string(),
-		cardSlug: v.string(),
+		blueprintSlug: v.string(),
 		builderMode
 	},
-	handler: async (ctx, { conversationId, resumeToken, cardSlug, builderMode }) => {
+	handler: async (ctx, { conversationId, resumeToken, blueprintSlug, builderMode }) => {
 		const now = Date.now();
 		const conversation = await getResumeAuthorizedConversation(
 			ctx,
 			{
 				conversationId,
 				resumeToken,
-				cardSlug,
+				blueprintSlug,
 				builderMode
 			},
 			now

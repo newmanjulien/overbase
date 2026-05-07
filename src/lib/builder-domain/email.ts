@@ -1,4 +1,4 @@
-export const CUSTOM_EMAIL_BUILDER_CARD_ID = 'custom-notification';
+export const CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID = 'custom-notification';
 
 export const EMAIL_DRAFT_CHANGED_FIELDS = ['to', 'cc', 'attachments', 'body', 'fireReason'] as const;
 

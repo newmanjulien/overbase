@@ -1,3 +1,3 @@
 export * from './builder-artwork';
-export * from './builder-cards';
+export * from './builder-blueprints';
 export * from './builder-guides';

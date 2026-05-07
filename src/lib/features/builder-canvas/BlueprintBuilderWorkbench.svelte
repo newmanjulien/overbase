@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { beforeNavigate, replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import type { BuilderCardRecord } from '$lib/features/builder-data';
+	import type { BuilderBlueprintRecord } from '$lib/features/builder-data';
 	import BuilderBlueprintPanel from '$lib/features/builder-canvas/BuilderBlueprintPanel.svelte';
 	import SplitPane from '$lib/features/builder-canvas/SplitPane.svelte';
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder-canvas/split-pane';
@@ -15,14 +15,14 @@
 	import BuilderSetupFlow from '$lib/features/builder-setup/BuilderSetupFlow.svelte';
 
 	type Props = {
-		card: BuilderCardRecord;
+		blueprint: BuilderBlueprintRecord;
 		guide: BuilderGuideDefinition | null;
 		initialMessage?: string | null;
 		activeConversation?: unknown;
 	};
 
-	let { card, guide, initialMessage = null, activeConversation = null }: Props = $props();
-	let activeCardId = $state('');
+	let { blueprint, guide, initialMessage = null, activeConversation = null }: Props = $props();
+	let activeBlueprintId = $state('');
 	let lifecycleVersion = 0;
 	let mode = $state<'setup' | 'chat'>('setup');
 
@@ -30,8 +30,8 @@
 
 	function replaceActiveConversationState(handle: BuilderConversationHandle | null) {
 		replaceState(
-			resolve('/builder/[cardId]', {
-				cardId: card.id
+			resolve('/builder/[blueprintSlug]', {
+				blueprintSlug: blueprint.id
 			}),
 			handle
 				? {
@@ -51,7 +51,7 @@
 		mode = 'chat';
 
 		try {
-			const handle = await conversation.start(normalizedFirstMessage, card);
+				const handle = await conversation.start(normalizedFirstMessage, blueprint);
 
 			if (version !== lifecycleVersion) {
 				void conversation.dispose(handle);
@@ -66,7 +66,7 @@
 		}
 	}
 
-	async function bootForCard(version: number) {
+	async function bootForBlueprint(version: number) {
 		const historyHandle = parseBuilderConversationHandle(activeConversation);
 		const nextInitialMessage = initialMessage?.trim() ?? '';
 
@@ -80,7 +80,7 @@
 			let resumedHandle: BuilderConversationHandle | null = null;
 
 			try {
-				resumedHandle = await conversation.resume(card, 'chat', historyHandle);
+					resumedHandle = await conversation.resume(blueprint, 'chat', historyHandle);
 			} catch {
 				if (version === lifecycleVersion) {
 					mode = 'chat';
@@ -121,22 +121,22 @@
 	}
 
 	$effect(() => {
-		if (activeCardId === card.id) {
-			return;
-		}
+			if (activeBlueprintId === blueprint.id) {
+				return;
+			}
 
-		activeCardId = card.id;
-		lifecycleVersion += 1;
-		void bootForCard(lifecycleVersion);
-	});
+			activeBlueprintId = blueprint.id;
+			lifecycleVersion += 1;
+			void bootForBlueprint(lifecycleVersion);
+		});
 
 	beforeNavigate((navigation) => {
 		if (navigation.type === 'leave') {
 			return;
 		}
 
-		const currentBuilderPath = resolve('/builder/[cardId]', {
-			cardId: card.id
+		const currentBuilderPath = resolve('/builder/[blueprintSlug]', {
+			blueprintSlug: blueprint.id
 		});
 
 		if (navigation.to?.url.pathname !== currentBuilderPath) {
@@ -175,7 +175,7 @@
 				onSend={sendMessage}
 			/>
 		{:else if guide}
-			<BuilderSetupFlow {card} {guide} onComplete={startChat} />
+				<BuilderSetupFlow {blueprint} {guide} onComplete={startChat} />
 		{:else}
 			<div class="flex h-full min-h-0 min-w-0 flex-col justify-center bg-white px-6">
 				<div class="mx-auto max-w-sm text-center">
@@ -195,6 +195,6 @@
 	{/snippet}
 
 	{#snippet secondary()}
-		<BuilderBlueprintPanel {card} />
+			<BuilderBlueprintPanel {blueprint} />
 	{/snippet}
 </SplitPane>

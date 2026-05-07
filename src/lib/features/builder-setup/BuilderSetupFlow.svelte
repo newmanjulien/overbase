@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BuilderCardRecord } from '$lib/features/builder-data';
+	import type { BuilderBlueprintRecord } from '$lib/features/builder-data';
 	import BuilderGuideQuestionCard from '$lib/features/builder-guide/BuilderGuideQuestionCard.svelte';
 	import {
 		getGuideAnswer,
@@ -12,12 +12,12 @@
 	} from '$lib/features/builder-guide/guide-types';
 
 	type Props = {
-		card: BuilderCardRecord;
+		blueprint: BuilderBlueprintRecord;
 		guide: BuilderGuideDefinition;
 		onComplete: (initialMessage: string) => void;
 	};
 
-	let { card, guide, onComplete }: Props = $props();
+	let { blueprint, guide, onComplete }: Props = $props();
 	let currentQuestionIndex = $state(0);
 	let answersByQuestionId = $state<BuilderGuideAnswersByQuestionId>({});
 
@@ -64,11 +64,11 @@
 			return `${question.title}\n${getAnswerText(question)}`;
 		});
 
-		return [
-			`I want to build this notification: ${card.title}`,
-			'',
-			'Description:',
-			card.description,
+			return [
+				`I want to build this notification: ${blueprint.title}`,
+				'',
+				'Description:',
+				blueprint.description,
 			'',
 			'Answers:',
 			...answers.flatMap((answer) => ['', answer])

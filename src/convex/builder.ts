@@ -15,19 +15,19 @@ async function getArtworkPreset(ctx: QueryCtx, slug: string) {
 	return artwork;
 }
 
-async function toBuilderCardView(ctx: QueryCtx, card: Doc<'builderCards'>) {
-	if (!card.artworkPresetSlug) {
-		throw new Error(`Builder card artwork preset slug is missing: ${card.slug}`);
+async function toBuilderBlueprintView(ctx: QueryCtx, blueprint: Doc<'builderBlueprints'>) {
+	if (!blueprint.artworkPresetSlug) {
+		throw new Error(`Builder blueprint artwork preset slug is missing: ${blueprint.slug}`);
 	}
 
-	const artwork = await getArtworkPreset(ctx, card.artworkPresetSlug);
+	const artwork = await getArtworkPreset(ctx, blueprint.artworkPresetSlug);
 
 	return {
-		id: card.slug,
-		slug: card.slug,
-		categoryIds: card.categoryIds,
-		title: card.title,
-		description: card.description,
+		id: blueprint.slug,
+		slug: blueprint.slug,
+		categoryIds: blueprint.categoryIds,
+		title: blueprint.title,
+		description: blueprint.description,
 		artwork
 	};
 }
@@ -35,44 +35,46 @@ async function toBuilderCardView(ctx: QueryCtx, card: Doc<'builderCards'>) {
 export const listBuilderHome = query({
 	args: {},
 	handler: async (ctx) => {
-		const [categories, cards] = await Promise.all([
-			ctx.db.query('builderCategories').withIndex('by_sortOrder').collect(),
-			ctx.db
-				.query('builderCards')
-				.withIndex('by_template_status_sortOrder', (q) =>
-					q.eq('isTemplate', true).eq('status', 'active')
+			const [categories, blueprints] = await Promise.all([
+				ctx.db.query('builderCategories').withIndex('by_sortOrder').collect(),
+				ctx.db
+					.query('builderBlueprints')
+				.withIndex('by_gallery_status_sortOrder', (q) =>
+					q.eq('showInGallery', true).eq('status', 'active')
 				)
 				.collect()
 		]);
 
-		return {
-			categories,
-			cards: await Promise.all(cards.map((card) => toBuilderCardView(ctx, card)))
-		};
-	}
-});
+			return {
+				categories,
+				blueprints: await Promise.all(
+					blueprints.map((blueprint) => toBuilderBlueprintView(ctx, blueprint))
+				)
+			};
+		}
+	});
 
-export const getActiveBuilderCardBySlug = query({
+export const getActiveBuilderBlueprintBySlug = query({
 	args: {
 		slug: v.string()
 	},
 	handler: async (ctx, { slug }) => {
-		const card = await ctx.db
-			.query('builderCards')
+		const blueprint = await ctx.db
+			.query('builderBlueprints')
 			.withIndex('by_slug_status', (q) => q.eq('slug', slug).eq('status', 'active'))
 			.unique();
 
-		if (!card) {
+		if (!blueprint) {
 			return null;
 		}
 
 		const guide = await ctx.db
 			.query('builderGuides')
-			.withIndex('by_cardSlug', (q) => q.eq('cardSlug', card.slug))
+			.withIndex('by_blueprintSlug', (q) => q.eq('blueprintSlug', blueprint.slug))
 			.unique();
 
 		return {
-			card: await toBuilderCardView(ctx, card),
+			blueprint: await toBuilderBlueprintView(ctx, blueprint),
 			guide
 		};
 	}

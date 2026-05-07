@@ -6,7 +6,7 @@ import { useConvexClient, useQuery } from 'convex-svelte';
 export type CustomEmailRunHandle = {
 	runId: Id<'customEmailRuns'>;
 	resumeToken: string;
-	builderSlug: string;
+	blueprintSlug: string;
 	expiresAt: number;
 };
 
@@ -35,8 +35,8 @@ type StoredCustomEmailRunHandle = Omit<CustomEmailRunHandle, 'runId'> & {
 	runId: string;
 };
 
-function getStorageKey(builderSlug: string) {
-	return `overbase:custom-email-run:${builderSlug}`;
+function getStorageKey(blueprintSlug: string) {
+	return `overbase:custom-email-run:${blueprintSlug}`;
 }
 
 function getErrorMessage(error: unknown) {
@@ -53,11 +53,11 @@ function parseStoredHandle(value: unknown): CustomEmailRunHandle | null {
 	if (
 		typeof candidate.runId !== 'string' ||
 		typeof candidate.resumeToken !== 'string' ||
-		typeof candidate.builderSlug !== 'string' ||
+		typeof candidate.blueprintSlug !== 'string' ||
 		typeof candidate.expiresAt !== 'number' ||
 		!candidate.runId ||
 		!candidate.resumeToken ||
-		!candidate.builderSlug ||
+		!candidate.blueprintSlug ||
 		candidate.expiresAt <= Date.now()
 	) {
 		return null;
@@ -66,13 +66,13 @@ function parseStoredHandle(value: unknown): CustomEmailRunHandle | null {
 	return candidate as StoredCustomEmailRunHandle as CustomEmailRunHandle;
 }
 
-function readStoredHandle(builderSlug: string) {
+function readStoredHandle(blueprintSlug: string) {
 	if (typeof sessionStorage === 'undefined') {
 		return null;
 	}
 
 	try {
-		return parseStoredHandle(JSON.parse(sessionStorage.getItem(getStorageKey(builderSlug)) ?? 'null'));
+		return parseStoredHandle(JSON.parse(sessionStorage.getItem(getStorageKey(blueprintSlug)) ?? 'null'));
 	} catch {
 		return null;
 	}
@@ -80,13 +80,13 @@ function readStoredHandle(builderSlug: string) {
 
 function writeStoredHandle(handle: CustomEmailRunHandle) {
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.setItem(getStorageKey(handle.builderSlug), JSON.stringify(handle));
+		sessionStorage.setItem(getStorageKey(handle.blueprintSlug), JSON.stringify(handle));
 	}
 }
 
-function clearStoredHandle(builderSlug: string) {
+function clearStoredHandle(blueprintSlug: string) {
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.removeItem(getStorageKey(builderSlug));
+		sessionStorage.removeItem(getStorageKey(blueprintSlug));
 	}
 }
 
@@ -157,7 +157,7 @@ function chooseSnapshot(
 }
 
 export function createCustomEmailRunController(
-	builderSlug: string,
+	blueprintSlug: string,
 	readInitialMessage: () => string = () => ''
 ) {
 	const client = useConvexClient();
@@ -197,7 +197,7 @@ export function createCustomEmailRunController(
 		handle = null;
 		localSnapshot = null;
 		error = null;
-		clearStoredHandle(builderSlug);
+		clearStoredHandle(blueprintSlug);
 	}
 
 	async function start(message?: string) {
@@ -232,9 +232,9 @@ export function createCustomEmailRunController(
 	}
 
 	async function resumeStored() {
-		const storedHandle = readStoredHandle(builderSlug);
+		const storedHandle = readStoredHandle(blueprintSlug);
 
-		if (!storedHandle || storedHandle.builderSlug !== builderSlug) {
+		if (!storedHandle || storedHandle.blueprintSlug !== blueprintSlug) {
 			clearLocal();
 			return null;
 		}

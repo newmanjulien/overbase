@@ -27,7 +27,7 @@ export type BuilderArtworkPreset = {
 		icon: ArtworkIcon;
 		symbolSize: BuilderArtworkCardSymbolSize;
 	};
-	blueprint: {
+	panel: {
 		backColor: string;
 		frontColor: string;
 		iconId: string;
@@ -65,13 +65,13 @@ export function toBuilderArtworkPreset(artwork: Doc<'builderArtworkPresets'>): B
 			icon: getArtworkIcon(artwork.card.iconId),
 			symbolSize: artwork.card.symbolSize
 		},
-		blueprint: {
-			backColor: artwork.blueprint.backColor,
-			frontColor: artwork.blueprint.frontColor,
-			iconId: artwork.blueprint.iconId,
-			icon: getArtworkIcon(artwork.blueprint.iconId),
-			iconCenterX: artwork.blueprint.iconCenterX,
-			iconCenterY: artwork.blueprint.iconCenterY
+		panel: {
+			backColor: artwork.panel.backColor,
+			frontColor: artwork.panel.frontColor,
+			iconId: artwork.panel.iconId,
+			icon: getArtworkIcon(artwork.panel.iconId),
+			iconCenterX: artwork.panel.iconCenterX,
+			iconCenterY: artwork.panel.iconCenterY
 		}
 	};
 }

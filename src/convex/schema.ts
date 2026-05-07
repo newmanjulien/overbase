@@ -37,7 +37,7 @@ export default defineSchema({
 			iconId: v.string(),
 			symbolSize: v.union(v.literal('sm'), v.literal('md'))
 		}),
-		blueprint: v.object({
+		panel: v.object({
 			backColor: v.string(),
 			frontColor: v.string(),
 			iconId: v.string(),
@@ -45,29 +45,29 @@ export default defineSchema({
 			iconCenterY: v.string()
 		})
 	}).index('by_slug', ['slug']),
-	builderCards: defineTable({
+	builderBlueprints: defineTable({
 		slug: v.string(),
 		categoryIds: v.array(v.string()),
 		title: v.string(),
 		description: v.string(),
 		artworkPresetSlug: v.string(),
-		isTemplate: v.boolean(),
+		showInGallery: v.boolean(),
 		sortOrder: v.number(),
 		status: v.union(v.literal('active'), v.literal('hidden'))
 	})
 		.index('by_slug', ['slug'])
 		.index('by_slug_status', ['slug', 'status'])
-		.index('by_template_status_sortOrder', ['isTemplate', 'status', 'sortOrder']),
+		.index('by_gallery_status_sortOrder', ['showInGallery', 'status', 'sortOrder']),
 	builderGuides: defineTable({
-		cardSlug: v.string(),
+		blueprintSlug: v.string(),
 		intro: v.string(),
 		questions: v.array(builderGuideQuestion)
-	}).index('by_cardSlug', ['cardSlug']),
+	}).index('by_blueprintSlug', ['blueprintSlug']),
 	conversations: defineTable({
-		cardId: v.id('builderCards'),
-		cardSlug: v.string(),
-		cardTitle: v.string(),
-		cardDescription: v.string(),
+		blueprintId: v.id('builderBlueprints'),
+		blueprintSlug: v.string(),
+		blueprintTitle: v.string(),
+		blueprintDescription: v.string(),
 		builderMode,
 		resumeTokenHash: v.string(),
 		ownerUserId: v.optional(v.string()),
@@ -81,7 +81,7 @@ export default defineSchema({
 		.index('by_updatedAt', ['updatedAt'])
 		.index('by_expiresAt', ['expiresAt'])
 		.index('by_organization_updatedAt', ['organizationId', 'updatedAt']),
-	builderTemplateGroups: defineTable({
+	emailTemplateGroups: defineTable({
 		slug: v.string(),
 		label: v.string(),
 		description: v.string(),
@@ -91,7 +91,7 @@ export default defineSchema({
 	})
 		.index('by_slug', ['slug'])
 		.index('by_status_sortOrder', ['status', 'sortOrder']),
-	builderTemplates: defineTable({
+	emailTemplates: defineTable({
 		slug: v.string(),
 		groupSlug: v.string(),
 		label: v.string(),
@@ -104,9 +104,9 @@ export default defineSchema({
 		.index('by_slug', ['slug'])
 		.index('by_group_status_sortOrder', ['groupSlug', 'status', 'sortOrder']),
 	customEmailRuns: defineTable({
-		cardId: v.id('builderCards'),
-		builderSlug: v.string(),
-		builderTitle: v.string(),
+		blueprintId: v.id('builderBlueprints'),
+		blueprintSlug: v.string(),
+		blueprintTitle: v.string(),
 		artifactKind: v.literal('email'),
 		artifactVersion: v.number(),
 		phase: v.union(
@@ -130,8 +130,8 @@ export default defineSchema({
 			v.literal('failed')
 		),
 		resumeTokenHash: v.string(),
-		selectedTemplateGroupSlug: v.optional(v.string()),
-		selectedTemplateSlug: v.optional(v.string()),
+		selectedEmailTemplateGroupSlug: v.optional(v.string()),
+		selectedEmailTemplateSlug: v.optional(v.string()),
 		activeMessageOperationId: v.optional(v.string()),
 		activeArtifactOperationId: v.optional(v.string()),
 		initialQuestionText: v.optional(v.string()),

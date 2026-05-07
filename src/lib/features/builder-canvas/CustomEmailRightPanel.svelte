@@ -1,17 +1,17 @@
 <script lang="ts">
 	import type { Doc } from '$convex/_generated/dataModel';
 	import type { EmailDraft } from '$lib/builder-domain/email';
-	import type { BuilderCardRecord } from '$lib/features/builder-data';
+	import type { BuilderBlueprintRecord } from '$lib/features/builder-data';
 	import BuilderBlueprintPanel from '$lib/features/builder-canvas/BuilderBlueprintPanel.svelte';
 	import BuilderEmailRunPreviewPanel from '$lib/features/builder-email/BuilderEmailRunPreviewPanel.svelte';
 
 	type Props = {
-		card: BuilderCardRecord;
+		blueprint: BuilderBlueprintRecord;
 		run: Doc<'customEmailRuns'> | null;
 		onSaveDraft: (draft: EmailDraft, baseArtifactVersion: number) => Promise<void>;
 	};
 
-	let { card, run, onSaveDraft }: Props = $props();
+	let { blueprint, run, onSaveDraft }: Props = $props();
 
 	const visibleDraft = $derived(run?.visibleEmailDraft ?? null);
 	const canEdit = $derived(
@@ -33,5 +33,5 @@
 		onSave={onSaveDraft}
 	/>
 {:else}
-	<BuilderBlueprintPanel {card} />
+	<BuilderBlueprintPanel {blueprint} />
 {/if}

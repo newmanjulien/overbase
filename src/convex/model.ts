@@ -131,6 +131,7 @@ type ParsedStreamEvent =
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 const DEFAULT_OPENAI_MODEL = 'gpt-5-mini';
 const MAX_OUTPUT_TOKENS = 1_200;
+const INITIAL_QUESTION_MAX_OUTPUT_TOKENS = 1_200;
 const STRUCTURED_MAX_OUTPUT_TOKENS = 8_000;
 const UPDATE_EMAIL_DRAFT_TOOL_NAME = 'update_email_draft';
 
@@ -610,6 +611,7 @@ export async function streamEmailInitialQuestion(params: {
 					content: [
 						'You are Overbase\'s custom email notification builder.',
 						'Ask exactly one concise follow-up question.',
+						'Return only the question text.',
 						'Do not mention templates, groups, routing, hidden drafts, or internal process.',
 						'The question should feel natural and should ask about the least certain important detail.'
 					].join('\n')
@@ -624,7 +626,7 @@ export async function streamEmailInitialQuestion(params: {
 				}
 			],
 			...(supportsReasoningOptions(model) ? { reasoning: { effort: 'low' } } : {}),
-			max_output_tokens: 220,
+			max_output_tokens: INITIAL_QUESTION_MAX_OUTPUT_TOKENS,
 			store: false,
 			stream: true
 		})
@@ -637,7 +639,7 @@ export async function streamEmailInitialQuestion(params: {
 	return await readOpenAIStream(response, params.handlers);
 }
 
-export async function adaptEmailBuilderTemplate(params: {
+export async function adaptEmailTemplate(params: {
 	initialMessage: string;
 	group: EmailTemplateGroupCandidate;
 	templates: EmailTemplateCandidate[];

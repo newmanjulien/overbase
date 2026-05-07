@@ -13,7 +13,7 @@ import {
 	type EmailDraft
 } from './emailArtifact';
 import {
-	adaptEmailBuilderTemplate,
+	adaptEmailTemplate,
 	applyEmailInitialAnswer,
 	routeEmailBuilderRequest,
 	streamCustomEmailBuilderTurn,
@@ -175,7 +175,7 @@ export const claimRouteAndAskOperation = internalMutation({
 			.withIndex('by_run_createdAt', (q) => q.eq('runId', run._id))
 			.first();
 		const groups = await ctx.db
-			.query('builderTemplateGroups')
+			.query('emailTemplateGroups')
 			.withIndex('by_status_sortOrder', (q) => q.eq('status', 'active'))
 			.collect();
 
@@ -245,7 +245,7 @@ export const completeRouteAndAsk = internalMutation({
 		await ctx.db.patch(run._id, {
 			phase: 'waitingForInitialAnswer',
 			workingArtifactStatus: 'preparing',
-			selectedTemplateGroupSlug: groupSlug,
+			selectedEmailTemplateGroupSlug: groupSlug,
 			initialQuestionText: assistantText,
 			activeMessageOperationId: undefined,
 			activeArtifactOperationId: artifactOperationId,
@@ -377,16 +377,16 @@ export const claimPrepareHiddenDraftOperation = internalMutation({
 			return null;
 		}
 
-		const selectedTemplateGroupSlug = run.selectedTemplateGroupSlug;
+		const selectedEmailTemplateGroupSlug = run.selectedEmailTemplateGroupSlug;
 
-		if (!selectedTemplateGroupSlug) {
+		if (!selectedEmailTemplateGroupSlug) {
 			await failHiddenDraftState(ctx, operation, 'The selected template group is unavailable.', now);
 			return null;
 		}
 
 		const group = await ctx.db
-			.query('builderTemplateGroups')
-			.withIndex('by_slug', (q) => q.eq('slug', selectedTemplateGroupSlug))
+			.query('emailTemplateGroups')
+			.withIndex('by_slug', (q) => q.eq('slug', selectedEmailTemplateGroupSlug))
 			.unique();
 
 		if (!group) {
@@ -395,9 +395,9 @@ export const claimPrepareHiddenDraftOperation = internalMutation({
 		}
 
 		const templates = await ctx.db
-			.query('builderTemplates')
+			.query('emailTemplates')
 			.withIndex('by_group_status_sortOrder', (q) =>
-				q.eq('groupSlug', selectedTemplateGroupSlug).eq('status', 'active')
+				q.eq('groupSlug', selectedEmailTemplateGroupSlug).eq('status', 'active')
 			)
 			.collect();
 
@@ -454,7 +454,7 @@ export const completeHiddenDraft = internalMutation({
 		await ctx.db.patch(operation.runId, {
 			workingEmailDraft: normalizeEmailDraft(emailDraft),
 			workingArtifactStatus: 'ready',
-			selectedTemplateSlug: templateSlug,
+			selectedEmailTemplateSlug: templateSlug,
 			activeArtifactOperationId: undefined,
 			errorText: undefined,
 			updatedAt: now
@@ -494,7 +494,7 @@ export const prepareHiddenDraftOperation = internalAction({
 				return;
 			}
 
-			const adapted = await adaptEmailBuilderTemplate({
+			const adapted = await adaptEmailTemplate({
 				initialMessage: context.initialMessage,
 				group: context.group,
 				templates: context.templates

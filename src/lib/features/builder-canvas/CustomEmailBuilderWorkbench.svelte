@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { CUSTOM_EMAIL_BUILDER_CARD_ID, type EmailDraft } from '$lib/builder-domain/email';
-	import type { BuilderCardRecord } from '$lib/features/builder-data';
+	import { CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID, type EmailDraft } from '$lib/builder-domain/email';
+	import type { BuilderBlueprintRecord } from '$lib/features/builder-data';
 	import CustomEmailRightPanel from '$lib/features/builder-canvas/CustomEmailRightPanel.svelte';
 	import SplitPane from '$lib/features/builder-canvas/SplitPane.svelte';
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder-canvas/split-pane';
@@ -10,24 +10,24 @@
 	import { createCustomEmailRunController } from '$lib/features/builder-chat/custom-email-run.svelte';
 
 	type Props = {
-		card: BuilderCardRecord;
+		blueprint: BuilderBlueprintRecord;
 		initialMessage?: string | null;
 	};
 
-	let { card, initialMessage = null }: Props = $props();
-	let bootedCardId = $state('');
+	let { blueprint, initialMessage = null }: Props = $props();
+	let bootedBlueprintId = $state('');
 
 	const run = createCustomEmailRunController(
-		CUSTOM_EMAIL_BUILDER_CARD_ID,
+		CUSTOM_EMAIL_BUILDER_BLUEPRINT_ID,
 		() => initialMessage?.trim() ?? ''
 	);
 	const runError = $derived(run.run?.errorText ?? (run.messages.length > 0 ? run.error : null));
 
 	function clearInitialMessageState() {
-		replaceState(
-			resolve('/builder/[cardId]', {
-				cardId: card.id
-			}),
+			replaceState(
+				resolve('/builder/[blueprintSlug]', {
+					blueprintSlug: blueprint.id
+				}),
 			{}
 		);
 	}
@@ -53,12 +53,12 @@
 	}
 
 	$effect(() => {
-		if (bootedCardId === card.id) {
-			return;
-		}
+			if (bootedBlueprintId === blueprint.id) {
+				return;
+			}
 
-		bootedCardId = card.id;
-		void boot();
+			bootedBlueprintId = blueprint.id;
+			void boot();
 	});
 </script>
 
@@ -109,6 +109,6 @@
 	{/snippet}
 
 	{#snippet secondary()}
-		<CustomEmailRightPanel card={card} run={run.run} onSaveDraft={saveDraft} />
+			<CustomEmailRightPanel {blueprint} run={run.run} onSaveDraft={saveDraft} />
 	{/snippet}
 </SplitPane>
