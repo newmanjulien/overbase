@@ -17,7 +17,19 @@ export type BuilderAppStartTurnInput = {
 export type BuilderAppInitialDraftInput = {
     initialMessage: string;
 };
+export type BuilderAppInitialQuestionInput = {
+    initialMessage: string;
+    handlers: BuilderAppTurnHandlers;
+};
+export type BuilderAppInitialAnswerInput = {
+    initialMessage: string;
+    initialQuestion: string;
+    initialAnswer: string;
+    draft: EmailDraft;
+};
 export type InitialDraftParams = BuilderAppInitialDraftInput;
+export type InitialQuestionParams = BuilderAppInitialQuestionInput;
+export type InitialAnswerParams = BuilderAppInitialAnswerInput;
 export type BuilderAppContinueTurnInput = {
     initialMessage: string;
     transcript: TranscriptMessage[];
@@ -46,7 +58,9 @@ export type BuilderAppRuntime = {
     runBackgroundJob?: (input: BuilderAppBackgroundJobInput) => Promise<BuilderAppOutputEvent[]>;
 };
 export type EmailAppDefinition = GuidedEmailAppCatalogDefinition & {
+    createInitialQuestion: (input: InitialQuestionParams) => Promise<string>;
     createInitialDraft: (input: InitialDraftParams) => Promise<EmailDraft>;
+    applyInitialAnswer: (input: InitialAnswerParams) => Promise<EmailDraft>;
     streamRefinementTurn: (input: RefinementParams) => Promise<EmailBuilderTurnStreamResult>;
 };
 export type BuilderAppPatchResult = {

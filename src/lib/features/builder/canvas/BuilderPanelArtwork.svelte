@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { BuilderArtworkPreset } from '$lib/features/builder/data';
+	import type { ComponentType } from 'svelte';
 
 	type Props = {
 		backColor: string;
 		frontColor: string;
-		icon: BuilderArtworkPreset['panel']['icon'];
+		icon: ComponentType;
 		iconCenterX: string;
 		iconCenterY: string;
 	};
@@ -14,7 +14,10 @@
 
 <div
 	class="panel-artwork"
-	style={`--panel-artwork-back: ${backColor}; --panel-artwork-front: ${frontColor}; --panel-artwork-icon-x: ${iconCenterX}; --panel-artwork-icon-y: ${iconCenterY};`}
+	style:--panel-artwork-back={backColor}
+	style:--panel-artwork-front={frontColor}
+	style:--panel-artwork-icon-x={iconCenterX}
+	style:--panel-artwork-icon-y={iconCenterY}
 	aria-hidden="true"
 >
 	<svg class="panel-artwork__shapes" viewBox="0 0 220 180" fill="none">

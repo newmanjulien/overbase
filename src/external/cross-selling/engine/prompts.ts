@@ -1,3 +1,8 @@
+import type { EmailDraft } from '@overbase/builder-sdk/email';
+import {
+	buildGuidedEmailInitialAnswerPrompt,
+	buildGuidedEmailInitialQuestionPrompt
+} from '../../shared/guided-email-workflow';
 import { crossSellingExamples } from '../examples';
 import {
 	crossSellingGuide,
@@ -32,6 +37,35 @@ export function buildCrossSellingInitialDraftPrompt(params: { initialMessage: st
 			stringifyPromptData(crossSellingExamples)
 		].join('\n\n')
 	};
+}
+
+export function buildCrossSellingInitialQuestionPrompt(params: { initialMessage: string }) {
+	return buildGuidedEmailInitialQuestionPrompt({
+		appTitle: 'Cross-selling',
+		initialMessage: params.initialMessage,
+		guideQuestions: crossSellingGuide.questions
+	});
+}
+
+export function buildCrossSellingInitialAnswerPrompt(params: {
+	initialMessage: string;
+	initialQuestion: string;
+	initialAnswer: string;
+	draft: EmailDraft;
+}) {
+	return buildGuidedEmailInitialAnswerPrompt({
+		appTitle: 'Cross-selling',
+		initialMessage: params.initialMessage,
+		initialQuestion: params.initialQuestion,
+		initialAnswer: params.initialAnswer,
+		draft: params.draft,
+		guideQuestions: crossSellingGuide.questions,
+		draftRules: [
+			...CROSS_SELLING_DRAFT_RULES,
+			EXECUTIVE_WRITING_RULES,
+			EXAMPLE_FIDELITY_RULES
+		]
+	});
 }
 
 export function buildCrossSellingRefinementSystemPrompt() {

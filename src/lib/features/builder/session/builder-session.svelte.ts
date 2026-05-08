@@ -39,7 +39,13 @@ type StoredBuilderSessionHandle = Omit<BuilderSessionHandle, 'sessionId'> & {
 	sessionId: string;
 };
 
+const BUILDER_SESSION_STORAGE_VERSION = 2;
+
 function getStorageKey(appSlug: string) {
+	return `overbase:builder-session:v${BUILDER_SESSION_STORAGE_VERSION}:${appSlug}`;
+}
+
+function getLegacyStorageKey(appSlug: string) {
 	return `overbase:builder-session:${appSlug}`;
 }
 
@@ -91,6 +97,7 @@ function writeStoredHandle(handle: BuilderSessionHandle) {
 function clearStoredHandle(appSlug: string) {
 	if (typeof sessionStorage !== 'undefined') {
 		sessionStorage.removeItem(getStorageKey(appSlug));
+		sessionStorage.removeItem(getLegacyStorageKey(appSlug));
 	}
 }
 

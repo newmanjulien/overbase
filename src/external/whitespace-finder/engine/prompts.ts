@@ -1,3 +1,8 @@
+import type { EmailDraft } from '@overbase/builder-sdk/email';
+import {
+	buildGuidedEmailInitialAnswerPrompt,
+	buildGuidedEmailInitialQuestionPrompt
+} from '../../shared/guided-email-workflow';
 import { whitespaceFinderExamples } from '../examples';
 import {
 	whitespaceFinderGuide,
@@ -32,6 +37,35 @@ export function buildWhitespaceFinderInitialDraftPrompt(params: { initialMessage
 			stringifyPromptData(whitespaceFinderExamples)
 		].join('\n\n')
 	};
+}
+
+export function buildWhitespaceFinderInitialQuestionPrompt(params: { initialMessage: string }) {
+	return buildGuidedEmailInitialQuestionPrompt({
+		appTitle: 'Whitespace finder',
+		initialMessage: params.initialMessage,
+		guideQuestions: whitespaceFinderGuide.questions
+	});
+}
+
+export function buildWhitespaceFinderInitialAnswerPrompt(params: {
+	initialMessage: string;
+	initialQuestion: string;
+	initialAnswer: string;
+	draft: EmailDraft;
+}) {
+	return buildGuidedEmailInitialAnswerPrompt({
+		appTitle: 'Whitespace finder',
+		initialMessage: params.initialMessage,
+		initialQuestion: params.initialQuestion,
+		initialAnswer: params.initialAnswer,
+		draft: params.draft,
+		guideQuestions: whitespaceFinderGuide.questions,
+		draftRules: [
+			...WHITESPACE_FINDER_DRAFT_RULES,
+			EXECUTIVE_WRITING_RULES,
+			EXAMPLE_FIDELITY_RULES
+		]
+	});
 }
 
 export function buildWhitespaceFinderRefinementSystemPrompt() {

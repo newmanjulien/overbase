@@ -57,6 +57,12 @@ function getStringField(value: Record<string, unknown>, field: string) {
 	return typeof fieldValue === 'string' ? fieldValue : undefined;
 }
 
+function getInitialQuestionText(appState?: BuilderAppState) {
+	const value = isRecord(appState?.value) ? appState.value : {};
+
+	return getStringField(value, 'initialQuestionText') ?? '';
+}
+
 function getCustomEmailAppState(appState?: BuilderAppState): CustomEmailAppState {
 	const value = isRecord(appState?.value) ? appState.value : {};
 
@@ -121,16 +127,53 @@ function toAssistantPatchResultEvents(result: {
 function createGuidedEmailRuntime(app: EmailAppDefinition): BuilderAppRuntime {
 	return {
 		manifest: app,
-		startTurn: async ({ initialMessage }) => {
-			const emailDraft = await app.createInitialDraft({ initialMessage });
+		startTurn: async ({ initialMessage, handlers }) => {
+			const questionText = await app.createInitialQuestion({
+				initialMessage,
+				handlers
+			});
 
 			return [
-				{ type: 'assistantComplete', text: 'I built the first draft and put it in the panel.' },
-				{ type: 'emailDraftReplace', emailDraft },
+				{ type: 'assistantComplete', text: questionText },
+				{
+					type: 'appStatePatch',
+					patch: {
+						initialQuestionText: questionText
+					}
+				},
+				{ type: 'enqueueBackgroundJob' },
+				{ type: 'waitForUser' },
 				{ type: 'complete' }
 			];
 		},
-		continueTurn: async ({ transcript, emailDraft, recentEvents, handlers }) => {
+		continueTurn: async ({
+			initialMessage,
+			userMessage,
+			transcript,
+			emailDraft,
+			preparedEmailDraft,
+			recentEvents,
+			appState,
+			handlers
+		}) => {
+			if (!emailDraft && preparedEmailDraft) {
+				const emailDraft = await app.applyInitialAnswer({
+					initialMessage,
+					initialQuestion: getInitialQuestionText(appState),
+					initialAnswer: userMessage,
+					draft: preparedEmailDraft
+				});
+
+				return [
+					{
+						type: 'assistantComplete',
+						text: 'I adjusted the draft based on that and put it in the panel.'
+					},
+					{ type: 'emailDraftReplace', emailDraft },
+					{ type: 'complete' }
+				];
+			}
+
 			if (!emailDraft) {
 				throw new Error('The visible email draft is unavailable.');
 			}
@@ -147,6 +190,18 @@ function createGuidedEmailRuntime(app: EmailAppDefinition): BuilderAppRuntime {
 			});
 
 			return toAssistantPatchResultEvents(result);
+		},
+		runBackgroundJob: async ({ initialMessage }) => {
+			const emailDraft = await app.createInitialDraft({ initialMessage });
+
+			return [
+				{
+					type: 'emailDraftReplace',
+					emailDraft,
+					visible: false
+				},
+				{ type: 'complete' }
+			];
 		}
 	};
 }
