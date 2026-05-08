@@ -1,6 +1,5 @@
 import {
 	BRING_THE_FIRM_APP_SLUG,
-	CUSTOM_NOTIFICATION_APP_SLUG,
 	getActiveBuilderAppPresentationEntry,
 	getBuilderAppPresentationEntry,
 	listBuilderHomeCategories,
@@ -36,10 +35,6 @@ const RUNTIME_CONFIGS: Record<string, RuntimeConfig> = {
 	[BRING_THE_FIRM_APP_SLUG]: {
 		urlEnv: 'BRING_THE_FIRM_RUNTIME_URL',
 		secretEnv: 'BRING_THE_FIRM_RUNTIME_SECRET'
-	},
-	[CUSTOM_NOTIFICATION_APP_SLUG]: {
-		urlEnv: 'CUSTOM_NOTIFICATION_RUNTIME_URL',
-		secretEnv: 'CUSTOM_NOTIFICATION_RUNTIME_SECRET'
 	}
 };
 
@@ -308,27 +303,39 @@ function relayAssistantDelta(input: RuntimeInput): RuntimeStreamHandler {
 	};
 }
 
-export function createBuilderAppRuntime(env: BuilderRuntimeEnv, fetchImpl: typeof fetch = fetch) {
+function filterCategoriesForApps(apps: BuilderAppPresentation[]) {
+	const categoryIds = new Set(apps.flatMap((app) => app.categoryIds));
+
+	return listBuilderHomeCategories().filter((category) => categoryIds.has(category.slug));
+}
+
+export function createExternalBuilderAppRuntime(env: BuilderRuntimeEnv, fetchImpl: typeof fetch = fetch) {
 	const getActiveBuilderAppManifest = async (slug: string) => {
 		assertRuntimePresentationCoverage();
 
 		const presentation = getActiveBuilderAppPresentationEntry(slug);
 
-		return presentation ? await getBuilderAppRegistryEntry(env, fetchImpl, presentation) : null;
+		return presentation && slug in RUNTIME_CONFIGS
+			? await getBuilderAppRegistryEntry(env, fetchImpl, presentation)
+			: null;
 	};
 
 	const listBuilderHomeApps = async () => {
 		assertRuntimePresentationCoverage();
 
-		const apps = await Promise.all(
-			listBuilderHomePresentationEntries().map((presentation) =>
-				getBuilderAppRegistryEntry(env, fetchImpl, presentation)
-			)
+		const appResults = await Promise.allSettled(
+			listBuilderHomePresentationEntries()
+				.filter((presentation) => presentation.slug in RUNTIME_CONFIGS)
+				.map((presentation) => getBuilderAppRegistryEntry(env, fetchImpl, presentation))
 		);
+		const apps = appResults
+			.filter((result) => result.status === 'fulfilled')
+			.map((result) => result.value)
+			.sort((left, right) => left.sortOrder - right.sortOrder);
 
 		return {
-			categories: listBuilderHomeCategories(),
-			apps: apps.sort((left, right) => left.sortOrder - right.sortOrder)
+			categories: filterCategoriesForApps(apps),
+			apps
 		};
 	};
 

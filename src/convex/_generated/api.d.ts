@@ -10,6 +10,7 @@
 
 import type * as builder from "../builder.js";
 import type * as builderEmailValidators from "../builderEmailValidators.js";
+import type * as builderRuntime from "../builderRuntime.js";
 import type * as builderSessionAccess from "../builderSessionAccess.js";
 import type * as builderSessionAppState from "../builderSessionAppState.js";
 import type * as builderSessionCore from "../builderSessionCore.js";
@@ -30,6 +31,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   builder: typeof builder;
   builderEmailValidators: typeof builderEmailValidators;
+  builderRuntime: typeof builderRuntime;
   builderSessionAccess: typeof builderSessionAccess;
   builderSessionAppState: typeof builderSessionAppState;
   builderSessionCore: typeof builderSessionCore;

@@ -1,5 +1,13 @@
-import { createBuilderAppRuntime } from '../builder-apps/runtime-core';
+import { CUSTOM_NOTIFICATION_APP_SLUG } from '../builder-apps/ids';
+import { runtime as customNotificationRuntime } from '../builder-apps/custom-notification/runtime';
+import { createExternalBuilderAppRuntime } from '../builder-apps/runtime-core';
 
-const runtime = createBuilderAppRuntime(process.env);
+const externalRuntime = createExternalBuilderAppRuntime(process.env);
 
-export const getBuilderAppRuntime = runtime.getBuilderAppRuntime;
+export function getBuilderAppRuntime(slug: string) {
+	if (slug === CUSTOM_NOTIFICATION_APP_SLUG) {
+		return customNotificationRuntime;
+	}
+
+	return externalRuntime.getBuilderAppRuntime(slug);
+}
