@@ -5,9 +5,7 @@ import {
 	getBuilderAppPresentationEntry,
 	listBuilderHomeCategories,
 	listBuilderHomePresentationEntries,
-	mergeBuilderAppManifest,
-	toBuilderAppGuideEntry,
-	type BuilderAppGuideEntry
+	mergeBuilderAppManifest
 } from './registry';
 import type {
 	BuilderAppBackgroundJobInput,
@@ -24,6 +22,8 @@ type RuntimeConfig = {
 	urlEnv: string;
 	secretEnv: string;
 };
+
+export type BuilderRuntimeEnv = Record<string, string | undefined>;
 
 type RuntimeInput =
 	| BuilderAppStartTurnInput
@@ -55,8 +55,8 @@ function assertRuntimePresentationCoverage() {
 	}
 }
 
-function getEnvValue(name: string) {
-	const value = process.env[name]?.trim();
+function getEnvValue(env: BuilderRuntimeEnv, name: string) {
+	const value = env[name]?.trim();
 
 	if (!value) {
 		throw new Error(`Missing ${name}.`);
@@ -75,16 +75,16 @@ function getRuntimeDefinition(appSlug: string) {
 	return config;
 }
 
-function getRuntimeBaseUrl(appSlug: string) {
-	return getEnvValue(getRuntimeDefinition(appSlug).urlEnv).replace(/\/+$/, '');
+function getRuntimeBaseUrl(env: BuilderRuntimeEnv, appSlug: string) {
+	return getEnvValue(env, getRuntimeDefinition(appSlug).urlEnv).replace(/\/+$/, '');
 }
 
-function getRuntimeConfig(appSlug: string) {
+function getRuntimeConfig(env: BuilderRuntimeEnv, appSlug: string) {
 	const config = getRuntimeDefinition(appSlug);
 
 	return {
-		baseUrl: getRuntimeBaseUrl(appSlug),
-		secret: getEnvValue(config.secretEnv)
+		baseUrl: getRuntimeBaseUrl(env, appSlug),
+		secret: getEnvValue(env, config.secretEnv)
 	};
 }
 
@@ -142,9 +142,13 @@ function isBuilderAppManifest(value: unknown): value is BuilderAppManifest {
 	);
 }
 
-async function fetchRuntimeManifest(appSlug: string) {
-	const baseUrl = getRuntimeBaseUrl(appSlug);
-	const response = await fetch(`${baseUrl}/api/builder/manifest`, {
+async function fetchRuntimeManifest(
+	env: BuilderRuntimeEnv,
+	fetchImpl: typeof fetch,
+	appSlug: string
+) {
+	const baseUrl = getRuntimeBaseUrl(env, appSlug);
+	const response = await fetchImpl(`${baseUrl}/api/builder/manifest`, {
 		headers: {
 			accept: 'application/json'
 		}
@@ -164,37 +168,14 @@ async function fetchRuntimeManifest(appSlug: string) {
 	return manifest;
 }
 
-async function getBuilderAppRegistryEntry(presentation: BuilderAppPresentation) {
-	const manifest = await fetchRuntimeManifest(presentation.slug);
+async function getBuilderAppRegistryEntry(
+	env: BuilderRuntimeEnv,
+	fetchImpl: typeof fetch,
+	presentation: BuilderAppPresentation
+) {
+	const manifest = await fetchRuntimeManifest(env, fetchImpl, presentation.slug);
 
 	return mergeBuilderAppManifest(manifest, presentation);
-}
-
-export async function getActiveBuilderAppManifest(slug: string) {
-	assertRuntimePresentationCoverage();
-
-	const presentation = getActiveBuilderAppPresentationEntry(slug);
-
-	return presentation ? await getBuilderAppRegistryEntry(presentation) : null;
-}
-
-export async function getBuilderAppGuide(slug: string): Promise<BuilderAppGuideEntry | null> {
-	const app = await getActiveBuilderAppManifest(slug);
-
-	return app ? toBuilderAppGuideEntry(app) : null;
-}
-
-export async function listBuilderHomeApps() {
-	assertRuntimePresentationCoverage();
-
-	const apps = await Promise.all(
-		listBuilderHomePresentationEntries().map(getBuilderAppRegistryEntry)
-	);
-
-	return {
-		categories: listBuilderHomeCategories(),
-		apps: apps.sort((left, right) => left.sortOrder - right.sortOrder)
-	};
 }
 
 async function createSignature(body: string, secret: string, timestamp: string) {
@@ -288,16 +269,18 @@ async function readRuntimeEvents(response: Response, onEvent?: RuntimeStreamHand
 }
 
 async function callRuntime(
+	env: BuilderRuntimeEnv,
+	fetchImpl: typeof fetch,
 	appSlug: string,
 	route: RuntimeRoute,
 	input: RuntimeInput,
 	onEvent?: RuntimeStreamHandler
 ) {
-	const { baseUrl, secret } = getRuntimeConfig(appSlug);
+	const { baseUrl, secret } = getRuntimeConfig(env, appSlug);
 	const body = JSON.stringify(stripHandlers(input));
 	const timestamp = String(Date.now());
 	const signature = await createSignature(body, secret, timestamp);
-	const response = await fetch(`${baseUrl}/api/builder/${route}`, {
+	const response = await fetchImpl(`${baseUrl}/api/builder/${route}`, {
 		method: 'POST',
 		headers: {
 			'content-type': 'application/json',
@@ -325,21 +308,52 @@ function relayAssistantDelta(input: RuntimeInput): RuntimeStreamHandler {
 	};
 }
 
-export function getBuilderAppRuntime(slug: string) {
-	assertRuntimePresentationCoverage();
+export function createBuilderAppRuntime(env: BuilderRuntimeEnv, fetchImpl: typeof fetch = fetch) {
+	const getActiveBuilderAppManifest = async (slug: string) => {
+		assertRuntimePresentationCoverage();
 
-	const presentation = getActiveBuilderAppPresentationEntry(slug);
+		const presentation = getActiveBuilderAppPresentationEntry(slug);
 
-	if (!presentation || !(slug in RUNTIME_CONFIGS)) {
-		return null;
-	}
+		return presentation ? await getBuilderAppRegistryEntry(env, fetchImpl, presentation) : null;
+	};
+
+	const listBuilderHomeApps = async () => {
+		assertRuntimePresentationCoverage();
+
+		const apps = await Promise.all(
+			listBuilderHomePresentationEntries().map((presentation) =>
+				getBuilderAppRegistryEntry(env, fetchImpl, presentation)
+			)
+		);
+
+		return {
+			categories: listBuilderHomeCategories(),
+			apps: apps.sort((left, right) => left.sortOrder - right.sortOrder)
+		};
+	};
+
+	const getBuilderAppRuntime = (slug: string) => {
+		assertRuntimePresentationCoverage();
+
+		const presentation = getActiveBuilderAppPresentationEntry(slug);
+
+		if (!presentation || !(slug in RUNTIME_CONFIGS)) {
+			return null;
+		}
+
+		return {
+			startTurn: async (input: BuilderAppStartTurnInput) =>
+				await callRuntime(env, fetchImpl, slug, 'start-turn', input, relayAssistantDelta(input)),
+			continueTurn: async (input: BuilderAppContinueTurnInput) =>
+				await callRuntime(env, fetchImpl, slug, 'continue-turn', input, relayAssistantDelta(input)),
+			backgroundJob: async (input: BuilderAppBackgroundJobInput) =>
+				await callRuntime(env, fetchImpl, slug, 'background-job', input)
+		};
+	};
 
 	return {
-		startTurn: async (input: BuilderAppStartTurnInput) =>
-			await callRuntime(slug, 'start-turn', input, relayAssistantDelta(input)),
-		continueTurn: async (input: BuilderAppContinueTurnInput) =>
-			await callRuntime(slug, 'continue-turn', input, relayAssistantDelta(input)),
-		backgroundJob: async (input: BuilderAppBackgroundJobInput) =>
-			await callRuntime(slug, 'background-job', input)
+		getActiveBuilderAppManifest,
+		listBuilderHomeApps,
+		getBuilderAppRuntime
 	};
 }

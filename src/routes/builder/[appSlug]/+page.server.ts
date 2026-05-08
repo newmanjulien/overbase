@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { getActiveBuilderAppManifest } from '../../../builder-apps/runtime';
+import { getActiveBuilderAppManifest } from '../../../builder-apps/runtime.server';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {

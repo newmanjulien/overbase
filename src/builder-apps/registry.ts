@@ -38,15 +38,6 @@ export function mergeBuilderAppManifest(
 	};
 }
 
-export function toBuilderAppGuideEntry(manifest: BuilderAppManifest): BuilderAppGuideEntry | null {
-	return manifest.guide
-		? {
-				appSlug: manifest.slug,
-				...manifest.guide
-			}
-		: null;
-}
-
 export function listBuilderHomeCategories() {
 	return [...builderAppCategories].sort((left, right) => left.sortOrder - right.sortOrder);
 }

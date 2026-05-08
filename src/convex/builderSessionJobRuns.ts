@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { internalAction } from './_generated/server';
-import { getBuilderAppRuntime } from '../builder-apps/runtime';
+import { getBuilderAppRuntime } from './builderRuntime';
 import {
 	ASSISTANT_STREAM_FLUSH_INTERVAL_MS,
 	ASSISTANT_STREAM_FLUSH_MIN_CHARS,
