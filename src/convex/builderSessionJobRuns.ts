@@ -172,11 +172,11 @@ export const runBackgroundJob = internalAction({
 
 			const runtime = getBuilderAppRuntime(context.appSlug);
 
-			if (!runtime?.runBackgroundJob) {
+			if (!runtime?.backgroundJob) {
 				throw new Error('This app is unavailable.');
 			}
 
-			const events = await runtime.runBackgroundJob({
+			const events = await runtime.backgroundJob({
 				initialMessage: context.initialMessage,
 				appState: context.appState
 			});

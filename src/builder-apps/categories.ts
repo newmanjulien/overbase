@@ -6,22 +6,10 @@ export const builderAppCategories = [
 		sortOrder: 0
 	},
 	{
-		slug: 'insurance',
-		label: 'Insurance',
-		iconId: 'shield-check',
-		sortOrder: 10
-	},
-	{
 		slug: 'law',
 		label: 'Law',
 		iconId: 'scale',
-		sortOrder: 20
-	},
-	{
-		slug: 'manufacturing',
-		label: 'Manufacturing',
-		iconId: 'factory',
-		sortOrder: 30
+		sortOrder: 10
 	}
 ] as const;
 

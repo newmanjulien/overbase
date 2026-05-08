@@ -1,345 +1,345 @@
 import {
-	adaptEmailExample,
-	applyEmailInitialAnswer,
-	getCustomEmailExamples,
-	listCustomEmailDraftExamples,
-	listCustomEmailExamples,
-	routeEmailBuilderRequest,
-	streamCustomEmailBuilderTurn,
-	streamEmailInitialQuestion
-} from '../external/custom';
-import { bringTheFirmApp } from '../external/bring-the-firm';
-import { crossSellingApp } from '../external/cross-selling';
-import { reasonsToConnectApp } from '../external/reasons-to-connect';
-import { whitespaceFinderApp } from '../external/whitespace-finder';
-import { customEmailBuilderCatalog } from '../external/custom/definition';
-import type { EmailDraft, EmailDraftPatch } from '@overbase/builder-sdk/email';
+	BRING_THE_FIRM_APP_SLUG,
+	CUSTOM_NOTIFICATION_APP_SLUG,
+	getActiveBuilderAppPresentationEntry,
+	getBuilderAppPresentationEntry,
+	listBuilderHomeCategories,
+	listBuilderHomePresentationEntries,
+	mergeBuilderAppManifest,
+	toBuilderAppGuideEntry,
+	type BuilderAppGuideEntry
+} from './registry';
 import type {
+	BuilderAppBackgroundJobInput,
+	BuilderAppContinueTurnInput,
+	BuilderAppManifest,
 	BuilderAppOutputEvent,
-	BuilderAppRuntime,
-	BuilderAppState,
-	EmailAppDefinition
+	BuilderAppStartTurnInput
 } from '@overbase/builder-sdk/app-protocol';
+import type { BuilderAppPresentation } from './presentation';
 
-type CustomEmailAppState = {
-	selectedEmailExamplesSlug?: string;
-	selectedEmailExampleSlug?: string;
-	initialQuestionText?: string;
+type RuntimeRoute = 'start-turn' | 'continue-turn' | 'background-job';
+
+type RuntimeConfig = {
+	urlEnv: string;
+	secretEnv: string;
 };
 
-type BuilderAppInitialQuestionExample = {
-	slug: string;
-	description: string;
-	questionGuidance: string;
+type RuntimeInput =
+	| BuilderAppStartTurnInput
+	| BuilderAppContinueTurnInput
+	| BuilderAppBackgroundJobInput;
+
+type RuntimeStreamHandler = (event: BuilderAppOutputEvent) => Promise<void> | void;
+
+const RUNTIME_CONFIGS: Record<string, RuntimeConfig> = {
+	[BRING_THE_FIRM_APP_SLUG]: {
+		urlEnv: 'BRING_THE_FIRM_RUNTIME_URL',
+		secretEnv: 'BRING_THE_FIRM_RUNTIME_SECRET'
+	},
+	[CUSTOM_NOTIFICATION_APP_SLUG]: {
+		urlEnv: 'CUSTOM_NOTIFICATION_RUNTIME_URL',
+		secretEnv: 'CUSTOM_NOTIFICATION_RUNTIME_SECRET'
+	}
 };
 
-type BuilderAppDraftExample = {
-	slug: string;
-	description: string;
-	matchSignals: string[];
-	emailDraft: EmailDraft;
-};
+function assertRuntimePresentationCoverage() {
+	const missingPresentationSlugs = Object.keys(RUNTIME_CONFIGS).filter(
+		(slug) => !getBuilderAppPresentationEntry(slug)
+	);
 
-const guidedEmailApps = [
-	bringTheFirmApp,
-	whitespaceFinderApp,
-	reasonsToConnectApp,
-	crossSellingApp
-];
+	if (missingPresentationSlugs.length > 0) {
+		throw new Error(
+			`Missing builder app presentation entries for: ${missingPresentationSlugs.join(', ')}.`
+		);
+	}
+}
+
+function getEnvValue(name: string) {
+	const value = process.env[name]?.trim();
+
+	if (!value) {
+		throw new Error(`Missing ${name}.`);
+	}
+
+	return value;
+}
+
+function getRuntimeDefinition(appSlug: string) {
+	const config = RUNTIME_CONFIGS[appSlug];
+
+	if (!config) {
+		throw new Error('This app is unavailable.');
+	}
+
+	return config;
+}
+
+function getRuntimeBaseUrl(appSlug: string) {
+	return getEnvValue(getRuntimeDefinition(appSlug).urlEnv).replace(/\/+$/, '');
+}
+
+function getRuntimeConfig(appSlug: string) {
+	const config = getRuntimeDefinition(appSlug);
+
+	return {
+		baseUrl: getRuntimeBaseUrl(appSlug),
+		secret: getEnvValue(config.secretEnv)
+	};
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
-function getStringField(value: Record<string, unknown>, field: string) {
-	const fieldValue = value[field];
-
-	return typeof fieldValue === 'string' ? fieldValue : undefined;
+function isStringArray(value: unknown): value is readonly string[] {
+	return Array.isArray(value) && value.every((item) => typeof item === 'string');
 }
 
-function getInitialQuestionText(appState?: BuilderAppState) {
-	const value = isRecord(appState?.value) ? appState.value : {};
-
-	return getStringField(value, 'initialQuestionText') ?? '';
-}
-
-function getCustomEmailAppState(appState?: BuilderAppState): CustomEmailAppState {
-	const value = isRecord(appState?.value) ? appState.value : {};
-
-	return {
-		selectedEmailExamplesSlug: getStringField(value, 'selectedEmailExamplesSlug'),
-		selectedEmailExampleSlug: getStringField(value, 'selectedEmailExampleSlug'),
-		initialQuestionText: getStringField(value, 'initialQuestionText')
-	};
-}
-
-function toInitialQuestionExample(examples: {
-	slug: string;
-	description: string;
-	questionGuidance: string;
-}): BuilderAppInitialQuestionExample {
-	return {
-		slug: examples.slug,
-		description: examples.description,
-		questionGuidance: examples.questionGuidance
-	};
-}
-
-function toDraftExample(example: {
-	slug: string;
-	description: string;
-	matchSignals: string[];
-	emailDraft: EmailDraft;
-}): BuilderAppDraftExample {
-	return {
-		slug: example.slug,
-		description: example.description,
-		matchSignals: example.matchSignals,
-		emailDraft: example.emailDraft
-	};
-}
-
-function toAssistantPatchResultEvents(result: {
-	text: string;
-	patch: EmailDraftPatch | null;
-	patchIntent: 'none' | 'noop' | 'meaningful';
-}): BuilderAppOutputEvent[] {
-	return [
-		{
-			type: 'assistantComplete',
-			text:
-				result.text.trim() ||
-				(result.patchIntent === 'meaningful'
-					? 'Updated the draft.'
-					: result.patchIntent === 'noop'
-						? 'No changes needed.'
-						: '')
-		},
-		{
-			type: 'emailDraftPatch',
-			patch: result.patch,
-			patchIntent: result.patchIntent
-		},
-		{ type: 'complete' }
-	];
-}
-
-function createGuidedEmailRuntime(app: EmailAppDefinition): BuilderAppRuntime {
-	return {
-		manifest: app,
-		startTurn: async ({ initialMessage, handlers }) => {
-			const questionText = await app.createInitialQuestion({
-				initialMessage,
-				handlers
-			});
-
-			return [
-				{ type: 'assistantComplete', text: questionText },
-				{
-					type: 'appStatePatch',
-					patch: {
-						initialQuestionText: questionText
-					}
-				},
-				{ type: 'enqueueBackgroundJob' },
-				{ type: 'waitForUser' },
-				{ type: 'complete' }
-			];
-		},
-		continueTurn: async ({
-			initialMessage,
-			userMessage,
-			transcript,
-			emailDraft,
-			preparedEmailDraft,
-			recentEvents,
-			appState,
-			handlers
-		}) => {
-			if (!emailDraft && preparedEmailDraft) {
-				const emailDraft = await app.applyInitialAnswer({
-					initialMessage,
-					initialQuestion: getInitialQuestionText(appState),
-					initialAnswer: userMessage,
-					draft: preparedEmailDraft
-				});
-
-				return [
-					{
-						type: 'assistantComplete',
-						text: 'I adjusted the draft based on that and put it in the panel.'
-					},
-					{ type: 'emailDraftReplace', emailDraft },
-					{ type: 'complete' }
-				];
-			}
-
-			if (!emailDraft) {
-				throw new Error('The visible email draft is unavailable.');
-			}
-
-			const result = await app.streamRefinementTurn({
-				transcript,
-				draft: emailDraft,
-				recentEvents,
-				handlers: {
-					onTextDelta: async (delta) => {
-						await handlers.onAssistantDelta?.(delta);
-					}
-				}
-			});
-
-			return toAssistantPatchResultEvents(result);
-		},
-		runBackgroundJob: async ({ initialMessage }) => {
-			const emailDraft = await app.createInitialDraft({ initialMessage });
-
-			return [
-				{
-					type: 'emailDraftReplace',
-					emailDraft,
-					visible: false
-				},
-				{ type: 'complete' }
-			];
-		}
-	};
-}
-
-const customEmailRuntime = {
-	manifest: customEmailBuilderCatalog,
-	startTurn: async ({ initialMessage, handlers }) => {
-		const examples = listCustomEmailExamples().map(toInitialQuestionExample);
-
-		if (examples.length === 0) {
-			throw new Error('No custom email examples are available.');
-		}
-
-		const routeResult = await routeEmailBuilderRequest({
-			initialMessage,
-			examples
-		});
-		const selectedExamples =
-			examples.find((candidate) => candidate.slug === routeResult.examplesSlug) ?? examples[0];
-		const questionText = await streamEmailInitialQuestion({
-			initialMessage,
-			examples: selectedExamples,
-			proposedQuestion: routeResult.question,
-			handlers: {
-				onDelta: async (delta) => {
-					await handlers.onAssistantDelta?.(delta);
-				}
-			}
-		});
-
-		return [
-			{ type: 'assistantComplete', text: questionText },
-			{
-				type: 'appStatePatch',
-				patch: {
-					selectedEmailExamplesSlug: selectedExamples.slug,
-					initialQuestionText: questionText
-				}
-			},
-			{ type: 'enqueueBackgroundJob' },
-			{ type: 'waitForUser' },
-			{ type: 'complete' }
-		];
-	},
-	continueTurn: async ({
-		initialMessage,
-		userMessage,
-		transcript,
-		emailDraft,
-		preparedEmailDraft,
-		recentEvents,
-		appState,
-		handlers
-	}) => {
-		if (!emailDraft && preparedEmailDraft) {
-			const customState = getCustomEmailAppState(appState);
-			const emailDraft = await applyEmailInitialAnswer({
-				initialMessage,
-				initialQuestion: customState.initialQuestionText ?? '',
-				initialAnswer: userMessage,
-				draft: preparedEmailDraft
-			});
-
-			return [
-				{
-					type: 'assistantComplete',
-					text: 'I adjusted the draft based on that and put it in the panel.'
-				},
-				{ type: 'emailDraftReplace', emailDraft },
-				{ type: 'complete' }
-			];
-		}
-
-		if (!emailDraft) {
-			throw new Error('The visible email draft is unavailable.');
-		}
-
-		const result = await streamCustomEmailBuilderTurn({
-			transcript,
-			draft: emailDraft,
-			recentEvents,
-			handlers: {
-				onTextDelta: async (delta) => {
-					await handlers.onAssistantDelta?.(delta);
-				}
-			}
-		});
-
-		return toAssistantPatchResultEvents(result);
-	},
-	runBackgroundJob: async ({ initialMessage, appState }) => {
-		const customState = getCustomEmailAppState(appState);
-		const selectedEmailExamplesSlug = customState.selectedEmailExamplesSlug;
-
-		if (!selectedEmailExamplesSlug) {
-			throw new Error('The selected examples are unavailable.');
-		}
-
-		const examples = getCustomEmailExamples(selectedEmailExamplesSlug);
-
-		if (!examples) {
-			throw new Error('The selected examples are unavailable.');
-		}
-
-		const draftExamples = listCustomEmailDraftExamples(selectedEmailExamplesSlug).map(toDraftExample);
-
-		if (draftExamples.length === 0) {
-			throw new Error('No custom email draft examples are available for these examples.');
-		}
-
-		const adapted = await adaptEmailExample({
-			initialMessage,
-			examples: toInitialQuestionExample(examples),
-			draftExamples
-		});
-
-		return [
-			{
-				type: 'emailDraftReplace',
-				emailDraft: adapted.emailDraft,
-				visible: false
-			},
-			{
-				type: 'appStatePatch',
-				patch: {
-					selectedEmailExampleSlug: adapted.exampleSlug
-				}
-			},
-			{ type: 'complete' }
-		];
+function isGuideQuestion(value: unknown) {
+	if (!isRecord(value)) {
+		return false;
 	}
-} satisfies BuilderAppRuntime;
 
-const builderAppRuntimes: BuilderAppRuntime[] = [
-	...guidedEmailApps.map(createGuidedEmailRuntime),
-	customEmailRuntime
-];
+	if (
+		value.type === 'choice' &&
+		typeof value.id === 'string' &&
+		typeof value.title === 'string' &&
+		isStringArray(value.options) &&
+		typeof value.customAnswerPlaceholder === 'string'
+	) {
+		return true;
+	}
+
+	return (
+		value.type === 'text' &&
+		typeof value.id === 'string' &&
+		typeof value.title === 'string' &&
+		typeof value.placeholder === 'string'
+	);
+}
+
+function isGuideDefinition(value: unknown) {
+	return (
+		isRecord(value) &&
+		typeof value.intro === 'string' &&
+		Array.isArray(value.questions) &&
+		value.questions.every(isGuideQuestion)
+	);
+}
+
+function isBuilderAppManifest(value: unknown): value is BuilderAppManifest {
+	if (!isRecord(value)) {
+		return false;
+	}
+
+	return (
+		typeof value.slug === 'string' &&
+		typeof value.title === 'string' &&
+		typeof value.description === 'string' &&
+		((value.mode === 'custom' && value.guide === null) ||
+			(value.mode === 'guided' && isGuideDefinition(value.guide)))
+	);
+}
+
+async function fetchRuntimeManifest(appSlug: string) {
+	const baseUrl = getRuntimeBaseUrl(appSlug);
+	const response = await fetch(`${baseUrl}/api/builder/manifest`, {
+		headers: {
+			accept: 'application/json'
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error(`The app manifest failed with status ${response.status}.`);
+	}
+
+	const body = (await response.json()) as unknown;
+	const manifest = isRecord(body) ? body.manifest : null;
+
+	if (!isBuilderAppManifest(manifest) || manifest.slug !== appSlug) {
+		throw new Error('The app runtime returned an invalid manifest.');
+	}
+
+	return manifest;
+}
+
+async function getBuilderAppRegistryEntry(presentation: BuilderAppPresentation) {
+	const manifest = await fetchRuntimeManifest(presentation.slug);
+
+	return mergeBuilderAppManifest(manifest, presentation);
+}
+
+export async function getActiveBuilderAppManifest(slug: string) {
+	assertRuntimePresentationCoverage();
+
+	const presentation = getActiveBuilderAppPresentationEntry(slug);
+
+	return presentation ? await getBuilderAppRegistryEntry(presentation) : null;
+}
+
+export async function getBuilderAppGuide(slug: string): Promise<BuilderAppGuideEntry | null> {
+	const app = await getActiveBuilderAppManifest(slug);
+
+	return app ? toBuilderAppGuideEntry(app) : null;
+}
+
+export async function listBuilderHomeApps() {
+	assertRuntimePresentationCoverage();
+
+	const apps = await Promise.all(
+		listBuilderHomePresentationEntries().map(getBuilderAppRegistryEntry)
+	);
+
+	return {
+		categories: listBuilderHomeCategories(),
+		apps: apps.sort((left, right) => left.sortOrder - right.sortOrder)
+	};
+}
+
+async function createSignature(body: string, secret: string, timestamp: string) {
+	const key = await crypto.subtle.importKey(
+		'raw',
+		new TextEncoder().encode(secret),
+		{ name: 'HMAC', hash: 'SHA-256' },
+		false,
+		['sign']
+	);
+	const signature = await crypto.subtle.sign(
+		'HMAC',
+		key,
+		new TextEncoder().encode(`${timestamp}.${body}`)
+	);
+
+	return [...new Uint8Array(signature)]
+		.map((byte) => byte.toString(16).padStart(2, '0'))
+		.join('');
+}
+
+function stripHandlers<T extends RuntimeInput>(input: T) {
+	const body = { ...input } as Record<string, unknown>;
+	delete body.handlers;
+
+	return body;
+}
+
+async function parseRuntimeEventLine(line: string) {
+	try {
+		const event = JSON.parse(line) as BuilderAppOutputEvent;
+
+		if (event.type === 'fail') {
+			throw new Error(event.errorText);
+		}
+
+		return event;
+	} catch (error) {
+		if (error instanceof Error) {
+			throw error;
+		}
+
+		throw new Error('The app runtime returned an invalid event.');
+	}
+}
+
+async function readRuntimeEvents(response: Response, onEvent?: RuntimeStreamHandler) {
+	const events: BuilderAppOutputEvent[] = [];
+
+	if (!response.body) {
+		return events;
+	}
+
+	const reader = response.body.getReader();
+	const decoder = new TextDecoder();
+	let buffer = '';
+
+	while (true) {
+		const { done, value } = await reader.read();
+
+		if (done) {
+			break;
+		}
+
+		buffer += decoder.decode(value, { stream: true });
+		const lines = buffer.split('\n');
+		buffer = lines.pop() ?? '';
+
+		for (const line of lines) {
+			const trimmedLine = line.trim();
+
+			if (!trimmedLine) {
+				continue;
+			}
+
+			const event = await parseRuntimeEventLine(trimmedLine);
+			events.push(event);
+			await onEvent?.(event);
+		}
+	}
+
+	buffer += decoder.decode();
+
+	if (buffer.trim()) {
+		const event = await parseRuntimeEventLine(buffer.trim());
+		events.push(event);
+		await onEvent?.(event);
+	}
+
+	return events;
+}
+
+async function callRuntime(
+	appSlug: string,
+	route: RuntimeRoute,
+	input: RuntimeInput,
+	onEvent?: RuntimeStreamHandler
+) {
+	const { baseUrl, secret } = getRuntimeConfig(appSlug);
+	const body = JSON.stringify(stripHandlers(input));
+	const timestamp = String(Date.now());
+	const signature = await createSignature(body, secret, timestamp);
+	const response = await fetch(`${baseUrl}/api/builder/${route}`, {
+		method: 'POST',
+		headers: {
+			'content-type': 'application/json',
+			'x-overbase-app': appSlug,
+			'x-overbase-timestamp': timestamp,
+			'x-overbase-signature': signature
+		},
+		body
+	});
+
+	if (!response.ok) {
+		const errorText = await response.text();
+
+		throw new Error(errorText.trim() || `The app runtime failed with status ${response.status}.`);
+	}
+
+	return await readRuntimeEvents(response, onEvent);
+}
+
+function relayAssistantDelta(input: RuntimeInput): RuntimeStreamHandler {
+	return async (event) => {
+		if (event.type === 'assistantDelta' && 'handlers' in input) {
+			await input.handlers?.onAssistantDelta?.(event.text);
+		}
+	};
+}
 
 export function getBuilderAppRuntime(slug: string) {
-	return builderAppRuntimes.find((runtime) => runtime.manifest.slug === slug) ?? null;
+	assertRuntimePresentationCoverage();
+
+	const presentation = getActiveBuilderAppPresentationEntry(slug);
+
+	if (!presentation || !(slug in RUNTIME_CONFIGS)) {
+		return null;
+	}
+
+	return {
+		startTurn: async (input: BuilderAppStartTurnInput) =>
+			await callRuntime(slug, 'start-turn', input, relayAssistantDelta(input)),
+		continueTurn: async (input: BuilderAppContinueTurnInput) =>
+			await callRuntime(slug, 'continue-turn', input, relayAssistantDelta(input)),
+		backgroundJob: async (input: BuilderAppBackgroundJobInput) =>
+			await callRuntime(slug, 'background-job', input)
+	};
 }

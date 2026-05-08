@@ -22,7 +22,7 @@ import {
 	insertJob
 } from './builderSessionCore';
 import {
-	getActiveBuilderAppManifest
+	getActiveBuilderAppPresentationEntry
 } from '../builder-apps/registry';
 
 export const startSession = mutation({
@@ -36,7 +36,7 @@ export const startSession = mutation({
 		const resumeToken = createResumeToken();
 		const resumeTokenHash = await hashResumeToken(resumeToken);
 		const expiresAt = getBuilderSessionExpiresAt(now);
-		const app = getActiveBuilderAppManifest(appSlug);
+		const app = getActiveBuilderAppPresentationEntry(appSlug);
 
 		if (!app) {
 			throw new Error('Builder app not found.');
@@ -44,7 +44,7 @@ export const startSession = mutation({
 
 		const sessionId = await ctx.db.insert('builderSessions', {
 			appSlug: app.slug,
-			appTitle: app.title,
+			appTitle: app.slug,
 			emailDraftVersion: 0,
 			status: 'working',
 			resumeTokenHash,

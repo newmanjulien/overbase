@@ -1,27 +1,27 @@
 <script lang="ts">
-	import { api } from '$convex/_generated/api';
-	import { useQuery } from 'convex-svelte';
 	import {
 		ALL_BUILDER_APP_FILTER,
 		toBuilderAppFilter,
 		toBuilderAppRecord,
+		type BuilderAppHomeData,
 		type BuilderAppFilterId,
 		type BuilderAppRecord
 	} from '$lib/features/builder/data';
 	import BuilderAppCard from '$lib/features/builder/apps/BuilderAppCard.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
+	type Props = {
+		builderHome: BuilderAppHomeData;
+	};
+
+	let { builderHome }: Props = $props();
 	let selectedFilterId = $state<BuilderAppFilterId>('all');
 
-	const loadingCardPlaceholders = [0, 1, 2, 3];
-	const builderHomeQuery = useQuery(api.builder.listBuilderHome);
-	const queryError = $derived(builderHomeQuery.error ?? null);
 	const filters = $derived([
 		ALL_BUILDER_APP_FILTER,
-		...(builderHomeQuery.data?.categories ?? []).map(toBuilderAppFilter)
+		...builderHome.categories.map(toBuilderAppFilter)
 	]);
-	const apps = $derived((builderHomeQuery.data?.apps ?? []).map(toBuilderAppRecord));
-	const isLoading = $derived(builderHomeQuery.data === undefined);
+	const apps = $derived(builderHome.apps.map(toBuilderAppRecord));
 
 	function appMatchesFilter(app: BuilderAppRecord, filterId: BuilderAppFilterId) {
 		return filterId === 'all' || app.categoryIds.includes(filterId);
@@ -56,22 +56,10 @@
 	</div>
 
 	<div class="mt-5">
-		{#if queryError}
-			<div class="mt-4 rounded-sm border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-				{queryError.message}
-			</div>
-		{:else if isLoading}
-			<div class="mt-4 grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-3">
-				{#each loadingCardPlaceholders as index (index)}
-					<div class="h-36 animate-pulse rounded-sm bg-zinc-100"></div>
-				{/each}
-			</div>
-		{:else}
-			<div class="mt-4 grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-3">
-				{#each visibleApps as app (app.id)}
-					<BuilderAppCard {app} />
-				{/each}
-			</div>
-		{/if}
+		<div class="mt-4 grid grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-3">
+			{#each visibleApps as app (app.id)}
+				<BuilderAppCard {app} />
+			{/each}
+		</div>
 	</div>
 </section>

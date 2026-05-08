@@ -3,7 +3,7 @@ import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
 import { internalMutation, type MutationCtx } from './_generated/server';
 import { builderAppOutputEvent } from './builderEmailValidators';
-import { getBuilderAppRuntime } from '../builder-apps/runtime';
+import { getActiveBuilderAppPresentationEntry } from '../builder-apps/registry';
 import { isBuilderSessionActive } from './builderSessionAccess';
 import {
 	BACKGROUND_JOB_MAX_ATTEMPTS,
@@ -150,9 +150,7 @@ export const claimStartTurn = internalMutation({
 			return null;
 		}
 
-		const runtime = getBuilderAppRuntime(session.appSlug);
-
-		if (!runtime?.startTurn) {
+		if (!getActiveBuilderAppPresentationEntry(session.appSlug)) {
 			await failJobRecord(ctx, jobId, 'This app is unavailable.', now);
 			return null;
 		}
@@ -241,9 +239,7 @@ export const claimContinueTurn = internalMutation({
 			};
 		}
 
-		const runtime = getBuilderAppRuntime(session.appSlug);
-
-		if (!runtime?.continueTurn) {
+		if (!getActiveBuilderAppPresentationEntry(session.appSlug)) {
 			await failJobRecord(ctx, jobId, 'This app is unavailable.', now);
 			return {
 				state: 'terminal' as const
@@ -307,9 +303,7 @@ export const claimBackgroundJob = internalMutation({
 			return null;
 		}
 
-		const runtime = getBuilderAppRuntime(session.appSlug);
-
-		if (!runtime?.runBackgroundJob) {
+		if (!getActiveBuilderAppPresentationEntry(session.appSlug)) {
 			await failBackgroundJobState(ctx, job, 'This app is unavailable.', now);
 			return null;
 		}

@@ -1,27 +1,21 @@
-import {
-	BriefcaseBusiness,
-	Factory,
-	Flag,
-	LoaderCircle,
-	Scale,
-	ShieldCheck
-} from 'lucide-svelte';
-import { CUSTOM_EMAIL_BUILDER_APP_ID } from '../../../../builder-apps/ids';
-import type { Artwork } from '@overbase/builder-sdk/catalog';
+import { BriefcaseBusiness, Flag, LoaderCircle, Scale } from 'lucide-svelte';
+import { CUSTOM_NOTIFICATION_APP_SLUG } from '../../../../builder-apps/ids';
+import type { BuilderAppRegistryEntry } from '../../../../builder-apps/registry';
 import type { BuilderAppCategory } from '../../../../builder-apps/categories';
+import type { BuilderAppArtwork } from '../../../../builder-apps/presentation';
 import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
 
 type CategoryIcon = typeof Flag;
 type BuilderAppView = {
 	slug: string;
-	categoryIds: string[];
+	categoryIds: readonly string[];
 	title: string;
 	description: string;
 	mode: 'custom' | 'guided';
-	artwork: Artwork;
+	artwork: BuilderAppArtwork;
 };
 
-export const CUSTOM_NOTIFICATION_APP_ID = CUSTOM_EMAIL_BUILDER_APP_ID;
+export const CUSTOM_NOTIFICATION_APP_ID = CUSTOM_NOTIFICATION_APP_SLUG;
 
 export type BuilderAppCategoryId = string;
 export type BuilderAppFilterId = BuilderAppCategoryId | 'all';
@@ -43,12 +37,15 @@ export type BuilderAppRecord = {
 	artwork: BuilderArtworkPreset;
 };
 
+export type BuilderAppHomeData = {
+	categories: BuilderAppCategory[];
+	apps: BuilderAppRegistryEntry[];
+};
+
 const CATEGORY_ICONS: Record<string, CategoryIcon> = {
 	'briefcase-business': BriefcaseBusiness,
-	factory: Factory,
 	flag: Flag,
-	scale: Scale,
-	'shield-check': ShieldCheck
+	scale: Scale
 };
 
 export const ALL_BUILDER_APP_FILTER = {
@@ -76,7 +73,7 @@ export function toBuilderAppFilter(category: BuilderAppCategory): BuilderAppFilt
 export function toBuilderAppRecord(app: BuilderAppView): BuilderAppRecord {
 	return {
 		id: app.slug,
-		categoryIds: app.categoryIds,
+		categoryIds: [...app.categoryIds],
 		title: app.title,
 		description: app.description,
 		mode: app.mode,

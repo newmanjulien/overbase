@@ -1,1 +1,2 @@
-export const CUSTOM_EMAIL_BUILDER_APP_ID = 'custom-notification';
+export const BRING_THE_FIRM_APP_SLUG = 'bring-the-firm';
+export const CUSTOM_NOTIFICATION_APP_SLUG = 'custom-notification';

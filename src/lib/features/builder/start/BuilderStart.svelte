@@ -1,6 +1,13 @@
 <script lang="ts">
 	import BuilderAppGallery from '$lib/features/builder/apps/BuilderAppGallery.svelte';
 	import BuilderChat from '$lib/features/builder/chat/BuilderChat.svelte';
+	import type { BuilderAppHomeData } from '$lib/features/builder/data';
+
+	type Props = {
+		builderHome: BuilderAppHomeData;
+	};
+
+	let { builderHome }: Props = $props();
 </script>
 
 <div class="mx-auto flex min-h-full w-full max-w-172 flex-col items-center pb-12">
@@ -13,6 +20,6 @@
 	</p>
 
 	<div class="mt-16 w-full">
-		<BuilderAppGallery />
+		<BuilderAppGallery {builderHome} />
 	</div>
 </div>
