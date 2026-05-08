@@ -13,7 +13,7 @@ import {
 	OPENAI_RESPONSES_URL,
 	STRUCTURED_MAX_OUTPUT_TOKENS,
 	supportsReasoningOptions
-} from '@overbase/builder-sdk/server';
+} from '@overbase/builder-sdk/openai';
 import {
 	buildEmailExampleAdaptationPrompt,
 	buildEmailInitialAnswerPrompt,
@@ -22,7 +22,7 @@ import {
 	buildEmailRefinementUserPrompt,
 	buildEmailRoutingPrompt
 } from './prompts';
-import { readEmailBuilderTurnStream, readOpenAIStream } from '@overbase/builder-sdk/server';
+import { readEmailBuilderTurnStream, readOpenAIStream } from '@overbase/builder-sdk/streams';
 import type {
 	ChatReplyStreamHandlers,
 	EmailAdaptedExampleResult,

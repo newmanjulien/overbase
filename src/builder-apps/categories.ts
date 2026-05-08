@@ -1,4 +1,4 @@
-export const externalCategories = [
+export const builderAppCategories = [
 	{
 		slug: 'consulting',
 		label: 'Consulting',
@@ -25,4 +25,4 @@ export const externalCategories = [
 	}
 ] as const;
 
-export type ExternalCategory = (typeof externalCategories)[number];
+export type BuilderAppCategory = (typeof builderAppCategories)[number];

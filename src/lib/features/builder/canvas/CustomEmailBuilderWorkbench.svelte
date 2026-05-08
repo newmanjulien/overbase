@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import {
-		CUSTOM_EMAIL_BUILDER_APP_ID,
-		type EmailDraft
-	} from '$lib/features/builder/domain/email-design';
+	import { untrack } from 'svelte';
+	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderAppRecord } from '$lib/features/builder/data';
 	import CustomEmailRightPanel from '$lib/features/builder/canvas/CustomEmailRightPanel.svelte';
 	import SplitPane from '$lib/features/builder/canvas/SplitPane.svelte';
@@ -19,9 +17,10 @@
 
 	let { app, initialMessage = null }: Props = $props();
 	let bootedAppId = $state('');
+	const initialAppId = untrack(() => app.id);
 
 	const builderSession = createBuilderSessionController(
-		CUSTOM_EMAIL_BUILDER_APP_ID,
+		initialAppId,
 		() => initialMessage?.trim() ?? ''
 	);
 	const runError = $derived(
@@ -54,8 +53,8 @@
 		await builderSession.send(text);
 	}
 
-	async function saveDraft(draft: EmailDraft, baseArtifactVersion: number) {
-		await builderSession.saveVisibleEmailDraft(draft, baseArtifactVersion);
+	async function saveDraft(draft: EmailDraft, baseEmailDraftVersion: number) {
+		await builderSession.saveEmailDraft(draft, baseEmailDraftVersion);
 	}
 
 	$effect(() => {

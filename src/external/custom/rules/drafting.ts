@@ -45,5 +45,5 @@ export const CUSTOM_EMAIL_REFINEMENT_DRAFT_RULES = [
 	'Attachments are PDF placeholder filenames only. Attachment names must end in .pdf.',
 	'Keep the email compact: at most four body blocks, at most five bullets, and roughly 150 visible words.',
 	'Do not invent business-critical facts. If required information is missing, ask one focused question in chat text.',
-	'When recent internal artifact events are present, treat them as source material for future chat context without mentioning them unless useful.'
+	'When recent email draft events are present, treat them as source material for future chat context without mentioning them unless useful.'
 ] as const;

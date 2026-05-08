@@ -3,14 +3,13 @@ import { internal } from './_generated/api';
 import { mutation, query } from './_generated/server';
 import {
 	emailDraft as emailDraftValidator
-} from './emailDesignValidators';
+} from './builderEmailValidators';
 import {
-	CUSTOM_EMAIL_BUILDER_APP_ID,
 	getEmailDraftChangedFields,
 	hasEmailDraftChanged,
 	normalizeEmailDraft,
 	summarizeEmailDraftEdit
-} from './emailDesign';
+} from '@overbase/builder-sdk/email';
 import {
 	createResumeToken,
 	getBuilderSessionExpiresAt,
@@ -19,11 +18,12 @@ import {
 } from './builderSessionAccess';
 import {
 	buildSessionSnapshot,
-	createOperationId,
 	getAuthorizedSession,
-	insertOperation
+	insertJob
 } from './builderSessionCore';
-import { getActiveExternalApp } from '../lib/features/builder/external/registry';
+import {
+	getActiveBuilderAppManifest
+} from '../builder-apps/registry';
 
 export const startSession = mutation({
 	args: {
@@ -36,24 +36,17 @@ export const startSession = mutation({
 		const resumeToken = createResumeToken();
 		const resumeTokenHash = await hashResumeToken(resumeToken);
 		const expiresAt = getBuilderSessionExpiresAt(now);
-		const app = getActiveExternalApp(appSlug);
+		const app = getActiveBuilderAppManifest(appSlug);
 
 		if (!app) {
 			throw new Error('Builder app not found.');
 		}
 
-		const isCustomEmailBuilder = app.slug === CUSTOM_EMAIL_BUILDER_APP_ID;
-		const operationId = createOperationId();
-		const initialOperationKind = isCustomEmailBuilder ? 'routeAndAsk' : 'prepareInitialDraft';
 		const sessionId = await ctx.db.insert('builderSessions', {
 			appSlug: app.slug,
 			appTitle: app.title,
-			artifactKind: 'email',
-			artifactVersion: 0,
-			phase: isCustomEmailBuilder ? 'routing' : 'preparingInitialDraft',
-			artifactVisibility: 'hidden',
-			workingArtifactStatus: isCustomEmailBuilder ? 'none' : 'preparing',
-			visibleArtifactStatus: 'notReleased',
+			emailDraftVersion: 0,
+			status: 'working',
 			resumeTokenHash,
 			createdAt: now,
 			updatedAt: now,
@@ -68,33 +61,32 @@ export const startSession = mutation({
 			createdAt: now,
 			updatedAt: now
 		});
+		const jobId = await insertJob(ctx, {
+			sessionId,
+			kind: 'startTurn',
+			createdAt: now
+		});
 		const assistantMessageId = await ctx.db.insert('builderSessionMessages', {
 			sessionId,
 			role: 'assistant',
 			text: '',
 			status: 'pending',
-			operationId,
+			jobId,
 			createdAt: now + 1,
 			updatedAt: now + 1
 		});
-
-		await insertOperation(ctx, {
-			sessionId,
-			kind: initialOperationKind,
-			operationId,
+		await ctx.db.patch(jobId, {
 			assistantMessageId,
-			createdAt: now
+			updatedAt: now
 		});
 		await ctx.db.patch(sessionId, {
-			activeMessageOperationId: operationId,
+			activeTurnJobId: jobId,
 			updatedAt: now
 		});
 		await ctx.scheduler.runAfter(
 			0,
-			isCustomEmailBuilder
-				? internal.builderSessionJobs.routeAndAsk
-				: internal.builderSessionJobs.prepareInitialDraftOperation,
-			{ operationId }
+			internal.builderSessionJobRuns.runStartTurn,
+			{ jobId }
 		);
 
 		const session = await ctx.db.get(sessionId);
@@ -168,11 +160,11 @@ export const sendMessage = mutation({
 			throw new Error('Builder session not found.');
 		}
 
-		if (session.activeMessageOperationId) {
+		if (session.activeTurnJobId) {
 			throw new Error('Please wait for the assistant response to finish before sending another message.');
 		}
 
-		if (session.phase !== 'waitingForInitialAnswer' && session.phase !== 'ready') {
+		if (session.status !== 'waitingForUser' && session.status !== 'ready') {
 			throw new Error('This builder is not ready for another message yet.');
 		}
 
@@ -185,38 +177,34 @@ export const sendMessage = mutation({
 			createdAt: now,
 			updatedAt: now
 		});
-		const operationKind = session.phase === 'waitingForInitialAnswer' ? 'applyInitialAnswer' : 'refine';
-		const operationId = createOperationId();
+		const jobId = await insertJob(ctx, {
+			sessionId: session._id,
+			kind: 'continueTurn',
+			createdAt: now
+		});
 		const assistantMessageId = await ctx.db.insert('builderSessionMessages', {
 			sessionId: session._id,
 			role: 'assistant',
 			text: '',
 			status: 'pending',
-			operationId,
+			jobId,
 			createdAt: now + 1,
 			updatedAt: now + 1
 		});
-
-		await insertOperation(ctx, {
-			sessionId: session._id,
-			kind: operationKind,
-			operationId,
+		await ctx.db.patch(jobId, {
 			assistantMessageId,
-			createdAt: now
+			updatedAt: now
 		});
 		await ctx.db.patch(session._id, {
-			phase: operationKind === 'applyInitialAnswer' ? 'applyingInitialAnswer' : 'refining',
-			initialAnswerText: operationKind === 'applyInitialAnswer' ? normalizedText : session.initialAnswerText,
-			activeMessageOperationId: operationId,
+			status: 'working',
+			activeTurnJobId: jobId,
 			expiresAt,
 			updatedAt: now
 		});
 		await ctx.scheduler.runAfter(
 			0,
-			operationKind === 'applyInitialAnswer'
-				? internal.builderSessionJobs.applyInitialAnswerOperation
-				: internal.builderSessionJobs.refineOperation,
-			{ operationId }
+			internal.builderSessionJobRuns.runContinueTurn,
+			{ jobId }
 		);
 
 		const updatedSession = await ctx.db.get(session._id);
@@ -233,33 +221,33 @@ export const sendMessage = mutation({
 	}
 });
 
-export const saveVisibleEmailDraft = mutation({
+export const saveEmailDraft = mutation({
 	args: {
 		sessionId: v.id('builderSessions'),
 		resumeToken: v.string(),
-		baseArtifactVersion: v.number(),
+		baseEmailDraftVersion: v.number(),
 		emailDraft: emailDraftValidator
 	},
-	handler: async (ctx, { sessionId, resumeToken, baseArtifactVersion, emailDraft }) => {
+	handler: async (ctx, { sessionId, resumeToken, baseEmailDraftVersion, emailDraft }) => {
 		const now = Date.now();
 		const session = await getAuthorizedSession(ctx, sessionId, resumeToken, now);
 
-		if (!session || !session.visibleEmailDraft) {
+		if (!session || !session.emailDraft) {
 			throw new Error('Email draft not found.');
 		}
 
-		if (session.activeMessageOperationId) {
+		if (session.activeTurnJobId) {
 			throw new Error('Please wait for the assistant response to finish before editing the draft.');
 		}
 
-		if (baseArtifactVersion !== session.artifactVersion) {
+		if (baseEmailDraftVersion !== session.emailDraftVersion) {
 			throw new Error(
 				'The draft changed while you were editing. Review the latest version before saving.'
 			);
 		}
 
 		const normalizedDraft = normalizeEmailDraft(emailDraft);
-		const previousDraft = normalizeEmailDraft(session.visibleEmailDraft);
+		const previousDraft = normalizeEmailDraft(session.emailDraft);
 		const expiresAt = getBuilderSessionExpiresAt(now);
 
 		if (!hasEmailDraftChanged(previousDraft, normalizedDraft)) {
@@ -273,27 +261,26 @@ export const saveVisibleEmailDraft = mutation({
 			return {
 				snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession, resumeToken) : null,
 				expiresAt,
-				artifactVersion: session.artifactVersion,
+				emailDraftVersion: session.emailDraftVersion,
 				changed: false
 			};
 		}
 
 		const changedFields = getEmailDraftChangedFields(previousDraft, normalizedDraft);
-		const nextArtifactVersion = session.artifactVersion + 1;
+		const nextEmailDraftVersion = session.emailDraftVersion + 1;
 
 		await ctx.db.patch(session._id, {
-			artifactVersion: nextArtifactVersion,
-			visibleEmailDraft: normalizedDraft,
-			workingEmailDraft: normalizedDraft,
-			visibleArtifactStatus: 'ready',
+			emailDraftVersion: nextEmailDraftVersion,
+			emailDraft: normalizedDraft,
+			preparedEmailDraft: normalizedDraft,
 			expiresAt,
 			updatedAt: now
 		});
-		await ctx.db.insert('builderSessionEvents', {
+		await ctx.db.insert('builderSessionEmailDraftEvents', {
 			sessionId: session._id,
-			type: 'artifactEditedByUser',
-			versionBefore: session.artifactVersion,
-			versionAfter: nextArtifactVersion,
+			type: 'emailDraftEditedByUser',
+			versionBefore: session.emailDraftVersion,
+			versionAfter: nextEmailDraftVersion,
 			changedFields,
 			summary: summarizeEmailDraftEdit(changedFields),
 			createdAt: now
@@ -304,7 +291,7 @@ export const saveVisibleEmailDraft = mutation({
 		return {
 			snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession, resumeToken) : null,
 			expiresAt,
-			artifactVersion: nextArtifactVersion,
+			emailDraftVersion: nextEmailDraftVersion,
 			changed: true
 		};
 	}

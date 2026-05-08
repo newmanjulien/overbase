@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createDefaultEmailDraft, type EmailDraft } from '$lib/features/builder/domain/email-design';
+	import { createDefaultEmailDraft, type EmailDraft } from '@overbase/builder-sdk/email';
 	import {
 		fromEditableEmailDraft,
 		toEditableEmailDraft,
@@ -10,22 +10,22 @@
 
 	type Props = {
 		draft: EmailDraft;
-		artifactVersion: number;
+		emailDraftVersion: number;
 		canEdit?: boolean;
-		onSave: (draft: EmailDraft, baseArtifactVersion: number) => Promise<void>;
+		onSave: (draft: EmailDraft, baseEmailDraftVersion: number) => Promise<void>;
 	};
 
-	let { draft, artifactVersion, canEdit = true, onSave }: Props = $props();
+	let { draft, emailDraftVersion, canEdit = true, onSave }: Props = $props();
 
 	let isEditing = $state(false);
 	let isSaving = $state(false);
 	let saveError = $state<string | null>(null);
 	let editableDraft = $state<EditableEmailDraft>(toEditableEmailDraft(createDefaultEmailDraft()));
-	let editingBaseArtifactVersion = $state(0);
+	let editingBaseEmailDraftVersion = $state(0);
 
 	function beginEdit() {
 		editableDraft = toEditableEmailDraft(draft);
-		editingBaseArtifactVersion = artifactVersion;
+		editingBaseEmailDraftVersion = emailDraftVersion;
 		saveError = null;
 		isEditing = true;
 	}
@@ -43,8 +43,8 @@
 		isSaving = true;
 		saveError = null;
 
-		try {
-			await onSave(fromEditableEmailDraft(editableDraft), editingBaseArtifactVersion);
+	try {
+			await onSave(fromEditableEmailDraft(editableDraft), editingBaseEmailDraftVersion);
 			isEditing = false;
 		} catch (error) {
 			saveError = error instanceof Error ? error.message : 'Could not save draft edits.';

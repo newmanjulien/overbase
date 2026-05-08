@@ -24,9 +24,17 @@
 			"types": "./dist/catalog.d.ts",
 			"default": "./dist/catalog.js"
 		},
-		"./server": {
-			"types": "./dist/server.d.ts",
-			"default": "./dist/server.js"
+		"./app-protocol": {
+			"types": "./dist/app-protocol.d.ts",
+			"default": "./dist/app-protocol.js"
+		},
+		"./streams": {
+			"types": "./dist/streams.d.ts",
+			"default": "./dist/streams.js"
+		},
+		"./openai": {
+			"types": "./dist/openai.d.ts",
+			"default": "./dist/openai.js"
 		}
 	}
 }

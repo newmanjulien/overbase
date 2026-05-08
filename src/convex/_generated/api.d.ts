@@ -9,14 +9,16 @@
  */
 
 import type * as builder from "../builder.js";
+import type * as builderEmailValidators from "../builderEmailValidators.js";
 import type * as builderSessionAccess from "../builderSessionAccess.js";
+import type * as builderSessionAppState from "../builderSessionAppState.js";
 import type * as builderSessionCore from "../builderSessionCore.js";
+import type * as builderSessionJobRuns from "../builderSessionJobRuns.js";
 import type * as builderSessionJobs from "../builderSessionJobs.js";
 import type * as builderSessionMaintenance from "../builderSessionMaintenance.js";
+import type * as builderSessionOutputEvents from "../builderSessionOutputEvents.js";
 import type * as builderSessions from "../builderSessions.js";
 import type * as crons from "../crons.js";
-import type * as emailDesign from "../emailDesign.js";
-import type * as emailDesignValidators from "../emailDesignValidators.js";
 import type * as health from "../health.js";
 
 import type {
@@ -27,14 +29,16 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   builder: typeof builder;
+  builderEmailValidators: typeof builderEmailValidators;
   builderSessionAccess: typeof builderSessionAccess;
+  builderSessionAppState: typeof builderSessionAppState;
   builderSessionCore: typeof builderSessionCore;
+  builderSessionJobRuns: typeof builderSessionJobRuns;
   builderSessionJobs: typeof builderSessionJobs;
   builderSessionMaintenance: typeof builderSessionMaintenance;
+  builderSessionOutputEvents: typeof builderSessionOutputEvents;
   builderSessions: typeof builderSessions;
   crons: typeof crons;
-  emailDesign: typeof emailDesign;
-  emailDesignValidators: typeof emailDesignValidators;
   health: typeof health;
 }>;
 

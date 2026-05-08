@@ -12,7 +12,7 @@ import {
 	UsersRound,
 	Zap
 } from 'lucide-svelte';
-import type { ExternalArtwork } from '$lib/features/builder/external';
+import type { Artwork } from '@overbase/builder-sdk/catalog';
 
 type ArtworkIcon = typeof Flag;
 
@@ -56,7 +56,7 @@ function getArtworkIcon(iconId: string) {
 	return ARTWORK_ICONS[iconId] ?? Flag;
 }
 
-export function toBuilderArtworkPreset(artwork: ExternalArtwork): BuilderArtworkPreset {
+export function toBuilderArtworkPreset(artwork: Artwork): BuilderArtworkPreset {
 	return {
 		id: artwork.id,
 		card: {

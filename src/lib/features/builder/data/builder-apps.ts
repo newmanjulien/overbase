@@ -6,8 +6,9 @@ import {
 	Scale,
 	ShieldCheck
 } from 'lucide-svelte';
-import { CUSTOM_EMAIL_BUILDER_APP_ID } from '$lib/features/builder/domain/email-design';
-import type { ExternalArtwork, ExternalCategory } from '$lib/features/builder/external';
+import { CUSTOM_EMAIL_BUILDER_APP_ID } from '../../../../builder-apps/ids';
+import type { Artwork } from '@overbase/builder-sdk/catalog';
+import type { BuilderAppCategory } from '../../../../builder-apps/categories';
 import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
 
 type CategoryIcon = typeof Flag;
@@ -17,7 +18,7 @@ type BuilderAppView = {
 	title: string;
 	description: string;
 	mode: 'custom' | 'guided';
-	artwork: ExternalArtwork;
+	artwork: Artwork;
 };
 
 export const CUSTOM_NOTIFICATION_APP_ID = CUSTOM_EMAIL_BUILDER_APP_ID;
@@ -62,7 +63,7 @@ function getCategoryIcon(iconId: string) {
 	return CATEGORY_ICONS[iconId] ?? Flag;
 }
 
-export function toBuilderAppFilter(category: ExternalCategory): BuilderAppFilter {
+export function toBuilderAppFilter(category: BuilderAppCategory): BuilderAppFilter {
 	return {
 		id: category.slug,
 		label: category.label,

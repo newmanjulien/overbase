@@ -58,3 +58,50 @@ export const emailDraftChangedField = v.union(
 	v.literal('body'),
 	v.literal('fireReason')
 );
+
+export const builderAppState = v.object({
+	version: v.number(),
+	value: v.any()
+});
+
+export const builderAppOutputEvent = v.union(
+	v.object({
+		type: v.literal('assistantDelta'),
+		text: v.string()
+	}),
+	v.object({
+		type: v.literal('assistantComplete'),
+		text: v.string()
+	}),
+	v.object({
+		type: v.literal('emailDraftReplace'),
+		emailDraft,
+		visible: v.optional(v.boolean())
+	}),
+	v.object({
+		type: v.literal('emailDraftPatch'),
+		patch: v.union(v.null(), emailDraftPatch),
+		patchIntent: v.union(v.literal('none'), v.literal('noop'), v.literal('meaningful'))
+	}),
+	v.object({
+		type: v.literal('appStateReplace'),
+		appState: builderAppState
+	}),
+	v.object({
+		type: v.literal('appStatePatch'),
+		patch: v.any()
+	}),
+	v.object({
+		type: v.literal('enqueueBackgroundJob')
+	}),
+	v.object({
+		type: v.literal('waitForUser')
+	}),
+	v.object({
+		type: v.literal('complete')
+	}),
+	v.object({
+		type: v.literal('fail'),
+		errorText: v.string()
+	})
+);

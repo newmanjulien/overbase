@@ -30,7 +30,7 @@ export const deleteExpiredSessions = internalMutation({
 					.withIndex('by_session_createdAt', (q) => q.eq('sessionId', session._id))
 					.collect(),
 				ctx.db
-					.query('builderSessionEvents')
+					.query('builderSessionEmailDraftEvents')
 					.withIndex('by_session_createdAt', (q) => q.eq('sessionId', session._id))
 					.collect()
 			]);

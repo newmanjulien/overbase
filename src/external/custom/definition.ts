@@ -1,6 +1,5 @@
+import { CUSTOM_EMAIL_BUILDER_APP_ID } from '../../builder-apps/ids';
 import type { AppCatalogDefinition } from './types';
-
-export const CUSTOM_EMAIL_BUILDER_APP_ID = 'custom-notification';
 
 export const customEmailBuilderCatalog = {
 	slug: CUSTOM_EMAIL_BUILDER_APP_ID,

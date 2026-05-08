@@ -2,7 +2,7 @@ import {
 	normalizePdfAttachmentName,
 	type EmailBodyBlock,
 	type EmailDraft
-} from '$lib/features/builder/domain/email-design';
+} from '@overbase/builder-sdk/email';
 
 export type EditableEmailDraft = {
 	toText: string;

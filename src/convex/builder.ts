@@ -1,13 +1,13 @@
 import { v } from 'convex/values';
 import { query } from './_generated/server';
 import {
-	getActiveExternalApp,
-	getExternalAppGuide,
-	listBuilderHomeExternalApps
-} from '../lib/features/builder/external/registry';
-import type { ExternalAppCatalogDefinition } from '../lib/features/builder/external/types';
+	getActiveBuilderAppManifest,
+	getBuilderAppGuide,
+	listBuilderHomeApps
+} from '../builder-apps/registry';
+import type { BuilderAppManifest } from '@overbase/builder-sdk/app-protocol';
 
-function toBuilderAppView(app: ExternalAppCatalogDefinition) {
+function toBuilderAppView(app: BuilderAppManifest) {
 	return {
 		id: app.slug,
 		slug: app.slug,
@@ -23,7 +23,7 @@ export const listBuilderHome = query({
 	args: {},
 	handler: async (ctx) => {
 		void ctx;
-		const { categories, apps } = listBuilderHomeExternalApps();
+		const { categories, apps } = listBuilderHomeApps();
 
 		return {
 			categories,
@@ -38,7 +38,7 @@ export const getActiveBuilderAppBySlug = query({
 	},
 	handler: async (ctx, { slug }) => {
 		void ctx;
-		const app = getActiveExternalApp(slug);
+		const app = getActiveBuilderAppManifest(slug);
 
 		if (!app) {
 			return null;
@@ -46,7 +46,7 @@ export const getActiveBuilderAppBySlug = query({
 
 		return {
 			app: toBuilderAppView(app),
-			guide: getExternalAppGuide(app.slug)
+			guide: getBuilderAppGuide(app.slug)
 		};
 	}
 });

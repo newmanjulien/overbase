@@ -9,4 +9,4 @@ export type {
 	EmailAppDefinition,
 	InitialDraftParams,
 	RefinementParams
-} from '@overbase/builder-sdk/server';
+} from '@overbase/builder-sdk/app-protocol';

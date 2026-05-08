@@ -1,7 +1,11 @@
 import { api } from '$convex/_generated/api';
 import type { Doc, Id } from '$convex/_generated/dataModel';
-import type { EmailDraft } from '$lib/features/builder/domain/email-design';
+import type { EmailDraft } from '@overbase/builder-sdk/email';
 import { useConvexClient, useQuery } from 'convex-svelte';
+import {
+	getBuilderSessionMessagingView,
+	getOptimisticSendingStatus
+} from './builder-session-view';
 
 export type BuilderSessionHandle = {
 	sessionId: Id<'builderSessions'>;
@@ -15,7 +19,7 @@ export type BuilderSessionMessage = {
 	role: 'user' | 'assistant';
 	text: string;
 	status: 'pending' | 'streaming' | 'complete' | 'failed';
-	operationId?: string;
+	jobId?: string;
 	errorText?: string;
 };
 
@@ -165,7 +169,7 @@ export function createBuilderSessionController(
 	let handle = $state<BuilderSessionHandle | null>(null);
 	let localSnapshot = $state<BuilderSessionSnapshot | null>(initialSnapshot);
 	let error = $state<string | null>(null);
-	let operationVersion = 0;
+	let jobVersion = 0;
 
 	const liveSnapshotQuery = useQuery(api.builderSessions.getSessionSnapshot, () =>
 		handle ? { sessionId: handle.sessionId, resumeToken: handle.resumeToken } : 'skip'
@@ -174,16 +178,17 @@ export function createBuilderSessionController(
 	const snapshot = $derived(chooseSnapshot(localSnapshot, liveSnapshot));
 	const messages = $derived(snapshot?.messages ?? []);
 	const session = $derived(snapshot?.session ?? null);
-	const hasActiveAssistant = $derived(
-		messages.some(
-			(message) =>
-				message.role === 'assistant' &&
-				(message.status === 'pending' || message.status === 'streaming')
-		)
+	const messagingView = $derived(
+		getBuilderSessionMessagingView({
+			session,
+			messages,
+			queryError: liveSnapshotQuery.error ?? null,
+			hasHandle: Boolean(handle)
+		})
 	);
 
-	function isCurrentOperation(version: number) {
-		return version === operationVersion;
+	function isCurrentJob(version: number) {
+		return version === jobVersion;
 	}
 
 	function setServerSnapshot(nextSnapshot: ServerBuilderSessionSnapshot) {
@@ -207,7 +212,7 @@ export function createBuilderSessionController(
 			throw new Error('Message text is required.');
 		}
 
-		const operation = (operationVersion += 1);
+		const job = (jobVersion += 1);
 		error = null;
 		handle = null;
 		localSnapshot = localSnapshot ?? createInitialSnapshot(normalizedInitialMessage);
@@ -218,13 +223,13 @@ export function createBuilderSessionController(
 				initialMessage: normalizedInitialMessage
 			});
 
-			if (isCurrentOperation(operation)) {
+			if (isCurrentJob(job)) {
 				setServerSnapshot(result);
 			}
 
 			return result.handle;
 		} catch (startError) {
-			if (isCurrentOperation(operation)) {
+			if (isCurrentJob(job)) {
 				error = getErrorMessage(startError);
 			}
 
@@ -240,7 +245,7 @@ export function createBuilderSessionController(
 			return null;
 		}
 
-		const operation = (operationVersion += 1);
+		const job = (jobVersion += 1);
 		error = null;
 
 		try {
@@ -250,20 +255,20 @@ export function createBuilderSessionController(
 			});
 
 			if (!result) {
-				if (isCurrentOperation(operation)) {
+				if (isCurrentJob(job)) {
 					clearLocal();
 				}
 
 				return null;
 			}
 
-			if (isCurrentOperation(operation)) {
+			if (isCurrentJob(job)) {
 				setServerSnapshot(result);
 			}
 
 			return result.handle;
 		} catch (resumeError) {
-			if (isCurrentOperation(operation)) {
+			if (isCurrentJob(job)) {
 				error = getErrorMessage(resumeError);
 			}
 
@@ -282,10 +287,10 @@ export function createBuilderSessionController(
 			return handle;
 		}
 
-		const operation = (operationVersion += 1);
+		const job = (jobVersion += 1);
 		const previousLocalSnapshot = localSnapshot;
 		const currentSnapshot = snapshot;
-		const localOperationId = createLocalMessageId('local-operation');
+		const localJobId = createLocalMessageId('local-job');
 		const now = Date.now();
 
 		error = null;
@@ -296,11 +301,8 @@ export function createBuilderSessionController(
 				session: currentSnapshot.session
 					? {
 							...currentSnapshot.session,
-							phase:
-								currentSnapshot.session.phase === 'waitingForInitialAnswer'
-									? 'applyingInitialAnswer'
-									: 'refining',
-							activeMessageOperationId: localOperationId,
+							status: getOptimisticSendingStatus(currentSnapshot.session),
+							activeTurnJobId: localJobId as Id<'builderSessionJobs'>,
 							updatedAt: now
 						}
 					: currentSnapshot.session,
@@ -317,7 +319,7 @@ export function createBuilderSessionController(
 						role: 'assistant',
 						text: '',
 						status: 'pending',
-						operationId: localOperationId
+						jobId: localJobId
 					}
 				]
 			};
@@ -330,13 +332,13 @@ export function createBuilderSessionController(
 				text: normalizedText
 			});
 
-			if (isCurrentOperation(operation)) {
+			if (isCurrentJob(job)) {
 				setServerSnapshot(result);
 			}
 
 			return result.handle;
 		} catch (sendError) {
-			if (isCurrentOperation(operation)) {
+			if (isCurrentJob(job)) {
 				localSnapshot = previousLocalSnapshot;
 			}
 
@@ -344,15 +346,15 @@ export function createBuilderSessionController(
 		}
 	}
 
-	async function saveVisibleEmailDraft(emailDraft: EmailDraft, baseArtifactVersion: number) {
+	async function saveEmailDraft(emailDraft: EmailDraft, baseEmailDraftVersion: number) {
 		if (!handle) {
 			throw new Error('Builder session not found.');
 		}
 
-		const result = await client.mutation(api.builderSessions.saveVisibleEmailDraft, {
+		const result = await client.mutation(api.builderSessions.saveEmailDraft, {
 			sessionId: handle.sessionId,
 			resumeToken: handle.resumeToken,
-			baseArtifactVersion,
+			baseEmailDraftVersion,
 			emailDraft
 		});
 
@@ -380,15 +382,10 @@ export function createBuilderSessionController(
 			return liveSnapshotQuery.error ?? null;
 		},
 		get canSend() {
-			return Boolean(handle) &&
-				!hasActiveAssistant &&
-				!liveSnapshotQuery.error &&
-				Boolean(session) &&
-				!session?.errorText &&
-				(session?.phase === 'waitingForInitialAnswer' || session?.phase === 'ready');
+			return messagingView.canSendMessage;
 		},
 		resumeStored,
-		saveVisibleEmailDraft,
+		saveEmailDraft,
 		start,
 		send
 	};

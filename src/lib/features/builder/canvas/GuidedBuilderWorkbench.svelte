@@ -7,7 +7,7 @@
 	import CustomEmailRightPanel from '$lib/features/builder/canvas/CustomEmailRightPanel.svelte';
 	import SplitPane from '$lib/features/builder/canvas/SplitPane.svelte';
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder/canvas/split-pane';
-	import type { EmailDraft } from '$lib/features/builder/domain/email-design';
+	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderGuideDefinition } from '$lib/features/builder/guide/guide-types';
 	import { createBuilderSessionController } from '$lib/features/builder/session/builder-session.svelte';
 	import BuilderSetupFlow from '$lib/features/builder/setup/BuilderSetupFlow.svelte';
@@ -70,8 +70,8 @@
 		await builderSession.send(text);
 	}
 
-	async function saveDraft(draft: EmailDraft, baseArtifactVersion: number) {
-		await builderSession.saveVisibleEmailDraft(draft, baseArtifactVersion);
+	async function saveDraft(draft: EmailDraft, baseEmailDraftVersion: number) {
+		await builderSession.saveEmailDraft(draft, baseEmailDraftVersion);
 	}
 
 	$effect(() => {

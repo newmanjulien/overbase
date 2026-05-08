@@ -1,8 +1,8 @@
 import type { BuilderGuideDefinition } from '$lib/features/builder/guide/guide-types';
-import type { ExternalGuideDefinition } from '$lib/features/builder/external';
+import type { BuilderAppGuideEntry } from '../../../../builder-apps/registry';
 
 export function toBuilderGuideDefinition(
-	guide: (ExternalGuideDefinition & { appSlug: string }) | null
+	guide: BuilderAppGuideEntry | null
 ): BuilderGuideDefinition | null {
 	if (!guide) {
 		return null;

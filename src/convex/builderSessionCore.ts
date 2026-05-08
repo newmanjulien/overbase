@@ -8,13 +8,9 @@ import {
 export const ASSISTANT_STREAM_FLUSH_INTERVAL_MS = 150;
 export const ASSISTANT_STREAM_FLUSH_MIN_CHARS = 120;
 export const EXPIRED_SESSION_CLEANUP_LIMIT = 50;
-export const INITIAL_ANSWER_RETRY_MS = 500;
-export const INITIAL_ANSWER_MAX_ATTEMPTS = 80;
-export const OPERATION_DEADLINE_MS = 45_000;
-
-export function createOperationId() {
-	return crypto.randomUUID();
-}
+export const BACKGROUND_JOB_RETRY_MS = 500;
+export const BACKGROUND_JOB_MAX_ATTEMPTS = 80;
+export const JOB_DEADLINE_MS = 45_000;
 
 export function normalizeAssistantText(text: string) {
 	return text.trim();
@@ -65,114 +61,96 @@ export async function buildSessionSnapshot(
 	};
 }
 
-export async function insertOperation(
+export async function insertJob(
 	ctx: MutationCtx,
 	{
 		sessionId,
 		kind,
 		createdAt,
-		assistantMessageId,
-		operationId = createOperationId()
+		assistantMessageId
 	}: {
 		sessionId: Id<'builderSessions'>;
 		kind: Doc<'builderSessionJobs'>['kind'];
 		createdAt: number;
 		assistantMessageId?: Id<'builderSessionMessages'>;
-		operationId?: string;
 	}
 ) {
-	await ctx.db.insert('builderSessionJobs', {
+	return await ctx.db.insert('builderSessionJobs', {
 		sessionId,
 		kind,
-		operationId,
 		status: 'pending',
 		assistantMessageId,
-		attempt: 0,
-		maxAttempts: INITIAL_ANSWER_MAX_ATTEMPTS,
-		deadlineAt: createdAt + OPERATION_DEADLINE_MS,
+		attempts: 0,
+		deadlineAt: createdAt + JOB_DEADLINE_MS,
 		createdAt,
 		updatedAt: createdAt
 	});
-
-	return operationId;
 }
 
-export async function getOperationById(ctx: QueryCtx | MutationCtx, operationId: string) {
-	return await ctx.db
-		.query('builderSessionJobs')
-		.withIndex('by_operationId', (q) => q.eq('operationId', operationId))
-		.unique();
+export async function getJobById(ctx: QueryCtx | MutationCtx, jobId: Id<'builderSessionJobs'>) {
+	return await ctx.db.get(jobId);
 }
 
-export async function completeOperation(
+export async function completeJobRecord(
 	ctx: MutationCtx,
-	operation: Doc<'builderSessionJobs'>,
+	job: Doc<'builderSessionJobs'>,
 	now: number
 ) {
-	await ctx.db.patch(operation._id, {
+	await ctx.db.patch(job._id, {
 		status: 'complete',
 		updatedAt: now
 	});
 }
 
-export async function failOperation(
+export async function failJobRecord(
 	ctx: MutationCtx,
-	operationId: string,
+	jobId: Id<'builderSessionJobs'>,
 	errorText: string,
 	now: number,
 	{
-		phase = 'failed',
-		artifactVisibility,
-		workingArtifactStatus,
-		visibleArtifactStatus,
+		status = 'failed',
 		failAssistantMessage = true,
-		clearActiveMessageOperation = true,
-		clearActiveArtifactOperation = true,
+		clearActiveTurnJob = true,
+		clearActiveBackgroundJob = true,
 		writeSessionError = true
 	}: {
-		phase?: Doc<'builderSessions'>['phase'];
-		artifactVisibility?: Doc<'builderSessions'>['artifactVisibility'];
-		workingArtifactStatus?: Doc<'builderSessions'>['workingArtifactStatus'];
-		visibleArtifactStatus?: Doc<'builderSessions'>['visibleArtifactStatus'];
+		status?: Doc<'builderSessions'>['status'];
 		failAssistantMessage?: boolean;
-		clearActiveMessageOperation?: boolean;
-		clearActiveArtifactOperation?: boolean;
+		clearActiveTurnJob?: boolean;
+		clearActiveBackgroundJob?: boolean;
 		writeSessionError?: boolean;
 	} = {}
 ) {
-	const operation = await getOperationById(ctx, operationId);
+	const job = await getJobById(ctx, jobId);
 
-	if (!operation) {
+	if (!job) {
 		return;
 	}
 
-	await ctx.db.patch(operation._id, {
+	await ctx.db.patch(job._id, {
 		status: 'failed',
 		errorText,
 		updatedAt: now
 	});
 
-	if (failAssistantMessage && operation.assistantMessageId) {
-		await ctx.db.patch(operation.assistantMessageId, {
+	if (failAssistantMessage && job.assistantMessageId) {
+		await ctx.db.patch(job.assistantMessageId, {
 			status: 'failed',
 			errorText,
 			updatedAt: now
 		});
 	}
 
-	const session = await ctx.db.get(operation.sessionId);
+	const session = await ctx.db.get(job.sessionId);
 
 	if (!session) {
 		return;
 	}
 
-	await ctx.db.patch(operation.sessionId, {
-		phase,
-		...(artifactVisibility ? { artifactVisibility } : {}),
-		...(workingArtifactStatus ? { workingArtifactStatus } : {}),
-		...(visibleArtifactStatus ? { visibleArtifactStatus } : {}),
-		...(clearActiveMessageOperation ? { activeMessageOperationId: undefined } : {}),
-		...(clearActiveArtifactOperation ? { activeArtifactOperationId: undefined } : {}),
+	await ctx.db.patch(job.sessionId, {
+		status,
+		...(clearActiveTurnJob ? { activeTurnJobId: undefined } : {}),
+		...(clearActiveBackgroundJob ? { activeBackgroundJobId: undefined } : {}),
 		...(writeSessionError ? { errorText } : {}),
 		updatedAt: now
 	});

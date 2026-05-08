@@ -1,34 +1,28 @@
 <script lang="ts">
 	import type { Doc } from '$convex/_generated/dataModel';
-	import type { EmailDraft } from '$lib/features/builder/domain/email-design';
+	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderAppRecord } from '$lib/features/builder/data';
 	import BuilderAppPanel from '$lib/features/builder/canvas/BuilderAppPanel.svelte';
 	import BuilderEmailRunPreviewPanel from '$lib/features/builder/email/BuilderEmailRunPreviewPanel.svelte';
+	import { getBuilderSessionEmailDraftView } from '$lib/features/builder/session/builder-session-view';
 
 	type Props = {
 		app: BuilderAppRecord;
 		session: Doc<'builderSessions'> | null;
-		onSaveDraft: (draft: EmailDraft, baseArtifactVersion: number) => Promise<void>;
+		onSaveDraft: (draft: EmailDraft, baseEmailDraftVersion: number) => Promise<void>;
 	};
 
 	let { app, session, onSaveDraft }: Props = $props();
 
-	const visibleDraft = $derived(session?.visibleEmailDraft ?? null);
-	const canEdit = $derived(
-		Boolean(
-			session &&
-				visibleDraft &&
-				session.phase === 'ready' &&
-				session.artifactVisibility === 'visible' &&
-				!session.activeMessageOperationId
-		)
-	);
+	const emailDraftView = $derived(getBuilderSessionEmailDraftView(session));
+	const emailDraft = $derived(emailDraftView.emailDraft);
+	const canEdit = $derived(emailDraftView.canEditEmailDraft);
 </script>
 
-{#if visibleDraft}
+{#if emailDraft}
 	<BuilderEmailRunPreviewPanel
-		draft={visibleDraft}
-		artifactVersion={session?.artifactVersion ?? 0}
+		draft={emailDraft}
+		emailDraftVersion={session?.emailDraftVersion ?? 0}
 		{canEdit}
 		onSave={onSaveDraft}
 	/>

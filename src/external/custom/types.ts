@@ -8,7 +8,7 @@ export type {
 	EmailBuilderTurnStreamHandlers,
 	EmailBuilderTurnStreamResult,
 	TranscriptMessage
-} from '@overbase/builder-sdk/server';
+} from '@overbase/builder-sdk/streams';
 
 export type EmailExamplesCandidate = {
 	slug: string;
