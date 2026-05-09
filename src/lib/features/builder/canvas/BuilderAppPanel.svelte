@@ -11,7 +11,8 @@
 	let detailsExpanded = $state(false);
 
 	const artwork = $derived(app.artwork.panel);
-	const detailsId = 'builder-app-panel-details';
+	const componentId = $props.id();
+	const detailsId = `${componentId}-details`;
 	const detailsGridRows = $derived(detailsExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]');
 	const chevronClass = $derived(
 		`size-3.5 text-zinc-500 transition-transform duration-200 ease-out ${

@@ -18,7 +18,7 @@ export type GuideDefinition = {
     questions: readonly GuideQuestion[];
 };
 export type BuilderAppDetails = {
-    paragraphs: readonly string[];
+    paragraphs: readonly [string, ...string[]];
 };
 export type GuidedBuilderAppManifest = {
     slug: string;

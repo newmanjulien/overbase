@@ -93,16 +93,12 @@ function isStringArray(value: unknown): value is readonly string[] {
 	return Array.isArray(value) && value.every((item) => typeof item === 'string');
 }
 
-function isNonEmptyStringArray(value: unknown): value is readonly string[] {
-	return (
-		Array.isArray(value) &&
-		value.length > 0 &&
-		value.every((item) => typeof item === 'string' && item.trim().length > 0)
-	);
+function isNonEmptyTrimmedStringArray(value: unknown): value is readonly string[] {
+	return isStringArray(value) && value.length > 0 && value.every((item) => item.trim().length > 0);
 }
 
 function isBuilderAppDetails(value: unknown) {
-	return isRecord(value) && isNonEmptyStringArray(value.paragraphs);
+	return isRecord(value) && isNonEmptyTrimmedStringArray(value.paragraphs);
 }
 
 function isGuideQuestion(value: unknown) {

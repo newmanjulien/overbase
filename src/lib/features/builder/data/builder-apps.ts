@@ -2,21 +2,13 @@ import { BriefcaseBusiness, Flag, LoaderCircle, Scale } from 'lucide-svelte';
 import { CUSTOM_NOTIFICATION_APP_SLUG } from '../../../../builder-apps/ids';
 import type { BuilderAppRegistryEntry } from '../../../../builder-apps/registry';
 import type { BuilderAppCategory } from '../../../../builder-apps/categories';
-import type { BuilderAppArtwork } from '../../../../builder-apps/presentation';
 import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
 
 type CategoryIcon = typeof Flag;
-type BuilderAppView = {
-	slug: string;
-	categoryIds: readonly string[];
-	title: string;
-	description: string;
-	details: {
-		paragraphs: readonly string[];
-	};
-	mode: 'custom' | 'guided';
-	artwork: BuilderAppArtwork;
-};
+type BuilderAppView = Pick<
+	BuilderAppRegistryEntry,
+	'slug' | 'categoryIds' | 'title' | 'description' | 'details' | 'mode' | 'artwork'
+>;
 
 export const CUSTOM_NOTIFICATION_APP_ID = CUSTOM_NOTIFICATION_APP_SLUG;
 
