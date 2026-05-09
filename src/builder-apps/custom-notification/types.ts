@@ -2,8 +2,6 @@ import type { EmailDraft } from '@overbase/builder-sdk/email';
 
 export type { BuilderAppManifest } from '@overbase/builder-sdk/catalog';
 export type {
-	ChatReplyDeltaHandler,
-	ChatReplyStreamHandlers,
 	EmailBuilderEventContext,
 	EmailBuilderTurnStreamHandlers,
 	EmailBuilderTurnStreamResult,
@@ -25,7 +23,7 @@ export type EmailExampleCandidate = {
 
 export type EmailRouteResult = {
 	examplesSlug: string;
-	question: string;
+	publicQuestion: string;
 };
 
 export type EmailAdaptedExampleResult = {

@@ -17,14 +17,12 @@ import {
 import {
 	buildEmailExampleAdaptationPrompt,
 	buildEmailInitialAnswerPrompt,
-	buildEmailInitialQuestionPrompt,
 	buildEmailRefinementSystemPrompt,
 	buildEmailRefinementUserPrompt,
 	buildEmailRoutingPrompt
 } from './prompts';
-import { readEmailBuilderTurnStream, readOpenAIStream } from '@overbase/builder-sdk/streams';
+import { readEmailBuilderTurnStream } from '@overbase/builder-sdk/streams';
 import type {
-	ChatReplyStreamHandlers,
 	EmailAdaptedExampleResult,
 	EmailBuilderEventContext,
 	EmailBuilderTurnStreamHandlers,
@@ -35,7 +33,6 @@ import type {
 	TranscriptMessage
 } from '../types';
 
-const INITIAL_QUESTION_MAX_OUTPUT_TOKENS = 300;
 const UPDATE_EMAIL_DRAFT_TOOL_NAME = 'update_email_draft';
 const EMAIL_ROUTE_TOOL_NAME = 'select_email_examples';
 const EMAIL_ADAPT_TOOL_NAME = 'adapt_email_example';
@@ -68,58 +65,15 @@ export async function routeEmailBuilderRequest(params: {
 					type: 'string',
 					enum: params.examples.map((examplesSet) => examplesSet.slug)
 				},
-				question: {
+				publicQuestion: {
 					type: 'string',
-					description: 'One concise question about the least certain important detail.'
+					description:
+						'The exact one-sentence public follow-up question to show the user, following the selected examples set questionGuidance.'
 				}
 			},
-			required: ['examplesSlug', 'question']
+			required: ['examplesSlug', 'publicQuestion']
 		}
 	});
-}
-
-/**
- * This writes the first visible assistant message in the builder flow.
- * The route step has already picked an example set and suggested a question;
- * this turns that into a short natural-language question and streams it to the
- * user while it is being generated.
- */
-export async function streamEmailInitialQuestion(params: {
-	initialMessage: string;
-	examples: EmailExamplesCandidate;
-	proposedQuestion: string;
-	handlers: ChatReplyStreamHandlers;
-	openAIConfig: OpenAIConfig;
-}) {
-	const { apiKey, model, reasoningEffort } = params.openAIConfig;
-	const prompt = buildEmailInitialQuestionPrompt(params);
-	const response = await fetch(OPENAI_RESPONSES_URL, {
-		method: 'POST',
-		headers: getOpenAIHeaders(apiKey),
-		body: JSON.stringify({
-			model,
-			input: [
-				{
-					role: 'system',
-					content: prompt.systemPrompt
-				},
-				{
-					role: 'user',
-					content: prompt.userPrompt
-				}
-			],
-			...(supportsReasoningOptions(model) ? { reasoning: { effort: reasoningEffort } } : {}),
-			max_output_tokens: INITIAL_QUESTION_MAX_OUTPUT_TOKENS,
-			store: false,
-			stream: true
-		})
-	});
-
-	if (!response.ok) {
-		throw new Error(await getOpenAIErrorMessage(response));
-	}
-
-	return await readOpenAIStream(response, params.handlers);
 }
 
 /**

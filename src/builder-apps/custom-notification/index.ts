@@ -9,6 +9,5 @@ export {
 	adaptEmailExample,
 	applyEmailInitialAnswer,
 	routeEmailBuilderRequest,
-	streamCustomEmailBuilderTurn,
-	streamEmailInitialQuestion
+	streamCustomEmailBuilderTurn
 } from './engine';

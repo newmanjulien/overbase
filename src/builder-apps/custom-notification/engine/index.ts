@@ -2,6 +2,5 @@ export {
 	adaptEmailExample,
 	applyEmailInitialAnswer,
 	routeEmailBuilderRequest,
-	streamCustomEmailBuilderTurn,
-	streamEmailInitialQuestion
+	streamCustomEmailBuilderTurn
 } from './workflow';

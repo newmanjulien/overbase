@@ -2,8 +2,7 @@ import {
 	adaptEmailExample,
 	applyEmailInitialAnswer,
 	routeEmailBuilderRequest,
-	streamCustomEmailBuilderTurn,
-	streamEmailInitialQuestion
+	streamCustomEmailBuilderTurn
 } from './engine';
 import { customEmailBuilderManifest } from './definition';
 import {
@@ -117,7 +116,7 @@ function toAssistantPatchResultEvents(result: {
 export function createCustomNotificationRuntime(
 	deps: CustomNotificationRuntimeDependencies
 ): BuilderAppRuntime {
-	async function startTurn(input: BuilderAppStartTurnInput, emit?: EmitEvent) {
+	async function startTurn(input: BuilderAppStartTurnInput) {
 		const fastOpenAIConfig = deps.getOpenAIConfig('fast');
 		const examples = listCustomEmailExamples().map(toInitialQuestionExample);
 
@@ -132,18 +131,7 @@ export function createCustomNotificationRuntime(
 		});
 		const selectedExamples =
 			examples.find((candidate) => candidate.slug === routeResult.examplesSlug) ?? examples[0];
-		const questionText = await streamEmailInitialQuestion({
-			initialMessage: input.initialMessage,
-			examples: selectedExamples,
-			proposedQuestion: routeResult.question,
-			openAIConfig: fastOpenAIConfig,
-			handlers: {
-				onDelta: async (delta) => {
-					await emit?.({ type: 'assistantDelta', text: delta });
-					await input.handlers.onAssistantDelta?.(delta);
-				}
-			}
-		});
+		const questionText = routeResult.publicQuestion;
 
 		return [
 			{ type: 'assistantComplete', text: questionText },

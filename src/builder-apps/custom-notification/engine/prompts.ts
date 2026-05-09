@@ -4,7 +4,6 @@ import {
 	CUSTOM_EMAIL_EXAMPLE_ADAPTATION_OPENING_RULES,
 	CUSTOM_EMAIL_INITIAL_ANSWER_DRAFT_RULES,
 	CUSTOM_EMAIL_INITIAL_ANSWER_OPENING_RULES,
-	CUSTOM_EMAIL_INITIAL_QUESTION_RULES,
 	CUSTOM_EMAIL_REFINEMENT_CHAT_RULES,
 	CUSTOM_EMAIL_REFINEMENT_DRAFT_RULES,
 	CUSTOM_EMAIL_ROUTING_RULES,
@@ -33,21 +32,6 @@ export function buildEmailRoutingPrompt(params: {
 			'Available examples:',
 			stringifyPromptData(params.examples)
 		].join('\n\n')
-	};
-}
-
-export function buildEmailInitialQuestionPrompt(params: {
-	initialMessage: string;
-	examples: EmailExamplesCandidate;
-	proposedQuestion: string;
-}) {
-	return {
-		systemPrompt: joinPromptLines(CUSTOM_EMAIL_INITIAL_QUESTION_RULES),
-		userPrompt: [
-			`User request: ${params.initialMessage}`,
-			`Question guidance: ${params.examples.questionGuidance}`,
-			`Proposed question: ${params.proposedQuestion}`
-		].join('\n')
 	};
 }
 
