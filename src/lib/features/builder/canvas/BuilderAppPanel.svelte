@@ -39,7 +39,7 @@
 
 				<button
 					type="button"
-					class="mt-3 inline-flex items-center justify-center gap-1.5 rounded-sm px-2 py-1 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
+					class="mt-3 inline-flex items-center justify-center gap-1.5 rounded-sm px-2 py-1 text-xs font-normal text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
 					aria-expanded={detailsExpanded}
 					aria-controls={detailsId}
 					onclick={() => {
@@ -60,7 +60,7 @@
 				>
 					<div class="min-h-0 overflow-hidden">
 						<div
-							class="space-y-2 pt-3 text-left text-xs leading-relaxed text-zinc-500 transition-all duration-300 ease-out"
+							class="space-y-2 pt-3 text-center text-xs leading-relaxed text-zinc-500 transition-all duration-300 ease-out"
 							class:translate-y-0={detailsExpanded}
 							class:opacity-100={detailsExpanded}
 							class:translate-y-1={!detailsExpanded}
