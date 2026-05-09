@@ -8,6 +8,7 @@
 	import SplitPane from '$lib/features/builder/canvas/SplitPane.svelte';
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder/canvas/split-pane';
 	import BuilderRunChatPanel from '$lib/features/builder/chat/BuilderRunChatPanel.svelte';
+	import NativeBuilderLeaveGuard from '$lib/features/builder/navigation/NativeBuilderLeaveGuard.svelte';
 	import { createBuilderSessionController } from '$lib/features/builder/session/builder-session.svelte';
 	import {
 		clearPendingBuilderLaunch,
@@ -33,6 +34,7 @@
 		builderSession.session?.errorText ??
 			(builderSession.messages.length > 0 ? builderSession.error : null)
 	);
+	const leaveGuardActive = $derived(Boolean(builderSession.handle || builderSession.messages.length > 0));
 
 	function clearLaunchState() {
 		clearPendingBuilderLaunch(app.id);
@@ -85,6 +87,8 @@
 		void boot().catch(() => undefined);
 	});
 </script>
+
+<NativeBuilderLeaveGuard active={leaveGuardActive} />
 
 <SplitPane
 	minPrimary={BUILDER_CANVAS_SPLIT.minPrimary}

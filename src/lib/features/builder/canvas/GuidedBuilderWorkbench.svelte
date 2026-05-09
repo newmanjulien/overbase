@@ -9,6 +9,7 @@
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder/canvas/split-pane';
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderGuideDefinition } from '$lib/features/builder/guide/guide-types';
+	import NativeBuilderLeaveGuard from '$lib/features/builder/navigation/NativeBuilderLeaveGuard.svelte';
 	import { createBuilderSessionController } from '$lib/features/builder/session/builder-session.svelte';
 	import {
 		clearPendingBuilderLaunch,
@@ -37,6 +38,7 @@
 		builderSession.session?.errorText ??
 			(builderSession.messages.length > 0 ? builderSession.error : null)
 	);
+	const leaveGuardActive = $derived(Boolean(builderSession.handle || builderSession.messages.length > 0));
 
 	function clearLaunchState() {
 		clearPendingBuilderLaunch(app.id);
@@ -108,6 +110,8 @@
 		});
 	});
 </script>
+
+<NativeBuilderLeaveGuard active={leaveGuardActive} />
 
 <SplitPane
 	minPrimary={BUILDER_CANVAS_SPLIT.minPrimary}
