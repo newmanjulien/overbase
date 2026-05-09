@@ -15,6 +15,7 @@
 		clearStoredBuilderSessionHandle,
 		type BuilderLaunchState
 	} from '$lib/features/builder/session/builder-launch';
+	import { Button } from '$lib/components/ui';
 
 	type Props = {
 		app: BuilderAppRecord;
@@ -125,12 +126,13 @@
 					<p class="mt-2 text-[0.72rem] leading-[1.5] text-zinc-500">
 						Describe the notification you want from the builder screen to start a custom email.
 					</p>
-					<a
+					<Button
+						variant="primary"
 						href={resolve('/builder')}
-						class="mt-4 inline-flex h-8 items-center justify-center rounded-full bg-zinc-950 px-3.5 text-[0.72rem] font-medium text-white transition-colors hover:bg-zinc-800"
+						class="mt-4 rounded-full text-[0.72rem]"
 					>
 						Back to builder
-					</a>
+					</Button>
 				</div>
 			</div>
 		{/if}

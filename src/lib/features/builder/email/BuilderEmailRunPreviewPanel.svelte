@@ -7,6 +7,7 @@
 	} from '$lib/features/builder/email/email-editable-draft';
 	import EmailComposeEditor from '$lib/features/builder/email/EmailComposeEditor.svelte';
 	import EmailComposePreview from '$lib/features/builder/email/EmailComposePreview.svelte';
+	import { Button } from '$lib/components/ui';
 
 	type Props = {
 		draft: EmailDraft;
@@ -78,31 +79,31 @@
 
 		<div class="flex justify-end gap-2">
 			{#if isEditing}
-				<button
-					type="button"
-					class="inline-flex h-8 items-center justify-center rounded-sm border border-zinc-200 bg-white px-3 text-[0.74rem] font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:cursor-default disabled:opacity-55"
+				<Button
+					variant="secondary"
+					class="px-3 text-[0.74rem] text-zinc-700"
 					disabled={isSaving}
 					onclick={cancelEdit}
 				>
 					Cancel
-				</button>
-				<button
-					type="button"
-					class="inline-flex h-8 items-center justify-center rounded-sm bg-zinc-950 px-3 text-[0.74rem] font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-default disabled:bg-zinc-300 disabled:text-zinc-500"
+				</Button>
+				<Button
+					variant="primary"
+					class="px-3 text-[0.74rem]"
 					disabled={isSaving}
 					onclick={() => void saveDraft()}
 				>
 					{isSaving ? 'Saving...' : 'Save changes'}
-				</button>
+				</Button>
 			{:else}
-				<button
-					type="button"
-					class="inline-flex h-8 items-center justify-center rounded-sm border border-zinc-200 bg-white px-3 text-[0.74rem] font-medium text-zinc-800 transition-colors hover:bg-zinc-50 disabled:cursor-default disabled:opacity-55"
+				<Button
+					variant="secondary"
+					class="px-3 text-[0.74rem] text-zinc-800"
 					disabled={!canEdit}
 					onclick={beginEdit}
 				>
 					Edit draft
-				</button>
+				</Button>
 			{/if}
 		</div>
 	</div>

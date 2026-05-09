@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ArrowRight } from 'lucide-svelte';
+	import { Button } from '$lib/components/ui';
 
 	type Props = {
 		canGoNext: boolean;
@@ -12,16 +13,12 @@
 </script>
 
 <div class="flex items-center gap-2 self-end">
-	<button
-		type="button"
-		class="inline-flex h-8 items-center justify-center whitespace-nowrap rounded-sm border border-zinc-200 bg-white px-3.5 text-[0.72rem] font-medium text-zinc-900 md:text-[0.74rem]"
-		disabled
-	>
+	<Button variant="secondary" disabled class="text-[0.72rem] text-zinc-900 md:text-[0.74rem]">
 		Skip all
-	</button>
-	<button
-		type="button"
-		class="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-sm bg-zinc-950 px-3.5 text-[0.72rem] font-medium text-white md:text-[0.74rem]"
+	</Button>
+	<Button
+		variant="primary"
+		class="text-[0.72rem] md:text-[0.74rem]"
 		onclick={() => {
 			if (canGoNext) {
 				onNext();
@@ -31,8 +28,10 @@
 		}}
 	>
 		<span>{primaryActionLabel}</span>
-		{#if canGoNext}
-			<ArrowRight class="size-3.75" />
-		{/if}
-	</button>
+		{#snippet trailing()}
+			{#if canGoNext}
+				<ArrowRight class="size-3.75" />
+			{/if}
+		{/snippet}
+	</Button>
 </div>

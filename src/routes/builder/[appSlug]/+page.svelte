@@ -4,6 +4,7 @@
 	import PageShell from '$lib/components/layout/PageShell.svelte';
 	import BuilderCanvas from '$lib/features/builder/canvas/BuilderCanvas.svelte';
 	import BuilderDesktopOnly from '$lib/features/builder/canvas/BuilderDesktopOnly.svelte';
+	import { Button } from '$lib/components/ui';
 	import { toBuilderAppRecord, toBuilderGuideDefinition } from '$lib/features/builder/data';
 	import {
 		createBuilderLaunchState,
@@ -40,12 +41,13 @@
 					<p class="mt-2 text-xs leading-relaxed text-zinc-500">
 						Choose a notification builder app from the builder to start a new draft.
 					</p>
-					<a
+					<Button
+						variant="primary"
 						href={resolve('/builder')}
-						class="mt-4 inline-flex h-8 items-center justify-center rounded-full bg-zinc-950 px-3.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800"
+						class="mt-4 rounded-full text-xs"
 					>
 						Back to builder
-					</a>
+					</Button>
 				</div>
 			</div>
 		{/if}

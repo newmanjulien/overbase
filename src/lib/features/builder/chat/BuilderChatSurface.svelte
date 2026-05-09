@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 	import { StickToBottom } from 'stick-to-bottom-svelte';
+	import { IconButton } from '$lib/components/ui';
 
 	type ChatMessage = {
 		_id: string;
@@ -191,14 +192,15 @@
 		</div>
 
 		{#if messages.length > 0 && !stickToBottom.isNearBottom}
-			<button
+			<IconButton
 				type="button"
 				aria-label="Jump to latest"
-				class="absolute right-5 bottom-4 inline-flex size-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50"
+				variant="secondary"
+				class="absolute right-5 bottom-4 size-8 rounded-full text-zinc-700 shadow-sm"
 				onclick={() => void stickToBottom.scrollToBottom('instant')}
 			>
 				<Plus class="size-4 rotate-45 stroke-[2.2]" />
-			</button>
+			</IconButton>
 		{/if}
 	</div>
 
@@ -229,14 +231,15 @@
 				}}
 			></textarea>
 
-			<button
+			<IconButton
 				type="submit"
 				aria-label="Send message"
-				class="inline-flex size-7.5 shrink-0 items-center justify-center rounded-full bg-black text-white transition-colors disabled:bg-zinc-300 disabled:text-zinc-500"
+				variant="primary"
+				class="size-7.5 shrink-0 rounded-full bg-black hover:bg-black"
 				disabled={!canSend}
 			>
 				<ArrowUp class="size-3.75 stroke-[2.4]" />
-			</button>
+			</IconButton>
 		</div>
 	</form>
 </section>

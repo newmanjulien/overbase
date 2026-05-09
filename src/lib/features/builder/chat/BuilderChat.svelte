@@ -6,6 +6,7 @@
 		createBuilderLaunchState,
 		writePendingBuilderLaunch
 	} from '$lib/features/builder/session/builder-launch';
+	import { IconButton } from '$lib/components/ui';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 
 	const CHAT_HEADING = 'Build a notification that fits the way you work';
@@ -121,28 +122,26 @@
 				</div>
 
 				<div class="mt-2 flex items-center justify-between md:mt-2.5">
-					<button
+					<IconButton
 						type="button"
 						aria-label="Add attachment"
-						class="group relative inline-flex items-center justify-center text-zinc-700 disabled:cursor-default disabled:opacity-55"
+						variant="ghost"
+						class="size-7.5 rounded-full text-zinc-700"
 						disabled
 					>
-						<span
-							aria-hidden="true"
-							class="pointer-events-none absolute -inset-2 rounded-full transition-colors group-hover:bg-zinc-100"
-						></span>
-						<Plus class="relative size-4 stroke-[2.25]" />
-					</button>
+						<Plus class="size-4 stroke-[2.25]" />
+					</IconButton>
 
 					<div class="flex items-center">
-						<button
+						<IconButton
 							type="submit"
 							aria-label="Send prompt"
-							class="inline-flex size-7.5 items-center justify-center rounded-full bg-black text-white transition-transform hover:scale-[1.02] disabled:cursor-default disabled:bg-zinc-300 disabled:text-zinc-500 disabled:hover:scale-100"
+							variant="primary"
+							class="size-7.5 rounded-full bg-black transition-transform hover:bg-black hover:scale-[1.02] disabled:hover:scale-100"
 							disabled={!canSubmit}
 						>
 							<ArrowUp class="size-3.75 stroke-[2.4]" />
-						</button>
+						</IconButton>
 					</div>
 				</div>
 			</form>

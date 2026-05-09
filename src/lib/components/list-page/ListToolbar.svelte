@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ChevronDown } from 'lucide-svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
+	import { Button } from '$lib/components/ui';
 	import ListActionButton from '$lib/components/list-page/ListActionButton.svelte';
 	import ListSearchInput from '$lib/components/list-page/ListSearchInput.svelte';
 
@@ -30,13 +31,15 @@
 
 	<div class="flex shrink-0 items-center gap-2 md:gap-2.5">
 		{#if filterLabel}
-			<button
-				type="button"
-				class="inline-flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-[0.76rem] font-normal text-zinc-950 transition-colors hover:bg-zinc-50 md:flex-none md:px-3.5 md:text-[0.78rem]"
+			<Button
+				variant="secondary"
+				class="min-w-0 flex-1 px-3 text-[0.76rem] font-normal text-zinc-950 md:flex-none md:text-[0.78rem]"
 			>
 				<span>{filterLabel}</span>
-				<ChevronDown aria-hidden="true" class="size-3.5 text-zinc-600" />
-			</button>
+				{#snippet trailing()}
+					<ChevronDown aria-hidden="true" class="size-3.5 text-zinc-600" />
+				{/snippet}
+			</Button>
 		{/if}
 
 		{#if actionLabel}
