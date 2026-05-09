@@ -8,6 +8,7 @@ export default defineSchema({
 	builderSessions: defineTable({
 		appSlug: v.string(),
 		appTitle: v.string(),
+		startRequestId: v.optional(v.string()),
 		emailDraftVersion: v.number(),
 		status: v.union(
 			v.literal('working'),
@@ -31,7 +32,8 @@ export default defineSchema({
 		updatedAt: v.number(),
 		expiresAt: v.number()
 	})
-		.index('by_expiresAt', ['expiresAt']),
+		.index('by_expiresAt', ['expiresAt'])
+		.index('by_app_startRequestId', ['appSlug', 'startRequestId']),
 	builderSessionMessages: defineTable({
 		sessionId: v.id('builderSessions'),
 		role: messageRole,

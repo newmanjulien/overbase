@@ -1,4 +1,5 @@
 export const MAX_MESSAGE_LENGTH = 8_000;
+export const START_REQUEST_ID_MAX_LENGTH = 128;
 export const BUILDER_SESSION_IDLE_RETENTION_MS = 2 * 60 * 60 * 1000;
 
 type ExpiringRecord = {
@@ -14,6 +15,34 @@ export function createResumeToken() {
 	crypto.getRandomValues(bytes);
 
 	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+export function normalizeStartRequestId(startRequestId?: string) {
+	const normalized = startRequestId?.trim();
+
+	if (!normalized) {
+		return undefined;
+	}
+
+	if (normalized.length > START_REQUEST_ID_MAX_LENGTH) {
+		throw new Error(`Start request id must be ${START_REQUEST_ID_MAX_LENGTH} characters or fewer.`);
+	}
+
+	return normalized;
+}
+
+export function normalizeResumeToken(resumeToken?: string) {
+	const normalized = resumeToken?.trim();
+
+	if (!normalized) {
+		return undefined;
+	}
+
+	if (!/^[a-f0-9]{64}$/.test(normalized)) {
+		throw new Error('Resume token is invalid.');
+	}
+
+	return normalized;
 }
 
 export async function hashResumeToken(resumeToken: string) {

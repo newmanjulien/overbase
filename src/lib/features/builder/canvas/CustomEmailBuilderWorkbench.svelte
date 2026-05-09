@@ -13,9 +13,16 @@
 	type Props = {
 		app: BuilderAppRecord;
 		initialMessage?: string | null;
+		startRequestId?: string | null;
+		resumeToken?: string | null;
 	};
 
-	let { app, initialMessage = null }: Props = $props();
+	let {
+		app,
+		initialMessage = null,
+		startRequestId = null,
+		resumeToken = null
+	}: Props = $props();
 	let bootedAppId = $state('');
 	const initialAppId = untrack(() => app.id);
 
@@ -41,7 +48,10 @@
 		const firstMessage = initialMessage?.trim() ?? '';
 
 		if (firstMessage) {
-			await builderSession.start(firstMessage);
+			await builderSession.start(firstMessage, {
+				startRequestId: startRequestId ?? undefined,
+				resumeToken: resumeToken ?? undefined
+			});
 			clearInitialMessageState();
 			return;
 		}

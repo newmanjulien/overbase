@@ -1,26 +1,19 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import BuilderAppCardArtwork from '$lib/features/builder/apps/artwork/BuilderAppCardArtwork.svelte';
 	import type { BuilderAppRecord } from '$lib/features/builder/data';
-	import { submitBuilderApp } from '$lib/features/builder/apps/builder-app-submit';
 
 	type Props = {
 		app: BuilderAppRecord;
 	};
 
 	let { app }: Props = $props();
-
-	async function handleSelect() {
-		await submitBuilderApp(app);
-	}
 </script>
 
-<button
-	type="button"
+<a
+	href={resolve('/builder/[appSlug]', { appSlug: app.id })}
 	class="group block w-full rounded-sm text-left outline-none"
 	aria-label={`Start with ${app.title}`}
-	onclick={() => {
-		void handleSelect();
-	}}
 >
 	<BuilderAppCardArtwork artwork={app.artwork.card} />
 
@@ -32,4 +25,4 @@
 			{app.description}
 		</p>
 	</div>
-</button>
+</a>

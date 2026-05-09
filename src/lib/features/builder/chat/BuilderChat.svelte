@@ -1,7 +1,10 @@
 <script lang="ts">
+	import { api } from '$convex/_generated/api';
 	import { resolve } from '$app/paths';
-	import { goto } from '$app/navigation';
+	import { goto, preloadData } from '$app/navigation';
 	import { CUSTOM_NOTIFICATION_APP_ID } from '$lib/features/builder/data';
+	import { createBuilderSessionStartRequest } from '$lib/features/builder/session/builder-session-start';
+	import { useConvexClient } from 'convex-svelte';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 
 	const CHAT_HEADING = 'Build a notification that fits the way you work';
@@ -9,8 +12,23 @@
 
 	let value = $state('');
 	let textareaElement = $state<HTMLTextAreaElement | null>(null);
+	let customBuilderRoutePreloaded = $state(false);
+	let isSubmitting = $state(false);
 
-	const canSubmit = $derived(value.trim().length > 0);
+	const convexClient = useConvexClient();
+	const customBuilderHref = resolve('/builder/[appSlug]', {
+		appSlug: CUSTOM_NOTIFICATION_APP_ID
+	});
+	const canSubmit = $derived(value.trim().length > 0 && !isSubmitting);
+
+	function preloadCustomBuilderRoute() {
+		if (customBuilderRoutePreloaded) {
+			return;
+		}
+
+		customBuilderRoutePreloaded = true;
+		void preloadData(customBuilderHref).catch(() => undefined);
+	}
 
 	function syncTextareaHeight() {
 		if (!textareaElement) {
@@ -44,11 +62,31 @@
 		}
 
 		const prompt = value.trim();
+		const startRequest = createBuilderSessionStartRequest();
 		value = '';
+		isSubmitting = true;
+		preloadCustomBuilderRoute();
 
-		await goto(resolve('/builder/[appSlug]', { appSlug: CUSTOM_NOTIFICATION_APP_ID }), {
-			state: { initialMessage: prompt }
-		});
+		void convexClient
+			.mutation(api.builderSessions.startSession, {
+				appSlug: CUSTOM_NOTIFICATION_APP_ID,
+				initialMessage: prompt,
+				startRequestId: startRequest.startRequestId,
+				resumeToken: startRequest.resumeToken
+			})
+			.catch(() => undefined);
+
+		try {
+			await goto(customBuilderHref, {
+				state: {
+					initialMessage: prompt,
+					startRequestId: startRequest.startRequestId,
+					resumeToken: startRequest.resumeToken
+				}
+			});
+		} finally {
+			isSubmitting = false;
+		}
 	}
 
 	$effect(() => {
@@ -81,6 +119,7 @@
 						aria-label="Prompt input"
 						placeholder="Describe the notification you want to receive by email..."
 						class="prompt-input w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.8rem] leading-[1.34] text-zinc-800 outline-none placeholder:text-zinc-400 md:text-[0.84rem]"
+						onfocus={preloadCustomBuilderRoute}
 						onkeydown={(event) => {
 							if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
 								event.preventDefault();

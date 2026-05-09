@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { mutation, query } from './_generated/server';
+import type { MutationCtx } from './_generated/server';
 import {
 	emailDraft as emailDraftValidator
 } from './builderEmailValidators';
@@ -14,7 +15,11 @@ import {
 	createResumeToken,
 	getBuilderSessionExpiresAt,
 	hashResumeToken,
-	normalizeUserText
+	isBuilderSessionActive,
+	normalizeResumeToken,
+	normalizeStartRequestId,
+	normalizeUserText,
+	verifyResumeToken
 } from './builderSessionAccess';
 import {
 	buildSessionSnapshot,
@@ -25,16 +30,82 @@ import {
 	getActiveBuilderAppPresentationEntry
 } from '../builder-apps/registry';
 
+async function getIdempotentStartSnapshot(
+	ctx: MutationCtx,
+	{
+		appSlug,
+		startRequestId,
+		resumeToken,
+		initialMessage,
+		expiresAt,
+		now
+	}: {
+		appSlug: string;
+		startRequestId?: string;
+		resumeToken?: string;
+		initialMessage: string;
+		expiresAt: number;
+		now: number;
+	}
+) {
+	if (!startRequestId || !resumeToken) {
+		return null;
+	}
+
+	const existingSession = await ctx.db
+		.query('builderSessions')
+		.withIndex('by_app_startRequestId', (q) =>
+			q.eq('appSlug', appSlug).eq('startRequestId', startRequestId)
+		)
+		.first();
+
+	if (!existingSession) {
+		return null;
+	}
+
+	if (!isBuilderSessionActive(existingSession, now)) {
+		throw new Error('Builder session expired.');
+	}
+
+	if (!(await verifyResumeToken(existingSession, resumeToken))) {
+		throw new Error('Builder session not found.');
+	}
+
+	const firstMessage = await ctx.db
+		.query('builderSessionMessages')
+		.withIndex('by_session_createdAt', (q) => q.eq('sessionId', existingSession._id))
+		.first();
+
+	if (firstMessage?.role !== 'user' || firstMessage.text !== initialMessage) {
+		throw new Error('Start request id was already used for a different message.');
+	}
+
+	await ctx.db.patch(existingSession._id, {
+		expiresAt,
+		updatedAt: now
+	});
+
+	const resumedSession = await ctx.db.get(existingSession._id);
+
+	if (!resumedSession) {
+		throw new Error('Builder session not found.');
+	}
+
+	return await buildSessionSnapshot(ctx, resumedSession, resumeToken);
+}
+
 export const startSession = mutation({
 	args: {
 		appSlug: v.string(),
-		initialMessage: v.string()
+		initialMessage: v.string(),
+		startRequestId: v.optional(v.string()),
+		resumeToken: v.optional(v.string())
 	},
-	handler: async (ctx, { appSlug, initialMessage }) => {
+	handler: async (ctx, { appSlug, initialMessage, startRequestId, resumeToken }) => {
 		const now = Date.now();
 		const normalizedInitialMessage = normalizeUserText(initialMessage);
-		const resumeToken = createResumeToken();
-		const resumeTokenHash = await hashResumeToken(resumeToken);
+		const normalizedStartRequestId = normalizeStartRequestId(startRequestId);
+		const normalizedResumeToken = normalizeResumeToken(resumeToken);
 		const expiresAt = getBuilderSessionExpiresAt(now);
 		const app = getActiveBuilderAppPresentationEntry(appSlug);
 
@@ -42,9 +113,30 @@ export const startSession = mutation({
 			throw new Error('Builder app not found.');
 		}
 
+		if (Boolean(normalizedStartRequestId) !== Boolean(normalizedResumeToken)) {
+			throw new Error('Start request id and resume token must be provided together.');
+		}
+
+		const existingSessionSnapshot = await getIdempotentStartSnapshot(ctx, {
+			appSlug: app.slug,
+			startRequestId: normalizedStartRequestId,
+			resumeToken: normalizedResumeToken,
+			initialMessage: normalizedInitialMessage,
+			expiresAt,
+			now
+		});
+
+		if (existingSessionSnapshot) {
+			return existingSessionSnapshot;
+		}
+
+		const sessionResumeToken = normalizedResumeToken ?? createResumeToken();
+		const resumeTokenHash = await hashResumeToken(sessionResumeToken);
+
 		const sessionId = await ctx.db.insert('builderSessions', {
 			appSlug: app.slug,
 			appTitle: app.slug,
+			...(normalizedStartRequestId ? { startRequestId: normalizedStartRequestId } : {}),
 			emailDraftVersion: 0,
 			status: 'working',
 			resumeTokenHash,
@@ -96,7 +188,7 @@ export const startSession = mutation({
 		}
 
 		return {
-			...(await buildSessionSnapshot(ctx, session, resumeToken)),
+			...(await buildSessionSnapshot(ctx, session, sessionResumeToken)),
 			userMessageId,
 			assistantMessageId
 		};

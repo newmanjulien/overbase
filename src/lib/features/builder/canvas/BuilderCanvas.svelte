@@ -8,15 +8,23 @@
 		app: BuilderAppRecord;
 		guide: BuilderGuideDefinition | null;
 		initialMessage?: string | null;
+		startRequestId?: string | null;
+		resumeToken?: string | null;
 	};
 
-	let { app, guide, initialMessage = null }: Props = $props();
+	let {
+		app,
+		guide,
+		initialMessage = null,
+		startRequestId = null,
+		resumeToken = null
+	}: Props = $props();
 	const isCustomEmailBuilder = $derived(app.mode === 'custom');
 </script>
 
 {#key app.id}
 	{#if isCustomEmailBuilder}
-		<CustomEmailBuilderWorkbench {app} {initialMessage} />
+		<CustomEmailBuilderWorkbench {app} {initialMessage} {startRequestId} {resumeToken} />
 	{:else}
 		<GuidedBuilderWorkbench {app} {guide} {initialMessage} />
 	{/if}

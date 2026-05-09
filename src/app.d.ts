@@ -7,6 +7,8 @@ declare global {
 
 		interface PageState {
 			initialMessage?: string;
+			startRequestId?: string;
+			resumeToken?: string;
 		}
 	}
 }

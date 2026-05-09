@@ -1,3 +1,16 @@
 # Agent Instructions
 
 - Never write or add tests
+- All data in the db can be nuked or reseeded
+- Destructive changes are fine
+- Backwards compatibility is not important
+- Maximally clean architecture matters
+- Patching things quickly is usually wrong
+- Intuitive mental model is important
+- Readable code is important
+
+- This is a new app I'm building
+- It currently mostly is a notification builder
+- Later we'll add many other features (current routes which have just and empty state now)
+- The builder relies on separate apps
+- Check out src/builder-apps/README.md to understand how those separate apps work

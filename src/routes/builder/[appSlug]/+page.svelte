@@ -11,12 +11,14 @@
 	const app = $derived(data.app ? toBuilderAppRecord(data.app) : null);
 	const guide = $derived(toBuilderGuideDefinition(data.guide));
 	const initialMessage = $derived(page.state.initialMessage ?? null);
+	const startRequestId = $derived(page.state.startRequestId ?? null);
+	const resumeToken = $derived(page.state.resumeToken ?? null);
 </script>
 
 <PageShell class="px-0 py-0 md:px-0 md:py-0">
 	<BuilderDesktopOnly>
 		{#if app}
-			<BuilderCanvas {app} {guide} {initialMessage} />
+			<BuilderCanvas {app} {guide} {initialMessage} {startRequestId} {resumeToken} />
 		{:else}
 			<div class="flex h-full min-h-full items-center justify-center bg-white px-6 py-12">
 				<div class="w-full max-w-sm rounded-sm border border-zinc-200 bg-white p-5 text-center shadow-sm">

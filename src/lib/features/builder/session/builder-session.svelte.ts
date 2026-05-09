@@ -3,6 +3,10 @@ import type { Doc, Id } from '$convex/_generated/dataModel';
 import type { EmailDraft } from '@overbase/builder-sdk/email';
 import { useConvexClient, useQuery } from 'convex-svelte';
 import {
+	createBuilderSessionStartRequest,
+	type BuilderSessionStartRequest
+} from './builder-session-start';
+import {
 	getBuilderSessionMessagingView,
 	getOptimisticSendingStatus
 } from './builder-session-view';
@@ -212,7 +216,10 @@ export function createBuilderSessionController(
 		clearStoredHandle(appSlug);
 	}
 
-	async function start(message?: string) {
+	async function start(
+		message?: string,
+		request?: Partial<BuilderSessionStartRequest> | null
+	) {
 		const normalizedInitialMessage = (message ?? readInitialMessage()).trim();
 
 		if (!normalizedInitialMessage) {
@@ -220,6 +227,7 @@ export function createBuilderSessionController(
 		}
 
 		const job = (jobVersion += 1);
+		const startRequest = createBuilderSessionStartRequest(request);
 		error = null;
 		handle = null;
 		localSnapshot = localSnapshot ?? createInitialSnapshot(normalizedInitialMessage);
@@ -227,7 +235,9 @@ export function createBuilderSessionController(
 		try {
 			const result = await client.mutation(api.builderSessions.startSession, {
 				appSlug,
-				initialMessage: normalizedInitialMessage
+				initialMessage: normalizedInitialMessage,
+				startRequestId: startRequest.startRequestId,
+				resumeToken: startRequest.resumeToken
 			});
 
 			if (isCurrentJob(job)) {

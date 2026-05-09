@@ -31,12 +31,14 @@ type RuntimeInput =
 
 type RuntimeStreamHandler = (event: BuilderAppOutputEvent) => Promise<void> | void;
 
+const MANIFEST_FETCH_TIMEOUT_MS = 2_500;
 const RUNTIME_CONFIGS: Record<string, RuntimeConfig> = {
 	[BRING_THE_FIRM_APP_SLUG]: {
 		urlEnv: 'BRING_THE_FIRM_RUNTIME_URL',
 		secretEnv: 'BRING_THE_FIRM_RUNTIME_SECRET'
 	}
 };
+const manifestRequests = new Map<string, Promise<BuilderAppManifest>>();
 
 function assertRuntimePresentationCoverage() {
 	const missingPresentationSlugs = Object.keys(RUNTIME_CONFIGS).filter(
@@ -138,29 +140,70 @@ function isBuilderAppManifest(value: unknown): value is BuilderAppManifest {
 }
 
 async function fetchRuntimeManifest(
+	fetchImpl: typeof fetch,
+	appSlug: string,
+	baseUrl: string
+) {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => {
+		controller.abort();
+	}, MANIFEST_FETCH_TIMEOUT_MS);
+
+	try {
+		const response = await fetchImpl(`${baseUrl}/api/builder/manifest`, {
+			headers: {
+				accept: 'application/json'
+			},
+			signal: controller.signal
+		});
+
+		if (!response.ok) {
+			throw new Error(`The app manifest failed with status ${response.status}.`);
+		}
+
+		const body = (await response.json()) as unknown;
+		const manifest = isRecord(body) ? body.manifest : null;
+
+		if (!isBuilderAppManifest(manifest) || manifest.slug !== appSlug) {
+			throw new Error('The app runtime returned an invalid manifest.');
+		}
+
+		return manifest;
+	} catch (error) {
+		if (error instanceof DOMException && error.name === 'AbortError') {
+			throw new Error('The app manifest timed out.');
+		}
+
+		throw error;
+	} finally {
+		clearTimeout(timeout);
+	}
+}
+
+function getManifestRequestKey(appSlug: string, baseUrl: string) {
+	return `${appSlug}:${baseUrl}`;
+}
+
+async function getRuntimeManifest(
 	env: BuilderRuntimeEnv,
 	fetchImpl: typeof fetch,
 	appSlug: string
 ) {
 	const baseUrl = getRuntimeBaseUrl(env, appSlug);
-	const response = await fetchImpl(`${baseUrl}/api/builder/manifest`, {
-		headers: {
-			accept: 'application/json'
-		}
+	const requestKey = getManifestRequestKey(appSlug, baseUrl);
+	const pendingRequest = manifestRequests.get(requestKey);
+
+	if (pendingRequest) {
+		return await pendingRequest;
+	}
+
+	const request = fetchRuntimeManifest(fetchImpl, appSlug, baseUrl).finally(() => {
+		manifestRequests.delete(requestKey);
 	});
 
-	if (!response.ok) {
-		throw new Error(`The app manifest failed with status ${response.status}.`);
-	}
+	manifestRequests.set(requestKey, request);
 
-	const body = (await response.json()) as unknown;
-	const manifest = isRecord(body) ? body.manifest : null;
-
-	if (!isBuilderAppManifest(manifest) || manifest.slug !== appSlug) {
-		throw new Error('The app runtime returned an invalid manifest.');
-	}
-
-	return manifest;
+	return await request;
 }
 
 async function getBuilderAppRegistryEntry(
@@ -168,7 +211,7 @@ async function getBuilderAppRegistryEntry(
 	fetchImpl: typeof fetch,
 	presentation: BuilderAppPresentation
 ) {
-	const manifest = await fetchRuntimeManifest(env, fetchImpl, presentation.slug);
+	const manifest = await getRuntimeManifest(env, fetchImpl, presentation.slug);
 
 	return mergeBuilderAppManifest(manifest, presentation);
 }
