@@ -11,6 +11,9 @@ type BuilderAppView = {
 	categoryIds: readonly string[];
 	title: string;
 	description: string;
+	details: {
+		paragraphs: readonly string[];
+	};
 	mode: 'custom' | 'guided';
 	artwork: BuilderAppArtwork;
 };
@@ -33,6 +36,9 @@ export type BuilderAppRecord = {
 	categoryIds: string[];
 	title: string;
 	description: string;
+	details: {
+		paragraphs: string[];
+	};
 	mode: 'custom' | 'guided';
 	artwork: BuilderArtworkPreset;
 };
@@ -76,6 +82,9 @@ export function toBuilderAppRecord(app: BuilderAppView): BuilderAppRecord {
 		categoryIds: [...app.categoryIds],
 		title: app.title,
 		description: app.description,
+		details: {
+			paragraphs: [...app.details.paragraphs]
+		},
 		mode: app.mode,
 		artwork: toBuilderArtworkPreset(app.artwork)
 	};

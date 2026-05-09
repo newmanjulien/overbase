@@ -93,6 +93,18 @@ function isStringArray(value: unknown): value is readonly string[] {
 	return Array.isArray(value) && value.every((item) => typeof item === 'string');
 }
 
+function isNonEmptyStringArray(value: unknown): value is readonly string[] {
+	return (
+		Array.isArray(value) &&
+		value.length > 0 &&
+		value.every((item) => typeof item === 'string' && item.trim().length > 0)
+	);
+}
+
+function isBuilderAppDetails(value: unknown) {
+	return isRecord(value) && isNonEmptyStringArray(value.paragraphs);
+}
+
 function isGuideQuestion(value: unknown) {
 	if (!isRecord(value)) {
 		return false;
@@ -134,6 +146,7 @@ function isBuilderAppManifest(value: unknown): value is BuilderAppManifest {
 		typeof value.slug === 'string' &&
 		typeof value.title === 'string' &&
 		typeof value.description === 'string' &&
+		isBuilderAppDetails(value.details) &&
 		((value.mode === 'custom' && value.guide === null) ||
 			(value.mode === 'guided' && isGuideDefinition(value.guide)))
 	);
