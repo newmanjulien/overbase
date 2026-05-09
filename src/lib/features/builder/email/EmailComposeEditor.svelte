@@ -14,7 +14,6 @@
 	};
 
 	let { editableDraft, disabled = false, onDraftChange }: Props = $props();
-	let fireReasonTextareaElement = $state<HTMLTextAreaElement | null>(null);
 
 	function updateDraft(patch: Partial<EditableEmailDraft>) {
 		onDraftChange({
@@ -26,21 +25,6 @@
 	function addAttachment() {
 		onDraftChange(addEditableAttachment(editableDraft, editableDraft.attachmentInputText));
 	}
-
-	function syncFireReasonTextareaHeight() {
-		if (!fireReasonTextareaElement) {
-			return;
-		}
-
-		fireReasonTextareaElement.style.height = '0px';
-		fireReasonTextareaElement.style.height = `${fireReasonTextareaElement.scrollHeight}px`;
-	}
-
-	$effect(() => {
-		void fireReasonTextareaElement;
-		void editableDraft.fireReasonText;
-		syncFireReasonTextareaHeight();
-	});
 </script>
 
 <EmailComposeDocument>
@@ -106,17 +90,4 @@
 		></textarea>
 	{/snippet}
 
-	{#snippet fireReason()}
-		<textarea
-			bind:this={fireReasonTextareaElement}
-			id="email-fire-reason"
-			value={editableDraft.fireReasonText}
-			rows={1}
-			aria-label="Why this email fires"
-			placeholder="Describe the trigger rule"
-			{disabled}
-			class="block w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.76rem] leading-relaxed text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
-			oninput={(event) => updateDraft({ fireReasonText: event.currentTarget.value })}
-		></textarea>
-	{/snippet}
 </EmailComposeDocument>

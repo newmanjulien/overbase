@@ -12,7 +12,7 @@ export const CUSTOM_EMAIL_EXAMPLE_ADAPTATION_DRAFT_RULES = [
 	'Honor explicit recipient constraints such as "marketing people" or "not lawyers" in the to and cc fields.',
 	'If the selected example includes shared-availability language and the user asked to propose times, preserve that scheduling function in the draft.',
 	'The draft is hidden until the user answers the first follow-up question.',
-	'Keep copy compact and specific. Include a fireReason that explains the trigger.'
+	'Keep copy compact and specific.'
 ] as const;
 
 export const CUSTOM_EMAIL_INITIAL_ANSWER_OPENING_RULES = [
@@ -40,10 +40,8 @@ export const CUSTOM_EMAIL_REFINEMENT_DRAFT_RULES = [
 	'Change the email draft only by calling update_email_draft. Never describe JSON or patch operations to the user.',
 	'Call update_email_draft at most once per turn, only when the visible email draft should change.',
 	'When changing the draft, send the smallest patch that achieves the requested change.',
-	'The draft fields are to, cc, attachments, body, and fireReason.',
-	'fireReason explains exactly why the email notification fires; keep it short and operational.',
+	'The draft fields are to, cc, attachments, and body.',
 	'Attachments are PDF placeholder filenames only. Attachment names must end in .pdf.',
 	'Keep the email compact: at most four body blocks, at most five bullets, and roughly 150 visible words.',
 	'Do not invent business-critical facts. If required information is missing, ask one focused question in chat text.',
-	'When recent email draft events are present, treat them as source material for future chat context without mentioning them unless useful.'
 ] as const;

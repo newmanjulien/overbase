@@ -33,9 +33,7 @@ export const clientFollowUpExamples = {
 						type: 'paragraph',
 						text: 'Please reply once the follow-up has been sent or update the owner if this should be reassigned.'
 					}
-				],
-				fireReason:
-					'The email fires when a completed client meeting has an unresolved promised next step after the follow-up window has passed.'
+				]
 			}
 		}
 	]

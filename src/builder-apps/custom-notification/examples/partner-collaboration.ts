@@ -45,9 +45,7 @@ export const partnerCollaborationExamples = {
 						type: 'paragraph',
 						text: 'But if there is, you both seem to be available today at 2pm and 3pm ET.'
 					}
-				],
-				fireReason:
-					'The email fires when Davies tracks in their CRM that they have been hired for a matter which could involve US work.'
+				]
 			}
 		}
 	]

@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
-import { emailDraft, emailDraftChangedField } from './builderEmailValidators';
+import { emailDraftState } from './builderEmailValidators';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 
@@ -9,7 +9,6 @@ export default defineSchema({
 		appSlug: v.string(),
 		appTitle: v.string(),
 		startRequestId: v.optional(v.string()),
-		emailDraftVersion: v.number(),
 		status: v.union(
 			v.literal('working'),
 			v.literal('waitingForUser'),
@@ -25,8 +24,7 @@ export default defineSchema({
 		),
 		activeTurnJobId: v.optional(v.id('builderSessionJobs')),
 		activeBackgroundJobId: v.optional(v.id('builderSessionJobs')),
-		preparedEmailDraft: v.optional(emailDraft),
-		emailDraft: v.optional(emailDraft),
+		emailDraftState: v.optional(emailDraftState),
 		errorText: v.optional(v.string()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
@@ -69,13 +67,4 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_session_createdAt', ['sessionId', 'createdAt']),
-	builderSessionEmailDraftEvents: defineTable({
-		sessionId: v.id('builderSessions'),
-		type: v.literal('emailDraftEditedByUser'),
-		versionBefore: v.number(),
-		versionAfter: v.number(),
-		changedFields: v.array(emailDraftChangedField),
-		summary: v.string(),
-		createdAt: v.number()
-	}).index('by_session_createdAt', ['sessionId', 'createdAt'])
 });

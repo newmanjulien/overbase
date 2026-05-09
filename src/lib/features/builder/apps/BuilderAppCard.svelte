@@ -11,7 +11,7 @@
 </script>
 
 <a
-	href={resolve('/builder/[appSlug]', { appSlug: app.id })}
+	href={resolve('/builder/[appSlug]?fresh=1', { appSlug: app.id })}
 	class="group block w-full rounded-sm text-left outline-none"
 	aria-label={`Start with ${app.title}`}
 >

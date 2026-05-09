@@ -5,7 +5,7 @@ export const pipelineRiskExamples = {
 	description: 'Notifications that surface stalled, risky, or changing commercial opportunities.',
 	// The AI sometimes uses this text more literally than it should, so write it as user-facing question copy.
 	questionGuidance:
-		'Which deal stage, account owner, or risk threshold should control when the email fires?',
+		'Which deal stage, account owner, or risk threshold should trigger the alert?',
 	examples: [
 		{
 			slug: 'stalled-opportunity',
@@ -28,9 +28,7 @@ export const pipelineRiskExamples = {
 						type: 'paragraph',
 						text: 'Confirm whether the next step is still active, and update the close plan if the opportunity should stay in forecast.'
 					}
-				],
-				fireReason:
-					'The email fires when an active opportunity remains in the same stage longer than the configured stall threshold.'
+				]
 			}
 		}
 	]

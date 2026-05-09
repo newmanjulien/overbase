@@ -111,9 +111,7 @@ export const runContinueTurn = internalAction({
 				initialMessage: claim.initialMessage,
 				userMessage: claim.userMessage,
 				transcript: claim.transcript,
-				emailDraft: claim.emailDraft,
-				preparedEmailDraft: claim.preparedEmailDraft,
-				recentEvents: claim.recentEvents,
+				emailDraftState: claim.emailDraftState,
 				appState: claim.appState,
 				handlers: {
 					onAssistantDelta: async (delta) => {

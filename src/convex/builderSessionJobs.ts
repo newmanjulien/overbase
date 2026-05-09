@@ -91,13 +91,6 @@ async function getSessionMessages(ctx: MutationCtx, sessionId: Doc<'builderSessi
 		.collect();
 }
 
-async function getRecentEmailDraftEvents(ctx: MutationCtx, sessionId: Doc<'builderSessions'>['_id']) {
-	return await ctx.db
-		.query('builderSessionEmailDraftEvents')
-		.withIndex('by_session_createdAt', (q) => q.eq('sessionId', sessionId))
-		.collect();
-}
-
 export const appendAssistantMessageDelta = internalMutation({
 	args: {
 		jobId: v.id('builderSessionJobs'),
@@ -212,7 +205,7 @@ export const claimContinueTurn = internalMutation({
 			};
 		}
 
-		if (!session.emailDraft && !session.preparedEmailDraft) {
+		if (!session.emailDraftState) {
 			const nextAttempt = job.attempts + 1;
 
 			if (nextAttempt >= BACKGROUND_JOB_MAX_ATTEMPTS || now >= job.deadlineAt) {
@@ -247,7 +240,6 @@ export const claimContinueTurn = internalMutation({
 		}
 
 		const messages = await getSessionMessages(ctx, session._id);
-		const events = await getRecentEmailDraftEvents(ctx, session._id);
 		const userMessage = [...messages].reverse().find((message) => message.role === 'user')?.text ?? '';
 
 		await ctx.db.patch(job._id, {
@@ -260,8 +252,7 @@ export const claimContinueTurn = internalMutation({
 			appSlug: session.appSlug,
 			initialMessage: messages.find((message) => message.role === 'user')?.text ?? '',
 			userMessage,
-			emailDraft: session.emailDraft,
-			preparedEmailDraft: session.preparedEmailDraft,
+			emailDraftState: session.emailDraftState,
 			appState: session.appState,
 			transcript: messages
 				.filter((message) => message.status === 'complete' && message.text.trim())
@@ -269,12 +260,7 @@ export const claimContinueTurn = internalMutation({
 				.map((message) => ({
 					role: message.role,
 					text: message.text
-				})),
-			recentEvents: events.slice(-5).map((event) => ({
-				summary: event.summary,
-				changedFields: event.changedFields,
-				createdAt: event.createdAt
-			}))
+				}))
 		};
 	}
 });
@@ -428,11 +414,12 @@ export const failBuilderJob = internalMutation({
 		}
 
 		const session = await ctx.db.get(job.sessionId);
+		const hasVisibleDraft = session?.emailDraftState?.visibility === 'visible';
 
 		await failJobRecord(ctx, jobId, errorText, now, {
-			status: session?.emailDraft ? 'ready' : 'failed',
-			clearActiveBackgroundJob: Boolean(!session?.emailDraft),
-			writeSessionError: Boolean(!session?.emailDraft)
+			status: hasVisibleDraft ? 'ready' : 'failed',
+			clearActiveBackgroundJob: !hasVisibleDraft,
+			writeSessionError: !hasVisibleDraft
 		});
 	}
 });

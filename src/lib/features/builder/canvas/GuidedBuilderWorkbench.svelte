@@ -10,29 +10,36 @@
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderGuideDefinition } from '$lib/features/builder/guide/guide-types';
 	import { createBuilderSessionController } from '$lib/features/builder/session/builder-session.svelte';
+	import {
+		clearPendingBuilderLaunch,
+		clearStoredBuilderSessionHandle,
+		type BuilderLaunchState
+	} from '$lib/features/builder/session/builder-launch';
 	import BuilderSetupFlow from '$lib/features/builder/setup/BuilderSetupFlow.svelte';
 
 	type Props = {
 		app: BuilderAppRecord;
 		guide: BuilderGuideDefinition | null;
-		initialMessage?: string | null;
+		launch?: BuilderLaunchState | null;
 	};
 
-	let { app, guide, initialMessage = null }: Props = $props();
+	let { app, guide, launch = null }: Props = $props();
 	let bootedAppId = $state('');
 	let mode = $state<'setup' | 'run'>('setup');
 
 	const initialAppId = untrack(() => app.id);
+	const initialLaunch = untrack(() => launch?.appSlug === initialAppId ? launch : null);
 	const builderSession = createBuilderSessionController(
 		initialAppId,
-		() => initialMessage?.trim() ?? ''
+		() => initialLaunch?.initialMessage?.trim() ?? ''
 	);
 	const runError = $derived(
 		builderSession.session?.errorText ??
 			(builderSession.messages.length > 0 ? builderSession.error : null)
 	);
 
-	function clearInitialMessageState() {
+	function clearLaunchState() {
+		clearPendingBuilderLaunch(app.id);
 		replaceState(
 			resolve('/builder/[appSlug]', {
 				appSlug: app.id
@@ -41,7 +48,10 @@
 		);
 	}
 
-	async function startRun(firstMessage: string) {
+	async function startRun(
+		firstMessage: string,
+		request?: Pick<BuilderLaunchState, 'startRequestId' | 'resumeToken'>
+	) {
 		const normalizedFirstMessage = firstMessage.trim();
 
 		if (!normalizedFirstMessage) {
@@ -49,15 +59,28 @@
 		}
 
 		mode = 'run';
-		await builderSession.start(normalizedFirstMessage);
-		clearInitialMessageState();
+		await builderSession.start(normalizedFirstMessage, request);
+		clearLaunchState();
 	}
 
 	async function boot() {
-		const firstMessage = initialMessage?.trim() ?? '';
+		const activeLaunch = launch?.appSlug === app.id ? launch : null;
+		const firstMessage = activeLaunch?.initialMessage?.trim() ?? '';
+
+		if (activeLaunch?.fresh) {
+			clearStoredBuilderSessionHandle(app.id);
+		}
 
 		if (firstMessage) {
-			await startRun(firstMessage);
+			await startRun(firstMessage, {
+				startRequestId: activeLaunch?.startRequestId,
+				resumeToken: activeLaunch?.resumeToken
+			});
+			return;
+		}
+
+		if (activeLaunch?.fresh) {
+			mode = 'setup';
 			return;
 		}
 

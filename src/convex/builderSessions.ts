@@ -6,10 +6,8 @@ import {
 	emailDraft as emailDraftValidator
 } from './builderEmailValidators';
 import {
-	getEmailDraftChangedFields,
 	hasEmailDraftChanged,
-	normalizeEmailDraft,
-	summarizeEmailDraftEdit
+	normalizeEmailDraft
 } from '@overbase/builder-sdk/email';
 import {
 	createResumeToken,
@@ -137,7 +135,6 @@ export const startSession = mutation({
 			appSlug: app.slug,
 			appTitle: app.slug,
 			...(normalizedStartRequestId ? { startRequestId: normalizedStartRequestId } : {}),
-			emailDraftVersion: 0,
 			status: 'working',
 			resumeTokenHash,
 			createdAt: now,
@@ -324,7 +321,7 @@ export const saveEmailDraft = mutation({
 		const now = Date.now();
 		const session = await getAuthorizedSession(ctx, sessionId, resumeToken, now);
 
-		if (!session || !session.emailDraft) {
+		if (!session || !session.emailDraftState || session.emailDraftState.visibility !== 'visible') {
 			throw new Error('Email draft not found.');
 		}
 
@@ -332,14 +329,14 @@ export const saveEmailDraft = mutation({
 			throw new Error('Please wait for the assistant response to finish before editing the draft.');
 		}
 
-		if (baseEmailDraftVersion !== session.emailDraftVersion) {
+		if (baseEmailDraftVersion !== session.emailDraftState.version) {
 			throw new Error(
 				'The draft changed while you were editing. Review the latest version before saving.'
 			);
 		}
 
 		const normalizedDraft = normalizeEmailDraft(emailDraft);
-		const previousDraft = normalizeEmailDraft(session.emailDraft);
+		const previousDraft = normalizeEmailDraft(session.emailDraftState.draft);
 		const expiresAt = getBuilderSessionExpiresAt(now);
 
 		if (!hasEmailDraftChanged(previousDraft, normalizedDraft)) {
@@ -353,29 +350,21 @@ export const saveEmailDraft = mutation({
 			return {
 				snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession, resumeToken) : null,
 				expiresAt,
-				emailDraftVersion: session.emailDraftVersion,
+				emailDraftVersion: session.emailDraftState.version,
 				changed: false
 			};
 		}
 
-		const changedFields = getEmailDraftChangedFields(previousDraft, normalizedDraft);
-		const nextEmailDraftVersion = session.emailDraftVersion + 1;
+		const nextEmailDraftVersion = session.emailDraftState.version + 1;
 
 		await ctx.db.patch(session._id, {
-			emailDraftVersion: nextEmailDraftVersion,
-			emailDraft: normalizedDraft,
-			preparedEmailDraft: normalizedDraft,
+			emailDraftState: {
+				version: nextEmailDraftVersion,
+				visibility: 'visible',
+				draft: normalizedDraft
+			},
 			expiresAt,
 			updatedAt: now
-		});
-		await ctx.db.insert('builderSessionEmailDraftEvents', {
-			sessionId: session._id,
-			type: 'emailDraftEditedByUser',
-			versionBefore: session.emailDraftVersion,
-			versionAfter: nextEmailDraftVersion,
-			changedFields,
-			summary: summarizeEmailDraftEdit(changedFields),
-			createdAt: now
 		});
 
 		const updatedSession = await ctx.db.get(session._id);

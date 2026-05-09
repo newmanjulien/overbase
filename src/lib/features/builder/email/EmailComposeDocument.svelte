@@ -6,10 +6,9 @@
 		cc: Snippet;
 		attachments: Snippet;
 		body: Snippet;
-		fireReason: Snippet;
 	};
 
-	let { to, cc, attachments, body, fireReason }: Props = $props();
+	let { to, cc, attachments, body }: Props = $props();
 </script>
 
 <div class="flex min-h-full w-full flex-1 flex-col">
@@ -41,11 +40,5 @@
 
 	<div class="pt-5 text-[0.82rem] leading-[1.52]">
 		{@render body()}
-	</div>
-
-	<div class="mt-auto pt-5">
-		<div class="rounded-sm border border-zinc-200 bg-zinc-50/50 px-3 py-2.5">
-			{@render fireReason()}
-		</div>
 	</div>
 </div>

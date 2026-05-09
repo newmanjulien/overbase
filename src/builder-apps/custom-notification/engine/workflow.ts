@@ -2,6 +2,7 @@ import {
 	applyEmailDraftPatch,
 	emailDraftJsonSchema,
 	emailDraftPatchJsonSchema,
+	hasEmailDraftPatchFields,
 	normalizeEmailDraft,
 	type EmailDraft
 } from '@overbase/builder-sdk/email';
@@ -24,7 +25,6 @@ import {
 import { readEmailBuilderTurnStream } from '@overbase/builder-sdk/streams';
 import type {
 	EmailAdaptedExampleResult,
-	EmailBuilderEventContext,
 	EmailBuilderTurnStreamHandlers,
 	EmailBuilderTurnStreamResult,
 	EmailExampleCandidate,
@@ -158,23 +158,20 @@ export async function applyEmailInitialAnswer(params: {
 
 /**
  * This handles every later message after the draft is visible.
- * It sends OpenAI the recent conversation, the current draft, and recent user
- * edits. OpenAI can stream a text reply, ask to patch the draft, or do both.
- * Before returning, this removes any patch operations that would not actually
- * change the current normalized draft.
+ * It sends OpenAI the recent conversation and current draft. OpenAI can stream
+ * a text reply, ask to patch the draft, or do both. Before returning, this
+ * removes any patch that would not actually change the current normalized draft.
  */
 export async function streamCustomEmailBuilderTurn(params: {
 	transcript: TranscriptMessage[];
 	draft: EmailDraft;
-	recentEvents: EmailBuilderEventContext[];
 	handlers: EmailBuilderTurnStreamHandlers;
 	openAIConfig: OpenAIConfig;
 }): Promise<EmailBuilderTurnStreamResult> {
 	const { apiKey, model, reasoningEffort } = params.openAIConfig;
 	const refinementSystemPrompt = buildEmailRefinementSystemPrompt();
 	const refinementUserPrompt = buildEmailRefinementUserPrompt({
-		draft: params.draft,
-		recentEvents: params.recentEvents
+		draft: params.draft
 	});
 	const response = await fetch(OPENAI_RESPONSES_URL, {
 		method: 'POST',
@@ -200,8 +197,7 @@ export async function streamCustomEmailBuilderTurn(params: {
 					type: 'function',
 					name: UPDATE_EMAIL_DRAFT_TOOL_NAME,
 					description: 'Patch the visible email notification draft.',
-					parameters: emailDraftPatchJsonSchema,
-					strict: true
+					parameters: emailDraftPatchJsonSchema
 				}
 			],
 			parallel_tool_calls: false,
@@ -217,25 +213,16 @@ export async function streamCustomEmailBuilderTurn(params: {
 	}
 
 	const result = await readEmailBuilderTurnStream(response, params.handlers);
-	const meaningfulOperations =
-		result.patch?.operations.filter((operation) => {
-			const nextDraft = applyEmailDraftPatch(params.draft, { operations: [operation] });
-			return JSON.stringify(nextDraft) !== JSON.stringify(normalizeEmailDraft(params.draft));
-		}) ?? null;
-	const patchIntent = result.patch
-		? meaningfulOperations && meaningfulOperations.length > 0
-			? 'meaningful'
-			: 'noop'
-		: 'none';
+	const normalizedDraft = normalizeEmailDraft(params.draft);
+	const nextDraft = hasEmailDraftPatchFields(result.patch)
+		? applyEmailDraftPatch(params.draft, result.patch)
+		: null;
+	const patchChanged = nextDraft
+		? JSON.stringify(nextDraft) !== JSON.stringify(normalizedDraft)
+		: false;
 
 	return {
 		...result,
-		patch:
-			patchIntent === 'meaningful' && meaningfulOperations
-				? {
-						operations: meaningfulOperations
-					}
-				: null,
-		patchIntent
+		patch: patchChanged ? result.patch : null
 	};
 }

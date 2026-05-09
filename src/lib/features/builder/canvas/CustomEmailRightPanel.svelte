@@ -22,7 +22,7 @@
 {#if emailDraft}
 	<BuilderEmailRunPreviewPanel
 		draft={emailDraft}
-		emailDraftVersion={session?.emailDraftVersion ?? 0}
+		emailDraftVersion={emailDraftView.emailDraftVersion}
 		{canEdit}
 		onSave={onSaveDraft}
 	/>

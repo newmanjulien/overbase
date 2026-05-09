@@ -3,29 +3,22 @@
 	import CustomEmailBuilderWorkbench from '$lib/features/builder/canvas/CustomEmailBuilderWorkbench.svelte';
 	import GuidedBuilderWorkbench from '$lib/features/builder/canvas/GuidedBuilderWorkbench.svelte';
 	import type { BuilderGuideDefinition } from '$lib/features/builder/guide/guide-types';
+	import type { BuilderLaunchState } from '$lib/features/builder/session/builder-launch';
 
 	type Props = {
 		app: BuilderAppRecord;
 		guide: BuilderGuideDefinition | null;
-		initialMessage?: string | null;
-		startRequestId?: string | null;
-		resumeToken?: string | null;
+		launch?: BuilderLaunchState | null;
 	};
 
-	let {
-		app,
-		guide,
-		initialMessage = null,
-		startRequestId = null,
-		resumeToken = null
-	}: Props = $props();
+	let { app, guide, launch = null }: Props = $props();
 	const isCustomEmailBuilder = $derived(app.mode === 'custom');
 </script>
 
 {#key app.id}
 	{#if isCustomEmailBuilder}
-		<CustomEmailBuilderWorkbench {app} {initialMessage} {startRequestId} {resumeToken} />
+		<CustomEmailBuilderWorkbench {app} {launch} />
 	{:else}
-		<GuidedBuilderWorkbench {app} {guide} {initialMessage} />
+		<GuidedBuilderWorkbench {app} {guide} {launch} />
 	{/if}
 {/key}

@@ -13,24 +13,19 @@ export const deleteExpiredSessions = internalMutation({
 		let deletedSessions = 0;
 		let deletedMessages = 0;
 		let deletedOperations = 0;
-		let deletedEvents = 0;
 
 		for (const session of sessions) {
 			if (session.expiresAt > now) {
 				continue;
 			}
 
-			const [messages, operations, events] = await Promise.all([
+			const [messages, operations] = await Promise.all([
 				ctx.db
 					.query('builderSessionMessages')
 					.withIndex('by_session_createdAt', (q) => q.eq('sessionId', session._id))
 					.collect(),
 				ctx.db
 					.query('builderSessionJobs')
-					.withIndex('by_session_createdAt', (q) => q.eq('sessionId', session._id))
-					.collect(),
-				ctx.db
-					.query('builderSessionEmailDraftEvents')
 					.withIndex('by_session_createdAt', (q) => q.eq('sessionId', session._id))
 					.collect()
 			]);
@@ -45,11 +40,6 @@ export const deleteExpiredSessions = internalMutation({
 				deletedOperations += 1;
 			}
 
-			for (const event of events) {
-				await ctx.db.delete(event._id);
-				deletedEvents += 1;
-			}
-
 			await ctx.db.delete(session._id);
 			deletedSessions += 1;
 		}
@@ -57,8 +47,7 @@ export const deleteExpiredSessions = internalMutation({
 		return {
 			deletedSessions,
 			deletedMessages,
-			deletedOperations,
-			deletedEvents
+			deletedOperations
 		};
 	}
 });

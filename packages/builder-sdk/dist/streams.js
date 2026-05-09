@@ -187,8 +187,7 @@ export async function readEmailBuilderTurnStream(response, handlers) {
     }
     return {
         text,
-        patch,
-        patchIntent: patch ? 'meaningful' : 'none'
+        patch
     };
 }
 //# sourceMappingURL=streams.js.map

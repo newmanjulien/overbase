@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { api } from '$convex/_generated/api';
 	import { resolve } from '$app/paths';
 	import { goto, preloadData } from '$app/navigation';
 	import { CUSTOM_NOTIFICATION_APP_ID } from '$lib/features/builder/data';
-	import { createBuilderSessionStartRequest } from '$lib/features/builder/session/builder-session-start';
-	import { useConvexClient } from 'convex-svelte';
+	import {
+		createBuilderLaunchState,
+		writePendingBuilderLaunch
+	} from '$lib/features/builder/session/builder-launch';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 
 	const CHAT_HEADING = 'Build a notification that fits the way you work';
@@ -15,7 +16,6 @@
 	let customBuilderRoutePreloaded = $state(false);
 	let isSubmitting = $state(false);
 
-	const convexClient = useConvexClient();
 	const customBuilderHref = resolve('/builder/[appSlug]', {
 		appSlug: CUSTOM_NOTIFICATION_APP_ID
 	});
@@ -62,27 +62,18 @@
 		}
 
 		const prompt = value.trim();
-		const startRequest = createBuilderSessionStartRequest();
+		const builderLaunch = createBuilderLaunchState(CUSTOM_NOTIFICATION_APP_ID, {
+			fresh: true,
+			initialMessage: prompt
+		});
 		value = '';
 		isSubmitting = true;
 		preloadCustomBuilderRoute();
-
-		void convexClient
-			.mutation(api.builderSessions.startSession, {
-				appSlug: CUSTOM_NOTIFICATION_APP_ID,
-				initialMessage: prompt,
-				startRequestId: startRequest.startRequestId,
-				resumeToken: startRequest.resumeToken
-			})
-			.catch(() => undefined);
+		writePendingBuilderLaunch(builderLaunch);
 
 		try {
 			await goto(customBuilderHref, {
-				state: {
-					initialMessage: prompt,
-					startRequestId: startRequest.startRequestId,
-					resumeToken: startRequest.resumeToken
-				}
+				state: { builderLaunch }
 			});
 		} finally {
 			isSubmitting = false;

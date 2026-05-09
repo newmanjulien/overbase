@@ -10,13 +10,13 @@ import {
 	getBuilderSessionMessagingView,
 	getOptimisticSendingStatus
 } from './builder-session-view';
-
-export type BuilderSessionHandle = {
-	sessionId: Id<'builderSessions'>;
-	resumeToken: string;
-	appSlug: string;
-	expiresAt: number;
-};
+import {
+	clearStoredBuilderSessionHandle,
+	readStoredBuilderSessionHandle,
+	writeStoredBuilderSessionHandle,
+	type BuilderSessionHandle
+} from './builder-session-storage';
+export type { BuilderSessionHandle } from './builder-session-storage';
 
 export type BuilderSessionMessage = {
 	_id: string;
@@ -39,70 +39,8 @@ type ServerBuilderSessionSnapshot = {
 	messages: Doc<'builderSessionMessages'>[];
 };
 
-type StoredBuilderSessionHandle = Omit<BuilderSessionHandle, 'sessionId'> & {
-	sessionId: string;
-};
-
-const BUILDER_SESSION_STORAGE_VERSION = 2;
-
-function getStorageKey(appSlug: string) {
-	return `overbase:builder-session:v${BUILDER_SESSION_STORAGE_VERSION}:${appSlug}`;
-}
-
-function getLegacyStorageKey(appSlug: string) {
-	return `overbase:builder-session:${appSlug}`;
-}
-
 function getErrorMessage(error: unknown) {
 	return error instanceof Error ? error.message : 'Something went wrong.';
-}
-
-function parseStoredHandle(value: unknown): BuilderSessionHandle | null {
-	if (!value || typeof value !== 'object') {
-		return null;
-	}
-
-	const candidate = value as Record<string, unknown>;
-
-	if (
-		typeof candidate.sessionId !== 'string' ||
-		typeof candidate.resumeToken !== 'string' ||
-		typeof candidate.appSlug !== 'string' ||
-		typeof candidate.expiresAt !== 'number' ||
-		!candidate.sessionId ||
-		!candidate.resumeToken ||
-		!candidate.appSlug ||
-		candidate.expiresAt <= Date.now()
-	) {
-		return null;
-	}
-
-	return candidate as StoredBuilderSessionHandle as BuilderSessionHandle;
-}
-
-function readStoredHandle(appSlug: string) {
-	if (typeof sessionStorage === 'undefined') {
-		return null;
-	}
-
-	try {
-		return parseStoredHandle(JSON.parse(sessionStorage.getItem(getStorageKey(appSlug)) ?? 'null'));
-	} catch {
-		return null;
-	}
-}
-
-function writeStoredHandle(handle: BuilderSessionHandle) {
-	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.setItem(getStorageKey(handle.appSlug), JSON.stringify(handle));
-	}
-}
-
-function clearStoredHandle(appSlug: string) {
-	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.removeItem(getStorageKey(appSlug));
-		sessionStorage.removeItem(getLegacyStorageKey(appSlug));
-	}
 }
 
 function toUiSnapshot(snapshot: ServerBuilderSessionSnapshot): BuilderSessionSnapshot {
@@ -206,14 +144,14 @@ export function createBuilderSessionController(
 		const uiSnapshot = toUiSnapshot(nextSnapshot);
 		handle = nextSnapshot.handle;
 		localSnapshot = uiSnapshot;
-		writeStoredHandle(nextSnapshot.handle);
+		writeStoredBuilderSessionHandle(nextSnapshot.handle);
 	}
 
 	function clearLocal() {
 		handle = null;
 		localSnapshot = null;
 		error = null;
-		clearStoredHandle(appSlug);
+		clearStoredBuilderSessionHandle(appSlug);
 	}
 
 	async function start(
@@ -255,7 +193,7 @@ export function createBuilderSessionController(
 	}
 
 	async function resumeStored() {
-		const storedHandle = readStoredHandle(appSlug);
+		const storedHandle = readStoredBuilderSessionHandle(appSlug);
 
 		if (!storedHandle || storedHandle.appSlug !== appSlug) {
 			clearLocal();

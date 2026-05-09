@@ -75,9 +75,4 @@
 		</div>
 	{/snippet}
 
-	{#snippet fireReason()}
-		<p class="text-[0.76rem] leading-relaxed text-zinc-800">
-			{draft.fireReason || 'Add the trigger rule this notification should use.'}
-		</p>
-	{/snippet}
 </EmailComposeDocument>

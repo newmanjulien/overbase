@@ -28,9 +28,7 @@ export const marketSignalExamples = {
 						type: 'paragraph',
 						text: 'Consider sending a short note and checking whether this creates any new priorities for the account.'
 					}
-				],
-				fireReason:
-					'The email fires when a monitored client or prospect has a new senior leader announced in a trusted external source.'
+				]
 			}
 		},
 		{
@@ -54,9 +52,7 @@ export const marketSignalExamples = {
 						type: 'paragraph',
 						text: 'Review the attached summary before reaching out so the message is specific to the client context.'
 					}
-				],
-				fireReason:
-					'The email fires when a trusted source publishes a regulatory update that matches the monitored client industry, location, or service need.'
+				]
 			}
 		}
 	]

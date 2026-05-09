@@ -1,11 +1,9 @@
-import { applyEmailDraftPatch, getEmailDraftChangedFields, normalizeEmailDraft } from './email.js';
+import { applyEmailDraftPatch, hasEmailDraftChanged, hasEmailDraftPatchFields, normalizeEmailDraft } from './email.js';
 export const BUILDER_HOST_APP_STATE_VERSION = 1;
 export function createInitialBuilderHostState(appState = { version: BUILDER_HOST_APP_STATE_VERSION, value: {} }) {
     return {
         appState,
-        emailDraft: null,
-        preparedEmailDraft: null,
-        recentEvents: []
+        emailDraftState: null
     };
 }
 export function createEmptyBuilderHostEffects() {
@@ -31,13 +29,9 @@ export function patchBuilderHostAppState(appState, patch) {
         }
     };
 }
-function appendRecentEvent(recentEvents, event) {
-    return [...recentEvents, event].slice(-5);
-}
-export function applyBuilderHostEvent(state, event, options = {}) {
+export function applyBuilderHostEvent(state, event) {
     let nextState = state;
     const effects = createEmptyBuilderHostEffects();
-    const now = options.now ?? Date.now();
     if (event.type === 'assistantComplete') {
         effects.assistantCompleteText = event.text;
         return { state: nextState, effects };
@@ -56,34 +50,35 @@ export function applyBuilderHostEvent(state, event, options = {}) {
         };
         return { state: nextState, effects };
     }
-    if (event.type === 'emailDraftReplace') {
+    if (event.type === 'emailDraftSet') {
         const emailDraft = normalizeEmailDraft(event.emailDraft);
-        const visible = event.visible !== false;
         nextState = {
             ...nextState,
-            preparedEmailDraft: emailDraft,
-            ...(visible ? { emailDraft } : {})
+            emailDraftState: {
+                version: (nextState.emailDraftState?.version ?? 0) + 1,
+                visibility: event.visibility,
+                draft: emailDraft
+            }
         };
         return { state: nextState, effects };
     }
     if (event.type === 'emailDraftPatch') {
-        if (!nextState.emailDraft || !event.patch || event.patchIntent !== 'meaningful') {
+        if (!nextState.emailDraftState ||
+            nextState.emailDraftState.visibility !== 'visible' ||
+            !hasEmailDraftPatchFields(event.patch)) {
             return { state: nextState, effects };
         }
-        const emailDraft = applyEmailDraftPatch(nextState.emailDraft, event.patch);
-        const changedFields = getEmailDraftChangedFields(nextState.emailDraft, emailDraft);
-        if (changedFields.length === 0) {
+        const emailDraft = applyEmailDraftPatch(nextState.emailDraftState.draft, event.patch);
+        if (!hasEmailDraftChanged(nextState.emailDraftState.draft, emailDraft)) {
             return { state: nextState, effects };
         }
         nextState = {
             ...nextState,
-            emailDraft,
-            preparedEmailDraft: emailDraft,
-            recentEvents: appendRecentEvent(nextState.recentEvents, {
-                summary: 'Runtime applied email draft patch.',
-                changedFields,
-                createdAt: now
-            })
+            emailDraftState: {
+                version: nextState.emailDraftState.version + 1,
+                visibility: 'visible',
+                draft: emailDraft
+            }
         };
         return { state: nextState, effects };
     }
@@ -105,11 +100,11 @@ export function applyBuilderHostEvent(state, event, options = {}) {
     }
     return { state: nextState, effects };
 }
-export function applyBuilderHostEvents(state, events, options = {}) {
+export function applyBuilderHostEvents(state, events) {
     let nextState = state;
     const effects = createEmptyBuilderHostEffects();
     for (const event of events) {
-        const reduction = applyBuilderHostEvent(nextState, event, options);
+        const reduction = applyBuilderHostEvent(nextState, event);
         nextState = reduction.state;
         effects.assistantCompleteText =
             reduction.effects.assistantCompleteText ?? effects.assistantCompleteText;

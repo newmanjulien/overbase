@@ -9,33 +9,33 @@
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder/canvas/split-pane';
 	import BuilderRunChatPanel from '$lib/features/builder/chat/BuilderRunChatPanel.svelte';
 	import { createBuilderSessionController } from '$lib/features/builder/session/builder-session.svelte';
+	import {
+		clearPendingBuilderLaunch,
+		clearStoredBuilderSessionHandle,
+		type BuilderLaunchState
+	} from '$lib/features/builder/session/builder-launch';
 
 	type Props = {
 		app: BuilderAppRecord;
-		initialMessage?: string | null;
-		startRequestId?: string | null;
-		resumeToken?: string | null;
+		launch?: BuilderLaunchState | null;
 	};
 
-	let {
-		app,
-		initialMessage = null,
-		startRequestId = null,
-		resumeToken = null
-	}: Props = $props();
+	let { app, launch = null }: Props = $props();
 	let bootedAppId = $state('');
 	const initialAppId = untrack(() => app.id);
+	const initialLaunch = untrack(() => launch?.appSlug === initialAppId ? launch : null);
 
 	const builderSession = createBuilderSessionController(
 		initialAppId,
-		() => initialMessage?.trim() ?? ''
+		() => initialLaunch?.initialMessage?.trim() ?? ''
 	);
 	const runError = $derived(
 		builderSession.session?.errorText ??
 			(builderSession.messages.length > 0 ? builderSession.error : null)
 	);
 
-	function clearInitialMessageState() {
+	function clearLaunchState() {
+		clearPendingBuilderLaunch(app.id);
 		replaceState(
 			resolve('/builder/[appSlug]', {
 				appSlug: app.id
@@ -45,14 +45,23 @@
 	}
 
 	async function boot() {
-		const firstMessage = initialMessage?.trim() ?? '';
+		const activeLaunch = launch?.appSlug === app.id ? launch : null;
+		const firstMessage = activeLaunch?.initialMessage?.trim() ?? '';
+
+		if (activeLaunch?.fresh) {
+			clearStoredBuilderSessionHandle(app.id);
+		}
 
 		if (firstMessage) {
 			await builderSession.start(firstMessage, {
-				startRequestId: startRequestId ?? undefined,
-				resumeToken: resumeToken ?? undefined
+				startRequestId: activeLaunch?.startRequestId,
+				resumeToken: activeLaunch?.resumeToken
 			});
-			clearInitialMessageState();
+			clearLaunchState();
+			return;
+		}
+
+		if (activeLaunch?.fresh) {
 			return;
 		}
 

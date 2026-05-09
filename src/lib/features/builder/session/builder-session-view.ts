@@ -38,10 +38,13 @@ export function getBuilderSessionMessagingView(params: {
 }
 
 export function getBuilderSessionEmailDraftView(session: Doc<'builderSessions'> | null) {
-	const emailDraft = session?.emailDraft ?? null;
+	const emailDraftState =
+		session?.emailDraftState?.visibility === 'visible' ? session.emailDraftState : null;
+	const emailDraft = emailDraftState?.draft ?? null;
 
 	return {
 		emailDraft,
+		emailDraftVersion: emailDraftState?.version ?? 0,
 		canEditEmailDraft: Boolean(
 			session &&
 				emailDraft &&

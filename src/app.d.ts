@@ -1,3 +1,5 @@
+import type { BuilderLaunchState } from '$lib/features/builder/session/builder-launch';
+
 declare global {
 	namespace App {
 		interface PageData {
@@ -6,9 +8,7 @@ declare global {
 		}
 
 		interface PageState {
-			initialMessage?: string;
-			startRequestId?: string;
-			resumeToken?: string;
+			builderLaunch?: BuilderLaunchState;
 		}
 	}
 }

@@ -10,7 +10,6 @@ export type EditableEmailDraft = {
 	attachmentInputText: string;
 	attachments: string[];
 	bodyText: string;
-	fireReasonText: string;
 };
 
 export function formatRecipients(recipients: string[]) {
@@ -23,8 +22,7 @@ export function toEditableEmailDraft(draft: EmailDraft): EditableEmailDraft {
 		ccText: formatRecipients(draft.cc),
 		attachmentInputText: '',
 		attachments: [...draft.attachments],
-		bodyText: serializeEmailBodyText(draft.body),
-		fireReasonText: draft.fireReason
+		bodyText: serializeEmailBodyText(draft.body)
 	};
 }
 
@@ -33,8 +31,7 @@ export function fromEditableEmailDraft(editableDraft: EditableEmailDraft): Email
 		to: parseRecipients(editableDraft.toText),
 		cc: parseRecipients(editableDraft.ccText),
 		attachments: editableDraft.attachments,
-		body: parseEmailBodyText(editableDraft.bodyText),
-		fireReason: editableDraft.fireReasonText
+		body: parseEmailBodyText(editableDraft.bodyText)
 	};
 }
 

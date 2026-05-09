@@ -27,9 +27,7 @@ export const teamOperationsExamples = {
 						type: 'paragraph',
 						text: 'Please assign owners for unresolved items or mark exceptions that no longer require action.'
 					}
-				],
-				fireReason:
-					'The email fires on the configured cadence when one or more team workflow exceptions are still unresolved.'
+				]
 			}
 		}
 	]

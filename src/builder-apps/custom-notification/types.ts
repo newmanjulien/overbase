@@ -2,7 +2,6 @@ import type { EmailDraft } from '@overbase/builder-sdk/email';
 
 export type { BuilderAppManifest } from '@overbase/builder-sdk/catalog';
 export type {
-	EmailBuilderEventContext,
 	EmailBuilderTurnStreamHandlers,
 	EmailBuilderTurnStreamResult,
 	TranscriptMessage

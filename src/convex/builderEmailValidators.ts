@@ -20,44 +20,21 @@ export const emailDraft = v.object({
 	to: v.array(v.string()),
 	cc: v.array(v.string()),
 	attachments: v.array(v.string()),
-	body: v.array(emailBodyBlock),
-	fireReason: v.string()
+	body: v.array(emailBodyBlock)
 });
-
-export const emailDraftPatchOperation = v.union(
-	v.object({
-		type: v.literal('setTo'),
-		to: v.array(v.string())
-	}),
-	v.object({
-		type: v.literal('setCc'),
-		cc: v.array(v.string())
-	}),
-	v.object({
-		type: v.literal('setAttachments'),
-		attachments: v.array(v.string())
-	}),
-	v.object({
-		type: v.literal('setBody'),
-		body: v.array(emailBodyBlock)
-	}),
-	v.object({
-		type: v.literal('setFireReason'),
-		fireReason: v.string()
-	})
-);
 
 export const emailDraftPatch = v.object({
-	operations: v.array(emailDraftPatchOperation)
+	to: v.optional(v.array(v.string())),
+	cc: v.optional(v.array(v.string())),
+	attachments: v.optional(v.array(v.string())),
+	body: v.optional(v.array(emailBodyBlock))
 });
 
-export const emailDraftChangedField = v.union(
-	v.literal('to'),
-	v.literal('cc'),
-	v.literal('attachments'),
-	v.literal('body'),
-	v.literal('fireReason')
-);
+export const emailDraftState = v.object({
+	version: v.number(),
+	visibility: v.union(v.literal('hidden'), v.literal('visible')),
+	draft: emailDraft
+});
 
 export const builderAppState = v.object({
 	version: v.number(),
@@ -74,14 +51,13 @@ export const builderAppOutputEvent = v.union(
 		text: v.string()
 	}),
 	v.object({
-		type: v.literal('emailDraftReplace'),
+		type: v.literal('emailDraftSet'),
 		emailDraft,
-		visible: v.optional(v.boolean())
+		visibility: v.union(v.literal('hidden'), v.literal('visible'))
 	}),
 	v.object({
 		type: v.literal('emailDraftPatch'),
-		patch: v.union(v.null(), emailDraftPatch),
-		patchIntent: v.union(v.literal('none'), v.literal('noop'), v.literal('meaningful'))
+		patch: v.union(v.null(), emailDraftPatch)
 	}),
 	v.object({
 		type: v.literal('appStateReplace'),
