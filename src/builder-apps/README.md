@@ -65,3 +65,25 @@ Required env per external app:
 BRING_THE_FIRM_RUNTIME_URL
 BRING_THE_FIRM_RUNTIME_SECRET
 ```
+
+## Runtime Shapes
+
+The custom notification runtime is a file because it is part of Overbase.
+Convex imports `custom-notification/runtime.ts` and calls `startTurn`, `continueTurn`,
+and `backgroundJob` directly.
+
+Blueprint app runtimes usually live in their own apps. In those apps, `runtime` is a
+folder because it includes both the app's real runtime logic and the HTTP layer that
+lets Overbase call it.
+
+For example, in Bring the Firm:
+
+- `src/runtime/operations.ts` is the real runtime logic. It is the closest match to
+  `custom-notification/runtime.ts`.
+- `src/runtime/http.ts`, `src/runtime/signing.ts`, and `src/runtime/ndjson.ts` are
+  there because Overbase calls the app over HTTP.
+- `src/routes/api/builder/*` exposes the runtime endpoints that Overbase calls.
+
+So the difference is not that Bring the Firm has a different kind of builder brain.
+It has the same runtime shape at the center, but it also needs hosting code around
+it because it runs outside Overbase.

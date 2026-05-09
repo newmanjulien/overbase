@@ -3,8 +3,9 @@ import type { CustomEmailExamples } from './types';
 export const clientFollowUpExamples = {
 	slug: 'client-follow-up',
 	description: 'Notifications that help a relationship owner follow up with clients or prospects.',
+	// The AI sometimes uses this text more literally than it should, so write it as user-facing question copy.
 	questionGuidance:
-		'Ask what specific relationship owner, client segment, or follow-up timing should be used.',
+		'What specific relationship owner, client segment, or follow-up timing should be used?',
 	examples: [
 		{
 			slug: 'weekly-missing-follow-up',

@@ -3,7 +3,8 @@ import type { CustomEmailExamples } from './types';
 export const teamOperationsExamples = {
 	slug: 'team-operations',
 	description: 'Notifications that summarize exceptions, misses, or recurring team workflow changes.',
-	questionGuidance: 'Ask which team, cadence, or exception threshold matters most for the workflow.',
+	// The AI sometimes uses this text more literally than it should, so write it as user-facing question copy.
+	questionGuidance: 'Which team, cadence, or exception threshold matters most for the workflow?',
 	examples: [
 		{
 			slug: 'team-exception-digest',

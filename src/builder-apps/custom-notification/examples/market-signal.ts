@@ -3,8 +3,9 @@ import type { CustomEmailExamples } from './types';
 export const marketSignalExamples = {
 	slug: 'market-signal',
 	description: 'Notifications triggered by outside events that create a timely reason to connect.',
+	// The AI sometimes uses this text more literally than it should, so write it as user-facing question copy.
 	questionGuidance:
-		'Ask which clients or markets should be monitored so the alert does not become too broad.',
+		'Which clients or markets should be monitored so the alert does not become too broad?',
 	examples: [
 		{
 			slug: 'leadership-change',

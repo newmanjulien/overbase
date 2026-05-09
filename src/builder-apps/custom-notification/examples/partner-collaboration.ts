@@ -4,8 +4,9 @@ export const partnerCollaborationExamples = {
 	slug: 'partner-collaboration',
 	description:
 		'Notifications that alert the right non-lawyer teams when a partner firm has client activity that may create a collaboration opportunity.',
+	// The AI sometimes uses this text more literally than it should, so write it as user-facing question copy.
 	questionGuidance:
-		'For named partner-firm requests, ask which client, matter type, or client segment should trigger the alert. Use this shape when possible: Which [partner] client(s) or client segment should trigger this alert (specific names or criteria)?',
+		'Which partner-firm clients, matter types, or client segment should trigger this alert?',
 	examples: [
 		{
 			slug: 'partner-client-collaboration',

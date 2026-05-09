@@ -3,8 +3,9 @@ import type { CustomEmailExamples } from './types';
 export const pipelineRiskExamples = {
 	slug: 'pipeline-risk',
 	description: 'Notifications that surface stalled, risky, or changing commercial opportunities.',
+	// The AI sometimes uses this text more literally than it should, so write it as user-facing question copy.
 	questionGuidance:
-		'Ask which deal stage, account owner, or risk threshold should control when the email fires.',
+		'Which deal stage, account owner, or risk threshold should control when the email fires?',
 	examples: [
 		{
 			slug: 'stalled-opportunity',
