@@ -7,12 +7,12 @@ import {
 } from '@overbase/builder-sdk/email';
 import {
 	callStructuredTool,
-	getOpenAIConfig,
 	getOpenAIErrorMessage,
 	getOpenAIHeaders,
 	OPENAI_RESPONSES_URL,
 	STRUCTURED_MAX_OUTPUT_TOKENS,
-	supportsReasoningOptions
+	supportsReasoningOptions,
+	type OpenAIConfig
 } from '@overbase/builder-sdk/openai';
 import {
 	buildEmailExampleAdaptationPrompt,
@@ -50,11 +50,12 @@ const EMAIL_INITIAL_ANSWER_TOOL_NAME = 'apply_initial_email_answer';
 export async function routeEmailBuilderRequest(params: {
 	initialMessage: string;
 	examples: EmailExamplesCandidate[];
+	openAIConfig: OpenAIConfig;
 }) {
 	const prompt = buildEmailRoutingPrompt(params);
 
 	return await callStructuredTool<EmailRouteResult>({
-		profile: 'fast',
+		openAIConfig: params.openAIConfig,
 		systemPrompt: prompt.systemPrompt,
 		userPrompt: prompt.userPrompt,
 		toolName: EMAIL_ROUTE_TOOL_NAME,
@@ -88,8 +89,9 @@ export async function streamEmailInitialQuestion(params: {
 	examples: EmailExamplesCandidate;
 	proposedQuestion: string;
 	handlers: ChatReplyStreamHandlers;
+	openAIConfig: OpenAIConfig;
 }) {
-	const { apiKey, model, reasoningEffort } = getOpenAIConfig('fast');
+	const { apiKey, model, reasoningEffort } = params.openAIConfig;
 	const prompt = buildEmailInitialQuestionPrompt(params);
 	const response = await fetch(OPENAI_RESPONSES_URL, {
 		method: 'POST',
@@ -130,9 +132,11 @@ export async function adaptEmailExample(params: {
 	initialMessage: string;
 	examples: EmailExamplesCandidate;
 	draftExamples: EmailExampleCandidate[];
+	openAIConfig: OpenAIConfig;
 }) {
 	const prompt = buildEmailExampleAdaptationPrompt(params);
 	const result = await callStructuredTool<EmailAdaptedExampleResult>({
+		openAIConfig: params.openAIConfig,
 		systemPrompt: prompt.systemPrompt,
 		userPrompt: prompt.userPrompt,
 		toolName: EMAIL_ADAPT_TOOL_NAME,
@@ -176,9 +180,11 @@ export async function applyEmailInitialAnswer(params: {
 	initialQuestion: string;
 	initialAnswer: string;
 	draft: EmailDraft;
+	openAIConfig: OpenAIConfig;
 }) {
 	const prompt = buildEmailInitialAnswerPrompt(params);
 	const result = await callStructuredTool<{ emailDraft: EmailDraft }>({
+		openAIConfig: params.openAIConfig,
 		systemPrompt: prompt.systemPrompt,
 		userPrompt: prompt.userPrompt,
 		toolName: EMAIL_INITIAL_ANSWER_TOOL_NAME,
@@ -208,8 +214,9 @@ export async function streamCustomEmailBuilderTurn(params: {
 	draft: EmailDraft;
 	recentEvents: EmailBuilderEventContext[];
 	handlers: EmailBuilderTurnStreamHandlers;
+	openAIConfig: OpenAIConfig;
 }): Promise<EmailBuilderTurnStreamResult> {
-	const { apiKey, model, reasoningEffort } = getOpenAIConfig();
+	const { apiKey, model, reasoningEffort } = params.openAIConfig;
 	const refinementSystemPrompt = buildEmailRefinementSystemPrompt();
 	const refinementUserPrompt = buildEmailRefinementUserPrompt({
 		draft: params.draft,

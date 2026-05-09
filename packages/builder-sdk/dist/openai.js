@@ -10,14 +10,13 @@ function isOpenAIReasoningEffort(value) {
 function getReasoningEffort(value, fallback) {
     return isOpenAIReasoningEffort(value) ? value : fallback;
 }
-export function getOpenAIConfig(profile = 'default') {
-    const apiKey = process.env.OPENAI_API_KEY;
+export function getOpenAIConfig({ apiKey, chatModel, fastChatModel, reasoningEffort: configuredReasoningEffort, fastReasoningEffort, profile = 'default' }) {
     const model = profile === 'fast'
-        ? (process.env.OPENAI_FAST_CHAT_MODEL ?? DEFAULT_OPENAI_FAST_MODEL)
-        : (process.env.OPENAI_CHAT_MODEL ?? DEFAULT_OPENAI_MODEL);
+        ? (fastChatModel ?? DEFAULT_OPENAI_FAST_MODEL)
+        : (chatModel ?? DEFAULT_OPENAI_MODEL);
     const reasoningEffort = profile === 'fast'
-        ? getReasoningEffort(process.env.OPENAI_FAST_REASONING_EFFORT, DEFAULT_OPENAI_FAST_REASONING_EFFORT)
-        : getReasoningEffort(process.env.OPENAI_REASONING_EFFORT, DEFAULT_OPENAI_REASONING_EFFORT);
+        ? getReasoningEffort(fastReasoningEffort, DEFAULT_OPENAI_FAST_REASONING_EFFORT)
+        : getReasoningEffort(configuredReasoningEffort, DEFAULT_OPENAI_REASONING_EFFORT);
     if (!apiKey) {
         throw new Error('OPENAI_API_KEY is not configured.');
     }
@@ -53,7 +52,7 @@ function getFunctionCallArguments(responseBody, toolName) {
     throw new Error(`OpenAI did not call ${toolName}.`);
 }
 export async function callStructuredTool(params) {
-    const { apiKey, model, reasoningEffort } = getOpenAIConfig(params.profile);
+    const { apiKey, model, reasoningEffort } = params.openAIConfig;
     const body = {
         model,
         input: [

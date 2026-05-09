@@ -1,10 +1,14 @@
+import type { BuilderAppState } from '@overbase/builder-sdk/app-protocol';
+import {
+	BUILDER_HOST_APP_STATE_VERSION,
+	patchBuilderHostAppState
+} from '@overbase/builder-sdk/host';
+
 type AppStateRecord = Record<string, unknown>;
 
 type AppStateHolder = {
 	appState?: unknown;
 };
-
-export const BUILDER_SESSION_APP_STATE_VERSION = 1;
 
 function isAppStateRecord(value: unknown): value is AppStateRecord {
 	return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -19,22 +23,28 @@ function isVersionedAppState(value: unknown): value is { version: number; value:
 }
 
 export function getBuilderSessionAppState(session: AppStateHolder): AppStateRecord {
+	const appState = getVersionedBuilderSessionAppState(session);
+
+	return isAppStateRecord(appState.value) ? appState.value : {};
+}
+
+export function getVersionedBuilderSessionAppState(session: AppStateHolder): BuilderAppState {
 	if (isVersionedAppState(session.appState)) {
-		return isAppStateRecord(session.appState.value) ? session.appState.value : {};
+		return {
+			version: session.appState.version,
+			value: isAppStateRecord(session.appState.value) ? session.appState.value : {}
+		};
 	}
 
-	return isAppStateRecord(session.appState) ? session.appState : {};
+	return {
+		version: BUILDER_HOST_APP_STATE_VERSION,
+		value: isAppStateRecord(session.appState) ? session.appState : {}
+	};
 }
 
 export function mergeBuilderSessionAppState(
 	session: AppStateHolder,
 	patch: AppStateRecord
-): { version: number; value: AppStateRecord } {
-	return {
-		version: BUILDER_SESSION_APP_STATE_VERSION,
-		value: {
-			...getBuilderSessionAppState(session),
-			...patch
-		}
-	};
+): BuilderAppState {
+	return patchBuilderHostAppState(getVersionedBuilderSessionAppState(session), patch);
 }
