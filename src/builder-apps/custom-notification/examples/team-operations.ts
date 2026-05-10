@@ -13,7 +13,15 @@ export const teamOperationsExamples = {
 			emailDraft: {
 				to: ['Team manager'],
 				cc: [],
-				attachments: ['Team Exception Digest.xlsx'],
+				attachment: {
+					filename: 'Team Exception Digest.xlsx',
+					cells: [
+						['Exception type', 'Owner', 'Age', 'Next action'],
+						['Unassigned intake', 'Operations lead', '2 days', 'Assign owner'],
+						['SLA miss', 'Support manager', '1 day', 'Confirm client update'],
+						['Blocked approval', 'Team manager', '4 days', 'Escalate approver']
+					]
+				},
 				body: [
 					{
 						type: 'paragraph',

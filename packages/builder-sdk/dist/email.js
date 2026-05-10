@@ -1,14 +1,17 @@
 export const EMAIL_DRAFT_LIMITS = {
     recipient: 140,
     recipients: 12,
-    attachment: 160,
-    attachments: 12,
+    attachmentFilename: 160,
+    spreadsheetColumns: 26,
+    spreadsheetRows: 100,
+    spreadsheetCell: 200,
     bodyBlocks: 12,
     bodyText: 1_000,
     bulletItems: 8,
     linkLabel: 120,
     linkHref: 500
 };
+export const SPREADSHEET_COLUMN_LABELS = Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetColumns }, (_, index) => String.fromCharCode('A'.charCodeAt(0) + index));
 export const EMAIL_ATTACHMENT_FORMAT = {
     extension: 'xlsx',
     shortLabel: 'XLSX',
@@ -18,7 +21,7 @@ export function createDefaultEmailDraft() {
     return {
         to: [],
         cc: [],
-        attachments: [],
+        attachment: null,
         body: []
     };
 }
@@ -46,15 +49,31 @@ export function normalizeEmailAttachmentName(value) {
         .replace(/\s+/g, ' ')
         .replace(/\.+$/g, '')
         .trim();
-    const normalized = clampText(sanitizedBaseName, EMAIL_DRAFT_LIMITS.attachment);
+    const normalized = clampText(sanitizedBaseName, EMAIL_DRAFT_LIMITS.attachmentFilename);
     return normalized ? `${normalized}.${EMAIL_ATTACHMENT_FORMAT.extension}` : '';
 }
-function normalizeAttachments(attachments) {
-    const normalizedAttachments = attachments
-        .slice(0, EMAIL_DRAFT_LIMITS.attachments)
-        .map(normalizeEmailAttachmentName)
-        .filter(Boolean);
-    return Array.from(new Set(normalizedAttachments));
+export function createDefaultEmailSpreadsheetAttachment(filename = `Spreadsheet.${EMAIL_ATTACHMENT_FORMAT.extension}`) {
+    return {
+        filename,
+        cells: Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetRows }, () => Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetColumns }, () => ''))
+    };
+}
+function normalizeSpreadsheetCell(value) {
+    return clampText(value, EMAIL_DRAFT_LIMITS.spreadsheetCell);
+}
+export function normalizeEmailSpreadsheetAttachment(attachment) {
+    if (!attachment) {
+        return null;
+    }
+    const filename = normalizeEmailAttachmentName(attachment.filename);
+    if (!filename) {
+        return null;
+    }
+    const cells = Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetRows }, (_, rowIndex) => Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetColumns }, (_, columnIndex) => normalizeSpreadsheetCell(attachment.cells[rowIndex]?.[columnIndex] ?? '')));
+    return {
+        filename,
+        cells
+    };
 }
 export function normalizeEmailBodyBlock(block) {
     switch (block.type) {
@@ -86,7 +105,7 @@ export function normalizeEmailDraft(draft) {
     return {
         to: normalizeRecipients(draft.to),
         cc: normalizeRecipients(draft.cc),
-        attachments: normalizeAttachments(draft.attachments),
+        attachment: normalizeEmailSpreadsheetAttachment(draft.attachment),
         body: normalizeEmailBody(draft.body)
     };
 }
@@ -99,7 +118,12 @@ export function applyEmailDraftPatch(draft, patch) {
     const nextDraft = {
         to: [...draft.to],
         cc: [...draft.cc],
-        attachments: [...draft.attachments],
+        attachment: draft.attachment
+            ? {
+                filename: draft.attachment.filename,
+                cells: draft.attachment.cells.map((row) => [...row])
+            }
+            : null,
         body: [...draft.body]
     };
     if (patch.to) {
@@ -108,8 +132,8 @@ export function applyEmailDraftPatch(draft, patch) {
     if (patch.cc) {
         nextDraft.cc = patch.cc;
     }
-    if (patch.attachments) {
-        nextDraft.attachments = patch.attachments;
+    if (patch.attachment !== undefined) {
+        nextDraft.attachment = patch.attachment;
     }
     if (patch.body) {
         nextDraft.body = patch.body;
@@ -120,7 +144,7 @@ export function hasEmailDraftPatchFields(patch) {
     return Boolean(patch &&
         (patch.to !== undefined ||
             patch.cc !== undefined ||
-            patch.attachments !== undefined ||
+            patch.attachment !== undefined ||
             patch.body !== undefined));
 }
 export const emailBodyBlockJsonSchema = {
@@ -165,16 +189,31 @@ export const emailBodyBlockJsonSchema = {
         }
     ]
 };
+export const emailSpreadsheetAttachmentJsonSchema = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+        filename: { type: 'string' },
+        cells: {
+            type: 'array',
+            items: {
+                type: 'array',
+                items: { type: 'string' },
+                maxItems: EMAIL_DRAFT_LIMITS.spreadsheetColumns
+            },
+            maxItems: EMAIL_DRAFT_LIMITS.spreadsheetRows
+        }
+    },
+    required: ['filename', 'cells']
+};
 export const emailDraftJsonSchema = {
     type: 'object',
     additionalProperties: false,
     properties: {
         to: { type: 'array', items: { type: 'string' }, maxItems: EMAIL_DRAFT_LIMITS.recipients },
         cc: { type: 'array', items: { type: 'string' }, maxItems: EMAIL_DRAFT_LIMITS.recipients },
-        attachments: {
-            type: 'array',
-            items: { type: 'string' },
-            maxItems: EMAIL_DRAFT_LIMITS.attachments
+        attachment: {
+            anyOf: [emailSpreadsheetAttachmentJsonSchema, { type: 'null' }]
         },
         body: {
             type: 'array',
@@ -182,7 +221,7 @@ export const emailDraftJsonSchema = {
             maxItems: EMAIL_DRAFT_LIMITS.bodyBlocks
         }
     },
-    required: ['to', 'cc', 'attachments', 'body']
+    required: ['to', 'cc', 'attachment', 'body']
 };
 export const emailDraftPatchJsonSchema = {
     type: 'object',
@@ -198,10 +237,8 @@ export const emailDraftPatchJsonSchema = {
             items: { type: 'string' },
             maxItems: EMAIL_DRAFT_LIMITS.recipients
         },
-        attachments: {
-            type: 'array',
-            items: { type: 'string' },
-            maxItems: EMAIL_DRAFT_LIMITS.attachments
+        attachment: {
+            anyOf: [emailSpreadsheetAttachmentJsonSchema, { type: 'null' }]
         },
         body: {
             type: 'array',

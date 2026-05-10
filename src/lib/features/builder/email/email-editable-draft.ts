@@ -1,14 +1,17 @@
 import {
+	createDefaultEmailSpreadsheetAttachment,
 	normalizeEmailAttachmentName,
+	normalizeEmailSpreadsheetAttachment,
 	type EmailBodyBlock,
-	type EmailDraft
+	type EmailDraft,
+	type EmailSpreadsheetAttachment
 } from '@overbase/builder-sdk/email';
 
 export type EditableEmailDraft = {
 	toText: string;
 	ccText: string;
 	attachmentInputText: string;
-	attachments: string[];
+	attachment: EmailSpreadsheetAttachment | null;
 	bodyText: string;
 };
 
@@ -16,12 +19,39 @@ export function formatRecipients(recipients: string[]) {
 	return recipients.join('; ');
 }
 
+export function areEmailSpreadsheetAttachmentsEqual(
+	left: EmailSpreadsheetAttachment | null,
+	right: EmailSpreadsheetAttachment | null
+) {
+	if (left === right) {
+		return true;
+	}
+
+	if (!left || !right || left.filename !== right.filename || left.cells.length !== right.cells.length) {
+		return false;
+	}
+
+	return left.cells.every((row, rowIndex) => {
+		const rightRow = right.cells[rowIndex] ?? [];
+
+		return (
+			row.length === rightRow.length &&
+			row.every((cell, columnIndex) => cell === rightRow[columnIndex])
+		);
+	});
+}
+
 export function toEditableEmailDraft(draft: EmailDraft): EditableEmailDraft {
 	return {
 		toText: formatRecipients(draft.to),
 		ccText: formatRecipients(draft.cc),
 		attachmentInputText: '',
-		attachments: [...draft.attachments],
+		attachment: draft.attachment
+			? {
+					filename: draft.attachment.filename,
+					cells: draft.attachment.cells.map((row) => [...row])
+				}
+			: null,
 		bodyText: serializeEmailBodyText(draft.body)
 	};
 }
@@ -30,12 +60,12 @@ export function fromEditableEmailDraft(editableDraft: EditableEmailDraft): Email
 	return {
 		to: parseRecipients(editableDraft.toText),
 		cc: parseRecipients(editableDraft.ccText),
-		attachments: editableDraft.attachments,
+		attachment: editableDraft.attachment,
 		body: parseEmailBodyText(editableDraft.bodyText)
 	};
 }
 
-export function addEditableAttachment(
+export function addEditableSpreadsheetAttachment(
 	editableDraft: EditableEmailDraft,
 	attachmentName: string
 ): EditableEmailDraft {
@@ -48,17 +78,16 @@ export function addEditableAttachment(
 	return {
 		...editableDraft,
 		attachmentInputText: '',
-		attachments: [...editableDraft.attachments, normalizedAttachmentName]
+		attachment: normalizeEmailSpreadsheetAttachment(
+			createDefaultEmailSpreadsheetAttachment(normalizedAttachmentName)
+		)
 	};
 }
 
-export function removeEditableAttachment(
-	editableDraft: EditableEmailDraft,
-	attachmentIndex: number
-): EditableEmailDraft {
+export function removeEditableSpreadsheetAttachment(editableDraft: EditableEmailDraft): EditableEmailDraft {
 	return {
 		...editableDraft,
-		attachments: editableDraft.attachments.filter((_, index) => index !== attachmentIndex)
+		attachment: null
 	};
 }
 

@@ -27,7 +27,7 @@ export const partnerCollaborationExamples = {
 			emailDraft: {
 				to: ['Marketing - Our Firm', 'Marketing - Davies'],
 				cc: [],
-				attachments: [],
+				attachment: null,
 				body: [
 					{
 						type: 'paragraph',

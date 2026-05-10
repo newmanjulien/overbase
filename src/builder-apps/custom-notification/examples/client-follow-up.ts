@@ -19,7 +19,15 @@ export const clientFollowUpExamples = {
 			emailDraft: {
 				to: ['Relationship owner'],
 				cc: ['Practice lead'],
-				attachments: ['Missing Follow Ups.xlsx'],
+				attachment: {
+					filename: 'Missing Follow Ups.xlsx',
+					cells: [
+						['Client', 'Meeting date', 'Promised next step', 'Owner', 'Days since meeting'],
+						['Acme Health', 'May 03', 'Send implementation timeline', 'Relationship owner', '7'],
+						['Northstar Foods', 'May 05', 'Confirm pricing questions', 'Relationship owner', '5'],
+						['Union Capital', 'May 07', 'Share legal review notes', 'Practice lead', '3']
+					]
+				},
 				body: [
 					{
 						type: 'paragraph',

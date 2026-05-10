@@ -14,7 +14,15 @@ export const marketSignalExamples = {
 			emailDraft: {
 				to: ['Client relationship partner'],
 				cc: [],
-				attachments: ['Leadership Change Brief.xlsx'],
+				attachment: {
+					filename: 'Leadership Change Brief.xlsx',
+					cells: [
+						['Company', 'New leader', 'Role', 'Effective date', 'Relationship context'],
+						['Watched company', 'New executive', 'Chief Operating Officer', 'May 15', 'Active prospect'],
+						['Portfolio client', 'Board appointee', 'Independent director', 'Jun 01', 'Recent matter'],
+						['Target account', 'Division head', 'President', 'Jun 10', 'Dormant relationship']
+					]
+				},
 				body: [
 					{
 						type: 'paragraph',
@@ -38,7 +46,15 @@ export const marketSignalExamples = {
 			emailDraft: {
 				to: ['Account partner'],
 				cc: ['Subject matter expert'],
-				attachments: ['Regulatory Watch Summary.xlsx'],
+				attachment: {
+					filename: 'Regulatory Watch Summary.xlsx',
+					cells: [
+						['Update', 'Jurisdiction', 'Affected clients', 'Suggested talking point'],
+						['Disclosure rule change', 'Federal', 'Public issuers', 'Board readiness'],
+						['Privacy guidance', 'Ontario', 'Retail and health clients', 'Data retention review'],
+						['Licensing update', 'New York', 'Financial services clients', 'Operating permissions']
+					]
+				},
 				body: [
 					{
 						type: 'paragraph',

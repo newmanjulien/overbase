@@ -16,17 +16,22 @@ export const emailBodyBlock = v.union(
 	})
 );
 
+export const emailSpreadsheetAttachment = v.object({
+	filename: v.string(),
+	cells: v.array(v.array(v.string()))
+});
+
 export const emailDraft = v.object({
 	to: v.array(v.string()),
 	cc: v.array(v.string()),
-	attachments: v.array(v.string()),
+	attachment: v.union(v.null(), emailSpreadsheetAttachment),
 	body: v.array(emailBodyBlock)
 });
 
 export const emailDraftPatch = v.object({
 	to: v.optional(v.array(v.string())),
 	cc: v.optional(v.array(v.string())),
-	attachments: v.optional(v.array(v.string())),
+	attachment: v.optional(v.union(v.null(), emailSpreadsheetAttachment)),
 	body: v.optional(v.array(emailBodyBlock))
 });
 

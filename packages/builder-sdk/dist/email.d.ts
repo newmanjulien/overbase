@@ -1,14 +1,17 @@
 export declare const EMAIL_DRAFT_LIMITS: {
     readonly recipient: 140;
     readonly recipients: 12;
-    readonly attachment: 160;
-    readonly attachments: 12;
+    readonly attachmentFilename: 160;
+    readonly spreadsheetColumns: 26;
+    readonly spreadsheetRows: 100;
+    readonly spreadsheetCell: 200;
     readonly bodyBlocks: 12;
     readonly bodyText: 1000;
     readonly bulletItems: 8;
     readonly linkLabel: 120;
     readonly linkHref: 500;
 };
+export declare const SPREADSHEET_COLUMN_LABELS: string[];
 export declare const EMAIL_ATTACHMENT_FORMAT: {
     readonly extension: "xlsx";
     readonly shortLabel: "XLSX";
@@ -28,16 +31,20 @@ export type EmailLinkBlock = {
     href: string;
 };
 export type EmailBodyBlock = EmailParagraphBlock | EmailBulletsBlock | EmailLinkBlock;
+export type EmailSpreadsheetAttachment = {
+    filename: string;
+    cells: string[][];
+};
 export type EmailDraft = {
     to: string[];
     cc: string[];
-    attachments: string[];
+    attachment: EmailSpreadsheetAttachment | null;
     body: EmailBodyBlock[];
 };
 export type EmailDraftPatch = {
     to?: string[];
     cc?: string[];
-    attachments?: string[];
+    attachment?: EmailSpreadsheetAttachment | null;
     body?: EmailBodyBlock[];
 };
 export type EmailDraftState = {
@@ -47,6 +54,8 @@ export type EmailDraftState = {
 };
 export declare function createDefaultEmailDraft(): EmailDraft;
 export declare function normalizeEmailAttachmentName(value: string): string;
+export declare function createDefaultEmailSpreadsheetAttachment(filename?: string): EmailSpreadsheetAttachment;
+export declare function normalizeEmailSpreadsheetAttachment(attachment: EmailSpreadsheetAttachment | null): EmailSpreadsheetAttachment | null;
 export declare function normalizeEmailBodyBlock(block: EmailBodyBlock): EmailBodyBlock | null;
 export declare function normalizeEmailDraft(draft: EmailDraft): EmailDraft;
 export declare function hasEmailDraftChanged(before: EmailDraft, after: EmailDraft): boolean;
@@ -103,6 +112,27 @@ export declare const emailBodyBlockJsonSchema: {
         readonly required: readonly ["type", "label", "href"];
     }];
 };
+export declare const emailSpreadsheetAttachmentJsonSchema: {
+    readonly type: "object";
+    readonly additionalProperties: false;
+    readonly properties: {
+        readonly filename: {
+            readonly type: "string";
+        };
+        readonly cells: {
+            readonly type: "array";
+            readonly items: {
+                readonly type: "array";
+                readonly items: {
+                    readonly type: "string";
+                };
+                readonly maxItems: 26;
+            };
+            readonly maxItems: 100;
+        };
+    };
+    readonly required: readonly ["filename", "cells"];
+};
 export declare const emailDraftJsonSchema: {
     readonly type: "object";
     readonly additionalProperties: false;
@@ -121,12 +151,30 @@ export declare const emailDraftJsonSchema: {
             };
             readonly maxItems: 12;
         };
-        readonly attachments: {
-            readonly type: "array";
-            readonly items: {
-                readonly type: "string";
-            };
-            readonly maxItems: 12;
+        readonly attachment: {
+            readonly anyOf: readonly [{
+                readonly type: "object";
+                readonly additionalProperties: false;
+                readonly properties: {
+                    readonly filename: {
+                        readonly type: "string";
+                    };
+                    readonly cells: {
+                        readonly type: "array";
+                        readonly items: {
+                            readonly type: "array";
+                            readonly items: {
+                                readonly type: "string";
+                            };
+                            readonly maxItems: 26;
+                        };
+                        readonly maxItems: 100;
+                    };
+                };
+                readonly required: readonly ["filename", "cells"];
+            }, {
+                readonly type: "null";
+            }];
         };
         readonly body: {
             readonly type: "array";
@@ -184,7 +232,7 @@ export declare const emailDraftJsonSchema: {
             readonly maxItems: 12;
         };
     };
-    readonly required: readonly ["to", "cc", "attachments", "body"];
+    readonly required: readonly ["to", "cc", "attachment", "body"];
 };
 export declare const emailDraftPatchJsonSchema: {
     readonly type: "object";
@@ -204,12 +252,30 @@ export declare const emailDraftPatchJsonSchema: {
             };
             readonly maxItems: 12;
         };
-        readonly attachments: {
-            readonly type: "array";
-            readonly items: {
-                readonly type: "string";
-            };
-            readonly maxItems: 12;
+        readonly attachment: {
+            readonly anyOf: readonly [{
+                readonly type: "object";
+                readonly additionalProperties: false;
+                readonly properties: {
+                    readonly filename: {
+                        readonly type: "string";
+                    };
+                    readonly cells: {
+                        readonly type: "array";
+                        readonly items: {
+                            readonly type: "array";
+                            readonly items: {
+                                readonly type: "string";
+                            };
+                            readonly maxItems: 26;
+                        };
+                        readonly maxItems: 100;
+                    };
+                };
+                readonly required: readonly ["filename", "cells"];
+            }, {
+                readonly type: "null";
+            }];
         };
         readonly body: {
             readonly type: "array";

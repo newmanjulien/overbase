@@ -6,9 +6,10 @@
 
 	type Props = {
 		draft: EmailDraft;
+		onOpenAttachment?: () => void;
 	};
 
-	let { draft }: Props = $props();
+	let { draft, onOpenAttachment }: Props = $props();
 
 	const toLine = $derived(formatRecipients(draft.to));
 	const ccLine = $derived(formatRecipients(draft.cc));
@@ -32,13 +33,12 @@
 		{/if}
 	{/snippet}
 
-	{#snippet attachments()}
-		{#if draft.attachments.length > 0}
-			<div class="flex flex-wrap gap-2">
-				{#each draft.attachments as attachment, attachmentIndex (`${attachment}:${attachmentIndex}`)}
-					<EmailAttachmentCard filename={attachment} />
-				{/each}
-			</div>
+	{#snippet attachment()}
+		{#if draft.attachment}
+			<EmailAttachmentCard
+				filename={draft.attachment.filename}
+				onOpen={onOpenAttachment}
+			/>
 		{:else}
 			<p class="text-zinc-500">Attach a spreadsheet</p>
 		{/if}

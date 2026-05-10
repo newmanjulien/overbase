@@ -14,7 +14,15 @@ export const pipelineRiskExamples = {
 			emailDraft: {
 				to: ['Opportunity owner'],
 				cc: ['Sales manager'],
-				attachments: ['Stalled Opportunity Detail.xlsx'],
+				attachment: {
+					filename: 'Stalled Opportunity Detail.xlsx',
+					cells: [
+						['Opportunity', 'Stage', 'Value', 'Days stalled', 'Last client interaction'],
+						['Enterprise renewal', 'Proposal', '$420K', '18', 'Pricing call on Apr 22'],
+						['Regional expansion', 'Negotiation', '$275K', '14', 'Procurement email on Apr 29'],
+						['Platform rollout', 'Discovery', '$190K', '21', 'Workshop on Apr 18']
+					]
+				},
 				body: [
 					{
 						type: 'paragraph',

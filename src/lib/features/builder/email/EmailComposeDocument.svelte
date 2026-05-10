@@ -4,11 +4,11 @@
 	type Props = {
 		to: Snippet;
 		cc: Snippet;
-		attachments: Snippet;
+		attachment: Snippet;
 		body: Snippet;
 	};
 
-	let { to, cc, attachments, body }: Props = $props();
+	let { to, cc, attachment, body }: Props = $props();
 </script>
 
 <div class="flex min-h-full w-full flex-1 flex-col">
@@ -35,7 +35,7 @@
 	</div>
 
 	<div class="mt-5 border-b border-zinc-200 pb-2 text-[0.82rem] leading-snug">
-		{@render attachments()}
+		{@render attachment()}
 	</div>
 
 	<div class="pt-5 text-[0.82rem] leading-[1.52]">

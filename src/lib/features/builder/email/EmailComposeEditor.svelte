@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {
-		addEditableAttachment,
-		removeEditableAttachment,
+		addEditableSpreadsheetAttachment,
+		removeEditableSpreadsheetAttachment,
 		type EditableEmailDraft
 	} from '$lib/features/builder/email/email-editable-draft';
 	import EmailAttachmentCard from '$lib/features/builder/email/EmailAttachmentCard.svelte';
@@ -11,9 +11,10 @@
 		editableDraft: EditableEmailDraft;
 		disabled?: boolean;
 		onDraftChange: (draft: EditableEmailDraft) => void;
+		onOpenAttachment?: () => void;
 	};
 
-	let { editableDraft, disabled = false, onDraftChange }: Props = $props();
+	let { editableDraft, disabled = false, onDraftChange, onOpenAttachment }: Props = $props();
 
 	function updateDraft(patch: Partial<EditableEmailDraft>) {
 		onDraftChange({
@@ -23,7 +24,15 @@
 	}
 
 	function addAttachment() {
-		onDraftChange(addEditableAttachment(editableDraft, editableDraft.attachmentInputText));
+		onDraftChange(addEditableSpreadsheetAttachment(editableDraft, editableDraft.attachmentInputText));
+	}
+
+	function removeAttachment() {
+		if (!editableDraft.attachment || !window.confirm(`Delete ${editableDraft.attachment.filename}?`)) {
+			return;
+		}
+
+		onDraftChange(removeEditableSpreadsheetAttachment(editableDraft));
 	}
 </script>
 
@@ -50,32 +59,29 @@
 		/>
 	{/snippet}
 
-	{#snippet attachments()}
-		<input
-			value={editableDraft.attachmentInputText}
-			aria-label="Spreadsheet attachment"
-			placeholder="Attach a spreadsheet"
-			{disabled}
-			class="h-8 w-full min-w-0 border-0 bg-transparent p-0 text-[0.82rem] text-zinc-950 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
-			oninput={(event) => updateDraft({ attachmentInputText: event.currentTarget.value })}
-			onkeydown={(event) => {
-				if (event.key === 'Enter') {
-					event.preventDefault();
-					addAttachment();
-				}
-			}}
-		/>
-
-		{#if editableDraft.attachments.length > 0}
-			<div class="mt-2 flex flex-wrap gap-2">
-				{#each editableDraft.attachments as attachment, attachmentIndex (`${attachment}:${attachmentIndex}`)}
-					<EmailAttachmentCard
-						filename={attachment}
-						removable
-						onRemove={() => onDraftChange(removeEditableAttachment(editableDraft, attachmentIndex))}
-					/>
-				{/each}
-			</div>
+	{#snippet attachment()}
+		{#if editableDraft.attachment}
+			<EmailAttachmentCard
+				filename={editableDraft.attachment.filename}
+				removable
+				onOpen={onOpenAttachment}
+				onRemove={removeAttachment}
+			/>
+		{:else}
+			<input
+				value={editableDraft.attachmentInputText}
+				aria-label="Spreadsheet attachment"
+				placeholder="Attach a spreadsheet"
+				{disabled}
+				class="h-8 w-full min-w-0 border-0 bg-transparent p-0 text-[0.82rem] text-zinc-950 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
+				oninput={(event) => updateDraft({ attachmentInputText: event.currentTarget.value })}
+				onkeydown={(event) => {
+					if (event.key === 'Enter') {
+						event.preventDefault();
+						addAttachment();
+					}
+				}}
+			/>
 		{/if}
 	{/snippet}
 
