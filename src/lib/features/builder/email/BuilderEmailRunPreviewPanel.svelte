@@ -4,7 +4,6 @@
 		type EmailDraft
 	} from '@overbase/builder-sdk/email';
 	import {
-		areEmailSpreadsheetAttachmentsEqual,
 		fromEditableEmailDraft,
 		toEditableEmailDraft,
 		type EditableEmailDraft
@@ -30,10 +29,6 @@
 	let editingBaseEmailDraftVersion = $state(0);
 	let isAttachmentOpen = $state(false);
 	const openAttachment = $derived(isEditing ? editableDraft.attachment : draft.attachment);
-	const hasUnsavedAttachmentChanges = $derived(
-		isEditing && !areEmailSpreadsheetAttachmentsEqual(editableDraft.attachment, draft.attachment)
-	);
-	const unsavedAttachmentMessage = 'You have unsaved spreadsheet changes. Leave the spreadsheet?';
 
 	function beginEdit() {
 		editableDraft = toEditableEmailDraft(draft);
@@ -43,10 +38,6 @@
 	}
 
 	function cancelEdit() {
-		if (!canDiscardUnsavedAttachmentChanges()) {
-			return;
-		}
-
 		saveError = null;
 		isEditing = false;
 		isAttachmentOpen = false;
@@ -57,15 +48,7 @@
 	}
 
 	function closeAttachment() {
-		if (!canDiscardUnsavedAttachmentChanges()) {
-			return;
-		}
-
 		isAttachmentOpen = false;
-	}
-
-	function canDiscardUnsavedAttachmentChanges() {
-		return !hasUnsavedAttachmentChanges || window.confirm(unsavedAttachmentMessage);
 	}
 
 	function updateOpenAttachment(attachment: NonNullable<EditableEmailDraft['attachment']>) {

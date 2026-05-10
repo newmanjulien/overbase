@@ -19,28 +19,6 @@ export function formatRecipients(recipients: string[]) {
 	return recipients.join('; ');
 }
 
-export function areEmailSpreadsheetAttachmentsEqual(
-	left: EmailSpreadsheetAttachment | null,
-	right: EmailSpreadsheetAttachment | null
-) {
-	if (left === right) {
-		return true;
-	}
-
-	if (!left || !right || left.filename !== right.filename || left.cells.length !== right.cells.length) {
-		return false;
-	}
-
-	return left.cells.every((row, rowIndex) => {
-		const rightRow = right.cells[rowIndex] ?? [];
-
-		return (
-			row.length === rightRow.length &&
-			row.every((cell, columnIndex) => cell === rightRow[columnIndex])
-		);
-	});
-}
-
 export function toEditableEmailDraft(draft: EmailDraft): EditableEmailDraft {
 	return {
 		toText: formatRecipients(draft.to),
