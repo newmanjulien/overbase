@@ -13,7 +13,7 @@ export const teamOperationsExamples = {
 			emailDraft: {
 				to: ['Team manager'],
 				cc: [],
-				attachments: ['Team Exception Digest.pdf'],
+				attachments: ['Team Exception Digest.xlsx'],
 				body: [
 					{
 						type: 'paragraph',

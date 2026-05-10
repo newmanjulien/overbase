@@ -14,3 +14,8 @@
 - Later we'll add many other features (current routes which have just and empty state now)
 - The builder relies on separate apps
 - Check out src/builder-apps/README.md to understand how those separate apps work
+
+- There's a package at packages/builder-sdk
+- That package is supposed to be a public package
+- For now, I'm just hosting it locally in all the apps
+- But it needs to be identical in all apps

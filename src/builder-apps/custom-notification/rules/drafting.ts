@@ -41,7 +41,7 @@ export const CUSTOM_EMAIL_REFINEMENT_DRAFT_RULES = [
 	'Call update_email_draft at most once per turn, only when the visible email draft should change.',
 	'When changing the draft, send the smallest patch that achieves the requested change.',
 	'The draft fields are to, cc, attachments, and body.',
-	'Attachments are PDF placeholder filenames only. Attachment names must end in .pdf.',
+	'Attachments are spreadsheet placeholder filenames only. Attachment names must end in .xlsx.',
 	'Keep the email compact: at most four body blocks, at most five bullets, and roughly 150 visible words.',
 	'Do not invent business-critical facts. If required information is missing, ask one focused question in chat text.',
 ] as const;

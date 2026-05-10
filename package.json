@@ -6,6 +6,8 @@
 	"scripts": {
 		"builder-sdk:build": "npm --prefix packages/builder-sdk run build",
 		"builder-sdk:check": "npm run builder-sdk:build && git diff --exit-code -- packages/builder-sdk/dist",
+		"builder-sdk:sync-bring": "node scripts/sync-builder-sdk.mjs --sync --check --build",
+		"builder-sdk:check-bring": "node scripts/sync-builder-sdk.mjs --check",
 		"dev": "npm run builder-sdk:build && vite dev",
 		"build": "npm run builder-sdk:build && vite build",
 		"convex:deploy": "npm run builder-sdk:build && convex deploy",

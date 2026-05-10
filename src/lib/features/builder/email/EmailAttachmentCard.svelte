@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EMAIL_ATTACHMENT_FORMAT } from '@overbase/builder-sdk/email';
 	import { X } from 'lucide-svelte';
 
 	type Props = {
@@ -11,12 +12,19 @@
 </script>
 
 <div
-	class="inline-flex h-9 max-w-full items-center gap-2 rounded-sm border border-zinc-200 bg-white px-2 pr-1.5 text-zinc-800"
+	class={`inline-flex h-9 max-w-full items-center gap-2 rounded-sm border border-zinc-200 bg-zinc-50 py-0 pl-2 ${removable ? 'pr-1.5' : 'pr-3'} text-zinc-800`}
 >
-	<div class="relative flex h-6 w-5 shrink-0 items-end justify-center rounded-sm border border-zinc-200 bg-zinc-50">
-		<div class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-zinc-200 bg-white"></div>
-		<div class="mb-1 rounded-[2px] bg-red-500/90 px-0.5 py-px text-[0.38rem] leading-none font-semibold text-white">
-			PDF
+	<div
+		class="relative flex h-6 w-5 shrink-0 items-end justify-center rounded-sm border border-emerald-200 bg-white"
+		aria-label={EMAIL_ATTACHMENT_FORMAT.label}
+	>
+		<div
+			class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-emerald-100 bg-zinc-50"
+		></div>
+		<div
+			class="mb-1 rounded-[2px] bg-emerald-700/70 px-0.5 py-px text-[0.34rem] leading-none font-semibold text-white"
+		>
+			{EMAIL_ATTACHMENT_FORMAT.shortLabel}
 		</div>
 	</div>
 

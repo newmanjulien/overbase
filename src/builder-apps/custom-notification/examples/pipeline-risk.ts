@@ -14,7 +14,7 @@ export const pipelineRiskExamples = {
 			emailDraft: {
 				to: ['Opportunity owner'],
 				cc: ['Sales manager'],
-				attachments: ['Stalled Opportunity Detail.pdf'],
+				attachments: ['Stalled Opportunity Detail.xlsx'],
 				body: [
 					{
 						type: 'paragraph',

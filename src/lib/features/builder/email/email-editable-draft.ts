@@ -1,5 +1,5 @@
 import {
-	normalizePdfAttachmentName,
+	normalizeEmailAttachmentName,
 	type EmailBodyBlock,
 	type EmailDraft
 } from '@overbase/builder-sdk/email';
@@ -39,7 +39,7 @@ export function addEditableAttachment(
 	editableDraft: EditableEmailDraft,
 	attachmentName: string
 ): EditableEmailDraft {
-	const normalizedAttachmentName = normalizePdfAttachmentName(attachmentName);
+	const normalizedAttachmentName = normalizeEmailAttachmentName(attachmentName);
 
 	if (!normalizedAttachmentName) {
 		return editableDraft;

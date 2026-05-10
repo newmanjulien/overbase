@@ -40,7 +40,7 @@
 				{/each}
 			</div>
 		{:else}
-			<p class="text-zinc-500">Attach a PDF</p>
+			<p class="text-zinc-500">Attach a spreadsheet</p>
 		{/if}
 	{/snippet}
 

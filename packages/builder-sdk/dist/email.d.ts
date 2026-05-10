@@ -9,6 +9,11 @@ export declare const EMAIL_DRAFT_LIMITS: {
     readonly linkLabel: 120;
     readonly linkHref: 500;
 };
+export declare const EMAIL_ATTACHMENT_FORMAT: {
+    readonly extension: "xlsx";
+    readonly shortLabel: "XLSX";
+    readonly label: "Excel workbook";
+};
 export type EmailParagraphBlock = {
     type: 'paragraph';
     text: string;
@@ -41,7 +46,7 @@ export type EmailDraftState = {
     draft: EmailDraft;
 };
 export declare function createDefaultEmailDraft(): EmailDraft;
-export declare function normalizePdfAttachmentName(value: string): string;
+export declare function normalizeEmailAttachmentName(value: string): string;
 export declare function normalizeEmailBodyBlock(block: EmailBodyBlock): EmailBodyBlock | null;
 export declare function normalizeEmailDraft(draft: EmailDraft): EmailDraft;
 export declare function hasEmailDraftChanged(before: EmailDraft, after: EmailDraft): boolean;

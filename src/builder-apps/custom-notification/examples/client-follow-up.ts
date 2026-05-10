@@ -19,7 +19,7 @@ export const clientFollowUpExamples = {
 			emailDraft: {
 				to: ['Relationship owner'],
 				cc: ['Practice lead'],
-				attachments: ['Missing Follow Ups.pdf'],
+				attachments: ['Missing Follow Ups.xlsx'],
 				body: [
 					{
 						type: 'paragraph',

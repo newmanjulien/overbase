@@ -14,7 +14,7 @@ export const marketSignalExamples = {
 			emailDraft: {
 				to: ['Client relationship partner'],
 				cc: [],
-				attachments: ['Leadership Change Brief.pdf'],
+				attachments: ['Leadership Change Brief.xlsx'],
 				body: [
 					{
 						type: 'paragraph',
@@ -38,7 +38,7 @@ export const marketSignalExamples = {
 			emailDraft: {
 				to: ['Account partner'],
 				cc: ['Subject matter expert'],
-				attachments: ['Regulatory Watch Summary.pdf'],
+				attachments: ['Regulatory Watch Summary.xlsx'],
 				body: [
 					{
 						type: 'paragraph',

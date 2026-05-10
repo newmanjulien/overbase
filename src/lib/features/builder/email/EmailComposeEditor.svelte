@@ -53,8 +53,8 @@
 	{#snippet attachments()}
 		<input
 			value={editableDraft.attachmentInputText}
-			aria-label="PDF attachment"
-			placeholder="Attach a PDF"
+			aria-label="Spreadsheet attachment"
+			placeholder="Attach a spreadsheet"
 			{disabled}
 			class="h-8 w-full min-w-0 border-0 bg-transparent p-0 text-[0.82rem] text-zinc-950 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
 			oninput={(event) => updateDraft({ attachmentInputText: event.currentTarget.value })}
