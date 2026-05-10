@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { resolve } from '$app/paths';
 	import PageShell from '$lib/components/layout/PageShell.svelte';
 	import BuilderCanvas from '$lib/features/builder/canvas/BuilderCanvas.svelte';
 	import BuilderDesktopOnly from '$lib/features/builder/canvas/BuilderDesktopOnly.svelte';
@@ -43,7 +42,7 @@
 					</p>
 					<Button
 						variant="primary"
-						href={resolve('/builder')}
+						href="/builder"
 						class="mt-4 rounded-full text-xs"
 					>
 						Back to builder

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import type { BuilderAppRecord } from '$lib/features/builder/data';
 	import BuilderSessionWorkbench from '$lib/features/builder/canvas/BuilderSessionWorkbench.svelte';
 	import type { BuilderLaunchState } from '$lib/features/builder/session/builder-launch';
@@ -23,7 +22,7 @@
 				</p>
 				<Button
 					variant="primary"
-					href={resolve('/builder')}
+					href="/builder"
 					class="mt-4 rounded-full text-[0.72rem]"
 				>
 					Back to builder

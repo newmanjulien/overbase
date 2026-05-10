@@ -2,14 +2,14 @@
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'clsx';
 	import Button from '$lib/components/ui/Button.svelte';
-	import type { ButtonSize, ButtonType, ButtonVariant } from '$lib/components/ui/types';
+	import type { ButtonHref, ButtonSize, ButtonType, ButtonVariant } from '$lib/components/ui/types';
 
 	type Props = {
 		'aria-label': string;
 		variant?: ButtonVariant;
 		size?: ButtonSize;
 		type?: ButtonType;
-		href?: string;
+		href?: ButtonHref;
 		disabled?: boolean;
 		class?: ClassValue;
 		onclick?: (event: MouseEvent) => void;

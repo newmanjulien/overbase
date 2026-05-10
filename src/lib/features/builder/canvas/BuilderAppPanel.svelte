@@ -67,7 +67,7 @@
 							class:translate-y-1={!detailsExpanded}
 							class:opacity-0={!detailsExpanded}
 						>
-							{#each app.details.paragraphs as paragraph}
+							{#each app.details.paragraphs as paragraph (paragraph)}
 								<p>{paragraph}</p>
 							{/each}
 						</div>

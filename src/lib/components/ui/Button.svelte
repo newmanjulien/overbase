@@ -1,15 +1,16 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'clsx';
 	import { cn } from '$lib/components/chrome/shared/cn';
-	import type { ButtonSize, ButtonType, ButtonVariant } from '$lib/components/ui/types';
+	import type { ButtonHref, ButtonSize, ButtonType, ButtonVariant } from '$lib/components/ui/types';
 
 	type Props = {
 		'aria-label'?: string;
 		variant?: ButtonVariant;
 		size?: ButtonSize;
 		type?: ButtonType;
-		href?: string;
+		href?: ButtonHref;
 		disabled?: boolean;
 		class?: ClassValue;
 		onclick?: (event: MouseEvent) => void;
@@ -62,7 +63,7 @@
 {#if href}
 	<a
 		class={buttonClass}
-		{href}
+		href={resolve(href as '/')}
 		aria-label={ariaLabel}
 		aria-disabled={disabled || undefined}
 		tabindex={disabled ? -1 : undefined}

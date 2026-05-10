@@ -43,8 +43,8 @@
 	);
 
 	$effect(() => {
-		id;
-		tooltipText;
+		void id;
+		void tooltipText;
 		closeTooltip();
 	});
 

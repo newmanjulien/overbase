@@ -4,7 +4,8 @@
 	import { untrack, type Snippet } from 'svelte';
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderAppRecord } from '$lib/features/builder/data';
-	import BuilderRunChatPanel from '$lib/features/builder/chat/BuilderRunChatPanel.svelte';
+	import BuilderChatError from '$lib/features/builder/chat/BuilderChatError.svelte';
+	import BuilderChatSurface from '$lib/features/builder/chat/BuilderChatSurface.svelte';
 	import CustomEmailRightPanel from '$lib/features/builder/canvas/CustomEmailRightPanel.svelte';
 	import SplitPane from '$lib/features/builder/canvas/SplitPane.svelte';
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder/canvas/split-pane';
@@ -142,14 +143,12 @@
 			<section class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white p-2">
 				<div class="min-h-0 flex-1 overflow-y-auto px-3 py-6 md:px-5">
 					<div class="mx-auto w-full max-w-3xl">
-						<div class="max-w-xl rounded-sm border border-red-200 bg-red-50 p-4 text-[0.82rem] text-red-700">
-							{builderSession.error}
-						</div>
+						<BuilderChatError message={builderSession.error} />
 					</div>
 				</div>
 			</section>
 		{:else if mode === 'run' && (builderSession.handle || builderSession.messages.length > 0)}
-			<BuilderRunChatPanel
+			<BuilderChatSurface
 				messages={builderSession.messages}
 				queryError={builderSession.queryError}
 				{runError}
