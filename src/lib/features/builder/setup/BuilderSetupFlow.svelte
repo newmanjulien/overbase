@@ -6,6 +6,7 @@
 		type BuilderGuideAnswer,
 		type BuilderGuideAnswersByQuestionId
 	} from '$lib/features/builder/guide/guide-answer';
+	import { getGuideQuestionHelpText } from '$lib/features/builder/guide/guide-question-help';
 	import type {
 		BuilderGuideDefinition,
 		BuilderGuideQuestion
@@ -118,6 +119,7 @@
 			answer={currentAnswer}
 			step={currentQuestionIndex + 1}
 			totalSteps={guide.questions.length}
+			helpText={getGuideQuestionHelpText(currentQuestion)}
 			{canGoPrevious}
 			{canGoNext}
 			onPrevious={goPrevious}

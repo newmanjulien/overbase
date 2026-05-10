@@ -1,5 +1,6 @@
 <script lang="ts">
 	import BuilderGuidePager from '$lib/features/builder/guide/BuilderGuidePager.svelte';
+	import BuilderGuideQuestionHelp from '$lib/features/builder/guide/BuilderGuideQuestionHelp.svelte';
 	import BuilderGuideQuestionBody from '$lib/features/builder/guide/BuilderGuideQuestionBody.svelte';
 	import BuilderGuideQuestionFooter from '$lib/features/builder/guide/BuilderGuideQuestionFooter.svelte';
 	import type { BuilderGuideAnswer } from '$lib/features/builder/guide/guide-answer';
@@ -10,6 +11,7 @@
 		answer: BuilderGuideAnswer;
 		step: number;
 		totalSteps: number;
+		helpText?: string | null;
 		canGoPrevious: boolean;
 		canGoNext: boolean;
 		onPrevious: () => void;
@@ -23,6 +25,7 @@
 		answer,
 		step,
 		totalSteps,
+		helpText = null,
 		canGoPrevious,
 		canGoNext,
 		onPrevious,
@@ -33,10 +36,13 @@
 </script>
 
 <div class="mt-6 rounded-sm border border-zinc-100 bg-white p-4 md:mt-8 md:p-6">
-	<div class="flex items-center justify-between gap-4">
-		<h2 class="text-[0.76rem] font-medium text-zinc-950 md:text-[0.8rem]">
-			{question.title}
-		</h2>
+	<div class="flex items-start justify-between gap-4">
+		<div class="flex min-w-0 items-center gap-1.5">
+			<h2 class="min-w-0 text-[0.76rem] font-medium text-zinc-950 md:text-[0.8rem]">
+				{question.title}
+			</h2>
+			<BuilderGuideQuestionHelp id={question.id} text={helpText} />
+		</div>
 
 		<BuilderGuidePager
 			{step}
