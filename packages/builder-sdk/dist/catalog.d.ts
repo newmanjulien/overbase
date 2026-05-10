@@ -3,6 +3,7 @@ export type GuideChoiceQuestion = {
     id: string;
     type: 'choice';
     title: string;
+    helpText?: string;
     options: readonly string[];
     customAnswerPlaceholder: string;
 };
@@ -10,6 +11,7 @@ export type GuideTextQuestion = {
     id: string;
     type: 'text';
     title: string;
+    helpText?: string;
     placeholder: string;
 };
 export type GuideQuestion = GuideChoiceQuestion | GuideTextQuestion;

@@ -101,6 +101,10 @@ function isBuilderAppDetails(value: unknown) {
 	return isRecord(value) && isNonEmptyTrimmedStringArray(value.paragraphs);
 }
 
+function hasValidOptionalHelpText(value: Record<string, unknown>) {
+	return value.helpText === undefined || typeof value.helpText === 'string';
+}
+
 function isGuideQuestion(value: unknown) {
 	if (!isRecord(value)) {
 		return false;
@@ -110,6 +114,7 @@ function isGuideQuestion(value: unknown) {
 		value.type === 'choice' &&
 		typeof value.id === 'string' &&
 		typeof value.title === 'string' &&
+		hasValidOptionalHelpText(value) &&
 		isStringArray(value.options) &&
 		typeof value.customAnswerPlaceholder === 'string'
 	) {
@@ -120,6 +125,7 @@ function isGuideQuestion(value: unknown) {
 		value.type === 'text' &&
 		typeof value.id === 'string' &&
 		typeof value.title === 'string' &&
+		hasValidOptionalHelpText(value) &&
 		typeof value.placeholder === 'string'
 	);
 }
