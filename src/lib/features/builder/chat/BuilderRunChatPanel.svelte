@@ -6,12 +6,26 @@
 		messages: BuilderSessionMessage[];
 		queryError?: Error | null;
 		runError?: string | null;
+		canComposeMessage?: boolean;
 		canSendMessage?: boolean;
 		onSend: (text: string) => Promise<void>;
 	};
 
-	let { messages, queryError = null, runError = null, canSendMessage = true, onSend }: Props =
-		$props();
+	let {
+		messages,
+		queryError = null,
+		runError = null,
+		canComposeMessage = true,
+		canSendMessage = true,
+		onSend
+	}: Props = $props();
 </script>
 
-<BuilderChatSurface {messages} {queryError} {runError} {canSendMessage} {onSend} />
+<BuilderChatSurface
+	{messages}
+	{queryError}
+	{runError}
+	{canComposeMessage}
+	{canSendMessage}
+	{onSend}
+/>

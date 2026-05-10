@@ -153,6 +153,7 @@
 				messages={builderSession.messages}
 				queryError={builderSession.queryError}
 				{runError}
+				canComposeMessage={builderSession.canCompose}
 				canSendMessage={builderSession.canSend}
 				onSend={sendMessage}
 			/>

@@ -339,6 +339,9 @@ export function createBuilderSessionController(
 		get canSend() {
 			return messagingView.canSendMessage;
 		},
+		get canCompose() {
+			return messagingView.canComposeMessage;
+		},
 		resumeStored,
 		saveEmailDraft,
 		start,

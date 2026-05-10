@@ -16,6 +16,7 @@
 		messages: ChatMessage[];
 		queryError?: Error | null;
 		runError?: string | null;
+		canComposeMessage?: boolean;
 		canSendMessage?: boolean;
 		onSend: (text: string) => Promise<void>;
 	};
@@ -23,8 +24,14 @@
 	const COMPOSER_TEXTAREA_MIN_HEIGHT = 20;
 	const COMPOSER_TEXTAREA_MAX_HEIGHT = 96;
 
-	let { messages, queryError = null, runError = null, canSendMessage = true, onSend }: Props =
-		$props();
+	let {
+		messages,
+		queryError = null,
+		runError = null,
+		canComposeMessage = true,
+		canSendMessage = true,
+		onSend
+	}: Props = $props();
 
 	let sendError = $state<string | null>(null);
 	let composerValue = $state('');
@@ -41,10 +48,16 @@
 				(message.status === 'pending' || message.status === 'streaming')
 		)
 	);
-	const composerDisabled = $derived(
-		isSending || hasActiveAssistant || Boolean(queryError) || Boolean(runError) || !canSendMessage
+	const composerReadOnly = $derived(
+		Boolean(queryError) || Boolean(runError) || !canComposeMessage
 	);
-	const canSend = $derived(!composerDisabled && composerValue.trim().length > 0);
+	const canSend = $derived(
+		composerValue.trim().length > 0 &&
+			!isSending &&
+			!hasActiveAssistant &&
+			!composerReadOnly &&
+			canSendMessage
+	);
 
 	const stickToBottom = new StickToBottom({
 		scrollElement: () => scrollElement,
@@ -78,13 +91,13 @@
 	}
 
 	async function focusComposer() {
-		if (!textareaElement || composerDisabled) {
+		if (!textareaElement || composerReadOnly || hasActiveAssistant) {
 			return;
 		}
 
 		await tick();
 
-		if (!textareaElement || composerDisabled) {
+		if (!textareaElement || composerReadOnly || hasActiveAssistant) {
 			return;
 		}
 
@@ -105,7 +118,7 @@
 		try {
 			await onSend(message);
 		} catch (error) {
-			composerValue = message;
+			composerValue = composerValue.trim().length > 0 ? composerValue : message;
 			sendError = getErrorMessage(error);
 		} finally {
 			isSending = false;
@@ -121,9 +134,10 @@
 
 	$effect(() => {
 		void textareaElement;
-		void composerDisabled;
+		void composerReadOnly;
+		void hasActiveAssistant;
 
-		if (shouldFocusComposer && textareaElement && !composerDisabled) {
+		if (shouldFocusComposer && textareaElement && !composerReadOnly && !hasActiveAssistant) {
 			shouldFocusComposer = false;
 			void focusComposer();
 		}
@@ -219,10 +233,10 @@
 				bind:value={composerValue}
 				rows={1}
 				aria-label="Chat message"
-				placeholder="Message the AI..."
-				disabled={composerDisabled}
+				placeholder="Explain the email you want your team to receive..."
+				readonly={composerReadOnly}
 				style={`height: ${COMPOSER_TEXTAREA_MIN_HEIGHT}px;`}
-				class="min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.8rem] leading-[1.2rem] font-normal text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default md:text-[0.84rem]"
+				class="min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.8rem] leading-[1.2rem] font-normal text-zinc-800 outline-none placeholder:text-zinc-400 read-only:cursor-default md:text-[0.84rem]"
 				onkeydown={(event) => {
 					if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
 						event.preventDefault();
