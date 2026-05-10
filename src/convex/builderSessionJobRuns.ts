@@ -31,7 +31,7 @@ export const runStartTurn = internalAction({
 			let pendingText = '';
 			let lastFlushAt = Date.now();
 			const events = await runtime.startTurn({
-				initialMessage: context.initialMessage,
+				setup: context.setup,
 				appState: context.appState,
 				handlers: {
 					onAssistantDelta: async (delta) => {
@@ -108,7 +108,7 @@ export const runContinueTurn = internalAction({
 			let pendingText = '';
 			let lastFlushAt = Date.now();
 			const events = await runtime.continueTurn({
-				initialMessage: claim.initialMessage,
+				setup: claim.setup,
 				userMessage: claim.userMessage,
 				transcript: claim.transcript,
 				emailDraftState: claim.emailDraftState,
@@ -175,7 +175,7 @@ export const runBackgroundJob = internalAction({
 			}
 
 			const events = await runtime.backgroundJob({
-				initialMessage: context.initialMessage,
+				setup: context.setup,
 				appState: context.appState
 			});
 

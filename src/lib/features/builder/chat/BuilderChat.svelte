@@ -6,6 +6,7 @@
 		createBuilderLaunchState,
 		writePendingBuilderLaunch
 	} from '$lib/features/builder/session/builder-launch';
+	import { createFreeformRunSetup } from '@overbase/builder-sdk/app-protocol';
 	import { IconButton } from '$lib/components/ui';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 
@@ -65,7 +66,7 @@
 		const prompt = value.trim();
 		const builderLaunch = createBuilderLaunchState(CUSTOM_NOTIFICATION_APP_ID, {
 			fresh: true,
-			initialMessage: prompt
+			setup: createFreeformRunSetup(prompt)
 		});
 		value = '';
 		isSubmitting = true;

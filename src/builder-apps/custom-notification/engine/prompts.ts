@@ -21,14 +21,14 @@ function joinPromptLines(lines: readonly string[]) {
 }
 
 export function buildEmailRoutingPrompt(params: {
-	initialMessage: string;
+	setupPromptText: string;
 	examples: EmailExamplesCandidate[];
 }) {
 	return {
 		systemPrompt: joinPromptLines(CUSTOM_EMAIL_ROUTING_RULES),
 		userPrompt: [
-			'User request:',
-			params.initialMessage,
+			'Run setup:',
+			params.setupPromptText,
 			'Available examples:',
 			stringifyPromptData(params.examples)
 		].join('\n\n')
@@ -36,7 +36,7 @@ export function buildEmailRoutingPrompt(params: {
 }
 
 export function buildEmailExampleAdaptationPrompt(params: {
-	initialMessage: string;
+	setupPromptText: string;
 	examples: EmailExamplesCandidate;
 	draftExamples: EmailExampleCandidate[];
 }) {
@@ -48,8 +48,8 @@ export function buildEmailExampleAdaptationPrompt(params: {
 			...CUSTOM_EMAIL_EXAMPLE_ADAPTATION_DRAFT_RULES
 		]),
 		userPrompt: [
-			'User request:',
-			params.initialMessage,
+			'Run setup:',
+			params.setupPromptText,
 			'Selected examples:',
 			stringifyPromptData(params.examples),
 			'Candidate email examples:',
@@ -59,7 +59,7 @@ export function buildEmailExampleAdaptationPrompt(params: {
 }
 
 export function buildEmailInitialAnswerPrompt(params: {
-	initialMessage: string;
+	setupPromptText: string;
 	initialQuestion: string;
 	initialAnswer: string;
 	draft: EmailDraft;
@@ -72,8 +72,8 @@ export function buildEmailInitialAnswerPrompt(params: {
 			...CUSTOM_EMAIL_INITIAL_ANSWER_DRAFT_RULES
 		]),
 		userPrompt: [
-			'Original user request:',
-			params.initialMessage,
+			'Run setup:',
+			params.setupPromptText,
 			'Follow-up question:',
 			params.initialQuestion,
 			'User answer:',

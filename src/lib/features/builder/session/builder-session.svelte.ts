@@ -1,5 +1,9 @@
 import { api } from '$convex/_generated/api';
 import type { Doc, Id } from '$convex/_generated/dataModel';
+import {
+	normalizeBuilderRunSetup,
+	type BuilderRunSetup
+} from '@overbase/builder-sdk/app-protocol';
 import type { EmailDraft } from '@overbase/builder-sdk/email';
 import { useConvexClient, useQuery } from 'convex-svelte';
 import {
@@ -155,10 +159,16 @@ export function createBuilderSessionController(
 	}
 
 	async function start(
-		message?: string,
+		setup?: BuilderRunSetup,
 		request?: Partial<BuilderSessionStartRequest> | null
 	) {
-		const normalizedInitialMessage = (message ?? readInitialMessage()).trim();
+		const runSetup = setup
+			? normalizeBuilderRunSetup(setup)
+			: normalizeBuilderRunSetup({
+					kind: 'freeform',
+					initialMessage: readInitialMessage()
+				});
+		const normalizedInitialMessage = runSetup.initialMessage.trim();
 
 		if (!normalizedInitialMessage) {
 			throw new Error('Message text is required.');
@@ -173,7 +183,7 @@ export function createBuilderSessionController(
 		try {
 			const result = await client.mutation(api.builderSessions.startSession, {
 				appSlug,
-				initialMessage: normalizedInitialMessage,
+				setup: runSetup,
 				startRequestId: startRequest.startRequestId,
 				resumeToken: startRequest.resumeToken
 			});

@@ -46,6 +46,29 @@ export const builderAppState = v.object({
 	value: v.any()
 });
 
+export const builderGuideSetup = v.object({
+	action: v.union(v.literal('submitted'), v.literal('skippedRemaining')),
+	answers: v.array(
+		v.object({
+			questionId: v.string(),
+			questionTitle: v.string(),
+			answer: v.string()
+		})
+	)
+});
+
+export const builderRunSetup = v.union(
+	v.object({
+		kind: v.literal('freeform'),
+		initialMessage: v.string()
+	}),
+	v.object({
+		kind: v.literal('guided'),
+		initialMessage: v.string(),
+		guideSetup: builderGuideSetup
+	})
+);
+
 export const builderAppOutputEvent = v.union(
 	v.object({
 		type: v.literal('assistantDelta'),

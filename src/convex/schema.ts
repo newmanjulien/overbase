@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
-import { emailDraftState } from './builderEmailValidators';
+import { builderRunSetup, emailDraftState } from './builderEmailValidators';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 
@@ -9,6 +9,7 @@ export default defineSchema({
 		appSlug: v.string(),
 		appTitle: v.string(),
 		startRequestId: v.optional(v.string()),
+		setup: builderRunSetup,
 		status: v.union(
 			v.literal('working'),
 			v.literal('waitingForUser'),

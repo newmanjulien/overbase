@@ -45,7 +45,7 @@ const EMAIL_INITIAL_ANSWER_TOOL_NAME = 'apply_initial_email_answer';
  * should be asked before drafting.
  */
 export async function routeEmailBuilderRequest(params: {
-	initialMessage: string;
+	setupPromptText: string;
 	examples: EmailExamplesCandidate[];
 	openAIConfig: OpenAIConfig;
 }) {
@@ -83,7 +83,7 @@ export async function routeEmailBuilderRequest(params: {
  * normalized email draft that stays hidden until the answer is applied.
  */
 export async function adaptEmailExample(params: {
-	initialMessage: string;
+	setupPromptText: string;
 	examples: EmailExamplesCandidate;
 	draftExamples: EmailExampleCandidate[];
 	openAIConfig: OpenAIConfig;
@@ -130,7 +130,7 @@ export async function adaptEmailExample(params: {
  * builder panel.
  */
 export async function applyEmailInitialAnswer(params: {
-	initialMessage: string;
+	setupPromptText: string;
 	initialQuestion: string;
 	initialAnswer: string;
 	draft: EmailDraft;

@@ -2,6 +2,7 @@
 	import { replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { untrack, type Snippet } from 'svelte';
+	import type { BuilderRunSetup } from '@overbase/builder-sdk/app-protocol';
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderAppRecord } from '$lib/features/builder/data';
 	import BuilderChatError from '$lib/features/builder/chat/BuilderChatError.svelte';
@@ -25,7 +26,7 @@
 	export type BuilderSessionWorkbenchBeforeRunContext = {
 		app: BuilderAppRecord;
 		startRun: (
-			firstMessage: string,
+			setup: BuilderRunSetup,
 			request?: BuilderSessionWorkbenchStartRequest
 		) => Promise<void>;
 	};
@@ -41,7 +42,8 @@
 
 	const initialAppId = untrack(() => app.id);
 	const initialLaunch = untrack(() => (launch?.appSlug === initialAppId ? launch : null));
-	const initialMessage = untrack(() => initialLaunch?.initialMessage?.trim() ?? '');
+	const initialSetup = untrack(() => initialLaunch?.setup ?? null);
+	const initialMessage = untrack(() => initialSetup?.initialMessage.trim() ?? '');
 	const builderSession = createBuilderSessionController(initialAppId, () => initialMessage);
 
 	let mode = $state<'beforeRun' | 'run'>(initialMessage ? 'run' : 'beforeRun');
@@ -67,30 +69,31 @@
 	}
 
 	async function startRun(
-		firstMessage: string,
+		setup: BuilderRunSetup,
 		request?: BuilderSessionWorkbenchStartRequest
 	) {
-		const normalizedFirstMessage = firstMessage.trim();
+		const normalizedFirstMessage = setup.initialMessage.trim();
 
 		if (!normalizedFirstMessage) {
 			return;
 		}
 
 		mode = 'run';
-		await builderSession.start(normalizedFirstMessage, request);
+		await builderSession.start(setup, request);
 		clearLaunchState();
 	}
 
 	async function boot() {
 		const activeLaunch = launch?.appSlug === app.id ? launch : null;
-		const firstMessage = activeLaunch?.initialMessage?.trim() ?? '';
+		const setup = activeLaunch?.setup ?? null;
+		const firstMessage = setup?.initialMessage.trim() ?? '';
 
 		if (activeLaunch?.fresh) {
 			clearStoredBuilderSessionHandle(app.id);
 		}
 
-		if (firstMessage) {
-			await startRun(firstMessage, {
+		if (setup && firstMessage) {
+			await startRun(setup, {
 				startRequestId: activeLaunch?.startRequestId,
 				resumeToken: activeLaunch?.resumeToken
 			});

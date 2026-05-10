@@ -1,8 +1,14 @@
 import { v } from 'convex/values';
+import {
+	builderRunSetupsEqual,
+	normalizeBuilderRunSetup,
+	type BuilderRunSetup
+} from '@overbase/builder-sdk/app-protocol';
 import { internal } from './_generated/api';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
 import {
+	builderRunSetup,
 	emailDraft as emailDraftValidator
 } from './builderEmailValidators';
 import {
@@ -34,14 +40,14 @@ async function getIdempotentStartSnapshot(
 		appSlug,
 		startRequestId,
 		resumeToken,
-		initialMessage,
+		setup,
 		expiresAt,
 		now
 	}: {
 		appSlug: string;
 		startRequestId?: string;
 		resumeToken?: string;
-		initialMessage: string;
+		setup: BuilderRunSetup;
 		expiresAt: number;
 		now: number;
 	}
@@ -74,8 +80,12 @@ async function getIdempotentStartSnapshot(
 		.withIndex('by_session_createdAt', (q) => q.eq('sessionId', existingSession._id))
 		.first();
 
-	if (firstMessage?.role !== 'user' || firstMessage.text !== initialMessage) {
+	if (firstMessage?.role !== 'user' || firstMessage.text !== setup.initialMessage) {
 		throw new Error('Start request id was already used for a different message.');
+	}
+
+	if (!builderRunSetupsEqual(existingSession.setup, setup)) {
+		throw new Error('Start request id was already used for a different setup.');
 	}
 
 	await ctx.db.patch(existingSession._id, {
@@ -95,13 +105,16 @@ async function getIdempotentStartSnapshot(
 export const startSession = mutation({
 	args: {
 		appSlug: v.string(),
-		initialMessage: v.string(),
+		setup: builderRunSetup,
 		startRequestId: v.optional(v.string()),
 		resumeToken: v.optional(v.string())
 	},
-	handler: async (ctx, { appSlug, initialMessage, startRequestId, resumeToken }) => {
+	handler: async (ctx, { appSlug, setup, startRequestId, resumeToken }) => {
 		const now = Date.now();
-		const normalizedInitialMessage = normalizeUserText(initialMessage);
+		const normalizedSetup = normalizeBuilderRunSetup({
+			...setup,
+			initialMessage: normalizeUserText(setup.initialMessage)
+		});
 		const normalizedStartRequestId = normalizeStartRequestId(startRequestId);
 		const normalizedResumeToken = normalizeResumeToken(resumeToken);
 		const expiresAt = getBuilderSessionExpiresAt(now);
@@ -119,7 +132,7 @@ export const startSession = mutation({
 			appSlug: app.slug,
 			startRequestId: normalizedStartRequestId,
 			resumeToken: normalizedResumeToken,
-			initialMessage: normalizedInitialMessage,
+			setup: normalizedSetup,
 			expiresAt,
 			now
 		});
@@ -135,6 +148,7 @@ export const startSession = mutation({
 			appSlug: app.slug,
 			appTitle: app.slug,
 			...(normalizedStartRequestId ? { startRequestId: normalizedStartRequestId } : {}),
+			setup: normalizedSetup,
 			status: 'working',
 			resumeTokenHash,
 			createdAt: now,
@@ -145,7 +159,7 @@ export const startSession = mutation({
 		const userMessageId = await ctx.db.insert('builderSessionMessages', {
 			sessionId,
 			role: 'user',
-			text: normalizedInitialMessage,
+			text: normalizedSetup.initialMessage,
 			status: 'complete',
 			createdAt: now,
 			updatedAt: now

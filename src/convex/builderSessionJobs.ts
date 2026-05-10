@@ -20,7 +20,7 @@ import {
 
 type RunnableTurnContext = {
 	appSlug: string;
-	initialMessage: string;
+	setup: Doc<'builderSessions'>['setup'];
 	appState?: Doc<'builderSessions'>['appState'];
 };
 
@@ -73,15 +73,6 @@ async function failBackgroundJobState(
 		errorText,
 		updatedAt: now
 	});
-}
-
-async function getFirstUserMessage(ctx: MutationCtx, sessionId: Doc<'builderSessions'>['_id']) {
-	const firstMessage = await ctx.db
-		.query('builderSessionMessages')
-		.withIndex('by_session_createdAt', (q) => q.eq('sessionId', sessionId))
-		.first();
-
-	return firstMessage?.role === 'user' ? firstMessage.text : '';
 }
 
 async function getSessionMessages(ctx: MutationCtx, sessionId: Doc<'builderSessions'>['_id']) {
@@ -148,8 +139,6 @@ export const claimStartTurn = internalMutation({
 			return null;
 		}
 
-		const initialMessage = await getFirstUserMessage(ctx, session._id);
-
 		await ctx.db.patch(job._id, {
 			status: 'running',
 			updatedAt: now
@@ -157,7 +146,7 @@ export const claimStartTurn = internalMutation({
 
 		return {
 			appSlug: session.appSlug,
-			initialMessage,
+			setup: session.setup,
 			appState: session.appState
 		};
 	}
@@ -250,7 +239,7 @@ export const claimContinueTurn = internalMutation({
 		return {
 			state: 'ready' as const,
 			appSlug: session.appSlug,
-			initialMessage: messages.find((message) => message.role === 'user')?.text ?? '',
+			setup: session.setup,
 			userMessage,
 			emailDraftState: session.emailDraftState,
 			appState: session.appState,
@@ -294,8 +283,6 @@ export const claimBackgroundJob = internalMutation({
 			return null;
 		}
 
-		const initialMessage = await getFirstUserMessage(ctx, session._id);
-
 		await ctx.db.patch(job._id, {
 			status: 'running',
 			updatedAt: now
@@ -303,7 +290,7 @@ export const claimBackgroundJob = internalMutation({
 
 		return {
 			appSlug: session.appSlug,
-			initialMessage,
+			setup: session.setup,
 			appState: session.appState
 		};
 	}

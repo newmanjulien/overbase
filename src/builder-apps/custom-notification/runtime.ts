@@ -10,6 +10,7 @@ import {
 	listCustomEmailDraftExamples,
 	listCustomEmailExamples
 } from './examples';
+import { buildBuilderRunSetupPromptText } from '@overbase/builder-sdk/app-protocol';
 import type {
 	BuilderAppBackgroundJobInput,
 	BuilderAppContinueTurnInput,
@@ -116,8 +117,9 @@ export function createCustomNotificationRuntime(
 			throw new Error('No custom email examples are available.');
 		}
 
+		const setupPromptText = buildBuilderRunSetupPromptText(input.setup);
 		const routeResult = await routeEmailBuilderRequest({
-			initialMessage: input.initialMessage,
+			setupPromptText,
 			examples,
 			openAIConfig: fastOpenAIConfig
 		});
@@ -146,8 +148,9 @@ export function createCustomNotificationRuntime(
 
 		if (draftState?.visibility === 'hidden') {
 			const customState = getCustomEmailAppState(input.appState);
+			const setupPromptText = buildBuilderRunSetupPromptText(input.setup);
 			const emailDraft = await applyEmailInitialAnswer({
-				initialMessage: input.initialMessage,
+				setupPromptText,
 				initialQuestion: customState.initialQuestionText ?? '',
 				initialAnswer: input.userMessage,
 				draft: draftState.draft,
@@ -204,8 +207,9 @@ export function createCustomNotificationRuntime(
 			throw new Error('No custom email draft examples are available for these examples.');
 		}
 
+		const setupPromptText = buildBuilderRunSetupPromptText(input.setup);
 		const adapted = await adaptEmailExample({
-			initialMessage: input.initialMessage,
+			setupPromptText,
 			examples: toInitialQuestionExample(examples),
 			draftExamples,
 			openAIConfig

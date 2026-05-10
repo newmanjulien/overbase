@@ -17,7 +17,11 @@
 <BuilderSessionWorkbench {app} {launch}>
 	{#snippet beforeRun(context)}
 		{#if guide}
-			<BuilderSetupFlow app={context.app} {guide} onComplete={context.startRun} />
+			<BuilderSetupFlow
+				app={context.app}
+				{guide}
+				onComplete={(setup) => context.startRun(setup)}
+			/>
 		{:else}
 			<div class="flex h-full min-h-0 min-w-0 flex-col justify-center bg-white px-6">
 				<div class="mx-auto max-w-sm text-center">

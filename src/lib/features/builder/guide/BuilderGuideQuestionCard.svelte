@@ -14,9 +14,11 @@
 		helpText?: string | null;
 		canGoPrevious: boolean;
 		canGoNext: boolean;
+		isSubmitting: boolean;
 		onPrevious: () => void;
 		onNext: () => void;
 		onSubmit: () => void | Promise<void>;
+		onSkipRemaining: () => void | Promise<void>;
 		onAnswerChange: (answer: BuilderGuideAnswer) => void;
 	};
 
@@ -28,9 +30,11 @@
 		helpText = null,
 		canGoPrevious,
 		canGoNext,
+		isSubmitting,
 		onPrevious,
 		onNext,
 		onSubmit,
+		onSkipRemaining,
 		onAnswerChange
 	}: Props = $props();
 </script>
@@ -68,8 +72,10 @@
 				{question}
 				{answer}
 				{canGoNext}
+				{isSubmitting}
 				{onNext}
 				{onSubmit}
+				{onSkipRemaining}
 				{onAnswerChange}
 			/>
 		</fieldset>

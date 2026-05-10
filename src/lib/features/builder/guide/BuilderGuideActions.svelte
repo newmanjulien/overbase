@@ -4,21 +4,33 @@
 
 	type Props = {
 		canGoNext: boolean;
+		isSubmitting: boolean;
 		onNext: () => void;
 		onSubmit: () => void | Promise<void>;
+		onSkipRemaining: () => void | Promise<void>;
 	};
 
-	let { canGoNext, onNext, onSubmit }: Props = $props();
+	let { canGoNext, isSubmitting, onNext, onSubmit, onSkipRemaining }: Props = $props();
 	const primaryActionLabel = $derived(canGoNext ? 'Next' : 'Submit');
 </script>
 
 <div class="flex items-center gap-2 self-end">
-	<Button variant="secondary" disabled class="text-[0.72rem] text-zinc-900 md:text-[0.74rem]">
-		Skip all
-	</Button>
+	{#if canGoNext}
+		<Button
+			variant="secondary"
+			disabled={isSubmitting}
+			class="text-[0.72rem] text-zinc-900 md:text-[0.74rem]"
+			onclick={() => {
+				void onSkipRemaining();
+			}}
+		>
+			Skip remaining
+		</Button>
+	{/if}
 	<Button
 		variant="primary"
 		class="text-[0.72rem] md:text-[0.74rem]"
+		disabled={isSubmitting}
 		onclick={() => {
 			if (canGoNext) {
 				onNext();

@@ -1,4 +1,9 @@
 <script lang="ts">
+	import {
+		createGuidedRunSetup,
+		type BuilderGuideSetupAction,
+		type BuilderRunSetup
+	} from '@overbase/builder-sdk/app-protocol';
 	import type { BuilderAppRecord } from '$lib/features/builder/data';
 	import BuilderGuideQuestionCard from '$lib/features/builder/guide/BuilderGuideQuestionCard.svelte';
 	import {
@@ -14,7 +19,7 @@
 	type Props = {
 		app: BuilderAppRecord;
 		guide: BuilderGuideDefinition;
-		onComplete: (initialMessage: string) => Promise<void>;
+		onComplete: (setup: BuilderRunSetup) => Promise<void>;
 	};
 
 	let { app, guide, onComplete }: Props = $props();
@@ -55,35 +60,31 @@
 		const answer = getGuideAnswer(answersByQuestionId, question);
 
 		if (answer.type === 'choice') {
-			return answer.customAnswer.trim() || answer.selectedOption || 'Not specified';
+			return answer.customAnswer.trim() || answer.selectedOption.trim();
 		}
 
-		return answer.value.trim() || 'Not specified';
+		return answer.value.trim();
 	}
 
-	function buildInitialMessage() {
-		const answers = guide.questions.map((question) => {
-			return `${question.title}\n${getAnswerText(question)}`;
+	function buildRunSetup(action: BuilderGuideSetupAction) {
+		return createGuidedRunSetup({
+			title: app.title,
+			description: app.description,
+			guide,
+			action,
+			answers: guide.questions.map((question) => ({
+				questionId: question.id,
+				questionTitle: question.title,
+				answer: getAnswerText(question)
+			}))
 		});
-
-		return [
-			`I want to build this notification: ${app.title}`,
-			'',
-			'Description:',
-			app.description,
-			'',
-			'Answers:',
-			...answers.flatMap((answer) => ['', answer])
-		]
-			.join('\n')
-			.trim();
 	}
 
 	function getErrorMessage(error: unknown) {
 		return error instanceof Error ? error.message : 'Something went wrong.';
 	}
 
-	async function completeSetup() {
+	async function completeSetup(action: BuilderGuideSetupAction) {
 		if (isSubmitting) {
 			return;
 		}
@@ -92,7 +93,7 @@
 		submitError = null;
 
 		try {
-			await onComplete(buildInitialMessage());
+			await onComplete(buildRunSetup(action));
 		} catch (error) {
 			submitError = getErrorMessage(error);
 		} finally {
@@ -121,9 +122,11 @@
 			helpText={currentQuestion.helpText ?? null}
 			{canGoPrevious}
 			{canGoNext}
+			{isSubmitting}
 			onPrevious={goPrevious}
 			onNext={goNext}
-			onSubmit={completeSetup}
+			onSubmit={() => completeSetup('submitted')}
+			onSkipRemaining={() => completeSetup('skippedRemaining')}
 			onAnswerChange={updateAnswer}
 		/>
 

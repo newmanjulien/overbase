@@ -9,12 +9,23 @@
 		question: BuilderGuideQuestion;
 		answer: BuilderGuideAnswer;
 		canGoNext: boolean;
+		isSubmitting: boolean;
 		onNext: () => void;
 		onSubmit: () => void | Promise<void>;
+		onSkipRemaining: () => void | Promise<void>;
 		onAnswerChange: (answer: BuilderGuideAnswer) => void;
 	};
 
-	let { question, answer, canGoNext, onNext, onSubmit, onAnswerChange }: Props = $props();
+	let {
+		question,
+		answer,
+		canGoNext,
+		isSubmitting,
+		onNext,
+		onSubmit,
+		onSkipRemaining,
+		onAnswerChange
+	}: Props = $props();
 	const emptyChoiceAnswer = {
 		type: 'choice',
 		selectedOption: '',
@@ -40,5 +51,5 @@
 		/>
 	{/if}
 
-	<BuilderGuideActions {canGoNext} {onNext} {onSubmit} />
+	<BuilderGuideActions {canGoNext} {isSubmitting} {onNext} {onSubmit} {onSkipRemaining} />
 </div>

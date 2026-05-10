@@ -1,20 +1,41 @@
 import type { EmailDraft, EmailDraftPatch, EmailDraftState } from './email.js';
 import type { TranscriptMessage } from './streams.js';
+import type { GuideDefinition } from './catalog.js';
 export type { BuilderAppManifest } from './catalog.js';
 export type BuilderAppState = {
     version: number;
     value: unknown;
 };
+export type BuilderGuideSetupAction = 'submitted' | 'skippedRemaining';
+export type BuilderGuideSetupAnswer = {
+    questionId: string;
+    questionTitle: string;
+    answer: string;
+};
+export type BuilderGuideSetup = {
+    action: BuilderGuideSetupAction;
+    answers: BuilderGuideSetupAnswer[];
+};
+export type BuilderFreeformRunSetup = {
+    kind: 'freeform';
+    initialMessage: string;
+};
+export type BuilderGuidedRunSetup = {
+    kind: 'guided';
+    initialMessage: string;
+    guideSetup: BuilderGuideSetup;
+};
+export type BuilderRunSetup = BuilderFreeformRunSetup | BuilderGuidedRunSetup;
 export type BuilderAppTurnHandlers = {
     onAssistantDelta?: (delta: string) => Promise<void> | void;
 };
 export type BuilderAppStartTurnInput = {
-    initialMessage: string;
+    setup: BuilderRunSetup;
     appState?: BuilderAppState;
     handlers: BuilderAppTurnHandlers;
 };
 export type BuilderAppContinueTurnInput = {
-    initialMessage: string;
+    setup: BuilderRunSetup;
     transcript: TranscriptMessage[];
     userMessage: string;
     emailDraftState?: EmailDraftState;
@@ -22,9 +43,21 @@ export type BuilderAppContinueTurnInput = {
     handlers: BuilderAppTurnHandlers;
 };
 export type BuilderAppBackgroundJobInput = {
-    initialMessage: string;
+    setup: BuilderRunSetup;
     appState?: BuilderAppState;
 };
+export type CreateGuidedRunSetupInput = {
+    title: string;
+    description: string;
+    guide: GuideDefinition;
+    action: BuilderGuideSetupAction;
+    answers: BuilderGuideSetupAnswer[];
+};
+export declare function createFreeformRunSetup(message: string): BuilderFreeformRunSetup;
+export declare function createGuidedRunSetup({ title, description, guide, action, answers }: CreateGuidedRunSetupInput): BuilderGuidedRunSetup;
+export declare function normalizeBuilderRunSetup(setup: BuilderRunSetup): BuilderRunSetup;
+export declare function builderRunSetupsEqual(left: BuilderRunSetup, right: BuilderRunSetup): boolean;
+export declare function buildBuilderRunSetupPromptText(setup: BuilderRunSetup): string;
 export type BuilderAppPatchResult = {
     text: string;
     patch: EmailDraftPatch | null;
