@@ -143,6 +143,7 @@
 				>
 					Edit draft
 				</Button>
+				<Button variant="primary" class="px-3 text-[0.74rem]">Publish</Button>
 			{/if}
 		</div>
 	</div>
