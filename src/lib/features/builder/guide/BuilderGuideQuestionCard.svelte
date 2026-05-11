@@ -15,6 +15,7 @@
 		canGoPrevious: boolean;
 		canGoNext: boolean;
 		isSubmitting: boolean;
+		skipActionLabel: string;
 		onPrevious: () => void;
 		onNext: () => void;
 		onSubmit: () => void | Promise<void>;
@@ -31,6 +32,7 @@
 		canGoPrevious,
 		canGoNext,
 		isSubmitting,
+		skipActionLabel,
 		onPrevious,
 		onNext,
 		onSubmit,
@@ -73,6 +75,7 @@
 				{answer}
 				{canGoNext}
 				{isSubmitting}
+				{skipActionLabel}
 				{onNext}
 				{onSubmit}
 				{onSkipRemaining}

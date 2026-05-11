@@ -5,12 +5,14 @@
 	type Props = {
 		canGoNext: boolean;
 		isSubmitting: boolean;
+		skipActionLabel: string;
 		onNext: () => void;
 		onSubmit: () => void | Promise<void>;
 		onSkipRemaining: () => void | Promise<void>;
 	};
 
-	let { canGoNext, isSubmitting, onNext, onSubmit, onSkipRemaining }: Props = $props();
+	let { canGoNext, isSubmitting, skipActionLabel, onNext, onSubmit, onSkipRemaining }: Props =
+		$props();
 	const primaryActionLabel = $derived(canGoNext ? 'Next' : 'Submit');
 </script>
 
@@ -24,7 +26,7 @@
 				void onSkipRemaining();
 			}}
 		>
-			Skip remaining
+			{skipActionLabel}
 		</Button>
 	{/if}
 	<Button

@@ -32,6 +32,7 @@
 	const currentAnswer = $derived(getGuideAnswer(answersByQuestionId, currentQuestion));
 	const canGoPrevious = $derived(currentQuestionIndex > 0);
 	const canGoNext = $derived(currentQuestionIndex < guide.questions.length - 1);
+	const skipActionLabel = $derived(canGoPrevious ? 'Skip remaining' : 'Skip all');
 
 	function updateAnswer(answer: BuilderGuideAnswer) {
 		answersByQuestionId = {
@@ -123,6 +124,7 @@
 			{canGoPrevious}
 			{canGoNext}
 			{isSubmitting}
+			{skipActionLabel}
 			onPrevious={goPrevious}
 			onNext={goNext}
 			onSubmit={() => completeSetup('submitted')}

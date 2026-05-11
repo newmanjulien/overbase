@@ -10,6 +10,7 @@
 		answer: BuilderGuideAnswer;
 		canGoNext: boolean;
 		isSubmitting: boolean;
+		skipActionLabel: string;
 		onNext: () => void;
 		onSubmit: () => void | Promise<void>;
 		onSkipRemaining: () => void | Promise<void>;
@@ -21,6 +22,7 @@
 		answer,
 		canGoNext,
 		isSubmitting,
+		skipActionLabel,
 		onNext,
 		onSubmit,
 		onSkipRemaining,
@@ -51,5 +53,12 @@
 		/>
 	{/if}
 
-	<BuilderGuideActions {canGoNext} {isSubmitting} {onNext} {onSubmit} {onSkipRemaining} />
+	<BuilderGuideActions
+		{canGoNext}
+		{isSubmitting}
+		{skipActionLabel}
+		{onNext}
+		{onSubmit}
+		{onSkipRemaining}
+	/>
 </div>
