@@ -358,11 +358,11 @@ export function createBuilderSessionController(
 		get queryError() {
 			return liveSnapshotQuery.error ?? null;
 		},
-		get canSend() {
-			return messagingView.canSendMessage;
+		get canSubmitDraft() {
+			return messagingView.canSubmitDraft;
 		},
-		get canCompose() {
-			return messagingView.canComposeMessage;
+		get canEditDraft() {
+			return messagingView.canEditDraft;
 		},
 		resumeStored,
 		publishNotification,

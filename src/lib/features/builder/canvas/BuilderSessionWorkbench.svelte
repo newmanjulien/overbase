@@ -170,8 +170,8 @@
 				messages={builderSession.messages}
 				queryError={builderSession.queryError}
 				{runError}
-				canComposeMessage={builderSession.canCompose}
-				canSendMessage={builderSession.canSend}
+				canEditDraft={builderSession.canEditDraft}
+				canSubmitDraft={builderSession.canSubmitDraft}
 				onSend={sendMessage}
 			/>
 		{:else}

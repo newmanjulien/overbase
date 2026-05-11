@@ -25,15 +25,19 @@ export function getBuilderSessionMessagingView(params: {
 }) {
 	const hasActiveAssistant = builderSessionHasActiveAssistant(params.messages);
 	const hasUsableSession = Boolean(
-		params.hasHandle && !params.queryError && params.session && !params.session.errorText
+		params.hasHandle &&
+			!params.queryError &&
+			params.session &&
+			params.session.status !== 'failed' &&
+			!params.session.errorText
 	);
 	const sessionCanAcceptUserMessage =
 		params.session?.status === 'waitingForUser' || params.session?.status === 'ready';
 
 	return {
 		hasActiveAssistant,
-		canComposeMessage: hasUsableSession && (sessionCanAcceptUserMessage || hasActiveAssistant),
-		canSendMessage: hasUsableSession && !hasActiveAssistant && sessionCanAcceptUserMessage
+		canEditDraft: hasUsableSession && (sessionCanAcceptUserMessage || hasActiveAssistant),
+		canSubmitDraft: hasUsableSession && !hasActiveAssistant && sessionCanAcceptUserMessage
 	};
 }
 

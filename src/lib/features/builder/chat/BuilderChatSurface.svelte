@@ -17,8 +17,8 @@
 		messages: ChatMessage[];
 		queryError?: Error | null;
 		runError?: string | null;
-		canComposeMessage?: boolean;
-		canSendMessage?: boolean;
+		canEditDraft?: boolean;
+		canSubmitDraft?: boolean;
 		onSend: (text: string) => Promise<void>;
 	};
 
@@ -29,8 +29,8 @@
 		messages,
 		queryError = null,
 		runError = null,
-		canComposeMessage = true,
-		canSendMessage = true,
+		canEditDraft = true,
+		canSubmitDraft = true,
 		onSend
 	}: Props = $props();
 
@@ -50,14 +50,13 @@
 		)
 	);
 	const composerReadOnly = $derived(
-		Boolean(queryError) || Boolean(runError) || !canComposeMessage
+		Boolean(queryError) || Boolean(runError) || !canEditDraft
 	);
 	const canSend = $derived(
 		composerValue.trim().length > 0 &&
 			!isSending &&
-			!hasActiveAssistant &&
 			!composerReadOnly &&
-			canSendMessage
+			canSubmitDraft
 	);
 
 	const stickToBottom = new StickToBottom({
@@ -92,13 +91,13 @@
 	}
 
 	async function focusComposer() {
-		if (!textareaElement || composerReadOnly || hasActiveAssistant) {
+		if (!textareaElement || composerReadOnly) {
 			return;
 		}
 
 		await tick();
 
-		if (!textareaElement || composerReadOnly || hasActiveAssistant) {
+		if (!textareaElement || composerReadOnly) {
 			return;
 		}
 
@@ -136,9 +135,8 @@
 	$effect(() => {
 		void textareaElement;
 		void composerReadOnly;
-		void hasActiveAssistant;
 
-		if (shouldFocusComposer && textareaElement && !composerReadOnly && !hasActiveAssistant) {
+		if (shouldFocusComposer && textareaElement && !composerReadOnly) {
 			shouldFocusComposer = false;
 			void focusComposer();
 		}
