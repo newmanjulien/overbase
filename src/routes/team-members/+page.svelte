@@ -8,7 +8,7 @@
 		searchPlaceholder: 'Search team members...',
 		searchAriaLabel: 'Search team members',
 		filterLabel: 'All roles',
-		actionLabel: 'Invite member'
+		actionLabel: 'Invite team'
 	}}
 	empty={{
 		icon: ContactRound,
@@ -17,6 +17,6 @@
 		details:
 			'Team members are the people inside your organization who help create notifications, manage data sources, and keep shared workflows moving. Add teammates here to coordinate operational updates across your internal team.',
 		learnMoreLabel: 'Learn more',
-		actionLabel: 'Invite member'
+		actionLabel: 'Invite team'
 	}}
 />

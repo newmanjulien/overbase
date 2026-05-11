@@ -8,7 +8,10 @@
 		type BuilderAppRecord
 	} from '$lib/features/builder/data';
 	import BuilderAppCard from '$lib/features/builder/apps/BuilderAppCard.svelte';
-	import { FilterPillGroup } from '$lib/components/ui';
+	import { FilterPillGroup, HelpTooltip } from '$lib/components/ui';
+
+	const BLUEPRINT_HELP_TEXT =
+		'Blueprints are guided starting points for common notification workflows. Pick one to answer a few setup questions and generate a tailored draft.';
 
 	type Props = {
 		builderHome: BuilderAppHomeData;
@@ -31,12 +34,20 @@
 </script>
 
 <section class="w-full" aria-labelledby="builder-app-gallery-title">
+	<div class="flex items-center gap-1.5">
+		<h2 id="builder-app-gallery-title" class="text-[0.82rem] font-medium text-zinc-950">
+			Start with a blueprint
+		</h2>
+		<HelpTooltip id="builder-app-gallery-blueprint-help" text={BLUEPRINT_HELP_TEXT} />
+	</div>
+
 	<FilterPillGroup
 		{filters}
 		selectedId={selectedFilterId}
 		onSelect={(filterId) => {
 			selectedFilterId = filterId;
 		}}
+		class="mt-5"
 	/>
 
 	<div class="mt-5">

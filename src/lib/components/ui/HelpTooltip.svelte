@@ -1,22 +1,24 @@
 <script lang="ts">
 	import { CircleQuestionMark } from 'lucide-svelte';
-	import { FloatingTooltip } from '$lib/components/ui';
+	import FloatingTooltip, { type FloatingTooltipPlacement } from './FloatingTooltip.svelte';
 
 	type Props = {
 		id: string;
 		text?: string | null;
+		ariaLabel?: string;
+		placement?: FloatingTooltipPlacement;
 	};
 
-	let { id, text = null }: Props = $props();
+	let { id, text = null, ariaLabel = 'Help', placement = 'bottom-start' }: Props = $props();
 
 	const helpText = $derived(text?.trim() ?? '');
 </script>
 
 <FloatingTooltip
-	id={`guide-question-help-${id}`}
+	{id}
 	text={helpText}
-	ariaLabel="Question help"
-	placement="bottom-start"
+	{ariaLabel}
+	{placement}
 	triggerClass="grid size-5 place-items-center rounded-[6px] text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:bg-zinc-100 focus-visible:text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
 >
 	{#snippet trigger()}

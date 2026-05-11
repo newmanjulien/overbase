@@ -1,8 +1,8 @@
 <script lang="ts">
 	import BuilderGuidePager from '$lib/features/builder/guide/BuilderGuidePager.svelte';
-	import BuilderGuideQuestionHelp from '$lib/features/builder/guide/BuilderGuideQuestionHelp.svelte';
 	import BuilderGuideQuestionBody from '$lib/features/builder/guide/BuilderGuideQuestionBody.svelte';
 	import BuilderGuideQuestionFooter from '$lib/features/builder/guide/BuilderGuideQuestionFooter.svelte';
+	import { HelpTooltip } from '$lib/components/ui';
 	import type { BuilderGuideAnswer } from '$lib/features/builder/guide/guide-answer';
 	import type { BuilderGuideQuestion } from '$lib/features/builder/guide/guide-types';
 
@@ -47,7 +47,11 @@
 			<h2 class="min-w-0 text-[0.76rem] font-medium text-zinc-950 md:text-[0.8rem]">
 				{question.title}
 			</h2>
-			<BuilderGuideQuestionHelp id={question.id} text={helpText} />
+			<HelpTooltip
+				id={`guide-question-help-${question.id}`}
+				text={helpText}
+				ariaLabel="Question help"
+			/>
 		</div>
 
 		<BuilderGuidePager

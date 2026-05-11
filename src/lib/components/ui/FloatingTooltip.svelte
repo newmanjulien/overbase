@@ -3,7 +3,7 @@
 	import type { ClassValue } from 'clsx';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
-	type FloatingTooltipPlacement = 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
+	export type FloatingTooltipPlacement = 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
 
 	type Props = {
 		id: string;
