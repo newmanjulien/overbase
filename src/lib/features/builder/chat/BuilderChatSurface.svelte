@@ -149,7 +149,7 @@
 	<div bind:this={scrollElement} class="relative min-h-0 flex-1 overflow-y-auto px-3 py-6 md:px-5">
 		<div bind:this={contentElement} class="mx-auto flex w-full max-w-3xl flex-col gap-4">
 			<p class="w-full text-center text-xs leading-snug text-zinc-400">
-				Overbase turns a plain-language request into a custom email notification.
+				Explain the emails you want your team to receive
 			</p>
 
 			{#if queryError}
