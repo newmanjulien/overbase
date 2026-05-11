@@ -49,6 +49,7 @@
 	const builderSession = createBuilderSessionController(initialAppId, () => initialMessage);
 
 	let mode = $state<'beforeRun' | 'run'>(initialMessage ? 'run' : 'beforeRun');
+	let isPublishNavigation = $state(false);
 
 	const runError = $derived(
 		builderSession.session?.errorText ??
@@ -122,7 +123,14 @@
 
 	async function publishNotification() {
 		await builderSession.publishNotification(routeTitleState.title);
-		await goto(resolve('/my-notifications'));
+		isPublishNavigation = true;
+
+		try {
+			await goto(resolve('/my-notifications'));
+		} catch (error) {
+			isPublishNavigation = false;
+			throw error;
+		}
 	}
 
 	$effect(() => {
@@ -137,7 +145,7 @@
 	});
 </script>
 
-<NativeBuilderLeaveGuard active={leaveGuardActive} />
+<NativeBuilderLeaveGuard active={leaveGuardActive && !isPublishNavigation} />
 
 <SplitPane
 	minPrimary={BUILDER_CANVAS_SPLIT.minPrimary}

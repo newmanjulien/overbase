@@ -43,7 +43,7 @@
 			aria-label="To recipients"
 			placeholder="Recipients"
 			{disabled}
-			class="h-8 min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.78rem] text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
+			class="h-8 min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.72rem] text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
 			oninput={(event) => updateDraft({ toText: event.currentTarget.value })}
 		/>
 	{/snippet}
@@ -54,7 +54,7 @@
 			aria-label="Cc recipients"
 			placeholder="Cc recipients"
 			{disabled}
-			class="h-8 min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.78rem] text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
+			class="h-8 min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.72rem] text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
 			oninput={(event) => updateDraft({ ccText: event.currentTarget.value })}
 		/>
 	{/snippet}
@@ -73,7 +73,7 @@
 				aria-label="Spreadsheet attachment"
 				placeholder="Attach a spreadsheet"
 				{disabled}
-				class="h-8 w-full min-w-0 border-0 bg-transparent p-0 text-[0.82rem] text-zinc-950 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
+				class="h-8 w-full min-w-0 border-0 bg-transparent p-0 text-[0.76rem] text-zinc-950 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
 				oninput={(event) => updateDraft({ attachmentInputText: event.currentTarget.value })}
 				onkeydown={(event) => {
 					if (event.key === 'Enter') {
@@ -91,7 +91,7 @@
 			aria-label="Email body"
 			placeholder="Add email body"
 			{disabled}
-			class="min-h-72 w-full resize-none border-0 bg-transparent p-0 text-[0.82rem] leading-[1.52] text-zinc-900 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
+			class="min-h-72 w-full resize-none border-0 bg-transparent p-0 text-[0.76rem] leading-[1.52] text-zinc-900 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
 			oninput={(event) => updateDraft({ bodyText: event.currentTarget.value })}
 		></textarea>
 	{/snippet}

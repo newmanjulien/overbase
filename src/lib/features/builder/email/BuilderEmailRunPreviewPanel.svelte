@@ -142,13 +142,13 @@
 
 	<div class="shrink-0 border-t border-zinc-100 bg-white px-4 py-3 md:px-5">
 		{#if saveError}
-			<p class="mb-2 text-[0.72rem] leading-snug text-red-600">{saveError}</p>
+			<p class="mb-2 text-[0.68rem] leading-snug text-red-600">{saveError}</p>
 		{/if}
 		{#if publishError}
-			<p class="mb-2 text-[0.72rem] leading-snug text-red-600">{publishError}</p>
+			<p class="mb-2 text-[0.68rem] leading-snug text-red-600">{publishError}</p>
 		{/if}
 
-		<div class="flex justify-end gap-2">
+		<div class="flex items-center justify-end gap-2">
 			{#if isEditing}
 				<Button
 					variant="secondary"

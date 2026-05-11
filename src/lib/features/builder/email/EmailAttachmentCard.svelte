@@ -28,14 +28,14 @@
 			class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-emerald-100 bg-zinc-50"
 		></div>
 		<div
-			class="mb-1 rounded-[2px] bg-emerald-700/70 px-0.5 py-px text-[0.34rem] leading-none font-semibold text-white"
+			class="mb-1 rounded-[2px] bg-emerald-700/70 px-0.5 py-px text-[0.32rem] leading-none font-semibold text-white"
 		>
 			{EMAIL_ATTACHMENT_FORMAT.shortLabel}
 		</div>
 	</div>
 
 	<div class="min-w-0">
-		<p class="truncate text-[0.72rem] leading-tight font-medium text-zinc-800">{filename}</p>
+		<p class="truncate text-[0.68rem] leading-tight font-medium text-zinc-800">{filename}</p>
 	</div>
 {/snippet}
 

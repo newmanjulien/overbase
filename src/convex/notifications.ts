@@ -101,3 +101,14 @@ export const listNotifications = query({
 		}));
 	}
 });
+
+export const deleteNotifications = mutation({
+	args: {
+		notificationIds: v.array(v.id('notifications'))
+	},
+	handler: async (ctx, { notificationIds }) => {
+		for (const notificationId of notificationIds) {
+			await ctx.db.delete(notificationId);
+		}
+	}
+});

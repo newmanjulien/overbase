@@ -35,12 +35,12 @@
 			</div>
 
 			<div class="px-1 pt-1 pb-5 text-center">
-				<h2 class="text-sm font-medium tracking-normal text-zinc-950">{app.title}</h2>
-				<p class="mt-1 text-xs leading-snug text-zinc-500">{app.description}</p>
+				<h2 class="text-xs font-medium tracking-normal text-zinc-950">{app.title}</h2>
+				<p class="mt-1 text-[0.7rem] leading-snug text-zinc-500">{app.description}</p>
 
 				<button
 					type="button"
-					class="mt-3 inline-flex items-center justify-center gap-1.5 rounded-sm px-2 py-1 text-xs font-normal text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
+					class="mt-3 inline-flex items-center justify-center gap-1.5 rounded-sm px-2 py-1 text-[0.7rem] font-normal text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
 					aria-expanded={detailsExpanded}
 					aria-controls={detailsId}
 					onclick={() => {
@@ -61,7 +61,7 @@
 				>
 					<div class="min-h-0 overflow-hidden">
 						<div
-							class="space-y-2 pt-3 text-center text-xs leading-relaxed text-zinc-500 transition-all duration-300 ease-out"
+							class="space-y-2 pt-3 text-center text-[0.7rem] leading-relaxed text-zinc-500 transition-all duration-300 ease-out"
 							class:translate-y-0={detailsExpanded}
 							class:opacity-100={detailsExpanded}
 							class:translate-y-1={!detailsExpanded}

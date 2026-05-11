@@ -29,4 +29,21 @@ export type SelectableListItem = {
 	};
 	selectAriaLabel?: string;
 	actionsAriaLabel?: string;
+	actions?: SelectableListItemAction[];
+};
+
+export type SelectableListItemAction = {
+	label: string;
+	ariaLabel?: string;
+	intent?: 'default' | 'destructive';
+	disabled?: boolean;
+	onSelect: () => void | Promise<void>;
+};
+
+export type SelectableListSelectedAction = {
+	label: string;
+	ariaLabel?: string;
+	intent?: 'default' | 'destructive';
+	disabled?: boolean;
+	onSelect: (selectedItemIds: string[]) => void | Promise<void>;
 };

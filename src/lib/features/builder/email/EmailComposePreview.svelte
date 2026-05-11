@@ -23,13 +23,13 @@
 <EmailComposeDocument>
 	{#snippet to()}
 		{#if toLine}
-			<p class="truncate text-[0.78rem] text-zinc-800">{toLine}</p>
+			<p class="truncate text-[0.72rem] text-zinc-800">{toLine}</p>
 		{/if}
 	{/snippet}
 
 	{#snippet cc()}
 		{#if ccLine}
-			<p class="truncate text-[0.78rem] text-zinc-800">{ccLine}</p>
+			<p class="truncate text-[0.72rem] text-zinc-800">{ccLine}</p>
 		{/if}
 	{/snippet}
 

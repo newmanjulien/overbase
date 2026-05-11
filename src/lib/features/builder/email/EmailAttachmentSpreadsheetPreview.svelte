@@ -81,19 +81,19 @@
 			<ArrowLeft class="size-3.5 stroke-[2]" />
 		</button>
 		<div
-			class="flex size-7 shrink-0 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-50/60 text-[0.58rem] font-normal text-emerald-700"
+			class="flex size-7 shrink-0 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-50/60 text-[0.54rem] font-normal text-emerald-700"
 			aria-hidden="true"
 		>
 			XLS
 		</div>
 		<div class="min-w-0 flex-1">
-			<p class="truncate text-[0.78rem] font-medium text-zinc-900">{attachment.filename}</p>
+			<p class="truncate text-[0.72rem] font-medium text-zinc-900">{attachment.filename}</p>
 		</div>
 	</div>
 
 	<div class="min-h-0 flex-1 overflow-auto bg-white">
 		<table
-			class="table-fixed border-separate border-spacing-0 text-left text-[0.72rem]"
+			class="table-fixed border-separate border-spacing-0 text-left text-[0.68rem]"
 			style={`width: ${spreadsheetTableWidth}px; min-width: ${spreadsheetTableWidth}px;`}
 		>
 			<colgroup>
@@ -110,7 +110,7 @@
 					></th>
 					{#each SPREADSHEET_COLUMN_LABELS as column (column)}
 						<th
-							class="sticky top-0 z-10 h-8 overflow-hidden border-r border-b border-zinc-200 bg-emerald-50/70 px-2 text-center text-[0.66rem] font-normal text-ellipsis whitespace-nowrap text-emerald-900"
+							class="sticky top-0 z-10 h-8 overflow-hidden border-r border-b border-zinc-200 bg-emerald-50/70 px-2 text-center text-[0.62rem] font-normal text-ellipsis whitespace-nowrap text-emerald-900"
 						>
 							{column}
 						</th>
@@ -121,7 +121,7 @@
 				{#each rowIndexes as rowIndex (rowIndex)}
 					<tr>
 						<th
-							class="sticky left-0 z-10 h-8 border-r border-b border-zinc-200 bg-zinc-50 px-2 text-right text-[0.66rem] font-normal text-zinc-500"
+							class="sticky left-0 z-10 h-8 border-r border-b border-zinc-200 bg-zinc-50 px-2 text-right text-[0.62rem] font-normal text-zinc-500"
 						>
 							{rowIndex + 1}
 						</th>
@@ -140,7 +140,7 @@
 										data-row={rowIndex}
 										data-column={cellIndex}
 										{disabled}
-										class="block h-full w-full min-w-0 overflow-hidden border-0 bg-transparent p-0 text-[0.72rem] text-ellipsis whitespace-nowrap outline-none"
+										class="block h-full w-full min-w-0 overflow-hidden border-0 bg-transparent p-0 text-[0.68rem] text-ellipsis whitespace-nowrap outline-none"
 										class:font-medium={rowIndex === 0}
 										class:text-zinc-900={rowIndex === 0}
 										class:text-zinc-800={rowIndex !== 0}
