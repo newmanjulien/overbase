@@ -330,6 +330,18 @@ export function createBuilderSessionController(
 		return result;
 	}
 
+	async function publishNotification(title: string) {
+		if (!handle) {
+			throw new Error('Builder session not found.');
+		}
+
+		return await client.mutation(api.notifications.publishFromBuilderSession, {
+			sessionId: handle.sessionId,
+			resumeToken: handle.resumeToken,
+			title
+		});
+	}
+
 	return {
 		get handle() {
 			return snapshot?.handle ?? handle;
@@ -353,6 +365,7 @@ export function createBuilderSessionController(
 			return messagingView.canComposeMessage;
 		},
 		resumeStored,
+		publishNotification,
 		saveEmailDraft,
 		start,
 		send

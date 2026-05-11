@@ -68,4 +68,18 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_session_createdAt', ['sessionId', 'createdAt']),
+	notifications: defineTable({
+		title: v.string(),
+		status: v.union(v.literal('paused'), v.literal('active')),
+		definition: v.object({
+			kind: v.literal('customEmail'),
+			builderAppSlug: v.string()
+		}),
+		createdByName: v.string(),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		publishedFromBuilderSessionId: v.id('builderSessions')
+	})
+		.index('by_createdAt', ['createdAt'])
+		.index('by_publishedFromBuilderSessionId', ['publishedFromBuilderSessionId'])
 });

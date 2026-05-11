@@ -17,14 +17,25 @@
 		draft: EmailDraft;
 		emailDraftVersion: number;
 		canEdit?: boolean;
+		canPublish?: boolean;
 		onSave: (draft: EmailDraft, baseEmailDraftVersion: number) => Promise<void>;
+		onPublish: () => Promise<void>;
 	};
 
-	let { draft, emailDraftVersion, canEdit = true, onSave }: Props = $props();
+	let {
+		draft,
+		emailDraftVersion,
+		canEdit = false,
+		canPublish = false,
+		onSave,
+		onPublish
+	}: Props = $props();
 
 	let isEditing = $state(false);
 	let isSaving = $state(false);
+	let isPublishing = $state(false);
 	let saveError = $state<string | null>(null);
+	let publishError = $state<string | null>(null);
 	let editableDraft = $state<EditableEmailDraft>(toEditableEmailDraft(createDefaultEmailDraft()));
 	let editingBaseEmailDraftVersion = $state(0);
 	let isAttachmentOpen = $state(false);
@@ -34,6 +45,7 @@
 		editableDraft = toEditableEmailDraft(draft);
 		editingBaseEmailDraftVersion = emailDraftVersion;
 		saveError = null;
+		publishError = null;
 		isEditing = true;
 	}
 
@@ -73,6 +85,23 @@
 			saveError = error instanceof Error ? error.message : 'Could not save draft edits.';
 		} finally {
 			isSaving = false;
+		}
+	}
+
+	async function publishDraft() {
+		if (isPublishing || !canPublish) {
+			return;
+		}
+
+		isPublishing = true;
+		publishError = null;
+
+		try {
+			await onPublish();
+		} catch (error) {
+			publishError = error instanceof Error ? error.message : 'Could not publish notification.';
+		} finally {
+			isPublishing = false;
 		}
 	}
 </script>
@@ -115,6 +144,9 @@
 		{#if saveError}
 			<p class="mb-2 text-[0.72rem] leading-snug text-red-600">{saveError}</p>
 		{/if}
+		{#if publishError}
+			<p class="mb-2 text-[0.72rem] leading-snug text-red-600">{publishError}</p>
+		{/if}
 
 		<div class="flex justify-end gap-2">
 			{#if isEditing}
@@ -138,12 +170,19 @@
 				<Button
 					variant="secondary"
 					class="px-3 text-[0.74rem] text-zinc-800"
-					disabled={!canEdit}
+					disabled={!canEdit || isPublishing}
 					onclick={beginEdit}
 				>
 					Edit draft
 				</Button>
-				<Button variant="primary" class="px-3 text-[0.74rem]">Publish</Button>
+				<Button
+					variant="primary"
+					class="px-3 text-[0.74rem]"
+					disabled={!canPublish || isPublishing}
+					onclick={() => void publishDraft()}
+				>
+					{isPublishing ? 'Publishing...' : 'Publish'}
+				</Button>
 			{/if}
 		</div>
 	</div>

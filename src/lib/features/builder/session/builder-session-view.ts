@@ -41,15 +41,17 @@ export function getBuilderSessionEmailDraftView(session: Doc<'builderSessions'> 
 	const emailDraftState =
 		session?.emailDraftState?.visibility === 'visible' ? session.emailDraftState : null;
 	const emailDraft = emailDraftState?.draft ?? null;
+	const canUseReadyEmailDraft = Boolean(
+		session &&
+			emailDraft &&
+			session.status === 'ready' &&
+			!session.activeTurnJobId
+	);
 
 	return {
 		emailDraft,
 		emailDraftVersion: emailDraftState?.version ?? 0,
-		canEditEmailDraft: Boolean(
-			session &&
-				emailDraft &&
-				session.status === 'ready' &&
-				!session.activeTurnJobId
-		)
+		canEditEmailDraft: canUseReadyEmailDraft,
+		canPublishEmailDraft: canUseReadyEmailDraft
 	};
 }

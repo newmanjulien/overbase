@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { replaceState } from '$app/navigation';
+	import { goto, replaceState } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { untrack, type Snippet } from 'svelte';
 	import type { BuilderRunSetup } from '@overbase/builder-sdk/app-protocol';
@@ -17,6 +17,7 @@
 		type BuilderLaunchState
 	} from '$lib/features/builder/session/builder-launch';
 	import { createBuilderSessionController } from '$lib/features/builder/session/builder-session.svelte';
+	import { useRouteTitleState } from '$lib/components/chrome/shared/route-title.svelte';
 
 	type BuilderSessionWorkbenchStartRequest = Pick<
 		BuilderLaunchState,
@@ -39,6 +40,7 @@
 
 	let { app, launch = null, beforeRun }: Props = $props();
 	let bootedAppId = $state('');
+	const routeTitleState = useRouteTitleState();
 
 	const initialAppId = untrack(() => app.id);
 	const initialLaunch = untrack(() => (launch?.appSlug === initialAppId ? launch : null));
@@ -118,6 +120,11 @@
 		await builderSession.saveEmailDraft(draft, baseEmailDraftVersion);
 	}
 
+	async function publishNotification() {
+		await builderSession.publishNotification(routeTitleState.title);
+		await goto(resolve('/my-notifications'));
+	}
+
 	$effect(() => {
 		if (bootedAppId === app.id) {
 			return;
@@ -169,6 +176,7 @@
 			{app}
 			session={builderSession.session}
 			onSaveDraft={saveDraft}
+			onPublish={publishNotification}
 		/>
 	{/snippet}
 </SplitPane>

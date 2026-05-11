@@ -7,6 +7,10 @@
 	import MobileHeader from '$lib/components/chrome/mobile/MobileHeader.svelte';
 	import { getActiveNavRoute } from '$lib/components/chrome/shared/nav';
 	import {
+		provideRouteTitleState,
+		type RouteTitleState
+	} from '$lib/components/chrome/shared/route-title.svelte';
+	import {
 		provideChromeShellState,
 		type ChromeShellState
 	} from '$lib/components/chrome/shared/shell.svelte';
@@ -19,6 +23,9 @@
 	const shellState = $state<ChromeShellState>({
 		isSidebarExpanded: false,
 		isMobileDrawerOpen: false
+	});
+	const routeTitleState = $state<RouteTitleState>({
+		title: APP_CONFIG.name
 	});
 	const activeRoute = $derived(getActiveNavRoute(page.url.pathname));
 	const sourceRouteTitle = $derived(page.data.headerTitle ?? activeRoute?.label ?? APP_CONFIG.name);
@@ -40,7 +47,12 @@
 		}
 	});
 
+	$effect(() => {
+		routeTitleState.title = routeTitle;
+	});
+
 	provideChromeShellState(shellState);
+	provideRouteTitleState(routeTitleState);
 	setupAppConvex();
 </script>
 
