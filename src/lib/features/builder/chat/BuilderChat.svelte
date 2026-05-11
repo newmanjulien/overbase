@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { goto, preloadData } from '$app/navigation';
+	import { tick } from 'svelte';
 	import { CUSTOM_NOTIFICATION_APP_ID } from '$lib/features/builder/data';
 	import {
 		createBuilderLaunchState,
@@ -17,6 +18,7 @@
 	let textareaElement = $state<HTMLTextAreaElement | null>(null);
 	let customBuilderRoutePreloaded = $state(false);
 	let isSubmitting = $state(false);
+	let shouldFocusComposer = $state(true);
 
 	const customBuilderHref = resolve('/builder/[appSlug]', {
 		appSlug: CUSTOM_NOTIFICATION_APP_ID
@@ -58,6 +60,21 @@
 			maxHeight !== null && textareaElement.scrollHeight > maxHeight ? 'auto' : 'hidden';
 	}
 
+	async function focusComposer() {
+		if (!textareaElement || isSubmitting) {
+			return;
+		}
+
+		await tick();
+
+		if (!textareaElement || isSubmitting) {
+			return;
+		}
+
+		textareaElement.focus({ preventScroll: true });
+		shouldFocusComposer = false;
+	}
+
 	async function handleSubmit() {
 		if (!canSubmit) {
 			return;
@@ -88,6 +105,14 @@
 		syncTextareaHeight();
 	});
 
+	$effect(() => {
+		void textareaElement;
+		void isSubmitting;
+
+		if (shouldFocusComposer && textareaElement && !isSubmitting) {
+			void focusComposer();
+		}
+	});
 </script>
 
 <div class="flex w-full flex-col items-center">
