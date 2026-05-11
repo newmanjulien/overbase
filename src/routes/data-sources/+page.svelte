@@ -15,7 +15,7 @@
 		title: 'No data sources found',
 		description: 'Connect data sources to power your notifications.',
 		details:
-			'Data sources are the systems Overbase reads from when building notifications. Connect the tools that hold your operational data, then use them to create alerts that reflect the real activity happening across your team and partner ecosystem.',
+			'Overbase can analyze any of your internal data sources. Add the data sources you want us to use to send you actionable opportunities or that you want to share with your ecosystem partners',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Add data source'
 	}}

@@ -96,9 +96,9 @@
 	empty={{
 		icon: Bell,
 		title: 'No notifications found',
-		description: 'Build notifications to track the updates that matter to you.',
+		description: 'Build your first notification with the notification builder.',
 		details:
-			'My notifications is where your active notification workflows will appear. Build notifications that monitor the data sources and partner activity your team relies on, then manage the updates you receive from this view.',
+			'Build your first notification using the notification builder then you will fine tune, add teammates and manage it here',
 		learnMoreLabel: 'Learn more'
 	}}
 	hasItems={listState !== 'empty'}

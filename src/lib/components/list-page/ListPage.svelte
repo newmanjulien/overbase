@@ -23,7 +23,7 @@
 	{@render toolbar?.()}
 
 	<section
-		class={cn('min-h-0 rounded-sm border border-zinc-200/70 bg-white', contentClass)}
+		class={cn('min-h-0 overflow-hidden rounded-sm border border-zinc-200/70 bg-white', contentClass)}
 		aria-label="List results"
 	>
 		{@render children?.()}

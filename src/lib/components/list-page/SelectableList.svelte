@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Check, Ellipsis, Minus, Trash2 } from 'lucide-svelte';
+	import { Check, Minus } from 'lucide-svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import PersonAvatar from '$lib/components/chrome/shared/PersonAvatar.svelte';
-	import { IconButton } from '$lib/components/ui';
+	import { FloatingActionMenu, type FloatingActionMenuAction } from '$lib/components/ui';
 	import type {
 		SelectableListItem,
 		SelectableListItemAction,
@@ -52,26 +52,6 @@
 		}
 	});
 
-	$effect(() => {
-		function closeActionsMenu(event: MouseEvent) {
-			if (
-				event.target instanceof Element &&
-				event.target.closest('[data-selectable-list-actions]')
-			) {
-				return;
-			}
-
-			openActionsItemId = null;
-			selectedActionsOpen = false;
-		}
-
-		document.addEventListener('click', closeActionsMenu);
-
-		return () => {
-			document.removeEventListener('click', closeActionsMenu);
-		};
-	});
-
 	function isSelected(id: string) {
 		return selectedItemIdSet.has(id);
 	}
@@ -86,36 +66,40 @@
 		selectedItemIds = allSelected ? [] : itemIds;
 	}
 
-	function toggleActionsMenu(id: string) {
-		openActionsItemId = openActionsItemId === id ? null : id;
-		selectedActionsOpen = false;
+	function toRowActionMenuActions(actions: SelectableListItemAction[] = []): FloatingActionMenuAction[] {
+		return actions.map((action) => ({
+			label: action.label,
+			ariaLabel: action.ariaLabel,
+			intent: action.intent,
+			disabled: action.disabled,
+			onSelect: action.onSelect
+		}));
 	}
 
-	function toggleSelectedActionsMenu() {
-		if (selectedItemIds.length === 0 || selectedActions.length === 0) {
-			return;
-		}
-
-		selectedActionsOpen = !selectedActionsOpen;
-		openActionsItemId = null;
+	function toSelectedActionMenuActions(): FloatingActionMenuAction[] {
+		return selectedActions.map((action: SelectableListSelectedAction) => ({
+			label: action.label,
+			ariaLabel: action.ariaLabel,
+			intent: action.intent,
+			disabled: action.disabled || selectedItemIds.length === 0,
+			onSelect: () => action.onSelect(selectedItemIds)
+		}));
 	}
 
-	async function selectAction(action: SelectableListItemAction) {
-		if (action.disabled) {
-			return;
-		}
+	function setSelectedActionsOpen(open: boolean) {
+		selectedActionsOpen = open;
 
-		openActionsItemId = null;
-		await action.onSelect();
+		if (open) {
+			openActionsItemId = null;
+		}
 	}
 
-	async function selectSelectedAction(action: SelectableListSelectedAction) {
-		if (action.disabled || selectedItemIds.length === 0) {
-			return;
-		}
+	function setRowActionsOpen(itemId: string, open: boolean) {
+		openActionsItemId = open ? itemId : null;
 
-		selectedActionsOpen = false;
-		await action.onSelect(selectedItemIds);
+		if (open) {
+			selectedActionsOpen = false;
+		}
 	}
 </script>
 
@@ -161,43 +145,16 @@
 				</th>
 				<th
 					scope="col"
-					class="relative h-12 py-2.5 pr-4 pl-4 text-right align-middle md:pr-5"
-					data-selectable-list-actions
+					class="h-12 py-2.5 pr-4 pl-4 text-right align-middle md:pr-5"
 				>
-					<IconButton
-						variant="ghost"
-						aria-label={selectedActionsAriaLabel}
+					<FloatingActionMenu
+						id="selectable-list-selected-actions"
+						ariaLabel={selectedActionsAriaLabel}
 						disabled={selectedItemIds.length === 0 || selectedActions.length === 0}
-						onclick={toggleSelectedActionsMenu}
-						class="size-7 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
-					>
-						<Ellipsis aria-hidden="true" class="size-3" />
-					</IconButton>
-					{#if selectedActionsOpen}
-						<div
-							class="absolute top-11 right-4 z-20 min-w-32 overflow-hidden rounded-sm border border-zinc-200 bg-white py-1 text-left shadow-lg shadow-zinc-950/5 md:right-5"
-						>
-							{#each selectedActions as action}
-								<button
-									type="button"
-									class={cn(
-										'flex h-8 w-full items-center gap-2 px-2.5 text-left text-[0.72rem] font-normal transition-colors disabled:cursor-default disabled:opacity-50',
-										action.intent === 'destructive'
-											? 'text-red-700 hover:bg-red-50'
-											: 'text-zinc-700 hover:bg-zinc-50'
-									)}
-									aria-label={action.ariaLabel ?? action.label}
-									disabled={action.disabled}
-									onclick={() => selectSelectedAction(action)}
-								>
-									{#if action.intent === 'destructive'}
-										<Trash2 aria-hidden="true" class="size-3.5" />
-									{/if}
-									<span class="truncate">{action.label}</span>
-								</button>
-							{/each}
-						</div>
-					{/if}
+						actions={toSelectedActionMenuActions()}
+						bind:open={selectedActionsOpen}
+						onOpenChange={setSelectedActionsOpen}
+					/>
 				</th>
 			</tr>
 		</thead>
@@ -259,43 +216,16 @@
 					</td>
 
 					<td
-						class="relative h-14 py-2.5 pr-4 pl-4 text-right align-middle md:pr-5"
-						data-selectable-list-actions
+						class="h-14 py-2.5 pr-4 pl-4 text-right align-middle md:pr-5"
 					>
-						<IconButton
-							variant="ghost"
-							aria-label={item.actionsAriaLabel ?? rowActionsAriaLabel}
+						<FloatingActionMenu
+							id={`selectable-list-${item.id}-actions`}
+							ariaLabel={item.actionsAriaLabel ?? rowActionsAriaLabel}
 							disabled={!item.actions?.length}
-							onclick={() => toggleActionsMenu(item.id)}
-							class="size-7 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
-						>
-							<Ellipsis aria-hidden="true" class="size-3" />
-						</IconButton>
-						{#if openActionsItemId === item.id && item.actions?.length}
-							<div
-								class="absolute top-11 right-4 z-20 min-w-32 overflow-hidden rounded-sm border border-zinc-200 bg-white py-1 text-left shadow-lg shadow-zinc-950/5 md:right-5"
-							>
-								{#each item.actions as action}
-									<button
-										type="button"
-										class={cn(
-											'flex h-8 w-full items-center gap-2 px-2.5 text-left text-[0.72rem] font-normal transition-colors disabled:cursor-default disabled:opacity-50',
-											action.intent === 'destructive'
-												? 'text-red-700 hover:bg-red-50'
-												: 'text-zinc-700 hover:bg-zinc-50'
-										)}
-										aria-label={action.ariaLabel ?? action.label}
-										disabled={action.disabled}
-										onclick={() => selectAction(action)}
-									>
-										{#if action.intent === 'destructive'}
-											<Trash2 aria-hidden="true" class="size-3.5" />
-										{/if}
-										<span class="truncate">{action.label}</span>
-									</button>
-								{/each}
-							</div>
-						{/if}
+							actions={toRowActionMenuActions(item.actions)}
+							open={openActionsItemId === item.id}
+							onOpenChange={(open) => setRowActionsOpen(item.id, open)}
+						/>
 					</td>
 				</tr>
 			{/each}

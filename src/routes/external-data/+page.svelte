@@ -15,7 +15,7 @@
 		title: 'No external data found',
 		description: 'Connect external data to enrich your notifications.',
 		details:
-			'External data includes the outside systems and shared datasets your team uses to add context to notifications. Connect external sources, then use them to build alerts that reflect activity beyond your internal tools.',
+			'Overbase can pull from any external APIs or data sources you purchase. Connect external sources, then use them to power your notifications',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Add external data'
 	}}

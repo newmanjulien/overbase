@@ -1,5 +1,7 @@
 export { default as Button } from './Button.svelte';
 export { default as FilterPillGroup } from './FilterPillGroup.svelte';
+export { default as FloatingActionMenu } from './FloatingActionMenu.svelte';
+export type { FloatingActionMenuAction } from './FloatingActionMenu.svelte';
 export { default as FloatingTooltip } from './FloatingTooltip.svelte';
 export type { FloatingTooltipPlacement } from './FloatingTooltip.svelte';
 export { default as HelpTooltip } from './HelpTooltip.svelte';

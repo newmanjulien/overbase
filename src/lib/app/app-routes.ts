@@ -1,4 +1,13 @@
-import { Bell, ContactRound, Database, Globe2, KeyRound, UserPlus, UsersRound, Workflow } from "lucide-svelte";
+import {
+  Bell,
+  ContactRound,
+  Database,
+  Globe2,
+  KeyRound,
+  UserPlus,
+  UsersRound,
+  Workflow,
+} from "lucide-svelte";
 
 type NavIcon = typeof Workflow;
 
@@ -7,7 +16,7 @@ export const APP_ROUTE_IDS = [
   "builder",
   "data-sources",
   "external-data",
-  "team-members",
+  "team",
   "invite-partners",
   "manage-partners",
   "data-access",
@@ -55,9 +64,9 @@ export const APP_ROUTE_REGISTRY = {
     navLabel: "External data",
     icon: Globe2,
   },
-  "team-members": {
-    href: "/team-members",
-    navLabel: "Team members",
+  team: {
+    href: "/team",
+    navLabel: "Team",
     icon: ContactRound,
   },
   "invite-partners": {
@@ -87,7 +96,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
   {
     id: "main",
     heading: "My team",
-    routeIds: ["data-sources", "external-data", "team-members"],
+    routeIds: ["data-sources", "external-data", "team"],
     desktopSectionClass: "pt-6",
     mobileSectionClass: "pt-6",
     showCollapsedDivider: true,
