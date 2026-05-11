@@ -47,12 +47,12 @@
 		cn(
 			'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-sm transition-colors disabled:cursor-default',
 			size === 'sm'
-				? 'h-8 gap-1.5 px-3 text-[0.74rem] font-medium md:px-3.5'
+				? 'h-8 gap-1.5 px-2.5 text-[0.74rem] font-medium'
 				: 'size-8 p-0',
 			variant === 'primary' &&
 				'bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-zinc-300 disabled:text-zinc-500',
 			variant === 'secondary' &&
-				'border border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50 disabled:opacity-55',
+				'border border-zinc-200/60 bg-white text-zinc-800 hover:bg-zinc-50 disabled:opacity-55',
 			variant === 'ghost' &&
 				'text-zinc-700 hover:bg-zinc-100 disabled:opacity-55 disabled:hover:bg-transparent',
 			className

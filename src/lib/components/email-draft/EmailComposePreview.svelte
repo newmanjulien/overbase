@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { EmailBodyBlock, EmailDraft } from '@overbase/builder-sdk/email';
-	import EmailComposeDocument from '$lib/features/builder/email/EmailComposeDocument.svelte';
-	import { formatRecipients } from '$lib/features/builder/email/email-editable-draft';
-	import EmailAttachmentCard from '$lib/features/builder/email/EmailAttachmentCard.svelte';
+	import EmailComposeDocument from '$lib/components/email-draft/EmailComposeDocument.svelte';
+	import { formatRecipients } from '$lib/components/email-draft/email-editable-draft';
+	import EmailAttachmentCard from '$lib/components/email-draft/EmailAttachmentCard.svelte';
 
 	type Props = {
 		draft: EmailDraft;

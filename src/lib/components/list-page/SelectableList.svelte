@@ -1,7 +1,9 @@
-<script lang="ts">
+<script lang="ts" generics="Item extends SelectableListItem">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import type { Snippet } from 'svelte';
 	import { Check, Minus } from 'lucide-svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
-	import PersonAvatar from '$lib/components/chrome/shared/PersonAvatar.svelte';
 	import { FloatingActionMenu, type FloatingActionMenuAction } from '$lib/components/ui';
 	import type {
 		SelectableListItem,
@@ -10,7 +12,8 @@
 	} from '$lib/components/list-page/types';
 
 	type Props = {
-		items: SelectableListItem[];
+		items: Item[];
+		rowCells: Snippet<[Item]>;
 		selectAllLabel?: string;
 		selectAllAriaLabel?: string;
 		selectedActionsAriaLabel?: string;
@@ -20,6 +23,7 @@
 
 	let {
 		items,
+		rowCells,
 		selectAllLabel = 'Select all',
 		selectAllAriaLabel = 'Select all items',
 		selectedActionsAriaLabel = 'Selected item actions',
@@ -105,134 +109,121 @@
 			selectedActionsOpen = false;
 		}
 	}
+
+	function handleRowClick(item: Item, event: MouseEvent) {
+		if (!item.href) {
+			return;
+		}
+
+		const target = event.target;
+
+		if (target instanceof Element && target.closest('a, button, input, label')) {
+			return;
+		}
+
+		void goto(resolve(item.href as '/'));
+	}
 </script>
 
+{#snippet itemCells(item: Item)}
+	<label class="flex size-3.5 shrink-0 items-center">
+		<input
+			type="checkbox"
+			class="peer sr-only"
+			checked={isSelected(item.id)}
+			aria-label={item.selectAriaLabel ?? 'Select item'}
+			onchange={() => toggleItem(item.id)}
+		/>
+		<span
+			class={cn(
+				'flex size-3.5 shrink-0 items-center justify-center rounded border border-zinc-300/70 bg-white text-white transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-zinc-300',
+				isSelected(item.id) && 'border-zinc-950 bg-zinc-950'
+			)}
+			aria-hidden="true"
+		>
+			{#if isSelected(item.id)}
+				<Check class="size-2.5 stroke-[2.5]" />
+			{/if}
+		</span>
+	</label>
+
+	{@render rowCells(item)}
+
+	<div class="justify-self-end">
+		<FloatingActionMenu
+			id={`selectable-list-${item.id}-actions`}
+			ariaLabel={item.actionsAriaLabel ?? rowActionsAriaLabel}
+			disabled={!item.actions?.length}
+			actions={toRowActionMenuActions(item.actions)}
+			open={openActionsItemId === item.id}
+			onOpenChange={(open) => setRowActionsOpen(item.id, open)}
+		/>
+	</div>
+{/snippet}
+
 <div class="bg-white">
-	<table class="w-full table-auto border-collapse">
-		<colgroup>
-			<col class="w-full" />
-			<col class="hidden sm:table-column" />
-			<col class="w-9" />
-			<col class="w-7" />
-		</colgroup>
-		<thead class="border-b border-zinc-200/70 bg-zinc-50">
-			<tr>
-				<th
-					colspan="3"
-					scope="colgroup"
-					class="h-12 py-2.5 pr-0 pl-4 text-left align-middle font-normal md:pl-5"
+	<div class="border-b border-zinc-200/70 bg-zinc-50">
+		<div
+			class="grid min-h-12 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 py-2.5 pr-4 pl-4 md:pr-5 md:pl-5"
+		>
+			<label class="col-span-2 flex min-w-0 items-center gap-3.5 text-[0.7rem] font-normal text-zinc-700">
+				<input
+					bind:this={selectAllCheckbox}
+					type="checkbox"
+					class="peer sr-only"
+					checked={allSelected}
+					aria-label={selectAllAriaLabel}
+					onchange={toggleAllItems}
+				/>
+				<span
+					class={cn(
+						'flex size-3.5 shrink-0 items-center justify-center rounded border border-zinc-300/70 bg-white text-white transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-zinc-300',
+						(allSelected || someSelected) && 'border-zinc-950 bg-zinc-950'
+					)}
+					aria-hidden="true"
 				>
-					<label class="flex min-w-0 items-center gap-3.5 text-[0.7rem] font-normal text-zinc-700">
-						<input
-							bind:this={selectAllCheckbox}
-							type="checkbox"
-							class="peer sr-only"
-							checked={allSelected}
-							aria-label={selectAllAriaLabel}
-							onchange={toggleAllItems}
-						/>
-						<span
-							class={cn(
-								'flex size-3.5 shrink-0 items-center justify-center rounded border border-zinc-300/70 bg-white text-white transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-zinc-300',
-								(allSelected || someSelected) && 'border-zinc-950 bg-zinc-950'
-							)}
-							aria-hidden="true"
-						>
-							{#if allSelected}
-								<Check class="size-2.5 stroke-[2.5]" />
-							{:else if someSelected}
-								<Minus class="size-2.5 stroke-[2.5]" />
-							{/if}
-						</span>
-						<span class="truncate">{selectAllLabel}</span>
-					</label>
-				</th>
-				<th
-					scope="col"
-					class="h-12 py-2.5 pr-4 pl-4 text-right align-middle md:pr-5"
+					{#if allSelected}
+						<Check class="size-2.5 stroke-[2.5]" />
+					{:else if someSelected}
+						<Minus class="size-2.5 stroke-[2.5]" />
+					{/if}
+				</span>
+				<span class="truncate">{selectAllLabel}</span>
+			</label>
+
+			<div class="justify-self-end">
+				<FloatingActionMenu
+					id="selectable-list-selected-actions"
+					ariaLabel={selectedActionsAriaLabel}
+					disabled={selectedItemIds.length === 0 || selectedActions.length === 0}
+					actions={toSelectedActionMenuActions()}
+					bind:open={selectedActionsOpen}
+					onOpenChange={setSelectedActionsOpen}
+				/>
+			</div>
+		</div>
+	</div>
+
+	<div role="list" class="divide-y divide-zinc-200/70 bg-white">
+		{#each items as item (item.id)}
+			{#if item.href}
+				<!-- The nested content owns the real link; this preserves pointer row-click without making the row a fake interactive parent around checkbox/menu controls. -->
+				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+				<div
+					role="listitem"
+					class="grid min-h-14 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 px-4 py-2.5 transition-colors hover:bg-zinc-50 sm:grid-cols-[auto_minmax(0,1fr)_max-content_auto_auto] sm:gap-x-4 md:px-5"
+					onclick={(event) => handleRowClick(item, event)}
 				>
-					<FloatingActionMenu
-						id="selectable-list-selected-actions"
-						ariaLabel={selectedActionsAriaLabel}
-						disabled={selectedItemIds.length === 0 || selectedActions.length === 0}
-						actions={toSelectedActionMenuActions()}
-						bind:open={selectedActionsOpen}
-						onOpenChange={setSelectedActionsOpen}
-					/>
-				</th>
-			</tr>
-		</thead>
-		<tbody class="divide-y divide-zinc-200/70 bg-white">
-			{#each items as item (item.id)}
-				<tr class="transition-colors hover:bg-zinc-50">
-					<th
-						scope="row"
-						class="h-14 min-w-0 py-2.5 pr-0 pl-4 text-left align-middle font-normal md:pl-5"
-					>
-						<label class="flex min-w-0 items-center gap-3.5">
-							<input
-								type="checkbox"
-								class="peer sr-only"
-								checked={isSelected(item.id)}
-								aria-label={item.selectAriaLabel ?? `Select ${item.title}`}
-								onchange={() => toggleItem(item.id)}
-							/>
-							<span
-								class={cn(
-									'flex size-3.5 shrink-0 items-center justify-center rounded border border-zinc-300/70 bg-white text-white transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-zinc-300',
-									isSelected(item.id) && 'border-zinc-950 bg-zinc-950'
-								)}
-								aria-hidden="true"
-							>
-								{#if isSelected(item.id)}
-									<Check class="size-2.5 stroke-[2.5]" />
-								{/if}
-							</span>
-							<span class="flex min-w-0 flex-col gap-0.5">
-								<span class="truncate text-[0.7rem] text-zinc-950">
-									{item.title}
-								</span>
-								{#if item.descriptionLabel}
-									<span class={cn('truncate text-[0.72rem] text-zinc-400', item.descriptionLabelClass)}>
-										{item.descriptionLabel}
-									</span>
-								{/if}
-							</span>
-						</label>
-					</th>
-
-					<td class="hidden h-14 whitespace-nowrap py-2.5 pr-0 pl-4 align-middle text-[0.72rem] text-zinc-400 sm:table-cell">
-						{#if item.metaLabel}
-							{item.metaLabel}
-						{/if}
-					</td>
-
-					<td class="h-14 py-2.5 pr-0 pl-4 align-middle">
-						{#if item.creator}
-							<PersonAvatar
-								person={item.creator}
-								size={22}
-								class="ring-1 ring-zinc-200/70"
-							/>
-						{:else}
-							<span aria-hidden="true" class="block size-5.5"></span>
-						{/if}
-					</td>
-
-					<td
-						class="h-14 py-2.5 pr-4 pl-4 text-right align-middle md:pr-5"
-					>
-						<FloatingActionMenu
-							id={`selectable-list-${item.id}-actions`}
-							ariaLabel={item.actionsAriaLabel ?? rowActionsAriaLabel}
-							disabled={!item.actions?.length}
-							actions={toRowActionMenuActions(item.actions)}
-							open={openActionsItemId === item.id}
-							onOpenChange={(open) => setRowActionsOpen(item.id, open)}
-						/>
-					</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
+					{@render itemCells(item)}
+				</div>
+			{:else}
+				<div
+					role="listitem"
+					class="grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 px-4 py-2.5 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_max-content_auto_auto] sm:gap-x-4 md:px-5"
+				>
+					{@render itemCells(item)}
+				</div>
+			{/if}
+		{/each}
+	</div>
 </div>

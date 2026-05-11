@@ -25,19 +25,35 @@
 		isMobileDrawerOpen: false
 	});
 	const routeTitleState = $state<RouteTitleState>({
-		title: APP_CONFIG.name
+		title: APP_CONFIG.name,
+		onTitleChange: null,
+		actions: null,
+		overflowActions: []
 	});
 	const activeRoute = $derived(getActiveNavRoute(page.url.pathname));
 	const sourceRouteTitle = $derived(page.data.headerTitle ?? activeRoute?.label ?? APP_CONFIG.name);
 	const routeTitleResetKey = $derived(`${page.url.pathname}:${sourceRouteTitle}`);
 	const routeTitleEditable = $derived(Boolean(page.data.headerTitleEditable));
+	const desktopHeaderParent = $derived(page.data.headerParent ?? null);
+	const mobileHeaderParent = $derived(
+		page.data.headerParentVisibility === 'desktopOnly' ? null : desktopHeaderParent
+	);
 	let customRouteTitle = $state<string | null>(null);
 	let currentRouteTitleResetKey = $state('');
 
 	const routeTitle = $derived(customRouteTitle ?? sourceRouteTitle);
 
-	function handleRouteTitleChange(title: string) {
+	async function handleRouteTitleChange(title: string) {
+		const previousTitle = routeTitleState.title;
 		customRouteTitle = title;
+		routeTitleState.title = title;
+
+		try {
+			await routeTitleState.onTitleChange?.(title);
+		} catch {
+			customRouteTitle = previousTitle;
+			routeTitleState.title = previousTitle;
+		}
 	}
 
 	$effect(() => {
@@ -72,16 +88,20 @@
 		>
 			<MobileDrawer currentPathname={page.url.pathname} />
 			<MobileHeader
-				title={routeTitle}
+				title={routeTitleState.title}
 				titleEditable={routeTitleEditable}
+				headerParent={mobileHeaderParent}
 				onTitleChange={handleRouteTitleChange}
 			/>
 
 			<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 				<DesktopHeader
-					title={routeTitle}
+					title={routeTitleState.title}
 					titleEditable={routeTitleEditable}
+					headerParent={desktopHeaderParent}
 					onTitleChange={handleRouteTitleChange}
+					actions={routeTitleState.actions}
+					overflowActions={routeTitleState.overflowActions}
 				/>
 
 				<div class="dashboard-main-viewport min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">

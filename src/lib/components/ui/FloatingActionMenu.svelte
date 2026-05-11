@@ -187,7 +187,7 @@
 			class="fixed z-50 min-w-32 overflow-hidden rounded-sm border border-zinc-200 bg-white py-1 text-left shadow-lg shadow-zinc-950/5"
 			style={panelStyle}
 		>
-			{#each actions as action}
+			{#each actions as action, index (`${action.label}-${index}`)}
 				<button
 					type="button"
 					role="menuitem"

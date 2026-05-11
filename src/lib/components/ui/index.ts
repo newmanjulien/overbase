@@ -6,4 +6,7 @@ export { default as FloatingTooltip } from './FloatingTooltip.svelte';
 export type { FloatingTooltipPlacement } from './FloatingTooltip.svelte';
 export { default as HelpTooltip } from './HelpTooltip.svelte';
 export { default as IconButton } from './IconButton.svelte';
+export { default as InfoBar } from './InfoBar.svelte';
+export { default as InfoBarAction } from './InfoBarAction.svelte';
+export { default as ModalShell } from './ModalShell.svelte';
 export type { ButtonSize, ButtonType, ButtonVariant } from './types';

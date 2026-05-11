@@ -10,5 +10,7 @@ export type {
 	EmptyListStateConfig,
 	ListIcon,
 	ListToolbarConfig,
+	SelectableListItemAction,
+	SelectableListSelectedAction,
 	SelectableListItem
 } from './types';

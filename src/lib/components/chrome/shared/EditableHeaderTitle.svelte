@@ -121,7 +121,7 @@
 				)}
 				onclick={beginEditing}
 			>
-				<Pencil class="size-3" strokeWidth={2.5} />
+				<Pencil class="size-3" strokeWidth={2.25} />
 			</button>
 		{/if}
 	{/if}

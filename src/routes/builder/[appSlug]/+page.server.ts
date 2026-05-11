@@ -24,7 +24,11 @@ export const load: PageServerLoad = async ({ params }) => {
 					}
 				: null,
 			headerTitle: app.title,
-			headerTitleEditable: true
+			headerTitleEditable: true,
+			headerParent: {
+				label: 'Notification builder',
+				href: '/builder'
+			}
 		};
 	} catch (loadError) {
 		error(503, loadError instanceof Error ? loadError.message : 'Builder app unavailable.');

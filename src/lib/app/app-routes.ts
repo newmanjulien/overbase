@@ -3,6 +3,7 @@ import {
   ContactRound,
   Database,
   Globe2,
+  Hammer,
   KeyRound,
   UserPlus,
   UsersRound,
@@ -51,7 +52,7 @@ export const APP_ROUTE_REGISTRY = {
   builder: {
     href: "/builder",
     navLabel: "Notification builder",
-    icon: Workflow,
+    icon: Hammer,
     hideOnMobile: true,
   },
   "data-sources": {

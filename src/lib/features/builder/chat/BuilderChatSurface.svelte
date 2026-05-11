@@ -42,13 +42,6 @@
 	let scrollElement = $state<HTMLElement | null>(null);
 	let contentElement = $state<HTMLElement | null>(null);
 
-	const hasActiveAssistant = $derived(
-		messages.some(
-			(message) =>
-				message.role === 'assistant' &&
-				(message.status === 'pending' || message.status === 'streaming')
-		)
-	);
 	const composerReadOnly = $derived(
 		Boolean(queryError) || Boolean(runError) || !canEditDraft
 	);
@@ -146,7 +139,7 @@
 <section class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white p-2">
 	<div bind:this={scrollElement} class="relative min-h-0 flex-1 overflow-y-auto px-3 py-6 md:px-5">
 		<div bind:this={contentElement} class="mx-auto flex w-full max-w-3xl flex-col gap-4">
-			<p class="w-full text-center text-xs leading-snug text-zinc-400">
+			<p class="w-full pb-1.5 text-center text-xs leading-snug text-zinc-400">
 				Explain the emails you want your team to receive
 			</p>
 

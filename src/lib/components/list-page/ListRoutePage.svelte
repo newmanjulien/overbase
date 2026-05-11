@@ -17,6 +17,7 @@
 		class?: string;
 		contentClass?: string;
 		children?: Snippet;
+		footer?: Snippet;
 	};
 
 	let {
@@ -25,14 +26,17 @@
 		hasItems = false,
 		class: className = '',
 		contentClass = '',
-		children
+		children,
+		footer: footerContent
 	}: Props = $props();
+
+	let isEmpty = $derived(!hasItems);
 </script>
 
 <PageShell>
 	<ListPage class={className} {contentClass}>
 		{#snippet toolbar()}
-			<ListToolbar {...toolbarConfig} />
+			<ListToolbar {...toolbarConfig} hideSecondaryControlsOnMobile={isEmpty} />
 		{/snippet}
 
 		{#if hasItems}
@@ -48,9 +52,10 @@
 		{/if}
 
 		{#snippet footer()}
-			{#if !hasItems && empty.nextSteps}
+			{#if isEmpty && empty.nextSteps}
 				<EmptyListNextSteps message={empty.nextSteps} />
 			{/if}
+			{@render footerContent?.()}
 		{/snippet}
 	</ListPage>
 </PageShell>

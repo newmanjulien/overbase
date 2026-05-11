@@ -3,9 +3,9 @@
 		addEditableSpreadsheetAttachment,
 		removeEditableSpreadsheetAttachment,
 		type EditableEmailDraft
-	} from '$lib/features/builder/email/email-editable-draft';
-	import EmailAttachmentCard from '$lib/features/builder/email/EmailAttachmentCard.svelte';
-	import EmailComposeDocument from '$lib/features/builder/email/EmailComposeDocument.svelte';
+	} from '$lib/components/email-draft/email-editable-draft';
+	import EmailAttachmentCard from '$lib/components/email-draft/EmailAttachmentCard.svelte';
+	import EmailComposeDocument from '$lib/components/email-draft/EmailComposeDocument.svelte';
 
 	type Props = {
 		editableDraft: EditableEmailDraft;

@@ -8,7 +8,7 @@
 	import BuilderChatError from '$lib/features/builder/chat/BuilderChatError.svelte';
 	import BuilderChatSurface from '$lib/features/builder/chat/BuilderChatSurface.svelte';
 	import CustomEmailRightPanel from '$lib/features/builder/canvas/CustomEmailRightPanel.svelte';
-	import SplitPane from '$lib/features/builder/canvas/SplitPane.svelte';
+	import SplitPane from '$lib/components/layout/split-pane/SplitPane.svelte';
 	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder/canvas/split-pane';
 	import NativeBuilderLeaveGuard from '$lib/features/builder/navigation/NativeBuilderLeaveGuard.svelte';
 	import {

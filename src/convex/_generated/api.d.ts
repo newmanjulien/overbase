@@ -20,8 +20,11 @@ import type * as builderSessionMaintenance from "../builderSessionMaintenance.js
 import type * as builderSessionOutputEvents from "../builderSessionOutputEvents.js";
 import type * as builderSessions from "../builderSessions.js";
 import type * as crons from "../crons.js";
+import type * as devSeed from "../devSeed.js";
 import type * as health from "../health.js";
+import type * as notificationReadiness from "../notificationReadiness.js";
 import type * as notifications from "../notifications.js";
+import type * as teamRoster from "../teamRoster.js";
 
 import type {
   ApiFromModules,
@@ -42,8 +45,11 @@ declare const fullApi: ApiFromModules<{
   builderSessionOutputEvents: typeof builderSessionOutputEvents;
   builderSessions: typeof builderSessions;
   crons: typeof crons;
+  devSeed: typeof devSeed;
   health: typeof health;
+  notificationReadiness: typeof notificationReadiness;
   notifications: typeof notifications;
+  teamRoster: typeof teamRoster;
 }>;
 
 /**

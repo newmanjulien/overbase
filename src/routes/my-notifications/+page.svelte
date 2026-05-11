@@ -8,7 +8,9 @@
 		ListRoutePage,
 		SelectableList
 	} from '$lib/components/list-page';
-	import type { SelectableListItem } from '$lib/components/list-page';
+	import { InfoBar } from '$lib/components/ui';
+	import NotificationListRow from './NotificationListRow.svelte';
+	import type { NotificationListItem } from './notification-list';
 
 	const dateFormatter = new Intl.DateTimeFormat(undefined, {
 		month: 'short',
@@ -18,7 +20,7 @@
 	const client = useConvexClient();
 	const notificationsQuery = useQuery(api.notifications.listNotifications);
 	let deletingNotificationIds = $state<Id<'notifications'>[]>([]);
-	let statusUpdatingNotificationIds = $state<Id<'notifications'>[]>([]);
+	let pausingNotificationIds = $state<Id<'notifications'>[]>([]);
 	let actionError = $state<string | null>(null);
 	const notificationItems = $derived((notificationsQuery.data ?? []).map(toNotificationItem));
 	const listState = $derived(
@@ -45,18 +47,17 @@
 		return deletingNotificationIds.includes(notificationId);
 	}
 
-	function isStatusUpdatingNotification(notificationId: Id<'notifications'>) {
-		return statusUpdatingNotificationIds.includes(notificationId);
+	function isPausingNotification(notificationId: Id<'notifications'>) {
+		return pausingNotificationIds.includes(notificationId);
 	}
 
-	function getNotificationsWithStatus(
-		notificationIds: Id<'notifications'>[],
-		status: NotificationListRecord['status']
-	) {
+	function getActiveNotificationIds(notificationIds: Id<'notifications'>[]) {
 		const notificationIdSet = new Set(notificationIds);
 
 		return (notificationsQuery.data ?? [])
-			.filter((notification) => notificationIdSet.has(notification.id) && notification.status === status)
+			.filter(
+				(notification) => notificationIdSet.has(notification.id) && notification.status === 'active'
+			)
 			.map((notification) => notification.id);
 	}
 
@@ -81,80 +82,73 @@
 		}
 	}
 
-	async function setNotificationStatuses(
-		notificationIds: Id<'notifications'>[],
-		status: NotificationListRecord['status']
-	) {
-		const idsToUpdate = getNotificationsWithStatus(
-			notificationIds,
-			status === 'active' ? 'paused' : 'active'
-		).filter((id) => !isStatusUpdatingNotification(id) && !isDeletingNotification(id));
+	async function pauseNotifications(notificationIds: Id<'notifications'>[]) {
+		const idsToPause = getActiveNotificationIds(notificationIds).filter(
+			(id) => !isPausingNotification(id) && !isDeletingNotification(id)
+		);
 
-		if (idsToUpdate.length === 0) {
+		if (idsToPause.length === 0) {
 			return;
 		}
 
 		actionError = null;
-		statusUpdatingNotificationIds = [...statusUpdatingNotificationIds, ...idsToUpdate];
+		pausingNotificationIds = [...pausingNotificationIds, ...idsToPause];
 
 		try {
-			await client.mutation(api.notifications.setNotificationStatuses, {
-				notificationIds: idsToUpdate,
-				status
-			});
+			for (const notificationId of idsToPause) {
+				await client.mutation(api.notifications.setNotificationStatus, {
+					notificationId,
+					status: 'paused'
+				});
+			}
 		} catch (error) {
-			actionError =
-				error instanceof Error ? error.message : 'Could not update notification statuses.';
+			actionError = error instanceof Error ? error.message : 'Could not pause notifications.';
 		} finally {
-			statusUpdatingNotificationIds = statusUpdatingNotificationIds.filter(
-				(id) => !idsToUpdate.includes(id)
-			);
+			pausingNotificationIds = pausingNotificationIds.filter((id) => !idsToPause.includes(id));
 		}
 	}
 
-	function selectedNotificationsIncludeStatus(
-		selectedNotificationIds: string[],
-		status: NotificationListRecord['status']
-	) {
-		return getNotificationsWithStatus(selectedNotificationIds as Id<'notifications'>[], status).length > 0;
+	function selectedNotificationsIncludeActive(selectedNotificationIds: string[]) {
+		return getActiveNotificationIds(selectedNotificationIds as Id<'notifications'>[]).length > 0;
 	}
 
-	function toNotificationItem(notification: NotificationListRecord): SelectableListItem {
+	function toNotificationItem(notification: NotificationListRecord): NotificationListItem {
 		const isDeleting = isDeletingNotification(notification.id);
-		const isStatusUpdating = isStatusUpdatingNotification(notification.id);
-		const actionsDisabled = isDeleting || isStatusUpdating;
-		const targetStatus = notification.status === 'active' ? 'paused' : 'active';
+		const isPausing = isPausingNotification(notification.id);
+		const actionsDisabled = isDeleting || isPausing;
+		const actions: NotificationListItem['actions'] = [
+			{
+				label: isDeleting ? 'Deleting...' : 'Delete',
+				ariaLabel: `Delete ${notification.title}`,
+				intent: 'destructive' as const,
+				disabled: actionsDisabled,
+				onSelect: () => deleteNotifications([notification.id])
+			}
+		];
+
+		if (notification.status === 'active') {
+			actions.unshift({
+				label: isPausing ? 'Updating...' : 'Pause',
+				ariaLabel: `Pause ${notification.title}`,
+				disabled: actionsDisabled,
+				onSelect: () => pauseNotifications([notification.id])
+			});
+		}
 
 		return {
 			id: notification.id,
 			title: notification.title,
-			descriptionLabel: formatStatus(notification.status),
-			descriptionLabelClass: getStatusLabelClass(notification.status),
-			metaLabel: dateFormatter.format(new Date(notification.createdAt)),
+			href: `/my-notifications/${notification.id}`,
+			selectAriaLabel: `Select ${notification.title}`,
+			statusLabel: formatStatus(notification.status),
+			statusLabelClass: getStatusLabelClass(notification.status),
+			createdAtLabel: dateFormatter.format(new Date(notification.createdAt)),
 			creator: {
 				name: notification.createdByName,
 				avatar: ''
 			},
 			actionsAriaLabel: 'Notification actions',
-			actions: [
-				{
-					label: isStatusUpdating
-						? 'Updating...'
-						: notification.status === 'active'
-							? 'Pause'
-							: 'Unpause',
-					ariaLabel: `${notification.status === 'active' ? 'Pause' : 'Unpause'} ${notification.title}`,
-					disabled: actionsDisabled,
-					onSelect: () => setNotificationStatuses([notification.id], targetStatus)
-				},
-				{
-					label: isDeleting ? 'Deleting...' : 'Delete',
-					ariaLabel: `Delete ${notification.title}`,
-					intent: 'destructive',
-					disabled: actionsDisabled,
-					onSelect: () => deleteNotifications([notification.id])
-				}
-			]
+			actions
 		};
 	}
 </script>
@@ -196,22 +190,13 @@
 			selectedActionsAriaLabel="Selected notification actions"
 			selectedActions={[
 				{
-					label: statusUpdatingNotificationIds.length > 0 ? 'Updating...' : 'Pause selected',
+					label: pausingNotificationIds.length > 0 ? 'Updating...' : 'Pause selected',
 					ariaLabel: 'Pause selected notifications',
 					disabled: (selectedNotificationIds) =>
-						statusUpdatingNotificationIds.length > 0 ||
-						!selectedNotificationsIncludeStatus(selectedNotificationIds, 'active'),
+						pausingNotificationIds.length > 0 ||
+						!selectedNotificationsIncludeActive(selectedNotificationIds),
 					onSelect: (selectedNotificationIds) =>
-						setNotificationStatuses(selectedNotificationIds as Id<'notifications'>[], 'paused')
-				},
-				{
-					label: statusUpdatingNotificationIds.length > 0 ? 'Updating...' : 'Unpause selected',
-					ariaLabel: 'Unpause selected notifications',
-					disabled: (selectedNotificationIds) =>
-						statusUpdatingNotificationIds.length > 0 ||
-						!selectedNotificationsIncludeStatus(selectedNotificationIds, 'paused'),
-					onSelect: (selectedNotificationIds) =>
-						setNotificationStatuses(selectedNotificationIds as Id<'notifications'>[], 'active')
+						pauseNotifications(selectedNotificationIds as Id<'notifications'>[])
 				},
 				{
 					label: deletingNotificationIds.length > 0 ? 'Deleting...' : 'Delete',
@@ -223,6 +208,18 @@
 				}
 			]}
 			rowActionsAriaLabel="Notification actions"
-		/>
+		>
+			{#snippet rowCells(item)}
+				<NotificationListRow {item} />
+			{/snippet}
+		</SelectableList>
 	{/if}
+
+	{#snippet footer()}
+		{#if listState === 'ready'}
+			<InfoBar label="Next steps:">
+				Click on your notification to set the rules for when it should fire and to configure which teammates should receive it
+			</InfoBar>
+		{/if}
+	{/snippet}
 </ListRoutePage>

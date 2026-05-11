@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
-	import SplitPaneHandle from '$lib/features/builder/canvas/SplitPaneHandle.svelte';
-	import { BUILDER_CANVAS_SPLIT } from '$lib/features/builder/canvas/split-pane';
+	import SplitPaneHandle from '$lib/components/layout/split-pane/SplitPaneHandle.svelte';
 
 	type Props = {
 		primary?: Snippet;
@@ -18,12 +17,12 @@
 	let {
 		primary,
 		secondary,
-		minPrimary = BUILDER_CANVAS_SPLIT.minPrimary,
-		minSecondary = BUILDER_CANVAS_SPLIT.minSecondary,
-		defaultRatio = BUILDER_CANVAS_SPLIT.defaultRatio,
-		mobileBreakpoint = BUILDER_CANVAS_SPLIT.mobileBreakpoint,
-		keyboardStep = BUILDER_CANVAS_SPLIT.keyboardStep,
-		handleWidth = BUILDER_CANVAS_SPLIT.handleWidth,
+		minPrimary = 360,
+		minSecondary = 320,
+		defaultRatio = 0.5,
+		mobileBreakpoint = 681,
+		keyboardStep = 24,
+		handleWidth = 1,
 		label = 'Resize panels'
 	}: Props = $props();
 

@@ -1,9 +1,16 @@
 import { getContext, setContext } from 'svelte';
+import type { Snippet } from 'svelte';
+import type { FloatingActionMenuAction } from '$lib/components/ui';
 
 const ROUTE_TITLE_STATE_KEY = Symbol('route-title-state');
 
+export type HeaderParentHref = '/builder' | '/my-notifications';
+
 export type RouteTitleState = {
 	title: string;
+	onTitleChange: ((title: string) => void | Promise<void>) | null;
+	actions: Snippet | null;
+	overflowActions: FloatingActionMenuAction[];
 };
 
 export function provideRouteTitleState(routeTitleState: RouteTitleState) {

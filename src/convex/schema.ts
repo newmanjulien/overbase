@@ -1,6 +1,10 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
-import { builderRunSetup, emailDraftState } from './builderEmailValidators';
+import {
+	builderRunSetup,
+	emailDraft,
+	emailDraftState
+} from './builderEmailValidators';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 
@@ -75,11 +79,36 @@ export default defineSchema({
 			kind: v.literal('customEmail'),
 			builderAppSlug: v.string()
 		}),
+		emailDraft,
+		emailDraftVersion: v.number(),
+		rules: v.array(
+			v.object({
+				id: v.string(),
+				text: v.string()
+			})
+		),
+		teamMemberIds: v.array(v.string()),
 		createdByName: v.string(),
 		createdAt: v.number(),
-		updatedAt: v.number(),
-		publishedFromBuilderSessionId: v.id('builderSessions')
+		updatedAt: v.number()
 	})
-		.index('by_createdAt', ['createdAt'])
-		.index('by_publishedFromBuilderSessionId', ['publishedFromBuilderSessionId'])
+		.index('by_createdAt', ['createdAt']),
+	notificationEmails: defineTable({
+		notificationId: v.id('notifications'),
+		sentAt: v.number(),
+		emailDraft,
+		createdAt: v.number()
+	})
+		.index('by_notification_sentAt', ['notificationId', 'sentAt'])
+		.index('by_notification_createdAt', ['notificationId', 'createdAt']),
+	notificationEmailFeedback: defineTable({
+		notificationId: v.id('notifications'),
+		emailId: v.id('notificationEmails'),
+		likedText: v.string(),
+		improvementText: v.string(),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	})
+		.index('by_notificationId', ['notificationId'])
+		.index('by_emailId', ['emailId'])
 });

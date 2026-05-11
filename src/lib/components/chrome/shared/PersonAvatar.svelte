@@ -9,10 +9,11 @@
 	type Props = {
 		person: PersonAvatarPerson;
 		size?: number;
+		alt?: string;
 		class?: string;
 	};
 
-	let { person, size = 20, class: classProp = '' }: Props = $props();
+	let { person, size = 20, alt, class: classProp = '' }: Props = $props();
 	let failedAvatar = $state<string | null>(null);
 	const showImage = $derived(Boolean(person.avatar) && failedAvatar !== person.avatar);
 </script>
@@ -27,7 +28,7 @@
 	{#if showImage}
 		<img
 			src={person.avatar}
-			alt={`${person.name} avatar`}
+			alt={alt ?? `${person.name} avatar`}
 			class="block h-full w-full object-cover"
 			onerror={() => {
 				failedAvatar = person.avatar;

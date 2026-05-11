@@ -33,14 +33,7 @@ export type EmptyListStateConfig = {
 
 export type SelectableListItem = {
 	id: string;
-	title: string;
-	descriptionLabel?: string;
-	descriptionLabelClass?: string;
-	metaLabel?: string;
-	creator?: {
-		name: string;
-		avatar: string;
-	};
+	href?: `/${string}`;
 	selectAriaLabel?: string;
 	actionsAriaLabel?: string;
 	actions?: SelectableListItemAction[];
