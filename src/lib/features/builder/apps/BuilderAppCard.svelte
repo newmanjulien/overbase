@@ -12,7 +12,7 @@
 
 <a
 	href={resolve('/builder/[appSlug]?fresh=1', { appSlug: app.id })}
-	class="group block w-full rounded-sm text-left outline-none"
+	class="group block w-full rounded-lg p-1.5 text-left outline-none hover:bg-zinc-100/80 focus-visible:bg-zinc-100/80"
 	aria-label={`Start with ${app.title}`}
 >
 	<BuilderAppCardArtwork artwork={app.artwork.card} />

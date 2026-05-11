@@ -28,7 +28,7 @@
 
 <div
 	class={cn(
-		'relative aspect-[1.9/1] w-full overflow-hidden rounded-[0.3rem] transition-transform duration-200 group-hover:scale-[1.01]',
+		'relative aspect-[1.9/1] w-full overflow-hidden rounded-[0.3rem]',
 		toneClass[artwork.tone]
 	)}
 >
