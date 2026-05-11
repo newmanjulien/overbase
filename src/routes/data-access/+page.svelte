@@ -5,16 +5,21 @@
 
 <ListRoutePage
 	toolbar={{
-		searchPlaceholder: 'Search data access...',
-		searchAriaLabel: 'Search data access',
-		filterLabel: 'All access'
+		searchPlaceholder: 'Search partners...',
+		searchAriaLabel: 'Search partners',
+		filterLabel: 'All partners'
 	}}
 	empty={{
 		icon: KeyRound,
-		title: 'No data access found',
-		description: 'Control ecosystem access to shared data.',
-		details:
-			'Data access defines which partners and teams can use shared ecosystem context. Use this area to review access relationships, understand what data is available across connected organizations, and maintain the boundaries that support shared notifications.',
+		title: 'No partners found',
+		description: 'Control what data you share with each partner.',
+		nextSteps: [
+			{ kind: 'link', text: 'Invite', href: '/invite-partners' },
+			{
+				kind: 'text',
+				text: ' your ecosystem partners then control what data they can access in a granular and secure way'
+			}
+		],
 		learnMoreLabel: 'Learn more'
 	}}
 />

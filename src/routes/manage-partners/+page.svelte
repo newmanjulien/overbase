@@ -13,8 +13,13 @@
 		icon: UsersRound,
 		title: 'No partners found',
 		description: 'Manage partners connected to your ecosystem.',
-		details:
-			'Partners represent the external organizations connected to your team. Use this area to keep track of who is part of your ecosystem, understand which relationships are active, and maintain the partner network that supports shared notifications.',
+		nextSteps: [
+			{ kind: 'link', text: 'Invite', href: '/invite-partners' },
+			{
+				kind: 'text',
+				text: ' your ecosystem partners so you can share sales data with them. You will be able to use their data in your notifications and they will be able to use your data in a secure way that you control'
+			}
+		],
 		learnMoreLabel: 'Learn more'
 	}}
 />

@@ -9,10 +9,23 @@ export type ListToolbarConfig = {
 	actionLabel?: string;
 };
 
+export type EmptyListNextStepsPart =
+	| {
+			kind: 'text';
+			text: string;
+	  }
+	| {
+			kind: 'link';
+			text: string;
+			href: `/${string}`;
+	  };
+
+export type EmptyListNextStepsContent = string | readonly EmptyListNextStepsPart[];
+
 export type EmptyListStateConfig = {
 	title: string;
 	description: string;
-	details?: string;
+	nextSteps?: EmptyListNextStepsContent;
 	learnMoreLabel?: string;
 	actionLabel?: string;
 	icon?: ListIcon;

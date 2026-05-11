@@ -14,8 +14,8 @@
 		icon: UserPlus,
 		title: 'No invitations found',
 		description: 'Invite ecosystem partners to share data and collaborate.',
-		details:
-			'Partner invitations let you bring external teams into the workflows that depend on shared context. Once invited, partners can participate in the ecosystem data flows that help Overbase produce more relevant notifications and operational updates.',
+		nextSteps:
+			'Invite your ecosystem partners so you can share sales data with them. You will be able to use their data in your notifications and they will be able to use your data in a secure way that you control',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Invite partner'
 	}}

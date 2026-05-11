@@ -169,8 +169,13 @@
 		icon: Bell,
 		title: 'No notifications found',
 		description: 'Build your first notification with the notification builder.',
-		details:
-			'Build your first notification using the notification builder then you will fine tune, add teammates and manage it here',
+		nextSteps: [
+			{ kind: 'link', text: 'Build', href: '/builder' },
+			{
+				kind: 'text',
+				text: ' your first notification using the notification builder then you will fine tune, add teammates and manage it here'
+			}
+		],
 		learnMoreLabel: 'Learn more'
 	}}
 	hasItems={listState !== 'empty'}

@@ -14,7 +14,7 @@
 		icon: Globe2,
 		title: 'No external data found',
 		description: 'Connect external data to enrich your notifications.',
-		details:
+		nextSteps:
 			'Overbase can pull from any external APIs or data sources you purchase. Connect external sources, then use them to power your notifications',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Add external data'

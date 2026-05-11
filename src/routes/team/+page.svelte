@@ -14,8 +14,8 @@
 		icon: ContactRound,
 		title: 'No teammates found',
 		description: 'Invite teammates who will receive notifications.',
-		details:
-			'Teammates are the people inside your organization who help create notifications, manage data sources, and keep shared workflows moving. Add teammates here to coordinate operational updates across your internal team.',
+		nextSteps:
+			'Teammates are the people inside your organization who receive notifications. Invite teammates here, then add them to the right notifications',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Invite team'
 	}}
