@@ -22,6 +22,7 @@ export type SelectableListItem = {
 	id: string;
 	title: string;
 	descriptionLabel?: string;
+	descriptionLabelClass?: string;
 	metaLabel?: string;
 	creator?: {
 		name: string;
@@ -44,6 +45,6 @@ export type SelectableListSelectedAction = {
 	label: string;
 	ariaLabel?: string;
 	intent?: 'default' | 'destructive';
-	disabled?: boolean;
+	disabled?: boolean | ((selectedItemIds: string[]) => boolean);
 	onSelect: (selectedItemIds: string[]) => void | Promise<void>;
 };

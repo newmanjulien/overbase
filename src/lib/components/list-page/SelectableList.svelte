@@ -81,7 +81,11 @@
 			label: action.label,
 			ariaLabel: action.ariaLabel,
 			intent: action.intent,
-			disabled: action.disabled || selectedItemIds.length === 0,
+			disabled:
+				selectedItemIds.length === 0 ||
+				(typeof action.disabled === 'function'
+					? action.disabled(selectedItemIds)
+					: action.disabled),
 			onSelect: () => action.onSelect(selectedItemIds)
 		}));
 	}
@@ -189,7 +193,7 @@
 									{item.title}
 								</span>
 								{#if item.descriptionLabel}
-									<span class="truncate text-[0.72rem] text-zinc-400">
+									<span class={cn('truncate text-[0.72rem] text-zinc-400', item.descriptionLabelClass)}>
 										{item.descriptionLabel}
 									</span>
 								{/if}

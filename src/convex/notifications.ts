@@ -112,3 +112,20 @@ export const deleteNotifications = mutation({
 		}
 	}
 });
+
+export const setNotificationStatuses = mutation({
+	args: {
+		notificationIds: v.array(v.id('notifications')),
+		status: v.union(v.literal('paused'), v.literal('active'))
+	},
+	handler: async (ctx, { notificationIds, status }) => {
+		const now = Date.now();
+
+		for (const notificationId of notificationIds) {
+			await ctx.db.patch(notificationId, {
+				status,
+				updatedAt: now
+			});
+		}
+	}
+});
