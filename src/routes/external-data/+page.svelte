@@ -1,25 +1,22 @@
 <script lang="ts">
 	import { Globe2 } from 'lucide-svelte';
-	import { EmptyListPage } from '$lib/components/list-page';
-	import PageShell from '$lib/components/layout/PageShell.svelte';
+	import { ListRoutePage } from '$lib/components/list-page';
 </script>
 
-<PageShell>
-	<EmptyListPage
-		toolbar={{
-			searchPlaceholder: 'Search external data...',
-			searchAriaLabel: 'Search external data',
-			filterLabel: 'All types',
-			actionLabel: 'Add external data'
-		}}
-		empty={{
-			icon: Globe2,
-			title: 'No external data found',
-			description: 'Connect external data to enrich your notifications.',
-			details:
-				'External data includes the outside systems and shared datasets your team uses to add context to notifications. Connect external sources, then use them to build alerts that reflect activity beyond your internal tools.',
-			learnMoreLabel: 'Learn more',
-			actionLabel: 'Add external data'
-		}}
-	/>
-</PageShell>
+<ListRoutePage
+	toolbar={{
+		searchPlaceholder: 'Search external data...',
+		searchAriaLabel: 'Search external data',
+		filterLabel: 'All types',
+		actionLabel: 'Add external data'
+	}}
+	empty={{
+		icon: Globe2,
+		title: 'No external data found',
+		description: 'Connect external data to enrich your notifications.',
+		details:
+			'External data includes the outside systems and shared datasets your team uses to add context to notifications. Connect external sources, then use them to build alerts that reflect activity beyond your internal tools.',
+		learnMoreLabel: 'Learn more',
+		actionLabel: 'Add external data'
+	}}
+/>

@@ -17,3 +17,16 @@ export type EmptyListStateConfig = {
 	actionLabel?: string;
 	icon?: ListIcon;
 };
+
+export type SelectableListItem = {
+	id: string;
+	title: string;
+	descriptionLabel?: string;
+	metaLabel?: string;
+	creator?: {
+		name: string;
+		avatar: string;
+	};
+	selectAriaLabel?: string;
+	actionsAriaLabel?: string;
+};

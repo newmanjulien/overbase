@@ -16,8 +16,8 @@
 <Button
 	variant={tone}
 	class={[
-		'text-[0.76rem] font-normal md:text-[0.78rem]',
-		tone === 'secondary' && 'text-zinc-950',
+		'text-[0.72rem] font-normal md:text-[0.74rem]',
+		tone === 'secondary' && 'border-zinc-200/70 text-zinc-950',
 		className
 	]}
 >

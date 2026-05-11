@@ -19,11 +19,11 @@
 	}: Props = $props();
 </script>
 
-<div class={cn('mx-auto flex min-h-full w-full max-w-172 flex-col gap-3 pb-12', className)}>
+<div class={cn('mx-auto flex min-h-full w-full max-w-320 flex-col gap-3 pb-12', className)}>
 	{@render toolbar?.()}
 
 	<section
-		class={cn('min-h-0 rounded-sm border border-zinc-200 bg-white', contentClass)}
+		class={cn('min-h-0 rounded-sm border border-zinc-200/70 bg-white', contentClass)}
 		aria-label="List results"
 	>
 		{@render children?.()}

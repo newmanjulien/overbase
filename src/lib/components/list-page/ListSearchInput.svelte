@@ -27,6 +27,6 @@
 		type="search"
 		{placeholder}
 		{readonly}
-		class="h-full w-full rounded-sm border border-zinc-200 bg-white pr-3 pl-8.5 text-[0.76rem] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-300 md:text-[0.78rem]"
+		class="h-full w-full rounded-sm border border-zinc-200/70 bg-white pr-3 pl-8.5 text-[0.72rem] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-200 md:text-[0.74rem]"
 	/>
 </label>

@@ -33,7 +33,7 @@
 		{#if filterLabel}
 			<Button
 				variant="secondary"
-				class="min-w-0 flex-1 px-3 text-[0.76rem] font-normal text-zinc-950 md:flex-none md:text-[0.78rem]"
+				class="min-w-0 flex-1 border-zinc-200/70 px-3 text-[0.72rem] font-normal text-zinc-950 md:flex-none md:text-[0.74rem]"
 			>
 				<span>{filterLabel}</span>
 				{#snippet trailing()}
