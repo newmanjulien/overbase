@@ -3,14 +3,12 @@ export const CUSTOM_EMAIL_EXAMPLE_ADAPTATION_OPENING_RULES = [
 	'Pick exactly one example from the provided list.'
 ] as const;
 
-export const CUSTOM_EMAIL_EXAMPLE_ADAPTATION_DRAFT_RULES = [
+export const CUSTOM_EMAIL_HIDDEN_DRAFT_RULES = [
 	'Use the selected example emailDraft as the base draft.',
-	'Do not rewrite, paraphrase, or generalize the selected example body text.',
-	'Adapt the draft to the user request without inventing unsupported business-critical facts.',
-	'Treat concrete details already present in the selected candidate example as supported example context. Preserve those details unless the user request contradicts them.',
-	'When the request names a firm, team, audience, or partner, replace generic placeholders with those named entities.',
-	'Honor explicit recipient constraints such as "marketing people" or "not lawyers" in the to and cc fields.',
-	'If the selected example includes shared-availability language and the user asked to propose times, preserve that scheduling function in the draft.',
+	'Adapt the draft to the guided setup answers without inventing real people, accounts, meetings, or deal facts.',
+	'You can invent people, accounts, meetings, or deal facts. But never be vague. Always specific.',
+	'Never use placeholders such as {{client_name}}, {{colleague_name}}, {{relevant_context}}.',
+	'Honor explicit recipient constraints in the to and cc fields.',
 	'The draft is hidden until the user answers the first follow-up question.',
 	'Keep copy compact and specific.'
 ] as const;
@@ -18,16 +16,6 @@ export const CUSTOM_EMAIL_EXAMPLE_ADAPTATION_DRAFT_RULES = [
 export const CUSTOM_EMAIL_INITIAL_ANSWER_OPENING_RULES = [
 	'You make the first minor adjustment to a hidden email notification draft after the user answers one follow-up question.',
 	'Return the complete updated draft.'
-] as const;
-
-export const CUSTOM_EMAIL_INITIAL_ANSWER_DRAFT_RULES = [
-	'Preserve useful structure from the draft. Only change fields affected by the answer or obvious fit improvements.',
-	'Do not rewrite, paraphrase, or generalize existing email body text unless the answer directly requires changing that specific text.',
-	'Preserve concrete facts already present in the hidden draft, including client names, transaction details, firms, and available times, unless the answer contradicts them.',
-	'If the answer names a client segment, matter type, or criteria, use it to sharpen the trigger and any relevant matter language.',
-	'Interpret broad scope answers such as "any client", "all matters", or "any Davies client" as trigger criteria only; do not use them to generalize unrelated email details.',
-	'If the answer is vague, uncertain, or expresses no preference, do not invent a narrower scope or erase useful draft specifics.',
-	'Keep the draft concise and operational.'
 ] as const;
 
 export const CUSTOM_EMAIL_REFINEMENT_CHAT_RULES = [

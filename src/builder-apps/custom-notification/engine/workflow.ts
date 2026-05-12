@@ -24,6 +24,7 @@ import {
 } from './prompts';
 import { readEmailBuilderTurnStream } from '@overbase/builder-sdk/streams';
 import type {
+	CustomEmailAiContext,
 	EmailAdaptedExampleResult,
 	EmailBuilderTurnStreamHandlers,
 	EmailBuilderTurnStreamResult,
@@ -47,6 +48,7 @@ const EMAIL_INITIAL_ANSWER_TOOL_NAME = 'apply_initial_email_answer';
 export async function routeEmailBuilderRequest(params: {
 	setupPromptText: string;
 	examples: EmailExamplesCandidate[];
+	aiContext?: CustomEmailAiContext;
 	openAIConfig: OpenAIConfig;
 }) {
 	const prompt = buildEmailRoutingPrompt(params);
@@ -86,6 +88,7 @@ export async function adaptEmailExample(params: {
 	setupPromptText: string;
 	examples: EmailExamplesCandidate;
 	draftExamples: EmailExampleCandidate[];
+	aiContext?: CustomEmailAiContext;
 	openAIConfig: OpenAIConfig;
 }) {
 	const prompt = buildEmailExampleAdaptationPrompt(params);
@@ -134,6 +137,7 @@ export async function applyEmailInitialAnswer(params: {
 	initialQuestion: string;
 	initialAnswer: string;
 	draft: EmailDraft;
+	aiContext?: CustomEmailAiContext;
 	openAIConfig: OpenAIConfig;
 }) {
 	const prompt = buildEmailInitialAnswerPrompt(params);
@@ -165,13 +169,15 @@ export async function applyEmailInitialAnswer(params: {
 export async function streamCustomEmailBuilderTurn(params: {
 	transcript: TranscriptMessage[];
 	draft: EmailDraft;
+	aiContext?: CustomEmailAiContext;
 	handlers: EmailBuilderTurnStreamHandlers;
 	openAIConfig: OpenAIConfig;
 }): Promise<EmailBuilderTurnStreamResult> {
 	const { apiKey, model, reasoningEffort } = params.openAIConfig;
 	const refinementSystemPrompt = buildEmailRefinementSystemPrompt();
 	const refinementUserPrompt = buildEmailRefinementUserPrompt({
-		draft: params.draft
+		draft: params.draft,
+		aiContext: params.aiContext
 	});
 	const response = await fetch(OPENAI_RESPONSES_URL, {
 		method: 'POST',

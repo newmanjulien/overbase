@@ -21,6 +21,8 @@ import type {
 import type { EmailDraft, EmailDraftPatch } from '@overbase/builder-sdk/email';
 import type { BuilderAppRuntime } from '@overbase/builder-sdk/host';
 import type { CustomNotificationRuntimeDependencies } from './dependencies';
+import { CUSTOM_EMAIL_DEFAULT_AI_CONTEXT } from './rules';
+import type { CustomEmailAiContext } from './types';
 
 type EmitEvent = (event: BuilderAppOutputEvent) => Promise<void> | void;
 
@@ -28,6 +30,7 @@ type CustomEmailAppState = {
 	selectedEmailExamplesSlug?: string;
 	selectedEmailExampleSlug?: string;
 	initialQuestionText?: string;
+	aiContext?: CustomEmailAiContext;
 };
 
 type BuilderAppInitialQuestionExample = {
@@ -53,13 +56,56 @@ function getStringField(value: Record<string, unknown>, field: string) {
 	return typeof fieldValue === 'string' ? fieldValue : undefined;
 }
 
+function getNonEmptyStringField(value: Record<string, unknown>, field: string) {
+	const fieldValue = getStringField(value, field)?.trim();
+
+	return fieldValue ? fieldValue : undefined;
+}
+
+function normalizeCustomEmailAiContext(
+	aiContext?: CustomEmailAiContext
+): CustomEmailAiContext | undefined {
+	const normalized = {
+		personContext: aiContext?.personContext?.trim() || undefined,
+		conversationReason: aiContext?.conversationReason?.trim() || undefined,
+		notificationUse: aiContext?.notificationUse?.trim() || undefined
+	};
+
+	return Object.values(normalized).some(Boolean) ? normalized : undefined;
+}
+
+export function parseCustomEmailAiContextFromAppState(
+	appState?: BuilderAppState
+): CustomEmailAiContext | undefined {
+	const value = isRecord(appState?.value) ? appState.value : {};
+	const aiContext = isRecord(value.aiContext) ? value.aiContext : {};
+	const parsed = {
+		personContext: getNonEmptyStringField(aiContext, 'personContext'),
+		conversationReason: getNonEmptyStringField(aiContext, 'conversationReason'),
+		notificationUse: getNonEmptyStringField(aiContext, 'notificationUse')
+	};
+
+	return Object.values(parsed).some(Boolean) ? parsed : undefined;
+}
+
+function getCustomEmailAiContext(appState?: BuilderAppState) {
+	const defaultAiContext = normalizeCustomEmailAiContext(CUSTOM_EMAIL_DEFAULT_AI_CONTEXT);
+	const appStateAiContext = parseCustomEmailAiContextFromAppState(appState);
+
+	return normalizeCustomEmailAiContext({
+		...defaultAiContext,
+		...appStateAiContext
+	});
+}
+
 function getCustomEmailAppState(appState?: BuilderAppState): CustomEmailAppState {
 	const value = isRecord(appState?.value) ? appState.value : {};
 
 	return {
 		selectedEmailExamplesSlug: getStringField(value, 'selectedEmailExamplesSlug'),
 		selectedEmailExampleSlug: getStringField(value, 'selectedEmailExampleSlug'),
-		initialQuestionText: getStringField(value, 'initialQuestionText')
+		initialQuestionText: getStringField(value, 'initialQuestionText'),
+		aiContext: getCustomEmailAiContext(appState)
 	};
 }
 
@@ -117,10 +163,12 @@ export function createCustomNotificationRuntime(
 			throw new Error('No custom email examples are available.');
 		}
 
+		const customState = getCustomEmailAppState(input.appState);
 		const setupPromptText = buildBuilderRunSetupPromptText(input.setup);
 		const routeResult = await routeEmailBuilderRequest({
 			setupPromptText,
 			examples,
+			aiContext: customState.aiContext,
 			openAIConfig: fastOpenAIConfig
 		});
 		const selectedExamples =
@@ -154,6 +202,7 @@ export function createCustomNotificationRuntime(
 				initialQuestion: customState.initialQuestionText ?? '',
 				initialAnswer: input.userMessage,
 				draft: draftState.draft,
+				aiContext: customState.aiContext,
 				openAIConfig
 			});
 
@@ -174,6 +223,7 @@ export function createCustomNotificationRuntime(
 		const result = await streamCustomEmailBuilderTurn({
 			transcript: input.transcript,
 			draft: draftState.draft,
+			aiContext: getCustomEmailAppState(input.appState).aiContext,
 			openAIConfig,
 			handlers: {
 				onTextDelta: async (delta) => {
@@ -212,6 +262,7 @@ export function createCustomNotificationRuntime(
 			setupPromptText,
 			examples: toInitialQuestionExample(examples),
 			draftExamples,
+			aiContext: customState.aiContext,
 			openAIConfig
 		});
 

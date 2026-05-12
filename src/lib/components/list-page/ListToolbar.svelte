@@ -10,7 +10,6 @@
 		searchAriaLabel?: string;
 		filterLabel?: string;
 		actionLabel?: string;
-		hideSecondaryControlsOnMobile?: boolean;
 		class?: string;
 	};
 
@@ -19,7 +18,6 @@
 		searchAriaLabel,
 		filterLabel,
 		actionLabel,
-		hideSecondaryControlsOnMobile = false,
 		class: className = ''
 	}: Props = $props();
 </script>
@@ -31,12 +29,7 @@
 		class="w-full md:flex-1"
 	/>
 
-	<div
-		class={cn(
-			'shrink-0 items-center gap-2 md:gap-2.5',
-			hideSecondaryControlsOnMobile ? 'hidden md:flex' : 'flex'
-		)}
-	>
+	<div class="hidden shrink-0 items-center gap-2 md:flex md:gap-2.5">
 		{#if filterLabel}
 			<Button
 				variant="secondary"

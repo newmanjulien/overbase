@@ -20,6 +20,12 @@ export type EmailExampleCandidate = {
 	emailDraft: EmailDraft;
 };
 
+export type CustomEmailAiContext = {
+	personContext?: string;
+	conversationReason?: string;
+	notificationUse?: string;
+};
+
 export type EmailRouteResult = {
 	examplesSlug: string;
 	publicQuestion: string;

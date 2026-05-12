@@ -36,7 +36,7 @@
 <PageShell>
 	<ListPage class={className} {contentClass}>
 		{#snippet toolbar()}
-			<ListToolbar {...toolbarConfig} hideSecondaryControlsOnMobile={isEmpty} />
+			<ListToolbar {...toolbarConfig} />
 		{/snippet}
 
 		{#if hasItems}
