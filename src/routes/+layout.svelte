@@ -20,7 +20,8 @@
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
-	let onboardingComplete = $state(false);
+	const onboardingEnabled = APP_CONFIG.onboarding.enabled;
+	let onboardingComplete = $state(!onboardingEnabled);
 
 	const shellState = $state<ChromeShellState>({
 		isSidebarExpanded: false,

@@ -2,7 +2,7 @@ import {
   Bell,
   ContactRound,
   Database,
-  Globe2,
+  Globe,
   Hammer,
   KeyRound,
   UserPlus,
@@ -44,7 +44,7 @@ export type AppRouteDefinition = {
 };
 
 export const APP_ROUTE_REGISTRY = {
-  "formats": {
+  formats: {
     href: "/formats",
     navLabel: "My formats",
     icon: Bell,
@@ -63,7 +63,7 @@ export const APP_ROUTE_REGISTRY = {
   "external-data": {
     href: "/external-data",
     navLabel: "External data",
-    icon: Globe2,
+    icon: Globe,
   },
   team: {
     href: "/team",
@@ -90,7 +90,7 @@ export const APP_ROUTE_REGISTRY = {
 export const APP_NAV_SECTION_DEFINITIONS = [
   {
     id: "formats",
-    heading: "Formats",
+    heading: "Opportunity formats",
     routeIds: ["builder", "formats"],
     desktopSectionClass: "pt-2",
   },

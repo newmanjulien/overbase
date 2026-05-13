@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import { BUILDER_FRESH_START_ROUTE, builderAppSlugParams } from '$lib/features/builder/paths';
 	import OnboardingBlueprintStep from '../steps/OnboardingBlueprintStep.svelte';
 	import OnboardingCompanyStep from '../steps/OnboardingCompanyStep.svelte';
 	import OnboardingPatternLayer from '../ui/OnboardingPatternLayer.svelte';
@@ -68,7 +69,7 @@
 	}
 
 	async function selectBlueprint(appSlug: string) {
-		await goto(resolve('/builder/[appSlug]?fresh=1', { appSlug }));
+		await goto(resolve(BUILDER_FRESH_START_ROUTE, builderAppSlugParams(appSlug)));
 		onComplete();
 	}
 
