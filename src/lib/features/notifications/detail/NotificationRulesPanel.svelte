@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListFilter, Plus, Trash2 } from 'lucide-svelte';
-	import { Button, InfoBar, InfoBarAction } from '$lib/components/ui';
+	import { Button, IconButton, InfoBar, InfoBarAction } from '$lib/components/ui';
 	import LinkDataSourcesModal from './LinkDataSourcesModal.svelte';
 	import type { NotificationRule } from './notification-detail-types';
 
@@ -71,24 +71,24 @@
 										></textarea>
 									</div>
 
-									<button
-										type="button"
+									<IconButton
 										aria-label="Remove rule"
-										class="inline-flex size-6 shrink-0 items-center justify-center rounded-sm text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
+										variant="ghost"
+										class="size-6 shrink-0 text-zinc-400 hover:bg-red-50 hover:text-red-600"
 										onclick={() => removeRule(rule.id)}
 									>
 										<Trash2 class="size-3" />
-									</button>
+									</IconButton>
 								</div>
 							</div>
 							<div class="flex items-center justify-end border-t border-zinc-100 bg-zinc-50/70 px-3 py-2">
-								<button
-									type="button"
+								<Button
+									variant="secondary"
 									class="inline-flex h-7 items-center justify-center rounded-sm border border-zinc-200 bg-white px-2.5 text-[0.7rem] font-medium text-zinc-800 transition-colors hover:bg-zinc-50 hover:text-zinc-950"
 									onclick={openLinkDataSourcesModal}
 								>
 									Link data sources
-								</button>
+								</Button>
 							</div>
 						</section>
 					{/each}

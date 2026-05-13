@@ -1,17 +1,11 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { recommendBlueprints } from '$lib/server/onboarding/recommendations';
-import { readBlueprintRecommendationRequest } from '$lib/server/onboarding/requests';
+import type { OnboardingBlueprintsResponse } from '$lib/features/onboarding/types';
+import { listBuilderHomeApps } from '../../../../builder-apps/runtime.server';
 
-export const POST: RequestHandler = async ({ request }) => {
-	try {
-		const input = await readBlueprintRecommendationRequest(request);
-		const blueprints = await recommendBlueprints(input);
+export const GET: RequestHandler = async () => {
+	const builderHome = await listBuilderHomeApps();
 
-		return json({ blueprints });
-	} catch (error) {
-		return json(
-			{ message: error instanceof Error ? error.message : 'Unable to recommend blueprints.' },
-			{ status: 400 }
-		);
-	}
+	return json({
+		blueprints: builderHome.apps
+	} satisfies OnboardingBlueprintsResponse);
 };

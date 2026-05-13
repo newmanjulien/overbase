@@ -5,6 +5,7 @@
 	import HomeLink from '$lib/components/chrome/shared/HomeLink.svelte';
 	import type { HeaderParentHref } from '$lib/components/chrome/shared/route-title.svelte';
 	import { useChromeShellState } from '$lib/components/chrome/shared/shell.svelte';
+	import { IconButton } from '$lib/components/ui';
 
 	type HeaderParent = {
 		label: string;
@@ -56,15 +57,15 @@
 		{/if}
 	</div>
 	<div class="flex w-12 justify-end">
-		<button
-			type="button"
+		<IconButton
 			aria-label="Toggle navigation menu"
-			class="inline-flex size-8 items-center justify-center rounded-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+			variant="ghost"
+			class="size-8 text-zinc-700"
 			onclick={() => {
 				shellState.isMobileDrawerOpen = !shellState.isMobileDrawerOpen;
 			}}
 		>
 			<Menu class="size-4" />
-		</button>
+		</IconButton>
 	</div>
 </header>

@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import { Pencil } from 'lucide-svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
+	import { IconButton } from '$lib/components/ui';
 
 	type Props = {
 		title: string;
@@ -112,17 +113,17 @@
 		</span>
 
 		{#if editable}
-			<button
-				type="button"
+			<IconButton
 				aria-label="Edit title"
+				variant="ghost"
 				class={cn(
-					'inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300',
+					'size-5 shrink-0 text-zinc-400 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300',
 					buttonClass
 				)}
 				onclick={beginEditing}
 			>
 				<Pencil class="size-3" strokeWidth={2.25} />
-			</button>
+			</IconButton>
 		{/if}
 	{/if}
 </div>

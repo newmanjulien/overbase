@@ -1,23 +1,23 @@
-export type OnboardingStep =
-	| 'businessForm'
-	| 'researchingBusiness'
-	| 'reviewBusiness'
-	| 'researchingGoToMarket'
-	| 'reviewGoToMarket'
-	| 'recommendingBlueprints'
-	| 'blueprintRecommendations';
+export type OnboardingStep = 'welcome' | 'company' | 'partner' | 'blueprint';
 
-export type OnboardingBlueprintRecommendation = {
-	appSlug: string;
-	title: string;
-	description: string;
-	reason: string;
-	artwork: {
-		id: string;
-		card: {
-			tone: 'coral' | 'violet' | 'aqua' | 'zinc';
-			iconId: string;
-			symbolSize: 'sm' | 'md';
-		};
-	};
+export type OnboardingQuote = {
+	text: string;
+	personName: string;
+	personTitle: string;
+	avatarSrc: string;
+	avatarAlt: string;
+};
+
+export type OnboardingCompany = {
+	name: string;
+	website: string;
+};
+
+export type OnboardingPartner = {
+	name: string;
+	collaboration: string;
+};
+
+export type OnboardingBlueprintsResponse = {
+	blueprints: import('../../../builder-apps/registry').BuilderAppRegistryEntry[];
 };

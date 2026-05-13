@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Ellipsis } from 'lucide-svelte';
-	import { FloatingActionMenu, type FloatingActionMenuAction } from '$lib/components/ui';
+	import { FloatingActionMenu, IconButton, type FloatingActionMenuAction } from '$lib/components/ui';
 
 	type Props = {
 		actions?: FloatingActionMenuAction[];
@@ -19,11 +19,11 @@
 		triggerClass="border border-zinc-200/60 bg-white hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300"
 	/>
 {:else}
-	<button
-		type="button"
+	<IconButton
 		aria-label="More options"
-		class="inline-flex size-7 items-center justify-center rounded-sm border border-zinc-200/60 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300"
+		variant="secondary"
+		class="size-7 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300"
 	>
 		<Ellipsis class="size-3" />
-	</button>
+	</IconButton>
 {/if}
