@@ -8,6 +8,7 @@
 		background: Snippet;
 		aside: Snippet;
 		footer?: Snippet;
+		showFooter?: boolean;
 		onReturn?: () => void;
 		returnLabel?: string;
 		footerBorder?: boolean;
@@ -18,6 +19,7 @@
 		background,
 		aside,
 		footer,
+		showFooter = Boolean(footer),
 		onReturn,
 		returnLabel = 'Return',
 		footerBorder = true
@@ -49,7 +51,7 @@
 				{@render children()}
 			</div>
 
-			{#if footer}
+			{#if footer && showFooter}
 				<footer class={cn('w-full pt-4', footerBorder && 'border-t border-[#eceef1]')}>
 					{@render footer()}
 				</footer>

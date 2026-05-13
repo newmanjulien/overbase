@@ -11,7 +11,7 @@
 
 <OnboardingStepFrame
 	title="Welcome to Overbase"
-	description="We make it easy to share sales data with your ecosystem partners. You connect your company's data and your partners connect their data. Then Overbase sends revenue opportunities that we find by analyzing both together"
+	description="You connect your company's data. Your partners connect their data. Then Overbase sends revenue opportunities"
 	descriptionClass="text-[15px] text-[#4f5359]"
 >
 	<OnboardingHotkeyButton onclick={onContinue}>Start setup</OnboardingHotkeyButton>
