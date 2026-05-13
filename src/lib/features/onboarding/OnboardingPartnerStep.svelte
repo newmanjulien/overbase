@@ -1,7 +1,6 @@
 <script lang="ts">
 	import OnboardingPrimaryButton from './OnboardingPrimaryButton.svelte';
 	import OnboardingStepFrame from './OnboardingStepFrame.svelte';
-	import OnboardingTextInput from './OnboardingTextInput.svelte';
 	import OnboardingTextarea from './OnboardingTextarea.svelte';
 
 	type Props = {
@@ -27,12 +26,12 @@
 			}
 		}}
 	>
-		<OnboardingTextInput
-			label="Partner company's name"
+		<input
 			bind:value={name}
+			placeholder="Partner company's name"
 			autocomplete="organization"
 			required
-			autofocus
+			class="box-border h-[42px] w-full rounded-lg border border-[#e2e3e6] bg-white px-3.5 text-sm leading-none text-[#202124] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-[#8f9297] focus:border-[#6bbdf8] focus:shadow-[0_0_0_1px_#6bbdf8]"
 		/>
 		<OnboardingTextarea
 			label="How do you collaborate today to get more growth together?"

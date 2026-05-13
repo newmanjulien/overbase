@@ -8,6 +8,7 @@
 	import OnboardingPartnerStep from './OnboardingPartnerStep.svelte';
 	import OnboardingQuotePanel from './OnboardingQuotePanel.svelte';
 	import OnboardingShell from './OnboardingShell.svelte';
+	import OnboardingSignupStep from './OnboardingSignupStep.svelte';
 	import OnboardingWelcomeStep from './OnboardingWelcomeStep.svelte';
 	import { loadOnboardingBlueprints } from './onboarding-blueprints';
 	import type {
@@ -27,6 +28,7 @@
 		name: '',
 		website: ''
 	});
+	let workEmail = $state('');
 	let partner = $state<OnboardingPartner>({
 		name: '',
 		collaboration: ''
@@ -35,6 +37,11 @@
 	let isLoadingBlueprints = $state(false);
 	let blueprintErrorText = $state<string | null>(null);
 	let hasStartedBlueprintLoad = $state(false);
+	const welcomeFooterLinks = [
+		{ label: 'Terms of Service', href: 'https://overbase.app/legal/terms-of-service' },
+		{ label: 'Privacy Policy', href: 'https://overbase.app/legal/dpa' },
+		{ label: 'Support', href: 'https://overbase.app/contact' }
+	];
 	const quote = {
 		text: 'Overbase turns business context into a clear path to the notifications worth building first.',
 		personName: 'Morgan Reed',
@@ -68,6 +75,25 @@
 		onComplete();
 	}
 
+	function returnFromCurrentStep() {
+		if (step === 'partner') {
+			step = 'company';
+			return;
+		}
+
+		if (step === 'company') {
+			step = 'signup';
+			return;
+		}
+
+		if (step === 'signup') {
+			step = 'welcome';
+			return;
+		}
+
+		onComplete();
+	}
+
 	$effect(() => {
 		if (step === 'partner' && !hasStartedBlueprintLoad) {
 			void loadBlueprints();
@@ -91,7 +117,10 @@
 		}}
 	/>
 {:else}
-	<OnboardingShell>
+	<OnboardingShell
+		onReturn={returnFromCurrentStep}
+		footerLinks={step === 'welcome' ? welcomeFooterLinks : undefined}
+	>
 		{#snippet background()}
 			<OnboardingPatternLayer />
 		{/snippet}
@@ -102,6 +131,13 @@
 
 		{#if step === 'welcome'}
 			<OnboardingWelcomeStep
+				onContinue={() => {
+					step = 'signup';
+				}}
+			/>
+		{:else if step === 'signup'}
+			<OnboardingSignupStep
+				bind:email={workEmail}
 				onContinue={() => {
 					step = 'company';
 				}}

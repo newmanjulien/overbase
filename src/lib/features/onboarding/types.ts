@@ -1,4 +1,4 @@
-export type OnboardingStep = 'welcome' | 'company' | 'partner' | 'blueprint';
+export type OnboardingStep = 'welcome' | 'signup' | 'company' | 'partner' | 'blueprint';
 
 export type OnboardingQuote = {
 	text: string;
