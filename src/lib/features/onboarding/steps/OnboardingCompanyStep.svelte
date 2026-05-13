@@ -14,7 +14,7 @@
 </script>
 
 <OnboardingStepFrame
-	title="Tell us about your company"
+	title="About your company"
 >
 	<form
 		class="grid gap-3.5"

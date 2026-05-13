@@ -47,7 +47,7 @@
 				</button>
 			{/if}
 
-			<div class="m-auto w-full max-w-95">
+			<div class="m-auto w-full max-w-85">
 				{@render children()}
 			</div>
 
