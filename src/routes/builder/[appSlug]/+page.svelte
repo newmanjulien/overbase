@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import PageShell from '$lib/components/layout/PageShell.svelte';
-	import BuilderCanvas from '$lib/features/builder/canvas/BuilderCanvas.svelte';
-	import BuilderDesktopOnly from '$lib/features/builder/canvas/BuilderDesktopOnly.svelte';
+	import BuilderDesktopOnly from '$lib/features/builder/workbench/BuilderDesktopOnly.svelte';
+	import { BuilderWorkbenchPage } from '$lib/features/builder/workbench';
 	import { Button } from '$lib/components/ui';
-	import { toBuilderAppRecord, toBuilderGuideDefinition } from '$lib/features/builder/data';
+	import { toBuilderAppRecord, toBuilderGuideDefinition } from '$lib/features/builder/catalog';
 	import {
 		createBuilderLaunchState,
 		readBuilderLaunchFromPageState,
 		readPendingBuilderLaunch
-	} from '$lib/features/builder/session/builder-launch';
+	} from '$lib/features/builder/session';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -32,7 +32,7 @@
 <PageShell class="px-0 py-0 md:px-0 md:py-0">
 	<BuilderDesktopOnly>
 		{#if app}
-			<BuilderCanvas {app} {guide} {launch} />
+			<BuilderWorkbenchPage {app} {guide} {launch} />
 		{:else}
 			<div class="flex h-full min-h-full items-center justify-center bg-white px-6 py-12">
 				<div class="w-full max-w-sm rounded-sm border border-zinc-200 bg-white p-5 text-center shadow-sm">

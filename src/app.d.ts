@@ -1,4 +1,4 @@
-import type { BuilderLaunchState } from '$lib/features/builder/session/builder-launch';
+import type { BuilderLaunchState } from '$lib/features/builder/session';
 import type { HeaderParentHref } from '$lib/components/chrome/shared/route-title.svelte';
 
 declare global {

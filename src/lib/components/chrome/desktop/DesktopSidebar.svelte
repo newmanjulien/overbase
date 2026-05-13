@@ -4,7 +4,7 @@
 	import DesktopNavList from '$lib/components/chrome/desktop/DesktopNavList.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import HomeLink from '$lib/components/chrome/shared/HomeLink.svelte';
-	import PersonAvatar from '$lib/components/chrome/shared/PersonAvatar.svelte';
+	import { PersonAvatar } from '$lib/components/people';
 	import {
 		getActiveNavRoute,
 		NAV_FOOTER_ITEMS,

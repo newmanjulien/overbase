@@ -15,7 +15,7 @@
 		type ChromeShellState
 	} from '$lib/components/chrome/shared/shell.svelte';
 	import { setupAppConvex } from '$lib/backend/convex/setup.svelte';
-	import OnboardingFlow from '$lib/features/onboarding/OnboardingFlow.svelte';
+	import { OnboardingFlow } from '$lib/features/onboarding/flow';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 

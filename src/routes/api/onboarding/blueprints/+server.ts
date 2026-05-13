@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import type { OnboardingBlueprintsResponse } from '$lib/features/onboarding/types';
+import type { OnboardingBlueprintsResponse } from '$lib/features/onboarding/flow';
 import { listBuilderHomeApps } from '../../../../builder-apps/runtime.server';
 
 export const GET: RequestHandler = async () => {

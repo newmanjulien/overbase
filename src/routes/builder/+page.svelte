@@ -1,7 +1,7 @@
 <script lang="ts">
-	import BuilderDesktopOnly from '$lib/features/builder/canvas/BuilderDesktopOnly.svelte';
+	import BuilderDesktopOnly from '$lib/features/builder/workbench/BuilderDesktopOnly.svelte';
 	import PageShell from '$lib/components/layout/PageShell.svelte';
-	import BuilderStart from '$lib/features/builder/start/BuilderStart.svelte';
+	import BuilderHomePage from '$lib/features/builder/home/BuilderHomePage.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -9,6 +9,6 @@
 
 <PageShell>
 	<BuilderDesktopOnly>
-		<BuilderStart builderHome={data.builderHome} />
+		<BuilderHomePage builderHome={data.builderHome} />
 	</BuilderDesktopOnly>
 </PageShell>
