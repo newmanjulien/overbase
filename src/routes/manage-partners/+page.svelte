@@ -17,7 +17,7 @@
 			{ kind: 'link', text: 'Invite', href: '/invite-partners' },
 			{
 				kind: 'text',
-				text: ' your ecosystem partners so you can share sales data with them. You will be able to use their data in your notifications and they will be able to use your data in a secure way that you control'
+				text: ' your ecosystem partners so you can share sales data with them. You will be able to use their data in your opportunities and they will be able to use your data in a secure way that you control'
 			}
 		],
 		learnMoreLabel: 'Learn more'

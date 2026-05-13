@@ -72,7 +72,7 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_session_createdAt', ['sessionId', 'createdAt']),
-	notifications: defineTable({
+	opportunityFormats: defineTable({
 		title: v.string(),
 		status: v.union(v.literal('paused'), v.literal('active')),
 		definition: v.object({
@@ -93,22 +93,22 @@ export default defineSchema({
 		updatedAt: v.number()
 	})
 		.index('by_createdAt', ['createdAt']),
-	notificationEmails: defineTable({
-		notificationId: v.id('notifications'),
+	opportunities: defineTable({
+		opportunityFormatId: v.id('opportunityFormats'),
 		sentAt: v.number(),
 		emailDraft,
 		createdAt: v.number()
 	})
-		.index('by_notification_sentAt', ['notificationId', 'sentAt'])
-		.index('by_notification_createdAt', ['notificationId', 'createdAt']),
-	notificationEmailFeedback: defineTable({
-		notificationId: v.id('notifications'),
-		emailId: v.id('notificationEmails'),
+		.index('by_opportunityFormat_sentAt', ['opportunityFormatId', 'sentAt'])
+		.index('by_opportunityFormat_createdAt', ['opportunityFormatId', 'createdAt']),
+	opportunityFeedback: defineTable({
+		opportunityFormatId: v.id('opportunityFormats'),
+		opportunityId: v.id('opportunities'),
 		likedText: v.string(),
 		improvementText: v.string(),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	})
-		.index('by_notificationId', ['notificationId'])
-		.index('by_emailId', ['emailId'])
+		.index('by_opportunityFormatId', ['opportunityFormatId'])
+		.index('by_opportunityId', ['opportunityId'])
 });

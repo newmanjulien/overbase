@@ -13,9 +13,9 @@
 	empty={{
 		icon: ContactRound,
 		title: 'No teammates found',
-		description: 'Invite teammates who will receive notifications.',
+		description: 'Invite teammates who will receive opportunities.',
 		nextSteps:
-			'Teammates are the people inside your organization who receive notifications. Invite teammates here, then add them to the right notifications',
+			'Teammates are the people inside your organization who receive opportunities. Invite teammates here, then add them to the right formats',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Invite team'
 	}}

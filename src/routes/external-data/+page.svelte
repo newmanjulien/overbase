@@ -13,9 +13,9 @@
 	empty={{
 		icon: Globe2,
 		title: 'No external data found',
-		description: 'Connect external data to enrich your notifications.',
+		description: 'Connect external data to enrich your opportunities.',
 		nextSteps:
-			'Overbase can pull from any external APIs or data sources you purchase. Connect external sources, then use them to power your notifications',
+			'Overbase can pull from any external APIs or data sources you purchase. Connect external sources, then use them to power your opportunities',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Add external data'
 	}}

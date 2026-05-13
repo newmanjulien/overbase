@@ -4,6 +4,7 @@
 	import HomeLink from '$lib/components/chrome/shared/HomeLink.svelte';
 	import { MOBILE_NAV_SECTIONS, NAV_FOOTER_ITEMS } from '$lib/components/chrome/shared/nav';
 	import { useChromeShellState } from '$lib/components/chrome/shared/shell.svelte';
+	import { IconButton } from '$lib/components/ui';
 
 	type Props = {
 		currentPathname: string;
@@ -22,16 +23,16 @@
 						shellState.isMobileDrawerOpen = false;
 					}}
 				/>
-				<button
-					type="button"
+				<IconButton
 					aria-label="Close navigation menu"
-					class="ml-auto inline-flex size-8 items-center justify-center rounded-sm text-zinc-700 transition-colors hover:bg-zinc-100"
+					variant="ghost"
+					class="ml-auto size-8 text-zinc-700"
 					onclick={() => {
 						shellState.isMobileDrawerOpen = false;
 					}}
 				>
 					<X class="size-4" />
-				</button>
+				</IconButton>
 			</header>
 
 			<div class="flex-1 overflow-y-auto px-(--shell-gutter-mobile) py-4">

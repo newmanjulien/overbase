@@ -22,8 +22,8 @@ import type * as builderSessions from "../builderSessions.js";
 import type * as crons from "../crons.js";
 import type * as devSeed from "../devSeed.js";
 import type * as health from "../health.js";
-import type * as notificationReadiness from "../notificationReadiness.js";
-import type * as notifications from "../notifications.js";
+import type * as opportunityFormatReadiness from "../opportunityFormatReadiness.js";
+import type * as opportunityFormats from "../opportunityFormats.js";
 import type * as teamRoster from "../teamRoster.js";
 
 import type {
@@ -47,8 +47,8 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   devSeed: typeof devSeed;
   health: typeof health;
-  notificationReadiness: typeof notificationReadiness;
-  notifications: typeof notifications;
+  opportunityFormatReadiness: typeof opportunityFormatReadiness;
+  opportunityFormats: typeof opportunityFormats;
   teamRoster: typeof teamRoster;
 }>;
 

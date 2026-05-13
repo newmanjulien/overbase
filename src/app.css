@@ -1,3 +1,5 @@
+@import "@fontsource/newsreader/400.css";
+@import "@fontsource/newsreader/500.css";
 @import "tailwindcss";
 
 @theme inline {
@@ -71,6 +73,10 @@ body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	overflow: hidden;
+}
+
+.font-quote {
+	font-family: "Newsreader", "Times New Roman", serif;
 }
 
 #app-root {

@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			return {
 				app: null,
 				guide: null,
-				headerTitle: 'Notification builder',
+				headerTitle: 'Format builder',
 				headerTitleEditable: false
 			};
 		}
@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			headerTitle: app.title,
 			headerTitleEditable: true,
 			headerParent: {
-				label: 'Notification builder',
+				label: 'Format builder',
 				href: '/builder'
 			}
 		};

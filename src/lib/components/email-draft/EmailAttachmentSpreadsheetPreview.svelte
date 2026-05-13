@@ -5,6 +5,7 @@
 		type EmailSpreadsheetAttachment
 	} from '@overbase/builder-sdk/email';
 	import { ArrowLeft } from 'lucide-svelte';
+	import { IconButton } from '$lib/components/ui';
 
 	type Props = {
 		attachment: EmailSpreadsheetAttachment;
@@ -72,14 +73,14 @@
 
 <div bind:this={spreadsheetRoot} class="flex min-h-full w-full flex-col overflow-hidden bg-white">
 	<div class="flex h-12 shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-2.5">
-		<button
-			type="button"
+		<IconButton
 			aria-label="Back to email"
-			class="inline-flex size-7 shrink-0 items-center justify-center rounded-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
+			variant="ghost"
+			class="size-7 shrink-0 text-zinc-500 hover:text-zinc-900 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
 			onclick={onClose}
 		>
 			<ArrowLeft class="size-3.5 stroke-[2]" />
-		</button>
+		</IconButton>
 		<div
 			class="flex size-7 shrink-0 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-50/60 text-[0.54rem] font-normal text-emerald-700"
 			aria-hidden="true"

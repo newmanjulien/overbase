@@ -15,10 +15,13 @@
 		type ChromeShellState
 	} from '$lib/components/chrome/shared/shell.svelte';
 	import { setupAppConvex } from '$lib/backend/convex/setup.svelte';
+	import { OnboardingFlow } from '$lib/features/onboarding/flow';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
+	const onboardingEnabled = APP_CONFIG.onboarding.enabled;
+	let onboardingComplete = $state(!onboardingEnabled);
 
 	const shellState = $state<ChromeShellState>({
 		isSidebarExpanded: false,
@@ -76,40 +79,48 @@
 	<title>{APP_CONFIG.name}</title>
 </svelte:head>
 
-<div class="h-dvh min-h-dvh overflow-hidden bg-zinc-50">
-	<div
-		class="dashboard-surface flex h-full min-h-0 md:gap-(--dashboard-surface-gap)"
-		data-sidebar-state={shellState.isSidebarExpanded ? 'expanded' : 'collapsed'}
-	>
-		<DesktopSidebar currentPathname={page.url.pathname} class="hidden md:flex" />
-
-		<main
-			class="min-w-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-white md:rounded-sm md:border md:border-zinc-100"
+{#if onboardingComplete}
+	<div class="h-dvh min-h-dvh overflow-hidden bg-zinc-50">
+		<div
+			class="dashboard-surface flex h-full min-h-0 md:gap-(--dashboard-surface-gap)"
+			data-sidebar-state={shellState.isSidebarExpanded ? 'expanded' : 'collapsed'}
 		>
-			<MobileDrawer currentPathname={page.url.pathname} />
-			<MobileHeader
-				title={routeTitleState.title}
-				titleEditable={routeTitleEditable}
-				headerParent={mobileHeaderParent}
-				onTitleChange={handleRouteTitleChange}
-			/>
+			<DesktopSidebar currentPathname={page.url.pathname} class="hidden md:flex" />
 
-			<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-				<DesktopHeader
+			<main
+				class="min-w-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-white md:rounded-sm md:border md:border-zinc-100"
+			>
+				<MobileDrawer currentPathname={page.url.pathname} />
+				<MobileHeader
 					title={routeTitleState.title}
 					titleEditable={routeTitleEditable}
-					headerParent={desktopHeaderParent}
+					headerParent={mobileHeaderParent}
 					onTitleChange={handleRouteTitleChange}
-					actions={routeTitleState.actions}
-					overflowActions={routeTitleState.overflowActions}
 				/>
 
-				<div class="dashboard-main-viewport min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-					<div class="h-full min-h-full min-w-0">
-						{@render children()}
+				<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+					<DesktopHeader
+						title={routeTitleState.title}
+						titleEditable={routeTitleEditable}
+						headerParent={desktopHeaderParent}
+						onTitleChange={handleRouteTitleChange}
+						actions={routeTitleState.actions}
+						overflowActions={routeTitleState.overflowActions}
+					/>
+
+					<div class="dashboard-main-viewport min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+						<div class="h-full min-h-full min-w-0">
+							{@render children()}
+						</div>
 					</div>
 				</div>
-			</div>
-		</main>
+			</main>
+		</div>
 	</div>
-</div>
+{:else}
+	<OnboardingFlow
+		onComplete={() => {
+			onboardingComplete = true;
+		}}
+	/>
+{/if}
