@@ -19,7 +19,12 @@
 	>
 		{title}
 	</h1>
-	<p class={cn('mx-auto mt-3.5 max-w-100 text-center text-sm leading-[1.45] text-[#777b82]', descriptionClass)}>
+	<p
+		class={cn(
+			'mx-auto mt-3.5 max-w-100 text-center text-sm leading-[1.45] text-[#777b82]',
+			descriptionClass
+		)}
+	>
 		{description}
 	</p>
 

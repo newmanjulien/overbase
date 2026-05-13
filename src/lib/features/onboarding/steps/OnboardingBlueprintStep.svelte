@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
-	import OnboardingBlueprintCard from './OnboardingBlueprintCard.svelte';
+	import OnboardingBlueprintCard from '../ui/OnboardingBlueprintCard.svelte';
 
 	type Props = {
 		apps: BuilderAppRecord[];
@@ -41,13 +41,22 @@
 					</Button>
 				</div>
 			{:else if apps.length > 0}
-				<div class="grid w-full grid-cols-1 justify-items-center gap-x-5 gap-y-5 sm:grid-cols-[repeat(auto-fit,minmax(250px,280px))] sm:justify-center">
-					{#each apps as app (app.id)}
-						<OnboardingBlueprintCard {app} {onSelect} />
-					{/each}
+				<div class="w-full">
+					<div class="grid w-full grid-cols-1 justify-items-center gap-x-5 gap-y-5 sm:grid-cols-[repeat(auto-fit,minmax(250px,280px))] sm:justify-center">
+						{#each apps as app (app.id)}
+							<OnboardingBlueprintCard {app} {onSelect} />
+						{/each}
+					</div>
+					<button
+						type="button"
+						class="mt-7 text-sm text-zinc-400/50 underline underline-offset-2 transition hover:text-zinc-400/70 focus-visible:rounded-sm focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgb(113_113_122_/_20%)]"
+						onclick={onOpenBuilder}
+					>
+						Let me explore the app on my own
+					</button>
 				</div>
 			{:else}
-				<div class="w-full max-w-[300px] text-center">
+				<div class="w-full max-w-75 text-center">
 					<p class="text-sm font-medium leading-6 text-[#686b73]">
 						No builder blueprints are available right now
 					</p>

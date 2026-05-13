@@ -119,7 +119,7 @@
 {:else}
 	<OnboardingShell
 		onReturn={returnFromCurrentStep}
-		footerLinks={step === 'welcome' ? welcomeFooterLinks : undefined}
+		footerBorder={step !== 'signup'}
 	>
 		{#snippet background()}
 			<OnboardingPatternLayer />
@@ -128,6 +128,30 @@
 		{#snippet aside()}
 			<OnboardingQuotePanel {quote} />
 		{/snippet}
+
+		{#if step === 'welcome'}
+			{#snippet footer()}
+				<nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] leading-5 text-[#8f9297]">
+					{#each welcomeFooterLinks as link (link.href)}
+						<a class="transition-colors hover:text-[#202124]" href={link.href} rel="external">
+							{link.label}
+						</a>
+					{/each}
+				</nav>
+			{/snippet}
+		{:else if step === 'signup'}
+			{#snippet footer()}
+				<p class="m-0 text-center text-[13px] leading-5 text-zinc-500">
+					Already have an account?
+					<a
+						href="https://overbase.app/login"
+						class="cursor-pointer border-0 bg-transparent p-0 text-[13px] leading-5 text-zinc-700 underline underline-offset-2 outline-none transition-colors hover:text-[#0d8eea] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
+					>
+						Log in
+					</a>
+				</p>
+			{/snippet}
+		{/if}
 
 		{#if step === 'welcome'}
 			<OnboardingWelcomeStep

@@ -1,28 +1,26 @@
 <script lang="ts">
 	import { ArrowLeft } from 'lucide-svelte';
 	import type { Snippet } from 'svelte';
-
-	type FooterLink = {
-		label: string;
-		href: string;
-	};
+	import { cn } from '$lib/components/chrome/shared/cn';
 
 	type Props = {
 		children: Snippet;
 		background: Snippet;
 		aside: Snippet;
+		footer?: Snippet;
 		onReturn?: () => void;
 		returnLabel?: string;
-		footerLinks?: FooterLink[];
+		footerBorder?: boolean;
 	};
 
 	let {
 		children,
 		background,
 		aside,
+		footer,
 		onReturn,
 		returnLabel = 'Return',
-		footerLinks = []
+		footerBorder = true
 	}: Props = $props();
 </script>
 
@@ -51,15 +49,9 @@
 				{@render children()}
 			</div>
 
-			{#if footerLinks.length > 0}
-				<footer class="w-full border-t border-[#eceef1] pt-4">
-					<nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] leading-5 text-[#8f9297]">
-						{#each footerLinks as link (link.href)}
-							<a class="transition-colors hover:text-[#202124]" href={link.href} rel="external">
-								{link.label}
-							</a>
-						{/each}
-					</nav>
+			{#if footer}
+				<footer class={cn('w-full pt-4', footerBorder && 'border-t border-[#eceef1]')}>
+					{@render footer()}
 				</footer>
 			{/if}
 		</section>
