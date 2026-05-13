@@ -1,11 +1,11 @@
-import { CURRENT_USER_PROFILE } from './current-user';
+import { CURRENT_USER_PROFILE } from "./current-user";
 
 export const APP_CONFIG = {
-	name: 'Overbase',
-	logoUrl: '/logo.png',
-	logoAlt: 'Overbase logo',
-	profile: CURRENT_USER_PROFILE,
-	onboarding: {
-		enabled: false
-	}
+  name: "Overbase",
+  logoUrl: "/logo.png",
+  logoAlt: "Overbase logo",
+  profile: CURRENT_USER_PROFILE,
+  onboarding: {
+    enabled: true,
+  },
 } as const;
