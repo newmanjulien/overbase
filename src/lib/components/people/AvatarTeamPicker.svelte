@@ -16,7 +16,7 @@
 		id?: string;
 		people: readonly AvatarTeamPickerPerson[];
 		selectedIds: readonly string[];
-		requiredSelectedIds?: readonly string[];
+		minSelected?: number;
 		onSelectedIdsChange: (nextIds: string[]) => void;
 		size?: number;
 		limit?: number;
@@ -34,7 +34,7 @@
 		id = generatedId,
 		people,
 		selectedIds,
-		requiredSelectedIds = [],
+		minSelected = 0,
 		onSelectedIdsChange,
 		size = 28,
 		limit = 3,
@@ -57,17 +57,10 @@
 	let panelWidth = $state(260);
 
 	const pickerId = $derived(id);
-	const requiredSelectedIdSet = $derived(new Set(requiredSelectedIds));
 	const effectiveSelectedIds = $derived.by(() => {
-		const nextIds = [...requiredSelectedIds];
+		const selectedIdSet = new Set(selectedIds);
 
-		for (const selectedId of selectedIds) {
-			if (!nextIds.includes(selectedId)) {
-				nextIds.push(selectedId);
-			}
-		}
-
-		return nextIds;
+		return people.filter((person) => selectedIdSet.has(person.id)).map((person) => person.id);
 	});
 	const selectedIdSet = $derived(new Set(effectiveSelectedIds));
 	const selectedPeople = $derived(people.filter((person) => selectedIdSet.has(person.id)));
@@ -161,13 +154,17 @@
 	}
 
 	function togglePerson(personId: string) {
-		if (requiredSelectedIdSet.has(personId)) {
+		const isSelected = selectedIdSet.has(personId);
+
+		if (isSelected && effectiveSelectedIds.length <= minSelected) {
 			return;
 		}
 
-		const nextSelectedIds = selectedIdSet.has(personId)
-			? effectiveSelectedIds.filter((selectedId) => selectedId !== personId)
-			: [...effectiveSelectedIds, personId];
+		const nextSelectedIds = people
+			.filter((person) =>
+				person.id === personId ? !isSelected : selectedIdSet.has(person.id)
+			)
+			.map((person) => person.id);
 
 		onSelectedIdsChange(nextSelectedIds);
 	}
@@ -247,13 +244,13 @@
 				{#if visiblePeople.length > 0}
 					{#each visiblePeople as person (person.id)}
 						{@const isSelected = selectedIdSet.has(person.id)}
-						{@const isRequired = requiredSelectedIdSet.has(person.id)}
+						{@const isRemovalBlocked = isSelected && effectiveSelectedIds.length <= minSelected}
 						<button
 							type="button"
 							role="checkbox"
 							aria-checked={isSelected}
-							aria-disabled={isRequired}
-							disabled={isRequired}
+							aria-disabled={isRemovalBlocked}
+							disabled={isRemovalBlocked}
 							class={cn(
 								'flex h-9 w-full items-center gap-2 px-2.5 text-left transition-colors hover:bg-zinc-50 disabled:cursor-default disabled:hover:bg-white',
 								isSelected ? 'text-zinc-950' : 'text-zinc-700'

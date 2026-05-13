@@ -38,11 +38,11 @@ export function getPeopleRoster() {
 }
 
 export function normalizeTeamMemberIds(teamMemberIds: string[]) {
-	const teammateIdSet = new Set<string>(TEAM_ROSTER.map((person) => person.personId));
-	const normalizedIds = teamMemberIds.map((id) => id.trim()).filter(Boolean);
-	const teammateIds = Array.from(new Set(normalizedIds)).filter((teamMemberId) =>
-		teammateIdSet.has(teamMemberId)
-	);
+	const roster = getPeopleRoster();
+	const normalizedIdSet = new Set(teamMemberIds.map((id) => id.trim()).filter(Boolean));
+	const validIds = roster
+		.filter((person) => normalizedIdSet.has(person.id))
+		.map((person) => person.id);
 
-	return [CURRENT_USER_ID, ...teammateIds];
+	return validIds.length > 0 ? validIds : [CURRENT_USER_ID];
 }

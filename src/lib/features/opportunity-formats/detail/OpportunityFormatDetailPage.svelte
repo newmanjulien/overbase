@@ -5,7 +5,6 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import { Pause, Play } from 'lucide-svelte';
 	import { useConvexClient, useQuery } from 'convex-svelte';
-	import { CURRENT_USER_ID } from '$lib/app/current-user';
 	import { AvatarTeamPicker } from '$lib/components/people';
 	import { Button } from '$lib/components/ui';
 	import EmailDraftPanel from '$lib/components/email-draft/EmailDraftPanel.svelte';
@@ -344,7 +343,7 @@
 		<AvatarTeamPicker
 			{people}
 			selectedIds={detailState.selectedTeamMemberIds}
-			requiredSelectedIds={[CURRENT_USER_ID]}
+			minSelected={1}
 			onSelectedIdsChange={(nextIds) => void updateSelectedTeamMemberIds(nextIds)}
 			altBase="Format teammate"
 			ariaLabel="Manage team members"
