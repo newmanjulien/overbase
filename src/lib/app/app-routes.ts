@@ -13,7 +13,7 @@ import {
 type NavIcon = typeof Workflow;
 
 export const APP_ROUTE_IDS = [
-  "my-notifications",
+  "formats",
   "builder",
   "data-sources",
   "external-data",
@@ -25,7 +25,7 @@ export const APP_ROUTE_IDS = [
 
 export type NavRouteId = (typeof APP_ROUTE_IDS)[number];
 export type NavPath = `/${NavRouteId}`;
-export type NavSectionId = "notifications" | "main" | "ecosystem";
+export type NavSectionId = "formats" | "main" | "ecosystem";
 
 type NavSectionDefinition = {
   id: NavSectionId;
@@ -44,14 +44,14 @@ export type AppRouteDefinition = {
 };
 
 export const APP_ROUTE_REGISTRY = {
-  "my-notifications": {
-    href: "/my-notifications",
-    navLabel: "My notifications",
+  "formats": {
+    href: "/formats",
+    navLabel: "My formats",
     icon: Bell,
   },
   builder: {
     href: "/builder",
-    navLabel: "Notification builder",
+    navLabel: "Format builder",
     icon: Hammer,
     hideOnMobile: true,
   },
@@ -89,9 +89,9 @@ export const APP_ROUTE_REGISTRY = {
 
 export const APP_NAV_SECTION_DEFINITIONS = [
   {
-    id: "notifications",
-    heading: "Notifications",
-    routeIds: ["builder", "my-notifications"],
+    id: "formats",
+    heading: "Formats",
+    routeIds: ["builder", "formats"],
     desktopSectionClass: "pt-2",
   },
   {

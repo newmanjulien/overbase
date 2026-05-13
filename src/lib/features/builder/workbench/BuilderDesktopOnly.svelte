@@ -13,7 +13,7 @@
 		const mediaQuery = window.matchMedia('(max-width: 767px)');
 
 		if (mediaQuery.matches) {
-			void goto(resolve('/my-notifications'), { replaceState: true });
+			void goto(resolve('/formats'), { replaceState: true });
 		}
 	});
 </script>

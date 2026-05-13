@@ -34,7 +34,7 @@
 				onSelect(app.id);
 			}}
 		>
-			Create this notification
+			Create this format
 		</Button>
 	</div>
 </article>

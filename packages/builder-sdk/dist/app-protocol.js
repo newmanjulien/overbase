@@ -28,7 +28,7 @@ function buildGuidedInitialMessage({ title, description, guide, guideSetup }) {
         return `${question.title}\n${answer || getMissingGuideAnswerText(guideSetup.action)}`;
     });
     return [
-        `I want to build this notification: ${title}`,
+        `I want to build this opportunity format: ${title}`,
         '',
         'Description:',
         description,

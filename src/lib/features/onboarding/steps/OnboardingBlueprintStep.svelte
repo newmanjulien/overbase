@@ -21,10 +21,10 @@
 >
 	<div class="w-full max-w-120 text-center">
 		<h1 class="mt-5 mb-0 text-[30px] leading-[1.08] font-medium tracking-[-0.02em] text-[#08090a]">
-			Step 1: Create a notification
+			Step 1: Create an opportunity format
 		</h1>
 		<p class="mx-auto mt-4 max-w-130 text-sm leading-[1.45] text-[#686b73]">
-			Get started quickly with Overbase by creating the notification we will send to your team when we find revenue opportunities
+			Get started quickly with Overbase by creating the format we will use to send revenue opportunities to your team
 		</p>
 
 		<div class="mt-10 flex justify-center">

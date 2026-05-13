@@ -16,7 +16,7 @@
 	</div>
 
 	<p class="mt-0 max-w-164 text-center text-[0.76rem] leading-relaxed text-zinc-500 md:text-[0.8rem]">
-		Overbase analyzes your data, analyzes data from your partners then sends actionable opportunities by email. This notification builder lets your design the emails your team receives
+		Overbase analyzes your data, analyzes data from your partners then sends actionable opportunities by email. This format builder lets you design the emails your team receives
 	</p>
 
 	<div class="mt-16 w-full">

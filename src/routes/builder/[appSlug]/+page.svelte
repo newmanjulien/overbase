@@ -38,7 +38,7 @@
 				<div class="w-full max-w-sm rounded-sm border border-zinc-200 bg-white p-5 text-center shadow-sm">
 					<p class="text-sm font-medium text-zinc-950">Builder app not found</p>
 					<p class="mt-2 text-xs leading-relaxed text-zinc-500">
-						Choose a notification builder app from the builder to start a new draft.
+						Choose an opportunity format builder app from the builder to start a new draft.
 					</p>
 					<Button
 						variant="primary"

@@ -121,12 +121,12 @@
 		await builderSession.saveEmailDraft(draft, baseEmailDraftVersion);
 	}
 
-	async function publishNotification() {
-		await builderSession.publishNotification(routeTitleState.title);
+	async function publishFormat() {
+		await builderSession.publishFormat(routeTitleState.title);
 		isPublishNavigation = true;
 
 		try {
-			await goto(resolve('/my-notifications'));
+			await goto(resolve('/formats'));
 		} catch (error) {
 			isPublishNavigation = false;
 			throw error;
@@ -184,7 +184,7 @@
 			{app}
 			session={builderSession.session}
 			onSaveDraft={saveDraft}
-			onPublish={publishNotification}
+			onPublish={publishFormat}
 		/>
 	{/snippet}
 </SplitPane>

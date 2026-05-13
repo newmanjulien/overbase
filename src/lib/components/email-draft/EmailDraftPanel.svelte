@@ -104,7 +104,7 @@
 		try {
 			await onPublish();
 		} catch (error) {
-			publishError = error instanceof Error ? error.message : 'Could not publish notification.';
+			publishError = error instanceof Error ? error.message : 'Could not publish format.';
 		} finally {
 			isPublishing = false;
 		}
@@ -178,7 +178,7 @@
 					disabled={!canEdit || isPublishing}
 					onclick={beginEdit}
 				>
-					Edit notification
+					Edit format
 				</Button>
 				{#if hasPublishAction}
 					<Button

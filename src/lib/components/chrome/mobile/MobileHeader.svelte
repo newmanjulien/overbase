@@ -31,7 +31,7 @@
 		{#if headerParent}
 			<div class="flex min-w-0 flex-col items-center gap-0.5">
 				<a
-					href={headerParent.href === '/builder' ? resolve('/builder') : resolve('/my-notifications')}
+					href={headerParent.href === '/builder' ? resolve('/builder') : resolve('/formats')}
 					class="block max-w-full truncate text-center text-[0.66rem] font-medium tracking-wide text-zinc-400 transition-colors hover:text-zinc-700"
 				>
 					{headerParent.label}

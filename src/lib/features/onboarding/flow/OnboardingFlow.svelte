@@ -45,7 +45,7 @@
 		{ label: 'Support', href: 'https://overbase.app/contact' }
 	];
 	const quote = {
-		text: 'Overbase turns business context into a clear path to the notifications worth building first.',
+		text: 'Overbase turns business context into a clear path to the opportunities worth building first.',
 		personName: 'Morgan Reed',
 		personTitle: 'VP Revenue, Northstar Labs',
 		avatarSrc: '/onboarding-fred.png',

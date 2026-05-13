@@ -60,7 +60,7 @@ function createDataQualityDraft(title: string): EmailDraft {
 		to: ['data@overbase.local'],
 		cc: ['growth@overbase.local'],
 		attachment: {
-			filename: 'notification-sample-data.xlsx',
+			filename: 'opportunity-sample-data.xlsx',
 			cells: [
 				['Partner', 'Signal', 'Priority'],
 				['Acme Capital', 'Viewed pipeline workbook', 'High'],
@@ -71,7 +71,7 @@ function createDataQualityDraft(title: string): EmailDraft {
 		body: [
 			{
 				type: 'paragraph',
-				text: `${title}: the notification found a few records that need review before the next partner update.`
+				text: `${title}: this opportunity format found a few records that need review before the next partner update.`
 			},
 			{
 				type: 'bullets',
@@ -83,66 +83,66 @@ function createDataQualityDraft(title: string): EmailDraft {
 			},
 			{
 				type: 'paragraph',
-				text: 'The attached workbook includes the rows that triggered this notification.'
+				text: 'The attached workbook includes the rows that triggered this opportunity.'
 			}
 		]
 	};
 }
 
-export const seedFeedbackEmailsForNotification = mutation({
+export const seedOpportunitiesForFormat = mutation({
 	args: {
-		notificationId: v.id('notifications'),
+		opportunityFormatId: v.id('opportunityFormats'),
 		replaceExisting: v.optional(v.boolean())
 	},
-	handler: async (ctx, { notificationId, replaceExisting = true }) => {
-		const notification = await ctx.db.get(notificationId);
+	handler: async (ctx, { opportunityFormatId, replaceExisting = true }) => {
+		const opportunityFormat = await ctx.db.get(opportunityFormatId);
 
-		if (!notification) {
-			throw new Error('Notification not found.');
+		if (!opportunityFormat) {
+			throw new Error('Format not found.');
 		}
 
 		if (replaceExisting) {
 			const feedback = await ctx.db
-				.query('notificationEmailFeedback')
-				.withIndex('by_notificationId', (q) => q.eq('notificationId', notificationId))
+				.query('opportunityFeedback')
+				.withIndex('by_opportunityFormatId', (q) => q.eq('opportunityFormatId', opportunityFormatId))
 				.collect();
-			const emails = await ctx.db
-				.query('notificationEmails')
-				.withIndex('by_notification_createdAt', (q) => q.eq('notificationId', notificationId))
+			const opportunities = await ctx.db
+				.query('opportunities')
+				.withIndex('by_opportunityFormat_createdAt', (q) => q.eq('opportunityFormatId', opportunityFormatId))
 				.collect();
 
 			for (const feedbackItem of feedback) {
 				await ctx.db.delete(feedbackItem._id);
 			}
 
-			for (const email of emails) {
-				await ctx.db.delete(email._id);
+			for (const opportunity of opportunities) {
+				await ctx.db.delete(opportunity._id);
 			}
 		}
 
 		const now = Date.now();
 		const drafts = [
-			createPipelineAlertDraft(notification.title),
-			createPartnerSignalDraft(notification.title),
-			createDataQualityDraft(notification.title)
+			createPipelineAlertDraft(opportunityFormat.title),
+			createPartnerSignalDraft(opportunityFormat.title),
+			createDataQualityDraft(opportunityFormat.title)
 		];
-		const emailIds = [];
+		const opportunityIds = [];
 
 		for (const [index, draft] of drafts.entries()) {
 			const sentAt = now - index * 1000 * 60 * 60 * 18;
-			const emailId = await ctx.db.insert('notificationEmails', {
-				notificationId,
+			const opportunityId = await ctx.db.insert('opportunities', {
+				opportunityFormatId,
 				sentAt,
 				emailDraft: normalizeEmailDraft(draft),
 				createdAt: sentAt
 			});
 
-			emailIds.push(emailId);
+			opportunityIds.push(opportunityId);
 		}
 
 		return {
-			notificationId,
-			insertedEmails: emailIds.length
+			opportunityFormatId,
+			insertedOpportunities: opportunityIds.length
 		};
 	}
 });

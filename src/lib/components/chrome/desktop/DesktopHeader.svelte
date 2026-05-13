@@ -49,7 +49,7 @@
 		{#if headerParent}
 			<nav aria-label="Breadcrumb" class="ml-2 flex min-w-0 flex-1 items-center gap-1.5">
 				<a
-					href={headerParent.href === '/builder' ? resolve('/builder') : resolve('/my-notifications')}
+					href={headerParent.href === '/builder' ? resolve('/builder') : resolve('/formats')}
 					class="block min-w-0 shrink truncate text-[0.74rem] font-medium tracking-wide text-zinc-400 transition-colors hover:text-zinc-600"
 				>
 					{headerParent.label}

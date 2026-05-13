@@ -4,27 +4,27 @@ This folder is where Overbase wires builder apps into the product.
 
 There are two paths:
 
-- `custom-notification` runs inside this repo.
+- `custom-opportunity-format` runs inside this repo.
 - Blueprint apps run somewhere else and Overbase calls them over HTTP.
 
-## Custom Notification
+## Custom Opportunity Format
 
-The custom notification builder is built into Overbase.
+The custom opportunity format builder is built into Overbase.
 
 Files:
 
-- `custom-notification/definition.ts`: app manifest.
-- `custom-notification/runtime.ts`: runtime entrypoint with `startTurn`, `continueTurn`, and `backgroundJob`.
-- `custom-notification/engine/`: OpenAI workflow.
-- `custom-notification/rules/`: prompts and rules.
-- `custom-notification/examples/`: example notifications used by the workflow.
+- `custom-opportunity-format/definition.ts`: app manifest.
+- `custom-opportunity-format/runtime.ts`: runtime entrypoint with `startTurn`, `continueTurn`, and `backgroundJob`.
+- `custom-opportunity-format/engine/`: OpenAI workflow.
+- `custom-opportunity-format/rules/`: prompts and rules.
+- `custom-opportunity-format/examples/`: example formats used by the workflow.
 
 Load path:
 
-- `/builder/custom-notification` asks `runtime.server.ts` for the manifest.
-- `runtime.server.ts` returns the local manifest from `custom-notification/definition.ts`.
+- `/builder/custom-opportunity-format` asks `runtime.server.ts` for the manifest.
+- `runtime.server.ts` returns the local manifest from `custom-opportunity-format/definition.ts`.
 - Convex jobs ask `src/convex/builderRuntime.ts` for the runtime.
-- `src/convex/builderRuntime.ts` returns the local runtime from `custom-notification/runtime.ts`.
+- `src/convex/builderRuntime.ts` returns the local runtime from `custom-opportunity-format/runtime.ts`.
 
 Required env:
 
@@ -32,7 +32,7 @@ Required env:
 OPENAI_API_KEY
 ```
 
-Set this in the Convex dev environment, because Convex runs the custom notification jobs.
+Set this in the Convex dev environment, because Convex runs the custom opportunity format jobs.
 
 ## Blueprint Apps
 
@@ -68,8 +68,8 @@ BRING_THE_FIRM_RUNTIME_SECRET
 
 ## Runtime Shapes
 
-The custom notification runtime is a file because it is part of Overbase.
-Convex imports `custom-notification/runtime.ts` and calls `startTurn`, `continueTurn`,
+The custom opportunity format runtime is a file because it is part of Overbase.
+Convex imports `custom-opportunity-format/runtime.ts` and calls `startTurn`, `continueTurn`,
 and `backgroundJob` directly.
 
 Blueprint app runtimes usually live in their own apps. In those apps, `runtime` is a
@@ -79,7 +79,7 @@ lets Overbase call it.
 For example, in Bring the Firm:
 
 - `src/runtime/operations.ts` is the real runtime logic. It is the closest match to
-  `custom-notification/runtime.ts`.
+  `custom-opportunity-format/runtime.ts`.
 - `src/runtime/http.ts`, `src/runtime/signing.ts`, and `src/runtime/ndjson.ts` are
   there because Overbase calls the app over HTTP.
 - `src/routes/api/builder/*` exposes the runtime endpoints that Overbase calls.

@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { goto, preloadData } from '$app/navigation';
 	import { tick } from 'svelte';
-	import { CUSTOM_NOTIFICATION_APP_ID } from '$lib/features/builder/catalog';
+	import { CUSTOM_OPPORTUNITY_FORMAT_APP_ID } from '$lib/features/builder/catalog';
 	import {
 		createBuilderLaunchState,
 		writePendingBuilderLaunch
@@ -11,7 +11,7 @@
 	import { IconButton } from '$lib/components/ui';
 	import { ArrowUp, Plus } from 'lucide-svelte';
 
-	const CHAT_HEADING = 'Build your custom email notification';
+	const CHAT_HEADING = 'Build your custom opportunity format';
 	const MAX_TEXTAREA_LINES = 11;
 
 	let value = $state('');
@@ -21,7 +21,7 @@
 	let shouldFocusComposer = $state(true);
 
 	const customBuilderHref = resolve('/builder/[appSlug]', {
-		appSlug: CUSTOM_NOTIFICATION_APP_ID
+		appSlug: CUSTOM_OPPORTUNITY_FORMAT_APP_ID
 	});
 	const canSubmit = $derived(value.trim().length > 0 && !isSubmitting);
 
@@ -81,7 +81,7 @@
 		}
 
 		const prompt = value.trim();
-		const builderLaunch = createBuilderLaunchState(CUSTOM_NOTIFICATION_APP_ID, {
+		const builderLaunch = createBuilderLaunchState(CUSTOM_OPPORTUNITY_FORMAT_APP_ID, {
 			fresh: true,
 			setup: createFreeformRunSetup(prompt)
 		});
@@ -135,7 +135,7 @@
 						bind:value
 						rows={1}
 						aria-label="Prompt input"
-						placeholder="Describe the notification you want your team to receive by email..."
+						placeholder="Describe the opportunity format you want your team to receive by email..."
 						class="prompt-input w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.8rem] leading-[1.34] text-zinc-800 outline-none placeholder:text-zinc-400 md:text-[0.84rem]"
 						onfocus={preloadCustomBuilderRoute}
 						onkeydown={(event) => {

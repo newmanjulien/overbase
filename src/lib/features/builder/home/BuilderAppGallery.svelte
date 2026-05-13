@@ -11,7 +11,7 @@
 	import { FilterPillGroup, HelpTooltip } from '$lib/components/ui';
 
 	const BLUEPRINT_HELP_TEXT =
-		'Blueprints are guided starting points for common notification workflows. Pick one to answer a few setup questions and generate a tailored draft';
+		'Blueprints are guided starting points for common opportunity workflows. Pick one to answer a few setup questions and generate a tailored draft';
 
 	type Props = {
 		builderHome: BuilderAppHomeData;

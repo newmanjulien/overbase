@@ -10,7 +10,7 @@
 - Readable code is important
 
 - This is a new app I'm building
-- It currently mostly is a notification builder
+- It currently mostly is an opportunity format builder
 - Later we'll add many other features (current routes which have just and empty state now)
 - The builder relies on separate apps
 - Check out src/builder-apps/README.md to understand how those separate apps work

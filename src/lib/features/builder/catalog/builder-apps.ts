@@ -1,5 +1,5 @@
 import { BriefcaseBusiness, Flag, LoaderCircle, Scale } from 'lucide-svelte';
-import { CUSTOM_NOTIFICATION_APP_SLUG } from '../../../../builder-apps/ids';
+import { CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG } from '../../../../builder-apps/ids';
 import type { BuilderAppRegistryEntry } from '../../../../builder-apps/registry';
 import type { BuilderAppCategory } from '../../../../builder-apps/categories';
 import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
@@ -10,7 +10,7 @@ type BuilderAppView = Pick<
 	'slug' | 'categoryIds' | 'title' | 'description' | 'details' | 'mode' | 'artwork'
 >;
 
-export const CUSTOM_NOTIFICATION_APP_ID = CUSTOM_NOTIFICATION_APP_SLUG;
+export const CUSTOM_OPPORTUNITY_FORMAT_APP_ID = CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG;
 
 export type BuilderAppCategoryId = string;
 export type BuilderAppFilterId = BuilderAppCategoryId | 'all';
