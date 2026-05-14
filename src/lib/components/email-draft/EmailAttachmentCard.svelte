@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { EMAIL_ATTACHMENT_FORMAT } from '@overbase/builder-sdk/email';
-	import { X } from 'lucide-svelte';
+	import X from 'phosphor-svelte/lib/X';
 
 	type Props = {
 		filename: string;
@@ -47,7 +47,7 @@
 			class="ml-1 inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
 			onclick={handleRemove}
 		>
-			<X class="size-3.25 stroke-[2.1]" />
+			<X size={13} weight="regular" />
 		</button>
 	{/if}
 {/snippet}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Ellipsis } from 'lucide-svelte';
+	import DotsThree from 'phosphor-svelte/lib/DotsThree';
 	import { FloatingActionMenu, IconButton, type FloatingActionMenuAction } from '$lib/components/ui';
 
 	type Props = {
@@ -24,6 +24,6 @@
 		variant="secondary"
 		class="size-7 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300"
 	>
-		<Ellipsis class="size-3" />
+		<DotsThree size={12} weight="regular" />
 	</IconButton>
 {/if}

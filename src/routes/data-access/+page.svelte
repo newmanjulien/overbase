@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { KeyRound } from 'lucide-svelte';
 	import { ListRoutePage } from '$lib/components/list-page';
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 </script>
 
 <ListRoutePage
@@ -10,7 +10,7 @@
 		filterLabel: 'All partners'
 	}}
 	empty={{
-		icon: KeyRound,
+		icon: APP_ROUTE_REGISTRY['data-access'].icon,
 		title: 'No partners found',
 		description: 'Control what data you share with each partner.',
 		nextSteps: [

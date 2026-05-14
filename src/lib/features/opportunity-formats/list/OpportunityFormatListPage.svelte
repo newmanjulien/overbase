@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
-	import { Bell } from 'lucide-svelte';
 	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import {
 		ListContentState,
 		ListRoutePage,
@@ -160,7 +160,7 @@
 		filterLabel: 'All formats'
 	}}
 	empty={{
-		icon: Bell,
+		icon: APP_ROUTE_REGISTRY.formats.icon,
 		title: 'No formats found',
 		description: 'Build your first format with the format builder.',
 		nextSteps: [

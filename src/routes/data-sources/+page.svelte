@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Database } from 'lucide-svelte';
 	import { ListRoutePage } from '$lib/components/list-page';
 	import { Button, ModalShell } from '$lib/components/ui';
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
 	let modalOpen = $state(false);
 </script>
@@ -14,7 +14,7 @@
 		actionLabel: 'Add data source'
 	}}
 	empty={{
-		icon: Database,
+		icon: APP_ROUTE_REGISTRY['data-sources'].icon,
 		title: 'No data sources found',
 		description: 'Connect data sources to power your opportunities.',
 		nextSteps:

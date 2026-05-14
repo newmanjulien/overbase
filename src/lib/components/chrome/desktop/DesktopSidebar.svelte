@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronsUpDown } from 'lucide-svelte';
+	import CaretUpDown from 'phosphor-svelte/lib/CaretUpDown';
 	import { APP_CONFIG } from '$lib/app/app-config';
 	import DesktopNavList from '$lib/components/chrome/desktop/DesktopNavList.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
@@ -60,7 +60,7 @@
 					size={20}
 					class="border border-zinc-100 bg-white"
 				/>
-				<ChevronsUpDown aria-hidden="true" class="h-3 w-3 text-zinc-400" />
+				<CaretUpDown aria-hidden="true" size={12} weight="regular" class="text-zinc-400" />
 			</div>
 		</div>
 	</div>

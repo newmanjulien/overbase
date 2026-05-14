@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown } from 'lucide-svelte';
+	import CaretDown from 'phosphor-svelte/lib/CaretDown';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import { Button } from '$lib/components/ui';
 	import ListActionButton from '$lib/components/list-page/ListActionButton.svelte';
@@ -37,7 +37,7 @@
 			>
 				<span>{filterLabel}</span>
 				{#snippet trailing()}
-					<ChevronDown aria-hidden="true" class="size-3.5 text-zinc-600" />
+					<CaretDown aria-hidden="true" size={14} weight="regular" class="text-zinc-600" />
 				{/snippet}
 			</Button>
 		{/if}

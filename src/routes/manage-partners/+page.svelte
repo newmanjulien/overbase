@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { UsersRound } from 'lucide-svelte';
 	import { ListRoutePage } from '$lib/components/list-page';
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 </script>
 
 <ListRoutePage
@@ -10,7 +10,7 @@
 		filterLabel: 'All partners'
 	}}
 	empty={{
-		icon: UsersRound,
+		icon: APP_ROUTE_REGISTRY['manage-partners'].icon,
 		title: 'No partners found',
 		description: 'Manage partners connected to your ecosystem.',
 		nextSteps: [

@@ -1,10 +1,14 @@
-import { BriefcaseBusiness, Flag, LoaderCircle, Scale } from 'lucide-svelte';
+import Briefcase from 'phosphor-svelte/lib/Briefcase';
+import CircleNotch from 'phosphor-svelte/lib/CircleNotch';
+import Flag from 'phosphor-svelte/lib/Flag';
+import Scales from 'phosphor-svelte/lib/Scales';
 import { CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG } from '../../../../builder-apps/ids';
 import type { BuilderAppRegistryEntry } from '../../../../builder-apps/registry';
 import type { BuilderAppCategory } from '../../../../builder-apps/categories';
 import { toBuilderArtworkPreset, type BuilderArtworkPreset } from './builder-artwork';
+import type { PhosphorIcon } from '$lib/components/icons/types';
 
-type CategoryIcon = typeof Flag;
+type CategoryIcon = PhosphorIcon;
 type BuilderAppView = Pick<
 	BuilderAppRegistryEntry,
 	'slug' | 'categoryIds' | 'title' | 'description' | 'details' | 'mode' | 'artwork'
@@ -41,16 +45,16 @@ export type BuilderAppHomeData = {
 };
 
 const CATEGORY_ICONS: Record<string, CategoryIcon> = {
-	'briefcase-business': BriefcaseBusiness,
+	'briefcase-business': Briefcase,
 	flag: Flag,
-	scale: Scale
+	scale: Scales
 };
 
 export const ALL_BUILDER_APP_FILTER = {
 	id: 'all',
 	label: 'All',
 	iconId: 'loader-circle',
-	icon: LoaderCircle,
+	icon: CircleNotch,
 	sortOrder: -1
 } satisfies BuilderAppFilter;
 

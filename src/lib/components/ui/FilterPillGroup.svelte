@@ -1,9 +1,9 @@
 <script lang="ts" generics="Id extends string">
-	import type { Flag } from 'lucide-svelte';
 	import type { ClassValue } from 'clsx';
 	import { cn } from '$lib/components/chrome/shared/cn';
+	import type { PhosphorIcon } from '$lib/components/icons/types';
 
-	type FilterIcon = typeof Flag;
+	type FilterIcon = PhosphorIcon;
 
 	type FilterPill = {
 		id: Id;
@@ -39,7 +39,7 @@
 				}}
 			>
 				{#if Icon}
-					<Icon class="size-3.5 shrink-0" />
+					<Icon size={14} weight="regular" class="shrink-0" />
 				{/if}
 				<span>{filter.label}</span>
 			</button>

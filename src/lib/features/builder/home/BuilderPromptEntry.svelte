@@ -9,7 +9,8 @@
 	} from '$lib/features/builder/session/builder-launch';
 	import { createFreeformRunSetup } from '@overbase/builder-sdk/app-protocol';
 	import { IconButton } from '$lib/components/ui';
-	import { ArrowUp, Plus } from 'lucide-svelte';
+	import ArrowUp from 'phosphor-svelte/lib/ArrowUp';
+	import Plus from 'phosphor-svelte/lib/Plus';
 
 	const CHAT_HEADING = 'Build your custom opportunity format';
 	const MAX_TEXTAREA_LINES = 11;
@@ -155,7 +156,7 @@
 						class="size-7.5 rounded-full text-zinc-700"
 						disabled
 					>
-						<Plus class="size-4 stroke-[2.25]" />
+						<Plus size={16} weight="regular" />
 					</IconButton>
 
 					<div class="flex items-center">
@@ -166,7 +167,7 @@
 							class="size-7.5 rounded-full bg-black transition-transform hover:bg-black hover:scale-[1.02] disabled:hover:scale-100"
 							disabled={!canSubmit}
 						>
-							<ArrowUp class="size-3.75 stroke-[2.4]" />
+							<ArrowUp size={15} weight="regular" />
 						</IconButton>
 					</div>
 				</div>

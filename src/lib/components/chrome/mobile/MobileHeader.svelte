@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { Menu } from 'lucide-svelte';
+	import List from 'phosphor-svelte/lib/List';
 	import EditableHeaderTitle from '$lib/components/chrome/shared/EditableHeaderTitle.svelte';
 	import HomeLink from '$lib/components/chrome/shared/HomeLink.svelte';
 	import type { HeaderParentHref } from '$lib/components/chrome/shared/route-title.svelte';
@@ -65,7 +65,7 @@
 				shellState.isMobileDrawerOpen = !shellState.isMobileDrawerOpen;
 			}}
 		>
-			<Menu class="size-4" />
+			<List size={16} weight="regular" />
 		</IconButton>
 	</div>
 </header>

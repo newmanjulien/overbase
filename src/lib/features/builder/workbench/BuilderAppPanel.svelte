@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronDown } from 'lucide-svelte';
+	import CaretDown from 'phosphor-svelte/lib/CaretDown';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 	import BuilderPanelArtwork from '$lib/features/builder/workbench/BuilderPanelArtwork.svelte';
 
@@ -48,8 +48,10 @@
 					}}
 				>
 					Learn more
-					<ChevronDown
+					<CaretDown
 						aria-hidden="true"
+						size={14}
+						weight="regular"
 						class={chevronClass}
 					/>
 				</button>

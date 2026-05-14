@@ -4,7 +4,7 @@
 </script>
 
 <script lang="ts">
-	import { X } from 'lucide-svelte';
+	import X from 'phosphor-svelte/lib/X';
 	import { tick } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'clsx';
@@ -158,7 +158,7 @@
 				class="absolute top-4 right-4 size-6 border-0"
 				onclick={onClose}
 			>
-				<X class="size-4" />
+				<X size={16} weight="regular" />
 			</IconButton>
 
 			<header class="space-y-1 px-4 py-5 pr-12">

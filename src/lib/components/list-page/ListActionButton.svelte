@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus } from 'lucide-svelte';
+	import Plus from 'phosphor-svelte/lib/Plus';
 	import { Button } from '$lib/components/ui';
 
 	type Tone = 'primary' | 'secondary';
@@ -24,7 +24,7 @@
 	{onclick}
 >
 	{#snippet leading()}
-		<Plus aria-hidden="true" class="size-3.5 stroke-[2.25]" />
+		<Plus aria-hidden="true" size={14} weight="regular" />
 	{/snippet}
 	<span>{label}</span>
 </Button>

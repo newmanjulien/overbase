@@ -80,7 +80,7 @@
 									onRouteHover?.(item);
 								}}
 							>
-								<Icon class="size-3.5 shrink-0" />
+								<Icon size={14} weight="regular" class="shrink-0" />
 								{#if expanded}
 									<span class="min-w-0 overflow-hidden" in:fly={{ x: -4, duration: 200 }}>
 										<span class="block truncate text-left">{item.label}</span>
@@ -104,7 +104,7 @@
 					<li>
 						<span class={cn('relative', expanded ? 'block w-full' : 'inline-flex self-center')}>
 							<span class={getFooterItemClassName(item.kind === 'disabled')}>
-								<Icon class="size-3.5 shrink-0" />
+								<Icon size={14} weight="regular" class="shrink-0" />
 								{#if expanded}
 									<span class="min-w-0 overflow-hidden">
 										<span class="block truncate text-left">{item.label}</span>

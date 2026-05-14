@@ -1,6 +1,6 @@
-import type { Database } from 'lucide-svelte';
+import type { PhosphorIcon } from '$lib/components/icons/types';
 
-export type ListIcon = typeof Database;
+export type ListIcon = PhosphorIcon;
 
 export type ListToolbarConfig = {
 	searchPlaceholder: string;

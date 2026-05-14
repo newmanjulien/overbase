@@ -1,6 +1,6 @@
 <script lang="ts">
 	import MobileNavList from '$lib/components/chrome/mobile/MobileNavList.svelte';
-	import { X } from 'lucide-svelte';
+	import X from 'phosphor-svelte/lib/X';
 	import HomeLink from '$lib/components/chrome/shared/HomeLink.svelte';
 	import { MOBILE_NAV_SECTIONS, NAV_FOOTER_ITEMS } from '$lib/components/chrome/shared/nav';
 	import { useChromeShellState } from '$lib/components/chrome/shared/shell.svelte';
@@ -31,7 +31,7 @@
 						shellState.isMobileDrawerOpen = false;
 					}}
 				>
-					<X class="size-4" />
+					<X size={16} weight="regular" />
 				</IconButton>
 			</header>
 

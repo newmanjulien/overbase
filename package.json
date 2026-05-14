@@ -40,7 +40,7 @@
 		"clsx": "^2.1.1",
 		"convex": "^1.37.0",
 		"convex-svelte": "^0.0.12",
-		"lucide-svelte": "^1.0.1",
+		"phosphor-svelte": "^3.1.0",
 		"stick-to-bottom-svelte": "^1.0.3",
 		"tailwind-merge": "^3.5.0"
 	},

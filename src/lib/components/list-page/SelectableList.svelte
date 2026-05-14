@@ -2,7 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { Snippet } from 'svelte';
-	import { Check, Minus } from 'lucide-svelte';
+	import Check from 'phosphor-svelte/lib/Check';
+	import Minus from 'phosphor-svelte/lib/Minus';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import { FloatingActionMenu, type FloatingActionMenuAction } from '$lib/components/ui';
 	import type {
@@ -142,7 +143,7 @@
 			aria-hidden="true"
 		>
 			{#if isSelected(item.id)}
-				<Check class="size-2.5 stroke-[2.5]" />
+				<Check size={10} weight="bold" />
 			{/if}
 		</span>
 	</label>
@@ -183,9 +184,9 @@
 					aria-hidden="true"
 				>
 					{#if allSelected}
-						<Check class="size-2.5 stroke-[2.5]" />
+						<Check size={10} weight="bold" />
 					{:else if someSelected}
-						<Minus class="size-2.5 stroke-[2.5]" />
+						<Minus size={10} weight="bold" />
 					{/if}
 				</span>
 				<span class="truncate">{selectAllLabel}</span>

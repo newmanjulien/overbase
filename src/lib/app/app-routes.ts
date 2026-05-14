@@ -1,16 +1,15 @@
-import {
-  Bell,
-  ContactRound,
-  Database,
-  Globe,
-  Hammer,
-  KeyRound,
-  UserPlus,
-  UsersRound,
-  Workflow,
-} from "lucide-svelte";
+import Building from "phosphor-svelte/lib/Building";
+import ChatTeardrop from "phosphor-svelte/lib/ChatTeardrop";
+import Cloud from "phosphor-svelte/lib/Cloud";
+import FolderSimple from "phosphor-svelte/lib/FolderSimple";
+import HardDrive from "phosphor-svelte/lib/HardDrive";
+import Key from "phosphor-svelte/lib/Key";
+import ListPlus from "phosphor-svelte/lib/ListPlus";
+import Users from "phosphor-svelte/lib/Users";
+import type { PhosphorIcon, PhosphorIconProps } from "$lib/components/icons/types";
 
-type NavIcon = typeof Workflow;
+export type RouteIconProps = PhosphorIconProps;
+export type RouteIcon = PhosphorIcon;
 
 export const APP_ROUTE_IDS = [
   "formats",
@@ -39,7 +38,7 @@ type NavSectionDefinition = {
 export type AppRouteDefinition = {
   href: NavPath;
   navLabel: string;
-  icon: NavIcon;
+  icon: RouteIcon;
   hideOnMobile?: boolean;
 };
 
@@ -47,43 +46,43 @@ export const APP_ROUTE_REGISTRY = {
   formats: {
     href: "/formats",
     navLabel: "My formats",
-    icon: Bell,
+    icon: FolderSimple,
   },
   builder: {
     href: "/builder",
     navLabel: "Format builder",
-    icon: Hammer,
+    icon: ChatTeardrop,
     hideOnMobile: true,
   },
   "data-sources": {
     href: "/data-sources",
     navLabel: "Data sources",
-    icon: Database,
+    icon: HardDrive,
   },
   "external-data": {
     href: "/external-data",
     navLabel: "External data",
-    icon: Globe,
+    icon: Cloud,
   },
   team: {
     href: "/team",
     navLabel: "Team",
-    icon: ContactRound,
+    icon: Users,
   },
   "invite-partners": {
     href: "/invite-partners",
     navLabel: "Invite partners",
-    icon: UserPlus,
+    icon: ListPlus,
   },
   "manage-partners": {
     href: "/manage-partners",
     navLabel: "Manage partners",
-    icon: UsersRound,
+    icon: Building,
   },
   "data-access": {
     href: "/data-access",
     navLabel: "Data access",
-    icon: KeyRound,
+    icon: Key,
   },
 } as const satisfies Record<NavRouteId, AppRouteDefinition>;
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { PhosphorIcon } from '$lib/components/icons/types';
 
 	type Props = {
 		backColor: string;
 		frontColor: string;
-		icon: ComponentType;
+		icon: PhosphorIcon;
 		iconCenterX: string;
 		iconCenterY: string;
 	};
@@ -32,7 +32,7 @@
 	</svg>
 
 	<div class="panel-artwork__icon">
-		<Icon />
+		<Icon size="100%" weight="regular" />
 	</div>
 </div>
 
@@ -58,13 +58,11 @@
 		width: 1.8rem;
 		height: 1.8rem;
 		color: #09090b;
-		stroke-width: 2.15;
 		transform: translate(-50%, -50%);
 	}
 
 	.panel-artwork__icon :global(svg) {
 		width: 100%;
 		height: 100%;
-		stroke-width: inherit;
 	}
 </style>

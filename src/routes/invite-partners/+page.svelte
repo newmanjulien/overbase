@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { UserPlus } from 'lucide-svelte';
 	import { ListRoutePage } from '$lib/components/list-page';
 	import { Button, ModalShell } from '$lib/components/ui';
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
 	let modalOpen = $state(false);
 </script>
@@ -14,7 +14,7 @@
 		actionLabel: 'Invite partner'
 	}}
 	empty={{
-		icon: UserPlus,
+		icon: APP_ROUTE_REGISTRY['invite-partners'].icon,
 		title: 'No invitations found',
 		description: 'Invite ecosystem partners to share data and collaborate.',
 		nextSteps:

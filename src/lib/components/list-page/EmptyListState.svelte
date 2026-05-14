@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Database, ExternalLink } from 'lucide-svelte';
+	import Database from 'phosphor-svelte/lib/Database';
+	import ArrowSquareOut from 'phosphor-svelte/lib/ArrowSquareOut';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import ListActionButton from '$lib/components/list-page/ListActionButton.svelte';
 	import type { ListIcon } from '$lib/components/list-page/types';
@@ -33,7 +34,13 @@
 >
 	<div class="flex w-full flex-col items-center text-center">
 		<div class="flex max-w-56 flex-col items-center">
-			<Icon aria-hidden="true" class="mb-5 size-6 text-zinc-950" />
+			<Icon
+				aria-hidden="true"
+				size={24}
+				weight="regular"
+				color="currentColor"
+				class="mb-5 text-zinc-950"
+			/>
 
 			<h2 class="text-[0.78rem] leading-tight font-medium text-zinc-950">
 				{title}
@@ -47,7 +54,7 @@
 						class="ml-1 inline-flex items-center gap-1 text-blue-400 hover:text-blue-500"
 					>
 						<span>{learnMoreLabel}</span>
-						<ExternalLink aria-hidden="true" class="size-3" />
+						<ArrowSquareOut aria-hidden="true" size={12} weight="regular" />
 					</button>
 				{/if}
 			</p>

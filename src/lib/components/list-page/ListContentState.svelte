@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { AlertCircle, LoaderCircle } from 'lucide-svelte';
+	import CircleNotch from 'phosphor-svelte/lib/CircleNotch';
+	import WarningCircle from 'phosphor-svelte/lib/WarningCircle';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
 	type ContentStateKind = 'loading' | 'error';
@@ -12,7 +13,7 @@
 
 	let { kind, message, class: className = '' }: Props = $props();
 
-	const Icon = $derived(kind === 'loading' ? LoaderCircle : AlertCircle);
+	const Icon = $derived(kind === 'loading' ? CircleNotch : WarningCircle);
 	const toneClass = $derived(
 		kind === 'error'
 			? 'border-red-100 bg-red-50/40 text-red-700'
@@ -30,7 +31,9 @@
 	<div class="inline-flex items-center gap-2">
 		<Icon
 			aria-hidden="true"
-			class={cn('size-3.5', kind === 'loading' && 'animate-spin')}
+			size={14}
+			weight="regular"
+			class={cn(kind === 'loading' && 'animate-spin')}
 		/>
 		<span>{message}</span>
 	</div>

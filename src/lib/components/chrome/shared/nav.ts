@@ -1,4 +1,4 @@
-import { CircleQuestionMark } from 'lucide-svelte';
+import Question from 'phosphor-svelte/lib/Question';
 import {
 	APP_NAV_SECTION_DEFINITIONS,
 	APP_ROUTE_REGISTRY,
@@ -70,7 +70,7 @@ export const NAV_FOOTER_ITEMS: readonly NavFooterItem[] = [
 		id: 'contact-support',
 		kind: 'disabled',
 		label: 'Contact support',
-		icon: CircleQuestionMark
+		icon: Question
 	}
 ] as const;
 

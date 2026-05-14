@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { ListFilter, Plus, Trash2 } from 'lucide-svelte';
+	import FunnelSimple from 'phosphor-svelte/lib/FunnelSimple';
+	import Plus from 'phosphor-svelte/lib/Plus';
+	import Trash from 'phosphor-svelte/lib/Trash';
 	import { Button, IconButton, InfoBar, InfoBarAction } from '$lib/components/ui';
 	import LinkDataSourcesModal from './LinkDataSourcesModal.svelte';
 	import type { OpportunityFormatRule } from './opportunity-format-detail-types';
@@ -48,7 +50,7 @@
 			<p class="text-[0.72rem] font-medium text-zinc-950">Rules for this format</p>
 			<Button variant="secondary" class="h-7 px-2.5 text-[0.68rem]" onclick={addRule}>
 				{#snippet leading()}
-					<Plus class="size-3.5" />
+					<Plus size={14} weight="regular" />
 				{/snippet}
 				Add rule
 			</Button>
@@ -77,7 +79,7 @@
 										class="size-6 shrink-0 text-zinc-400 hover:bg-red-50 hover:text-red-600"
 										onclick={() => removeRule(rule.id)}
 									>
-										<Trash2 class="size-3" />
+										<Trash size={12} weight="regular" />
 									</IconButton>
 								</div>
 							</div>
@@ -108,7 +110,7 @@
 		{:else}
 			<div class="flex min-h-60 flex-1 items-center justify-center px-3 py-8">
 				<div class="flex max-w-52 flex-col items-center text-center">
-					<ListFilter aria-hidden="true" class="mb-4 size-5 text-zinc-950" />
+					<FunnelSimple aria-hidden="true" size={20} weight="regular" class="mb-4 text-zinc-950" />
 
 					<h2 class="text-[0.78rem] leading-tight font-medium text-zinc-950">No rules yet</h2>
 

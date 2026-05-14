@@ -46,7 +46,7 @@
 								onRouteSelect?.(item);
 							}}
 						>
-							<Icon class="size-3.5 shrink-0" />
+							<Icon size={14} weight="regular" class="shrink-0" />
 							<span class="min-w-0 truncate">{item.label}</span>
 						</a>
 					</li>
@@ -62,7 +62,7 @@
 					{@const Icon = item.icon}
 					<li>
 						<span class={getItemClassName({ isActive: false, disabled: item.kind === 'disabled' })}>
-							<Icon class="size-3.5 shrink-0" />
+							<Icon size={14} weight="regular" class="shrink-0" />
 							<span class="min-w-0 truncate">{item.label}</span>
 						</span>
 					</li>

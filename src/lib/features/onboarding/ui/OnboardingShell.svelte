@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowLeft } from 'lucide-svelte';
+	import ArrowLeft from 'phosphor-svelte/lib/ArrowLeft';
 	import type { Snippet } from 'svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
@@ -42,7 +42,7 @@
 					class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
 					onclick={onReturn}
 				>
-					<ArrowLeft aria-hidden="true" class="size-3.5" strokeWidth={1.8} />
+					<ArrowLeft aria-hidden="true" size={14} weight="regular" />
 					<span>{returnLabel}</span>
 				</button>
 			{/if}

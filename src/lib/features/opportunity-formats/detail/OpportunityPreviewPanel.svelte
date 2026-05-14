@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { ArrowLeft, ArrowRight } from 'lucide-svelte';
+	import ArrowLeft from 'phosphor-svelte/lib/ArrowLeft';
+	import ArrowRight from 'phosphor-svelte/lib/ArrowRight';
 	import EmailAttachmentSpreadsheetPreview from '$lib/components/email-draft/EmailAttachmentSpreadsheetPreview.svelte';
 	import EmailComposePreview from '$lib/components/email-draft/EmailComposePreview.svelte';
 	import { IconButton } from '$lib/components/ui';
@@ -74,7 +75,7 @@
 					disabled={!canGoPrevious}
 					onclick={onPrevious}
 				>
-					<ArrowLeft class="size-3.5 stroke-[2]" />
+					<ArrowLeft size={14} weight="regular" />
 				</IconButton>
 				<IconButton
 					aria-label="Next opportunity"
@@ -83,7 +84,7 @@
 					disabled={!canGoNext}
 					onclick={onNext}
 				>
-					<ArrowRight class="size-3.5 stroke-[2]" />
+					<ArrowRight size={14} weight="regular" />
 				</IconButton>
 			</div>
 		</div>

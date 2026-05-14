@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { ContactRound } from 'lucide-svelte';
 	import { ListRoutePage } from '$lib/components/list-page';
 	import { Button, ModalShell } from '$lib/components/ui';
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
 	let modalOpen = $state(false);
 </script>
@@ -14,7 +14,7 @@
 		actionLabel: 'Invite team'
 	}}
 	empty={{
-		icon: ContactRound,
+		icon: APP_ROUTE_REGISTRY.team.icon,
 		title: 'No teammates found',
 		description: 'Invite teammates who will receive opportunities.',
 		nextSteps:

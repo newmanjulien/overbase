@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { Pencil } from 'lucide-svelte';
+	import PencilSimple from 'phosphor-svelte/lib/PencilSimple';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import { IconButton } from '$lib/components/ui';
 
@@ -122,7 +122,7 @@
 				)}
 				onclick={beginEditing}
 			>
-				<Pencil class="size-3" strokeWidth={2.25} />
+				<PencilSimple size={12} weight="regular" />
 			</IconButton>
 		{/if}
 	{/if}

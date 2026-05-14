@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Globe } from 'lucide-svelte';
 	import { ListRoutePage } from '$lib/components/list-page';
 	import { Button, ModalShell } from '$lib/components/ui';
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
 	let modalOpen = $state(false);
 </script>
@@ -14,7 +14,7 @@
 		actionLabel: 'Add external data'
 	}}
 	empty={{
-		icon: Globe,
+		icon: APP_ROUTE_REGISTRY['external-data'].icon,
 		title: 'No external data found',
 		description: 'Connect external data to enrich your opportunities.',
 		nextSteps:

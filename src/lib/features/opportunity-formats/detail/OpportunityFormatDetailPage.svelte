@@ -3,7 +3,8 @@
 	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
-	import { Pause, Play } from 'lucide-svelte';
+	import Pause from 'phosphor-svelte/lib/Pause';
+	import Play from 'phosphor-svelte/lib/Play';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { AvatarTeamPicker } from '$lib/components/people';
 	import { Button } from '$lib/components/ui';
@@ -333,9 +334,9 @@
 		>
 			{#snippet leading()}
 				{#if status === 'active'}
-					<Play class="size-3.5" />
+					<Play size={14} weight="regular" />
 				{:else}
-					<Pause class="size-3.5" />
+					<Pause size={14} weight="regular" />
 				{/if}
 			{/snippet}
 			{status === 'active' ? 'Active' : 'Paused'}

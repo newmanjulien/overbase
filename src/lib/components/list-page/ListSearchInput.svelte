@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Search } from 'lucide-svelte';
+	import MagnifyingGlass from 'phosphor-svelte/lib/MagnifyingGlass';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
 	type Props = {
@@ -19,9 +19,11 @@
 
 <label class={cn('relative block h-8 min-w-0', className)}>
 	<span class="sr-only">{ariaLabel}</span>
-	<Search
+	<MagnifyingGlass
 		aria-hidden="true"
-		class="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-zinc-400"
+		size={14}
+		weight="regular"
+		class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-zinc-400"
 	/>
 	<input
 		type="search"

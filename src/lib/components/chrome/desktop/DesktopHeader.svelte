@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import type { Snippet } from 'svelte';
-	import { ChevronRight, PanelLeft } from 'lucide-svelte';
+	import SidebarSimple from 'phosphor-svelte/lib/SidebarSimple';
+	import CaretRight from 'phosphor-svelte/lib/CaretRight';
 	import EditableHeaderTitle from '$lib/components/chrome/shared/EditableHeaderTitle.svelte';
 	import HeaderOverflowButton from '$lib/components/chrome/shared/HeaderOverflowButton.svelte';
 	import type { HeaderParentHref } from '$lib/components/chrome/shared/route-title.svelte';
@@ -43,7 +44,7 @@
 				shellState.isSidebarExpanded = !shellState.isSidebarExpanded;
 			}}
 		>
-			<PanelLeft class="h-3.5 w-3.5" />
+			<SidebarSimple size={14} weight="regular" />
 		</IconButton>
 
 		{#if headerParent}
@@ -54,7 +55,7 @@
 				>
 					{headerParent.label}
 				</a>
-				<ChevronRight class="size-3 shrink-0 text-zinc-300" strokeWidth={2.25} />
+				<CaretRight size={12} weight="regular" class="shrink-0 text-zinc-300" />
 				<EditableHeaderTitle
 					{title}
 					editable={titleEditable}
