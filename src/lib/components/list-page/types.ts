@@ -28,6 +28,7 @@ export type EmptyListStateConfig = {
 	nextSteps?: EmptyListNextStepsContent;
 	learnMoreLabel?: string;
 	actionLabel?: string;
+	onAction?: () => void;
 	icon?: ListIcon;
 };
 

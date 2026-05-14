@@ -6,6 +6,6 @@ export const APP_CONFIG = {
   logoAlt: "Overbase logo",
   profile: CURRENT_USER_PROFILE,
   onboarding: {
-    enabled: true,
+    enabled: false,
   },
 } as const;

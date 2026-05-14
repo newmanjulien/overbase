@@ -8,9 +8,10 @@
 		label: string;
 		tone?: Tone;
 		class?: string;
+		onclick?: () => void;
 	};
 
-	let { label, tone = 'primary', class: className = '' }: Props = $props();
+	let { label, tone = 'primary', class: className = '', onclick }: Props = $props();
 </script>
 
 <Button
@@ -20,6 +21,7 @@
 		tone === 'secondary' && 'border-zinc-200/70 text-zinc-950',
 		className
 	]}
+	{onclick}
 >
 	{#snippet leading()}
 		<Plus aria-hidden="true" class="size-3.5 stroke-[2.25]" />

@@ -9,6 +9,7 @@
 		description: string;
 		learnMoreLabel?: string;
 		actionLabel?: string;
+		onAction?: () => void;
 		icon?: ListIcon;
 		class?: string;
 	};
@@ -18,6 +19,7 @@
 		description,
 		learnMoreLabel,
 		actionLabel,
+		onAction,
 		icon: Icon = Database,
 		class: className = ''
 	}: Props = $props();
@@ -51,7 +53,7 @@
 			</p>
 
 			{#if actionLabel}
-				<ListActionButton label={actionLabel} tone="secondary" class="mt-6" />
+				<ListActionButton label={actionLabel} tone="secondary" class="mt-6" onclick={onAction} />
 			{/if}
 		</div>
 	</div>

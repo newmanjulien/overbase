@@ -48,6 +48,7 @@
 				description={empty.description}
 				learnMoreLabel={empty.learnMoreLabel}
 				actionLabel={empty.actionLabel}
+				onAction={empty.onAction}
 			/>
 		{/if}
 

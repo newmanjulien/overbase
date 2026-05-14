@@ -14,6 +14,7 @@
 	type Props = {
 		open: boolean;
 		title: string;
+		subtitle?: string;
 		onClose: () => void;
 		class?: ClassValue;
 		footer?: Snippet;
@@ -23,6 +24,7 @@
 	let {
 		open,
 		title,
+		subtitle,
 		onClose,
 		class: className = '',
 		footer,
@@ -128,11 +130,10 @@
 			previousBodyOverflow = '';
 		}
 	}
-
 </script>
 
 {#if open}
-	<div class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+	<div class="fixed inset-0 z-50 flex justify-end p-4">
 		<button
 			type="button"
 			tabindex="-1"
@@ -148,7 +149,7 @@
 			aria-labelledby={titleId}
 			tabindex="-1"
 			class={cn(
-				'relative flex max-h-[calc(100vh-3rem)] w-full max-w-110 flex-col overflow-hidden rounded-lg border border-zinc-200/80 bg-white text-zinc-950 shadow-sm shadow-zinc-400/15 outline-none',
+				'relative flex h-full w-full max-w-120 flex-col overflow-hidden rounded-lg border border-zinc-200/80 bg-white text-zinc-950 shadow-sm shadow-zinc-400/15 outline-none',
 				className
 			)}
 		>
@@ -160,11 +161,14 @@
 				<X class="size-4" />
 			</IconButton>
 
-			<header class="px-4 py-5">
+			<header class="space-y-1 px-4 py-5 pr-12">
 				<h2 id={titleId} class="text-sm leading-tight font-medium text-zinc-950">{title}</h2>
+				{#if subtitle}
+					<p class="text-[11px] leading-5 text-zinc-500">{subtitle}</p>
+				{/if}
 			</header>
 
-			<div class="min-h-56 flex-1 px-6 pb-8">
+			<div class="min-h-0 flex-1 overflow-y-auto px-6 pb-8">
 				{@render children?.()}
 			</div>
 
