@@ -73,8 +73,8 @@ export const sidebarIndicator: Action<HTMLElement, SidebarIndicatorOptions> = (
 		const navRect = node.getBoundingClientRect();
 		const targetRect = targetElement.getBoundingClientRect();
 
-		node.style.setProperty('--sidebar-nav-indicator-top', `${targetRect.top - navRect.top}px`);
-		node.style.setProperty('--sidebar-nav-indicator-left', `${targetRect.left - navRect.left}px`);
+		node.style.setProperty('--sidebar-nav-indicator-x', `${targetRect.left - navRect.left}px`);
+		node.style.setProperty('--sidebar-nav-indicator-y', `${targetRect.top - navRect.top}px`);
 		node.style.setProperty('--sidebar-nav-indicator-width', `${targetRect.width}px`);
 		node.style.setProperty('--sidebar-nav-indicator-height', `${targetRect.height}px`);
 		node.style.setProperty('--sidebar-nav-indicator-opacity', '1');

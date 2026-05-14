@@ -114,11 +114,23 @@ button {
 }
 
 .sidebar-nav-indicator {
-	top: var(--sidebar-nav-indicator-top, 0);
-	left: var(--sidebar-nav-indicator-left, 0);
+	top: 0;
+	left: 0;
+	transform: translate3d(
+		var(--sidebar-nav-indicator-x, 0),
+		var(--sidebar-nav-indicator-y, 0),
+		0
+	);
 	width: var(--sidebar-nav-indicator-width, 0);
 	height: var(--sidebar-nav-indicator-height, 0);
 	opacity: var(--sidebar-nav-indicator-opacity, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sidebar-nav-indicator {
+		transition-duration: 0ms !important;
+		transition-delay: 0ms !important;
+	}
 }
 
 .dashboard-main-viewport {
