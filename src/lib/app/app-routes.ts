@@ -2,6 +2,7 @@ import Building from "phosphor-svelte/lib/Building";
 import ChatTeardrop from "phosphor-svelte/lib/ChatTeardrop";
 import Cloud from "phosphor-svelte/lib/Cloud";
 import FolderSimple from "phosphor-svelte/lib/FolderSimple";
+import Folders from "phosphor-svelte/lib/Folders";
 import HardDrive from "phosphor-svelte/lib/HardDrive";
 import Key from "phosphor-svelte/lib/Key";
 import ListPlus from "phosphor-svelte/lib/ListPlus";
@@ -17,6 +18,7 @@ export const APP_ROUTE_IDS = [
   "data-sources",
   "external-data",
   "team",
+  "team-formats",
   "invite-partners",
   "manage-partners",
   "data-access",
@@ -69,6 +71,11 @@ export const APP_ROUTE_REGISTRY = {
     navLabel: "Team",
     icon: Users,
   },
+  "team-formats": {
+    href: "/team-formats",
+    navLabel: "Team formats",
+    icon: Folders,
+  },
   "invite-partners": {
     href: "/invite-partners",
     navLabel: "Invite partners",
@@ -96,7 +103,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
   {
     id: "main",
     heading: "My team",
-    routeIds: ["data-sources", "external-data", "team"],
+    routeIds: ["data-sources", "external-data", "team", "team-formats"],
     desktopSectionClass: "pt-6",
     mobileSectionClass: "pt-6",
     showCollapsedDivider: true,

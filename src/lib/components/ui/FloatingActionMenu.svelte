@@ -177,7 +177,7 @@
 			triggerClass
 		)}
 	>
-		<DotsThree aria-hidden="true" size={12} weight="regular" />
+		<DotsThree aria-hidden="true" size={13} weight="bold" />
 	</button>
 
 	{#if open}

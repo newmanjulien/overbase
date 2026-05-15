@@ -4,6 +4,10 @@
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
 	let modalOpen = $state(false);
+
+	function openModal() {
+		modalOpen = true;
+	}
 </script>
 
 <ListRoutePage
@@ -11,7 +15,8 @@
 		searchPlaceholder: 'Search data sources...',
 		searchAriaLabel: 'Search data sources',
 		filterLabel: 'All types',
-		actionLabel: 'Add data source'
+		actionLabel: 'Add data source',
+		onAction: openModal
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['data-sources'].icon,
@@ -21,9 +26,7 @@
 			'Overbase can analyze any of your internal data sources. Add the data sources you want us to use to send you actionable opportunities or that you want to share with your ecosystem partners',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Add data source',
-		onAction: () => {
-			modalOpen = true;
-		}
+		onAction: openModal
 	}}
 />
 

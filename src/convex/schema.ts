@@ -93,6 +93,13 @@ export default defineSchema({
 		updatedAt: v.number()
 	})
 		.index('by_createdAt', ['createdAt']),
+	teamMembers: defineTable({
+		email: v.string(),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	})
+		.index('by_email', ['email'])
+		.index('by_createdAt', ['createdAt']),
 	opportunities: defineTable({
 		opportunityFormatId: v.id('opportunityFormats'),
 		sentAt: v.number(),

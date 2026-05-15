@@ -6,10 +6,11 @@
 	import ListSearchInput from '$lib/components/list-page/ListSearchInput.svelte';
 
 	type Props = {
-		searchPlaceholder: string;
+		searchPlaceholder?: string;
 		searchAriaLabel?: string;
 		filterLabel?: string;
 		actionLabel?: string;
+		onAction?: () => void;
 		class?: string;
 	};
 
@@ -18,18 +19,26 @@
 		searchAriaLabel,
 		filterLabel,
 		actionLabel,
+		onAction,
 		class: className = ''
 	}: Props = $props();
 </script>
 
 <div class={cn('flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-2.5', className)}>
-	<ListSearchInput
-		placeholder={searchPlaceholder}
-		ariaLabel={searchAriaLabel}
-		class="w-full md:flex-1"
-	/>
+	{#if searchPlaceholder}
+		<ListSearchInput
+			placeholder={searchPlaceholder}
+			ariaLabel={searchAriaLabel}
+			class="w-full md:flex-1"
+		/>
+	{/if}
 
-	<div class="hidden shrink-0 items-center gap-2 md:flex md:gap-2.5">
+	<div
+		class={cn(
+			'shrink-0 items-center gap-2 md:gap-2.5',
+			searchPlaceholder ? 'hidden md:flex' : 'flex justify-end'
+		)}
+	>
 		{#if filterLabel}
 			<Button
 				variant="secondary"
@@ -43,7 +52,7 @@
 		{/if}
 
 		{#if actionLabel}
-			<ListActionButton label={actionLabel} class="flex-1 md:flex-none" />
+			<ListActionButton label={actionLabel} class="flex-1 md:flex-none" onclick={onAction} />
 		{/if}
 	</div>
 </div>

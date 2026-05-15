@@ -148,7 +148,9 @@
 		</span>
 	</label>
 
-	{@render rowCells(item)}
+	<div class="min-w-0">
+		{@render rowCells(item)}
+	</div>
 
 	<div class="justify-self-end">
 		<FloatingActionMenu
@@ -212,7 +214,7 @@
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 				<div
 					role="listitem"
-					class="grid min-h-14 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 px-4 py-2.5 transition-colors hover:bg-zinc-50 sm:grid-cols-[auto_minmax(0,1fr)_max-content_auto_auto] sm:gap-x-4 md:px-5"
+					class="grid min-h-14 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 px-4 py-2.5 md:px-5"
 					onclick={(event) => handleRowClick(item, event)}
 				>
 					{@render itemCells(item)}
@@ -220,7 +222,7 @@
 			{:else}
 				<div
 					role="listitem"
-					class="grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 px-4 py-2.5 transition-colors sm:grid-cols-[auto_minmax(0,1fr)_max-content_auto_auto] sm:gap-x-4 md:px-5"
+					class="grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 px-4 py-2.5 md:px-5"
 				>
 					{@render itemCells(item)}
 				</div>

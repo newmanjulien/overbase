@@ -4,6 +4,10 @@
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
 	let modalOpen = $state(false);
+
+	function openModal() {
+		modalOpen = true;
+	}
 </script>
 
 <ListRoutePage
@@ -11,7 +15,8 @@
 		searchPlaceholder: 'Search invitations...',
 		searchAriaLabel: 'Search invitations',
 		filterLabel: 'All statuses',
-		actionLabel: 'Invite partner'
+		actionLabel: 'Invite partner',
+		onAction: openModal
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['invite-partners'].icon,
@@ -21,9 +26,7 @@
 			'Invite your ecosystem partners so you can share sales data with them. You will be able to use their data in your opportunities and they will be able to use your data in a secure way that you control',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Invite partner',
-		onAction: () => {
-			modalOpen = true;
-		}
+		onAction: openModal
 	}}
 />
 

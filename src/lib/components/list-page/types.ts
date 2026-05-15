@@ -3,10 +3,11 @@ import type { PhosphorIcon } from '$lib/components/icons/types';
 export type ListIcon = PhosphorIcon;
 
 export type ListToolbarConfig = {
-	searchPlaceholder: string;
+	searchPlaceholder?: string;
 	searchAriaLabel?: string;
 	filterLabel?: string;
 	actionLabel?: string;
+	onAction?: () => void;
 };
 
 export type EmptyListNextStepsPart =

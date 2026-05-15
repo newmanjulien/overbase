@@ -24,6 +24,6 @@
 		variant="secondary"
 		class="size-7 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300"
 	>
-		<DotsThree size={12} weight="regular" />
+		<DotsThree size={13} weight="bold" />
 	</IconButton>
 {/if}

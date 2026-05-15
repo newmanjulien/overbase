@@ -21,10 +21,11 @@ import type * as builderSessionOutputEvents from "../builderSessionOutputEvents.
 import type * as builderSessions from "../builderSessions.js";
 import type * as crons from "../crons.js";
 import type * as devSeed from "../devSeed.js";
+import type * as formatRecipients from "../formatRecipients.js";
 import type * as health from "../health.js";
 import type * as opportunityFormatReadiness from "../opportunityFormatReadiness.js";
 import type * as opportunityFormats from "../opportunityFormats.js";
-import type * as teamRoster from "../teamRoster.js";
+import type * as teamMembers from "../teamMembers.js";
 
 import type {
   ApiFromModules,
@@ -46,10 +47,11 @@ declare const fullApi: ApiFromModules<{
   builderSessions: typeof builderSessions;
   crons: typeof crons;
   devSeed: typeof devSeed;
+  formatRecipients: typeof formatRecipients;
   health: typeof health;
   opportunityFormatReadiness: typeof opportunityFormatReadiness;
   opportunityFormats: typeof opportunityFormats;
-  teamRoster: typeof teamRoster;
+  teamMembers: typeof teamMembers;
 }>;
 
 /**

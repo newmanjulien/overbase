@@ -6,9 +6,9 @@ import {
 	emailDraft as emailDraftValidator
 } from './builderEmailValidators';
 import {
-	getPeopleRoster,
-	normalizeTeamMemberIds
-} from './teamRoster';
+	getFormatRecipients,
+	normalizeFormatRecipientIds
+} from './formatRecipients';
 import {
 	getOpportunityFormatReadiness,
 	normalizeOpportunityFormatRules
@@ -46,7 +46,7 @@ export const publishFromBuilderSession = mutation({
 		}
 
 		const emailDraft = normalizeEmailDraft(session.emailDraftState.draft);
-		const teamMemberIds = normalizeTeamMemberIds([]);
+		const teamMemberIds = await normalizeFormatRecipientIds(ctx, []);
 		const opportunityFormatId = await ctx.db.insert('opportunityFormats', {
 			title: opportunityFormatTitle,
 			status: 'paused',
@@ -83,7 +83,7 @@ export const getOpportunityFormatDetail = query({
 			return null;
 		}
 
-		const people = getPeopleRoster();
+		const people = await getFormatRecipients(ctx);
 		const opportunityDocs = await ctx.db
 			.query('opportunities')
 			.withIndex('by_opportunityFormat_sentAt', (q) => q.eq('opportunityFormatId', opportunityFormatId))
@@ -119,7 +119,7 @@ export const getOpportunityFormatDetail = query({
 				emailDraftVersion: opportunityFormat.emailDraftVersion,
 				rules,
 				readiness: getOpportunityFormatReadiness(rules),
-				teamMemberIds: normalizeTeamMemberIds(opportunityFormat.teamMemberIds),
+				teamMemberIds: await normalizeFormatRecipientIds(ctx, opportunityFormat.teamMemberIds),
 				createdByName: opportunityFormat.createdByName,
 				createdAt: opportunityFormat.createdAt,
 				updatedAt: opportunityFormat.updatedAt
@@ -321,7 +321,7 @@ export const setOpportunityFormatTeamMembers = mutation({
 
 		const now = Date.now();
 
-		const nextTeamMemberIds = normalizeTeamMemberIds(teamMemberIds);
+		const nextTeamMemberIds = await normalizeFormatRecipientIds(ctx, teamMemberIds);
 
 		await ctx.db.patch(opportunityFormatId, {
 			teamMemberIds: nextTeamMemberIds,
