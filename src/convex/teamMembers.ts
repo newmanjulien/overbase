@@ -1,20 +1,38 @@
 import { v } from 'convex/values';
+import type { Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
+import {
+	getTeamMemberDisplayName,
+	normalizeTeamMemberEmail,
+	normalizeTeamMemberName,
+	TEAM_MEMBER_EMAIL_REGEX,
+	TEAM_MEMBER_EMAIL_SEPARATOR_REGEX
+} from './teamMemberIdentity';
 
-const EMAIL_SEPARATOR_REGEX = /[,\s]+/;
-const EMAIL_REGEX = /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/;
-
-function normalizeEmail(email: string) {
-	return email.trim().toLocaleLowerCase();
+function toTeamMemberResult(teamMember: {
+	_id: Id<'teamMembers'>;
+	email: string;
+	name: string;
+	createdAt: number;
+	updatedAt: number;
+}) {
+	return {
+		id: teamMember._id,
+		email: teamMember.email,
+		name: teamMember.name,
+		displayName: getTeamMemberDisplayName(teamMember),
+		createdAt: teamMember.createdAt,
+		updatedAt: teamMember.updatedAt
+	};
 }
 
 function parseEmails(input: string[]) {
 	const normalizedEmails = input
-		.flatMap((value) => value.split(EMAIL_SEPARATOR_REGEX))
-		.map(normalizeEmail)
+		.flatMap((value) => value.split(TEAM_MEMBER_EMAIL_SEPARATOR_REGEX))
+		.map(normalizeTeamMemberEmail)
 		.filter(Boolean);
 	const uniqueEmails = [...new Set(normalizedEmails)];
-	const invalidEmails = uniqueEmails.filter((email) => !EMAIL_REGEX.test(email));
+	const invalidEmails = uniqueEmails.filter((email) => !TEAM_MEMBER_EMAIL_REGEX.test(email));
 
 	if (invalidEmails.length > 0) {
 		throw new Error(`Invalid email: ${invalidEmails[0]}`);
@@ -28,12 +46,7 @@ export const listTeamMembers = query({
 	handler: async (ctx) => {
 		const teamMembers = await ctx.db.query('teamMembers').withIndex('by_createdAt').order('desc').collect();
 
-		return teamMembers.map((teamMember) => ({
-			id: teamMember._id,
-			email: teamMember.email,
-			createdAt: teamMember.createdAt,
-			updatedAt: teamMember.updatedAt
-		}));
+		return teamMembers.map(toTeamMemberResult);
 	}
 });
 
@@ -66,6 +79,7 @@ export const addTeamMembers = mutation({
 			insertedIds.push(
 				await ctx.db.insert('teamMembers', {
 					email,
+					name: '',
 					createdAt: now,
 					updatedAt: now
 				})
@@ -76,6 +90,51 @@ export const addTeamMembers = mutation({
 			insertedIds,
 			skippedEmails
 		};
+	}
+});
+
+export const updateTeamMember = mutation({
+	args: {
+		teamMemberId: v.id('teamMembers'),
+		email: v.string(),
+		name: v.string()
+	},
+	handler: async (ctx, { teamMemberId, email, name }) => {
+		const teamMember = await ctx.db.get(teamMemberId);
+
+		if (!teamMember) {
+			throw new Error('Teammate not found.');
+		}
+
+		const normalizedEmail = normalizeTeamMemberEmail(email);
+
+		if (!TEAM_MEMBER_EMAIL_REGEX.test(normalizedEmail)) {
+			throw new Error(`Invalid email: ${normalizedEmail || email}`);
+		}
+
+		const existingTeamMember = await ctx.db
+			.query('teamMembers')
+			.withIndex('by_email', (q) => q.eq('email', normalizedEmail))
+			.first();
+
+		if (existingTeamMember && existingTeamMember._id !== teamMemberId) {
+			throw new Error(`Email already exists: ${normalizedEmail}`);
+		}
+
+		const updatedTeamMember = {
+			...teamMember,
+			email: normalizedEmail,
+			name: normalizeTeamMemberName(name),
+			updatedAt: Date.now()
+		};
+
+		await ctx.db.patch(teamMemberId, {
+			email: updatedTeamMember.email,
+			name: updatedTeamMember.name,
+			updatedAt: updatedTeamMember.updatedAt
+		});
+
+		return toTeamMemberResult(updatedTeamMember);
 	}
 });
 

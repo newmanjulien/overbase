@@ -95,6 +95,7 @@ export default defineSchema({
 		.index('by_createdAt', ['createdAt']),
 	teamMembers: defineTable({
 		email: v.string(),
+		name: v.string(),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	})

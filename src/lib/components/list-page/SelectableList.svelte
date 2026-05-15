@@ -95,6 +95,10 @@
 		}));
 	}
 
+	function hasRowActions(item: Item) {
+		return Boolean(item.actions?.length);
+	}
+
 	function setSelectedActionsOpen(open: boolean) {
 		selectedActionsOpen = open;
 
@@ -124,10 +128,17 @@
 
 		void goto(resolve(item.href as '/'));
 	}
+
+	function rowClass(item: Item) {
+		return cn(
+			'grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3.5 px-4 py-2.5 md:px-5',
+			item.href && 'cursor-pointer'
+		);
+	}
 </script>
 
 {#snippet itemCells(item: Item)}
-	<label class="flex size-3.5 shrink-0 items-center">
+	<label class="flex h-9 w-3.5 shrink-0 items-center">
 		<input
 			type="checkbox"
 			class="peer sr-only"
@@ -148,20 +159,21 @@
 		</span>
 	</label>
 
-	<div class="min-w-0">
+	<div class={cn('min-w-0', !hasRowActions(item) && 'col-span-2')}>
 		{@render rowCells(item)}
 	</div>
 
-	<div class="justify-self-end">
-		<FloatingActionMenu
-			id={`selectable-list-${item.id}-actions`}
-			ariaLabel={item.actionsAriaLabel ?? rowActionsAriaLabel}
-			disabled={!item.actions?.length}
-			actions={toRowActionMenuActions(item.actions)}
-			open={openActionsItemId === item.id}
-			onOpenChange={(open) => setRowActionsOpen(item.id, open)}
-		/>
-	</div>
+	{#if hasRowActions(item)}
+		<div class="flex h-9 items-center justify-self-end">
+			<FloatingActionMenu
+				id={`selectable-list-${item.id}-actions`}
+				ariaLabel={item.actionsAriaLabel ?? rowActionsAriaLabel}
+				actions={toRowActionMenuActions(item.actions)}
+				open={openActionsItemId === item.id}
+				onOpenChange={(open) => setRowActionsOpen(item.id, open)}
+			/>
+		</div>
+	{/if}
 {/snippet}
 
 <div class="bg-white">
@@ -214,7 +226,7 @@
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 				<div
 					role="listitem"
-					class="grid min-h-14 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 px-4 py-2.5 md:px-5"
+					class={rowClass(item)}
 					onclick={(event) => handleRowClick(item, event)}
 				>
 					{@render itemCells(item)}
@@ -222,7 +234,7 @@
 			{:else}
 				<div
 					role="listitem"
-					class="grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 px-4 py-2.5 md:px-5"
+					class={rowClass(item)}
 				>
 					{@render itemCells(item)}
 				</div>

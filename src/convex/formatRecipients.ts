@@ -3,6 +3,7 @@ import {
 	CURRENT_USER_PROFILE
 } from '../lib/app/current-user';
 import type { QueryCtx } from './_generated/server';
+import { getTeamMemberDisplayName } from './teamMemberIdentity';
 
 const CURRENT_USER_RECIPIENT = {
 	id: CURRENT_USER_ID,
@@ -16,7 +17,7 @@ export async function getFormatRecipients(ctx: Pick<QueryCtx, 'db'>) {
 		CURRENT_USER_RECIPIENT,
 		...dbTeamMembers.map((teamMember) => ({
 			id: teamMember._id,
-			name: teamMember.email,
+			name: getTeamMemberDisplayName(teamMember),
 			avatar: ''
 		}))
 	];

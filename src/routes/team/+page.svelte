@@ -21,6 +21,12 @@
 	let isAddingTeamMembers = $state(false);
 	let deletingTeamMemberIds = $state<Id<'teamMembers'>[]>([]);
 	let actionError = $state<string | null>(null);
+	let editingTeamMemberId = $state<Id<'teamMembers'> | null>(null);
+	let savingTeamMemberId = $state<Id<'teamMembers'> | null>(null);
+	let teamMemberDraft = $state({
+		name: '',
+		email: ''
+	});
 	const teamMemberItems = $derived((teamMembersQuery.data ?? []).map(toTeamMemberItem));
 	const listState = $derived(
 		teamMembersQuery.isLoading
@@ -51,7 +57,7 @@
 	function parseEmailInput(input: string) {
 		const emails = input
 			.split(EMAIL_SEPARATOR_REGEX)
-			.map((email) => email.trim().toLocaleLowerCase())
+			.map((email) => email.trim().toLowerCase())
 			.filter(Boolean);
 		const uniqueEmails = [...new Set(emails)];
 
@@ -109,6 +115,59 @@
 		return deletingTeamMemberIds.includes(teamMemberId);
 	}
 
+	function editTeamMember(teamMember: TeamMemberRecord) {
+		actionError = null;
+		editingTeamMemberId = teamMember.id;
+		teamMemberDraft = {
+			name: teamMember.name,
+			email: teamMember.email
+		};
+	}
+
+	function closeTeamMemberEditor() {
+		editingTeamMemberId = null;
+		teamMemberDraft = {
+			name: '',
+			email: ''
+		};
+	}
+
+	function updateTeamMemberNameDraft(name: string) {
+		teamMemberDraft = {
+			...teamMemberDraft,
+			name
+		};
+	}
+
+	function updateTeamMemberEmailDraft(email: string) {
+		teamMemberDraft = {
+			...teamMemberDraft,
+			email
+		};
+	}
+
+	async function saveTeamMember(teamMember: TeamMemberRecord) {
+		if (savingTeamMemberId) {
+			return;
+		}
+
+		actionError = null;
+		savingTeamMemberId = teamMember.id;
+
+		try {
+			await client.mutation(api.teamMembers.updateTeamMember, {
+				teamMemberId: teamMember.id,
+				name: teamMemberDraft.name,
+				email: teamMemberDraft.email
+			});
+			closeTeamMemberEditor();
+		} catch (error) {
+			actionError = error instanceof Error ? error.message : 'Could not update teammate.';
+		} finally {
+			savingTeamMemberId = null;
+		}
+	}
+
 	async function deleteTeamMembers(teamMemberIds: Id<'teamMembers'>[]) {
 		const idsToDelete = teamMemberIds.filter((id) => !isDeletingTeamMember(id));
 
@@ -132,21 +191,40 @@
 
 	function toTeamMemberItem(teamMember: TeamMemberRecord): TeamMemberItem {
 		const isDeleting = isDeletingTeamMember(teamMember.id);
+		const isEditing = editingTeamMemberId === teamMember.id;
+		const isSaving = savingTeamMemberId === teamMember.id;
+		const isBusy = isDeleting || isSaving;
 
 		return {
 			id: teamMember.id,
 			email: teamMember.email,
-			selectAriaLabel: `Select ${teamMember.email}`,
+			displayName: teamMember.displayName,
+			isEditing,
+			nameDraft: isEditing ? teamMemberDraft.name : '',
+			emailDraft: isEditing ? teamMemberDraft.email : teamMember.email,
+			deleteLabel: isDeleting ? 'Deleting...' : 'Delete',
+			saveLabel: isSaving ? 'Saving...' : 'Save',
+			deleteDisabled: isBusy,
+			saveDisabled: isBusy,
+			onEdit: () => editTeamMember(teamMember),
+			onCancel: closeTeamMemberEditor,
+			onSave: () => saveTeamMember(teamMember),
+			onDelete: () => deleteTeamMembers([teamMember.id]),
+			onNameDraftChange: updateTeamMemberNameDraft,
+			onEmailDraftChange: updateTeamMemberEmailDraft,
+			selectAriaLabel: `Select ${teamMember.displayName}`,
 			actionsAriaLabel: 'Teammate actions',
-			actions: [
-				{
-					label: isDeleting ? 'Deleting...' : 'Delete',
-					ariaLabel: `Delete ${teamMember.email}`,
-					intent: 'destructive',
-					disabled: isDeleting,
-					onSelect: () => deleteTeamMembers([teamMember.id])
-				}
-			]
+			actions: isEditing
+				? undefined
+				: [
+						{
+							label: isDeleting ? 'Deleting...' : 'Delete',
+							ariaLabel: `Delete ${teamMember.displayName}`,
+							intent: 'destructive',
+							disabled: isDeleting,
+							onSelect: () => deleteTeamMembers([teamMember.id])
+						}
+					]
 		};
 	}
 </script>
