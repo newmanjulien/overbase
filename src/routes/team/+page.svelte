@@ -245,6 +245,9 @@
 			'Teammates are the people inside your organization who receive opportunities. Add teammates here, then add them to the right formats',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Add team',
+		actionHelpText: "We won't contact them yet",
+		actionHelpTooltipText:
+			"We won't contact teammates after you add them. They'll only receive emails after you add them to an active opportunity format",
 		onAction: openModal
 	}}
 	hasItems={listState !== 'empty'}

@@ -3,6 +3,7 @@
 	import ArrowSquareOut from 'phosphor-svelte/lib/ArrowSquareOut';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import ListActionButton from '$lib/components/list-page/ListActionButton.svelte';
+	import FloatingTooltip from '$lib/components/ui/FloatingTooltip.svelte';
 	import type { ListIcon } from '$lib/components/list-page/types';
 
 	type Props = {
@@ -10,6 +11,8 @@
 		description: string;
 		learnMoreLabel?: string;
 		actionLabel?: string;
+		actionHelpText?: string;
+		actionHelpTooltipText?: string;
 		onAction?: () => void;
 		icon?: ListIcon;
 		class?: string;
@@ -20,6 +23,8 @@
 		description,
 		learnMoreLabel,
 		actionLabel,
+		actionHelpText,
+		actionHelpTooltipText,
 		onAction,
 		icon: Icon = Database,
 		class: className = ''
@@ -61,6 +66,27 @@
 
 			{#if actionLabel}
 				<ListActionButton label={actionLabel} tone="secondary" class="mt-6" onclick={onAction} />
+				{#if actionHelpText}
+					{#if actionHelpTooltipText}
+						<div class="mt-3 max-w-64 text-[0.66rem] leading-relaxed text-zinc-500">
+							<FloatingTooltip
+								id={`empty-list-action-help-${actionLabel}`}
+								text={actionHelpTooltipText}
+								ariaLabel={actionHelpText}
+								placement="bottom-start"
+								triggerClass="inline text-[0.66rem] leading-relaxed text-zinc-400 underline decoration-zinc-200 underline-offset-3 transition-colors hover:text-zinc-600 hover:decoration-zinc-400 focus-visible:text-zinc-700 focus-visible:decoration-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
+							>
+								{#snippet trigger()}
+									{actionHelpText}
+								{/snippet}
+							</FloatingTooltip>
+						</div>
+					{:else}
+						<p class="mt-3 max-w-64 text-[0.66rem] leading-relaxed text-zinc-500">
+							{actionHelpText}
+						</p>
+					{/if}
+				{/if}
 			{/if}
 		</div>
 	</div>
