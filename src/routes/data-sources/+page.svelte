@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ListRoutePage } from '$lib/components/list-page';
-	import { Button, ModalShell } from '$lib/components/ui';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
+	import { AddDataSourceModal } from '$lib/features/data-sources/add';
 
 	let modalOpen = $state(false);
 
@@ -30,9 +30,4 @@
 	}}
 />
 
-<ModalShell open={modalOpen} title="Add data source" onClose={() => (modalOpen = false)}>
-	{#snippet footer()}
-		<Button variant="secondary" onclick={() => (modalOpen = false)}>Cancel</Button>
-		<Button onclick={() => (modalOpen = false)}>Add data source</Button>
-	{/snippet}
-</ModalShell>
+<AddDataSourceModal open={modalOpen} onClose={() => (modalOpen = false)} />

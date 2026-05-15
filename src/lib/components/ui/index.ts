@@ -8,6 +8,7 @@ export { default as HelpTooltip } from './HelpTooltip.svelte';
 export { default as IconButton } from './IconButton.svelte';
 export { default as InfoBar } from './InfoBar.svelte';
 export { default as InfoBarAction } from './InfoBarAction.svelte';
+export { default as FullHeightModalShell } from './FullHeightModalShell.svelte';
+export type { FullHeightModalPlacement } from './FullHeightModalShell.svelte';
 export { default as ModalShell } from './ModalShell.svelte';
-export { default as SideModalShell } from './SideModalShell.svelte';
 export type { ButtonSize, ButtonType, ButtonVariant } from './types';

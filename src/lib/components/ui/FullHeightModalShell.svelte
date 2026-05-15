@@ -11,11 +11,14 @@
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import IconButton from '$lib/components/ui/IconButton.svelte';
 
+	export type FullHeightModalPlacement = 'right' | 'center';
+
 	type Props = {
 		open: boolean;
 		title: string;
 		subtitle?: string;
 		onClose: () => void;
+		placement?: FullHeightModalPlacement;
 		class?: ClassValue;
 		footer?: Snippet;
 		children?: Snippet;
@@ -26,10 +29,16 @@
 		title,
 		subtitle,
 		onClose,
+		placement = 'right',
 		class: className = '',
 		footer,
 		children
 	}: Props = $props();
+
+	const placementClass: Record<FullHeightModalPlacement, string> = {
+		right: 'justify-end',
+		center: 'justify-center'
+	};
 
 	let dialogElement = $state<HTMLDivElement | null>(null);
 	let previouslyFocusedElement: HTMLElement | null = null;
@@ -133,7 +142,7 @@
 </script>
 
 {#if open}
-	<div class="fixed inset-0 z-50 flex justify-end p-4">
+	<div class={cn('fixed inset-0 z-50 flex p-4', placementClass[placement])}>
 		<button
 			type="button"
 			tabindex="-1"

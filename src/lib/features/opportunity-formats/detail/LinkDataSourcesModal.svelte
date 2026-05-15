@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, SideModalShell } from '$lib/components/ui';
+	import { Button, FullHeightModalShell } from '$lib/components/ui';
 
 	type Props = {
 		open: boolean;
@@ -9,14 +9,15 @@
 	let { open, onClose }: Props = $props();
 </script>
 
-<SideModalShell
+<FullHeightModalShell
 	{open}
 	title="Link data sources"
 	subtitle="Choose the data sources this rule can reference"
+	placement="right"
 	{onClose}
 >
 	{#snippet footer()}
 		<Button variant="secondary" onclick={onClose}>Cancel</Button>
 		<Button onclick={onClose}>Link data sources</Button>
 	{/snippet}
-</SideModalShell>
+</FullHeightModalShell>
