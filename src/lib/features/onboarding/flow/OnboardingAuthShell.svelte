@@ -32,13 +32,14 @@
 		avatarSrc: '/onboarding-fred.png',
 		avatarAlt: 'Morgan Reed'
 	} satisfies OnboardingQuote;
+	const shouldShowFooter = $derived(Boolean(footer) && showFooter);
 </script>
 
 <OnboardingShell
 	{onReturn}
 	{returnHref}
 	{returnLabel}
-	{showFooter}
+	showFooter={shouldShowFooter}
 	{footerBorder}
 >
 	{#snippet background()}

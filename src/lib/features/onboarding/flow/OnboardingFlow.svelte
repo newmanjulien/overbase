@@ -63,11 +63,7 @@
 	const canReturn = $derived(
 		step === 'signup' || step === 'code' || step === 'partner' || (!clerk.auth.userId && step === 'company')
 	);
-	const currentReturnHref = $derived(
-		step === 'welcome' || (step === 'signup' && Boolean(marketingReturnHref))
-			? marketingReturnHref
-			: undefined
-	);
+	const currentReturnHref = $derived(step === 'welcome' ? marketingReturnHref : undefined);
 	const loginHref = $derived(buildAuthEntryHref('/login', marketingReturnHref));
 	const welcomeFooterLinks = [
 		{ label: 'Terms of Service', href: 'https://overbase.app/legal/terms-of-service' },
