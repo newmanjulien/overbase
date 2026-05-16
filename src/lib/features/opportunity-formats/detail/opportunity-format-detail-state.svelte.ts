@@ -2,13 +2,10 @@ import {
 	createDefaultEmailDraft,
 	type EmailDraft
 } from '@overbase/builder-sdk/email';
-import { areOpportunityFormatRulesFilled } from './opportunity-format-detail-rules';
-import type { OpportunityFormatRule } from './opportunity-format-detail-types';
-
-export type OpportunityFeedback = {
-	likedText: string;
-	improvementText: string;
-};
+import type {
+	OpportunityFeedback,
+	OpportunityFormatRule
+} from './opportunity-format-detail-types';
 
 type OpportunityFormatDetailSnapshot = {
 	opportunityFormat: {
@@ -43,6 +40,10 @@ function cloneFeedback(feedback: OpportunityFeedback) {
 
 function areRulesEqual(firstRules: OpportunityFormatRule[], secondRules: OpportunityFormatRule[]) {
 	return JSON.stringify(firstRules) === JSON.stringify(secondRules);
+}
+
+export function areOpportunityFormatRulesFilled(rules: OpportunityFormatRule[]) {
+	return rules.every((rule) => rule.text.trim().length > 0);
 }
 
 function areFeedbackEqual(
@@ -228,3 +229,5 @@ export function createOpportunityFormatDetailState() {
 		updateSelectedTeamMemberIds
 	};
 }
+
+export type OpportunityFormatDetailState = ReturnType<typeof createOpportunityFormatDetailState>;

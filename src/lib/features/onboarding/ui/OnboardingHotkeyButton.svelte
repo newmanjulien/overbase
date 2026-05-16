@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import OnboardingHotkeyBadge from './OnboardingHotkeyBadge.svelte';
 
 	type Props = {
 		children: Snippet;
@@ -50,6 +49,10 @@
 >
 	<span>{@render children()}</span>
 	<span class="absolute right-3 hidden sm:inline-flex">
-		<OnboardingHotkeyBadge label={hotkeyLabel} />
+		<span
+			class="inline-flex h-5 min-w-5 items-center justify-center rounded-sm bg-white/15 px-2 text-xs font-medium text-white/75"
+		>
+			{hotkeyLabel}
+		</span>
 	</span>
 </button>

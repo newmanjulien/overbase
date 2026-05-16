@@ -9,8 +9,9 @@
 		SelectableList
 	} from '$lib/components/list-page';
 	import { InfoBar } from '$lib/components/ui';
-	import OpportunityFormatListRow from './OpportunityFormatListRow.svelte';
-	import type { OpportunityFormatListItem } from './opportunity-format-list';
+	import OpportunityFormatListRow, {
+		type OpportunityFormatListItem
+	} from './OpportunityFormatListRow.svelte';
 
 	const dateFormatter = new Intl.DateTimeFormat(undefined, {
 		month: 'short',

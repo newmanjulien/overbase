@@ -1,8 +1,19 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { cn } from '$lib/components/chrome/shared/cn';
+	import type { SelectableListItem } from '$lib/components/list-page';
 	import { PersonAvatar } from '$lib/components/people';
-	import type { OpportunityFormatListItem } from './opportunity-format-list';
+
+	export type OpportunityFormatListItem = SelectableListItem & {
+		title: string;
+		statusLabel: string;
+		statusLabelClass: string;
+		createdAtLabel: string;
+		creator: {
+			name: string;
+			avatar: string;
+		};
+	};
 
 	type Props = {
 		item: OpportunityFormatListItem;

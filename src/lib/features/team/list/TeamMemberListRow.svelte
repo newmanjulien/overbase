@@ -1,7 +1,25 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { Button } from '$lib/components/ui';
-	import type { TeamMemberItem } from './team-member-list';
+	import type { SelectableListItem } from '$lib/components/list-page';
+
+	export type TeamMemberItem = SelectableListItem & {
+		email: string;
+		displayName: string;
+		isEditing: boolean;
+		nameDraft: string;
+		emailDraft: string;
+		deleteLabel: string;
+		saveLabel: string;
+		deleteDisabled: boolean;
+		saveDisabled: boolean;
+		onEdit: () => void;
+		onCancel: () => void;
+		onSave: () => void | Promise<void>;
+		onDelete: () => void | Promise<void>;
+		onNameDraftChange: (name: string) => void;
+		onEmailDraftChange: (email: string) => void;
+	};
 
 	type Props = {
 		item: TeamMemberItem;

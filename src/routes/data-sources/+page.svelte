@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ListRoutePage } from '$lib/components/list-page';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
-	import { AddDataSourceModal } from '$lib/features/data-sources/add';
+	import AddDataSourceModal from '$lib/features/data-sources/AddDataSourceModal.svelte';
 
 	let modalOpen = $state(false);
 
