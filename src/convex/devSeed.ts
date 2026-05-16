@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { normalizeEmailDraft, type EmailDraft } from '@overbase/builder-sdk/email';
 import { mutation } from './_generated/server';
+import { requireWorkspaceRecord } from './auth';
 
 function createPipelineAlertDraft(title: string): EmailDraft {
 	return {
@@ -95,7 +96,7 @@ export const seedOpportunitiesForFormat = mutation({
 		replaceExisting: v.optional(v.boolean())
 	},
 	handler: async (ctx, { opportunityFormatId, replaceExisting = true }) => {
-		const opportunityFormat = await ctx.db.get(opportunityFormatId);
+		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -104,11 +105,19 @@ export const seedOpportunitiesForFormat = mutation({
 		if (replaceExisting) {
 			const feedback = await ctx.db
 				.query('opportunityFeedback')
-				.withIndex('by_opportunityFormatId', (q) => q.eq('opportunityFormatId', opportunityFormatId))
+				.withIndex('by_workspace_opportunityFormat', (q) =>
+					q
+						.eq('workspaceId', opportunityFormat.workspaceId)
+						.eq('opportunityFormatId', opportunityFormatId)
+				)
 				.collect();
 			const opportunities = await ctx.db
 				.query('opportunities')
-				.withIndex('by_opportunityFormat_createdAt', (q) => q.eq('opportunityFormatId', opportunityFormatId))
+				.withIndex('by_workspace_opportunityFormat_createdAt', (q) =>
+					q
+						.eq('workspaceId', opportunityFormat.workspaceId)
+						.eq('opportunityFormatId', opportunityFormatId)
+				)
 				.collect();
 
 			for (const feedbackItem of feedback) {
@@ -131,6 +140,7 @@ export const seedOpportunitiesForFormat = mutation({
 		for (const [index, draft] of drafts.entries()) {
 			const sentAt = now - index * 1000 * 60 * 60 * 18;
 			const opportunityId = await ctx.db.insert('opportunities', {
+				workspaceId: opportunityFormat.workspaceId,
 				opportunityFormatId,
 				sentAt,
 				emailDraft: normalizeEmailDraft(draft),

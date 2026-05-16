@@ -2,13 +2,15 @@
 	import Database from 'phosphor-svelte/lib/Database';
 	import ArrowSquareOut from 'phosphor-svelte/lib/ArrowSquareOut';
 	import { cn } from '$lib/components/chrome/shared/cn';
+	import InlineText from '$lib/components/ui/InlineText.svelte';
 	import ListActionButton from '$lib/components/list-page/ListActionButton.svelte';
 	import FloatingTooltip from '$lib/components/ui/FloatingTooltip.svelte';
+	import type { InlineTextContent } from '$lib/components/ui/inline-text';
 	import type { ListIcon } from '$lib/components/list-page/types';
 
 	type Props = {
 		title: string;
-		description: string;
+		description: InlineTextContent;
 		learnMoreLabel?: string;
 		actionLabel?: string;
 		actionHelpText?: string;
@@ -52,7 +54,11 @@
 			</h2>
 
 			<p class="mt-2.5 text-[0.67rem] leading-relaxed text-zinc-600 md:text-[0.69rem]">
-				<span>{description}</span>
+				<InlineText
+					content={description}
+					tooltipIdPrefix={`empty-list-description-tooltip-${title}`}
+					tooltipTriggerClass="inline text-[0.67rem] leading-relaxed text-zinc-400 underline decoration-zinc-200 underline-offset-3 transition-colors hover:text-zinc-600 hover:decoration-zinc-400 focus-visible:text-zinc-700 focus-visible:decoration-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 md:text-[0.69rem]"
+				/>
 				{#if learnMoreLabel}
 					<button
 						type="button"

@@ -7,6 +7,7 @@ import {
 import { internal } from './_generated/api';
 import { mutation, query } from './_generated/server';
 import type { MutationCtx } from './_generated/server';
+import type { Id } from './_generated/dataModel';
 import {
 	builderRunSetup,
 	emailDraft as emailDraftValidator
@@ -16,20 +17,17 @@ import {
 	normalizeEmailDraft
 } from '@overbase/builder-sdk/email';
 import {
-	createResumeToken,
 	getBuilderSessionExpiresAt,
-	hashResumeToken,
 	isBuilderSessionActive,
-	normalizeResumeToken,
 	normalizeStartRequestId,
-	normalizeUserText,
-	verifyResumeToken
+	normalizeUserText
 } from './builderSessionAccess';
 import {
 	buildSessionSnapshot,
 	getAuthorizedSession,
 	insertJob
 } from './builderSessionCore';
+import { requireWorkspace } from './auth';
 import {
 	getActiveBuilderAppPresentationEntry
 } from '../builder-apps/registry';
@@ -39,27 +37,27 @@ async function getIdempotentStartSnapshot(
 	{
 		appSlug,
 		startRequestId,
-		resumeToken,
+		workspaceId,
 		setup,
 		expiresAt,
 		now
 	}: {
 		appSlug: string;
 		startRequestId?: string;
-		resumeToken?: string;
+		workspaceId: Id<'workspaces'>;
 		setup: BuilderRunSetup;
 		expiresAt: number;
 		now: number;
 	}
 ) {
-	if (!startRequestId || !resumeToken) {
+	if (!startRequestId) {
 		return null;
 	}
 
 	const existingSession = await ctx.db
 		.query('builderSessions')
-		.withIndex('by_app_startRequestId', (q) =>
-			q.eq('appSlug', appSlug).eq('startRequestId', startRequestId)
+		.withIndex('by_workspace_app_startRequestId', (q) =>
+			q.eq('workspaceId', workspaceId).eq('appSlug', appSlug).eq('startRequestId', startRequestId)
 		)
 		.first();
 
@@ -69,10 +67,6 @@ async function getIdempotentStartSnapshot(
 
 	if (!isBuilderSessionActive(existingSession, now)) {
 		throw new Error('Builder session expired.');
-	}
-
-	if (!(await verifyResumeToken(existingSession, resumeToken))) {
-		throw new Error('Builder session not found.');
 	}
 
 	const firstMessage = await ctx.db
@@ -99,24 +93,23 @@ async function getIdempotentStartSnapshot(
 		throw new Error('Builder session not found.');
 	}
 
-	return await buildSessionSnapshot(ctx, resumedSession, resumeToken);
+	return await buildSessionSnapshot(ctx, resumedSession);
 }
 
 export const startSession = mutation({
 	args: {
 		appSlug: v.string(),
 		setup: builderRunSetup,
-		startRequestId: v.optional(v.string()),
-		resumeToken: v.optional(v.string())
+		startRequestId: v.optional(v.string())
 	},
-	handler: async (ctx, { appSlug, setup, startRequestId, resumeToken }) => {
+	handler: async (ctx, { appSlug, setup, startRequestId }) => {
+		const { workspace } = await requireWorkspace(ctx);
 		const now = Date.now();
 		const normalizedSetup = normalizeBuilderRunSetup({
 			...setup,
 			initialMessage: normalizeUserText(setup.initialMessage)
 		});
 		const normalizedStartRequestId = normalizeStartRequestId(startRequestId);
-		const normalizedResumeToken = normalizeResumeToken(resumeToken);
 		const expiresAt = getBuilderSessionExpiresAt(now);
 		const app = getActiveBuilderAppPresentationEntry(appSlug);
 
@@ -124,14 +117,10 @@ export const startSession = mutation({
 			throw new Error('Builder app not found.');
 		}
 
-		if (Boolean(normalizedStartRequestId) !== Boolean(normalizedResumeToken)) {
-			throw new Error('Start request id and resume token must be provided together.');
-		}
-
 		const existingSessionSnapshot = await getIdempotentStartSnapshot(ctx, {
 			appSlug: app.slug,
 			startRequestId: normalizedStartRequestId,
-			resumeToken: normalizedResumeToken,
+			workspaceId: workspace._id,
 			setup: normalizedSetup,
 			expiresAt,
 			now
@@ -141,16 +130,13 @@ export const startSession = mutation({
 			return existingSessionSnapshot;
 		}
 
-		const sessionResumeToken = normalizedResumeToken ?? createResumeToken();
-		const resumeTokenHash = await hashResumeToken(sessionResumeToken);
-
 		const sessionId = await ctx.db.insert('builderSessions', {
+			workspaceId: workspace._id,
 			appSlug: app.slug,
 			appTitle: app.slug,
 			...(normalizedStartRequestId ? { startRequestId: normalizedStartRequestId } : {}),
 			setup: normalizedSetup,
 			status: 'working',
-			resumeTokenHash,
 			createdAt: now,
 			updatedAt: now,
 			expiresAt
@@ -199,7 +185,7 @@ export const startSession = mutation({
 		}
 
 		return {
-			...(await buildSessionSnapshot(ctx, session, sessionResumeToken)),
+			...(await buildSessionSnapshot(ctx, session)),
 			userMessageId,
 			assistantMessageId
 		};
@@ -208,12 +194,11 @@ export const startSession = mutation({
 
 export const resumeSession = mutation({
 	args: {
-		sessionId: v.id('builderSessions'),
-		resumeToken: v.string()
+		sessionId: v.id('builderSessions')
 	},
-	handler: async (ctx, { sessionId, resumeToken }) => {
+	handler: async (ctx, { sessionId }) => {
 		const now = Date.now();
-		const session = await getAuthorizedSession(ctx, sessionId, resumeToken, now);
+		const session = await getAuthorizedSession(ctx, sessionId, now);
 
 		if (!session) {
 			return null;
@@ -228,36 +213,34 @@ export const resumeSession = mutation({
 
 		const resumedSession = await ctx.db.get(session._id);
 
-		return resumedSession ? await buildSessionSnapshot(ctx, resumedSession, resumeToken) : null;
+		return resumedSession ? await buildSessionSnapshot(ctx, resumedSession) : null;
 	}
 });
 
 export const getSessionSnapshot = query({
 	args: {
-		sessionId: v.id('builderSessions'),
-		resumeToken: v.string()
+		sessionId: v.id('builderSessions')
 	},
-	handler: async (ctx, { sessionId, resumeToken }) => {
-		const session = await getAuthorizedSession(ctx, sessionId, resumeToken);
+	handler: async (ctx, { sessionId }) => {
+		const session = await getAuthorizedSession(ctx, sessionId);
 
 		if (!session) {
 			return null;
 		}
 
-		return await buildSessionSnapshot(ctx, session, resumeToken);
+		return await buildSessionSnapshot(ctx, session);
 	}
 });
 
 export const sendMessage = mutation({
 	args: {
 		sessionId: v.id('builderSessions'),
-		resumeToken: v.string(),
 		text: v.string()
 	},
-	handler: async (ctx, { sessionId, resumeToken, text }) => {
+	handler: async (ctx, { sessionId, text }) => {
 		const now = Date.now();
 		const normalizedText = normalizeUserText(text);
-		const session = await getAuthorizedSession(ctx, sessionId, resumeToken, now);
+		const session = await getAuthorizedSession(ctx, sessionId, now);
 
 		if (!session) {
 			throw new Error('Builder session not found.');
@@ -317,7 +300,7 @@ export const sendMessage = mutation({
 		}
 
 		return {
-			...(await buildSessionSnapshot(ctx, updatedSession, resumeToken)),
+			...(await buildSessionSnapshot(ctx, updatedSession)),
 			userMessageId,
 			assistantMessageId
 		};
@@ -327,13 +310,12 @@ export const sendMessage = mutation({
 export const saveEmailDraft = mutation({
 	args: {
 		sessionId: v.id('builderSessions'),
-		resumeToken: v.string(),
 		baseEmailDraftVersion: v.number(),
 		emailDraft: emailDraftValidator
 	},
-	handler: async (ctx, { sessionId, resumeToken, baseEmailDraftVersion, emailDraft }) => {
+	handler: async (ctx, { sessionId, baseEmailDraftVersion, emailDraft }) => {
 		const now = Date.now();
-		const session = await getAuthorizedSession(ctx, sessionId, resumeToken, now);
+		const session = await getAuthorizedSession(ctx, sessionId, now);
 
 		if (!session || !session.emailDraftState || session.emailDraftState.visibility !== 'visible') {
 			throw new Error('Email draft not found.');
@@ -362,7 +344,7 @@ export const saveEmailDraft = mutation({
 			const updatedSession = await ctx.db.get(session._id);
 
 			return {
-				snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession, resumeToken) : null,
+				snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession) : null,
 				expiresAt,
 				emailDraftVersion: session.emailDraftState.version,
 				changed: false
@@ -384,7 +366,7 @@ export const saveEmailDraft = mutation({
 		const updatedSession = await ctx.db.get(session._id);
 
 		return {
-			snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession, resumeToken) : null,
+			snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession) : null,
 			expiresAt,
 			emailDraftVersion: nextEmailDraftVersion,
 			changed: true

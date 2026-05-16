@@ -9,9 +9,11 @@ import {
 	type OpportunityFormatDetailState
 } from './opportunity-format-detail-state.svelte';
 import type {
+	FormatRecipientRef,
 	OpportunityFeedback,
 	OpportunityFeedbackViewState
 } from './opportunity-format-detail-types';
+import { getFormatRecipientKey } from './opportunity-format-detail-types';
 
 type OpportunityFormatStatus = 'active' | 'paused';
 
@@ -22,10 +24,12 @@ type ControllerOptions = {
 	onTitleSaved: (title: string) => void;
 };
 
-function areStringArraysEqual(firstValues: string[], secondValues: string[]) {
+function areRecipientRefsEqual(firstValues: FormatRecipientRef[], secondValues: FormatRecipientRef[]) {
 	return (
 		firstValues.length === secondValues.length &&
-		firstValues.every((value, index) => value === secondValues[index])
+		firstValues.every(
+			(value, index) => getFormatRecipientKey(value) === getFormatRecipientKey(secondValues[index])
+		)
 	);
 }
 
@@ -43,8 +47,8 @@ export function createOpportunityFormatDetailController({
 	let status = $state<OpportunityFormatStatus>('paused');
 	let isDeletingFormat = $state(false);
 	let isUpdatingStatus = $state(false);
-	let isSavingTeamMemberIds = $state(false);
-	let hasPendingTeamMemberIdsSave = $state(false);
+	let isSavingRecipients = $state(false);
+	let hasPendingRecipientsSave = $state(false);
 	let deleteError = $state<string | null>(null);
 	let actionError = $state<string | null>(null);
 
@@ -77,38 +81,38 @@ export function createOpportunityFormatDetailController({
 		}
 	}
 
-	async function updateSelectedTeamMemberIds(nextIds: string[]) {
-		detailState.updateSelectedTeamMemberIds(nextIds);
+	async function updateSelectedRecipientRefs(nextRefs: FormatRecipientRef[]) {
+		detailState.updateSelectedRecipientRefs(nextRefs);
 		actionError = null;
-		hasPendingTeamMemberIdsSave = true;
-		await flushTeamMemberIdsSave();
+		hasPendingRecipientsSave = true;
+		await flushRecipientsSave();
 	}
 
-	async function flushTeamMemberIdsSave() {
-		if (isSavingTeamMemberIds) {
+	async function flushRecipientsSave() {
+		if (isSavingRecipients) {
 			return;
 		}
 
-		isSavingTeamMemberIds = true;
+		isSavingRecipients = true;
 
 		try {
-			while (hasPendingTeamMemberIdsSave) {
-				hasPendingTeamMemberIdsSave = false;
-				const requestedTeamMemberIds = [...detailState.selectedTeamMemberIds];
+			while (hasPendingRecipientsSave) {
+				hasPendingRecipientsSave = false;
+				const requestedRecipientRefs = [...detailState.selectedRecipientRefs];
 
-				const result = await client.mutation(api.opportunityFormats.setOpportunityFormatTeamMembers, {
+				const result = await client.mutation(api.opportunityFormats.setOpportunityFormatRecipients, {
 					opportunityFormatId: getOpportunityFormatId(),
-					teamMemberIds: requestedTeamMemberIds
+					recipientRefs: requestedRecipientRefs
 				});
 
-				if (areStringArraysEqual(detailState.selectedTeamMemberIds, requestedTeamMemberIds)) {
-					detailState.markTeamMembersSaved(result.teamMemberIds, result.updatedAt);
+				if (areRecipientRefsEqual(detailState.selectedRecipientRefs, requestedRecipientRefs)) {
+					detailState.markRecipientsSaved(result.recipientRefs, result.updatedAt);
 				}
 			}
 		} catch (error) {
-			actionError = getErrorMessage(error, 'Could not update team members.');
+			actionError = getErrorMessage(error, 'Could not update recipients.');
 		} finally {
-			isSavingTeamMemberIds = false;
+			isSavingRecipients = false;
 		}
 	}
 
@@ -218,8 +222,8 @@ export function createOpportunityFormatDetailController({
 		get isDeletingFormat() {
 			return isDeletingFormat;
 		},
-		get isSavingTeamMemberIds() {
-			return isSavingTeamMemberIds;
+		get isSavingRecipients() {
+			return isSavingRecipients;
 		},
 		get isUpdatingStatus() {
 			return isUpdatingStatus;
@@ -235,6 +239,6 @@ export function createOpportunityFormatDetailController({
 		syncStatus,
 		toggleStatus,
 		updateSelectedFeedback,
-		updateSelectedTeamMemberIds
+		updateSelectedRecipientRefs
 	};
 }

@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
 import type * as builder from "../builder.js";
 import type * as builderEmailValidators from "../builderEmailValidators.js";
 import type * as builderRuntime from "../builderRuntime.js";
@@ -21,6 +22,7 @@ import type * as builderSessionOutputEvents from "../builderSessionOutputEvents.
 import type * as builderSessions from "../builderSessions.js";
 import type * as crons from "../crons.js";
 import type * as devSeed from "../devSeed.js";
+import type * as formatRecipientValidators from "../formatRecipientValidators.js";
 import type * as formatRecipients from "../formatRecipients.js";
 import type * as health from "../health.js";
 import type * as opportunityFormatReadiness from "../opportunityFormatReadiness.js";
@@ -35,6 +37,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   builder: typeof builder;
   builderEmailValidators: typeof builderEmailValidators;
   builderRuntime: typeof builderRuntime;
@@ -48,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   builderSessions: typeof builderSessions;
   crons: typeof crons;
   devSeed: typeof devSeed;
+  formatRecipientValidators: typeof formatRecipientValidators;
   formatRecipients: typeof formatRecipients;
   health: typeof health;
   opportunityFormatReadiness: typeof opportunityFormatReadiness;

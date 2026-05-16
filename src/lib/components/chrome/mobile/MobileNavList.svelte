@@ -61,10 +61,22 @@
 				{#each footerItems as item (item.id)}
 					{@const Icon = item.icon}
 					<li>
-						<span class={getItemClassName({ isActive: false, disabled: item.kind === 'disabled' })}>
-							<Icon size={14} weight="regular" class="shrink-0" />
-							<span class="min-w-0 truncate">{item.label}</span>
-						</span>
+						{#if item.kind === 'external-link'}
+							<a
+								href={item.href}
+								target="_blank"
+								rel="noreferrer"
+								class={getItemClassName({ isActive: false })}
+							>
+								<Icon size={14} weight="regular" class="shrink-0" />
+								<span class="min-w-0 truncate">{item.label}</span>
+							</a>
+						{:else}
+							<span class={getItemClassName({ isActive: false, disabled: true })}>
+								<Icon size={14} weight="regular" class="shrink-0" />
+								<span class="min-w-0 truncate">{item.label}</span>
+							</span>
+						{/if}
 					</li>
 				{/each}
 			</ul>

@@ -1,9 +1,9 @@
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import {
-	isBuilderSessionActive,
-	verifyResumeToken
+	isBuilderSessionActive
 } from './builderSessionAccess';
+import { requireWorkspace } from './auth';
 
 export const ASSISTANT_STREAM_FLUSH_INTERVAL_MS = 150;
 export const ASSISTANT_STREAM_FLUSH_MIN_CHARS = 120;
@@ -23,16 +23,12 @@ export function getErrorMessage(error: unknown) {
 export async function getAuthorizedSession(
 	ctx: QueryCtx | MutationCtx,
 	sessionId: Id<'builderSessions'>,
-	resumeToken: string,
 	now = Date.now()
 ) {
+	const { workspace } = await requireWorkspace(ctx);
 	const session = await ctx.db.get(sessionId);
 
-	if (!session || !isBuilderSessionActive(session, now)) {
-		return null;
-	}
-
-	if (!(await verifyResumeToken(session, resumeToken))) {
+	if (!session || session.workspaceId !== workspace._id || !isBuilderSessionActive(session, now)) {
 		return null;
 	}
 
@@ -42,7 +38,6 @@ export async function getAuthorizedSession(
 export async function buildSessionSnapshot(
 	ctx: QueryCtx | MutationCtx,
 	session: Doc<'builderSessions'>,
-	resumeToken: string
 ) {
 	const messages = await ctx.db
 		.query('builderSessionMessages')
@@ -52,7 +47,6 @@ export async function buildSessionSnapshot(
 	return {
 		handle: {
 			sessionId: session._id,
-			resumeToken,
 			appSlug: session.appSlug,
 			expiresAt: session.expiresAt
 		},

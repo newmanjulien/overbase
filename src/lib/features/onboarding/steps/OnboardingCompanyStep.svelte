@@ -7,11 +7,21 @@
 	type Props = {
 		name: string;
 		website: string;
+		errorText: string | null;
+		isSubmitting: boolean;
 		onContinue: () => void;
 	};
 
-	let { name = $bindable(), website = $bindable(), onContinue }: Props = $props();
-	const canContinue = $derived(name.trim().length > 0 && website.trim().length > 0);
+	let {
+		name = $bindable(),
+		website = $bindable(),
+		errorText,
+		isSubmitting,
+		onContinue
+	}: Props = $props();
+	const canContinue = $derived(
+		name.trim().length > 0 && website.trim().length > 0 && !isSubmitting
+	);
 </script>
 
 <OnboardingStepFrame
@@ -46,6 +56,11 @@
 			label="Why your website?"
 			text="We search for your website then use the information on it to understand your company without you needing to tell us anything"
 		/>
-		<OnboardingPrimaryButton type="submit" disabled={!canContinue}>Last step</OnboardingPrimaryButton>
+		{#if errorText}
+			<p class="m-0 text-sm leading-5 text-red-600">{errorText}</p>
+		{/if}
+		<OnboardingPrimaryButton type="submit" disabled={!canContinue}>
+			{isSubmitting ? 'Saving...' : 'Last step'}
+		</OnboardingPrimaryButton>
 	</form>
 </OnboardingStepFrame>

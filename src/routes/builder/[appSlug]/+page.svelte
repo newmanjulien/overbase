@@ -10,19 +10,25 @@
 		readBuilderLaunchFromPageState,
 		readPendingBuilderLaunch
 	} from '$lib/features/builder/session';
+	import {
+		getCurrentWorkspaceStorageScope,
+		useCurrentWorkspaceContext
+	} from '$lib/app/current-workspace.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+	const currentWorkspace = useCurrentWorkspaceContext();
+	const storageScope = getCurrentWorkspaceStorageScope(currentWorkspace);
 	const app = $derived(data.app ? toBuilderAppRecord(data.app) : null);
 	const guide = $derived(toBuilderGuideDefinition(data.guide));
 
 	function readLaunch(appSlug: string) {
 		return (
-			readBuilderLaunchFromPageState(appSlug, page.state) ??
+			readBuilderLaunchFromPageState(appSlug, page.state, storageScope) ??
 			(page.url.searchParams.get('fresh') === '1'
-				? createBuilderLaunchState(appSlug, { fresh: true })
+				? createBuilderLaunchState(appSlug, storageScope, { fresh: true })
 				: null) ??
-			readPendingBuilderLaunch(appSlug)
+			readPendingBuilderLaunch(appSlug, storageScope)
 		);
 	}
 

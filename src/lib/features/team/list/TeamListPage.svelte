@@ -214,14 +214,19 @@
 	empty={{
 		icon: APP_ROUTE_REGISTRY.team.icon,
 		title: 'No teammates found',
-		description: 'Add teammates who will receive opportunities.',
+		description: [
+			{ kind: 'text', text: 'Add teammates and we ' },
+			{
+				kind: 'tooltip',
+				label: "won't contact them",
+				tooltipText:
+					"We won't contact teammates after you add them. They'll only receive emails after you add them to an active opportunity format"
+			},
+			{ kind: 'text', text: 'until you add them to opportunities' }
+		],
 		nextSteps:
 			'Teammates are the people inside your organization who receive opportunities. Add teammates here, then add them to the right formats',
-		learnMoreLabel: 'Learn more',
 		actionLabel: 'Add team',
-		actionHelpText: "We won't contact them yet",
-		actionHelpTooltipText:
-			"We won't contact teammates after you add them. They'll only receive emails after you add them to an active opportunity format",
 		onAction: openModal
 	}}
 	hasItems={listState !== 'empty'}

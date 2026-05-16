@@ -121,3 +121,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
 export const DEFAULT_ROUTE_ID: NavRouteId = "builder";
 export const DEFAULT_ROUTE_HREF: NavPath =
   APP_ROUTE_REGISTRY[DEFAULT_ROUTE_ID].href;
+
+export const AUTH_ENTRY_ROUTE_HREFS = ["/signup", "/login"] as const;
+
+export type AuthEntryRouteHref = (typeof AUTH_ENTRY_ROUTE_HREFS)[number];

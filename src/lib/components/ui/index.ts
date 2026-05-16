@@ -8,6 +8,8 @@ export { default as HelpTooltip } from './HelpTooltip.svelte';
 export { default as IconButton } from './IconButton.svelte';
 export { default as InfoBar } from './InfoBar.svelte';
 export { default as InfoBarAction } from './InfoBarAction.svelte';
+export { default as InlineText } from './InlineText.svelte';
+export type { InlineTextContent, InlineTextPart } from './inline-text';
 export { default as FullHeightModalShell } from './FullHeightModalShell.svelte';
 export type { FullHeightModalPlacement } from './FullHeightModalShell.svelte';
 export { default as ModalShell } from './ModalShell.svelte';

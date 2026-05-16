@@ -27,7 +27,15 @@ export type NavDisabledItem = {
 	icon: NavIcon;
 };
 
-export type NavFooterItem = NavDisabledItem;
+export type NavExternalLinkItem = {
+	id: string;
+	kind: 'external-link';
+	label: string;
+	href: string;
+	icon: NavIcon;
+};
+
+export type NavFooterItem = NavDisabledItem | NavExternalLinkItem;
 
 export type NavSection = {
 	id: NavSectionId;
@@ -68,8 +76,9 @@ export const MOBILE_NAV_SECTIONS: readonly NavSection[] = NAV_SECTIONS.map((sect
 export const NAV_FOOTER_ITEMS: readonly NavFooterItem[] = [
 	{
 		id: 'contact-support',
-		kind: 'disabled',
+		kind: 'external-link',
 		label: 'Contact support',
+		href: 'https://cal.com/juliennewman',
 		icon: Question
 	}
 ] as const;

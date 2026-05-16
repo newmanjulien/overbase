@@ -103,16 +103,34 @@
 					{@const Icon = item.icon}
 					<li>
 						<span class={cn('relative', expanded ? 'block w-full' : 'inline-flex self-center')}>
-							<span class={getFooterItemClassName(item.kind === 'disabled')}>
-								<Icon size={14} weight="regular" class="shrink-0" />
-								{#if expanded}
-									<span class="min-w-0 overflow-hidden">
-										<span class="block truncate text-left">{item.label}</span>
-									</span>
-								{:else}
-									<span class="sr-only">{item.label}</span>
-								{/if}
-							</span>
+							{#if item.kind === 'external-link'}
+								<a
+									href={item.href}
+									target="_blank"
+									rel="noreferrer"
+									class={getFooterItemClassName()}
+								>
+									<Icon size={14} weight="regular" class="shrink-0" />
+									{#if expanded}
+										<span class="min-w-0 overflow-hidden">
+											<span class="block truncate text-left">{item.label}</span>
+										</span>
+									{:else}
+										<span class="sr-only">{item.label}</span>
+									{/if}
+								</a>
+							{:else}
+								<span class={getFooterItemClassName(true)}>
+									<Icon size={14} weight="regular" class="shrink-0" />
+									{#if expanded}
+										<span class="min-w-0 overflow-hidden">
+											<span class="block truncate text-left">{item.label}</span>
+										</span>
+									{:else}
+										<span class="sr-only">{item.label}</span>
+									{/if}
+								</span>
+							{/if}
 						</span>
 					</li>
 				{/each}

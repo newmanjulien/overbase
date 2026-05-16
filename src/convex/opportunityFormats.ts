@@ -1,21 +1,24 @@
 import { v } from 'convex/values';
 import { normalizeEmailDraft } from '@overbase/builder-sdk/email';
 import { mutation, query } from './_generated/server';
+import type { Id } from './_generated/dataModel';
+import type { MutationCtx, QueryCtx } from './_generated/server';
 import { getAuthorizedSession } from './builderSessionCore';
+import { emailDraft as emailDraftValidator } from './builderEmailValidators';
+import { formatRecipientRef } from './formatRecipientValidators';
 import {
-	emailDraft as emailDraftValidator
-} from './builderEmailValidators';
-import {
+	getDefaultFormatRecipientRefs,
 	getFormatRecipients,
-	normalizeFormatRecipientIds
+	getUserDisplayName,
+	normalizeFormatRecipientRefs
 } from './formatRecipients';
 import {
 	getOpportunityFormatReadiness,
 	normalizeOpportunityFormatRules
 } from './opportunityFormatReadiness';
+import { requireWorkspace, requireWorkspaceRecord } from './auth';
 
 const DEFAULT_OPPORTUNITY_FORMAT_TITLE = 'Untitled format';
-const CREATED_BY_NAME = 'Overbase user';
 
 const opportunityFormatRule = v.object({
 	id: v.string(),
@@ -26,16 +29,26 @@ function normalizeOpportunityFormatTitle(title: string) {
 	return title.trim() || DEFAULT_OPPORTUNITY_FORMAT_TITLE;
 }
 
+async function getCreator(ctx: QueryCtx | MutationCtx, userId: Id<'users'>) {
+	const user = await ctx.db.get(userId);
+
+	return {
+		id: userId,
+		name: user ? getUserDisplayName(user) : 'Unknown user',
+		avatar: user?.avatarUrl ?? ''
+	};
+}
+
 export const publishFromBuilderSession = mutation({
 	args: {
 		sessionId: v.id('builderSessions'),
-		resumeToken: v.string(),
 		title: v.string()
 	},
-	handler: async (ctx, { sessionId, resumeToken, title }) => {
+	handler: async (ctx, { sessionId, title }) => {
+		const { user, workspace } = await requireWorkspace(ctx);
 		const now = Date.now();
 		const opportunityFormatTitle = normalizeOpportunityFormatTitle(title);
-		const session = await getAuthorizedSession(ctx, sessionId, resumeToken, now);
+		const session = await getAuthorizedSession(ctx, sessionId, now);
 
 		if (!session) {
 			throw new Error('Builder session not found.');
@@ -46,8 +59,8 @@ export const publishFromBuilderSession = mutation({
 		}
 
 		const emailDraft = normalizeEmailDraft(session.emailDraftState.draft);
-		const teamMemberIds = await normalizeFormatRecipientIds(ctx, []);
 		const opportunityFormatId = await ctx.db.insert('opportunityFormats', {
+			workspaceId: workspace._id,
 			title: opportunityFormatTitle,
 			status: 'paused',
 			definition: {
@@ -57,8 +70,8 @@ export const publishFromBuilderSession = mutation({
 			emailDraft,
 			emailDraftVersion: 1,
 			rules: [],
-			teamMemberIds,
-			createdByName: CREATED_BY_NAME,
+			recipientRefs: getDefaultFormatRecipientRefs(user._id),
+			createdByUserId: user._id,
 			createdAt: now,
 			updatedAt: now
 		});
@@ -77,7 +90,7 @@ export const getOpportunityFormatDetail = query({
 		opportunityFormatId: v.id('opportunityFormats')
 	},
 	handler: async (ctx, { opportunityFormatId }) => {
-		const opportunityFormat = await ctx.db.get(opportunityFormatId);
+		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			return null;
@@ -86,7 +99,11 @@ export const getOpportunityFormatDetail = query({
 		const people = await getFormatRecipients(ctx);
 		const opportunityDocs = await ctx.db
 			.query('opportunities')
-			.withIndex('by_opportunityFormat_sentAt', (q) => q.eq('opportunityFormatId', opportunityFormatId))
+			.withIndex('by_workspace_opportunityFormat_sentAt', (q) =>
+				q
+					.eq('workspaceId', opportunityFormat.workspaceId)
+					.eq('opportunityFormatId', opportunityFormatId)
+			)
 			.order('desc')
 			.collect();
 		const opportunities = opportunityDocs.map((opportunity) => ({
@@ -96,7 +113,11 @@ export const getOpportunityFormatDetail = query({
 		}));
 		const feedbackDocs = await ctx.db
 			.query('opportunityFeedback')
-			.withIndex('by_opportunityFormatId', (q) => q.eq('opportunityFormatId', opportunityFormatId))
+			.withIndex('by_workspace_opportunityFormat', (q) =>
+				q
+					.eq('workspaceId', opportunityFormat.workspaceId)
+					.eq('opportunityFormatId', opportunityFormatId)
+			)
 			.collect();
 		const feedback = feedbackDocs.map((feedbackItem) => ({
 			opportunityId: feedbackItem.opportunityId,
@@ -119,8 +140,8 @@ export const getOpportunityFormatDetail = query({
 				emailDraftVersion: opportunityFormat.emailDraftVersion,
 				rules,
 				readiness: getOpportunityFormatReadiness(rules),
-				teamMemberIds: await normalizeFormatRecipientIds(ctx, opportunityFormat.teamMemberIds),
-				createdByName: opportunityFormat.createdByName,
+				recipientRefs: await normalizeFormatRecipientRefs(ctx, opportunityFormat.recipientRefs),
+				creator: await getCreator(ctx, opportunityFormat.createdByUserId),
 				createdAt: opportunityFormat.createdAt,
 				updatedAt: opportunityFormat.updatedAt
 			},
@@ -138,7 +159,7 @@ export const updateOpportunityFormatTitle = mutation({
 		title: v.string()
 	},
 	handler: async (ctx, { opportunityFormatId, title }) => {
-		const opportunityFormat = await ctx.db.get(opportunityFormatId);
+		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -160,20 +181,23 @@ export const updateOpportunityFormatTitle = mutation({
 export const listOpportunityFormats = query({
 	args: {},
 	handler: async (ctx) => {
+		const { workspace } = await requireWorkspace(ctx);
 		const opportunityFormats = await ctx.db
 			.query('opportunityFormats')
-			.withIndex('by_createdAt')
+			.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
 			.order('desc')
 			.collect();
 
-		return opportunityFormats.map((opportunityFormat) => ({
-			id: opportunityFormat._id,
-			title: opportunityFormat.title,
-			status: opportunityFormat.status,
-			readiness: getOpportunityFormatReadiness(opportunityFormat.rules),
-			createdByName: opportunityFormat.createdByName,
-			createdAt: opportunityFormat.createdAt
-		}));
+		return await Promise.all(
+			opportunityFormats.map(async (opportunityFormat) => ({
+				id: opportunityFormat._id,
+				title: opportunityFormat.title,
+				status: opportunityFormat.status,
+				readiness: getOpportunityFormatReadiness(opportunityFormat.rules),
+				creator: await getCreator(ctx, opportunityFormat.createdByUserId),
+				createdAt: opportunityFormat.createdAt
+			}))
+		);
 	}
 });
 
@@ -183,13 +207,25 @@ export const deleteOpportunityFormats = mutation({
 	},
 	handler: async (ctx, { opportunityFormatIds }) => {
 		for (const opportunityFormatId of opportunityFormatIds) {
+			const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+			if (!opportunityFormat) {
+				continue;
+			}
 			const feedback = await ctx.db
 				.query('opportunityFeedback')
-				.withIndex('by_opportunityFormatId', (q) => q.eq('opportunityFormatId', opportunityFormatId))
+				.withIndex('by_workspace_opportunityFormat', (q) =>
+					q
+						.eq('workspaceId', opportunityFormat.workspaceId)
+						.eq('opportunityFormatId', opportunityFormatId)
+				)
 				.collect();
 			const opportunities = await ctx.db
 				.query('opportunities')
-				.withIndex('by_opportunityFormat_createdAt', (q) => q.eq('opportunityFormatId', opportunityFormatId))
+				.withIndex('by_workspace_opportunityFormat_createdAt', (q) =>
+					q
+						.eq('workspaceId', opportunityFormat.workspaceId)
+						.eq('opportunityFormatId', opportunityFormatId)
+				)
 				.collect();
 
 			for (const feedbackItem of feedback) {
@@ -211,7 +247,7 @@ export const setOpportunityFormatStatus = mutation({
 		status: v.union(v.literal('paused'), v.literal('active'))
 	},
 	handler: async (ctx, { opportunityFormatId, status }) => {
-		const opportunityFormat = await ctx.db.get(opportunityFormatId);
+		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -246,7 +282,7 @@ export const saveOpportunityFormatEmailDraft = mutation({
 		draft: emailDraftValidator
 	},
 	handler: async (ctx, { opportunityFormatId, baseEmailDraftVersion, draft }) => {
-		const opportunityFormat = await ctx.db.get(opportunityFormatId);
+		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -279,7 +315,7 @@ export const saveOpportunityFormatRules = mutation({
 		rules: v.array(opportunityFormatRule)
 	},
 	handler: async (ctx, { opportunityFormatId, rules }) => {
-		const opportunityFormat = await ctx.db.get(opportunityFormatId);
+		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -307,29 +343,28 @@ export const saveOpportunityFormatRules = mutation({
 	}
 });
 
-export const setOpportunityFormatTeamMembers = mutation({
+export const setOpportunityFormatRecipients = mutation({
 	args: {
 		opportunityFormatId: v.id('opportunityFormats'),
-		teamMemberIds: v.array(v.string())
+		recipientRefs: v.array(formatRecipientRef)
 	},
-	handler: async (ctx, { opportunityFormatId, teamMemberIds }) => {
-		const opportunityFormat = await ctx.db.get(opportunityFormatId);
+	handler: async (ctx, { opportunityFormatId, recipientRefs }) => {
+		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
 		}
 
 		const now = Date.now();
-
-		const nextTeamMemberIds = await normalizeFormatRecipientIds(ctx, teamMemberIds);
+		const nextRecipientRefs = await normalizeFormatRecipientRefs(ctx, recipientRefs);
 
 		await ctx.db.patch(opportunityFormatId, {
-			teamMemberIds: nextTeamMemberIds,
+			recipientRefs: nextRecipientRefs,
 			updatedAt: now
 		});
 
 		return {
-			teamMemberIds: nextTeamMemberIds,
+			recipientRefs: nextRecipientRefs,
 			updatedAt: now
 		};
 	}
@@ -342,7 +377,7 @@ export const saveOpportunityFeedback = mutation({
 		improvementText: v.string()
 	},
 	handler: async (ctx, { opportunityId, likedText, improvementText }) => {
-		const opportunity = await ctx.db.get(opportunityId);
+		const opportunity = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityId));
 
 		if (!opportunity) {
 			throw new Error('Opportunity not found.');
@@ -355,7 +390,9 @@ export const saveOpportunityFeedback = mutation({
 		};
 		const existingFeedback = await ctx.db
 			.query('opportunityFeedback')
-			.withIndex('by_opportunityId', (q) => q.eq('opportunityId', opportunityId))
+			.withIndex('by_workspace_opportunity', (q) =>
+				q.eq('workspaceId', opportunity.workspaceId).eq('opportunityId', opportunityId)
+			)
 			.first();
 
 		if (existingFeedback) {
@@ -368,6 +405,7 @@ export const saveOpportunityFeedback = mutation({
 		}
 
 		await ctx.db.insert('opportunityFeedback', {
+			workspaceId: opportunity.workspaceId,
 			opportunityFormatId: opportunity.opportunityFormatId,
 			opportunityId,
 			...normalizedFeedback,

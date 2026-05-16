@@ -5,6 +5,10 @@
 	import type { BuilderRunSetup } from '@overbase/builder-sdk/app-protocol';
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import {
+		getCurrentWorkspaceStorageScope,
+		useCurrentWorkspaceContext
+	} from '$lib/app/current-workspace.svelte';
 	import BuilderChatError from './chat/BuilderChatError.svelte';
 	import BuilderChatSurface from './chat/BuilderChatSurface.svelte';
 	import CustomEmailRightPanel from '$lib/features/builder/email-output/CustomEmailRightPanel.svelte';
@@ -21,7 +25,7 @@
 
 	type BuilderSessionWorkbenchStartRequest = Pick<
 		BuilderLaunchState,
-		'startRequestId' | 'resumeToken'
+		'startRequestId'
 	>;
 
 	export type BuilderSessionWorkbenchBeforeRunContext = {
@@ -41,12 +45,20 @@
 	let { app, launch = null, beforeRun }: Props = $props();
 	let bootedAppId = $state('');
 	const routeTitleState = useRouteTitleState();
+	const currentWorkspace = useCurrentWorkspaceContext();
+	const storageScope = getCurrentWorkspaceStorageScope(currentWorkspace);
 
 	const initialAppId = untrack(() => app.id);
-	const initialLaunch = untrack(() => (launch?.appSlug === initialAppId ? launch : null));
+	const initialLaunch = untrack(() =>
+		launch?.appSlug === initialAppId &&
+		launch.owner.userId === storageScope.userId &&
+		launch.owner.workspaceId === storageScope.workspaceId
+			? launch
+			: null
+	);
 	const initialSetup = untrack(() => initialLaunch?.setup ?? null);
 	const initialMessage = untrack(() => initialSetup?.initialMessage.trim() ?? '');
-	const builderSession = createBuilderSessionController(initialAppId, () => initialMessage);
+	const builderSession = createBuilderSessionController(initialAppId, storageScope, () => initialMessage);
 
 	let mode = $state<'beforeRun' | 'run'>(initialMessage ? 'run' : 'beforeRun');
 	let isPublishNavigation = $state(false);
@@ -62,7 +74,7 @@
 	});
 
 	function clearLaunchState() {
-		clearPendingBuilderLaunch(app.id);
+		clearPendingBuilderLaunch(app.id, storageScope);
 		replaceState(
 			resolve('/builder/[appSlug]', {
 				appSlug: app.id
@@ -87,18 +99,22 @@
 	}
 
 	async function boot() {
-		const activeLaunch = launch?.appSlug === app.id ? launch : null;
+		const activeLaunch =
+			launch?.appSlug === app.id &&
+			launch.owner.userId === storageScope.userId &&
+			launch.owner.workspaceId === storageScope.workspaceId
+				? launch
+				: null;
 		const setup = activeLaunch?.setup ?? null;
 		const firstMessage = setup?.initialMessage.trim() ?? '';
 
 		if (activeLaunch?.fresh) {
-			clearStoredBuilderSessionHandle(app.id);
+			clearStoredBuilderSessionHandle(app.id, storageScope);
 		}
 
 		if (setup && firstMessage) {
 			await startRun(setup, {
-				startRequestId: activeLaunch?.startRequestId,
-				resumeToken: activeLaunch?.resumeToken
+				startRequestId: activeLaunch?.startRequestId
 			});
 			return;
 		}

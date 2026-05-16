@@ -152,8 +152,8 @@
 			statusLabelClass: getStatusLabelClass(format.status),
 			createdAtLabel: dateFormatter.format(new Date(format.createdAt)),
 			creator: {
-				name: format.createdByName,
-				avatar: ''
+				name: format.creator.name,
+				avatar: format.creator.avatar
 			},
 			actionsAriaLabel: 'Format actions',
 			actions
