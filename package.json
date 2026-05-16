@@ -42,6 +42,7 @@
 		"convex-svelte": "^0.0.12",
 		"phosphor-svelte": "^3.1.0",
 		"stick-to-bottom-svelte": "^1.0.3",
+		"svelte-clerk": "^1.1.8",
 		"tailwind-merge": "^3.5.0"
 	},
 	"overrides": {

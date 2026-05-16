@@ -3,6 +3,7 @@ import {
 	type EmailDraft
 } from '@overbase/builder-sdk/email';
 import type {
+	FormatRecipientRef,
 	OpportunityFeedback,
 	OpportunityFormatRule
 } from './opportunity-format-detail-types';
@@ -13,7 +14,7 @@ type OpportunityFormatDetailSnapshot = {
 		emailDraft: EmailDraft;
 		emailDraftVersion: number;
 		rules: OpportunityFormatRule[];
-		teamMemberIds: string[];
+		recipientRefs: FormatRecipientRef[];
 		updatedAt: number;
 	};
 	feedback: Array<{
@@ -60,13 +61,13 @@ export function createOpportunityFormatDetailState() {
 	let syncedOpportunityFormatId = $state<string | null>(null);
 	let syncedEmailDraftVersion = $state(0);
 	let syncedRulesUpdatedAt = $state(0);
-	let syncedTeamMembersUpdatedAt = $state(0);
+	let syncedRecipientsUpdatedAt = $state(0);
 	let syncedFeedbackUpdatedAt = $state(-1);
 	let emailDraft = $state<EmailDraft>(createDefaultEmailDraft());
 	let emailDraftVersion = $state(0);
 	let rulesDraft = $state<OpportunityFormatRule[]>([]);
 	let savedRules = $state<OpportunityFormatRule[]>([]);
-	let selectedTeamMemberIds = $state<string[]>([]);
+	let selectedRecipientRefs = $state<FormatRecipientRef[]>([]);
 	let selectedOpportunityIndex = $state(0);
 	let feedbackDraftsByOpportunityId = $state<Record<string, OpportunityFeedback>>({});
 	let savedFeedbackByOpportunityId = $state<Record<string, OpportunityFeedback>>({});
@@ -82,13 +83,13 @@ export function createOpportunityFormatDetailState() {
 	function sync(
 		opportunityFormatId: string,
 		detail: OpportunityFormatDetailSnapshot,
-		{ syncTeamMembers = true } = {}
+		{ syncRecipients = true } = {}
 	) {
 		if (syncedOpportunityFormatId !== opportunityFormatId) {
 			syncedOpportunityFormatId = opportunityFormatId;
 			syncedEmailDraftVersion = 0;
 			syncedRulesUpdatedAt = 0;
-			syncedTeamMembersUpdatedAt = 0;
+			syncedRecipientsUpdatedAt = 0;
 			syncedFeedbackUpdatedAt = -1;
 			selectedOpportunityIndex = 0;
 		}
@@ -105,9 +106,9 @@ export function createOpportunityFormatDetailState() {
 			syncedRulesUpdatedAt = detail.opportunityFormat.updatedAt;
 		}
 
-		if (syncTeamMembers && detail.opportunityFormat.updatedAt > syncedTeamMembersUpdatedAt) {
-			selectedTeamMemberIds = [...detail.opportunityFormat.teamMemberIds];
-			syncedTeamMembersUpdatedAt = detail.opportunityFormat.updatedAt;
+		if (syncRecipients && detail.opportunityFormat.updatedAt > syncedRecipientsUpdatedAt) {
+			selectedRecipientRefs = [...detail.opportunityFormat.recipientRefs];
+			syncedRecipientsUpdatedAt = detail.opportunityFormat.updatedAt;
 		}
 
 		if (detail.feedbackUpdatedAt !== syncedFeedbackUpdatedAt) {
@@ -146,13 +147,13 @@ export function createOpportunityFormatDetailState() {
 		syncedRulesUpdatedAt = updatedAt;
 	}
 
-	function updateSelectedTeamMemberIds(nextIds: string[]) {
-		selectedTeamMemberIds = nextIds;
+	function updateSelectedRecipientRefs(nextRefs: FormatRecipientRef[]) {
+		selectedRecipientRefs = nextRefs;
 	}
 
-	function markTeamMembersSaved(nextIds: string[], updatedAt: number) {
-		selectedTeamMemberIds = [...nextIds];
-		syncedTeamMembersUpdatedAt = updatedAt;
+	function markRecipientsSaved(nextRefs: FormatRecipientRef[], updatedAt: number) {
+		selectedRecipientRefs = [...nextRefs];
+		syncedRecipientsUpdatedAt = updatedAt;
 	}
 
 	function getFeedback(
@@ -208,8 +209,8 @@ export function createOpportunityFormatDetailState() {
 		get canSaveRules() {
 			return canSaveRules();
 		},
-		get selectedTeamMemberIds() {
-			return selectedTeamMemberIds;
+		get selectedRecipientRefs() {
+			return selectedRecipientRefs;
 		},
 		get selectedOpportunityIndex() {
 			return selectedOpportunityIndex;
@@ -222,11 +223,11 @@ export function createOpportunityFormatDetailState() {
 		markEmailDraftSaved,
 		markFeedbackSaved,
 		markRulesSaved,
-		markTeamMembersSaved,
+		markRecipientsSaved,
 		sync,
 		updateFeedback,
 		updateRules,
-		updateSelectedTeamMemberIds
+		updateSelectedRecipientRefs
 	};
 }
 

@@ -1,5 +1,6 @@
 import { api } from '$convex/_generated/api';
 import type { Doc, Id } from '$convex/_generated/dataModel';
+import type { CurrentWorkspaceStorageScope } from '$lib/app/current-workspace.svelte';
 import {
 	normalizeBuilderRunSetup,
 	type BuilderRunSetup
@@ -115,6 +116,7 @@ function chooseSnapshot(
 
 export function createBuilderSessionController(
 	appSlug: string,
+	storageScope: CurrentWorkspaceStorageScope,
 	readInitialMessage: () => string = () => ''
 ) {
 	const client = useConvexClient();
@@ -125,7 +127,7 @@ export function createBuilderSessionController(
 	let jobVersion = 0;
 
 	const liveSnapshotQuery = useQuery(api.builderSessions.getSessionSnapshot, () =>
-		handle ? { sessionId: handle.sessionId, resumeToken: handle.resumeToken } : 'skip'
+		handle ? { sessionId: handle.sessionId } : 'skip'
 	);
 	const liveSnapshot = $derived(liveSnapshotQuery.data ? toUiSnapshot(liveSnapshotQuery.data) : null);
 	const snapshot = $derived(chooseSnapshot(localSnapshot, liveSnapshot));
@@ -148,14 +150,14 @@ export function createBuilderSessionController(
 		const uiSnapshot = toUiSnapshot(nextSnapshot);
 		handle = nextSnapshot.handle;
 		localSnapshot = uiSnapshot;
-		writeStoredBuilderSessionHandle(nextSnapshot.handle);
+		writeStoredBuilderSessionHandle(nextSnapshot.handle, storageScope);
 	}
 
 	function clearLocal() {
 		handle = null;
 		localSnapshot = null;
 		error = null;
-		clearStoredBuilderSessionHandle(appSlug);
+		clearStoredBuilderSessionHandle(appSlug, storageScope);
 	}
 
 	async function start(
@@ -184,8 +186,7 @@ export function createBuilderSessionController(
 			const result = await client.mutation(api.builderSessions.startSession, {
 				appSlug,
 				setup: runSetup,
-				startRequestId: startRequest.startRequestId,
-				resumeToken: startRequest.resumeToken
+				startRequestId: startRequest.startRequestId
 			});
 
 			if (isCurrentJob(job)) {
@@ -203,7 +204,7 @@ export function createBuilderSessionController(
 	}
 
 	async function resumeStored() {
-		const storedHandle = readStoredBuilderSessionHandle(appSlug);
+		const storedHandle = readStoredBuilderSessionHandle(appSlug, storageScope);
 
 		if (!storedHandle || storedHandle.appSlug !== appSlug) {
 			clearLocal();
@@ -215,8 +216,7 @@ export function createBuilderSessionController(
 
 		try {
 			const result = await client.mutation(api.builderSessions.resumeSession, {
-				sessionId: storedHandle.sessionId,
-				resumeToken: storedHandle.resumeToken
+				sessionId: storedHandle.sessionId
 			});
 
 			if (!result) {
@@ -293,7 +293,6 @@ export function createBuilderSessionController(
 		try {
 			const result = await client.mutation(api.builderSessions.sendMessage, {
 				sessionId: handle.sessionId,
-				resumeToken: handle.resumeToken,
 				text: normalizedText
 			});
 
@@ -318,7 +317,6 @@ export function createBuilderSessionController(
 
 		const result = await client.mutation(api.builderSessions.saveEmailDraft, {
 			sessionId: handle.sessionId,
-			resumeToken: handle.resumeToken,
 			baseEmailDraftVersion,
 			emailDraft
 		});
@@ -337,10 +335,15 @@ export function createBuilderSessionController(
 
 		return await client.mutation(api.opportunityFormats.publishFromBuilderSession, {
 			sessionId: handle.sessionId,
-			resumeToken: handle.resumeToken,
 			title
 		});
 	}
+
+	$effect(() => {
+		if (handle && !liveSnapshotQuery.isLoading && liveSnapshotQuery.data === null) {
+			clearLocal();
+		}
+	});
 
 	return {
 		get handle() {

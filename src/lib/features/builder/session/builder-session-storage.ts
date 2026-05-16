@@ -1,8 +1,8 @@
 import type { Id } from '$convex/_generated/dataModel';
+import type { CurrentWorkspaceStorageScope } from '$lib/app/current-workspace.svelte';
 
 export type BuilderSessionHandle = {
 	sessionId: Id<'builderSessions'>;
-	resumeToken: string;
 	appSlug: string;
 	expiresAt: number;
 };
@@ -11,10 +11,14 @@ type StoredBuilderSessionHandle = Omit<BuilderSessionHandle, 'sessionId'> & {
 	sessionId: string;
 };
 
-const BUILDER_SESSION_STORAGE_VERSION = 2;
+const BUILDER_SESSION_STORAGE_VERSION = 3;
 
-function getStorageKey(appSlug: string) {
-	return `overbase:builder-session:v${BUILDER_SESSION_STORAGE_VERSION}:${appSlug}`;
+function getStorageOwnerKey(scope: CurrentWorkspaceStorageScope) {
+	return `${scope.workspaceId}:${scope.userId}`;
+}
+
+function getStorageKey(appSlug: string, scope: CurrentWorkspaceStorageScope) {
+	return `overbase:builder-session:v${BUILDER_SESSION_STORAGE_VERSION}:${getStorageOwnerKey(scope)}:${appSlug}`;
 }
 
 function getLegacyStorageKey(appSlug: string) {
@@ -30,11 +34,9 @@ function parseStoredHandle(value: unknown): BuilderSessionHandle | null {
 
 	if (
 		typeof candidate.sessionId !== 'string' ||
-		typeof candidate.resumeToken !== 'string' ||
 		typeof candidate.appSlug !== 'string' ||
 		typeof candidate.expiresAt !== 'number' ||
 		!candidate.sessionId ||
-		!candidate.resumeToken ||
 		!candidate.appSlug ||
 		candidate.expiresAt <= Date.now()
 	) {
@@ -44,27 +46,38 @@ function parseStoredHandle(value: unknown): BuilderSessionHandle | null {
 	return candidate as StoredBuilderSessionHandle as BuilderSessionHandle;
 }
 
-export function readStoredBuilderSessionHandle(appSlug: string) {
+export function readStoredBuilderSessionHandle(
+	appSlug: string,
+	scope: CurrentWorkspaceStorageScope
+) {
 	if (typeof sessionStorage === 'undefined') {
 		return null;
 	}
 
 	try {
-		return parseStoredHandle(JSON.parse(sessionStorage.getItem(getStorageKey(appSlug)) ?? 'null'));
+		return parseStoredHandle(JSON.parse(sessionStorage.getItem(getStorageKey(appSlug, scope)) ?? 'null'));
 	} catch {
 		return null;
 	}
 }
 
-export function writeStoredBuilderSessionHandle(handle: BuilderSessionHandle) {
+export function writeStoredBuilderSessionHandle(
+	handle: BuilderSessionHandle,
+	scope: CurrentWorkspaceStorageScope
+) {
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.setItem(getStorageKey(handle.appSlug), JSON.stringify(handle));
+		sessionStorage.setItem(getStorageKey(handle.appSlug, scope), JSON.stringify(handle));
 	}
 }
 
-export function clearStoredBuilderSessionHandle(appSlug: string) {
+export function clearStoredBuilderSessionHandle(
+	appSlug: string,
+	scope: CurrentWorkspaceStorageScope
+) {
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.removeItem(getStorageKey(appSlug));
+		sessionStorage.removeItem(getStorageKey(appSlug, scope));
+		sessionStorage.removeItem('overbase:builder-session:v3:' + appSlug);
+		sessionStorage.removeItem('overbase:builder-session:v2:' + appSlug);
 		sessionStorage.removeItem(getLegacyStorageKey(appSlug));
 	}
 }

@@ -3,9 +3,12 @@
 	import Play from 'phosphor-svelte/lib/Play';
 	import { AvatarTeamPicker } from '$lib/components/people';
 	import { Button } from '$lib/components/ui';
+	import type { FormatRecipientRef } from './opportunity-format-detail-types';
+	import { getFormatRecipientKey } from './opportunity-format-detail-types';
 
 	type TeamPickerPerson = {
 		id: string;
+		ref: FormatRecipientRef;
 		name: string;
 		avatar: string;
 	};
@@ -14,9 +17,9 @@
 		canToggleStatus: boolean;
 		detailViewActionLabel: string;
 		people: TeamPickerPerson[];
-		selectedTeamMemberIds: string[];
+		selectedRecipientRefs: FormatRecipientRef[];
 		status: 'active' | 'paused';
-		onSelectedTeamMemberIdsChange: (nextIds: string[]) => void | Promise<void>;
+		onSelectedRecipientRefsChange: (nextRefs: FormatRecipientRef[]) => void | Promise<void>;
 		onToggleDetailView: () => void;
 		onToggleStatus: () => void | Promise<void>;
 	};
@@ -25,12 +28,25 @@
 		canToggleStatus,
 		detailViewActionLabel,
 		people,
-		selectedTeamMemberIds,
+		selectedRecipientRefs,
 		status,
-		onSelectedTeamMemberIdsChange,
+		onSelectedRecipientRefsChange,
 		onToggleDetailView,
 		onToggleStatus
 	}: Props = $props();
+
+	const selectedRecipientIds = $derived(selectedRecipientRefs.map(getFormatRecipientKey));
+
+	function handleSelectedRecipientIdsChange(nextIds: string[]) {
+		const peopleById = new Map(people.map((person) => [person.id, person]));
+		const nextRefs = nextIds.flatMap((id) => {
+			const person = peopleById.get(id);
+
+			return person ? [person.ref] : [];
+		});
+
+		void onSelectedRecipientRefsChange(nextRefs);
+	}
 </script>
 
 <div class="flex items-center gap-2">
@@ -51,13 +67,13 @@
 	</Button>
 	<AvatarTeamPicker
 		{people}
-		selectedIds={selectedTeamMemberIds}
+		selectedIds={selectedRecipientIds}
 		minSelected={1}
-		onSelectedIdsChange={(nextIds) => void onSelectedTeamMemberIdsChange(nextIds)}
-		altBase="Format teammate"
-		ariaLabel="Manage team members"
+		onSelectedIdsChange={handleSelectedRecipientIdsChange}
+		altBase="Format recipient"
+		ariaLabel="Manage recipients"
 		searchPlaceholder="Search team..."
-		emptyLabel="No team members found"
+		emptyLabel="No recipients found"
 	/>
 	<Button variant="secondary" class="h-7 px-2.5 text-[0.68rem]" onclick={onToggleDetailView}>
 		{detailViewActionLabel}

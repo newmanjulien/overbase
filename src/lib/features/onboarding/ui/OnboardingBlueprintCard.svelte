@@ -6,12 +6,19 @@
 
 	type Props = {
 		app: BuilderAppRecord;
+		isDisabled?: boolean;
+		isSelected?: boolean;
 		onSelect: (appSlug: string) => void;
 	};
 
-	let { app, onSelect }: Props = $props();
+	let { app, isDisabled = false, isSelected = false, onSelect }: Props = $props();
 
 	function handleClick(event: MouseEvent) {
+		if (isDisabled) {
+			event.preventDefault();
+			return;
+		}
+
 		if (
 			event.defaultPrevented ||
 			event.button !== 0 ||
@@ -30,8 +37,10 @@
 
 <a
 	href={resolve(BUILDER_FRESH_START_ROUTE, builderAppSlugParams(app.id))}
-	class="flex min-h-70 w-full flex-col rounded-lg border border-zinc-200/60 bg-white p-2 text-left outline-none transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-zinc-200 focus-visible:-translate-y-0.5 focus-visible:border-zinc-300 focus-visible:shadow-[0_0_0_3px_rgb(24_24_27_/_14%)]"
+	class="flex min-h-70 w-full flex-col rounded-lg border border-zinc-200/60 bg-white p-2 text-left outline-none transition-[border-color,box-shadow,transform,opacity] duration-150 hover:-translate-y-0.5 hover:border-zinc-200 focus-visible:-translate-y-0.5 focus-visible:border-zinc-300 focus-visible:shadow-[0_0_0_3px_rgb(24_24_27_/_14%)] aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-60"
 	aria-label={`Start with ${app.title}`}
+	aria-disabled={isDisabled}
+	tabindex={isDisabled ? -1 : 0}
 	onclick={handleClick}
 >
 	<div class="rounded-[0.45rem] bg-zinc-50 p-1">
@@ -48,7 +57,7 @@
 		<span
 			class="mt-4 inline-flex h-9 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-zinc-200/60 bg-white px-3.5 text-[0.76rem] font-medium text-zinc-800 transition-colors hover:bg-zinc-50"
 		>
-			Create this format
+			{isSelected ? 'Opening...' : 'Create this format'}
 		</span>
 	</div>
 </a>

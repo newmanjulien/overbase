@@ -7,31 +7,60 @@ import {
 	type BuilderGuideSetup,
 	type BuilderRunSetup
 } from '@overbase/builder-sdk/app-protocol';
+import type { CurrentWorkspaceStorageScope } from '$lib/app/current-workspace.svelte';
 export { clearStoredBuilderSessionHandle } from './builder-session-storage';
 
 export type BuilderLaunchState = {
 	appSlug: string;
+	owner: CurrentWorkspaceStorageScope;
 	fresh: boolean;
 	setup?: BuilderRunSetup;
 	startRequestId?: string;
-	resumeToken?: string;
 };
 
 type BuilderLaunchOptions = {
 	fresh?: boolean;
 	setup?: BuilderRunSetup | null;
 	startRequestId?: string | null;
-	resumeToken?: string | null;
 };
 
 const PENDING_BUILDER_LAUNCH_STORAGE_VERSION = 1;
 
-function getPendingLaunchStorageKey(appSlug: string) {
+function getStorageOwnerKey(scope: CurrentWorkspaceStorageScope) {
+	return `${scope.workspaceId}:${scope.userId}`;
+}
+
+function getPendingLaunchStorageKey(appSlug: string, scope: CurrentWorkspaceStorageScope) {
+	return `overbase:builder-launch:v${PENDING_BUILDER_LAUNCH_STORAGE_VERSION}:${getStorageOwnerKey(scope)}:${appSlug}`;
+}
+
+function getLegacyPendingLaunchStorageKey(appSlug: string) {
 	return `overbase:builder-launch:v${PENDING_BUILDER_LAUNCH_STORAGE_VERSION}:${appSlug}`;
 }
 
 function normalizeString(value: unknown) {
 	return typeof value === 'string' ? value.trim() : '';
+}
+
+function isSameStorageScope(left: CurrentWorkspaceStorageScope, right: CurrentWorkspaceStorageScope) {
+	return left.userId === right.userId && left.workspaceId === right.workspaceId;
+}
+
+function parseLaunchOwner(value: unknown): CurrentWorkspaceStorageScope | null {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) {
+		return null;
+	}
+
+	const candidate = value as Record<string, unknown>;
+	const userId = normalizeString(candidate.userId);
+	const workspaceId = normalizeString(candidate.workspaceId);
+
+	return userId && workspaceId
+		? ({
+				userId,
+				workspaceId
+			} as CurrentWorkspaceStorageScope)
+		: null;
 }
 
 function parseGuideSetup(value: unknown): BuilderGuideSetup | undefined {
@@ -102,7 +131,11 @@ function parseRunSetup(value: unknown): BuilderRunSetup | undefined {
 	return undefined;
 }
 
-function parseBuilderLaunchState(value: unknown, appSlug: string): BuilderLaunchState | null {
+function parseBuilderLaunchState(
+	value: unknown,
+	appSlug: string,
+	scope: CurrentWorkspaceStorageScope
+): BuilderLaunchState | null {
 	if (!value || typeof value !== 'object') {
 		return null;
 	}
@@ -114,33 +147,39 @@ function parseBuilderLaunchState(value: unknown, appSlug: string): BuilderLaunch
 		return null;
 	}
 
+	const owner = parseLaunchOwner(candidate.owner);
+
+	if (!owner || !isSameStorageScope(owner, scope)) {
+		return null;
+	}
+
 	const setup = parseRunSetup(candidate.setup);
 	const startRequestId = normalizeString(candidate.startRequestId);
-	const resumeToken = normalizeString(candidate.resumeToken);
 
 	return {
 		appSlug,
+		owner,
 		fresh: candidate.fresh === true,
 		...(setup ? { setup } : {}),
-		...(startRequestId ? { startRequestId } : {}),
-		...(resumeToken ? { resumeToken } : {})
+		...(startRequestId ? { startRequestId } : {})
 	};
 }
 
 export function createBuilderLaunchState(
 	appSlug: string,
+	scope: CurrentWorkspaceStorageScope,
 	options: BuilderLaunchOptions = {}
 ): BuilderLaunchState {
 	const setup = options.setup ? normalizeBuilderRunSetup(options.setup) : null;
 	const startRequest = setup?.initialMessage
 		? createBuilderSessionStartRequest({
-				startRequestId: options.startRequestId ?? undefined,
-				resumeToken: options.resumeToken ?? undefined
+				startRequestId: options.startRequestId ?? undefined
 			})
 		: null;
 
 	return {
 		appSlug,
+		owner: scope,
 		fresh: options.fresh ?? true,
 		...(setup ? { setup } : {}),
 		...(startRequest ? toLaunchStartRequest(startRequest) : {})
@@ -149,35 +188,46 @@ export function createBuilderLaunchState(
 
 function toLaunchStartRequest(startRequest: BuilderSessionStartRequest) {
 	return {
-		startRequestId: startRequest.startRequestId,
-		resumeToken: startRequest.resumeToken
+		startRequestId: startRequest.startRequestId
 	};
 }
 
-export function readPendingBuilderLaunch(appSlug: string): BuilderLaunchState | null {
+export function readPendingBuilderLaunch(
+	appSlug: string,
+	scope: CurrentWorkspaceStorageScope
+): BuilderLaunchState | null {
 	if (typeof sessionStorage === 'undefined') {
 		return null;
 	}
 
 	try {
 		return parseBuilderLaunchState(
-			JSON.parse(sessionStorage.getItem(getPendingLaunchStorageKey(appSlug)) ?? 'null'),
-			appSlug
+			JSON.parse(sessionStorage.getItem(getPendingLaunchStorageKey(appSlug, scope)) ?? 'null'),
+			appSlug,
+			scope
 		);
 	} catch {
 		return null;
 	}
 }
 
-export function writePendingBuilderLaunch(launch: BuilderLaunchState) {
+export function writePendingBuilderLaunch(
+	launch: BuilderLaunchState,
+	scope: CurrentWorkspaceStorageScope
+) {
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.setItem(getPendingLaunchStorageKey(launch.appSlug), JSON.stringify(launch));
+		if (!isSameStorageScope(launch.owner, scope)) {
+			return;
+		}
+
+		sessionStorage.setItem(getPendingLaunchStorageKey(launch.appSlug, scope), JSON.stringify(launch));
 	}
 }
 
-export function clearPendingBuilderLaunch(appSlug: string) {
+export function clearPendingBuilderLaunch(appSlug: string, scope: CurrentWorkspaceStorageScope) {
 	if (typeof sessionStorage !== 'undefined') {
-		sessionStorage.removeItem(getPendingLaunchStorageKey(appSlug));
+		sessionStorage.removeItem(getPendingLaunchStorageKey(appSlug, scope));
+		sessionStorage.removeItem(getLegacyPendingLaunchStorageKey(appSlug));
 	}
 }
 
@@ -185,7 +235,8 @@ export function readBuilderLaunchFromPageState(
 	appSlug: string,
 	pageState: {
 		builderLaunch?: unknown;
-	}
+	},
+	scope: CurrentWorkspaceStorageScope
 ): BuilderLaunchState | null {
-	return parseBuilderLaunchState(pageState.builderLaunch, appSlug);
+	return parseBuilderLaunchState(pageState.builderLaunch, appSlug, scope);
 }

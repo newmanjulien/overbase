@@ -7,6 +7,10 @@
 		createBuilderLaunchState,
 		writePendingBuilderLaunch
 	} from '$lib/features/builder/session/builder-launch';
+	import {
+		getCurrentWorkspaceStorageScope,
+		useCurrentWorkspaceContext
+	} from '$lib/app/current-workspace.svelte';
 	import { createFreeformRunSetup } from '@overbase/builder-sdk/app-protocol';
 	import { IconButton } from '$lib/components/ui';
 	import ArrowUp from 'phosphor-svelte/lib/ArrowUp';
@@ -20,6 +24,8 @@
 	let customBuilderRoutePreloaded = $state(false);
 	let isSubmitting = $state(false);
 	let shouldFocusComposer = $state(true);
+	const currentWorkspace = useCurrentWorkspaceContext();
+	const storageScope = getCurrentWorkspaceStorageScope(currentWorkspace);
 
 	const customBuilderHref = resolve('/builder/[appSlug]', {
 		appSlug: CUSTOM_OPPORTUNITY_FORMAT_APP_ID
@@ -82,14 +88,18 @@
 		}
 
 		const prompt = value.trim();
-		const builderLaunch = createBuilderLaunchState(CUSTOM_OPPORTUNITY_FORMAT_APP_ID, {
-			fresh: true,
-			setup: createFreeformRunSetup(prompt)
-		});
+		const builderLaunch = createBuilderLaunchState(
+			CUSTOM_OPPORTUNITY_FORMAT_APP_ID,
+			storageScope,
+			{
+				fresh: true,
+				setup: createFreeformRunSetup(prompt)
+			}
+		);
 		value = '';
 		isSubmitting = true;
 		preloadCustomBuilderRoute();
-		writePendingBuilderLaunch(builderLaunch);
+		writePendingBuilderLaunch(builderLaunch, storageScope);
 
 		try {
 			await goto(customBuilderHref, {

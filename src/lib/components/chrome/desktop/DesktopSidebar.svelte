@@ -1,6 +1,6 @@
 <script lang="ts">
 	import CaretUpDown from 'phosphor-svelte/lib/CaretUpDown';
-	import { APP_CONFIG } from '$lib/app/app-config';
+	import type { Doc } from '$convex/_generated/dataModel';
 	import DesktopNavList from '$lib/components/chrome/desktop/DesktopNavList.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import HomeLink from '$lib/components/chrome/shared/HomeLink.svelte';
@@ -16,13 +16,18 @@
 
 	type Props = {
 		currentPathname: string;
+		user: Doc<'users'>;
 		class?: string;
 	};
 
-	let { currentPathname, class: className = '' }: Props = $props();
+	let { currentPathname, user, class: className = '' }: Props = $props();
 
 	const shellState = useChromeShellState();
 	const activeRoute = $derived(getActiveNavRoute(currentPathname));
+	const profile = $derived({
+		name: user.displayName || user.email,
+		avatar: user.avatarUrl ?? ''
+	});
 	let hoveredRoute = $state<NavRouteItem | null>(null);
 
 	const indicatorTarget = $derived.by(() => {
@@ -56,7 +61,7 @@
 		>
 			<div class="inline-flex h-6 origin-center scale-110 items-center gap-1 rounded-full border border-zinc-100 bg-zinc-50 px-1 text-zinc-100">
 				<PersonAvatar
-					person={APP_CONFIG.profile}
+					person={profile}
 					size={20}
 					class="border border-zinc-100 bg-white"
 				/>

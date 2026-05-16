@@ -6,17 +6,6 @@ type ExpiringRecord = {
 	expiresAt: number;
 };
 
-type ResumableBuilderSession = ExpiringRecord & {
-	resumeTokenHash: string;
-};
-
-export function createResumeToken() {
-	const bytes = new Uint8Array(32);
-	crypto.getRandomValues(bytes);
-
-	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-}
-
 export function normalizeStartRequestId(startRequestId?: string) {
 	const normalized = startRequestId?.trim();
 
@@ -29,33 +18,6 @@ export function normalizeStartRequestId(startRequestId?: string) {
 	}
 
 	return normalized;
-}
-
-export function normalizeResumeToken(resumeToken?: string) {
-	const normalized = resumeToken?.trim();
-
-	if (!normalized) {
-		return undefined;
-	}
-
-	if (!/^[a-f0-9]{64}$/.test(normalized)) {
-		throw new Error('Resume token is invalid.');
-	}
-
-	return normalized;
-}
-
-export async function hashResumeToken(resumeToken: string) {
-	const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(resumeToken));
-
-	return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
-}
-
-export async function verifyResumeToken(
-	session: ResumableBuilderSession,
-	resumeToken: string
-) {
-	return resumeToken.length > 0 && (await hashResumeToken(resumeToken)) === session.resumeTokenHash;
 }
 
 export function normalizeUserText(text: string) {

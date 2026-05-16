@@ -5,11 +5,39 @@ import {
 	emailDraft,
 	emailDraftState
 } from './builderEmailValidators';
+import { formatRecipientRef } from './formatRecipientValidators';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 
 export default defineSchema({
+	users: defineTable({
+		clerkUserId: v.string(),
+		email: v.string(),
+		displayName: v.optional(v.string()),
+		avatarUrl: v.optional(v.string()),
+		primaryWorkspaceId: v.optional(v.id('workspaces')),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	}).index('by_clerkUserId', ['clerkUserId']),
+	workspaces: defineTable({
+		name: v.string(),
+		website: v.string(),
+		createdByUserId: v.id('users'),
+		onboardingCompletedAt: v.optional(v.number()),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	}).index('by_createdByUserId', ['createdByUserId']),
+	workspaceMemberships: defineTable({
+		workspaceId: v.id('workspaces'),
+		userId: v.id('users'),
+		role: v.union(v.literal('owner'), v.literal('member')),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	})
+		.index('by_userId', ['userId'])
+		.index('by_workspace_user', ['workspaceId', 'userId']),
 	builderSessions: defineTable({
+		workspaceId: v.id('workspaces'),
 		appSlug: v.string(),
 		appTitle: v.string(),
 		startRequestId: v.optional(v.string()),
@@ -20,7 +48,6 @@ export default defineSchema({
 			v.literal('ready'),
 			v.literal('failed')
 		),
-		resumeTokenHash: v.string(),
 		appState: v.optional(
 			v.object({
 				version: v.number(),
@@ -36,7 +63,7 @@ export default defineSchema({
 		expiresAt: v.number()
 	})
 		.index('by_expiresAt', ['expiresAt'])
-		.index('by_app_startRequestId', ['appSlug', 'startRequestId']),
+		.index('by_workspace_app_startRequestId', ['workspaceId', 'appSlug', 'startRequestId']),
 	builderSessionMessages: defineTable({
 		sessionId: v.id('builderSessions'),
 		role: messageRole,
@@ -73,6 +100,7 @@ export default defineSchema({
 		updatedAt: v.number()
 	}).index('by_session_createdAt', ['sessionId', 'createdAt']),
 	opportunityFormats: defineTable({
+		workspaceId: v.id('workspaces'),
 		title: v.string(),
 		status: v.union(v.literal('paused'), v.literal('active')),
 		definition: v.object({
@@ -87,29 +115,41 @@ export default defineSchema({
 				text: v.string()
 			})
 		),
-		teamMemberIds: v.array(v.string()),
-		createdByName: v.string(),
+		recipientRefs: v.array(formatRecipientRef),
+		createdByUserId: v.id('users'),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	})
-		.index('by_createdAt', ['createdAt']),
+		.index('by_workspace_createdAt', ['workspaceId', 'createdAt'])
+		.index('by_createdByUserId', ['createdByUserId']),
 	teamMembers: defineTable({
+		workspaceId: v.id('workspaces'),
 		email: v.string(),
 		name: v.string(),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	})
-		.index('by_email', ['email'])
-		.index('by_createdAt', ['createdAt']),
+		.index('by_workspace_email', ['workspaceId', 'email'])
+		.index('by_workspace_createdAt', ['workspaceId', 'createdAt']),
 	opportunities: defineTable({
+		workspaceId: v.id('workspaces'),
 		opportunityFormatId: v.id('opportunityFormats'),
 		sentAt: v.number(),
 		emailDraft,
 		createdAt: v.number()
 	})
-		.index('by_opportunityFormat_sentAt', ['opportunityFormatId', 'sentAt'])
-		.index('by_opportunityFormat_createdAt', ['opportunityFormatId', 'createdAt']),
+		.index('by_workspace_opportunityFormat_sentAt', [
+			'workspaceId',
+			'opportunityFormatId',
+			'sentAt'
+		])
+		.index('by_workspace_opportunityFormat_createdAt', [
+			'workspaceId',
+			'opportunityFormatId',
+			'createdAt'
+		]),
 	opportunityFeedback: defineTable({
+		workspaceId: v.id('workspaces'),
 		opportunityFormatId: v.id('opportunityFormats'),
 		opportunityId: v.id('opportunities'),
 		likedText: v.string(),
@@ -117,6 +157,6 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number()
 	})
-		.index('by_opportunityFormatId', ['opportunityFormatId'])
-		.index('by_opportunityId', ['opportunityId'])
+		.index('by_workspace_opportunityFormat', ['workspaceId', 'opportunityFormatId'])
+		.index('by_workspace_opportunity', ['workspaceId', 'opportunityId'])
 });

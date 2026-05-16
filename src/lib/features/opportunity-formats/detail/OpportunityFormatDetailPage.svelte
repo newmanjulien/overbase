@@ -148,7 +148,7 @@
 		routeTitleState.title = detail.opportunityFormat.title;
 		controller.syncStatus(detail.opportunityFormat.status);
 		detailState.sync(opportunityFormatId, detail, {
-			syncTeamMembers: !controller.isSavingTeamMemberIds
+			syncRecipients: !controller.isSavingRecipients
 		});
 	});
 </script>
@@ -158,9 +158,9 @@
 		{canToggleStatus}
 		{detailViewActionLabel}
 		{people}
-		selectedTeamMemberIds={detailState.selectedTeamMemberIds}
+		selectedRecipientRefs={detailState.selectedRecipientRefs}
 		status={controller.status}
-		onSelectedTeamMemberIdsChange={controller.updateSelectedTeamMemberIds}
+		onSelectedRecipientRefsChange={controller.updateSelectedRecipientRefs}
 		onToggleDetailView={toggleDetailView}
 		onToggleStatus={() => controller.toggleStatus(canToggleStatus)}
 	/>

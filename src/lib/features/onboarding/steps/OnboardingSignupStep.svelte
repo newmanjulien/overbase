@@ -5,14 +5,16 @@
 
 	type Props = {
 		email: string;
+		errorText: string | null;
+		isSubmitting: boolean;
 		onContinue: () => void;
 	};
 
-	let { email = $bindable(), onContinue }: Props = $props();
-	const canContinue = $derived(email.trim().length > 0);
+	let { email = $bindable(), errorText, isSubmitting, onContinue }: Props = $props();
+	const canContinue = $derived(email.trim().length > 0 && !isSubmitting);
 </script>
 
-<OnboardingStepFrame title="Create your account">
+<OnboardingStepFrame title="Continue with your email">
 	<form
 		class="grid gap-3.5"
 		onsubmit={(event) => {
@@ -30,6 +32,29 @@
 			required
 			autofocus
 		/>
-		<OnboardingPrimaryButton type="submit" disabled={!canContinue}>Sign up</OnboardingPrimaryButton>
+		{#if errorText}
+			<p class="m-0 text-sm leading-5 text-red-600">{errorText}</p>
+		{/if}
+		<OnboardingPrimaryButton type="submit" disabled={!canContinue}>
+			{isSubmitting ? 'Sending...' : 'Email me a code'}
+		</OnboardingPrimaryButton>
+		<p class="m-0 text-center text-[13px] leading-5 text-[#8f9297]">
+			By continuing, you accept the
+			<a
+				href="https://overbase.app/legal/terms-of-service"
+				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
+				rel="external"
+			>
+				Terms of Service
+			</a>
+			and
+			<a
+				href="https://overbase.app/legal/dpa"
+				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
+				rel="external"
+			>
+				Privacy Policy
+			</a>.
+		</p>
 	</form>
 </OnboardingStepFrame>

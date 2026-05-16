@@ -8,6 +8,7 @@ import {
 	TEAM_MEMBER_EMAIL_REGEX,
 	TEAM_MEMBER_EMAIL_SEPARATOR_REGEX
 } from './teamMemberIdentity';
+import { requireWorkspace, requireWorkspaceRecord } from './auth';
 
 function toTeamMemberResult(teamMember: {
 	_id: Id<'teamMembers'>;
@@ -44,7 +45,12 @@ function parseEmails(input: string[]) {
 export const listTeamMembers = query({
 	args: {},
 	handler: async (ctx) => {
-		const teamMembers = await ctx.db.query('teamMembers').withIndex('by_createdAt').order('desc').collect();
+		const { workspace } = await requireWorkspace(ctx);
+		const teamMembers = await ctx.db
+			.query('teamMembers')
+			.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
+			.order('desc')
+			.collect();
 
 		return teamMembers.map(toTeamMemberResult);
 	}
@@ -55,6 +61,7 @@ export const addTeamMembers = mutation({
 		emails: v.array(v.string())
 	},
 	handler: async (ctx, { emails }) => {
+		const { workspace } = await requireWorkspace(ctx);
 		const normalizedEmails = parseEmails(emails);
 
 		if (normalizedEmails.length === 0) {
@@ -68,7 +75,7 @@ export const addTeamMembers = mutation({
 		for (const email of normalizedEmails) {
 			const existingTeamMember = await ctx.db
 				.query('teamMembers')
-				.withIndex('by_email', (q) => q.eq('email', email))
+				.withIndex('by_workspace_email', (q) => q.eq('workspaceId', workspace._id).eq('email', email))
 				.first();
 
 			if (existingTeamMember) {
@@ -79,6 +86,7 @@ export const addTeamMembers = mutation({
 			insertedIds.push(
 				await ctx.db.insert('teamMembers', {
 					email,
+					workspaceId: workspace._id,
 					name: '',
 					createdAt: now,
 					updatedAt: now
@@ -100,7 +108,8 @@ export const updateTeamMember = mutation({
 		name: v.string()
 	},
 	handler: async (ctx, { teamMemberId, email, name }) => {
-		const teamMember = await ctx.db.get(teamMemberId);
+		const { workspace } = await requireWorkspace(ctx);
+		const teamMember = await requireWorkspaceRecord(ctx, await ctx.db.get(teamMemberId));
 
 		if (!teamMember) {
 			throw new Error('Teammate not found.');
@@ -114,7 +123,7 @@ export const updateTeamMember = mutation({
 
 		const existingTeamMember = await ctx.db
 			.query('teamMembers')
-			.withIndex('by_email', (q) => q.eq('email', normalizedEmail))
+			.withIndex('by_workspace_email', (q) => q.eq('workspaceId', workspace._id).eq('email', normalizedEmail))
 			.first();
 
 		if (existingTeamMember && existingTeamMember._id !== teamMemberId) {
@@ -143,10 +152,11 @@ export const deleteTeamMembers = mutation({
 		teamMemberIds: v.array(v.id('teamMembers'))
 	},
 	handler: async (ctx, { teamMemberIds }) => {
+		const { workspace } = await requireWorkspace(ctx);
 		for (const teamMemberId of new Set(teamMemberIds)) {
 			const teamMember = await ctx.db.get(teamMemberId);
 
-			if (teamMember) {
+			if (teamMember && teamMember.workspaceId === workspace._id) {
 				await ctx.db.delete(teamMemberId);
 			}
 		}
