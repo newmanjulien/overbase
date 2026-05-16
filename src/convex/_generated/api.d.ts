@@ -27,8 +27,8 @@ import type * as formatRecipients from "../formatRecipients.js";
 import type * as health from "../health.js";
 import type * as opportunityFormatReadiness from "../opportunityFormatReadiness.js";
 import type * as opportunityFormats from "../opportunityFormats.js";
-import type * as teamMemberIdentity from "../teamMemberIdentity.js";
-import type * as teamMembers from "../teamMembers.js";
+import type * as teammateIdentity from "../teammateIdentity.js";
+import type * as teammates from "../teammates.js";
 
 import type {
   ApiFromModules,
@@ -56,8 +56,8 @@ declare const fullApi: ApiFromModules<{
   health: typeof health;
   opportunityFormatReadiness: typeof opportunityFormatReadiness;
   opportunityFormats: typeof opportunityFormats;
-  teamMemberIdentity: typeof teamMemberIdentity;
-  teamMembers: typeof teamMembers;
+  teammateIdentity: typeof teammateIdentity;
+  teammates: typeof teammates;
 }>;
 
 /**

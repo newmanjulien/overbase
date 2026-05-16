@@ -14,7 +14,7 @@
 	toolbar={{
 		searchPlaceholder: 'Search invitations...',
 		searchAriaLabel: 'Search invitations',
-		filterLabel: 'All statuses',
+		filter: { label: 'All statuses', selectedId: 'all', options: [{ id: 'all', label: 'All statuses' }], onSelect: () => {} },
 		actionLabel: 'Invite partners',
 		onAction: openModal
 	}}

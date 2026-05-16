@@ -14,7 +14,7 @@
 	toolbar={{
 		searchPlaceholder: 'Search data sources...',
 		searchAriaLabel: 'Search data sources',
-		filterLabel: 'All types',
+		filter: { label: 'All types', selectedId: 'all', options: [{ id: 'all', label: 'All types' }], onSelect: () => {} },
 		actionLabel: 'Add data source',
 		onAction: openModal
 	}}

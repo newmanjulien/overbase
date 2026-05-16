@@ -10,6 +10,7 @@
 		footer?: Snippet;
 		showFooter?: boolean;
 		onReturn?: () => void;
+		returnHref?: string;
 		returnLabel?: string;
 		footerBorder?: boolean;
 	};
@@ -21,6 +22,7 @@
 		footer,
 		showFooter = Boolean(footer),
 		onReturn,
+		returnHref,
 		returnLabel = 'Return',
 		footerBorder = true
 	}: Props = $props();
@@ -36,7 +38,15 @@
 			class="box-border flex min-h-dvh flex-col bg-white px-6 pt-12 pb-8 sm:min-h-[calc(100dvh-16px)] sm:rounded-[10px] sm:border sm:border-black/[0.04] lg:px-[clamp(40px,8.55vw,248px)] lg:pt-[clamp(56px,8.6vh,138px)] lg:pb-7"
 			aria-label="Overbase onboarding"
 		>
-			{#if onReturn}
+			{#if returnHref}
+				<a
+					class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
+					href={returnHref}
+				>
+					<ArrowLeft aria-hidden="true" size={14} weight="regular" />
+					<span>{returnLabel}</span>
+				</a>
+			{:else if onReturn}
 				<button
 					type="button"
 					class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"

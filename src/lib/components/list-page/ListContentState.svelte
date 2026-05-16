@@ -3,7 +3,7 @@
 	import WarningCircle from 'phosphor-svelte/lib/WarningCircle';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
-	type ContentStateKind = 'loading' | 'error';
+	type ContentStateKind = 'loading' | 'error' | 'empty';
 
 	type Props = {
 		kind: ContentStateKind;
@@ -13,7 +13,7 @@
 
 	let { kind, message, class: className = '' }: Props = $props();
 
-	const Icon = $derived(kind === 'loading' ? CircleNotch : WarningCircle);
+	const Icon = $derived(kind === 'error' ? WarningCircle : CircleNotch);
 	const toneClass = $derived(
 		kind === 'error'
 			? 'border-red-100 bg-red-50/40 text-red-700'
@@ -33,7 +33,7 @@
 			aria-hidden="true"
 			size={14}
 			weight="regular"
-			class={cn(kind === 'loading' && 'animate-spin')}
+			class={cn(kind === 'loading' && 'animate-spin', kind === 'empty' && 'hidden')}
 		/>
 		<span>{message}</span>
 	</div>

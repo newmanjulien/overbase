@@ -6,7 +6,7 @@ export const formatRecipientRef = v.union(
 		userId: v.id('users')
 	}),
 	v.object({
-		kind: v.literal('teamMember'),
-		teamMemberId: v.id('teamMembers')
+		kind: v.literal('teammate'),
+		teammateId: v.id('teammates')
 	})
 );

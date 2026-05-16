@@ -1,12 +1,12 @@
 const EMAIL_SEPARATOR_REGEX = /[,\s]+/;
 const EMAIL_REGEX = /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/;
 
-export type TeamEmailInputResult = {
+export type TeammateEmailInputResult = {
 	emails: string[];
 	error: string | null;
 };
 
-export function parseTeamEmailInput(input: string): TeamEmailInputResult {
+export function parseTeammateEmailInput(input: string): TeammateEmailInputResult {
 	const emails = input
 		.split(EMAIL_SEPARATOR_REGEX)
 		.map((email) => email.trim().toLowerCase())

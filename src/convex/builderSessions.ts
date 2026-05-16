@@ -27,7 +27,7 @@ import {
 	getAuthorizedSession,
 	insertJob
 } from './builderSessionCore';
-import { requireWorkspace } from './auth';
+import { requireViewerWorkspace } from './auth';
 import {
 	getActiveBuilderAppPresentationEntry
 } from '../builder-apps/registry';
@@ -103,7 +103,7 @@ export const startSession = mutation({
 		startRequestId: v.optional(v.string())
 	},
 	handler: async (ctx, { appSlug, setup, startRequestId }) => {
-		const { workspace } = await requireWorkspace(ctx);
+		const { workspace } = await requireViewerWorkspace(ctx);
 		const now = Date.now();
 		const normalizedSetup = normalizeBuilderRunSetup({
 			...setup,

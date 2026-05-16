@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TeamListPage from '$lib/features/team/list/TeamListPage.svelte';
+	import TeammateListPage from '$lib/features/teammates/list/TeammateListPage.svelte';
 </script>
 
-<TeamListPage />
+<TeammateListPage />

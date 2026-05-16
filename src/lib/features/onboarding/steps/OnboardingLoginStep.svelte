@@ -14,7 +14,7 @@
 	const canContinue = $derived(email.trim().length > 0 && !isSubmitting);
 </script>
 
-<OnboardingStepFrame title="What's your email?">
+<OnboardingStepFrame title="Log in to Overbase">
 	<form
 		class="grid gap-3.5"
 		onsubmit={(event) => {
@@ -39,23 +39,5 @@
 		<OnboardingPrimaryButton type="submit" disabled={!canContinue}>
 			{isSubmitting ? 'Sending...' : 'Email me a code'}
 		</OnboardingPrimaryButton>
-		<p class="m-0 text-center text-[13px] leading-5 text-[#8f9297]">
-			By continuing, you accept the
-			<a
-				href="https://overbase.app/legal/terms-of-service"
-				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
-				rel="external"
-			>
-				Terms of Service
-			</a>
-			and
-			<a
-				href="https://overbase.app/legal/dpa"
-				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
-				rel="external"
-			>
-				Privacy Policy
-			</a>
-		</p>
 	</form>
 </OnboardingStepFrame>

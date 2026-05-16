@@ -11,14 +11,17 @@
 	import ConvexClerkAuthBridge from '$lib/backend/convex/ConvexClerkAuthBridge.svelte';
 	import {
 		getOnboardingStepForWorkspace,
+		LoginFlow,
 		OnboardingFlow,
 		type OnboardingStep
 	} from '$lib/features/onboarding/flow';
+	import { resolveAuthEntryReturnHref } from '$lib/features/onboarding/flow/auth-return';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import type { Snippet } from 'svelte';
 	import { useClerkContext } from 'svelte-clerk';
 
 	type GateStatus = 'loading' | 'signedOut' | 'company' | 'partner' | 'complete' | 'error';
+	type AuthEntryRoute = 'signup' | 'login';
 
 	type Props = {
 		children: Snippet;
@@ -35,6 +38,13 @@
 	const signedInUserId = $derived(clerk.auth.userId ?? null);
 	const isAuthEntryRoute = $derived(
 		AUTH_ENTRY_ROUTE_HREFS.some((href) => page.url.pathname === href)
+	);
+	const authEntryRoute = $derived<AuthEntryRoute | undefined>(
+		page.url.pathname === '/signup'
+			? 'signup'
+			: page.url.pathname === '/login'
+				? 'login'
+				: undefined
 	);
 	const shouldLoadCurrentUser = $derived(
 		clerk.isLoaded && Boolean(signedInUserId) && convexAuthReady
@@ -74,11 +84,18 @@
 			? 'company'
 			: gateStatus === 'partner'
 				? 'partner'
-				: page.url.pathname === '/login'
-					? 'signup'
-					: 'welcome'
+				: 'welcome'
 	);
-	const onboardingKey = $derived(`${signedInUserId ?? 'signed-out'}:${onboardingInitialStep}`);
+	const onboardingKey = $derived(
+		`${signedInUserId ?? 'signed-out'}:${authEntryRoute ?? 'app'}:${onboardingInitialStep}`
+	);
+	const marketingReturnHref = $derived(
+		authEntryRoute
+			? resolveAuthEntryReturnHref(page.url, {
+					useDefaultWhenMissing: true
+				})
+			: undefined
+	);
 	const gateErrorText = $derived(
 		bootstrapErrorText ?? currentUser.error?.message ?? 'Unable to load your workspace.'
 	);
@@ -93,7 +110,7 @@
 		bootstrapAttemptedForUserId = userId;
 
 		try {
-			await client.mutation(api.auth.bootstrapCurrentUserAndWorkspace, {});
+			await client.mutation(api.auth.ensureViewerWorkspace, {});
 		} catch (error) {
 			bootstrapErrorText = error instanceof Error ? error.message : 'Unable to create your workspace.';
 		} finally {
@@ -149,11 +166,10 @@
 
 {#if gateStatus === 'complete' && isAuthEntryRoute}
 	<AppLoadingScreen />
-{:else if gateStatus === 'complete' && currentUser.data?.user && currentUser.data.workspace && currentUser.data.membership}
+{:else if gateStatus === 'complete' && currentUser.data?.user && currentUser.data.workspace}
 	<AppShell
 		user={currentUser.data.user}
 		workspace={currentUser.data.workspace}
-		membership={currentUser.data.membership}
 	>
 		{@render children()}
 	</AppShell>
@@ -163,6 +179,10 @@
 	<AppGateError message={gateErrorText} onRetry={retryBootstrap} />
 {:else}
 	{#key onboardingKey}
-		<OnboardingFlow initialStep={onboardingInitialStep} />
+		{#if gateStatus === 'signedOut' && authEntryRoute === 'login'}
+			<LoginFlow {marketingReturnHref} />
+		{:else}
+			<OnboardingFlow initialStep={onboardingInitialStep} {marketingReturnHref} />
+		{/if}
 	{/key}
 {/if}

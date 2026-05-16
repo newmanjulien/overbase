@@ -1,14 +1,16 @@
 <script lang="ts">
-	import CaretDown from 'phosphor-svelte/lib/CaretDown';
 	import { cn } from '$lib/components/chrome/shared/cn';
-	import { Button } from '$lib/components/ui';
+	import type { ListFilterConfig } from '$lib/components/list-page/types';
 	import ListActionButton from '$lib/components/list-page/ListActionButton.svelte';
+	import ListFilterControl from '$lib/components/list-page/ListFilterControl.svelte';
 	import ListSearchInput from '$lib/components/list-page/ListSearchInput.svelte';
 
 	type Props = {
 		searchPlaceholder?: string;
 		searchAriaLabel?: string;
-		filterLabel?: string;
+		searchValue?: string;
+		onSearchValueChange?: (value: string) => void;
+		filter?: ListFilterConfig;
 		actionLabel?: string;
 		onAction?: () => void;
 		class?: string;
@@ -17,7 +19,9 @@
 	let {
 		searchPlaceholder,
 		searchAriaLabel,
-		filterLabel,
+		searchValue = '',
+		onSearchValueChange,
+		filter,
 		actionLabel,
 		onAction,
 		class: className = ''
@@ -29,6 +33,9 @@
 		<ListSearchInput
 			placeholder={searchPlaceholder}
 			ariaLabel={searchAriaLabel}
+			value={searchValue}
+			onValueChange={onSearchValueChange}
+			readonly={!onSearchValueChange}
 			class="w-full md:flex-1"
 		/>
 	{/if}
@@ -39,16 +46,8 @@
 			searchPlaceholder ? 'hidden md:flex' : 'flex justify-end'
 		)}
 	>
-		{#if filterLabel}
-			<Button
-				variant="secondary"
-				class="min-w-0 flex-1 border-zinc-200/70 px-3 text-[0.72rem] font-normal text-zinc-950 md:flex-none md:text-[0.74rem]"
-			>
-				<span>{filterLabel}</span>
-				{#snippet trailing()}
-					<CaretDown aria-hidden="true" size={14} weight="regular" class="text-zinc-600" />
-				{/snippet}
-			</Button>
+		{#if filter}
+			<ListFilterControl {filter} class="flex-1 md:flex-none" />
 		{/if}
 
 		{#if actionLabel}

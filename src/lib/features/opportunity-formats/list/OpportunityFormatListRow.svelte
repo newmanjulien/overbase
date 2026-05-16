@@ -6,6 +6,7 @@
 
 	export type OpportunityFormatListItem = SelectableListItem & {
 		title: string;
+		status: 'active' | 'paused';
 		statusLabel: string;
 		statusLabelClass: string;
 		createdAtLabel: string;

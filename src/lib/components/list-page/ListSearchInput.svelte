@@ -5,6 +5,8 @@
 	type Props = {
 		placeholder: string;
 		ariaLabel?: string;
+		value?: string;
+		onValueChange?: (value: string) => void;
 		readonly?: boolean;
 		class?: string;
 	};
@@ -12,7 +14,9 @@
 	let {
 		placeholder,
 		ariaLabel = placeholder,
-		readonly = true,
+		value = '',
+		onValueChange,
+		readonly = false,
 		class: className = ''
 	}: Props = $props();
 </script>
@@ -29,6 +33,8 @@
 		type="search"
 		{placeholder}
 		{readonly}
+		{value}
+		oninput={(event) => onValueChange?.(event.currentTarget.value)}
 		class="h-full w-full rounded-sm border border-zinc-200/70 bg-white pr-3 pl-8.5 text-[0.72rem] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-200 md:text-[0.74rem]"
 	/>
 </label>

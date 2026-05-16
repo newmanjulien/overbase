@@ -7,7 +7,7 @@
 	toolbar={{
 		searchPlaceholder: 'Search partners...',
 		searchAriaLabel: 'Search partners',
-		filterLabel: 'All partners'
+		filter: { label: 'All partners', selectedId: 'all', options: [{ id: 'all', label: 'All partners' }], onSelect: () => {} }
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['data-access'].icon,

@@ -1,7 +1,7 @@
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
-import { requireWorkspace } from './auth';
-import { getTeamMemberDisplayName } from './teamMemberIdentity';
+import { requireViewerWorkspace, type ViewerWorkspace } from './auth';
+import { getTeammateDisplayName } from './teammateIdentity';
 
 export type FormatRecipientRef =
 	| {
@@ -9,8 +9,8 @@ export type FormatRecipientRef =
 			userId: Id<'users'>;
 	  }
 	| {
-			kind: 'teamMember';
-			teamMemberId: Id<'teamMembers'>;
+			kind: 'teammate';
+			teammateId: Id<'teammates'>;
 	  };
 
 export function getUserDisplayName(user: Pick<Doc<'users'>, 'displayName' | 'email'>) {
@@ -18,7 +18,7 @@ export function getUserDisplayName(user: Pick<Doc<'users'>, 'displayName' | 'ema
 }
 
 export function getFormatRecipientKey(ref: FormatRecipientRef) {
-	return ref.kind === 'user' ? `user:${ref.userId}` : `teamMember:${ref.teamMemberId}`;
+	return ref.kind === 'user' ? `user:${ref.userId}` : `teammate:${ref.teammateId}`;
 }
 
 export function getDefaultFormatRecipientRefs(userId: Id<'users'>): FormatRecipientRef[] {
@@ -30,22 +30,19 @@ async function isWorkspaceUserRef(
 	workspaceId: Id<'workspaces'>,
 	userId: Id<'users'>
 ) {
-	const membership = await ctx.db
-		.query('workspaceMemberships')
-		.withIndex('by_workspace_user', (q) => q.eq('workspaceId', workspaceId).eq('userId', userId))
-		.first();
+	const user = await ctx.db.get(userId);
 
-	return Boolean(membership);
+	return Boolean(user && user.workspaceId === workspaceId);
 }
 
-async function isWorkspaceTeamMemberRef(
+async function isWorkspaceTeammateRef(
 	ctx: QueryCtx | MutationCtx,
 	workspaceId: Id<'workspaces'>,
-	teamMemberId: Id<'teamMembers'>
+	teammateId: Id<'teammates'>
 ) {
-	const teamMember = await ctx.db.get(teamMemberId);
+	const teammate = await ctx.db.get(teammateId);
 
-	return Boolean(teamMember && teamMember.workspaceId === workspaceId);
+	return Boolean(teammate && teammate.workspaceId === workspaceId);
 }
 
 async function isValidRecipientRef(
@@ -57,13 +54,16 @@ async function isValidRecipientRef(
 		return await isWorkspaceUserRef(ctx, workspaceId, ref.userId);
 	}
 
-	return await isWorkspaceTeamMemberRef(ctx, workspaceId, ref.teamMemberId);
+	return await isWorkspaceTeammateRef(ctx, workspaceId, ref.teammateId);
 }
 
-export async function getFormatRecipients(ctx: QueryCtx | MutationCtx) {
-	const { user, workspace } = await requireWorkspace(ctx);
-	const dbTeamMembers = await ctx.db
-		.query('teamMembers')
+export async function getFormatRecipients(
+	ctx: QueryCtx | MutationCtx,
+	viewerWorkspace?: ViewerWorkspace
+) {
+	const { user, workspace } = viewerWorkspace ?? (await requireViewerWorkspace(ctx));
+	const dbTeammates = await ctx.db
+		.query('teammates')
 		.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
 		.order('desc')
 		.collect();
@@ -75,13 +75,13 @@ export async function getFormatRecipients(ctx: QueryCtx | MutationCtx) {
 			name: getUserDisplayName(user),
 			avatar: user.avatarUrl ?? ''
 		},
-		...dbTeamMembers.map((teamMember) => {
-			const ref = { kind: 'teamMember' as const, teamMemberId: teamMember._id };
+		...dbTeammates.map((teammate) => {
+			const ref = { kind: 'teammate' as const, teammateId: teammate._id };
 
 			return {
 				id: getFormatRecipientKey(ref),
 				ref,
-				name: getTeamMemberDisplayName(teamMember),
+				name: getTeammateDisplayName(teammate),
 				avatar: ''
 			};
 		})
@@ -90,9 +90,10 @@ export async function getFormatRecipients(ctx: QueryCtx | MutationCtx) {
 
 export async function normalizeFormatRecipientRefs(
 	ctx: QueryCtx | MutationCtx,
-	recipientRefs: FormatRecipientRef[]
+	recipientRefs: FormatRecipientRef[],
+	viewerWorkspace?: ViewerWorkspace
 ) {
-	const { user, workspace } = await requireWorkspace(ctx);
+	const { user, workspace } = viewerWorkspace ?? (await requireViewerWorkspace(ctx));
 	const normalizedRefs: FormatRecipientRef[] = [];
 	const seenKeys = new Set<string>();
 

@@ -102,7 +102,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
   },
   {
     id: "main",
-    heading: "My team",
+    heading: "Workspace",
     routeIds: ["data-sources", "external-data", "team", "team-formats"],
     desktopSectionClass: "pt-6",
     mobileSectionClass: "pt-6",

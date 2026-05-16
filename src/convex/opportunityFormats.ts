@@ -16,7 +16,7 @@ import {
 	getOpportunityFormatReadiness,
 	normalizeOpportunityFormatRules
 } from './opportunityFormatReadiness';
-import { requireWorkspace, requireWorkspaceRecord } from './auth';
+import { getViewerWorkspaceRecord, requireViewerWorkspace } from './auth';
 
 const DEFAULT_OPPORTUNITY_FORMAT_TITLE = 'Untitled format';
 
@@ -45,10 +45,11 @@ export const publishFromBuilderSession = mutation({
 		title: v.string()
 	},
 	handler: async (ctx, { sessionId, title }) => {
-		const { user, workspace } = await requireWorkspace(ctx);
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const { user, workspace } = viewerWorkspace;
 		const now = Date.now();
 		const opportunityFormatTitle = normalizeOpportunityFormatTitle(title);
-		const session = await getAuthorizedSession(ctx, sessionId, now);
+		const session = await getAuthorizedSession(ctx, sessionId, now, viewerWorkspace);
 
 		if (!session) {
 			throw new Error('Builder session not found.');
@@ -90,13 +91,14 @@ export const getOpportunityFormatDetail = query({
 		opportunityFormatId: v.id('opportunityFormats')
 	},
 	handler: async (ctx, { opportunityFormatId }) => {
-		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			return null;
 		}
 
-		const people = await getFormatRecipients(ctx);
+		const people = await getFormatRecipients(ctx, viewerWorkspace);
 		const opportunityDocs = await ctx.db
 			.query('opportunities')
 			.withIndex('by_workspace_opportunityFormat_sentAt', (q) =>
@@ -140,7 +142,11 @@ export const getOpportunityFormatDetail = query({
 				emailDraftVersion: opportunityFormat.emailDraftVersion,
 				rules,
 				readiness: getOpportunityFormatReadiness(rules),
-				recipientRefs: await normalizeFormatRecipientRefs(ctx, opportunityFormat.recipientRefs),
+				recipientRefs: await normalizeFormatRecipientRefs(
+					ctx,
+					opportunityFormat.recipientRefs,
+					viewerWorkspace
+				),
 				creator: await getCreator(ctx, opportunityFormat.createdByUserId),
 				createdAt: opportunityFormat.createdAt,
 				updatedAt: opportunityFormat.updatedAt
@@ -159,7 +165,8 @@ export const updateOpportunityFormatTitle = mutation({
 		title: v.string()
 	},
 	handler: async (ctx, { opportunityFormatId, title }) => {
-		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -181,7 +188,7 @@ export const updateOpportunityFormatTitle = mutation({
 export const listOpportunityFormats = query({
 	args: {},
 	handler: async (ctx) => {
-		const { workspace } = await requireWorkspace(ctx);
+		const { workspace } = await requireViewerWorkspace(ctx);
 		const opportunityFormats = await ctx.db
 			.query('opportunityFormats')
 			.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
@@ -206,8 +213,10 @@ export const deleteOpportunityFormats = mutation({
 		opportunityFormatIds: v.array(v.id('opportunityFormats'))
 	},
 	handler: async (ctx, { opportunityFormatIds }) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+
 		for (const opportunityFormatId of opportunityFormatIds) {
-			const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+			const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
 			if (!opportunityFormat) {
 				continue;
 			}
@@ -247,7 +256,8 @@ export const setOpportunityFormatStatus = mutation({
 		status: v.union(v.literal('paused'), v.literal('active'))
 	},
 	handler: async (ctx, { opportunityFormatId, status }) => {
-		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -282,7 +292,8 @@ export const saveOpportunityFormatEmailDraft = mutation({
 		draft: emailDraftValidator
 	},
 	handler: async (ctx, { opportunityFormatId, baseEmailDraftVersion, draft }) => {
-		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -315,7 +326,8 @@ export const saveOpportunityFormatRules = mutation({
 		rules: v.array(opportunityFormatRule)
 	},
 	handler: async (ctx, { opportunityFormatId, rules }) => {
-		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
@@ -349,14 +361,19 @@ export const setOpportunityFormatRecipients = mutation({
 		recipientRefs: v.array(formatRecipientRef)
 	},
 	handler: async (ctx, { opportunityFormatId, recipientRefs }) => {
-		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');
 		}
 
 		const now = Date.now();
-		const nextRecipientRefs = await normalizeFormatRecipientRefs(ctx, recipientRefs);
+		const nextRecipientRefs = await normalizeFormatRecipientRefs(
+			ctx,
+			recipientRefs,
+			viewerWorkspace
+		);
 
 		await ctx.db.patch(opportunityFormatId, {
 			recipientRefs: nextRecipientRefs,
@@ -377,7 +394,8 @@ export const saveOpportunityFeedback = mutation({
 		improvementText: v.string()
 	},
 	handler: async (ctx, { opportunityId, likedText, improvementText }) => {
-		const opportunity = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityId));
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const opportunity = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityId));
 
 		if (!opportunity) {
 			throw new Error('Opportunity not found.');

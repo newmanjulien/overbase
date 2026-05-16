@@ -24,7 +24,7 @@
 		children: Snippet;
 	};
 
-	let { user, workspace, membership, children }: Props = $props();
+	let { user, workspace, children }: Props = $props();
 
 	function getDefaultSidebarExpanded(sidebarDefault?: 'expanded' | 'collapsed') {
 		return sidebarDefault !== 'collapsed';
@@ -36,9 +36,6 @@
 		},
 		get workspace() {
 			return workspace;
-		},
-		get membership() {
-			return membership;
 		}
 	};
 	const shellState = $state<ChromeShellState>({

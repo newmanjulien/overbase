@@ -8,7 +8,7 @@
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import PersonAvatar from './PersonAvatar.svelte';
 
-	type AvatarTeamPickerPerson = {
+	type AvatarPersonPickerPerson = {
 		id: string;
 		name: string;
 		avatar: string;
@@ -16,7 +16,7 @@
 
 	type Props = {
 		id?: string;
-		people: readonly AvatarTeamPickerPerson[];
+		people: readonly AvatarPersonPickerPerson[];
 		selectedIds: readonly string[];
 		minSelected?: number;
 		onSelectedIdsChange: (nextIds: string[]) => void;
@@ -40,8 +40,8 @@
 		onSelectedIdsChange,
 		size = 28,
 		limit = 3,
-		altBase = 'Teammate',
-		ariaLabel = 'Manage team members',
+		altBase = 'Person',
+		ariaLabel = 'Manage people',
 		searchLabel = 'Search people',
 		searchPlaceholder = 'Search people...',
 		emptyLabel = 'No people found',

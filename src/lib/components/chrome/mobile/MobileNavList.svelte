@@ -65,7 +65,7 @@
 							<a
 								href={item.href}
 								target="_blank"
-								rel="noreferrer"
+								rel="external noreferrer"
 								class={getItemClassName({ isActive: false })}
 							>
 								<Icon size={14} weight="regular" class="shrink-0" />

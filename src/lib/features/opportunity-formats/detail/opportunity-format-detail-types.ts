@@ -7,12 +7,12 @@ export type FormatRecipientRef =
 			userId: Id<'users'>;
 	  }
 	| {
-			kind: 'teamMember';
-			teamMemberId: Id<'teamMembers'>;
+			kind: 'teammate';
+			teammateId: Id<'teammates'>;
 	  };
 
 export function getFormatRecipientKey(ref: FormatRecipientRef) {
-	return ref.kind === 'user' ? `user:${ref.userId}` : `teamMember:${ref.teamMemberId}`;
+	return ref.kind === 'user' ? `user:${ref.userId}` : `teammate:${ref.teammateId}`;
 }
 
 export type OpportunityFormatRule = {

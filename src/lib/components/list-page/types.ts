@@ -6,9 +6,23 @@ export type ListIcon = PhosphorIcon;
 export type ListToolbarConfig = {
 	searchPlaceholder?: string;
 	searchAriaLabel?: string;
-	filterLabel?: string;
+	searchValue?: string;
+	onSearchValueChange?: (value: string) => void;
+	filter?: ListFilterConfig;
 	actionLabel?: string;
 	onAction?: () => void;
+};
+
+export type ListFilterConfig = {
+	label: string;
+	selectedId: string;
+	options: ListFilterOption[];
+	onSelect: (optionId: string) => void;
+};
+
+export type ListFilterOption = {
+	id: string;
+	label: string;
 };
 
 export type EmptyListNextStepsPart =

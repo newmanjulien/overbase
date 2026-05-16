@@ -21,7 +21,7 @@
 	const safeTooltipIdPrefix = $derived(tooltipIdPrefix.replace(/[^a-zA-Z0-9_-]/g, '-'));
 </script>
 
-{#if typeof content === 'string'}<span>{content}</span>{:else}{#each content as part, index}{#if part.kind === 'text'}<span>{part.text}</span>{:else}<FloatingTooltip
+{#if typeof content === 'string'}<span>{content}</span>{:else}{#each content as part, index (`${part.kind}:${index}`)}{#if part.kind === 'text'}<span>{part.text}</span>{:else}<FloatingTooltip
 				id={`${safeTooltipIdPrefix}-${index}`}
 				text={part.tooltipText}
 				ariaLabel={part.label}

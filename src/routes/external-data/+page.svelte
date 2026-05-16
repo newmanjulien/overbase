@@ -14,7 +14,7 @@
 	toolbar={{
 		searchPlaceholder: 'Search external data...',
 		searchAriaLabel: 'Search external data',
-		filterLabel: 'All types',
+		filter: { label: 'All types', selectedId: 'all', options: [{ id: 'all', label: 'All types' }], onSelect: () => {} },
 		actionLabel: 'Add external data',
 		onAction: openModal
 	}}

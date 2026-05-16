@@ -7,7 +7,7 @@
 	toolbar={{
 		searchPlaceholder: 'Search team formats...',
 		searchAriaLabel: 'Search team formats',
-		filterLabel: 'All teammates'
+		filter: { label: 'All teammates', selectedId: 'all', options: [{ id: 'all', label: 'All teammates' }], onSelect: () => {} }
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['team-formats'].icon,

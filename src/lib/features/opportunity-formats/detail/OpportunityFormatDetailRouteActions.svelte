@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Pause from 'phosphor-svelte/lib/Pause';
 	import Play from 'phosphor-svelte/lib/Play';
-	import { AvatarTeamPicker } from '$lib/components/people';
+	import { AvatarPersonPicker } from '$lib/components/people';
 	import { Button } from '$lib/components/ui';
 	import type { FormatRecipientRef } from './opportunity-format-detail-types';
 	import { getFormatRecipientKey } from './opportunity-format-detail-types';
 
-	type TeamPickerPerson = {
+	type RecipientPickerPerson = {
 		id: string;
 		ref: FormatRecipientRef;
 		name: string;
@@ -16,7 +16,7 @@
 	type Props = {
 		canToggleStatus: boolean;
 		detailViewActionLabel: string;
-		people: TeamPickerPerson[];
+		people: RecipientPickerPerson[];
 		selectedRecipientRefs: FormatRecipientRef[];
 		status: 'active' | 'paused';
 		onSelectedRecipientRefsChange: (nextRefs: FormatRecipientRef[]) => void | Promise<void>;
@@ -65,14 +65,14 @@
 		{/snippet}
 		{status === 'active' ? 'Active' : 'Paused'}
 	</Button>
-	<AvatarTeamPicker
+	<AvatarPersonPicker
 		{people}
 		selectedIds={selectedRecipientIds}
 		minSelected={1}
 		onSelectedIdsChange={handleSelectedRecipientIdsChange}
 		altBase="Format recipient"
 		ariaLabel="Manage recipients"
-		searchPlaceholder="Search team..."
+		searchPlaceholder="Search recipients..."
 		emptyLabel="No recipients found"
 	/>
 	<Button variant="secondary" class="h-7 px-2.5 text-[0.68rem]" onclick={onToggleDetailView}>

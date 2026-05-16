@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { normalizeEmailDraft, type EmailDraft } from '@overbase/builder-sdk/email';
 import { mutation } from './_generated/server';
-import { requireWorkspaceRecord } from './auth';
+import { getViewerWorkspaceRecord, requireViewerWorkspace } from './auth';
 
 function createPipelineAlertDraft(title: string): EmailDraft {
 	return {
@@ -96,7 +96,8 @@ export const seedOpportunitiesForFormat = mutation({
 		replaceExisting: v.optional(v.boolean())
 	},
 	handler: async (ctx, { opportunityFormatId, replaceExisting = true }) => {
-		const opportunityFormat = await requireWorkspaceRecord(ctx, await ctx.db.get(opportunityFormatId));
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
 
 		if (!opportunityFormat) {
 			throw new Error('Format not found.');

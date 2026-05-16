@@ -2,38 +2,43 @@ import { v } from 'convex/values';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/server';
 
-type AuthenticatedUser = {
+export type ViewerWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'>;
-	membership: Doc<'workspaceMemberships'>;
 };
 
 type CurrentUserAndWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'> | null;
-	membership: Doc<'workspaceMemberships'> | null;
 };
 
-function getIdentityEmail(identity: NonNullable<Awaited<ReturnType<QueryCtx['auth']['getUserIdentity']>>>) {
+type ClerkIdentity = NonNullable<Awaited<ReturnType<QueryCtx['auth']['getUserIdentity']>>>;
+
+function getIdentityEmail(identity: ClerkIdentity) {
 	return identity.email ?? identity.tokenIdentifier;
 }
 
-function getIdentityName(identity: NonNullable<Awaited<ReturnType<QueryCtx['auth']['getUserIdentity']>>>) {
+function getIdentityName(identity: ClerkIdentity) {
 	const name = identity.name?.trim();
 	return name || undefined;
 }
 
-function getIdentityAvatar(identity: NonNullable<Awaited<ReturnType<QueryCtx['auth']['getUserIdentity']>>>) {
+function getIdentityAvatar(identity: ClerkIdentity) {
 	return identity.pictureUrl?.trim() || undefined;
 }
 
-export async function requireAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
+async function getViewerIdentity(ctx: QueryCtx | MutationCtx) {
 	const identity = await ctx.auth.getUserIdentity();
 
 	if (!identity?.subject) {
 		throw new Error('Authentication required.');
 	}
 
+	return identity;
+}
+
+export async function requireAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
+	const identity = await getViewerIdentity(ctx);
 	const user = await ctx.db
 		.query('users')
 		.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', identity.subject))
@@ -46,76 +51,31 @@ export async function requireAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
 	return user;
 }
 
-export async function getPrimaryWorkspaceForUser(ctx: QueryCtx | MutationCtx, userId: Id<'users'>) {
-	const user = await ctx.db.get(userId);
-
-	if (!user?.primaryWorkspaceId) {
-		return { workspace: null, membership: null };
+export async function getWorkspaceForUser(ctx: QueryCtx | MutationCtx, user: Doc<'users'>) {
+	if (!user.workspaceId) {
+		return null;
 	}
 
-	const workspace = await ctx.db.get(user.primaryWorkspaceId);
-	if (!workspace || workspace.createdByUserId !== userId) {
-		return { workspace: null, membership: null };
+	const workspace = await ctx.db.get(user.workspaceId);
+
+	if (!workspace || workspace.ownerUserId !== user._id) {
+		return null;
 	}
 
-	const membership = await ctx.db
-		.query('workspaceMemberships')
-		.withIndex('by_workspace_user', (q) =>
-			q.eq('workspaceId', workspace._id).eq('userId', userId)
-		)
-		.first();
-
-	return { workspace, membership };
+	return workspace;
 }
 
-async function ensureOwnerMembership(
-	ctx: MutationCtx,
-	userId: Id<'users'>,
-	workspaceId: Id<'workspaces'>,
-	now: number
-) {
-	let membership = await ctx.db
-		.query('workspaceMemberships')
-		.withIndex('by_workspace_user', (q) =>
-			q.eq('workspaceId', workspaceId).eq('userId', userId)
-		)
-		.first();
-
-	if (!membership) {
-		const membershipId = await ctx.db.insert('workspaceMemberships', {
-			workspaceId,
-			userId,
-			role: 'owner',
-			createdAt: now,
-			updatedAt: now
-		});
-		membership = await ctx.db.get(membershipId);
-	} else if (membership.role !== 'owner') {
-		await ctx.db.patch(membership._id, {
-			role: 'owner',
-			updatedAt: now
-		});
-		membership = await ctx.db.get(membership._id);
-	}
-
-	if (!membership) {
-		throw new Error('Unable to initialize workspace.');
-	}
-
-	return membership;
-}
-
-async function createPrimaryWorkspaceForUser(ctx: MutationCtx, user: Doc<'users'>, now: number) {
+async function createWorkspaceForUser(ctx: MutationCtx, user: Doc<'users'>, now: number) {
 	const workspaceId = await ctx.db.insert('workspaces', {
 		name: '',
 		website: '',
-		createdByUserId: user._id,
+		ownerUserId: user._id,
 		createdAt: now,
 		updatedAt: now
 	});
-	const membership = await ensureOwnerMembership(ctx, user._id, workspaceId, now);
+
 	await ctx.db.patch(user._id, {
-		primaryWorkspaceId: workspaceId,
+		workspaceId,
 		updatedAt: now
 	});
 
@@ -128,25 +88,25 @@ async function createPrimaryWorkspaceForUser(ctx: MutationCtx, user: Doc<'users'
 		throw new Error('Unable to initialize workspace.');
 	}
 
-	return { user: updatedUser, workspace, membership };
+	return { user: updatedUser, workspace };
 }
 
-export async function requireWorkspace(ctx: QueryCtx | MutationCtx) {
+export async function requireViewerWorkspace(ctx: QueryCtx | MutationCtx): Promise<ViewerWorkspace> {
 	const user = await requireAuthenticatedUser(ctx);
-	const { workspace, membership } = await getPrimaryWorkspaceForUser(ctx, user._id);
+	const workspace = await getWorkspaceForUser(ctx, user);
 
-	if (!workspace || !membership) {
+	if (!workspace) {
 		throw new Error('Workspace required.');
 	}
 
-	return { user, workspace, membership };
+	return { user, workspace };
 }
 
 export async function requireWorkspaceRecord<T extends { workspaceId: Id<'workspaces'> }>(
 	ctx: QueryCtx | MutationCtx,
 	record: T | null
 ) {
-	const { workspace } = await requireWorkspace(ctx);
+	const { workspace } = await requireViewerWorkspace(ctx);
 
 	if (!record || record.workspaceId !== workspace._id) {
 		return null;
@@ -155,15 +115,21 @@ export async function requireWorkspaceRecord<T extends { workspaceId: Id<'worksp
 	return record;
 }
 
-export const bootstrapCurrentUserAndWorkspace = mutation({
+export function getViewerWorkspaceRecord<T extends { workspaceId: Id<'workspaces'> }>(
+	{ workspace }: ViewerWorkspace,
+	record: T | null
+) {
+	if (!record || record.workspaceId !== workspace._id) {
+		return null;
+	}
+
+	return record;
+}
+
+export const ensureViewerWorkspace = mutation({
 	args: {},
-	handler: async (ctx): Promise<AuthenticatedUser> => {
-		const identity = await ctx.auth.getUserIdentity();
-
-		if (!identity?.subject) {
-			throw new Error('Authentication required.');
-		}
-
+	handler: async (ctx): Promise<ViewerWorkspace> => {
+		const identity = await getViewerIdentity(ctx);
 		const now = Date.now();
 		const email = getIdentityEmail(identity);
 		const displayName = getIdentityName(identity);
@@ -197,15 +163,9 @@ export const bootstrapCurrentUserAndWorkspace = mutation({
 			throw new Error('Unable to initialize user.');
 		}
 
-		const primaryWorkspace = user.primaryWorkspaceId ? await ctx.db.get(user.primaryWorkspaceId) : null;
+		const workspace = await getWorkspaceForUser(ctx, user);
 
-		if (!primaryWorkspace || primaryWorkspace.createdByUserId !== user._id) {
-			return await createPrimaryWorkspaceForUser(ctx, user, now);
-		}
-
-		const membership = await ensureOwnerMembership(ctx, user._id, primaryWorkspace._id, now);
-
-		return { user, workspace: primaryWorkspace, membership };
+		return workspace ? { user, workspace } : await createWorkspaceForUser(ctx, user, now);
 	}
 });
 
@@ -214,8 +174,8 @@ export const saveOnboardingCompany = mutation({
 		companyName: v.string(),
 		companyWebsite: v.string()
 	},
-	handler: async (ctx, { companyName, companyWebsite }): Promise<AuthenticatedUser> => {
-		const { user, workspace, membership } = await requireWorkspace(ctx);
+	handler: async (ctx, { companyName, companyWebsite }): Promise<ViewerWorkspace> => {
+		const { user, workspace } = await requireViewerWorkspace(ctx);
 		const name = companyName.trim();
 		const website = companyWebsite.trim();
 
@@ -234,7 +194,7 @@ export const saveOnboardingCompany = mutation({
 			throw new Error('Unable to save company profile.');
 		}
 
-		return { user, workspace: updatedWorkspace, membership };
+		return { user, workspace: updatedWorkspace };
 	}
 });
 
@@ -256,19 +216,14 @@ export const currentUserAndWorkspace = query({
 			return null;
 		}
 
-		const { workspace, membership } = await getPrimaryWorkspaceForUser(ctx, user._id);
-		if (!workspace || !membership) {
-			return { user, workspace: null, membership: null };
-		}
-
-		return { user, workspace, membership };
+		return { user, workspace: await getWorkspaceForUser(ctx, user) };
 	}
 });
 
 export const markOnboardingComplete = mutation({
 	args: {},
 	handler: async (ctx) => {
-		const { workspace } = await requireWorkspace(ctx);
+		const { workspace } = await requireViewerWorkspace(ctx);
 		const now = Date.now();
 
 		if (!workspace.onboardingCompletedAt) {

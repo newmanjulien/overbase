@@ -9,7 +9,8 @@ type SignInEmailCodeFactor = Extract<
 >;
 
 export type ClerkEmailCodeAuthController = {
-	sendCode(email: string): Promise<void>;
+	sendSignupCode(email: string): Promise<void>;
+	sendLoginCode(email: string): Promise<void>;
 	verifyCode(code: string): Promise<void>;
 	resendCode(): Promise<void>;
 	getErrorMessage(error: unknown): string;
@@ -30,21 +31,24 @@ export function createClerkEmailCodeAuthController({
 	let signInEmailAddressId: string | null = null;
 	let activeEmail: string | null = null;
 
-	async function sendCode(email: string) {
+	async function sendSignupCode(email: string) {
 		const normalizedEmail = email.trim().toLowerCase();
 		if (!normalizedEmail) {
 			throw new Error('Enter your work email.');
 		}
 
-		try {
-			await sendSignUpCode(normalizedEmail);
-		} catch (error) {
-			if (getErrorCode(error) !== 'form_identifier_exists') {
-				throw error;
-			}
+		resetActiveAttempt();
+		await sendSignUpCode(normalizedEmail);
+	}
 
-			await sendSignInCode(normalizedEmail);
+	async function sendLoginCode(email: string) {
+		const normalizedEmail = email.trim().toLowerCase();
+		if (!normalizedEmail) {
+			throw new Error('Enter your work email.');
 		}
+
+		resetActiveAttempt();
+		await sendSignInCode(normalizedEmail);
 	}
 
 	async function verifyCode(code: string) {
@@ -144,7 +148,13 @@ export function createClerkEmailCodeAuthController({
 		return signUp;
 	}
 
-	return { sendCode, verifyCode, resendCode, getErrorMessage };
+	function resetActiveAttempt() {
+		mode = null;
+		signInEmailAddressId = null;
+		activeEmail = null;
+	}
+
+	return { sendSignupCode, sendLoginCode, verifyCode, resendCode, getErrorMessage };
 }
 
 function throwIfClerkError(result: ClerkMutationResult) {
@@ -153,7 +163,7 @@ function throwIfClerkError(result: ClerkMutationResult) {
 	}
 }
 
-function getErrorCode(error: unknown) {
+export function getClerkErrorCode(error: unknown) {
 	const clerkErrors = (error as { errors?: { code?: string }[] })?.errors;
 	return clerkErrors?.[0]?.code ?? (error as { code?: string })?.code;
 }

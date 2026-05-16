@@ -6,29 +6,24 @@
 	import { useClerkContext, useSignIn, useSignUp } from 'svelte-clerk';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 	import { BUILDER_FRESH_START_ROUTE, builderAppSlugParams } from '$lib/features/builder/paths';
+	import { buildAuthEntryHref } from './auth-return';
 	import OnboardingBlueprintStep from '../steps/OnboardingBlueprintStep.svelte';
 	import OnboardingCodeStep from '../steps/OnboardingCodeStep.svelte';
 	import OnboardingCompanyStep from '../steps/OnboardingCompanyStep.svelte';
-	import OnboardingPatternLayer from '../ui/OnboardingPatternLayer.svelte';
 	import OnboardingPartnerStep from '../steps/OnboardingPartnerStep.svelte';
-	import OnboardingQuotePanel from '../ui/OnboardingQuotePanel.svelte';
-	import OnboardingShell from '../ui/OnboardingShell.svelte';
 	import OnboardingSignupStep from '../steps/OnboardingSignupStep.svelte';
 	import OnboardingWelcomeStep from '../steps/OnboardingWelcomeStep.svelte';
-	import { createClerkEmailCodeAuthController } from './clerk-email-code-auth';
+	import OnboardingAuthShell from './OnboardingAuthShell.svelte';
+	import { createClerkEmailCodeAuthController, getClerkErrorCode } from './clerk-email-code-auth';
 	import { loadOnboardingBlueprints } from './onboarding-blueprints';
-	import type {
-		OnboardingCompany,
-		OnboardingPartner,
-		OnboardingQuote,
-		OnboardingStep
-	} from './types';
+	import type { OnboardingCompany, OnboardingPartner, OnboardingStep } from './types';
 
 	type Props = {
 		initialStep?: OnboardingStep;
+		marketingReturnHref?: string;
 	};
 
-	let { initialStep = 'welcome' }: Props = $props();
+	let { initialStep = 'welcome', marketingReturnHref }: Props = $props();
 	const client = useConvexClient();
 	const clerk = useClerkContext();
 	const signUpState = useSignUp();
@@ -63,23 +58,22 @@
 	let completingAppSlug = $state<string | null>(null);
 	let isOpeningBuilder = $state(false);
 	const isCompletingOnboarding = $derived(Boolean(completingAppSlug) || isOpeningBuilder);
-	const hasFooter = $derived(step === 'welcome');
-	const footerBorder = $derived(step === 'welcome');
+	const hasFooter = $derived(step === 'welcome' || step === 'signup');
+	const footerBorder = $derived(step === 'welcome' || step === 'signup');
 	const canReturn = $derived(
 		step === 'signup' || step === 'code' || step === 'partner' || (!clerk.auth.userId && step === 'company')
 	);
+	const currentReturnHref = $derived(
+		step === 'welcome' || (step === 'signup' && Boolean(marketingReturnHref))
+			? marketingReturnHref
+			: undefined
+	);
+	const loginHref = $derived(buildAuthEntryHref('/login', marketingReturnHref));
 	const welcomeFooterLinks = [
 		{ label: 'Terms of Service', href: 'https://overbase.app/legal/terms-of-service' },
 		{ label: 'Privacy Policy', href: 'https://overbase.app/legal/dpa' },
 		{ label: 'Support', href: 'https://overbase.app/contact' }
 	];
-	const quote = {
-		text: 'Overbase turns business context into a clear path to the opportunities worth building first.',
-		personName: 'Morgan Reed',
-		personTitle: 'VP Revenue, Northstar Labs',
-		avatarSrc: '/onboarding-fred.png',
-		avatarAlt: 'Morgan Reed'
-	} satisfies OnboardingQuote;
 
 	async function loadBlueprints() {
 		hasStartedBlueprintLoad = true;
@@ -137,11 +131,14 @@
 		verificationCode = '';
 
 		try {
-			await authController.sendCode(email);
+			await authController.sendSignupCode(email);
 			workEmail = email;
 			step = 'code';
 		} catch (error) {
-			authErrorText = authController.getErrorMessage(error);
+			authErrorText =
+				getClerkErrorCode(error) === 'form_identifier_exists'
+					? 'An account already exists for that email.'
+					: authController.getErrorMessage(error);
 		} finally {
 			isSubmittingEmail = false;
 		}
@@ -248,19 +245,12 @@
 		}}
 	/>
 {:else}
-	<OnboardingShell
+	<OnboardingAuthShell
 		onReturn={canReturn ? returnFromCurrentStep : undefined}
+		returnHref={currentReturnHref}
 		showFooter={hasFooter}
 		footerBorder={footerBorder}
 	>
-		{#snippet background()}
-			<OnboardingPatternLayer />
-		{/snippet}
-
-		{#snippet aside()}
-			<OnboardingQuotePanel {quote} />
-		{/snippet}
-
 		{#snippet footer()}
 			{#if step === 'welcome'}
 				<nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] leading-5 text-[#8f9297]">
@@ -270,6 +260,16 @@
 						</a>
 					{/each}
 				</nav>
+			{:else if step === 'signup'}
+				<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
+					Already have an account?
+					<a
+						href={loginHref}
+						class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
+					>
+						Log in
+					</a>
+				</p>
 			{/if}
 		{/snippet}
 
@@ -321,5 +321,5 @@
 				}}
 			/>
 		{/if}
-	</OnboardingShell>
+	</OnboardingAuthShell>
 {/if}

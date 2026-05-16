@@ -15,27 +15,18 @@ export default defineSchema({
 		email: v.string(),
 		displayName: v.optional(v.string()),
 		avatarUrl: v.optional(v.string()),
-		primaryWorkspaceId: v.optional(v.id('workspaces')),
+		workspaceId: v.optional(v.id('workspaces')),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_clerkUserId', ['clerkUserId']),
 	workspaces: defineTable({
 		name: v.string(),
 		website: v.string(),
-		createdByUserId: v.id('users'),
+		ownerUserId: v.id('users'),
 		onboardingCompletedAt: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number()
-	}).index('by_createdByUserId', ['createdByUserId']),
-	workspaceMemberships: defineTable({
-		workspaceId: v.id('workspaces'),
-		userId: v.id('users'),
-		role: v.union(v.literal('owner'), v.literal('member')),
-		createdAt: v.number(),
-		updatedAt: v.number()
-	})
-		.index('by_userId', ['userId'])
-		.index('by_workspace_user', ['workspaceId', 'userId']),
+	}).index('by_ownerUserId', ['ownerUserId']),
 	builderSessions: defineTable({
 		workspaceId: v.id('workspaces'),
 		appSlug: v.string(),
@@ -122,10 +113,11 @@ export default defineSchema({
 	})
 		.index('by_workspace_createdAt', ['workspaceId', 'createdAt'])
 		.index('by_createdByUserId', ['createdByUserId']),
-	teamMembers: defineTable({
+	teammates: defineTable({
 		workspaceId: v.id('workspaces'),
 		email: v.string(),
 		name: v.string(),
+		role: v.string(),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	})

@@ -23,7 +23,10 @@
 	let deletingFormatIds = $state<Id<'opportunityFormats'>[]>([]);
 	let pausingFormatIds = $state<Id<'opportunityFormats'>[]>([]);
 	let actionError = $state<string | null>(null);
+	let searchQuery = $state('');
+	let selectedStatusFilter = $state<'all' | OpportunityFormatListRecord['status']>('all');
 	const formatItems = $derived((formatsQuery.data ?? []).map(toFormatItem));
+	const filteredFormatItems = $derived(formatItems.filter(matchesFormatFilters));
 	const listState = $derived(
 		formatsQuery.isLoading
 			? 'loading'
@@ -35,9 +38,46 @@
 	);
 
 	type OpportunityFormatListRecord = NonNullable<typeof formatsQuery.data>[number];
+	type FormatStatusFilterId = 'all' | OpportunityFormatListRecord['status'];
+
+	const statusFilterOptions: { id: FormatStatusFilterId; label: string }[] = [
+		{ id: 'all', label: 'All formats' },
+		{ id: 'active', label: 'Active' },
+		{ id: 'paused', label: 'Paused' }
+	];
+
+	const selectedStatusFilterLabel = $derived(
+		statusFilterOptions.find((option) => option.id === selectedStatusFilter)?.label ?? 'All formats'
+	);
 
 	function formatStatus(status: OpportunityFormatListRecord['status']) {
 		return status === 'active' ? 'Active' : 'Paused';
+	}
+
+	function normalizeSearchText(value: string) {
+		return value.trim().toLowerCase();
+	}
+
+	function setSelectedStatusFilter(optionId: string) {
+		if (optionId === 'all' || optionId === 'active' || optionId === 'paused') {
+			selectedStatusFilter = optionId;
+		}
+	}
+
+	function matchesFormatFilters(item: OpportunityFormatListItem) {
+		if (selectedStatusFilter !== 'all' && item.status !== selectedStatusFilter) {
+			return false;
+		}
+
+		const normalizedQuery = normalizeSearchText(searchQuery);
+
+		if (!normalizedQuery) {
+			return true;
+		}
+
+		return [item.title, item.creator.name].some((value) =>
+			value.toLowerCase().includes(normalizedQuery)
+		);
 	}
 
 	function getStatusLabelClass(status: OpportunityFormatListRecord['status']) {
@@ -146,6 +186,7 @@
 		return {
 			id: format.id,
 			title: format.title,
+			status: format.status,
 			href: `/formats/${format.id}`,
 			selectAriaLabel: `Select ${format.title}`,
 			statusLabel: formatStatus(format.status),
@@ -165,7 +206,14 @@
 	toolbar={{
 		searchPlaceholder: 'Search formats...',
 		searchAriaLabel: 'Search formats',
-		filterLabel: 'All formats'
+		searchValue: searchQuery,
+		onSearchValueChange: (value) => (searchQuery = value),
+		filter: {
+			label: selectedStatusFilterLabel,
+			selectedId: selectedStatusFilter,
+			options: statusFilterOptions,
+			onSelect: setSelectedStatusFilter
+		}
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY.formats.icon,
@@ -192,8 +240,11 @@
 				{actionError}
 			</p>
 		{/if}
-		<SelectableList
-			items={formatItems}
+		{#if filteredFormatItems.length === 0}
+			<ListContentState kind="empty" message="No matching formats." />
+		{:else}
+			<SelectableList
+				items={filteredFormatItems}
 			selectAllAriaLabel="Select all formats"
 			selectedActionsAriaLabel="Selected format actions"
 			selectedActions={[
@@ -220,7 +271,8 @@
 			{#snippet rowCells(item)}
 				<OpportunityFormatListRow {item} />
 			{/snippet}
-		</SelectableList>
+			</SelectableList>
+		{/if}
 	{/if}
 
 	{#snippet footer()}

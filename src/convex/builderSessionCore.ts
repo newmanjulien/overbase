@@ -3,7 +3,7 @@ import type { MutationCtx, QueryCtx } from './_generated/server';
 import {
 	isBuilderSessionActive
 } from './builderSessionAccess';
-import { requireWorkspace } from './auth';
+import { requireViewerWorkspace, type ViewerWorkspace } from './auth';
 
 export const ASSISTANT_STREAM_FLUSH_INTERVAL_MS = 150;
 export const ASSISTANT_STREAM_FLUSH_MIN_CHARS = 120;
@@ -23,9 +23,10 @@ export function getErrorMessage(error: unknown) {
 export async function getAuthorizedSession(
 	ctx: QueryCtx | MutationCtx,
 	sessionId: Id<'builderSessions'>,
-	now = Date.now()
+	now = Date.now(),
+	viewerWorkspace?: ViewerWorkspace
 ) {
-	const { workspace } = await requireWorkspace(ctx);
+	const { workspace } = viewerWorkspace ?? (await requireViewerWorkspace(ctx));
 	const session = await ctx.db.get(sessionId);
 
 	if (!session || session.workspaceId !== workspace._id || !isBuilderSessionActive(session, now)) {
