@@ -38,7 +38,7 @@
 		}}
 	>
 		<p class="m-0 text-sm leading-5 text-[#686b73]">
-			We sent a verification code to {email}.
+			Sent a code to {email}
 		</p>
 		<OnboardingTextInput
 			label="Verification code"

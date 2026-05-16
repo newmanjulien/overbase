@@ -1,6 +1,10 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { api } from '$convex/_generated/api';
 	import { APP_CONFIG } from '$lib/app/app-config';
+	import { AUTH_ENTRY_ROUTE_HREFS, DEFAULT_ROUTE_HREF } from '$lib/app/app-routes';
 	import AppGateError from '$lib/app/AppGateError.svelte';
 	import AppLoadingScreen from '$lib/app/AppLoadingScreen.svelte';
 	import AppShell from '$lib/app/AppShell.svelte';
@@ -29,6 +33,9 @@
 	let bootstrapAttemptedForUserId = $state<string | null>(null);
 
 	const signedInUserId = $derived(clerk.auth.userId ?? null);
+	const isAuthEntryRoute = $derived(
+		AUTH_ENTRY_ROUTE_HREFS.some((href) => page.url.pathname === href)
+	);
 	const shouldLoadCurrentUser = $derived(
 		clerk.isLoaded && Boolean(signedInUserId) && convexAuthReady
 	);
@@ -63,7 +70,13 @@
 		return getOnboardingStepForWorkspace(currentUser.data.workspace);
 	});
 	const onboardingInitialStep = $derived<OnboardingStep>(
-		gateStatus === 'company' ? 'company' : gateStatus === 'partner' ? 'partner' : 'welcome'
+		gateStatus === 'company'
+			? 'company'
+			: gateStatus === 'partner'
+				? 'partner'
+				: page.url.pathname === '/login'
+					? 'signup'
+					: 'welcome'
 	);
 	const onboardingKey = $derived(`${signedInUserId ?? 'signed-out'}:${onboardingInitialStep}`);
 	const gateErrorText = $derived(
@@ -124,11 +137,19 @@
 
 		void bootstrapCurrentUser(signedInUserId);
 	});
+
+	$effect(() => {
+		if (gateStatus === 'complete' && isAuthEntryRoute) {
+			void goto(resolve(DEFAULT_ROUTE_HREF), { replaceState: true });
+		}
+	});
 </script>
 
 <ConvexClerkAuthBridge bind:isReady={convexAuthReady} />
 
-{#if gateStatus === 'complete' && currentUser.data?.user && currentUser.data.workspace && currentUser.data.membership}
+{#if gateStatus === 'complete' && isAuthEntryRoute}
+	<AppLoadingScreen />
+{:else if gateStatus === 'complete' && currentUser.data?.user && currentUser.data.workspace && currentUser.data.membership}
 	<AppShell
 		user={currentUser.data.user}
 		workspace={currentUser.data.workspace}

@@ -1,10 +1,9 @@
 <script lang="ts">
-	import CaretUpDown from 'phosphor-svelte/lib/CaretUpDown';
 	import type { Doc } from '$convex/_generated/dataModel';
 	import DesktopNavList from '$lib/components/chrome/desktop/DesktopNavList.svelte';
+	import DesktopSidebarProfileMenu from '$lib/components/chrome/desktop/DesktopSidebarProfileMenu.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import HomeLink from '$lib/components/chrome/shared/HomeLink.svelte';
-	import { PersonAvatar } from '$lib/components/people';
 	import {
 		getActiveNavRoute,
 		NAV_FOOTER_ITEMS,
@@ -48,26 +47,10 @@
 	)}
 	aria-label="Dashboard sidebar"
 >
-	<div class="mb-4 ml-0.5 flex w-full items-center pr-0.5">
+	<div class="relative mb-4 ml-0.5 flex w-full items-center pr-0.5">
 		<HomeLink class="shrink-0" />
 
-		<div
-			class={cn(
-				'ml-auto flex shrink-0 items-center overflow-hidden transition-[max-width,opacity,transform] duration-200',
-				shellState.isSidebarExpanded
-					? 'max-w-24 translate-x-0 opacity-100'
-					: 'pointer-events-none max-w-0 translate-x-1 opacity-0'
-			)}
-		>
-			<div class="inline-flex h-6 origin-center scale-110 items-center gap-1 rounded-full border border-zinc-100 bg-zinc-50 px-1 text-zinc-100">
-				<PersonAvatar
-					person={profile}
-					size={20}
-					class="border border-zinc-100 bg-white"
-				/>
-				<CaretUpDown aria-hidden="true" size={12} weight="regular" class="text-zinc-400" />
-			</div>
-		</div>
+		<DesktopSidebarProfileMenu {profile} expanded={shellState.isSidebarExpanded} />
 	</div>
 
 	<nav

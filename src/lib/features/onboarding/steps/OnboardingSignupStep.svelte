@@ -14,7 +14,7 @@
 	const canContinue = $derived(email.trim().length > 0 && !isSubmitting);
 </script>
 
-<OnboardingStepFrame title="Continue with your email">
+<OnboardingStepFrame title="What's your email?">
 	<form
 		class="grid gap-3.5"
 		onsubmit={(event) => {
@@ -54,7 +54,7 @@
 				rel="external"
 			>
 				Privacy Policy
-			</a>.
+			</a>
 		</p>
 	</form>
 </OnboardingStepFrame>

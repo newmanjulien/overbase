@@ -1,4 +1,5 @@
 import type { PhosphorIcon } from '$lib/components/icons/types';
+import type { InlineTextContent } from '$lib/components/ui/inline-text';
 
 export type ListIcon = PhosphorIcon;
 
@@ -25,7 +26,7 @@ export type EmptyListNextStepsContent = string | readonly EmptyListNextStepsPart
 
 export type EmptyListStateConfig = {
 	title: string;
-	description: string;
+	description: InlineTextContent;
 	nextSteps?: EmptyListNextStepsContent;
 	learnMoreLabel?: string;
 	actionLabel?: string;
