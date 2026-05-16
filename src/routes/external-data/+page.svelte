@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ListRoutePage } from '$lib/components/list-page';
-	import { Button, ModalShell } from '$lib/components/ui';
+	import AddExternalDataModal from '$lib/features/external-data/AddExternalDataModal.svelte';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
 	let modalOpen = $state(false);
@@ -30,9 +30,4 @@
 	}}
 />
 
-<ModalShell open={modalOpen} title="Add external data" onClose={() => (modalOpen = false)}>
-	{#snippet footer()}
-		<Button variant="secondary" onclick={() => (modalOpen = false)}>Cancel</Button>
-		<Button onclick={() => (modalOpen = false)}>Add external data</Button>
-	{/snippet}
-</ModalShell>
+<AddExternalDataModal open={modalOpen} onClose={() => (modalOpen = false)} />

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Button, FullHeightModalShell } from '$lib/components/ui';
 	import BuildingsIcon from 'phosphor-svelte/lib/BuildingsIcon';
-	import CalendarDotsIcon from 'phosphor-svelte/lib/CalendarDotsIcon';
-	import FilesIcon from 'phosphor-svelte/lib/FilesIcon';
+	import ChartLineUpIcon from 'phosphor-svelte/lib/ChartLineUpIcon';
+	import IdentificationBadgeIcon from 'phosphor-svelte/lib/IdentificationBadgeIcon';
 	import StackSimpleIcon from 'phosphor-svelte/lib/StackSimpleIcon';
 	import ShieldCheckIcon from 'phosphor-svelte/lib/ShieldCheckIcon';
 
@@ -11,30 +11,30 @@
 		onClose: () => void;
 	};
 
-	const dataSourceCategories = [
+	const externalDataCategories = [
+		{
+			icon: ChartLineUpIcon,
+			title: 'Bloomberg, S&P, etc.',
+			description:
+				'Connect the Bloomberg Server API, the S&P Capital IQ API or other sources of financial data'
+		},
+		{
+			icon: IdentificationBadgeIcon,
+			title: 'Zoominfo, etc.',
+			description:
+				'Pull in lead generation data and contact details from Zoominfo or other data providers'
+		},
 		{
 			icon: BuildingsIcon,
-			title: 'CRMs and ERPs',
+			title: 'Grata, Crunchbase, etc.',
 			description:
-				'Connect your CRM, ERP or any other system you use to run your operation'
-		},
-		{
-			icon: CalendarDotsIcon,
-			title: 'Email, calendar, etc.',
-			description:
-				'We can analyze emails, calendars, chat system like Slack or Teams or anywhere else you already work'
-		},
-		{
-			icon: FilesIcon,
-			title: 'Spreadsheets, PDFs, etc.',
-			description:
-				'Share your data from where it already lives, even if it lives in spreadsheets, PDFs, etc.'
+				'Use private company data from Grata, Crunchbase or other leading data providers'
 		},
 		{
 			icon: StackSimpleIcon,
 			title: 'Any other data source',
 			description:
-				'Connect the most disconnected data from the hardest to access places'
+				'Connect any external data source to power your opportunities with the deepest insight'
 		}
 	];
 
@@ -49,20 +49,19 @@
 
 <FullHeightModalShell
 	{open}
-	title="Add data source"
-	subtitle="Connect your company's data sources to power your opportunities"
+	title="Add external data"
+	subtitle="Connect any external APIs or data sources you have purchased"
 	placement="center"
 	{onClose}
 >
 	<div class="flex min-h-full flex-col justify-between gap-6 pt-1">
 		<div class="space-y-5">
 			<p class="text-[0.72rem] leading-relaxed text-zinc-600">
-				Overbase's engineers will work with your IT team to bring together even your most
-				disconnected data
+				Overbase's engineers will work with your IT team to integrate any external data sources you have purchased
 			</p>
 
 			<div class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-				{#each dataSourceCategories as category}
+				{#each externalDataCategories as category}
 					{@const Icon = category.icon}
 					<section class="grid grid-cols-[1rem_1fr] gap-x-2.5 gap-y-1.5">
 						<Icon size={16} weight="regular" class="mt-px text-zinc-500" aria-hidden="true" />
@@ -80,7 +79,7 @@
 		>
 			<ShieldCheckIcon size={16} weight="regular" class="mt-0.5 shrink-0" aria-hidden="true" />
 			<p class="text-[0.72rem] leading-relaxed text-zinc-800">
-				Connect any of your internal data sources quickly and securely
+				Connect any of your external data sources quickly and securely
 			</p>
 		</aside>
 	</div>
