@@ -36,7 +36,6 @@
 	const opportunityFormat = $derived(detail?.opportunityFormat ?? null);
 	const opportunities = $derived(detail?.opportunities ?? []);
 	const people = $derived(detail?.people ?? []);
-	const readiness = $derived(opportunityFormat?.readiness ?? null);
 	let detailView = $state<OpportunityFormatDetailView>('rules');
 	let isMobileAttachmentOpen = $state(false);
 	const detailViewActionLabel = $derived(
@@ -45,7 +44,7 @@
 	const canToggleStatus = $derived(
 		Boolean(opportunityFormat) &&
 			!controller.isUpdatingStatus &&
-			(controller.status === 'active' || (readiness?.canActivate ?? false))
+			controller.status === 'active'
 	);
 	const feedbackViewState = $derived(getFeedbackViewState());
 	const loadState = $derived(getLoadState());

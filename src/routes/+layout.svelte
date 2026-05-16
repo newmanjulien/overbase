@@ -23,8 +23,12 @@
 	const onboardingEnabled = APP_CONFIG.onboarding.enabled;
 	let onboardingComplete = $state(!onboardingEnabled);
 
+	function getDefaultSidebarExpanded(sidebarDefault?: App.PageData['sidebarDefault']) {
+		return sidebarDefault !== 'collapsed';
+	}
+
 	const shellState = $state<ChromeShellState>({
-		isSidebarExpanded: false,
+		isSidebarExpanded: getDefaultSidebarExpanded(page.data.sidebarDefault),
 		isMobileDrawerOpen: false
 	});
 	const routeTitleState = $state<RouteTitleState>({
@@ -43,6 +47,7 @@
 	);
 	let customRouteTitle = $state<string | null>(null);
 	let currentRouteTitleResetKey = $state('');
+	let currentSidebarRoutePathname = $state(page.url.pathname);
 
 	const routeTitle = $derived(customRouteTitle ?? sourceRouteTitle);
 
@@ -63,6 +68,13 @@
 		if (currentRouteTitleResetKey !== routeTitleResetKey) {
 			currentRouteTitleResetKey = routeTitleResetKey;
 			customRouteTitle = null;
+		}
+	});
+
+	$effect(() => {
+		if (currentSidebarRoutePathname !== page.url.pathname) {
+			currentSidebarRoutePathname = page.url.pathname;
+			shellState.isSidebarExpanded = getDefaultSidebarExpanded(page.data.sidebarDefault);
 		}
 	});
 

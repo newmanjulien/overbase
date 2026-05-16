@@ -134,6 +134,13 @@
 				disabled: actionsDisabled,
 				onSelect: () => pauseFormats([format.id])
 			});
+		} else {
+			actions.unshift({
+				label: 'Activate',
+				ariaLabel: `Activate ${format.title}`,
+				disabled: true,
+				onSelect: () => {}
+			});
 		}
 
 		return {

@@ -6,6 +6,7 @@ export function load() {
 			label: 'My formats',
 			href: '/formats'
 		},
-		headerParentVisibility: 'desktopOnly'
+		headerParentVisibility: 'desktopOnly',
+		sidebarDefault: 'collapsed'
 	};
 }

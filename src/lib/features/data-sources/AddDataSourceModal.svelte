@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { Button, FullHeightModalShell } from '$lib/components/ui';
+	import {
+		Button,
+		FullHeightModalShell,
+		TallModalCallout,
+		TallModalFeatureGrid
+	} from '$lib/components/ui';
 	import BuildingsIcon from 'phosphor-svelte/lib/BuildingsIcon';
 	import CalendarDotsIcon from 'phosphor-svelte/lib/CalendarDotsIcon';
 	import FilesIcon from 'phosphor-svelte/lib/FilesIcon';
 	import StackSimpleIcon from 'phosphor-svelte/lib/StackSimpleIcon';
-	import ShieldCheckIcon from 'phosphor-svelte/lib/ShieldCheckIcon';
 
 	type Props = {
 		open: boolean;
@@ -61,28 +65,10 @@
 				disconnected data
 			</p>
 
-			<div class="grid gap-x-6 gap-y-5 sm:grid-cols-2">
-				{#each dataSourceCategories as category}
-					{@const Icon = category.icon}
-					<section class="grid grid-cols-[1rem_1fr] gap-x-2.5 gap-y-1.5">
-						<Icon size={16} weight="regular" class="mt-px text-zinc-500" aria-hidden="true" />
-						<h3 class="text-[0.76rem] leading-tight font-medium text-zinc-950">{category.title}</h3>
-						<p class="col-start-2 text-[0.69rem] leading-relaxed text-zinc-600">
-							{category.description}
-						</p>
-					</section>
-				{/each}
-			</div>
+			<TallModalFeatureGrid features={dataSourceCategories} />
 		</div>
 
-		<aside
-			class="flex items-start gap-2.5 rounded-[0.45rem] border border-blue-100/70 bg-blue-50/50 px-3.5 py-3 text-blue-500"
-		>
-			<ShieldCheckIcon size={16} weight="regular" class="mt-0.5 shrink-0" aria-hidden="true" />
-			<p class="text-[0.72rem] leading-relaxed text-zinc-800">
-				Connect any of your internal data sources quickly and securely
-			</p>
-		</aside>
+		<TallModalCallout text="Connect any of your internal data sources quickly and securely" />
 	</div>
 
 	{#snippet footer()}

@@ -11,6 +11,7 @@ declare global {
 				href: HeaderParentHref;
 			};
 			headerParentVisibility?: 'all' | 'desktopOnly';
+			sidebarDefault?: 'expanded' | 'collapsed';
 		}
 
 		interface PageState {

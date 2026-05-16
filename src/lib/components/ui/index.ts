@@ -11,4 +11,7 @@ export { default as InfoBarAction } from './InfoBarAction.svelte';
 export { default as FullHeightModalShell } from './FullHeightModalShell.svelte';
 export type { FullHeightModalPlacement } from './FullHeightModalShell.svelte';
 export { default as ModalShell } from './ModalShell.svelte';
+export { default as TallModalCallout } from './TallModalCallout.svelte';
+export { default as TallModalFeatureGrid } from './TallModalFeatureGrid.svelte';
+export { default as TallModalStepList } from './TallModalStepList.svelte';
 export type { ButtonSize, ButtonType, ButtonVariant } from './types';

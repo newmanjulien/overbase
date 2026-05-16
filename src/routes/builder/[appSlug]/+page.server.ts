@@ -11,7 +11,8 @@ export const load: PageServerLoad = async ({ params }) => {
 				app: null,
 				guide: null,
 				headerTitle: 'Format builder',
-				headerTitleEditable: false
+				headerTitleEditable: false,
+				sidebarDefault: 'collapsed'
 			};
 		}
 
@@ -25,6 +26,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				: null,
 			headerTitle: app.title,
 			headerTitleEditable: true,
+			sidebarDefault: 'collapsed',
 			headerParent: {
 				label: 'Format builder',
 				href: '/builder'
