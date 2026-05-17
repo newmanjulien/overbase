@@ -1,5 +1,5 @@
 <script lang="ts">
-	import OnboardingPrimaryButton from '../ui/OnboardingPrimaryButton.svelte';
+	import OnboardingHotkeyButton from '../ui/OnboardingHotkeyButton.svelte';
 	import OnboardingStepFrame from '../ui/OnboardingStepFrame.svelte';
 	import OnboardingTextInput from '../ui/OnboardingTextInput.svelte';
 
@@ -36,8 +36,8 @@
 		{#if errorText}
 			<p class="m-0 text-sm leading-5 text-[#ff3a1e]">{errorText}</p>
 		{/if}
-		<OnboardingPrimaryButton type="submit" disabled={!canContinue}>
+		<OnboardingHotkeyButton type="submit" disabled={!canContinue}>
 			{isSubmitting ? 'Sending...' : 'Email me a code'}
-		</OnboardingPrimaryButton>
+		</OnboardingHotkeyButton>
 	</form>
 </OnboardingStepFrame>

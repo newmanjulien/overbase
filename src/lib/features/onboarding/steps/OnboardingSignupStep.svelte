@@ -44,7 +44,8 @@
 			<a
 				href="https://overbase.app/legal/terms-of-service"
 				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
-				rel="external"
+				target="_blank"
+				rel="external noopener noreferrer"
 			>
 				Terms of Service
 			</a>
@@ -52,7 +53,8 @@
 			<a
 				href="https://overbase.app/legal/dpa"
 				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
-				rel="external"
+				target="_blank"
+				rel="external noopener noreferrer"
 			>
 				Privacy Policy
 			</a>

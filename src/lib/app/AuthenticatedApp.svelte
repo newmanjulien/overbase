@@ -16,7 +16,10 @@
 		type OnboardingStep,
 		type WorkspaceOnboardingStep
 	} from '$lib/features/onboarding/flow';
-	import { resolveAuthEntryReturnHref } from '$lib/features/onboarding/flow/auth-return';
+	import {
+		deriveAuthReturnButtonHrefFromRoute,
+		resolveAuthReturnButtonHref
+	} from '$lib/features/onboarding/flow/auth-return';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import type { Snippet } from 'svelte';
 	import { useClerkContext } from 'svelte-clerk';
@@ -94,12 +97,12 @@
 	const onboardingKey = $derived(
 		`${signedInUserId ?? 'signed-out'}:${authEntryRoute ?? 'app'}:${onboardingInitialStep}`
 	);
-	const marketingReturnHref = $derived(
+	const authReturnButtonHref = $derived(
 		authEntryRoute
-			? resolveAuthEntryReturnHref(page.url, {
+			? resolveAuthReturnButtonHref(page.url, {
 					useDefaultWhenMissing: true
 				})
-			: undefined
+			: deriveAuthReturnButtonHrefFromRoute(page.url)
 	);
 	const gateErrorText = $derived(
 		bootstrapErrorText ?? currentUser.error?.message ?? 'Unable to load your workspace.'
@@ -178,7 +181,7 @@
 	<AppLoadingScreen />
 {:else if authGateStatus === 'ready' && authEntryRoute === 'signup' && signupOnboardingStep !== 'complete'}
 	{#key onboardingKey}
-		<OnboardingFlow initialStep={onboardingInitialStep} {marketingReturnHref} />
+		<OnboardingFlow initialStep={onboardingInitialStep} {authReturnButtonHref} />
 	{/key}
 {:else if authGateStatus === 'ready' && currentUser.data?.user && currentUser.data.workspace}
 	<AppShell
@@ -193,10 +196,10 @@
 	<AppGateError message={gateErrorText} onRetry={retryBootstrap} />
 {:else}
 	{#key onboardingKey}
-		{#if authEntryRoute === 'login'}
-			<LoginFlow {marketingReturnHref} />
+		{#if authEntryRoute === 'signup'}
+			<OnboardingFlow initialStep={onboardingInitialStep} {authReturnButtonHref} />
 		{:else}
-			<OnboardingFlow initialStep={onboardingInitialStep} {marketingReturnHref} />
+			<LoginFlow {authReturnButtonHref} />
 		{/if}
 	{/key}
 {/if}

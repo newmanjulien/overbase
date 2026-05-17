@@ -6,7 +6,7 @@
 		disabled?: boolean;
 		hotkey?: 'Enter';
 		hotkeyLabel?: string;
-		onclick: () => void;
+		onclick?: () => void;
 		type?: 'button' | 'submit';
 	};
 
@@ -29,7 +29,7 @@
 	}
 
 	function handleWindowKeydown(event: KeyboardEvent) {
-		if (disabled || event.key !== hotkey || isEditableTarget(event.target)) {
+		if (!onclick || disabled || event.key !== hotkey || isEditableTarget(event.target)) {
 			return;
 		}
 

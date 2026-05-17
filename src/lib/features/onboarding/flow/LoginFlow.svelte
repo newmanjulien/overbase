@@ -9,10 +9,10 @@
 	type LoginStep = 'login' | 'code';
 
 	type Props = {
-		marketingReturnHref?: string;
+		authReturnButtonHref?: string;
 	};
 
-	let { marketingReturnHref }: Props = $props();
+	let { authReturnButtonHref }: Props = $props();
 
 	const signUpState = useSignUp();
 	const signInState = useSignIn();
@@ -29,8 +29,8 @@
 	let isSubmittingCode = $state(false);
 	let isResendingCode = $state(false);
 
-	const signupHref = $derived(buildAuthEntryHref('/signup', marketingReturnHref));
-	const currentReturnHref = $derived(step === 'login' ? marketingReturnHref : undefined);
+	const signupHref = $derived(buildAuthEntryHref('/signup', authReturnButtonHref));
+	const currentReturnButtonHref = $derived(step === 'login' ? authReturnButtonHref : undefined);
 
 	async function submitEmail() {
 		const normalizedEmail = email.trim().toLowerCase();
@@ -85,15 +85,15 @@
 		}
 	}
 
-	function returnToEmail() {
+	function showEmailStep() {
 		authErrorText = null;
 		step = 'login';
 	}
 </script>
 
 <OnboardingAuthShell
-	onReturn={step === 'code' ? returnToEmail : undefined}
-	returnHref={currentReturnHref}
+	onReturnButtonClick={step === 'code' ? showEmailStep : undefined}
+	returnButtonHref={currentReturnButtonHref}
 	showFooter={step === 'login'}
 >
 	{#snippet footer()}
@@ -126,7 +126,7 @@
 			isResending={isResendingCode}
 			onSubmit={() => void submitCode()}
 			onResend={() => void resendCode()}
-			onChangeEmail={returnToEmail}
+			onChangeEmail={showEmailStep}
 		/>
 	{/if}
 </OnboardingAuthShell>

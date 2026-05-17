@@ -9,8 +9,8 @@
 		children: Snippet;
 		footer?: Snippet;
 		showFooter?: boolean;
-		onReturn?: () => void;
-		returnHref?: string;
+		onReturnButtonClick?: () => void;
+		returnButtonHref?: string;
 		returnLabel?: string;
 		footerBorder?: boolean;
 	};
@@ -19,8 +19,8 @@
 		children,
 		footer,
 		showFooter = Boolean(footer),
-		onReturn,
-		returnHref,
+		onReturnButtonClick,
+		returnButtonHref,
 		returnLabel,
 		footerBorder = true
 	}: Props = $props();
@@ -36,8 +36,8 @@
 </script>
 
 <OnboardingShell
-	{onReturn}
-	{returnHref}
+	{onReturnButtonClick}
+	{returnButtonHref}
 	{returnLabel}
 	showFooter={shouldShowFooter}
 	{footerBorder}

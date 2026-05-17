@@ -20,10 +20,10 @@
 
 	type Props = {
 		initialStep?: OnboardingStep;
-		marketingReturnHref?: string;
+		authReturnButtonHref?: string;
 	};
 
-	let { initialStep = 'welcome', marketingReturnHref }: Props = $props();
+	let { initialStep = 'welcome', authReturnButtonHref }: Props = $props();
 	const client = useConvexClient();
 	const clerk = useClerkContext();
 	const signUpState = useSignUp();
@@ -63,8 +63,8 @@
 	const canReturn = $derived(
 		step === 'signup' || step === 'code' || step === 'partner' || (!clerk.auth.userId && step === 'company')
 	);
-	const currentReturnHref = $derived(step === 'welcome' ? marketingReturnHref : undefined);
-	const loginHref = $derived(buildAuthEntryHref('/login', marketingReturnHref));
+	const currentReturnButtonHref = $derived(step === 'welcome' ? authReturnButtonHref : undefined);
+	const loginHref = $derived(buildAuthEntryHref('/login', authReturnButtonHref));
 	const welcomeFooterLinks = [
 		{ label: 'Terms of Service', href: 'https://overbase.app/legal/terms-of-service' },
 		{ label: 'Privacy Policy', href: 'https://overbase.app/legal/dpa' },
@@ -242,8 +242,8 @@
 	/>
 {:else}
 	<OnboardingAuthShell
-		onReturn={canReturn ? returnFromCurrentStep : undefined}
-		returnHref={currentReturnHref}
+		onReturnButtonClick={canReturn ? returnFromCurrentStep : undefined}
+		returnButtonHref={currentReturnButtonHref}
 		showFooter={hasFooter}
 		footerBorder={footerBorder}
 	>
@@ -251,7 +251,12 @@
 			{#if step === 'welcome'}
 				<nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] leading-5 text-[#8f9297]">
 					{#each welcomeFooterLinks as link (link.href)}
-						<a class="transition-colors hover:text-[#202124]" href={link.href} rel="external">
+						<a
+							class="transition-colors hover:text-[#202124]"
+							href={link.href}
+							target="_blank"
+							rel="external noopener noreferrer"
+						>
 							{link.label}
 						</a>
 					{/each}
