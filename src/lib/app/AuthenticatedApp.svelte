@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { api } from '$convex/_generated/api';
 	import { APP_CONFIG } from '$lib/app/app-config';
-	import { AUTH_ENTRY_ROUTE_HREFS, DEFAULT_ROUTE_HREF } from '$lib/app/app-routes';
+	import { DEFAULT_ROUTE_HREF } from '$lib/app/app-routes';
 	import AppGateError from '$lib/app/AppGateError.svelte';
 	import AppLoadingScreen from '$lib/app/AppLoadingScreen.svelte';
 	import AppShell from '$lib/app/AppShell.svelte';
@@ -13,14 +13,15 @@
 		getOnboardingStepForWorkspace,
 		LoginFlow,
 		OnboardingFlow,
-		type OnboardingStep
+		type OnboardingStep,
+		type WorkspaceOnboardingStep
 	} from '$lib/features/onboarding/flow';
 	import { resolveAuthEntryReturnHref } from '$lib/features/onboarding/flow/auth-return';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import type { Snippet } from 'svelte';
 	import { useClerkContext } from 'svelte-clerk';
 
-	type GateStatus = 'loading' | 'signedOut' | 'company' | 'partner' | 'complete' | 'error';
+	type AuthGateStatus = 'loading' | 'signedOut' | 'ready' | 'error';
 	type AuthEntryRoute = 'signup' | 'login';
 
 	type Props = {
@@ -36,9 +37,6 @@
 	let bootstrapAttemptedForUserId = $state<string | null>(null);
 
 	const signedInUserId = $derived(clerk.auth.userId ?? null);
-	const isAuthEntryRoute = $derived(
-		AUTH_ENTRY_ROUTE_HREFS.some((href) => page.url.pathname === href)
-	);
 	const authEntryRoute = $derived<AuthEntryRoute | undefined>(
 		page.url.pathname === '/signup'
 			? 'signup'
@@ -52,7 +50,7 @@
 	const currentUser = useQuery(api.auth.currentUserAndWorkspace, () =>
 		shouldLoadCurrentUser ? {} : 'skip'
 	);
-	const gateStatus = $derived.by<GateStatus>(() => {
+	const authGateStatus = $derived.by<AuthGateStatus>(() => {
 		if (!clerk.isLoaded) {
 			return 'loading';
 		}
@@ -73,16 +71,23 @@
 			return 'loading';
 		}
 
-		if (!APP_CONFIG.onboarding.enabled) {
+		return 'ready';
+	});
+	const signupOnboardingStep = $derived.by<WorkspaceOnboardingStep>(() => {
+		if (
+			authGateStatus !== 'ready' ||
+			authEntryRoute !== 'signup' ||
+			!APP_CONFIG.onboarding.enabled
+		) {
 			return 'complete';
 		}
 
-		return getOnboardingStepForWorkspace(currentUser.data.workspace);
+		return getOnboardingStepForWorkspace(currentUser.data?.workspace);
 	});
 	const onboardingInitialStep = $derived<OnboardingStep>(
-		gateStatus === 'company'
+		signupOnboardingStep === 'company'
 			? 'company'
-			: gateStatus === 'partner'
+			: signupOnboardingStep === 'partner'
 				? 'partner'
 				: 'welcome'
 	);
@@ -98,6 +103,11 @@
 	);
 	const gateErrorText = $derived(
 		bootstrapErrorText ?? currentUser.error?.message ?? 'Unable to load your workspace.'
+	);
+	const shouldRedirectSignedInAuthEntry = $derived(
+		authGateStatus === 'ready' &&
+			(authEntryRoute === 'login' ||
+				(authEntryRoute === 'signup' && signupOnboardingStep === 'complete'))
 	);
 
 	async function bootstrapCurrentUser(userId: string) {
@@ -156,7 +166,7 @@
 	});
 
 	$effect(() => {
-		if (gateStatus === 'complete' && isAuthEntryRoute) {
+		if (shouldRedirectSignedInAuthEntry) {
 			void goto(resolve(DEFAULT_ROUTE_HREF), { replaceState: true });
 		}
 	});
@@ -164,22 +174,26 @@
 
 <ConvexClerkAuthBridge bind:isReady={convexAuthReady} />
 
-{#if gateStatus === 'complete' && isAuthEntryRoute}
+{#if shouldRedirectSignedInAuthEntry}
 	<AppLoadingScreen />
-{:else if gateStatus === 'complete' && currentUser.data?.user && currentUser.data.workspace}
+{:else if authGateStatus === 'ready' && authEntryRoute === 'signup' && signupOnboardingStep !== 'complete'}
+	{#key onboardingKey}
+		<OnboardingFlow initialStep={onboardingInitialStep} {marketingReturnHref} />
+	{/key}
+{:else if authGateStatus === 'ready' && currentUser.data?.user && currentUser.data.workspace}
 	<AppShell
 		user={currentUser.data.user}
 		workspace={currentUser.data.workspace}
 	>
 		{@render children()}
 	</AppShell>
-{:else if gateStatus === 'loading' || gateStatus === 'complete'}
+{:else if authGateStatus === 'loading'}
 	<AppLoadingScreen />
-{:else if gateStatus === 'error'}
+{:else if authGateStatus === 'error'}
 	<AppGateError message={gateErrorText} onRetry={retryBootstrap} />
 {:else}
 	{#key onboardingKey}
-		{#if gateStatus === 'signedOut' && authEntryRoute === 'login'}
+		{#if authEntryRoute === 'login'}
 			<LoginFlow {marketingReturnHref} />
 		{:else}
 			<OnboardingFlow initialStep={onboardingInitialStep} {marketingReturnHref} />
