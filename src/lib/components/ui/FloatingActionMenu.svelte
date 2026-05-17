@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import DotsThree from 'phosphor-svelte/lib/DotsThree';
-	import Trash from 'phosphor-svelte/lib/Trash';
+	import DotsThreeIcon from 'phosphor-svelte/lib/DotsThreeIcon';
+	import TrashIcon from 'phosphor-svelte/lib/TrashIcon';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
 	export type FloatingActionMenuAction = {
@@ -177,7 +177,7 @@
 			triggerClass
 		)}
 	>
-		<DotsThree aria-hidden="true" size={13} weight="bold" />
+		<DotsThreeIcon aria-hidden="true" size={13} weight="bold" />
 	</button>
 
 	{#if open}
@@ -203,7 +203,7 @@
 					onclick={() => selectAction(action)}
 				>
 					{#if action.intent === 'destructive'}
-						<Trash aria-hidden="true" size={14} weight="regular" />
+						<TrashIcon aria-hidden="true" size={14} weight="regular" />
 					{/if}
 					<span class="truncate">{action.label}</span>
 				</button>

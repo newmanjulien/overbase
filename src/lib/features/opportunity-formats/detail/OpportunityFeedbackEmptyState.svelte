@@ -1,10 +1,10 @@
 <script lang="ts">
-	import ChatCircle from 'phosphor-svelte/lib/ChatCircle';
+	import ChatCircleIcon from 'phosphor-svelte/lib/ChatCircleIcon';
 </script>
 
 <section class="flex h-full min-h-0 items-center justify-center bg-zinc-50/50 px-5 py-8">
 	<div class="flex max-w-60 flex-col items-center text-center">
-		<ChatCircle aria-hidden="true" size={20} weight="regular" class="mb-4 text-zinc-950" />
+		<ChatCircleIcon aria-hidden="true" size={20} weight="regular" class="mb-4 text-zinc-950" />
 
 		<h2 class="text-[0.78rem] leading-tight font-medium text-zinc-950">
 			No opportunities sent yet

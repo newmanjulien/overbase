@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import ArrowUp from 'phosphor-svelte/lib/ArrowUp';
-	import Plus from 'phosphor-svelte/lib/Plus';
+	import ArrowUpIcon from 'phosphor-svelte/lib/ArrowUpIcon';
+	import PlusIcon from 'phosphor-svelte/lib/PlusIcon';
 	import { StickToBottom } from 'stick-to-bottom-svelte';
 	import { IconButton } from '$lib/components/ui';
 	import BuilderChatError from './BuilderChatError.svelte';
@@ -206,7 +206,7 @@
 				class="absolute right-5 bottom-4 size-8 rounded-full text-zinc-700 shadow-sm"
 				onclick={() => void stickToBottom.scrollToBottom('instant')}
 			>
-				<Plus size={16} weight="regular" class="rotate-45" />
+				<PlusIcon size={16} weight="regular" class="rotate-45" />
 			</IconButton>
 		{/if}
 	</div>
@@ -245,7 +245,7 @@
 				class="size-7.5 shrink-0 rounded-full bg-black hover:bg-black"
 				disabled={!canSend}
 			>
-				<ArrowUp size={15} weight="regular" />
+				<ArrowUpIcon size={15} weight="regular" />
 			</IconButton>
 		</div>
 	</form>

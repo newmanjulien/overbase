@@ -53,7 +53,7 @@
 
 <section
 	class="flex min-h-dvh items-center justify-center overflow-auto bg-white px-6 py-16 text-[#202124]"
-	aria-label="Recommended blueprints"
+	aria-label="Recommended builders"
 >
 	<div class="w-full max-w-120 text-center">
 		<h1 class="mt-5 mb-0 text-[30px] leading-[1.08] font-medium text-[#08090a]">
@@ -65,7 +65,7 @@
 
 		<div class="mt-10 flex justify-center">
 			{#if isLoading}
-				<p class="text-sm font-medium leading-6 text-[#686b73]">Loading available blueprints...</p>
+				<p class="text-sm font-medium leading-6 text-[#686b73]">Loading available builders...</p>
 			{:else if errorText}
 				<div class="w-full max-w-75 text-left">
 					<p class="text-sm font-medium leading-6 text-[#686b73]">{errorText}</p>
@@ -126,7 +126,7 @@
 			{:else}
 				<div class="w-full max-w-75 text-center">
 					<p class="text-sm font-medium leading-6 text-[#686b73]">
-						No builder blueprints are available right now
+						No builders are available right now
 					</p>
 					{#if completionErrorText}
 						<p class="mt-4 text-sm leading-5 text-red-600">{completionErrorText}</p>

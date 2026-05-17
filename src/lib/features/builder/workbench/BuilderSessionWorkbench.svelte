@@ -76,7 +76,7 @@
 	function clearLaunchState() {
 		clearPendingBuilderLaunch(app.id, storageScope);
 		replaceState(
-			resolve('/builder/[appSlug]', {
+			resolve('/builders/[appSlug]', {
 				appSlug: app.id
 			}),
 			{}

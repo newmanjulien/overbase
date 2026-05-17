@@ -4,7 +4,7 @@ import type { FloatingActionMenuAction } from '$lib/components/ui';
 
 const ROUTE_TITLE_STATE_KEY = Symbol('route-title-state');
 
-export type HeaderParentHref = '/builder' | '/formats';
+export type HeaderParentHref = '/builders' | '/formats';
 
 export type RouteTitleState = {
 	title: string;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Question from 'phosphor-svelte/lib/Question';
+	import QuestionIcon from 'phosphor-svelte/lib/QuestionIcon';
 	import FloatingTooltip, { type FloatingTooltipPlacement } from './FloatingTooltip.svelte';
 
 	type Props = {
@@ -22,6 +22,6 @@
 	triggerClass="grid size-5 place-items-center rounded-[6px] text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:bg-zinc-100 focus-visible:text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
 >
 	{#snippet trigger()}
-		<Question size={14} weight="regular" />
+		<QuestionIcon size={14} weight="regular" />
 	{/snippet}
 </FloatingTooltip>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import List from 'phosphor-svelte/lib/List';
+	import ListIcon from 'phosphor-svelte/lib/ListIcon';
 	import EditableHeaderTitle from '$lib/components/chrome/shared/EditableHeaderTitle.svelte';
 	import HomeLink from '$lib/components/chrome/shared/HomeLink.svelte';
 	import type { HeaderParentHref } from '$lib/components/chrome/shared/route-title.svelte';
@@ -31,7 +31,7 @@
 		{#if headerParent}
 			<div class="flex min-w-0 flex-col items-center gap-0.5">
 				<a
-					href={headerParent.href === '/builder' ? resolve('/builder') : resolve('/formats')}
+					href={headerParent.href === '/builders' ? resolve('/builders') : resolve('/formats')}
 					class="block max-w-full truncate text-center text-[0.66rem] font-medium tracking-wide text-zinc-400 transition-colors hover:text-zinc-700"
 				>
 					{headerParent.label}
@@ -65,7 +65,7 @@
 				shellState.isMobileDrawerOpen = !shellState.isMobileDrawerOpen;
 			}}
 		>
-			<List size={16} weight="regular" />
+			<ListIcon size={16} weight="regular" />
 		</IconButton>
 	</div>
 </header>

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import type { ClassValue } from 'clsx';
-	import Check from 'phosphor-svelte/lib/Check';
-	import MagnifyingGlass from 'phosphor-svelte/lib/MagnifyingGlass';
-	import Plus from 'phosphor-svelte/lib/Plus';
+	import CheckIcon from 'phosphor-svelte/lib/CheckIcon';
+	import MagnifyingGlassIcon from 'phosphor-svelte/lib/MagnifyingGlassIcon';
+	import PlusIcon from 'phosphor-svelte/lib/PlusIcon';
 	import AvatarStack from './AvatarStack.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import PersonAvatar from './PersonAvatar.svelte';
@@ -213,7 +213,7 @@
 			style={`width:${size}px;height:${size}px;`}
 			onclick={togglePicker}
 		>
-			<Plus size={12} weight="regular" />
+			<PlusIcon size={12} weight="regular" />
 		</button>
 	</span>
 
@@ -228,7 +228,7 @@
 		>
 			<label class="sr-only" for={`${pickerId}-search`}>{searchLabel}</label>
 			<div class="relative border-b border-zinc-100">
-				<MagnifyingGlass
+				<MagnifyingGlassIcon
 					aria-hidden="true"
 					size={14}
 					weight="regular"
@@ -277,7 +277,7 @@
 								)}
 								aria-hidden="true"
 							>
-								<Check size={10} weight="bold" />
+								<CheckIcon size={10} weight="bold" />
 							</span>
 						</button>
 					{/each}

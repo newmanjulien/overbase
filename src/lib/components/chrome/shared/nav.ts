@@ -1,4 +1,4 @@
-import Question from 'phosphor-svelte/lib/Question';
+import QuestionIcon from 'phosphor-svelte/lib/QuestionIcon';
 import {
 	APP_NAV_SECTION_DEFINITIONS,
 	APP_ROUTE_REGISTRY,
@@ -79,7 +79,7 @@ export const NAV_FOOTER_ITEMS: readonly NavFooterItem[] = [
 		kind: 'external-link',
 		label: 'Contact support',
 		href: 'https://cal.com/juliennewman',
-		icon: Question
+		icon: QuestionIcon
 	}
 ] as const;
 

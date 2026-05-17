@@ -39,13 +39,6 @@ type BuilderAppInitialQuestionExample = {
 	questionGuidance: string;
 };
 
-type BuilderAppDraftExample = {
-	slug: string;
-	description: string;
-	matchSignals: string[];
-	emailDraft: EmailDraft;
-};
-
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
@@ -57,9 +50,7 @@ function getStringField(value: Record<string, unknown>, field: string) {
 }
 
 function getNonEmptyStringField(value: Record<string, unknown>, field: string) {
-	const fieldValue = getStringField(value, field)?.trim();
-
-	return fieldValue ? fieldValue : undefined;
+	return getStringField(value, field)?.trim() || undefined;
 }
 
 function normalizeCustomEmailAiContext(
@@ -118,20 +109,6 @@ function toInitialQuestionExample(examples: {
 		slug: examples.slug,
 		description: examples.description,
 		questionGuidance: examples.questionGuidance
-	};
-}
-
-function toDraftExample(example: {
-	slug: string;
-	description: string;
-	matchSignals: string[];
-	emailDraft: EmailDraft;
-}): BuilderAppDraftExample {
-	return {
-		slug: example.slug,
-		description: example.description,
-		matchSignals: example.matchSignals,
-		emailDraft: example.emailDraft
 	};
 }
 
@@ -251,7 +228,7 @@ export function createCustomOpportunityFormatRuntime(
 			throw new Error('The selected examples are unavailable.');
 		}
 
-		const draftExamples = listCustomEmailDraftExamples(selectedEmailExamplesSlug).map(toDraftExample);
+		const draftExamples = listCustomEmailDraftExamples(selectedEmailExamplesSlug);
 
 		if (draftExamples.length === 0) {
 			throw new Error('No custom email draft examples are available for these examples.');

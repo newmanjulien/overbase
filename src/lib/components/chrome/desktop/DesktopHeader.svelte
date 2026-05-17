@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import type { Snippet } from 'svelte';
-	import SidebarSimple from 'phosphor-svelte/lib/SidebarSimple';
-	import CaretRight from 'phosphor-svelte/lib/CaretRight';
+	import SidebarSimpleIcon from 'phosphor-svelte/lib/SidebarSimpleIcon';
+	import CaretRightIcon from 'phosphor-svelte/lib/CaretRightIcon';
 	import EditableHeaderTitle from '$lib/components/chrome/shared/EditableHeaderTitle.svelte';
 	import HeaderOverflowButton from '$lib/components/chrome/shared/HeaderOverflowButton.svelte';
 	import type { HeaderParentHref } from '$lib/components/chrome/shared/route-title.svelte';
@@ -44,18 +44,18 @@
 				shellState.isSidebarExpanded = !shellState.isSidebarExpanded;
 			}}
 		>
-			<SidebarSimple size={14} weight="regular" />
+			<SidebarSimpleIcon size={14} weight="regular" />
 		</IconButton>
 
 		{#if headerParent}
 			<nav aria-label="Breadcrumb" class="ml-2 flex min-w-0 flex-1 items-center gap-1.5">
 				<a
-					href={headerParent.href === '/builder' ? resolve('/builder') : resolve('/formats')}
+					href={headerParent.href === '/builders' ? resolve('/builders') : resolve('/formats')}
 					class="block min-w-0 shrink truncate text-[0.74rem] font-medium tracking-wide text-zinc-400 transition-colors hover:text-zinc-600"
 				>
 					{headerParent.label}
 				</a>
-				<CaretRight size={12} weight="regular" class="shrink-0 text-zinc-300" />
+				<CaretRightIcon size={12} weight="regular" class="shrink-0 text-zinc-300" />
 				<EditableHeaderTitle
 					{title}
 					editable={titleEditable}

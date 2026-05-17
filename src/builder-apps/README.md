@@ -5,7 +5,7 @@ This folder is where Overbase wires builder apps into the product.
 There are two paths:
 
 - `custom-opportunity-format` runs inside this repo.
-- Blueprint apps run somewhere else and Overbase calls them over HTTP.
+- External builder apps run somewhere else and Overbase calls them over HTTP.
 
 ## Custom Opportunity Format
 
@@ -21,7 +21,7 @@ Files:
 
 Load path:
 
-- `/builder/custom-opportunity-format` asks `runtime.server.ts` for the manifest.
+- `/builders/custom-opportunity-format` asks `runtime.server.ts` for the manifest.
 - `runtime.server.ts` returns the local manifest from `custom-opportunity-format/definition.ts`.
 - Convex jobs ask `src/convex/builderRuntime.ts` for the runtime.
 - `src/convex/builderRuntime.ts` returns the local runtime from `custom-opportunity-format/runtime.ts`.
@@ -34,9 +34,9 @@ OPENAI_API_KEY
 
 Set this in the Convex dev environment, because Convex runs the custom opportunity format jobs.
 
-## Blueprint Apps
+## External Builder Apps
 
-Blueprint apps are external apps. Overbase stores their local display metadata, but the actual app manifest and runtime are fetched from the external app.
+External builder apps are external apps. Overbase stores their local display metadata, but the actual app manifest and runtime are fetched from the external app.
 
 Files:
 
@@ -48,15 +48,15 @@ Files:
 
 Load path:
 
-- `/builder` calls `runtime.server.ts`.
+- `/builders` calls `runtime.server.ts`.
 - `runtime.server.ts` asks `runtime-core.ts` to fetch each external app manifest.
-- If an external app cannot be reached, it is skipped on `/builder`.
+- If an external app cannot be reached, it is skipped on `/builders`.
 - Opening a specific external app still requires that app runtime to be available.
 
 Run path:
 
 - Convex jobs call `src/convex/builderRuntime.ts`.
-- `src/convex/builderRuntime.ts` sends blueprint jobs through `runtime-core.ts`.
+- `src/convex/builderRuntime.ts` sends external builder jobs through `runtime-core.ts`.
 - `runtime-core.ts` signs the request and calls the external runtime HTTP endpoint.
 
 Required env per external app:
@@ -72,7 +72,7 @@ The custom opportunity format runtime is a file because it is part of Overbase.
 Convex imports `custom-opportunity-format/runtime.ts` and calls `startTurn`, `continueTurn`,
 and `backgroundJob` directly.
 
-Blueprint app runtimes usually live in their own apps. In those apps, `runtime` is a
+External builder app runtimes usually live in their own apps. In those apps, `runtime` is a
 folder because it includes both the app's real runtime logic and the HTTP layer that
 lets Overbase call it.
 

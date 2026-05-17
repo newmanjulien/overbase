@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ArrowRight from 'phosphor-svelte/lib/ArrowRight';
+	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
 	import { Button } from '$lib/components/ui';
 
 	type Props = {
@@ -44,7 +44,7 @@
 		<span>{primaryActionLabel}</span>
 		{#snippet trailing()}
 			{#if canGoNext}
-				<ArrowRight size={15} weight="regular" />
+				<ArrowRightIcon size={15} weight="regular" />
 			{/if}
 		{/snippet}
 	</Button>

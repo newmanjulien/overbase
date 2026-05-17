@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Database from 'phosphor-svelte/lib/Database';
-	import ArrowSquareOut from 'phosphor-svelte/lib/ArrowSquareOut';
+	import DatabaseIcon from 'phosphor-svelte/lib/DatabaseIcon';
+	import ArrowSquareOutIcon from 'phosphor-svelte/lib/ArrowSquareOutIcon';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import InlineText from '$lib/components/ui/InlineText.svelte';
 	import ListActionButton from '$lib/components/list-page/ListActionButton.svelte';
@@ -28,7 +28,7 @@
 		actionHelpText,
 		actionHelpTooltipText,
 		onAction,
-		icon: Icon = Database,
+		icon: Icon = DatabaseIcon,
 		class: className = ''
 	}: Props = $props();
 </script>
@@ -65,7 +65,7 @@
 						class="ml-1 inline-flex items-center gap-1 text-blue-400 hover:text-blue-500"
 					>
 						<span>{learnMoreLabel}</span>
-						<ArrowSquareOut aria-hidden="true" size={12} weight="regular" />
+						<ArrowSquareOutIcon aria-hidden="true" size={12} weight="regular" />
 					</button>
 				{/if}
 			</p>

@@ -9,16 +9,16 @@
 	import AuthButton from './AuthButton.svelte';
 	import AuthCodeStep from './AuthCodeStep.svelte';
 	import AuthEntryShell from './AuthEntryShell.svelte';
-	import SignupBlueprintStep from './SignupBlueprintStep.svelte';
+	import SignupBuilderStep from './SignupBuilderStep.svelte';
 	import SignupCompanyStep from './SignupCompanyStep.svelte';
 	import SignupPartnerStep from './SignupPartnerStep.svelte';
 	import AuthStepFrame from './AuthStepFrame.svelte';
 	import AuthTextInput from './AuthTextInput.svelte';
 	import { buildAuthEntryHref } from './auth-navigation';
 	import { createClerkEmailCodeAuthController, getClerkErrorCode } from './email-code-auth';
-	import { loadOnboardingBlueprints } from './onboarding-blueprints';
+	import { loadOnboardingBuilders } from './onboarding-builders';
 
-	type SignupStep = 'signup' | 'code' | 'company' | 'partner' | 'blueprint';
+	type SignupStep = 'signup' | 'code' | 'company' | 'partner' | 'builder';
 
 	type Props = {
 		returnTo?: string;
@@ -62,10 +62,10 @@
 	});
 	let companyErrorText = $state<string | null>(null);
 	let isSavingCompany = $state(false);
-	let blueprintApps = $state<BuilderAppRecord[]>([]);
-	let isLoadingBlueprints = $state(false);
-	let blueprintErrorText = $state<string | null>(null);
-	let hasStartedBlueprintLoad = $state(false);
+	let builderApps = $state<BuilderAppRecord[]>([]);
+	let isLoadingBuilders = $state(false);
+	let builderErrorText = $state<string | null>(null);
+	let hasStartedBuilderLoad = $state(false);
 	let completionErrorText = $state<string | null>(null);
 	let completingAppSlug = $state<string | null>(null);
 	let isOpeningBuilder = $state(false);
@@ -172,22 +172,22 @@
 		}
 	}
 
-	async function loadBlueprints() {
-		hasStartedBlueprintLoad = true;
-		isLoadingBlueprints = true;
-		blueprintErrorText = null;
+	async function loadBuilders() {
+		hasStartedBuilderLoad = true;
+		isLoadingBuilders = true;
+		builderErrorText = null;
 
 		try {
-			blueprintApps = await loadOnboardingBlueprints();
+			builderApps = await loadOnboardingBuilders();
 		} catch (error) {
-			blueprintErrorText = error instanceof Error ? error.message : 'Unable to load blueprints.';
-			blueprintApps = [];
+			builderErrorText = error instanceof Error ? error.message : 'Unable to load builders.';
+			builderApps = [];
 		} finally {
-			isLoadingBlueprints = false;
+			isLoadingBuilders = false;
 		}
 	}
 
-	async function selectBlueprint(appSlug: string) {
+	async function selectBuilder(appSlug: string) {
 		if (isCompletingOnboarding) return;
 
 		completionErrorText = null;
@@ -211,7 +211,7 @@
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(resolve('/builder'));
+			await goto(resolve('/builders'));
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
@@ -230,28 +230,28 @@
 	}
 
 	$effect(() => {
-		if (step === 'blueprint' && !hasStartedBlueprintLoad) {
-			void loadBlueprints();
+		if (step === 'builder' && !hasStartedBuilderLoad) {
+			void loadBuilders();
 		}
 	});
 </script>
 
-{#if step === 'blueprint'}
-	<SignupBlueprintStep
-		apps={blueprintApps}
-		isLoading={isLoadingBlueprints}
-		errorText={blueprintErrorText}
+{#if step === 'builder'}
+	<SignupBuilderStep
+		apps={builderApps}
+		isLoading={isLoadingBuilders}
+		errorText={builderErrorText}
 		completionErrorText={completionErrorText}
 		selectedAppSlug={completingAppSlug}
 		isOpeningBuilder={isOpeningBuilder}
 		onSelect={(appSlug) => {
-			void selectBlueprint(appSlug);
+			void selectBuilder(appSlug);
 		}}
 		onOpenBuilder={() => {
 			void openBuilder();
 		}}
 		onRetry={() => {
-			void loadBlueprints();
+			void loadBuilders();
 		}}
 	/>
 {:else}
@@ -346,7 +346,7 @@
 				bind:name={partner.name}
 				bind:collaboration={partner.collaboration}
 				onContinue={() => {
-					step = 'blueprint';
+					step = 'builder';
 				}}
 			/>
 		{/if}

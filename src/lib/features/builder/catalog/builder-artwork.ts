@@ -1,15 +1,15 @@
-import ArrowRight from 'phosphor-svelte/lib/ArrowRight';
-import BellRinging from 'phosphor-svelte/lib/BellRinging';
-import Club from 'phosphor-svelte/lib/Club';
-import Flag from 'phosphor-svelte/lib/Flag';
-import Handshake from 'phosphor-svelte/lib/Handshake';
-import Lightning from 'phosphor-svelte/lib/Lightning';
-import MagnifyingGlassPlus from 'phosphor-svelte/lib/MagnifyingGlassPlus';
-import Network from 'phosphor-svelte/lib/Network';
-import Quotes from 'phosphor-svelte/lib/Quotes';
-import Sparkle from 'phosphor-svelte/lib/Sparkle';
-import Target from 'phosphor-svelte/lib/Target';
-import Users from 'phosphor-svelte/lib/Users';
+import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
+import BellRingingIcon from 'phosphor-svelte/lib/BellRingingIcon';
+import ClubIcon from 'phosphor-svelte/lib/ClubIcon';
+import FlagIcon from 'phosphor-svelte/lib/FlagIcon';
+import HandshakeIcon from 'phosphor-svelte/lib/HandshakeIcon';
+import LightningIcon from 'phosphor-svelte/lib/LightningIcon';
+import MagnifyingGlassPlusIcon from 'phosphor-svelte/lib/MagnifyingGlassPlusIcon';
+import NetworkIcon from 'phosphor-svelte/lib/NetworkIcon';
+import QuotesIcon from 'phosphor-svelte/lib/QuotesIcon';
+import SparkleIcon from 'phosphor-svelte/lib/SparkleIcon';
+import TargetIcon from 'phosphor-svelte/lib/TargetIcon';
+import UsersIcon from 'phosphor-svelte/lib/UsersIcon';
 import type { BuilderAppArtwork } from '../../../../builder-apps/presentation';
 import type { PhosphorIcon } from '$lib/components/icons/types';
 
@@ -37,22 +37,22 @@ export type BuilderArtworkPreset = {
 };
 
 const ARTWORK_ICONS: Record<string, ArtworkIcon> = {
-	'arrow-right': ArrowRight,
-	'bell-ring': BellRinging,
-	club: Club,
-	flag: Flag,
-	handshake: Handshake,
-	'message-square-quote': Quotes,
-	network: Network,
-	'scan-search': MagnifyingGlassPlus,
-	sparkles: Sparkle,
-	target: Target,
-	'users-round': Users,
-	zap: Lightning
+	'arrow-right': ArrowRightIcon,
+	'bell-ring': BellRingingIcon,
+	club: ClubIcon,
+	flag: FlagIcon,
+	handshake: HandshakeIcon,
+	'message-square-quote': QuotesIcon,
+	network: NetworkIcon,
+	'scan-search': MagnifyingGlassPlusIcon,
+	sparkles: SparkleIcon,
+	target: TargetIcon,
+	'users-round': UsersIcon,
+	zap: LightningIcon
 };
 
 function getArtworkIcon(iconId: string) {
-	return ARTWORK_ICONS[iconId] ?? Flag;
+	return ARTWORK_ICONS[iconId] ?? FlagIcon;
 }
 
 export function toBuilderArtworkPreset(artwork: BuilderAppArtwork): BuilderArtworkPreset {

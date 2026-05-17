@@ -65,18 +65,14 @@
 	}
 
 	function matchesFormatFilters(item: OpportunityFormatListItem) {
-		if (selectedStatusFilter !== 'all' && item.status !== selectedStatusFilter) {
-			return false;
-		}
-
 		const normalizedQuery = normalizeSearchText(searchQuery);
 
-		if (!normalizedQuery) {
-			return true;
-		}
-
-		return [item.title, item.creator.name].some((value) =>
-			value.toLowerCase().includes(normalizedQuery)
+		return (
+			(selectedStatusFilter === 'all' || item.status === selectedStatusFilter) &&
+			(!normalizedQuery ||
+				[item.title, item.creator.name].some((value) =>
+					value.toLowerCase().includes(normalizedQuery)
+				))
 		);
 	}
 
@@ -220,7 +216,7 @@
 		title: 'No formats found',
 		description: 'Build your first format with the format builder.',
 		nextSteps: [
-			{ kind: 'link', text: 'Build', href: '/builder' },
+			{ kind: 'link', text: 'Build', href: '/builders' },
 			{
 				kind: 'text',
 				text: ' your first format using the format builder then you will fine tune, add teammates and manage it here'

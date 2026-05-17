@@ -71,7 +71,7 @@ export const builderAppPresentationEntries = [
 				iconCenterY: '46%'
 			}
 		},
-		showInGallery: false,
+		showInGallery: true,
 		sortOrder: 50,
 		status: 'active'
 	}

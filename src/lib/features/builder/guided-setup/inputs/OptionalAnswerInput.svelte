@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Pen from 'phosphor-svelte/lib/Pen';
+	import PenIcon from 'phosphor-svelte/lib/PenIcon';
 
 	type Props = {
 		name: string;
@@ -12,7 +12,7 @@
 </script>
 
 <label class="flex min-h-10 min-w-0 flex-1 items-center gap-3 text-[0.76rem] text-zinc-500 md:text-[0.8rem]">
-	<Pen size={14} weight="regular" class="shrink-0" />
+	<PenIcon size={14} weight="regular" class="shrink-0" />
 	<input
 		type="text"
 		{name}

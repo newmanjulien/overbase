@@ -4,7 +4,7 @@
 </script>
 
 <script lang="ts">
-	import X from 'phosphor-svelte/lib/X';
+	import XIcon from 'phosphor-svelte/lib/XIcon';
 	import { tick } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'clsx';
@@ -157,7 +157,7 @@
 				class="absolute top-4 right-4 size-6 border-0"
 				onclick={onClose}
 			>
-				<X size={16} weight="regular" />
+				<XIcon size={16} weight="regular" />
 			</IconButton>
 
 			<header class="px-4 py-5">

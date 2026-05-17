@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DotsThree from 'phosphor-svelte/lib/DotsThree';
+	import DotsThreeIcon from 'phosphor-svelte/lib/DotsThreeIcon';
 	import { FloatingActionMenu, IconButton, type FloatingActionMenuAction } from '$lib/components/ui';
 
 	type Props = {
@@ -24,6 +24,6 @@
 		variant="secondary"
 		class="size-7 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300"
 	>
-		<DotsThree size={13} weight="bold" />
+		<DotsThreeIcon size={13} weight="bold" />
 	</IconButton>
 {/if}

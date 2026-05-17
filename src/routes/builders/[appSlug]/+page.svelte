@@ -48,7 +48,7 @@
 					</p>
 					<Button
 						variant="primary"
-						href="/builder"
+						href="/builders"
 						class="mt-4 rounded-full text-xs"
 					>
 						Back to builder

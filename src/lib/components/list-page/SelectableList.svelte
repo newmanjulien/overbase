@@ -2,13 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { Snippet } from 'svelte';
-	import Check from 'phosphor-svelte/lib/Check';
-	import Minus from 'phosphor-svelte/lib/Minus';
+	import CheckIcon from 'phosphor-svelte/lib/CheckIcon';
+	import MinusIcon from 'phosphor-svelte/lib/MinusIcon';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import { FloatingActionMenu, type FloatingActionMenuAction } from '$lib/components/ui';
 	import type {
 		SelectableListItem,
-		SelectableListItemAction,
 		SelectableListSelectedAction
 	} from '$lib/components/list-page/types';
 
@@ -69,16 +68,6 @@
 
 	function toggleAllItems() {
 		selectedItemIds = allSelected ? [] : itemIds;
-	}
-
-	function toRowActionMenuActions(actions: SelectableListItemAction[] = []): FloatingActionMenuAction[] {
-		return actions.map((action) => ({
-			label: action.label,
-			ariaLabel: action.ariaLabel,
-			intent: action.intent,
-			disabled: action.disabled,
-			onSelect: action.onSelect
-		}));
 	}
 
 	function toSelectedActionMenuActions(): FloatingActionMenuAction[] {
@@ -154,7 +143,7 @@
 			aria-hidden="true"
 		>
 			{#if isSelected(item.id)}
-				<Check size={10} weight="bold" />
+				<CheckIcon size={10} weight="bold" />
 			{/if}
 		</span>
 	</label>
@@ -168,7 +157,7 @@
 			<FloatingActionMenu
 				id={`selectable-list-${item.id}-actions`}
 				ariaLabel={item.actionsAriaLabel ?? rowActionsAriaLabel}
-				actions={toRowActionMenuActions(item.actions)}
+				actions={item.actions ?? []}
 				open={openActionsItemId === item.id}
 				onOpenChange={(open) => setRowActionsOpen(item.id, open)}
 			/>
@@ -198,9 +187,9 @@
 					aria-hidden="true"
 				>
 					{#if allSelected}
-						<Check size={10} weight="bold" />
+						<CheckIcon size={10} weight="bold" />
 					{:else if someSelected}
-						<Minus size={10} weight="bold" />
+						<MinusIcon size={10} weight="bold" />
 					{/if}
 				</span>
 				<span class="truncate">{selectAllLabel}</span>

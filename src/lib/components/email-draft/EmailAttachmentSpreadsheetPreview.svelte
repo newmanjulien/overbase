@@ -4,7 +4,7 @@
 		SPREADSHEET_COLUMN_LABELS,
 		type EmailSpreadsheetAttachment
 	} from '@overbase/builder-sdk/email';
-	import ArrowLeft from 'phosphor-svelte/lib/ArrowLeft';
+	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import { IconButton } from '$lib/components/ui';
 
 	type Props = {
@@ -79,7 +79,7 @@
 			class="size-7 shrink-0 text-zinc-500 hover:text-zinc-900 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
 			onclick={onClose}
 		>
-			<ArrowLeft size={14} weight="regular" />
+			<ArrowLeftIcon size={14} weight="regular" />
 		</IconButton>
 		<div
 			class="flex size-7 shrink-0 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-50/60 text-[0.54rem] font-normal text-emerald-700"

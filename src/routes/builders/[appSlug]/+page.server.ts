@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			sidebarDefault: 'collapsed',
 			headerParent: {
 				label: 'Format builder',
-				href: '/builder'
+				href: '/builders'
 			}
 		};
 	} catch (loadError) {

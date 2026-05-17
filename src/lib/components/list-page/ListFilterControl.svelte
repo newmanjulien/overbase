@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import CaretDown from 'phosphor-svelte/lib/CaretDown';
-	import Check from 'phosphor-svelte/lib/Check';
+	import CaretDownIcon from 'phosphor-svelte/lib/CaretDownIcon';
+	import CheckIcon from 'phosphor-svelte/lib/CheckIcon';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import type { ListFilterConfig } from '$lib/components/list-page/types';
 
@@ -132,7 +132,7 @@
 		onclick={toggleOpen}
 	>
 		<span class="truncate">{filter.label}</span>
-		<CaretDown aria-hidden="true" size={14} weight="regular" class="shrink-0 text-zinc-600" />
+		<CaretDownIcon aria-hidden="true" size={14} weight="regular" class="shrink-0 text-zinc-600" />
 	</button>
 
 	{#if open}
@@ -153,7 +153,7 @@
 				>
 					<span class="flex size-3.5 shrink-0 items-center justify-center text-zinc-950">
 						{#if option.id === filter.selectedId}
-							<Check aria-hidden="true" size={12} weight="bold" />
+							<CheckIcon aria-hidden="true" size={12} weight="bold" />
 						{/if}
 					</span>
 					<span class="truncate">{option.label}</span>

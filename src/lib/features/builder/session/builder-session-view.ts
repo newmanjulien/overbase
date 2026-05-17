@@ -47,7 +47,7 @@ export function getBuilderSessionEmailDraftView(session: Doc<'builderSessions'> 
 	const emailDraft = emailDraftState?.draft ?? null;
 	const canUseReadyEmailDraft = Boolean(
 		session &&
-			emailDraft &&
+			emailDraftState &&
 			session.status === 'ready' &&
 			!session.activeTurnJobId
 	);

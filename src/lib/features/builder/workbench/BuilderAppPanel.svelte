@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CaretDown from 'phosphor-svelte/lib/CaretDown';
+	import CaretDownIcon from 'phosphor-svelte/lib/CaretDownIcon';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 	import BuilderPanelArtwork from '$lib/features/builder/workbench/BuilderPanelArtwork.svelte';
 
@@ -48,7 +48,7 @@
 					}}
 				>
 					Learn more
-					<CaretDown
+					<CaretDownIcon
 						aria-hidden="true"
 						size={14}
 						weight="regular"

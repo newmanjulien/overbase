@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Pause from 'phosphor-svelte/lib/Pause';
-	import Play from 'phosphor-svelte/lib/Play';
+	import PauseIcon from 'phosphor-svelte/lib/PauseIcon';
+	import PlayIcon from 'phosphor-svelte/lib/PlayIcon';
 	import { AvatarPersonPicker } from '$lib/components/people';
 	import { Button } from '$lib/components/ui';
 	import type { FormatRecipientRef } from './opportunity-format-detail-types';
@@ -58,9 +58,9 @@
 	>
 		{#snippet leading()}
 			{#if status === 'active'}
-				<Play size={14} weight="regular" />
+				<PlayIcon size={14} weight="regular" />
 			{:else}
-				<Pause size={14} weight="regular" />
+				<PauseIcon size={14} weight="regular" />
 			{/if}
 		{/snippet}
 		{status === 'active' ? 'Active' : 'Paused'}

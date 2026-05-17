@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MagnifyingGlass from 'phosphor-svelte/lib/MagnifyingGlass';
+	import MagnifyingGlassIcon from 'phosphor-svelte/lib/MagnifyingGlassIcon';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
 	type Props = {
@@ -23,7 +23,7 @@
 
 <label class={cn('relative block h-8 min-w-0', className)}>
 	<span class="sr-only">{ariaLabel}</span>
-	<MagnifyingGlass
+	<MagnifyingGlassIcon
 		aria-hidden="true"
 		size={14}
 		weight="regular"

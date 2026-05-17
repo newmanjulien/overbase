@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import CaretUpDown from 'phosphor-svelte/lib/CaretUpDown';
+	import CaretUpDownIcon from 'phosphor-svelte/lib/CaretUpDownIcon';
 	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import { PersonAvatar } from '$lib/components/people';
@@ -153,7 +153,7 @@
 				size={20}
 				class="border border-zinc-100 bg-white"
 			/>
-			<CaretUpDown aria-hidden="true" size={12} weight="regular" class="text-zinc-400" />
+			<CaretUpDownIcon aria-hidden="true" size={12} weight="regular" class="text-zinc-400" />
 		</button>
 	</div>
 

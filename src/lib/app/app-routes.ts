@@ -1,20 +1,23 @@
-import Building from "phosphor-svelte/lib/Building";
-import ChatTeardrop from "phosphor-svelte/lib/ChatTeardrop";
-import Cloud from "phosphor-svelte/lib/Cloud";
-import FolderSimple from "phosphor-svelte/lib/FolderSimple";
-import Folders from "phosphor-svelte/lib/Folders";
-import HardDrive from "phosphor-svelte/lib/HardDrive";
-import Key from "phosphor-svelte/lib/Key";
-import ListPlus from "phosphor-svelte/lib/ListPlus";
-import Users from "phosphor-svelte/lib/Users";
-import type { PhosphorIcon, PhosphorIconProps } from "$lib/components/icons/types";
+import BuildingIcon from "phosphor-svelte/lib/BuildingIcon";
+import ChatTeardropIcon from "phosphor-svelte/lib/ChatTeardropIcon";
+import CloudIcon from "phosphor-svelte/lib/CloudIcon";
+import FolderSimpleIcon from "phosphor-svelte/lib/FolderSimpleIcon";
+import FoldersIcon from "phosphor-svelte/lib/FoldersIcon";
+import HardDriveIcon from "phosphor-svelte/lib/HardDriveIcon";
+import KeyIcon from "phosphor-svelte/lib/KeyIcon";
+import ListPlusIcon from "phosphor-svelte/lib/ListPlusIcon";
+import UsersIcon from "phosphor-svelte/lib/UsersIcon";
+import type {
+  PhosphorIcon,
+  PhosphorIconProps,
+} from "$lib/components/icons/types";
 
 export type RouteIconProps = PhosphorIconProps;
 export type RouteIcon = PhosphorIcon;
 
 export const APP_ROUTE_IDS = [
   "formats",
-  "builder",
+  "builders",
   "data-sources",
   "external-data",
   "team",
@@ -48,48 +51,48 @@ export const APP_ROUTE_REGISTRY = {
   formats: {
     href: "/formats",
     navLabel: "My formats",
-    icon: FolderSimple,
+    icon: FolderSimpleIcon,
   },
-  builder: {
-    href: "/builder",
-    navLabel: "Format builder",
-    icon: ChatTeardrop,
+  builders: {
+    href: "/builders",
+    navLabel: "Format builders",
+    icon: ChatTeardropIcon,
     hideOnMobile: true,
   },
   "data-sources": {
     href: "/data-sources",
     navLabel: "Data sources",
-    icon: HardDrive,
+    icon: HardDriveIcon,
   },
   "external-data": {
     href: "/external-data",
     navLabel: "External data",
-    icon: Cloud,
+    icon: CloudIcon,
   },
   team: {
     href: "/team",
     navLabel: "Team",
-    icon: Users,
+    icon: UsersIcon,
   },
   "team-formats": {
     href: "/team-formats",
     navLabel: "Team formats",
-    icon: Folders,
+    icon: FoldersIcon,
   },
   "invite-partners": {
     href: "/invite-partners",
     navLabel: "Invite partners",
-    icon: ListPlus,
+    icon: ListPlusIcon,
   },
   "manage-partners": {
     href: "/manage-partners",
     navLabel: "Manage partners",
-    icon: Building,
+    icon: BuildingIcon,
   },
   "data-access": {
     href: "/data-access",
     navLabel: "Data access",
-    icon: Key,
+    icon: KeyIcon,
   },
 } as const satisfies Record<NavRouteId, AppRouteDefinition>;
 
@@ -97,7 +100,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
   {
     id: "formats",
     heading: "Opportunity formats",
-    routeIds: ["builder", "formats"],
+    routeIds: ["builders", "formats"],
     desktopSectionClass: "pt-2",
   },
   {
@@ -118,6 +121,6 @@ export const APP_NAV_SECTION_DEFINITIONS = [
   },
 ] as const satisfies readonly NavSectionDefinition[];
 
-export const DEFAULT_ROUTE_ID: NavRouteId = "builder";
+export const DEFAULT_ROUTE_ID: NavRouteId = "builders";
 export const DEFAULT_ROUTE_HREF: NavPath =
   APP_ROUTE_REGISTRY[DEFAULT_ROUTE_ID].href;

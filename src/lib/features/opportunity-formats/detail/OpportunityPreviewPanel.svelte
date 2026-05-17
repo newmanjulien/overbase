@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ArrowLeft from 'phosphor-svelte/lib/ArrowLeft';
-	import ArrowRight from 'phosphor-svelte/lib/ArrowRight';
+	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
+	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
 	import EmailAttachmentSpreadsheetPreview from '$lib/components/email-draft/EmailAttachmentSpreadsheetPreview.svelte';
 	import EmailComposePreview from '$lib/components/email-draft/EmailComposePreview.svelte';
 	import { IconButton } from '$lib/components/ui';
@@ -75,7 +75,7 @@
 					disabled={!canGoPrevious}
 					onclick={onPrevious}
 				>
-					<ArrowLeft size={14} weight="regular" />
+					<ArrowLeftIcon size={14} weight="regular" />
 				</IconButton>
 				<IconButton
 					aria-label="Next opportunity"
@@ -84,7 +84,7 @@
 					disabled={!canGoNext}
 					onclick={onNext}
 				>
-					<ArrowRight size={14} weight="regular" />
+					<ArrowRightIcon size={14} weight="regular" />
 				</IconButton>
 			</div>
 		</div>

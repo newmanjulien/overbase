@@ -1,6 +1,6 @@
 <script lang="ts">
-	import CircleNotch from 'phosphor-svelte/lib/CircleNotch';
-	import WarningCircle from 'phosphor-svelte/lib/WarningCircle';
+	import CircleNotchIcon from 'phosphor-svelte/lib/CircleNotchIcon';
+	import WarningCircleIcon from 'phosphor-svelte/lib/WarningCircleIcon';
 	import { cn } from '$lib/components/chrome/shared/cn';
 
 	type ContentStateKind = 'loading' | 'error' | 'empty';
@@ -13,7 +13,7 @@
 
 	let { kind, message, class: className = '' }: Props = $props();
 
-	const Icon = $derived(kind === 'error' ? WarningCircle : CircleNotch);
+	const Icon = $derived(kind === 'error' ? WarningCircleIcon : CircleNotchIcon);
 	const toneClass = $derived(
 		kind === 'error'
 			? 'border-red-100 bg-red-50/40 text-red-700'
