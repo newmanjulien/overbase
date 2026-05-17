@@ -9,10 +9,11 @@
 	type LoginStep = 'login' | 'code';
 
 	type Props = {
-		authReturnButtonHref?: string;
+		exitHref?: string;
+		entryReturnHref?: string;
 	};
 
-	let { authReturnButtonHref }: Props = $props();
+	let { exitHref, entryReturnHref }: Props = $props();
 
 	const signUpState = useSignUp();
 	const signInState = useSignIn();
@@ -29,8 +30,8 @@
 	let isSubmittingCode = $state(false);
 	let isResendingCode = $state(false);
 
-	const signupHref = $derived(buildAuthEntryHref('/signup', authReturnButtonHref));
-	const currentReturnButtonHref = $derived(step === 'login' ? authReturnButtonHref : undefined);
+	const signupHref = $derived(buildAuthEntryHref('/signup', exitHref, '/login'));
+	const currentReturnButtonHref = $derived(step === 'login' ? (entryReturnHref ?? exitHref) : undefined);
 
 	async function submitEmail() {
 		const normalizedEmail = email.trim().toLowerCase();

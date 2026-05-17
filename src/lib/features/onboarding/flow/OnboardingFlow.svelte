@@ -20,10 +20,11 @@
 
 	type Props = {
 		initialStep?: OnboardingStep;
-		authReturnButtonHref?: string;
+		exitHref?: string;
+		entryReturnHref?: string;
 	};
 
-	let { initialStep = 'welcome', authReturnButtonHref }: Props = $props();
+	let { initialStep = 'welcome', exitHref, entryReturnHref }: Props = $props();
 	const client = useConvexClient();
 	const clerk = useClerkContext();
 	const signUpState = useSignUp();
@@ -63,8 +64,10 @@
 	const canReturn = $derived(
 		step === 'signup' || step === 'code' || step === 'partner' || (!clerk.auth.userId && step === 'company')
 	);
-	const currentReturnButtonHref = $derived(step === 'welcome' ? authReturnButtonHref : undefined);
-	const loginHref = $derived(buildAuthEntryHref('/login', authReturnButtonHref));
+	const currentReturnButtonHref = $derived(
+		step === 'welcome' ? (entryReturnHref ?? exitHref) : undefined
+	);
+	const loginHref = $derived(buildAuthEntryHref('/login', exitHref, '/signup'));
 	const welcomeFooterLinks = [
 		{ label: 'Terms of Service', href: 'https://overbase.app/legal/terms-of-service' },
 		{ label: 'Privacy Policy', href: 'https://overbase.app/legal/dpa' },
