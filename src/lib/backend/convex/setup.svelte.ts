@@ -1,16 +1,10 @@
-import { env } from '$env/dynamic/public';
+import { validatePublicAuthEnv, type PublicAuthEnv } from '$lib/auth/auth-env';
 import { setupConvex } from 'convex-svelte';
 
-const CONVEX_URL_ENV_VAR = 'PUBLIC_CONVEX_URL';
-
-export function setupAppConvex() {
-	const convexUrl = env.PUBLIC_CONVEX_URL;
-
-	if (!convexUrl) {
-		throw new Error(
-			`${CONVEX_URL_ENV_VAR} is required. Run npx convex dev to configure Convex before starting the app.`
-		);
+export function setupAppConvex(authEnv: PublicAuthEnv = validatePublicAuthEnv()) {
+	if (!authEnv.convexUrl) {
+		throw new Error('PUBLIC_CONVEX_URL is required before Convex can initialize.');
 	}
 
-	setupConvex(convexUrl);
+	setupConvex(authEnv.convexUrl);
 }

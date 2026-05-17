@@ -57,23 +57,27 @@ export function resolveAuthExitHref(
 	}
 }
 
-export function deriveAuthExitHrefFromRoute(url: URL) {
-	if (isAuthEntryPathname(url.pathname)) {
-		return undefined;
-	}
-
-	const exitHref = `${url.pathname}${url.search}${url.hash}`;
-	return isSafeInAppReturnHref(exitHref) ? exitHref : undefined;
-}
-
 export function resolveAuthEntryReturnHref(url: URL) {
 	const fromAuth = url.searchParams.get(AUTH_ENTRY_RETURN_PARAM)?.trim();
 
 	if (fromAuth === '/login' || fromAuth === '/signup') {
-		return buildAuthEntryHref(fromAuth, resolveAuthExitHref(url));
+		return buildAuthEntryHref(
+			fromAuth,
+			resolveAuthExitHref(url, { useDefaultWhenMissing: false })
+		);
 	}
 
 	return undefined;
+}
+
+export function resolveAuthEntryPostAuthHref(url: URL) {
+	const returnTo = url.searchParams.get(AUTH_RETURN_TO_PARAM)?.trim();
+
+	if (!returnTo || !isSafeInAppReturnHref(returnTo)) {
+		return undefined;
+	}
+
+	return returnTo;
 }
 
 export function buildAuthEntryHref(

@@ -3,7 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
 	import { useConvexClient } from 'convex-svelte';
-	import { useClerkContext, useSignIn, useSignUp } from 'svelte-clerk';
+	import { useSignIn, useSignUp } from 'svelte-clerk';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 	import { BUILDER_FRESH_START_ROUTE, builderAppSlugParams } from '$lib/features/builder/paths';
 	import { buildAuthEntryHref } from './auth-return';
@@ -22,11 +22,15 @@
 		initialStep?: OnboardingStep;
 		exitHref?: string;
 		entryReturnHref?: string;
+		isSignedIn?: boolean;
+	};
+	type OnboardingReturnAction = {
+		href?: string;
+		onClick?: () => void;
 	};
 
-	let { initialStep = 'welcome', exitHref, entryReturnHref }: Props = $props();
+	let { initialStep = 'welcome', exitHref, entryReturnHref, isSignedIn = false }: Props = $props();
 	const client = useConvexClient();
-	const clerk = useClerkContext();
 	const signUpState = useSignUp();
 	const signInState = useSignIn();
 	const authController = createClerkEmailCodeAuthController({
@@ -61,12 +65,34 @@
 	const isCompletingOnboarding = $derived(Boolean(completingAppSlug) || isOpeningBuilder);
 	const hasFooter = $derived(step === 'welcome' || step === 'signup');
 	const footerBorder = $derived(step === 'welcome' || step === 'signup');
-	const canReturn = $derived(
-		step === 'signup' || step === 'code' || step === 'partner' || (!clerk.auth.userId && step === 'company')
-	);
-	const currentReturnButtonHref = $derived(
-		step === 'welcome' ? (entryReturnHref ?? exitHref) : undefined
-	);
+	const currentReturnAction = $derived.by<OnboardingReturnAction | undefined>(() => {
+		if (step === 'welcome') {
+			const href = entryReturnHref ?? exitHref;
+			return href ? { href } : undefined;
+		}
+
+		if (step === 'signup') {
+			return { onClick: returnToWelcome };
+		}
+
+		if (step === 'code') {
+			return { onClick: returnToSignup };
+		}
+
+		if (step === 'company') {
+			return isSignedIn
+				? exitHref
+					? { href: exitHref }
+					: undefined
+				: { onClick: returnToSignup };
+		}
+
+		if (step === 'partner') {
+			return { onClick: returnToCompany };
+		}
+
+		return undefined;
+	});
 	const loginHref = $derived(buildAuthEntryHref('/login', exitHref, '/signup'));
 	const welcomeFooterLinks = [
 		{ label: 'Terms of Service', href: 'https://overbase.app/legal/terms-of-service' },
@@ -191,30 +217,16 @@
 		}
 	}
 
-	function returnFromCurrentStep() {
-		if (step === 'partner') {
-			step = 'company';
-			return;
-		}
+	function returnToWelcome() {
+		step = 'welcome';
+	}
 
-		if (step === 'company') {
-			if (!clerk.auth.userId) {
-				step = 'signup';
-			}
-			return;
-		}
+	function returnToSignup() {
+		step = 'signup';
+	}
 
-		if (step === 'code') {
-			step = 'signup';
-			return;
-		}
-
-		if (step === 'signup') {
-			step = 'welcome';
-			return;
-		}
-
-		return;
+	function returnToCompany() {
+		step = 'company';
 	}
 
 	$effect(() => {
@@ -245,8 +257,8 @@
 	/>
 {:else}
 	<OnboardingAuthShell
-		onReturnButtonClick={canReturn ? returnFromCurrentStep : undefined}
-		returnButtonHref={currentReturnButtonHref}
+		onReturnButtonClick={currentReturnAction?.onClick}
+		returnButtonHref={currentReturnAction?.href}
 		showFooter={hasFooter}
 		footerBorder={footerBorder}
 	>
@@ -268,7 +280,7 @@
 				<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
 					Already have an account?
 					<a
-						href={loginHref}
+						href={resolve(loginHref as '/')}
 						class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 					>
 						Log in

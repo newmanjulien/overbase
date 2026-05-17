@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
 	import { buildAuthEntryHref } from './auth-return';
 	import OnboardingCodeStep from '../steps/OnboardingCodeStep.svelte';
@@ -101,7 +102,7 @@
 		<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
 			Need an account?
 			<a
-				href={signupHref}
+				href={resolve(signupHref as '/')}
 				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 			>
 				Sign up

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { validatePublicAuthEnv } from '$lib/auth/auth-env';
 	import { setupAppConvex } from '$lib/backend/convex/setup.svelte';
 	import { ClerkProvider } from 'svelte-clerk';
 	import type { Snippet } from 'svelte';
@@ -8,9 +9,10 @@
 	};
 
 	let { children }: Props = $props();
-	setupAppConvex();
+	const authEnv = validatePublicAuthEnv();
+	setupAppConvex(authEnv);
 </script>
 
-<ClerkProvider>
+<ClerkProvider publishableKey={authEnv.clerkPublishableKey}>
 	{@render children()}
 </ClerkProvider>

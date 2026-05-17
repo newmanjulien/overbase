@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ArrowLeft from 'phosphor-svelte/lib/ArrowLeft';
 	import type { Snippet } from 'svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
@@ -26,6 +27,9 @@
 		returnLabel = 'Return',
 		footerBorder = true
 	}: Props = $props();
+	const isExternalReturnButtonHref = $derived(
+		Boolean(returnButtonHref && !returnButtonHref.startsWith('/'))
+	);
 </script>
 
 <section class="relative min-h-dvh overflow-auto bg-[#f7f7f7] p-0 text-[#202124] sm:p-2 lg:overflow-hidden">
@@ -39,13 +43,24 @@
 			aria-label="Overbase onboarding"
 		>
 			{#if returnButtonHref}
-				<a
-					class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
-					href={returnButtonHref}
-				>
-					<ArrowLeft aria-hidden="true" size={14} weight="regular" />
-					<span>{returnLabel}</span>
-				</a>
+				{#if isExternalReturnButtonHref}
+					<a
+						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
+						href={returnButtonHref}
+						rel="external"
+					>
+						<ArrowLeft aria-hidden="true" size={14} weight="regular" />
+						<span>{returnLabel}</span>
+					</a>
+				{:else}
+					<a
+						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
+						href={resolve(returnButtonHref as '/')}
+					>
+						<ArrowLeft aria-hidden="true" size={14} weight="regular" />
+						<span>{returnLabel}</span>
+					</a>
+				{/if}
 			{:else if onReturnButtonClick}
 				<button
 					type="button"

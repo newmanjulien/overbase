@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import CaretUpDown from 'phosphor-svelte/lib/CaretUpDown';
-	import { useClerkContext } from 'svelte-clerk';
+	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import { PersonAvatar } from '$lib/components/people';
 
@@ -17,7 +17,7 @@
 
 	let { profile, expanded }: Props = $props();
 
-	const clerk = useClerkContext();
+	const viewerSession = useViewerSession();
 	const menuId = 'desktop-sidebar-profile-menu';
 	let isOpen = $state(false);
 	let triggerElement = $state<HTMLButtonElement | null>(null);
@@ -51,7 +51,7 @@
 
 	async function logOut() {
 		closeMenu();
-		await clerk.clerk?.signOut();
+		await viewerSession.signOut();
 	}
 
 	function shouldOpenAbove(triggerRect: DOMRect, menuHeight: number, gap: number, padding: number) {
