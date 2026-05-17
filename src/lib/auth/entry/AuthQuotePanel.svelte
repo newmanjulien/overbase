@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { OnboardingQuote } from '../flow/types';
+	import type { AuthQuote } from './types';
 
 	type Props = {
-		quote: OnboardingQuote;
+		quote: AuthQuote;
 	};
 
 	let { quote }: Props = $props();

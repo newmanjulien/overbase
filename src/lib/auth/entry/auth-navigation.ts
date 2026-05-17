@@ -1,8 +1,11 @@
+import { DEFAULT_ROUTE_HREF } from '$lib/app/app-routes';
+import type { AuthEntryPathname } from './types';
+
 const DEFAULT_AUTH_EXIT_HREF = 'https://overbase.app/';
 const TRUSTED_MARKETING_ORIGINS = new Set(['https://overbase.app', 'https://www.overbase.app']);
+
 export const AUTH_RETURN_TO_PARAM = 'returnTo';
 export const AUTH_ENTRY_RETURN_PARAM = 'fromAuth';
-type AuthEntryPathname = '/login' | '/signup';
 
 type ResolveAuthExitHrefOptions = {
 	useDefaultWhenMissing?: boolean;
@@ -12,7 +15,7 @@ function isSafeRelativeReturnHref(value: string) {
 	return value.startsWith('/') && !value.startsWith('//');
 }
 
-function isAuthEntryPathname(pathname: string) {
+export function isAuthEntryPathname(pathname: string): pathname is AuthEntryPathname {
 	return pathname === '/login' || pathname === '/signup';
 }
 
@@ -27,6 +30,25 @@ function isSafeInAppReturnHref(value: string) {
 	} catch {
 		return false;
 	}
+}
+
+function getCurrentInAppHref(url: URL) {
+	const href = `${url.pathname}${url.search}${url.hash}`;
+	return isSafeInAppReturnHref(href) ? href : undefined;
+}
+
+export function resolveAuthReturnTo(url: URL) {
+	const returnTo = url.searchParams.get(AUTH_RETURN_TO_PARAM)?.trim();
+
+	if (returnTo && isSafeInAppReturnHref(returnTo)) {
+		return returnTo;
+	}
+
+	return getCurrentInAppHref(url);
+}
+
+export function resolvePostAuthHref(url: URL) {
+	return resolveAuthReturnTo(url) ?? DEFAULT_ROUTE_HREF;
 }
 
 export function resolveAuthExitHref(
@@ -61,38 +83,32 @@ export function resolveAuthEntryReturnHref(url: URL) {
 	const fromAuth = url.searchParams.get(AUTH_ENTRY_RETURN_PARAM)?.trim();
 
 	if (fromAuth === '/login' || fromAuth === '/signup') {
-		return buildAuthEntryHref(
-			fromAuth,
-			resolveAuthExitHref(url, { useDefaultWhenMissing: false })
-		);
+		return buildAuthEntryHref(fromAuth, {
+			returnTo: resolveAuthReturnTo(url)
+		});
 	}
 
 	return undefined;
 }
 
-export function resolveAuthEntryPostAuthHref(url: URL) {
-	const returnTo = url.searchParams.get(AUTH_RETURN_TO_PARAM)?.trim();
-
-	if (!returnTo || !isSafeInAppReturnHref(returnTo)) {
-		return undefined;
-	}
-
-	return returnTo;
-}
-
 export function buildAuthEntryHref(
 	pathname: AuthEntryPathname,
-	exitHref?: string,
-	entryReturnHref?: AuthEntryPathname
+	{
+		returnTo,
+		fromAuth
+	}: {
+		returnTo?: string;
+		fromAuth?: AuthEntryPathname;
+	} = {}
 ) {
 	const params = new URLSearchParams();
 
-	if (exitHref) {
-		params.set(AUTH_RETURN_TO_PARAM, exitHref);
+	if (returnTo) {
+		params.set(AUTH_RETURN_TO_PARAM, returnTo);
 	}
 
-	if (entryReturnHref) {
-		params.set(AUTH_ENTRY_RETURN_PARAM, entryReturnHref);
+	if (fromAuth) {
+		params.set(AUTH_ENTRY_RETURN_PARAM, fromAuth);
 	}
 
 	const query = params.toString();

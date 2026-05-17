@@ -1,7 +1,7 @@
 <script lang="ts">
-	import OnboardingPrimaryButton from '../ui/OnboardingPrimaryButton.svelte';
-	import OnboardingStepFrame from '../ui/OnboardingStepFrame.svelte';
-	import OnboardingTextInput from '../ui/OnboardingTextInput.svelte';
+	import AuthButton from './AuthButton.svelte';
+	import AuthStepFrame from './AuthStepFrame.svelte';
+	import AuthTextInput from './AuthTextInput.svelte';
 
 	type Props = {
 		email: string;
@@ -27,7 +27,7 @@
 	const canSubmit = $derived(code.trim().length > 0 && !isSubmitting);
 </script>
 
-<OnboardingStepFrame title="Enter your code">
+<AuthStepFrame title="Enter your code">
 	<form
 		class="grid gap-3.5"
 		onsubmit={(event) => {
@@ -40,7 +40,7 @@
 		<p class="m-0 text-sm leading-5 text-[#686b73]">
 			Sent a code to {email}
 		</p>
-		<OnboardingTextInput
+		<AuthTextInput
 			label="Verification code"
 			bind:value={code}
 			autocomplete="one-time-code"
@@ -51,9 +51,9 @@
 		{#if errorText}
 			<p class="m-0 text-sm leading-5 text-red-600">{errorText}</p>
 		{/if}
-		<OnboardingPrimaryButton type="submit" disabled={!canSubmit}>
+		<AuthButton type="submit" disabled={!canSubmit}>
 			{isSubmitting ? 'Checking...' : 'Continue'}
-		</OnboardingPrimaryButton>
+		</AuthButton>
 		<div class="flex items-center justify-between gap-3 text-[13px] leading-5">
 			<button
 				type="button"
@@ -72,4 +72,4 @@
 			</button>
 		</div>
 	</form>
-</OnboardingStepFrame>
+</AuthStepFrame>

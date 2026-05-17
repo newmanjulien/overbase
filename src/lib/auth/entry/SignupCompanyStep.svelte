@@ -1,8 +1,7 @@
 <script lang="ts">
-	import OnboardingPrimaryButton from '../ui/OnboardingPrimaryButton.svelte';
-	import OnboardingStepFrame from '../ui/OnboardingStepFrame.svelte';
-	import OnboardingTextTooltip from '../ui/OnboardingTextTooltip.svelte';
-	import OnboardingTextInput from '../ui/OnboardingTextInput.svelte';
+	import AuthButton from './AuthButton.svelte';
+	import AuthStepFrame from './AuthStepFrame.svelte';
+	import AuthTextInput from './AuthTextInput.svelte';
 
 	type Props = {
 		name: string;
@@ -24,9 +23,7 @@
 	);
 </script>
 
-<OnboardingStepFrame
-	title="About your company"
->
+<AuthStepFrame title="About your company">
 	<form
 		class="grid gap-3.5"
 		onsubmit={(event) => {
@@ -36,14 +33,14 @@
 			}
 		}}
 	>
-		<OnboardingTextInput
+		<AuthTextInput
 			label="Your company's name"
 			bind:value={name}
 			autocomplete="organization"
 			required
 			autofocus
 		/>
-		<OnboardingTextInput
+		<AuthTextInput
 			label="Your company's website"
 			bind:value={website}
 			type="url"
@@ -51,16 +48,14 @@
 			inputmode="url"
 			required
 		/>
-		<OnboardingTextTooltip
-			id="onboarding-company-website-tooltip"
-			label="Why your website?"
-			text="We search for your website then use the information on it to understand your company without you needing to tell us anything"
-		/>
+		<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
+			We use your website to understand your company without making you fill out a long profile.
+		</p>
 		{#if errorText}
 			<p class="m-0 text-sm leading-5 text-red-600">{errorText}</p>
 		{/if}
-		<OnboardingPrimaryButton type="submit" disabled={!canContinue}>
+		<AuthButton type="submit" disabled={!canContinue}>
 			{isSubmitting ? 'Saving...' : 'Last step'}
-		</OnboardingPrimaryButton>
+		</AuthButton>
 	</form>
-</OnboardingStepFrame>
+</AuthStepFrame>

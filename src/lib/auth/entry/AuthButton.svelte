@@ -1,8 +1,10 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+
 	type Props = {
 		type?: 'button' | 'submit';
 		disabled?: boolean;
-		children: import('svelte').Snippet;
+		children: Snippet;
 		onclick?: () => void;
 	};
 

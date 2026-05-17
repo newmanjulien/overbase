@@ -1,8 +1,8 @@
 <script lang="ts">
-	import OnboardingPrimaryButton from '../ui/OnboardingPrimaryButton.svelte';
-	import OnboardingStepFrame from '../ui/OnboardingStepFrame.svelte';
-	import OnboardingTextarea from '../ui/OnboardingTextarea.svelte';
-	import OnboardingTextInput from '../ui/OnboardingTextInput.svelte';
+	import AuthButton from './AuthButton.svelte';
+	import AuthStepFrame from './AuthStepFrame.svelte';
+	import AuthTextarea from './AuthTextarea.svelte';
+	import AuthTextInput from './AuthTextInput.svelte';
 
 	type Props = {
 		name: string;
@@ -14,7 +14,7 @@
 	const canContinue = $derived(name.trim().length > 0 && collaboration.trim().length > 0);
 </script>
 
-<OnboardingStepFrame
+<AuthStepFrame
 	title="Tell us about one of your ecosystem partners"
 	description="Tell us about one of the ecosystem partners you currently work with closely"
 >
@@ -27,19 +27,19 @@
 			}
 		}}
 	>
-		<OnboardingTextInput
+		<AuthTextInput
 			label="Partner company's name"
 			bind:value={name}
 			autocomplete="organization"
 			required
 			autofocus
 		/>
-		<OnboardingTextarea
+		<AuthTextarea
 			label="How do you collaborate today to get more growth together?"
 			bind:value={collaboration}
 			required
 			submitOnEnter
 		/>
-		<OnboardingPrimaryButton type="submit" disabled={!canContinue}>Done</OnboardingPrimaryButton>
+		<AuthButton type="submit" disabled={!canContinue}>Done</AuthButton>
 	</form>
-</OnboardingStepFrame>
+</AuthStepFrame>

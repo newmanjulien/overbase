@@ -1,5 +1,9 @@
 import { toBuilderAppRecord, type BuilderAppRecord } from '$lib/features/builder/catalog';
-import type { OnboardingBlueprintsResponse } from './types';
+import type { BuilderAppRegistryEntry } from '../../../builder-apps/registry';
+
+type OnboardingBlueprintsResponse = {
+	blueprints: BuilderAppRegistryEntry[];
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -18,7 +22,7 @@ function parseOnboardingBlueprintsResponse(body: unknown): OnboardingBlueprintsR
 		throw new Error('Onboarding returned invalid blueprints.');
 	}
 
-	return { blueprints };
+	return { blueprints: blueprints as BuilderAppRegistryEntry[] };
 }
 
 export async function loadOnboardingBlueprints(): Promise<BuilderAppRecord[]> {

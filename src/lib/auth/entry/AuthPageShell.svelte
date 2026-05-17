@@ -40,7 +40,7 @@
 	>
 		<section
 			class="box-border flex min-h-dvh flex-col bg-white px-6 pt-12 pb-8 sm:min-h-[calc(100dvh-16px)] sm:rounded-[10px] sm:border sm:border-black/[0.04] lg:px-[clamp(40px,8.55vw,248px)] lg:pt-[clamp(56px,8.6vh,138px)] lg:pb-7"
-			aria-label="Overbase onboarding"
+			aria-label="Overbase auth"
 		>
 			{#if returnButtonHref}
 				{#if isExternalReturnButtonHref}

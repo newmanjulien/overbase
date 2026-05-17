@@ -19,14 +19,16 @@
 	>
 		{title}
 	</h1>
-	<p
-		class={cn(
-			'mx-auto mt-3.5 max-w-100 text-center text-sm leading-[1.45] text-[#777b82]',
-			descriptionClass
-		)}
-	>
-		{description}
-	</p>
+	{#if description}
+		<p
+			class={cn(
+				'mx-auto mt-3.5 max-w-100 text-center text-sm leading-[1.45] text-[#777b82]',
+				descriptionClass
+			)}
+		>
+			{description}
+		</p>
+	{/if}
 
 	<div class="mt-[clamp(26px,4vh,52px)]">
 		{@render children()}

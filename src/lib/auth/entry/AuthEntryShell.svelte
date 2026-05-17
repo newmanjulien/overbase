@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import OnboardingPatternLayer from '../ui/OnboardingPatternLayer.svelte';
-	import OnboardingQuotePanel from '../ui/OnboardingQuotePanel.svelte';
-	import OnboardingShell from '../ui/OnboardingShell.svelte';
-	import type { OnboardingQuote } from './types';
+	import AuthPageShell from './AuthPageShell.svelte';
+	import AuthPatternLayer from './AuthPatternLayer.svelte';
+	import AuthQuotePanel from './AuthQuotePanel.svelte';
+	import type { AuthQuote } from './types';
 
 	type Props = {
 		children: Snippet;
@@ -29,13 +29,13 @@
 		text: 'Overbase turns business context into a clear path to the opportunities worth building first.',
 		personName: 'Morgan Reed',
 		personTitle: 'VP Revenue, Northstar Labs',
-		avatarSrc: '/onboarding-fred.png',
+		avatarSrc: '/auth-quote-avatar.png',
 		avatarAlt: 'Morgan Reed'
-	} satisfies OnboardingQuote;
+	} satisfies AuthQuote;
 	const shouldShowFooter = $derived(Boolean(footer) && showFooter);
 </script>
 
-<OnboardingShell
+<AuthPageShell
 	{onReturnButtonClick}
 	{returnButtonHref}
 	{returnLabel}
@@ -43,11 +43,11 @@
 	{footerBorder}
 >
 	{#snippet background()}
-		<OnboardingPatternLayer />
+		<AuthPatternLayer />
 	{/snippet}
 
 	{#snippet aside()}
-		<OnboardingQuotePanel {quote} />
+		<AuthQuotePanel {quote} />
 	{/snippet}
 
 	{#snippet footer()}
@@ -57,4 +57,4 @@
 	{/snippet}
 
 	{@render children()}
-</OnboardingShell>
+</AuthPageShell>

@@ -2,20 +2,20 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { DEFAULT_ROUTE_HREF } from '$lib/app/app-routes';
 	import AppGateError from '$lib/app/AppGateError.svelte';
 	import AppLoadingScreen from '$lib/app/AppLoadingScreen.svelte';
 	import AppShell from '$lib/app/AppShell.svelte';
-	import { LoginFlow, OnboardingFlow } from '$lib/features/onboarding/flow';
 	import {
-		resolveAuthEntryPostAuthHref,
+		isAuthEntryPathname,
+		LoginFlow,
+		resolveAuthReturnTo,
 		resolveAuthEntryReturnHref,
-		resolveAuthExitHref
-	} from '$lib/features/onboarding/flow/auth-return';
+		resolveAuthExitHref,
+		resolvePostAuthHref,
+		SignupFlow
+	} from '$lib/auth/entry';
 	import type { Snippet } from 'svelte';
 	import { createViewerSession, provideViewerSession } from './viewer-session.svelte';
-
-	type AuthEntryRoute = 'signup' | 'login';
 
 	type Props = {
 		children: Snippet;
@@ -24,22 +24,15 @@
 	let { children }: Props = $props();
 	const session = createViewerSession();
 	provideViewerSession(session);
-	const authEntryRoute = $derived<AuthEntryRoute | undefined>(
-		page.url.pathname === '/signup'
-			? 'signup'
-			: page.url.pathname === '/login'
-				? 'login'
-				: undefined
+	const authEntryRoute = $derived(
+		isAuthEntryPathname(page.url.pathname) ? page.url.pathname : undefined
 	);
-	const onboardingKey = $derived(
+	const authEntryKey = $derived(
 		`${session.signedInUserId ?? 'signed-out'}:${authEntryRoute ?? 'app'}`
 	);
-	const postAuthHref = $derived(
-		authEntryRoute
-			? (resolveAuthEntryPostAuthHref(page.url) ?? DEFAULT_ROUTE_HREF)
-			: `${page.url.pathname}${page.url.search}${page.url.hash}`
-	);
-	const exitHref = $derived(
+	const returnTo = $derived(resolveAuthReturnTo(page.url));
+	const postAuthHref = $derived(resolvePostAuthHref(page.url));
+	const returnButtonHref = $derived(
 		authEntryRoute
 			? resolveAuthExitHref(page.url, {
 					useDefaultWhenMissing: false
@@ -48,8 +41,14 @@
 	);
 	const entryReturnHref = $derived(authEntryRoute ? resolveAuthEntryReturnHref(page.url) : undefined);
 	const gateErrorText = $derived(session.error?.message ?? 'Unable to load your workspace.');
+	const shouldShowSignupOnboarding = $derived(
+		session.status === 'ready' &&
+			authEntryRoute === '/signup' &&
+			Boolean(session.viewer) &&
+			!session.viewer?.workspace.onboardingCompletedAt
+	);
 	const shouldRedirectSignedInAuthEntry = $derived(
-		session.status === 'ready' && Boolean(authEntryRoute)
+		session.status === 'ready' && Boolean(authEntryRoute) && !shouldShowSignupOnboarding
 	);
 
 	$effect(() => {
@@ -61,6 +60,16 @@
 
 {#if shouldRedirectSignedInAuthEntry}
 	<AppLoadingScreen />
+{:else if shouldShowSignupOnboarding}
+	{#key authEntryKey}
+		<SignupFlow
+			{returnTo}
+			{returnButtonHref}
+			{entryReturnHref}
+			initialStep="company"
+			isSignedIn
+		/>
+	{/key}
 {:else if session.status === 'ready' && session.viewer}
 	<AppShell
 		user={session.viewer.user}
@@ -73,15 +82,11 @@
 {:else if session.status === 'error'}
 	<AppGateError message={gateErrorText} onRetry={session.retry} />
 {:else}
-	{#key onboardingKey}
-		{#if authEntryRoute === 'signup'}
-			<OnboardingFlow
-				{exitHref}
-				{entryReturnHref}
-				isSignedIn={session.isSignedIn}
-			/>
+	{#key authEntryKey}
+		{#if authEntryRoute === '/signup'}
+			<SignupFlow {returnTo} {returnButtonHref} {entryReturnHref} />
 		{:else}
-			<LoginFlow {exitHref} {entryReturnHref} />
+			<LoginFlow {returnTo} {returnButtonHref} {entryReturnHref} />
 		{/if}
 	{/key}
 {/if}

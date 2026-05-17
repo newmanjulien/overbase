@@ -1,20 +1,23 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
-	import { buildAuthEntryHref } from './auth-return';
-	import OnboardingCodeStep from '../steps/OnboardingCodeStep.svelte';
-	import OnboardingLoginStep from '../steps/OnboardingLoginStep.svelte';
-	import OnboardingAuthShell from './OnboardingAuthShell.svelte';
-	import { createClerkEmailCodeAuthController, getClerkErrorCode } from './clerk-email-code-auth';
+	import AuthCodeStep from './AuthCodeStep.svelte';
+	import AuthEntryShell from './AuthEntryShell.svelte';
+	import AuthHotkeyButton from './AuthHotkeyButton.svelte';
+	import AuthStepFrame from './AuthStepFrame.svelte';
+	import AuthTextInput from './AuthTextInput.svelte';
+	import { buildAuthEntryHref } from './auth-navigation';
+	import { createClerkEmailCodeAuthController, getClerkErrorCode } from './email-code-auth';
 
 	type LoginStep = 'login' | 'code';
 
 	type Props = {
-		exitHref?: string;
+		returnTo?: string;
+		returnButtonHref?: string;
 		entryReturnHref?: string;
 	};
 
-	let { exitHref, entryReturnHref }: Props = $props();
+	let { returnTo, returnButtonHref, entryReturnHref }: Props = $props();
 
 	const signUpState = useSignUp();
 	const signInState = useSignIn();
@@ -31,8 +34,11 @@
 	let isSubmittingCode = $state(false);
 	let isResendingCode = $state(false);
 
-	const signupHref = $derived(buildAuthEntryHref('/signup', exitHref, '/login'));
-	const currentReturnButtonHref = $derived(step === 'login' ? (entryReturnHref ?? exitHref) : undefined);
+	const signupHref = $derived(buildAuthEntryHref('/signup', { returnTo, fromAuth: '/login' }));
+	const currentReturnButtonHref = $derived(
+		step === 'login' ? (entryReturnHref ?? returnButtonHref) : undefined
+	);
+	const canContinue = $derived(email.trim().length > 0 && !isSubmittingEmail);
 
 	async function submitEmail() {
 		const normalizedEmail = email.trim().toLowerCase();
@@ -93,7 +99,7 @@
 	}
 </script>
 
-<OnboardingAuthShell
+<AuthEntryShell
 	onReturnButtonClick={step === 'code' ? showEmailStep : undefined}
 	returnButtonHref={currentReturnButtonHref}
 	showFooter={step === 'login'}
@@ -111,16 +117,35 @@
 	{/snippet}
 
 	{#if step === 'login'}
-		<OnboardingLoginStep
-			bind:email
-			errorText={authErrorText}
-			isSubmitting={isSubmittingEmail}
-			onContinue={() => {
-				void submitEmail();
-			}}
-		/>
+		<AuthStepFrame title="Log in to Overbase">
+			<form
+				class="grid gap-3.5"
+				onsubmit={(event) => {
+					event.preventDefault();
+					if (canContinue) {
+						void submitEmail();
+					}
+				}}
+			>
+				<AuthTextInput
+					label="Your work email"
+					bind:value={email}
+					type="email"
+					autocomplete="email"
+					required
+					autofocus
+					invalid={Boolean(authErrorText)}
+				/>
+				{#if authErrorText}
+					<p class="m-0 text-sm leading-5 text-[#ff3a1e]">{authErrorText}</p>
+				{/if}
+				<AuthHotkeyButton type="submit" disabled={!canContinue}>
+					{isSubmittingEmail ? 'Sending...' : 'Email me a code'}
+				</AuthHotkeyButton>
+			</form>
+		</AuthStepFrame>
 	{:else}
-		<OnboardingCodeStep
+		<AuthCodeStep
 			email={email}
 			bind:code={verificationCode}
 			errorText={authErrorText}
@@ -131,4 +156,4 @@
 			onChangeEmail={showEmailStep}
 		/>
 	{/if}
-</OnboardingAuthShell>
+</AuthEntryShell>

@@ -26,6 +26,7 @@ export function createViewerSession() {
 	const client = useConvexClient();
 	const clerk = useClerkContext();
 	let authVersion = 0;
+	let authRetryNonce = $state(0);
 	let convexAuthReady = $state(false);
 	let tokenErrorText = $state<string | null>(null);
 	let bootstrappingUserId = $state<string | null>(null);
@@ -113,6 +114,8 @@ export function createViewerSession() {
 	}
 
 	function retry() {
+		tokenErrorText = null;
+		authRetryNonce += 1;
 		resetBootstrapState();
 
 		if (signedInUserId && convexAuthReady) {
@@ -133,8 +136,10 @@ export function createViewerSession() {
 	$effect(() => {
 		const userId = signedInUserId;
 		const session = clerk.session;
+		const retryNonce = authRetryNonce;
 		const version = (authVersion += 1);
 
+		void retryNonce;
 		convexAuthReady = false;
 		tokenErrorText = null;
 

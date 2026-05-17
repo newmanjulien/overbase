@@ -1,8 +1,5 @@
 export const APP_CONFIG = {
 	name: 'Overbase',
 	logoUrl: '/logo.png',
-	logoAlt: 'Overbase logo',
-	onboarding: {
-		enabled: true
-	}
+	logoAlt: 'Overbase logo'
 } as const;

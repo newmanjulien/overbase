@@ -71,26 +71,27 @@
 	}
 
 	function getRoleFilterOptions(teammates: TeammateRecord[]) {
-		const rolesByKey = new Map<string, string>();
+		const roles: { key: string; label: string }[] = [];
 
 		for (const teammate of teammates) {
 			const role = normalizeRole(teammate.role);
 			const roleKey = roleFilterKey(role);
 
-			if (roleKey && !rolesByKey.has(roleKey)) {
-				rolesByKey.set(roleKey, role);
+			if (roleKey && !roles.some((existingRole) => existingRole.key === roleKey)) {
+				roles.push({ key: roleKey, label: role });
 			}
 		}
 
-		const roles = [...rolesByKey.entries()].sort(
-			([firstKey, firstLabel], [secondKey, secondLabel]) =>
-				firstLabel.localeCompare(secondLabel) || firstKey.localeCompare(secondKey)
+		const sortedRoles = [...roles].sort(
+			(firstRole, secondRole) =>
+				firstRole.label.localeCompare(secondRole.label) ||
+				firstRole.key.localeCompare(secondRole.key)
 		);
 		const hasNoRole = teammates.some((teammate) => normalizeRole(teammate.role).length === 0);
 
 		return [
 			{ id: 'all', label: 'All roles' },
-			...roles.map(([roleKey, role]) => ({ id: `role:${roleKey}`, label: role })),
+			...sortedRoles.map((role) => ({ id: `role:${role.key}`, label: role.label })),
 			...(hasNoRole ? [{ id: 'no-role', label: 'No role' }] : [])
 		];
 	}
