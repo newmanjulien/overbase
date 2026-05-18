@@ -210,24 +210,15 @@
 
 	<div role="list" class="divide-y divide-zinc-200/70 bg-white">
 		{#each items as item (item.id)}
-			{#if item.href}
-				<!-- The nested content owns the real link; this preserves pointer row-click without making the row a fake interactive parent around checkbox/menu controls. -->
-				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-				<div
-					role="listitem"
-					class={rowClass(item)}
-					onclick={(event) => handleRowClick(item, event)}
-				>
-					{@render itemCells(item)}
-				</div>
-			{:else}
-				<div
-					role="listitem"
-					class={rowClass(item)}
-				>
-					{@render itemCells(item)}
-				</div>
-			{/if}
+			<!-- The nested content owns the real link; this preserves pointer row-click without making the row a fake interactive parent around checkbox/menu controls. -->
+			<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+			<div
+				role="listitem"
+				class={rowClass(item)}
+				onclick={item.href ? (event) => handleRowClick(item, event) : undefined}
+			>
+				{@render itemCells(item)}
+			</div>
 		{/each}
 	</div>
 </div>

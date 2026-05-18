@@ -32,13 +32,6 @@
 		}).format(new Date(opportunity.sentAt))
 	);
 
-	function showAttachment() {
-		isAttachmentOpen = true;
-	}
-
-	function closeAttachment() {
-		isAttachmentOpen = false;
-	}
 </script>
 
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-zinc-950">
@@ -51,12 +44,15 @@
 			<div class="flex h-full min-h-0 w-full flex-col">
 				<EmailAttachmentSpreadsheetPreview
 					attachment={opportunity.draft.attachment}
-					onClose={closeAttachment}
+					onClose={() => (isAttachmentOpen = false)}
 				/>
 			</div>
 		{:else}
 			<div class="mx-auto flex min-h-full w-full max-w-[820px] flex-col">
-				<EmailComposePreview draft={opportunity.draft} onOpenAttachment={showAttachment} />
+				<EmailComposePreview
+					draft={opportunity.draft}
+					onOpenAttachment={() => (isAttachmentOpen = true)}
+				/>
 			</div>
 		{/if}
 	</div>

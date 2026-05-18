@@ -44,7 +44,6 @@
 	let editingBaseEmailDraftVersion = $state(0);
 	let isAttachmentOpen = $state(false);
 	const openAttachment = $derived(isEditing ? editableDraft.attachment : draft.attachment);
-	const hasPublishAction = $derived(Boolean(onPublish));
 
 	function beginEdit() {
 		editableDraft = toEditableEmailDraft(draft);
@@ -133,9 +132,7 @@
 					<EmailComposeEditor
 						{editableDraft}
 						disabled={isSaving}
-						onDraftChange={(nextDraft) => {
-							editableDraft = nextDraft;
-						}}
+						onDraftChange={(nextDraft) => (editableDraft = nextDraft)}
 						onOpenAttachment={showAttachment}
 					/>
 				{:else}
@@ -180,7 +177,7 @@
 				>
 					Edit format
 				</Button>
-				{#if hasPublishAction}
+				{#if onPublish}
 					<Button
 						variant="primary"
 						class="px-3 text-[0.74rem]"

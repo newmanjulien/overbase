@@ -18,7 +18,7 @@ import type {
 	BuilderAppStartTurnInput,
 	BuilderAppState
 } from '@overbase/builder-sdk/app-protocol';
-import type { EmailDraft, EmailDraftPatch } from '@overbase/builder-sdk/email';
+import type { EmailDraftPatch } from '@overbase/builder-sdk/email';
 import type { BuilderAppRuntime } from '@overbase/builder-sdk/host';
 import type { CustomOpportunityFormatRuntimeDependencies } from './dependencies';
 import { CUSTOM_EMAIL_DEFAULT_AI_CONTEXT } from './rules';

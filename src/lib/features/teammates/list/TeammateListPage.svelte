@@ -96,10 +96,6 @@
 		];
 	}
 
-	function setSelectedRoleFilter(optionId: string) {
-		selectedRoleFilter = optionId;
-	}
-
 	function matchesTeammateFilters(item: TeammateItem) {
 		if (selectedRoleFilter !== 'all' && roleFilterId(item.role) !== selectedRoleFilter) {
 			return false;
@@ -128,10 +124,6 @@
 
 		modalOpen = false;
 		modalError = null;
-	}
-
-	function updateTeammateEmails(value: string) {
-		teammateEmails = value;
 	}
 
 	async function addTeammates() {
@@ -185,25 +177,8 @@
 		};
 	}
 
-	function updateTeammateNameDraft(name: string) {
-		teammateDraft = {
-			...teammateDraft,
-			name
-		};
-	}
-
-	function updateTeammateEmailDraft(email: string) {
-		teammateDraft = {
-			...teammateDraft,
-			email
-		};
-	}
-
-	function updateTeammateRoleDraft(role: string) {
-		teammateDraft = {
-			...teammateDraft,
-			role
-		};
+	function updateTeammateDraft(patch: Partial<typeof teammateDraft>) {
+		teammateDraft = { ...teammateDraft, ...patch };
 	}
 
 	async function saveTeammate(teammate: TeammateRecord) {
@@ -273,9 +248,9 @@
 			onCancel: closeTeammateEditor,
 			onSave: () => saveTeammate(teammate),
 			onDelete: () => deleteTeammates([teammate.id]),
-			onNameDraftChange: updateTeammateNameDraft,
-			onEmailDraftChange: updateTeammateEmailDraft,
-			onRoleDraftChange: updateTeammateRoleDraft,
+			onNameDraftChange: (name) => updateTeammateDraft({ name }),
+			onEmailDraftChange: (email) => updateTeammateDraft({ email }),
+			onRoleDraftChange: (role) => updateTeammateDraft({ role }),
 			selectAriaLabel: `Select ${teammate.displayName}`,
 			actionsAriaLabel: 'Teammate actions',
 			actions: isEditing
@@ -302,8 +277,9 @@
 		filter: {
 			label: selectedRoleFilterLabel,
 			selectedId: selectedRoleFilter,
+			width: 'wide',
 			options: roleFilterOptions,
-			onSelect: setSelectedRoleFilter
+			onSelect: (optionId) => (selectedRoleFilter = optionId)
 		},
 		actionLabel: 'Add teammates',
 		onAction: openModal
@@ -372,5 +348,5 @@
 	value={teammateEmails}
 	onClose={closeModal}
 	onSubmit={addTeammates}
-	onValueChange={updateTeammateEmails}
+	onValueChange={(value) => (teammateEmails = value)}
 />

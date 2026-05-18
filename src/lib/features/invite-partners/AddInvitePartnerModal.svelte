@@ -32,10 +32,6 @@
 	const engineeringCalendarUrl = 'https://cal.com/juliennewman/julien';
 
 	let { open, onClose }: Props = $props();
-
-	function openEngineeringCalendar() {
-		window.open(engineeringCalendarUrl, '_blank', 'noopener,noreferrer');
-	}
 </script>
 
 <FullHeightModalShell
@@ -58,6 +54,11 @@
 	</div>
 
 	{#snippet footer()}
-		<Button class="ml-auto" onclick={openEngineeringCalendar}>Talk to our success team</Button>
+		<Button
+			class="ml-auto"
+			onclick={() => window.open(engineeringCalendarUrl, '_blank', 'noopener,noreferrer')}
+		>
+			Talk to our success team
+		</Button>
 	{/snippet}
 </FullHeightModalShell>

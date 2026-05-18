@@ -34,10 +34,6 @@
 	);
 	const visibleApps = $derived(apps.filter(matchesFilters));
 
-	function normalizeSearchText(value: string) {
-		return value.trim().toLowerCase();
-	}
-
 	function setSelectedFilter(optionId: string) {
 		if (optionId === 'all' || builderHome.categories.some((category) => category.slug === optionId)) {
 			selectedFilterId = optionId;
@@ -57,7 +53,7 @@
 			return false;
 		}
 
-		const normalizedQuery = normalizeSearchText(searchQuery);
+		const normalizedQuery = searchQuery.trim().toLowerCase();
 
 		return !normalizedQuery || getSearchableCardText(app).toLowerCase().includes(normalizedQuery);
 	}

@@ -153,31 +153,6 @@
 		const isDeleting = isDeletingFormat(format.id);
 		const isPausing = isPausingFormat(format.id);
 		const actionsDisabled = isDeleting || isPausing;
-		const actions: OpportunityFormatListItem['actions'] = [
-			{
-				label: isDeleting ? 'Deleting...' : 'Delete',
-				ariaLabel: `Delete ${format.title}`,
-				intent: 'destructive' as const,
-				disabled: actionsDisabled,
-				onSelect: () => deleteFormats([format.id])
-			}
-		];
-
-		if (format.status === 'active') {
-			actions.unshift({
-				label: isPausing ? 'Updating...' : 'Pause',
-				ariaLabel: `Pause ${format.title}`,
-				disabled: actionsDisabled,
-				onSelect: () => pauseFormats([format.id])
-			});
-		} else {
-			actions.unshift({
-				label: 'Activate',
-				ariaLabel: `Activate ${format.title}`,
-				disabled: true,
-				onSelect: () => {}
-			});
-		}
 
 		return {
 			id: format.id,
@@ -193,7 +168,28 @@
 				avatar: format.creator.avatar
 			},
 			actionsAriaLabel: 'Format actions',
-			actions
+			actions: [
+				format.status === 'active'
+					? {
+							label: isPausing ? 'Updating...' : 'Pause',
+							ariaLabel: `Pause ${format.title}`,
+							disabled: actionsDisabled,
+							onSelect: () => pauseFormats([format.id])
+						}
+					: {
+							label: 'Activate',
+							ariaLabel: `Activate ${format.title}`,
+							disabled: true,
+							onSelect: () => {}
+						},
+				{
+					label: isDeleting ? 'Deleting...' : 'Delete',
+					ariaLabel: `Delete ${format.title}`,
+					intent: 'destructive',
+					disabled: actionsDisabled,
+					onSelect: () => deleteFormats([format.id])
+				}
+			]
 		};
 	}
 </script>

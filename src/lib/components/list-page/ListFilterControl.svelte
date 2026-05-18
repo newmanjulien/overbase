@@ -19,6 +19,7 @@
 	let panelWidth = $state(160);
 	let panelMaxHeight = $state(240);
 
+	const widthClass = $derived(filter.width === 'wide' ? 'md:w-56' : 'md:w-44');
 	const menuId = $derived(`list-filter-${filter.label}`.replace(/[^a-zA-Z0-9_-]/g, '-'));
 	const panelStyle = $derived(
 		`top: ${panelTop}px; left: ${panelLeft}px; width: ${panelWidth}px; max-height: ${panelMaxHeight}px;`
@@ -62,13 +63,16 @@
 		const viewportPadding = 16;
 		const triggerGap = 8;
 		const triggerRect = triggerElement.getBoundingClientRect();
-		const measuredPanelWidth = panelElement?.getBoundingClientRect().width ?? 160;
+		const availablePanelWidth = Math.max(160, window.innerWidth - viewportPadding * 2);
+		const minPanelWidth = Math.min(Math.max(triggerRect.width, 160), availablePanelWidth);
+		const measuredPanelWidth = Math.max(
+			minPanelWidth,
+			panelElement?.getBoundingClientRect().width ?? 160,
+			panelElement?.scrollWidth ?? 160
+		);
 		const maxPanelHeight = Math.max(120, window.innerHeight - viewportPadding * 2);
 		const measuredPanelHeight = Math.min(panelElement?.scrollHeight ?? 0, maxPanelHeight);
-		const menuWidth = Math.min(
-			Math.max(triggerRect.width, measuredPanelWidth, 160),
-			Math.max(160, window.innerWidth - viewportPadding * 2)
-		);
+		const menuWidth = Math.min(measuredPanelWidth, availablePanelWidth);
 		const preferredLeft = triggerRect.right - menuWidth;
 		const maxLeft = window.innerWidth - menuWidth - viewportPadding;
 		const preferredTop = triggerRect.bottom + triggerGap;
@@ -125,13 +129,16 @@
 	<button
 		bind:this={triggerElement}
 		type="button"
-		class="inline-flex h-8 min-w-0 flex-1 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-sm border border-zinc-200/70 bg-white px-3 text-[0.72rem] font-normal text-zinc-950 transition-colors hover:bg-zinc-50 md:flex-none md:text-[0.74rem]"
+		class={cn(
+			'inline-flex h-8 w-full min-w-0 flex-1 shrink-0 items-center justify-between gap-1.5 whitespace-nowrap rounded-sm border border-zinc-200/70 bg-white px-3 text-left text-[0.72rem] font-normal text-zinc-950 transition-colors hover:bg-zinc-50 md:flex-none md:text-[0.74rem]',
+			widthClass
+		)}
 		aria-haspopup="menu"
 		aria-expanded={open}
 		aria-controls={open ? menuId : undefined}
 		onclick={toggleOpen}
 	>
-		<span class="truncate">{filter.label}</span>
+		<span class="min-w-0 truncate">{filter.label}</span>
 		<CaretDownIcon aria-hidden="true" size={14} weight="regular" class="shrink-0 text-zinc-600" />
 	</button>
 
@@ -156,7 +163,7 @@
 							<CheckIcon aria-hidden="true" size={12} weight="bold" />
 						{/if}
 					</span>
-					<span class="truncate">{option.label}</span>
+					<span class="whitespace-nowrap">{option.label}</span>
 				</button>
 			{/each}
 		</div>

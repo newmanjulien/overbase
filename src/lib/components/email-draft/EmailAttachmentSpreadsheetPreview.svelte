@@ -60,14 +60,12 @@
 			return;
 		}
 
-		const nextRowIndex = rowIndex + 1;
-
-		if (nextRowIndex >= EMAIL_DRAFT_LIMITS.spreadsheetRows) {
+		if (rowIndex + 1 >= EMAIL_DRAFT_LIMITS.spreadsheetRows) {
 			return;
 		}
 
 		event.preventDefault();
-		focusCell(nextRowIndex, columnIndex);
+		focusCell(rowIndex + 1, columnIndex);
 	}
 </script>
 

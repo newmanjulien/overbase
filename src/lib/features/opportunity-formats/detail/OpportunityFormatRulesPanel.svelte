@@ -17,14 +17,6 @@
 	let { rules, canSave, onRulesChange, onSave, onGiveEmailFeedback }: Props = $props();
 	let linkDataSourcesModalOpen = $state(false);
 
-	function openLinkDataSourcesModal() {
-		linkDataSourcesModalOpen = true;
-	}
-
-	function closeLinkDataSourcesModal() {
-		linkDataSourcesModalOpen = false;
-	}
-
 	function updateRule(ruleId: string, patch: Partial<OpportunityFormatRule>) {
 		onRulesChange(rules.map((rule) => (rule.id === ruleId ? { ...rule, ...patch } : rule)));
 	}
@@ -87,7 +79,7 @@
 								<Button
 									variant="secondary"
 									class="inline-flex h-7 items-center justify-center rounded-sm border border-zinc-200 bg-white px-2.5 text-[0.7rem] font-medium text-zinc-800 transition-colors hover:bg-zinc-50 hover:text-zinc-950"
-									onclick={openLinkDataSourcesModal}
+									onclick={() => (linkDataSourcesModalOpen = true)}
 								>
 									Link data sources
 								</Button>
@@ -136,4 +128,4 @@
 	</div>
 </aside>
 
-<LinkDataSourcesModal open={linkDataSourcesModalOpen} onClose={closeLinkDataSourcesModal} />
+<LinkDataSourcesModal open={linkDataSourcesModalOpen} onClose={() => (linkDataSourcesModalOpen = false)} />

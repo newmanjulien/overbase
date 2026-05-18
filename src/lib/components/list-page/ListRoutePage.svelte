@@ -29,8 +29,6 @@
 		children,
 		footer: footerContent
 	}: Props = $props();
-
-	let isEmpty = $derived(!hasItems);
 </script>
 
 <PageShell>
@@ -42,20 +40,11 @@
 		{#if hasItems}
 			{@render children?.()}
 		{:else}
-			<EmptyListState
-				icon={empty.icon}
-				title={empty.title}
-				description={empty.description}
-				learnMoreLabel={empty.learnMoreLabel}
-				actionLabel={empty.actionLabel}
-				actionHelpText={empty.actionHelpText}
-				actionHelpTooltipText={empty.actionHelpTooltipText}
-				onAction={empty.onAction}
-			/>
+			<EmptyListState {...empty} />
 		{/if}
 
 		{#snippet footer()}
-			{#if isEmpty && empty.nextSteps}
+			{#if !hasItems && empty.nextSteps}
 				<EmptyListNextSteps message={empty.nextSteps} />
 			{/if}
 			{@render footerContent?.()}

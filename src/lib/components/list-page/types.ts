@@ -16,6 +16,7 @@ export type ListToolbarConfig = {
 export type ListFilterConfig = {
 	label: string;
 	selectedId: string;
+	width?: 'default' | 'wide';
 	options: ListFilterOption[];
 	onSelect: (optionId: string) => void;
 };

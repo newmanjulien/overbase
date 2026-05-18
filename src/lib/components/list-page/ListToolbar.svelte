@@ -36,14 +36,14 @@
 			value={searchValue}
 			onValueChange={onSearchValueChange}
 			readonly={!onSearchValueChange}
-			class="w-full md:flex-1"
+			class="w-full md:min-w-0 md:flex-1"
 		/>
 	{/if}
 
 	<div
 		class={cn(
-			'shrink-0 items-center gap-2 md:gap-2.5',
-			searchPlaceholder ? 'hidden md:flex' : 'flex justify-end'
+			'items-center gap-2 md:gap-2.5',
+			searchPlaceholder ? 'hidden md:flex md:shrink-0' : 'flex w-full justify-end md:w-auto'
 		)}
 	>
 		{#if filter}

@@ -4,10 +4,6 @@
 	import AddDataSourceModal from '$lib/features/data-sources/AddDataSourceModal.svelte';
 
 	let modalOpen = $state(false);
-
-	function openModal() {
-		modalOpen = true;
-	}
 </script>
 
 <ListRoutePage
@@ -16,7 +12,7 @@
 		searchAriaLabel: 'Search data sources',
 		filter: { label: 'All types', selectedId: 'all', options: [{ id: 'all', label: 'All types' }], onSelect: () => {} },
 		actionLabel: 'Add data source',
-		onAction: openModal
+		onAction: () => (modalOpen = true)
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['data-sources'].icon,
@@ -26,7 +22,7 @@
 			'Overbase can analyze any of your internal data sources. Add the data sources you want us to use to send you actionable opportunities or that you want to share with your ecosystem partners',
 		learnMoreLabel: 'Learn more',
 		actionLabel: 'Add data source',
-		onAction: openModal
+		onAction: () => (modalOpen = true)
 	}}
 />
 
