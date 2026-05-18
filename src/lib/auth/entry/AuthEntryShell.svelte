@@ -26,11 +26,11 @@
 	}: Props = $props();
 
 	const quote = {
-		text: 'Overbase turns business context into a clear path to the opportunities worth building first.',
-		personName: 'Morgan Reed',
-		personTitle: 'VP Revenue, Northstar Labs',
-		avatarSrc: '/auth-quote-avatar.png',
-		avatarAlt: 'Morgan Reed'
+		text: 'Sharing data with our ecosystem partners increased net new revenue by 10% in the divisions we deployed it to',
+		personName: "Alexandre L'Heureux",
+		personTitle: 'CEO at WSP',
+		avatarSrc: '/wsp.jpeg',
+		avatarAlt: "Alexandre L'Heureux"
 	} satisfies AuthQuote;
 	const shouldShowFooter = $derived(Boolean(footer) && showFooter);
 </script>
