@@ -7,12 +7,12 @@
 	import AppShell from '$lib/app/AppShell.svelte';
 	import {
 		isAuthEntryPathname,
+		JoinFlow,
 		LoginFlow,
 		resolveAuthReturnTo,
 		resolveAuthEntryReturnHref,
 		resolveAuthExitHref,
-		resolvePostAuthHref,
-		SignupFlow
+		resolvePostAuthHref
 	} from '$lib/auth/entry';
 	import type { Snippet } from 'svelte';
 	import { createViewerSession, provideViewerSession } from './viewer-session.svelte';
@@ -41,14 +41,14 @@
 	);
 	const entryReturnHref = $derived(authEntryRoute ? resolveAuthEntryReturnHref(page.url) : undefined);
 	const gateErrorText = $derived(session.error?.message ?? 'Unable to load your workspace.');
-	const shouldShowSignupOnboarding = $derived(
+	const shouldShowJoinOnboarding = $derived(
 		session.status === 'ready' &&
-			authEntryRoute === '/signup' &&
+			authEntryRoute === '/join' &&
 			Boolean(session.viewer) &&
 			!session.viewer?.workspace.onboardingCompletedAt
 	);
 	const shouldRedirectSignedInAuthEntry = $derived(
-		session.status === 'ready' && Boolean(authEntryRoute) && !shouldShowSignupOnboarding
+		session.status === 'ready' && Boolean(authEntryRoute) && !shouldShowJoinOnboarding
 	);
 
 	$effect(() => {
@@ -60,9 +60,9 @@
 
 {#if shouldRedirectSignedInAuthEntry}
 	<AppLoadingScreen />
-{:else if shouldShowSignupOnboarding}
+{:else if shouldShowJoinOnboarding}
 	{#key authEntryKey}
-		<SignupFlow
+		<JoinFlow
 			{returnTo}
 			{returnButtonHref}
 			{entryReturnHref}
@@ -83,8 +83,8 @@
 	<AppGateError message={gateErrorText} onRetry={session.retry} />
 {:else}
 	{#key authEntryKey}
-		{#if authEntryRoute === '/signup'}
-			<SignupFlow {returnTo} {returnButtonHref} {entryReturnHref} />
+		{#if authEntryRoute === '/join'}
+			<JoinFlow {returnTo} {returnButtonHref} {entryReturnHref} />
 		{:else}
 			<LoginFlow {returnTo} {returnButtonHref} {entryReturnHref} />
 		{/if}

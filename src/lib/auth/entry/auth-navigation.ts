@@ -16,7 +16,7 @@ function isSafeRelativeReturnHref(value: string) {
 }
 
 export function isAuthEntryPathname(pathname: string): pathname is AuthEntryPathname {
-	return pathname === '/login' || pathname === '/signup';
+	return pathname === '/login' || pathname === '/join';
 }
 
 function isSafeInAppReturnHref(value: string) {
@@ -82,7 +82,7 @@ export function resolveAuthExitHref(
 export function resolveAuthEntryReturnHref(url: URL) {
 	const fromAuth = url.searchParams.get(AUTH_ENTRY_RETURN_PARAM)?.trim();
 
-	if (fromAuth === '/login' || fromAuth === '/signup') {
+	if (fromAuth === '/login' || fromAuth === '/join') {
 		return buildAuthEntryHref(fromAuth, {
 			returnTo: resolveAuthReturnTo(url)
 		});

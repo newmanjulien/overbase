@@ -34,7 +34,7 @@
 	let isSubmittingCode = $state(false);
 	let isResendingCode = $state(false);
 
-	const signupHref = $derived(buildAuthEntryHref('/signup', { returnTo, fromAuth: '/login' }));
+	const joinHref = $derived(buildAuthEntryHref('/join', { returnTo, fromAuth: '/login' }));
 	const currentReturnButtonHref = $derived(
 		step === 'login' ? (entryReturnHref ?? returnButtonHref) : undefined
 	);
@@ -108,10 +108,10 @@
 		<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
 			Need an account?
 			<a
-				href={resolve(signupHref as '/')}
+				href={resolve(joinHref as '/')}
 				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 			>
-				Sign up
+				Join
 			</a>
 		</p>
 	{/snippet}

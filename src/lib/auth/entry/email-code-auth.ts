@@ -9,7 +9,7 @@ type SignInEmailCodeFactor = Extract<
 >;
 
 export type ClerkEmailCodeAuthController = {
-	sendSignupCode(email: string): Promise<void>;
+	sendJoinCode(email: string): Promise<void>;
 	sendLoginCode(email: string): Promise<void>;
 	verifyCode(code: string): Promise<void>;
 	resendCode(): Promise<void>;
@@ -31,7 +31,7 @@ export function createClerkEmailCodeAuthController({
 	let signInEmailAddressId: string | null = null;
 	let activeEmail: string | null = null;
 
-	async function sendSignupCode(email: string) {
+	async function sendJoinCode(email: string) {
 		const normalizedEmail = email.trim().toLowerCase();
 		if (!normalizedEmail) {
 			throw new Error('Enter your work email.');
@@ -154,7 +154,7 @@ export function createClerkEmailCodeAuthController({
 		activeEmail = null;
 	}
 
-	return { sendSignupCode, sendLoginCode, verifyCode, resendCode, getErrorMessage };
+	return { sendJoinCode, sendLoginCode, verifyCode, resendCode, getErrorMessage };
 }
 
 function throwIfClerkError(result: ClerkMutationResult) {

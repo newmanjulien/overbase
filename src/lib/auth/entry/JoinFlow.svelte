@@ -9,23 +9,23 @@
 	import AuthButton from './AuthButton.svelte';
 	import AuthCodeStep from './AuthCodeStep.svelte';
 	import AuthEntryShell from './AuthEntryShell.svelte';
-	import SignupBuilderStep from './SignupBuilderStep.svelte';
-	import SignupCompanyStep from './SignupCompanyStep.svelte';
-	import SignupPartnerStep from './SignupPartnerStep.svelte';
-	import SignupWelcomeStep from './SignupWelcomeStep.svelte';
+	import JoinBuilderStep from './JoinBuilderStep.svelte';
+	import JoinCompanyStep from './JoinCompanyStep.svelte';
+	import JoinPartnerStep from './JoinPartnerStep.svelte';
+	import JoinWelcomeStep from './JoinWelcomeStep.svelte';
 	import AuthStepFrame from './AuthStepFrame.svelte';
 	import AuthTextInput from './AuthTextInput.svelte';
 	import { buildAuthEntryHref } from './auth-navigation';
 	import { createClerkEmailCodeAuthController, getClerkErrorCode } from './email-code-auth';
 	import { loadOnboardingBuilders } from './onboarding-builders';
 
-	type SignupStep = 'welcome' | 'signup' | 'code' | 'company' | 'partner' | 'builder';
+	type JoinStep = 'welcome' | 'join' | 'code' | 'company' | 'partner' | 'builder';
 
 	type Props = {
 		returnTo?: string;
 		returnButtonHref?: string;
 		entryReturnHref?: string;
-		initialStep?: SignupStep;
+		initialStep?: JoinStep;
 		isSignedIn?: boolean;
 	};
 
@@ -46,7 +46,7 @@
 	});
 	const getInitialStep = () => initialStep ?? (isSignedIn ? 'company' : 'welcome');
 
-	let step = $state<SignupStep>(getInitialStep());
+	let step = $state<JoinStep>(getInitialStep());
 	let email = $state('');
 	let verificationCode = $state('');
 	let authErrorText = $state<string | null>(null);
@@ -71,7 +71,7 @@
 	let completingAppSlug = $state<string | null>(null);
 	let isOpeningBuilder = $state(false);
 
-	const loginHref = $derived(buildAuthEntryHref('/login', { returnTo, fromAuth: '/signup' }));
+	const loginHref = $derived(buildAuthEntryHref('/login', { returnTo, fromAuth: '/join' }));
 	const currentReturnButtonHref = $derived.by(() => {
 		if (step === 'welcome') {
 			return entryReturnHref ?? returnButtonHref;
@@ -84,7 +84,7 @@
 		return undefined;
 	});
 	const currentReturnButtonClick = $derived.by<(() => void) | undefined>(() => {
-		if (step === 'signup') {
+		if (step === 'join') {
 			return showWelcomeStep;
 		}
 
@@ -114,7 +114,7 @@
 		verificationCode = '';
 
 		try {
-			await authController.sendSignupCode(normalizedEmail);
+			await authController.sendJoinCode(normalizedEmail);
 			email = normalizedEmail;
 			step = 'code';
 		} catch (error) {
@@ -226,7 +226,7 @@
 
 	function showEmailStep() {
 		authErrorText = null;
-		step = 'signup';
+		step = 'join';
 	}
 
 	function showWelcomeStep() {
@@ -247,7 +247,7 @@
 </script>
 
 {#if step === 'builder'}
-	<SignupBuilderStep
+	<JoinBuilderStep
 		apps={builderApps}
 		isLoading={isLoadingBuilders}
 		errorText={builderErrorText}
@@ -268,7 +268,7 @@
 	<AuthEntryShell
 		onReturnButtonClick={currentReturnButtonClick}
 		returnButtonHref={currentReturnButtonHref}
-		showFooter={step === 'signup'}
+		showFooter={step === 'join'}
 	>
 		{#snippet footer()}
 			<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
@@ -283,12 +283,12 @@
 		{/snippet}
 
 		{#if step === 'welcome'}
-			<SignupWelcomeStep
+			<JoinWelcomeStep
 				onContinue={() => {
-					step = 'signup';
+					step = 'join';
 				}}
 			/>
-		{:else if step === 'signup'}
+		{:else if step === 'join'}
 			<AuthStepFrame title="What's your email?">
 				<form
 					class="grid gap-3.5"
@@ -348,7 +348,7 @@
 				onChangeEmail={showEmailStep}
 			/>
 		{:else if step === 'company'}
-			<SignupCompanyStep
+			<JoinCompanyStep
 				bind:name={company.name}
 				bind:website={company.website}
 				errorText={companyErrorText}
@@ -358,7 +358,7 @@
 				}}
 			/>
 		{:else if step === 'partner'}
-			<SignupPartnerStep
+			<JoinPartnerStep
 				bind:name={partner.name}
 				bind:collaboration={partner.collaboration}
 				onContinue={() => {

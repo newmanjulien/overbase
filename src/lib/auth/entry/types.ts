@@ -1,4 +1,4 @@
-export type AuthEntryPathname = '/login' | '/signup';
+export type AuthEntryPathname = '/login' | '/join';
 
 export type AuthQuote = {
 	text: string;
