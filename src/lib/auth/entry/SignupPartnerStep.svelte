@@ -15,8 +15,8 @@
 </script>
 
 <AuthStepFrame
-	title="Tell us about one of your ecosystem partners"
-	description="Tell us about one of the ecosystem partners you currently work with closely"
+	title="Tell us about the partner who invited you"
+	description="How do you collaborate with the ecosystem partner who invited you to Overbase?"
 >
 	<form
 		class="grid gap-3.5"

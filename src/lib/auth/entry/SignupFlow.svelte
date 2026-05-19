@@ -12,13 +12,14 @@
 	import SignupBuilderStep from './SignupBuilderStep.svelte';
 	import SignupCompanyStep from './SignupCompanyStep.svelte';
 	import SignupPartnerStep from './SignupPartnerStep.svelte';
+	import SignupWelcomeStep from './SignupWelcomeStep.svelte';
 	import AuthStepFrame from './AuthStepFrame.svelte';
 	import AuthTextInput from './AuthTextInput.svelte';
 	import { buildAuthEntryHref } from './auth-navigation';
 	import { createClerkEmailCodeAuthController, getClerkErrorCode } from './email-code-auth';
 	import { loadOnboardingBuilders } from './onboarding-builders';
 
-	type SignupStep = 'signup' | 'code' | 'company' | 'partner' | 'builder';
+	type SignupStep = 'welcome' | 'signup' | 'code' | 'company' | 'partner' | 'builder';
 
 	type Props = {
 		returnTo?: string;
@@ -43,7 +44,7 @@
 		getSignIn: () => signInState.signIn,
 		getSignUp: () => signUpState.signUp
 	});
-	const getInitialStep = () => initialStep ?? (isSignedIn ? 'company' : 'signup');
+	const getInitialStep = () => initialStep ?? (isSignedIn ? 'company' : 'welcome');
 
 	let step = $state<SignupStep>(getInitialStep());
 	let email = $state('');
@@ -72,7 +73,7 @@
 
 	const loginHref = $derived(buildAuthEntryHref('/login', { returnTo, fromAuth: '/signup' }));
 	const currentReturnButtonHref = $derived.by(() => {
-		if (step === 'signup') {
+		if (step === 'welcome') {
 			return entryReturnHref ?? returnButtonHref;
 		}
 
@@ -83,6 +84,10 @@
 		return undefined;
 	});
 	const currentReturnButtonClick = $derived.by<(() => void) | undefined>(() => {
+		if (step === 'signup') {
+			return showWelcomeStep;
+		}
+
 		if (step === 'code') {
 			return showEmailStep;
 		}
@@ -224,6 +229,11 @@
 		step = 'signup';
 	}
 
+	function showWelcomeStep() {
+		authErrorText = null;
+		step = 'welcome';
+	}
+
 	function showCompanyStep() {
 		companyErrorText = null;
 		step = 'company';
@@ -272,7 +282,13 @@
 			</p>
 		{/snippet}
 
-		{#if step === 'signup'}
+		{#if step === 'welcome'}
+			<SignupWelcomeStep
+				onContinue={() => {
+					step = 'signup';
+				}}
+			/>
+		{:else if step === 'signup'}
 			<AuthStepFrame title="What's your email?">
 				<form
 					class="grid gap-3.5"
