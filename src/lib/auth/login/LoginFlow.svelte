@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
-	import AuthCodeStep from './AuthCodeStep.svelte';
-	import AuthEntryShell from './AuthEntryShell.svelte';
-	import AuthHotkeyButton from './AuthHotkeyButton.svelte';
-	import AuthStepFrame from './AuthStepFrame.svelte';
-	import AuthTextInput from './AuthTextInput.svelte';
-	import { buildAuthEntryHref } from './auth-navigation';
-	import { createClerkEmailCodeAuthController, getClerkErrorCode } from './email-code-auth';
+	import AuthCodeStep from '$lib/auth/components/AuthCodeStep.svelte';
+	import AuthEntryShell from '$lib/auth/components/AuthEntryShell.svelte';
+	import AuthHotkeyButton from '$lib/auth/components/AuthHotkeyButton.svelte';
+	import AuthStepFrame from '$lib/auth/components/AuthStepFrame.svelte';
+	import AuthTextInput from '$lib/auth/components/AuthTextInput.svelte';
+	import { buildAuthEntryHref } from '$lib/auth/navigation';
+	import { createClerkEmailCodeAuthController, getClerkErrorCode } from '$lib/auth/email-code-auth';
 
 	type LoginStep = 'login' | 'code';
 

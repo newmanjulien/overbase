@@ -1,6 +1,6 @@
 <script lang="ts">
-	import AuthHotkeyButton from './AuthHotkeyButton.svelte';
-	import AuthStepFrame from './AuthStepFrame.svelte';
+	import AuthHotkeyButton from '$lib/auth/components/AuthHotkeyButton.svelte';
+	import AuthStepFrame from '$lib/auth/components/AuthStepFrame.svelte';
 
 	type Props = {
 		onContinue: () => void;

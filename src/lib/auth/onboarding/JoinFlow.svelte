@@ -6,17 +6,17 @@
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 	import { useConvexClient } from 'convex-svelte';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
-	import AuthButton from './AuthButton.svelte';
-	import AuthCodeStep from './AuthCodeStep.svelte';
-	import AuthEntryShell from './AuthEntryShell.svelte';
+	import AuthButton from '$lib/auth/components/AuthButton.svelte';
+	import AuthCodeStep from '$lib/auth/components/AuthCodeStep.svelte';
+	import AuthEntryShell from '$lib/auth/components/AuthEntryShell.svelte';
+	import AuthStepFrame from '$lib/auth/components/AuthStepFrame.svelte';
+	import AuthTextInput from '$lib/auth/components/AuthTextInput.svelte';
+	import { createClerkEmailCodeAuthController, getClerkErrorCode } from '$lib/auth/email-code-auth';
+	import { buildAuthEntryHref } from '$lib/auth/navigation';
 	import JoinBuilderStep from './JoinBuilderStep.svelte';
 	import JoinCompanyStep from './JoinCompanyStep.svelte';
 	import JoinPartnerStep from './JoinPartnerStep.svelte';
 	import JoinWelcomeStep from './JoinWelcomeStep.svelte';
-	import AuthStepFrame from './AuthStepFrame.svelte';
-	import AuthTextInput from './AuthTextInput.svelte';
-	import { buildAuthEntryHref } from './auth-navigation';
-	import { createClerkEmailCodeAuthController, getClerkErrorCode } from './email-code-auth';
 	import { loadOnboardingBuilders } from './onboarding-builders';
 
 	type JoinStep = 'welcome' | 'join' | 'code' | 'company' | 'partner' | 'builder';

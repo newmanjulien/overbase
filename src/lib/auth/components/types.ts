@@ -1,5 +1,3 @@
-export type AuthEntryPathname = '/login' | '/join';
-
 export type AuthQuote = {
 	text: string;
 	personName: string;

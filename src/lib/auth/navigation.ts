@@ -1,5 +1,6 @@
 import { DEFAULT_ROUTE_HREF } from '$lib/app/app-routes';
-import type { AuthEntryPathname } from './types';
+
+export type AuthEntryPathname = '/login' | '/join';
 
 const DEFAULT_AUTH_EXIT_HREF = 'https://overbase.app/';
 const TRUSTED_MARKETING_ORIGINS = new Set(['https://overbase.app', 'https://www.overbase.app']);

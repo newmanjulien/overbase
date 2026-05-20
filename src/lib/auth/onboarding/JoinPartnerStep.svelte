@@ -1,8 +1,8 @@
 <script lang="ts">
-	import AuthButton from './AuthButton.svelte';
-	import AuthStepFrame from './AuthStepFrame.svelte';
-	import AuthTextarea from './AuthTextarea.svelte';
-	import AuthTextInput from './AuthTextInput.svelte';
+	import AuthButton from '$lib/auth/components/AuthButton.svelte';
+	import AuthStepFrame from '$lib/auth/components/AuthStepFrame.svelte';
+	import AuthTextarea from '$lib/auth/components/AuthTextarea.svelte';
+	import AuthTextInput from '$lib/auth/components/AuthTextInput.svelte';
 
 	type Props = {
 		name: string;

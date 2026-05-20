@@ -5,15 +5,15 @@
 	import AppGateError from '$lib/app/AppGateError.svelte';
 	import AppLoadingScreen from '$lib/app/AppLoadingScreen.svelte';
 	import AppShell from '$lib/app/AppShell.svelte';
+	import { LoginFlow } from '$lib/auth/login';
+	import { JoinFlow } from '$lib/auth/onboarding';
 	import {
 		isAuthEntryPathname,
-		JoinFlow,
-		LoginFlow,
 		resolveAuthReturnTo,
 		resolveAuthEntryReturnHref,
 		resolveAuthExitHref,
 		resolvePostAuthHref
-	} from '$lib/auth/entry';
+	} from '$lib/auth/navigation';
 	import type { Snippet } from 'svelte';
 	import { createViewerSession, provideViewerSession } from './viewer-session.svelte';
 

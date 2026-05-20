@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AuthButton from './AuthButton.svelte';
-	import AuthStepFrame from './AuthStepFrame.svelte';
-	import AuthTextInput from './AuthTextInput.svelte';
+	import AuthButton from '$lib/auth/components/AuthButton.svelte';
+	import AuthStepFrame from '$lib/auth/components/AuthStepFrame.svelte';
+	import AuthTextInput from '$lib/auth/components/AuthTextInput.svelte';
 
 	type Props = {
 		name: string;
@@ -49,7 +49,7 @@
 			required
 		/>
 		<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
-			We use your website to understand your company without making you fill out a long profile.
+			We use your website to understand your company without making you fill out a long profile
 		</p>
 		{#if errorText}
 			<p class="m-0 text-sm leading-5 text-red-600">{errorText}</p>
