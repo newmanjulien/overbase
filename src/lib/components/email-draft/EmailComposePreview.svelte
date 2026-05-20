@@ -40,7 +40,7 @@
 				onOpen={onOpenAttachment}
 			/>
 		{:else}
-			<p class="text-zinc-500">Attach a spreadsheet</p>
+			<p class="text-[0.72rem] text-zinc-400">No attachment</p>
 		{/if}
 	{/snippet}
 
