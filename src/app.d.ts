@@ -9,6 +9,7 @@ declare global {
 		}
 
 		interface PageData {
+			chromeMode?: 'dashboard' | 'focused';
 			headerTitle?: string;
 			headerTitleEditable?: boolean;
 			headerParent?: {
@@ -16,7 +17,6 @@ declare global {
 				href: HeaderParentHref;
 			};
 			headerParentVisibility?: 'all' | 'desktopOnly';
-			sidebarDefault?: 'expanded' | 'collapsed';
 		}
 
 		interface PageState {

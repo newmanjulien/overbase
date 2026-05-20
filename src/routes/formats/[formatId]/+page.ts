@@ -7,6 +7,6 @@ export function load() {
 			href: '/formats'
 		},
 		headerParentVisibility: 'desktopOnly',
-		sidebarDefault: 'collapsed'
+		chromeMode: 'focused'
 	};
 }

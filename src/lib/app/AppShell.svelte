@@ -24,10 +24,12 @@
 		children: Snippet;
 	};
 
+	type ChromeMode = NonNullable<App.PageData['chromeMode']>;
+
 	let { user, workspace, children }: Props = $props();
 
-	function getDefaultSidebarExpanded(sidebarDefault?: 'expanded' | 'collapsed') {
-		return sidebarDefault !== 'collapsed';
+	function getChromeMode(chromeMode?: ChromeMode) {
+		return chromeMode ?? 'dashboard';
 	}
 
 	const currentWorkspace: CurrentWorkspaceContext = {
@@ -38,9 +40,21 @@
 			return workspace;
 		}
 	};
+	const sidebarExpandedByMode = $state<Record<ChromeMode, boolean>>({
+		dashboard: true,
+		focused: false
+	});
+	const initialChromeMode = getChromeMode(page.data.chromeMode);
+	const activeChromeMode = $derived(getChromeMode(page.data.chromeMode));
+	let currentChromeMode = $state(initialChromeMode);
 	const shellState = $state<ChromeShellState>({
-		isSidebarExpanded: getDefaultSidebarExpanded(page.data.sidebarDefault),
-		isMobileDrawerOpen: false
+		isSidebarExpanded: sidebarExpandedByMode[initialChromeMode],
+		isMobileDrawerOpen: false,
+		toggleSidebar() {
+			const nextSidebarExpanded = !shellState.isSidebarExpanded;
+			shellState.isSidebarExpanded = nextSidebarExpanded;
+			sidebarExpandedByMode[currentChromeMode] = nextSidebarExpanded;
+		}
 	});
 	const routeTitleState = $state<RouteTitleState>({
 		title: APP_CONFIG.name,
@@ -58,7 +72,6 @@
 	);
 	let customRouteTitle = $state<string | null>(null);
 	let currentRouteTitleResetKey = $state('');
-	let currentSidebarRoutePathname = $state(page.url.pathname);
 	const routeTitle = $derived(customRouteTitle ?? sourceRouteTitle);
 
 	async function handleRouteTitleChange(title: string) {
@@ -82,9 +95,10 @@
 	});
 
 	$effect(() => {
-		if (currentSidebarRoutePathname !== page.url.pathname) {
-			currentSidebarRoutePathname = page.url.pathname;
-			shellState.isSidebarExpanded = getDefaultSidebarExpanded(page.data.sidebarDefault);
+		if (currentChromeMode !== activeChromeMode) {
+			sidebarExpandedByMode[currentChromeMode] = shellState.isSidebarExpanded;
+			currentChromeMode = activeChromeMode;
+			shellState.isSidebarExpanded = sidebarExpandedByMode[currentChromeMode];
 		}
 	});
 

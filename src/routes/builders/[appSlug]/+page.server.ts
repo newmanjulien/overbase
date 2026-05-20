@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				guide: null,
 				headerTitle: 'Format builder',
 				headerTitleEditable: false,
-				sidebarDefault: 'collapsed'
+				chromeMode: 'focused'
 			};
 		}
 
@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				: null,
 			headerTitle: app.title,
 			headerTitleEditable: true,
-			sidebarDefault: 'collapsed',
+			chromeMode: 'focused',
 			headerParent: {
 				label: 'Format builder',
 				href: '/builders'

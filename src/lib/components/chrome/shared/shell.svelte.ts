@@ -5,6 +5,7 @@ const SHELL_STATE_KEY = Symbol('chrome-shell-state');
 export type ChromeShellState = {
 	isSidebarExpanded: boolean;
 	isMobileDrawerOpen: boolean;
+	toggleSidebar: () => void;
 };
 
 export function provideChromeShellState(shellState: ChromeShellState) {

@@ -41,7 +41,7 @@
 			variant="ghost"
 			class="mr-1 ml-1 size-5 text-zinc-500 hover:bg-transparent hover:text-zinc-400"
 			onclick={() => {
-				shellState.isSidebarExpanded = !shellState.isSidebarExpanded;
+				shellState.toggleSidebar();
 			}}
 		>
 			<SidebarSimpleIcon size={14} weight="regular" />
