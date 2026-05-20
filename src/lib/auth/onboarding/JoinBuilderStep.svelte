@@ -12,6 +12,7 @@
 		selectedAppSlug: string | null;
 		isOpeningBuilder: boolean;
 		onSelect: (appSlug: string) => void;
+		onPreload: (appSlug: string) => void;
 		onOpenBuilder: () => void;
 		onRetry: () => void;
 	};
@@ -24,6 +25,7 @@
 		selectedAppSlug,
 		isOpeningBuilder,
 		onSelect,
+		onPreload,
 		onOpenBuilder,
 		onRetry
 	}: Props = $props();
@@ -49,6 +51,12 @@
 		event.preventDefault();
 		onSelect(app.id);
 	}
+
+	function preloadApp(app: BuilderAppRecord) {
+		if (!isCompletingOnboarding) {
+			onPreload(app.id);
+		}
+	}
 </script>
 
 <section
@@ -65,7 +73,20 @@
 
 		<div class="mt-10 flex justify-center">
 			{#if isLoading}
-				<p class="text-sm font-medium leading-6 text-[#686b73]">Loading available builders...</p>
+				<div class="w-full max-w-75 text-center">
+					<p class="text-sm font-medium leading-6 text-[#686b73]">Loading available builders...</p>
+					{#if completionErrorText}
+						<p class="mt-4 text-sm leading-5 text-red-600">{completionErrorText}</p>
+					{/if}
+					<button
+						type="button"
+						class="mt-5 text-sm text-zinc-400/50 underline underline-offset-2 transition hover:text-zinc-400/70 focus-visible:rounded-sm focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgb(113_113_122_/_20%)] disabled:cursor-not-allowed disabled:text-zinc-300"
+						disabled={isCompletingOnboarding}
+						onclick={onOpenBuilder}
+					>
+						{isOpeningBuilder ? 'Opening builder...' : 'Let me explore the app on my own'}
+					</button>
+				</div>
 			{:else if errorText}
 				<div class="w-full max-w-75 text-left">
 					<p class="text-sm font-medium leading-6 text-[#686b73]">{errorText}</p>
@@ -87,6 +108,8 @@
 								aria-label={`Start with ${app.title}`}
 								aria-disabled={isCompletingOnboarding}
 								tabindex={isCompletingOnboarding ? -1 : 0}
+								onpointerenter={() => preloadApp(app)}
+								onfocus={() => preloadApp(app)}
 								onclick={(event) => selectApp(event, app)}
 							>
 								<div class="rounded-[0.45rem] bg-zinc-50 p-1">

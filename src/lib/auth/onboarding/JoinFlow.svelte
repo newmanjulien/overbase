@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, preloadData } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
 	import { BUILDER_FRESH_START_ROUTE, builderAppSlugParams } from '$lib/features/builder/paths';
@@ -70,6 +70,9 @@
 	let completionErrorText = $state<string | null>(null);
 	let completingAppSlug = $state<string | null>(null);
 	let isOpeningBuilder = $state(false);
+	let builderHomePreloadPromise: Promise<void> | null = null;
+	let builderLoadPromise: Promise<void> | null = null;
+	const builderRoutePreloadPromises = new Map<string, Promise<void>>();
 
 	const loginHref = $derived(buildAuthEntryHref('/login', { returnTo, fromAuth: '/join' }));
 	const currentReturnButtonHref = $derived.by(() => {
@@ -177,19 +180,64 @@
 		}
 	}
 
+	function preloadBuildersHome() {
+		if (builderHomePreloadPromise) {
+			return builderHomePreloadPromise;
+		}
+
+		builderHomePreloadPromise = preloadData(resolve('/builders')).then(
+			() => undefined,
+			() => undefined
+		);
+
+		return builderHomePreloadPromise;
+	}
+
+	function preloadBuilderRoute(appSlug: string) {
+		const existingPreload = builderRoutePreloadPromises.get(appSlug);
+
+		if (existingPreload) {
+			return existingPreload;
+		}
+
+		const routePreload = preloadBuildersHome()
+			.then(() => preloadData(resolve(BUILDER_FRESH_START_ROUTE, builderAppSlugParams(appSlug))))
+			.then(
+				() => undefined,
+				() => undefined
+			);
+
+		builderRoutePreloadPromises.set(appSlug, routePreload);
+
+		return routePreload;
+	}
+
+	function preloadOnboardingBuilders() {
+		return loadBuilders();
+	}
+
 	async function loadBuilders() {
+		if (builderLoadPromise) {
+			return builderLoadPromise;
+		}
+
 		hasStartedBuilderLoad = true;
 		isLoadingBuilders = true;
 		builderErrorText = null;
 
-		try {
-			builderApps = await loadOnboardingBuilders();
-		} catch (error) {
-			builderErrorText = error instanceof Error ? error.message : 'Unable to load builders.';
-			builderApps = [];
-		} finally {
-			isLoadingBuilders = false;
-		}
+		builderLoadPromise = (async () => {
+			try {
+				builderApps = await loadOnboardingBuilders();
+			} catch (error) {
+				builderErrorText = error instanceof Error ? error.message : 'Unable to load builders.';
+				builderApps = [];
+			} finally {
+				isLoadingBuilders = false;
+				builderLoadPromise = null;
+			}
+		})();
+
+		return builderLoadPromise;
 	}
 
 	async function selectBuilder(appSlug: string) {
@@ -241,7 +289,12 @@
 
 	$effect(() => {
 		if (step === 'builder' && !hasStartedBuilderLoad) {
-			void loadBuilders();
+			void preloadOnboardingBuilders();
+		}
+
+		if (step === 'partner') {
+			void preloadBuildersHome();
+			void preloadOnboardingBuilders();
 		}
 	});
 </script>
@@ -256,6 +309,9 @@
 		isOpeningBuilder={isOpeningBuilder}
 		onSelect={(appSlug) => {
 			void selectBuilder(appSlug);
+		}}
+		onPreload={(appSlug) => {
+			void preloadBuilderRoute(appSlug);
 		}}
 		onOpenBuilder={() => {
 			void openBuilder();
