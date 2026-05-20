@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { onMount, tick } from 'svelte';
 	import CaretUpDownIcon from 'phosphor-svelte/lib/CaretUpDownIcon';
 	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
@@ -24,7 +25,7 @@
 	let menuElement = $state<HTMLDivElement | null>(null);
 	let menuTop = $state(0);
 	let menuLeft = $state(0);
-	let menuWidth = $state(128);
+	let menuWidth = $state(144);
 	const menuStyle = $derived(
 		`top: ${menuTop}px; left: ${menuLeft}px; width: ${menuWidth}px;`
 	);
@@ -68,7 +69,7 @@
 
 		const viewportPadding = 16;
 		const triggerGap = 8;
-		const width = Math.min(128, window.innerWidth - viewportPadding * 2);
+		const width = Math.min(144, window.innerWidth - viewportPadding * 2);
 		const triggerRect = triggerElement.getBoundingClientRect();
 		const menuHeight = menuElement?.getBoundingClientRect().height ?? 0;
 		const preferredLeft = triggerRect.right - width;
@@ -162,10 +163,20 @@
 			bind:this={menuElement}
 			id={menuId}
 			role="menu"
-			class="fixed z-50 min-w-32 overflow-hidden rounded-sm border border-zinc-200 bg-white py-1 text-left shadow-lg shadow-zinc-950/5"
+			class="fixed z-50 min-w-36 overflow-hidden rounded-sm border border-zinc-200 bg-white py-1 text-left shadow-lg shadow-zinc-950/5"
 			style={menuStyle}
 			aria-label="Profile menu"
 		>
+			<a
+				role="menuitem"
+				href={resolve('/settings')}
+				class="flex h-8 w-full items-center px-2.5 text-left text-[0.72rem] font-normal text-zinc-700 transition-colors hover:bg-zinc-50 focus-visible:bg-zinc-50 focus-visible:outline-none"
+				onclick={() => {
+					closeMenu();
+				}}
+			>
+				Settings
+			</a>
 			<button
 				type="button"
 				role="menuitem"

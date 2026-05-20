@@ -50,7 +50,7 @@
 				? 'h-8 gap-1.5 px-2.5 text-[0.74rem] font-medium'
 				: 'size-8 p-0',
 			variant === 'primary' &&
-				'bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-zinc-300 disabled:text-zinc-500',
+				'bg-zinc-950 text-white hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400',
 			variant === 'secondary' &&
 				'border border-zinc-200/60 bg-white text-zinc-800 hover:bg-zinc-50 disabled:opacity-55',
 			variant === 'ghost' &&

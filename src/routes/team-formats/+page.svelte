@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import { ListRoutePage } from '$lib/components/list-page';
+	import { InfoBar } from '$lib/components/ui';
 </script>
 
 <ListRoutePage
@@ -15,4 +16,10 @@
 		description: 'Manage the opportunity formats that your team created for themselves.',
 		learnMoreLabel: 'Learn more'
 	}}
-/>
+>
+	{#snippet footer()}
+		<InfoBar label="Next steps:">
+			Ask your team to build their own opportunity formats and manage them here
+		</InfoBar>
+	{/snippet}
+</ListRoutePage>

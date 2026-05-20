@@ -2,7 +2,6 @@ import QuestionIcon from 'phosphor-svelte/lib/QuestionIcon';
 import {
 	APP_NAV_SECTION_DEFINITIONS,
 	APP_ROUTE_REGISTRY,
-	DEFAULT_ROUTE_ID,
 	type AppRouteDefinition,
 	type NavPath,
 	type NavRouteId,
@@ -90,9 +89,5 @@ export function isNavItemActive(href: string, pathname: string) {
 }
 
 export function getActiveNavRoute(pathname: string) {
-	return (
-		NAV_ROUTE_ITEMS.find((item) => isNavItemActive(item.href, pathname)) ??
-		NAV_ROUTE_ITEMS.find((item) => item.id === DEFAULT_ROUTE_ID) ??
-		null
-	);
+	return NAV_ROUTE_ITEMS.find((item) => isNavItemActive(item.href, pathname)) ?? null;
 }
