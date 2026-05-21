@@ -1,35 +1,80 @@
 <script lang="ts">
-	import { PersonAvatar } from '$lib/components/people';
+	import type { Snippet } from 'svelte';
 	import SettingsCard from './SettingsCard.svelte';
-
-	type AvatarPerson = {
-		name: string;
-		avatar: string;
-	};
 
 	type Props = {
 		title: string;
 		description: string[];
 		footerText: string;
-		person: AvatarPerson;
 		ariaLabel: string;
+		preview: Snippet;
+		uploading?: boolean;
+		errorText?: string | null;
+		onFileSelected: (file: File) => void | Promise<void>;
 	};
 
-	let { title, description, footerText, person, ariaLabel }: Props = $props();
+	let {
+		title,
+		description,
+		footerText,
+		ariaLabel,
+		preview,
+		uploading = false,
+		errorText = null,
+		onFileSelected
+	}: Props = $props();
+
+	let inputElement = $state<HTMLInputElement | null>(null);
+
+	function chooseFile() {
+		if (uploading) {
+			return;
+		}
+
+		inputElement?.click();
+	}
+
+	async function handleFileChange(event: Event) {
+		const input = event.currentTarget;
+
+		if (!(input instanceof HTMLInputElement)) {
+			return;
+		}
+
+		const file = input.files?.[0];
+		input.value = '';
+
+		if (!file) {
+			return;
+		}
+
+		await onFileSelected(file);
+	}
 </script>
 
 <SettingsCard {title} {description}>
+	<div class="mt-4">
+		<input
+			bind:this={inputElement}
+			type="file"
+			accept="image/*"
+			class="sr-only"
+			onchange={handleFileChange}
+		/>
+		<p class="min-h-5 text-[0.72rem] leading-5 {errorText ? 'text-red-600' : 'text-zinc-500'}">
+			{errorText ?? (uploading ? 'Uploading...' : '')}
+		</p>
+	</div>
+
 	{#snippet media()}
 		<button
 			type="button"
+			disabled={uploading}
 			class="inline-flex size-[68px] shrink-0 items-center justify-center rounded-full outline-none transition-opacity hover:opacity-85 focus-visible:ring-2 focus-visible:ring-zinc-300 focus-visible:ring-offset-2"
 			aria-label={ariaLabel}
+			onclick={chooseFile}
 		>
-			<PersonAvatar
-				{person}
-				size={68}
-				class="border border-zinc-200/70 bg-zinc-100 text-xl text-zinc-500"
-			/>
+			{@render preview()}
 		</button>
 	{/snippet}
 

@@ -9,11 +9,15 @@ export type ViewerSessionStatus = 'loading' | 'signedOut' | 'bootstrapping' | 'r
 export type ViewerWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'>;
+	identityEmail: string;
+	identityName?: string;
 };
 
 type CurrentUserAndWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'> | null;
+	identityEmail: string;
+	identityName?: string;
 } | null;
 
 const VIEWER_SESSION_CONTEXT = Symbol('viewer-session');
@@ -49,7 +53,9 @@ export function createViewerSession() {
 		if (currentViewer?.workspace) {
 			return {
 				user: currentViewer.user,
-				workspace: currentViewer.workspace
+				workspace: currentViewer.workspace,
+				identityEmail: currentViewer.identityEmail,
+				identityName: currentViewer.identityName
 			};
 		}
 

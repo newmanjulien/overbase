@@ -165,7 +165,7 @@
 			createdAtLabel: dateFormatter.format(new Date(format.createdAt)),
 			creator: {
 				name: format.creator.name,
-				avatar: format.creator.avatar
+				avatarUrl: format.creator.avatarUrl
 			},
 			actionsAriaLabel: 'Format actions',
 			actions: [

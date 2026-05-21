@@ -6,6 +6,8 @@ const CURRENT_WORKSPACE_CONTEXT_KEY = Symbol('current-workspace-context');
 export type CurrentWorkspaceContext = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'>;
+	identityEmail: string;
+	identityName?: string;
 };
 
 export type CurrentWorkspaceStorageScope = {

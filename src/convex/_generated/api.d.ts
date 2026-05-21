@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as accountDeletion from "../accountDeletion.js";
 import type * as auth from "../auth.js";
+import type * as avatar from "../avatar.js";
 import type * as builder from "../builder.js";
 import type * as builderEmailValidators from "../builderEmailValidators.js";
 import type * as builderRuntime from "../builderRuntime.js";
@@ -25,8 +27,10 @@ import type * as devSeed from "../devSeed.js";
 import type * as formatRecipientValidators from "../formatRecipientValidators.js";
 import type * as formatRecipients from "../formatRecipients.js";
 import type * as health from "../health.js";
+import type * as http from "../http.js";
 import type * as opportunityFormatReadiness from "../opportunityFormatReadiness.js";
 import type * as opportunityFormats from "../opportunityFormats.js";
+import type * as settings from "../settings.js";
 import type * as teammateIdentity from "../teammateIdentity.js";
 import type * as teammates from "../teammates.js";
 
@@ -37,7 +41,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  accountDeletion: typeof accountDeletion;
   auth: typeof auth;
+  avatar: typeof avatar;
   builder: typeof builder;
   builderEmailValidators: typeof builderEmailValidators;
   builderRuntime: typeof builderRuntime;
@@ -54,8 +60,10 @@ declare const fullApi: ApiFromModules<{
   formatRecipientValidators: typeof formatRecipientValidators;
   formatRecipients: typeof formatRecipients;
   health: typeof health;
+  http: typeof http;
   opportunityFormatReadiness: typeof opportunityFormatReadiness;
   opportunityFormats: typeof opportunityFormats;
+  settings: typeof settings;
   teammateIdentity: typeof teammateIdentity;
   teammates: typeof teammates;
 }>;

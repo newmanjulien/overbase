@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { ClassValue } from 'clsx';
 	import { cn } from '$lib/components/chrome/shared/cn';
-	import PersonAvatar from './PersonAvatar.svelte';
+	import { PersonAvatar } from '$lib/components/avatar';
 
 	type AvatarStackPerson = {
 		id: string;
 		name: string;
-		avatar: string;
+		avatarUrl: string;
 	};
 
 	type Props = {

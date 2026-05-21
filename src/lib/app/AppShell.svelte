@@ -26,7 +26,7 @@
 
 	type ChromeMode = NonNullable<App.PageData['chromeMode']>;
 
-	let { user, workspace, children }: Props = $props();
+	let { user, workspace, identityEmail, identityName, children }: Props = $props();
 
 	function getChromeMode(chromeMode?: ChromeMode) {
 		return chromeMode ?? 'dashboard';
@@ -38,6 +38,12 @@
 		},
 		get workspace() {
 			return workspace;
+		},
+		get identityEmail() {
+			return identityEmail;
+		},
+		get identityName() {
+			return identityName;
 		}
 	};
 	const sidebarExpandedByMode = $state<Record<ChromeMode, boolean>>({
@@ -119,6 +125,7 @@
 		<DesktopSidebar
 			currentPathname={page.url.pathname}
 			user={currentWorkspace.user}
+			identityEmail={currentWorkspace.identityEmail}
 			class="hidden md:flex"
 		/>
 

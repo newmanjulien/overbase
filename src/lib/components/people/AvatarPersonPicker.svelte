@@ -6,12 +6,12 @@
 	import PlusIcon from 'phosphor-svelte/lib/PlusIcon';
 	import AvatarStack from './AvatarStack.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
-	import PersonAvatar from './PersonAvatar.svelte';
+	import { PersonAvatar } from '$lib/components/avatar';
 
 	type AvatarPersonPickerPerson = {
 		id: string;
 		name: string;
-		avatar: string;
+		avatarUrl: string;
 	};
 
 	type Props = {

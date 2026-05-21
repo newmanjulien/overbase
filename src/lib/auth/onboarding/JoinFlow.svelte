@@ -5,6 +5,7 @@
 	import { BUILDER_FRESH_START_ROUTE, builderAppSlugParams } from '$lib/features/builder/paths';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 	import { useConvexClient } from 'convex-svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
 	import AuthButton from '$lib/auth/components/AuthButton.svelte';
 	import AuthCodeStep from '$lib/auth/components/AuthCodeStep.svelte';
@@ -72,7 +73,7 @@
 	let isOpeningBuilder = $state(false);
 	let builderHomePreloadPromise: Promise<void> | null = null;
 	let builderLoadPromise: Promise<void> | null = null;
-	const builderRoutePreloadPromises = new Map<string, Promise<void>>();
+	const builderRoutePreloadPromises = new SvelteMap<string, Promise<void>>();
 
 	const loginHref = $derived(buildAuthEntryHref('/login', { returnTo, fromAuth: '/join' }));
 	const currentReturnButtonHref = $derived.by(() => {

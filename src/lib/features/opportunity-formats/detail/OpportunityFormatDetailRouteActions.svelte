@@ -10,7 +10,7 @@
 		id: string;
 		ref: FormatRecipientRef;
 		name: string;
-		avatar: string;
+		avatarUrl: string;
 	};
 
 	type Props = {

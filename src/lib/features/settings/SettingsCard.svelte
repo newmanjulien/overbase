@@ -37,7 +37,7 @@
 			<h2 class="text-[0.82rem] leading-5 text-zinc-950">{title}</h2>
 			{#if descriptionLines.length > 0}
 				<div class="mt-3 space-y-1.5 text-[0.74rem] leading-5 text-zinc-600">
-					{#each descriptionLines as line}
+					{#each descriptionLines as line, index (index)}
 						<p>{line}</p>
 					{/each}
 				</div>

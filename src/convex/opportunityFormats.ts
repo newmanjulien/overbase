@@ -16,7 +16,11 @@ import {
 	getOpportunityFormatReadiness,
 	normalizeOpportunityFormatRules
 } from './opportunityFormatReadiness';
-import { getViewerWorkspaceRecord, requireViewerWorkspace } from './auth';
+import {
+	getViewerWorkspaceRecord,
+	requireViewerWorkspace,
+	type ViewerWorkspace
+} from './auth';
 
 const DEFAULT_OPPORTUNITY_FORMAT_TITLE = 'Untitled format';
 
@@ -29,13 +33,21 @@ function normalizeOpportunityFormatTitle(title: string) {
 	return title.trim() || DEFAULT_OPPORTUNITY_FORMAT_TITLE;
 }
 
-async function getCreator(ctx: QueryCtx | MutationCtx, userId: Id<'users'>) {
+async function getCreator(
+	ctx: QueryCtx | MutationCtx,
+	userId: Id<'users'>,
+	viewerWorkspace?: ViewerWorkspace
+) {
 	const user = await ctx.db.get(userId);
+	const identityEmail =
+		viewerWorkspace && userId === viewerWorkspace.user._id
+			? viewerWorkspace.identityEmail
+			: undefined;
 
 	return {
 		id: userId,
-		name: user ? getUserDisplayName(user) : 'Unknown user',
-		avatar: user?.avatarUrl ?? ''
+		name: user ? getUserDisplayName(user, identityEmail) : 'Unknown user',
+		avatarUrl: user?.avatar?.url ?? ''
 	};
 }
 
@@ -147,7 +159,7 @@ export const getOpportunityFormatDetail = query({
 					opportunityFormat.recipientRefs,
 					viewerWorkspace
 				),
-				creator: await getCreator(ctx, opportunityFormat.createdByUserId),
+				creator: await getCreator(ctx, opportunityFormat.createdByUserId, viewerWorkspace),
 				createdAt: opportunityFormat.createdAt,
 				updatedAt: opportunityFormat.updatedAt
 			},
@@ -188,7 +200,8 @@ export const updateOpportunityFormatTitle = mutation({
 export const listOpportunityFormats = query({
 	args: {},
 	handler: async (ctx) => {
-		const { workspace } = await requireViewerWorkspace(ctx);
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const { workspace } = viewerWorkspace;
 		const opportunityFormats = await ctx.db
 			.query('opportunityFormats')
 			.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
@@ -201,7 +214,7 @@ export const listOpportunityFormats = query({
 				title: opportunityFormat.title,
 				status: opportunityFormat.status,
 				readiness: getOpportunityFormatReadiness(opportunityFormat.rules),
-				creator: await getCreator(ctx, opportunityFormat.createdByUserId),
+				creator: await getCreator(ctx, opportunityFormat.createdByUserId, viewerWorkspace),
 				createdAt: opportunityFormat.createdAt
 			}))
 		);

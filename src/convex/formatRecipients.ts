@@ -13,8 +13,11 @@ export type FormatRecipientRef =
 			teammateId: Id<'teammates'>;
 	  };
 
-export function getUserDisplayName(user: Pick<Doc<'users'>, 'displayName' | 'email'>) {
-	return user.displayName?.trim() || user.email;
+export function getUserDisplayName(
+	user: Pick<Doc<'users'>, 'displayName'>,
+	identityEmail?: string
+) {
+	return user.displayName?.trim() || identityEmail || 'Unknown user';
 }
 
 export function getFormatRecipientKey(ref: FormatRecipientRef) {
@@ -61,7 +64,8 @@ export async function getFormatRecipients(
 	ctx: QueryCtx | MutationCtx,
 	viewerWorkspace?: ViewerWorkspace
 ) {
-	const { user, workspace } = viewerWorkspace ?? (await requireViewerWorkspace(ctx));
+	const viewer = viewerWorkspace ?? (await requireViewerWorkspace(ctx));
+	const { user, workspace, identityEmail } = viewer;
 	const dbTeammates = await ctx.db
 		.query('teammates')
 		.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
@@ -72,8 +76,8 @@ export async function getFormatRecipients(
 		{
 			id: getFormatRecipientKey({ kind: 'user', userId: user._id }),
 			ref: { kind: 'user' as const, userId: user._id },
-			name: getUserDisplayName(user),
-			avatar: user.avatarUrl ?? ''
+			name: getUserDisplayName(user, identityEmail),
+			avatarUrl: user.avatar?.url ?? ''
 		},
 		...dbTeammates.map((teammate) => {
 			const ref = { kind: 'teammate' as const, teammateId: teammate._id };
@@ -82,7 +86,7 @@ export async function getFormatRecipients(
 				id: getFormatRecipientKey(ref),
 				ref,
 				name: getTeammateDisplayName(teammate),
-				avatar: ''
+				avatarUrl: ''
 			};
 		})
 	];

@@ -4,11 +4,11 @@
 	import CaretUpDownIcon from 'phosphor-svelte/lib/CaretUpDownIcon';
 	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
-	import { PersonAvatar } from '$lib/components/people';
+	import { PersonAvatar } from '$lib/components/avatar';
 
 	type Profile = {
 		name: string;
-		avatar: string;
+		avatarUrl: string;
 	};
 
 	type Props = {

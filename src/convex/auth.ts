@@ -5,11 +5,15 @@ import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/s
 export type ViewerWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'>;
+	identityEmail: string;
+	identityName?: string;
 };
 
 type CurrentUserAndWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'> | null;
+	identityEmail: string;
+	identityName?: string;
 };
 
 type ClerkIdentity = NonNullable<Awaited<ReturnType<QueryCtx['auth']['getUserIdentity']>>>;
@@ -23,8 +27,13 @@ function getIdentityName(identity: ClerkIdentity) {
 	return name || undefined;
 }
 
-function getIdentityAvatar(identity: ClerkIdentity) {
-	return identity.pictureUrl?.trim() || undefined;
+function getIdentityMetadata(identity: ClerkIdentity) {
+	const identityName = getIdentityName(identity);
+
+	return {
+		identityEmail: getIdentityEmail(identity),
+		...(identityName ? { identityName } : {})
+	};
 }
 
 async function getViewerIdentity(ctx: QueryCtx | MutationCtx) {
@@ -37,12 +46,18 @@ async function getViewerIdentity(ctx: QueryCtx | MutationCtx) {
 	return identity;
 }
 
-export async function requireAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
-	const identity = await getViewerIdentity(ctx);
+async function getUserForIdentity(ctx: QueryCtx | MutationCtx, identity: ClerkIdentity) {
 	const user = await ctx.db
 		.query('users')
 		.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', identity.subject))
 		.first();
+
+	return user;
+}
+
+export async function requireAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
+	const identity = await getViewerIdentity(ctx);
+	const user = await getUserForIdentity(ctx, identity);
 
 	if (!user) {
 		throw new Error('User has not been initialized.');
@@ -92,14 +107,20 @@ async function createWorkspaceForUser(ctx: MutationCtx, user: Doc<'users'>, now:
 }
 
 export async function requireViewerWorkspace(ctx: QueryCtx | MutationCtx): Promise<ViewerWorkspace> {
-	const user = await requireAuthenticatedUser(ctx);
+	const identity = await getViewerIdentity(ctx);
+	const user = await getUserForIdentity(ctx, identity);
+
+	if (!user) {
+		throw new Error('User has not been initialized.');
+	}
+
 	const workspace = await getWorkspaceForUser(ctx, user);
 
 	if (!workspace) {
 		throw new Error('Workspace required.');
 	}
 
-	return { user, workspace };
+	return { user, workspace, ...getIdentityMetadata(identity) };
 }
 
 export async function requireWorkspaceRecord<T extends { workspaceId: Id<'workspaces'> }>(
@@ -131,9 +152,7 @@ export const ensureViewerWorkspace = mutation({
 	handler: async (ctx): Promise<ViewerWorkspace> => {
 		const identity = await getViewerIdentity(ctx);
 		const now = Date.now();
-		const email = getIdentityEmail(identity);
 		const displayName = getIdentityName(identity);
-		const avatarUrl = getIdentityAvatar(identity);
 		let user = await ctx.db
 			.query('users')
 			.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', identity.subject))
@@ -142,21 +161,11 @@ export const ensureViewerWorkspace = mutation({
 		if (!user) {
 			const userId = await ctx.db.insert('users', {
 				clerkUserId: identity.subject,
-				email,
 				...(displayName ? { displayName } : {}),
-				...(avatarUrl ? { avatarUrl } : {}),
 				createdAt: now,
 				updatedAt: now
 			});
 			user = await ctx.db.get(userId);
-		} else {
-			await ctx.db.patch(user._id, {
-				email,
-				...(displayName ? { displayName } : {}),
-				...(avatarUrl ? { avatarUrl } : {}),
-				updatedAt: now
-			});
-			user = await ctx.db.get(user._id);
 		}
 
 		if (!user) {
@@ -164,8 +173,11 @@ export const ensureViewerWorkspace = mutation({
 		}
 
 		const workspace = await getWorkspaceForUser(ctx, user);
+		const identityMetadata = getIdentityMetadata(identity);
 
-		return workspace ? { user, workspace } : await createWorkspaceForUser(ctx, user, now);
+		return workspace
+			? { user, workspace, ...identityMetadata }
+			: { ...(await createWorkspaceForUser(ctx, user, now)), ...identityMetadata };
 	}
 });
 
@@ -175,7 +187,8 @@ export const saveOnboardingCompany = mutation({
 		companyWebsite: v.string()
 	},
 	handler: async (ctx, { companyName, companyWebsite }): Promise<ViewerWorkspace> => {
-		const { user, workspace } = await requireViewerWorkspace(ctx);
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const { workspace } = viewerWorkspace;
 		const name = companyName.trim();
 		const website = companyWebsite.trim();
 
@@ -194,7 +207,7 @@ export const saveOnboardingCompany = mutation({
 			throw new Error('Unable to save company profile.');
 		}
 
-		return { user, workspace: updatedWorkspace };
+		return { ...viewerWorkspace, workspace: updatedWorkspace };
 	}
 });
 
@@ -216,7 +229,11 @@ export const currentUserAndWorkspace = query({
 			return null;
 		}
 
-		return { user, workspace: await getWorkspaceForUser(ctx, user) };
+		return {
+			user,
+			workspace: await getWorkspaceForUser(ctx, user),
+			...getIdentityMetadata(identity)
+		};
 	}
 });
 

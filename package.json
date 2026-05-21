@@ -43,6 +43,7 @@
 		"phosphor-svelte": "^3.1.0",
 		"stick-to-bottom-svelte": "^1.0.3",
 		"svelte-clerk": "^1.1.8",
+		"svix": "^1.94.0",
 		"tailwind-merge": "^3.5.0"
 	},
 	"overrides": {

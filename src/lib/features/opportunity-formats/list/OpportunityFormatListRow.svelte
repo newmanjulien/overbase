@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { cn } from '$lib/components/chrome/shared/cn';
 	import type { SelectableListItem } from '$lib/components/list-page';
-	import { PersonAvatar } from '$lib/components/people';
+	import { PersonAvatar } from '$lib/components/avatar';
 
 	export type OpportunityFormatListItem = SelectableListItem & {
 		title: string;
@@ -12,7 +12,7 @@
 		createdAtLabel: string;
 		creator: {
 			name: string;
-			avatar: string;
+			avatarUrl: string;
 		};
 	};
 

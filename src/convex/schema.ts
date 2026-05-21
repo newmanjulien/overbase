@@ -6,15 +6,15 @@ import {
 	emailDraftState
 } from './builderEmailValidators';
 import { formatRecipientRef } from './formatRecipientValidators';
+import { avatar } from './avatar';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 
 export default defineSchema({
 	users: defineTable({
 		clerkUserId: v.string(),
-		email: v.string(),
 		displayName: v.optional(v.string()),
-		avatarUrl: v.optional(v.string()),
+		avatar: v.optional(avatar),
 		workspaceId: v.optional(v.id('workspaces')),
 		createdAt: v.number(),
 		updatedAt: v.number()
@@ -22,6 +22,7 @@ export default defineSchema({
 	workspaces: defineTable({
 		name: v.string(),
 		website: v.string(),
+		avatar: v.optional(avatar),
 		ownerUserId: v.id('users'),
 		onboardingCompletedAt: v.optional(v.number()),
 		createdAt: v.number(),
