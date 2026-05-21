@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Doc } from '$convex/_generated/dataModel';
+	import type { ViewerIdentity } from '$lib/app/current-workspace.svelte';
 	import DesktopNavList from '$lib/components/chrome/desktop/DesktopNavList.svelte';
 	import DesktopSidebarProfileMenu from '$lib/components/chrome/desktop/DesktopSidebarProfileMenu.svelte';
 	import { cn } from '$lib/components/chrome/shared/cn';
@@ -16,16 +17,16 @@
 	type Props = {
 		currentPathname: string;
 		user: Doc<'users'>;
-		identityEmail: string;
+		identity: ViewerIdentity;
 		class?: string;
 	};
 
-	let { currentPathname, user, identityEmail, class: className = '' }: Props = $props();
+	let { currentPathname, user, identity, class: className = '' }: Props = $props();
 
 	const shellState = useChromeShellState();
 	const activeRoute = $derived(getActiveNavRoute(currentPathname));
 	const profile = $derived({
-		name: user.displayName || identityEmail,
+		name: user.displayName || identity.email,
 		avatarUrl: user.avatar?.url ?? ''
 	});
 	let hoveredRoute = $state<NavRouteItem | null>(null);

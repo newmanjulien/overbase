@@ -16,9 +16,9 @@
 	const client = useConvexClient();
 	const userName = $derived(currentWorkspace.user.displayName ?? '');
 	const userDisplayLabel = $derived(
-		currentWorkspace.user.displayName || currentWorkspace.identityEmail
+		currentWorkspace.user.displayName || currentWorkspace.identity.email
 	);
-	const userEmail = $derived(currentWorkspace.identityEmail);
+	const userEmail = $derived(currentWorkspace.identity.email);
 	const userAvatarUrl = $derived(currentWorkspace.user.avatar?.url ?? '');
 	const workspaceName = $derived(currentWorkspace.workspace.name);
 	const workspaceAvatarUrl = $derived(currentWorkspace.workspace.avatar?.url ?? '');

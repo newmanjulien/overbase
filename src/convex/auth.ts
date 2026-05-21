@@ -1,67 +1,75 @@
 import { v } from 'convex/values';
+import type { ViewerIdentity } from '../shared/viewer';
 import type { Doc, Id } from './_generated/dataModel';
 import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/server';
+
+export type { ViewerIdentity } from '../shared/viewer';
 
 export type ViewerWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'>;
-	identityEmail: string;
-	identityName?: string;
+	identity: ViewerIdentity;
 };
 
 type CurrentUserAndWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'> | null;
-	identityEmail: string;
-	identityName?: string;
-};
+	identity: ViewerIdentity;
+} | null;
 
 type ClerkIdentity = NonNullable<Awaited<ReturnType<QueryCtx['auth']['getUserIdentity']>>>;
 
-function getIdentityEmail(identity: ClerkIdentity) {
-	return identity.email ?? identity.tokenIdentifier;
-}
+type SignedInClerkViewer = {
+	clerkUserId: string;
+	identity: ViewerIdentity;
+	initialDisplayName?: string;
+};
 
-function getIdentityName(identity: ClerkIdentity) {
-	const name = identity.name?.trim();
-	return name || undefined;
-}
+function getSignedInClerkViewer(identity: ClerkIdentity): SignedInClerkViewer {
+	const clerkUserId = identity.subject?.trim();
+	const email = identity.email?.trim();
+	const initialDisplayName = identity.name?.trim() || undefined;
 
-function getIdentityMetadata(identity: ClerkIdentity) {
-	const identityName = getIdentityName(identity);
-
-	return {
-		identityEmail: getIdentityEmail(identity),
-		...(identityName ? { identityName } : {})
-	};
-}
-
-async function getViewerIdentity(ctx: QueryCtx | MutationCtx) {
-	const identity = await ctx.auth.getUserIdentity();
-
-	if (!identity?.subject) {
+	if (!clerkUserId) {
 		throw new Error('Authentication required.');
 	}
 
-	return identity;
+	if (!email) {
+		throw new Error("Clerk Convex JWT template must include the user's email address.");
+	}
+
+	return {
+		clerkUserId,
+		identity: { email },
+		...(initialDisplayName ? { initialDisplayName } : {})
+	};
 }
 
-async function getUserForIdentity(ctx: QueryCtx | MutationCtx, identity: ClerkIdentity) {
+async function requireSignedInClerkViewer(ctx: QueryCtx | MutationCtx) {
+	const identity = await ctx.auth.getUserIdentity();
+
+	if (!identity) {
+		throw new Error('Authentication required.');
+	}
+
+	return getSignedInClerkViewer(identity);
+}
+
+async function getCurrentSignedInClerkViewer(ctx: QueryCtx | MutationCtx) {
+	const identity = await ctx.auth.getUserIdentity();
+
+	if (!identity) {
+		return null;
+	}
+
+	return getSignedInClerkViewer(identity);
+}
+
+async function getUserForClerkUserId(ctx: QueryCtx | MutationCtx, clerkUserId: string) {
 	const user = await ctx.db
 		.query('users')
-		.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', identity.subject))
+		.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', clerkUserId))
 		.first();
-
-	return user;
-}
-
-export async function requireAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
-	const identity = await getViewerIdentity(ctx);
-	const user = await getUserForIdentity(ctx, identity);
-
-	if (!user) {
-		throw new Error('User has not been initialized.');
-	}
 
 	return user;
 }
@@ -107,8 +115,8 @@ async function createWorkspaceForUser(ctx: MutationCtx, user: Doc<'users'>, now:
 }
 
 export async function requireViewerWorkspace(ctx: QueryCtx | MutationCtx): Promise<ViewerWorkspace> {
-	const identity = await getViewerIdentity(ctx);
-	const user = await getUserForIdentity(ctx, identity);
+	const viewer = await requireSignedInClerkViewer(ctx);
+	const user = await getUserForClerkUserId(ctx, viewer.clerkUserId);
 
 	if (!user) {
 		throw new Error('User has not been initialized.');
@@ -120,7 +128,7 @@ export async function requireViewerWorkspace(ctx: QueryCtx | MutationCtx): Promi
 		throw new Error('Workspace required.');
 	}
 
-	return { user, workspace, ...getIdentityMetadata(identity) };
+	return { user, workspace, identity: viewer.identity };
 }
 
 export async function requireWorkspaceRecord<T extends { workspaceId: Id<'workspaces'> }>(
@@ -150,18 +158,17 @@ export function getViewerWorkspaceRecord<T extends { workspaceId: Id<'workspaces
 export const ensureViewerWorkspace = mutation({
 	args: {},
 	handler: async (ctx): Promise<ViewerWorkspace> => {
-		const identity = await getViewerIdentity(ctx);
+		const viewer = await requireSignedInClerkViewer(ctx);
 		const now = Date.now();
-		const displayName = getIdentityName(identity);
 		let user = await ctx.db
 			.query('users')
-			.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', identity.subject))
+			.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', viewer.clerkUserId))
 			.first();
 
 		if (!user) {
 			const userId = await ctx.db.insert('users', {
-				clerkUserId: identity.subject,
-				...(displayName ? { displayName } : {}),
+				clerkUserId: viewer.clerkUserId,
+				...(viewer.initialDisplayName ? { displayName: viewer.initialDisplayName } : {}),
 				createdAt: now,
 				updatedAt: now
 			});
@@ -173,11 +180,10 @@ export const ensureViewerWorkspace = mutation({
 		}
 
 		const workspace = await getWorkspaceForUser(ctx, user);
-		const identityMetadata = getIdentityMetadata(identity);
 
 		return workspace
-			? { user, workspace, ...identityMetadata }
-			: { ...(await createWorkspaceForUser(ctx, user, now)), ...identityMetadata };
+			? { user, workspace, identity: viewer.identity }
+			: { ...(await createWorkspaceForUser(ctx, user, now)), identity: viewer.identity };
 	}
 });
 
@@ -213,17 +219,14 @@ export const saveOnboardingCompany = mutation({
 
 export const currentUserAndWorkspace = query({
 	args: {},
-	handler: async (ctx): Promise<CurrentUserAndWorkspace | null> => {
-		const identity = await ctx.auth.getUserIdentity();
+	handler: async (ctx): Promise<CurrentUserAndWorkspace> => {
+		const viewer = await getCurrentSignedInClerkViewer(ctx);
 
-		if (!identity?.subject) {
+		if (!viewer) {
 			return null;
 		}
 
-		const user = await ctx.db
-			.query('users')
-			.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', identity.subject))
-			.first();
+		const user = await getUserForClerkUserId(ctx, viewer.clerkUserId);
 
 		if (!user) {
 			return null;
@@ -232,7 +235,7 @@ export const currentUserAndWorkspace = query({
 		return {
 			user,
 			workspace: await getWorkspaceForUser(ctx, user),
-			...getIdentityMetadata(identity)
+			identity: viewer.identity
 		};
 	}
 });

@@ -1,24 +1,38 @@
 import { api } from '$convex/_generated/api';
 import type { Doc } from '$convex/_generated/dataModel';
+import type { ViewerIdentity } from '$lib/app/current-workspace.svelte';
 import { getContext, setContext } from 'svelte';
 import { useConvexClient, useQuery } from 'convex-svelte';
 import { useClerkContext } from 'svelte-clerk';
 
 export type ViewerSessionStatus = 'loading' | 'signedOut' | 'bootstrapping' | 'ready' | 'error';
+type ClerkSessionState = 'loading' | 'signedOut' | 'signedIn';
+type ConvexAuthState = 'pending' | 'authenticated' | 'failed';
+type ViewerBootstrapState = 'missing' | 'bootstrapping' | 'ready' | 'error';
 
 export type ViewerWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'>;
-	identityEmail: string;
-	identityName?: string;
+	identity: ViewerIdentity;
 };
 
 type CurrentUserAndWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'> | null;
-	identityEmail: string;
-	identityName?: string;
+	identity: ViewerIdentity;
 } | null;
+
+type ViewerPayload = {
+	user?: Doc<'users'>;
+	workspace?: Doc<'workspaces'> | null;
+	identity?: Partial<ViewerIdentity> | null;
+};
+
+type LiveViewerResult = {
+	raw: CurrentUserAndWorkspace;
+	viewer: ViewerWorkspace | null;
+	error: Error | null;
+};
 
 const VIEWER_SESSION_CONTEXT = Symbol('viewer-session');
 
@@ -26,43 +40,99 @@ function getErrorMessage(error: unknown, fallback: string) {
 	return error instanceof Error ? error.message : fallback;
 }
 
+function getViewerIdentity(payload: ViewerPayload) {
+	const email = typeof payload.identity?.email === 'string' ? payload.identity.email.trim() : '';
+
+	if (!email) {
+		throw new Error("Viewer session is missing the user's email address.");
+	}
+
+	return { email };
+}
+
+function normalizeViewerWorkspace(payload: ViewerPayload | null | undefined): ViewerWorkspace | null {
+	if (!payload?.workspace) {
+		return null;
+	}
+
+	if (!payload.user) {
+		throw new Error('Viewer session is missing the user.');
+	}
+
+	return {
+		user: payload.user,
+		workspace: payload.workspace,
+		identity: getViewerIdentity(payload)
+	};
+}
+
 export function createViewerSession() {
 	const client = useConvexClient();
 	const clerk = useClerkContext();
 	let authVersion = 0;
 	let authRetryNonce = $state(0);
-	let convexAuthReady = $state(false);
+	let convexAuthState = $state<ConvexAuthState>('pending');
 	let tokenErrorText = $state<string | null>(null);
+	let convexAuthErrorText = $state<string | null>(null);
 	let bootstrappingUserId = $state<string | null>(null);
-	let bootstrappedUserId = $state<string | null>(null);
+	let bootstrapAttemptedUserId = $state<string | null>(null);
 	let bootstrapErrorText = $state<string | null>(null);
 	let ensuredViewer = $state<ViewerWorkspace | null>(null);
 	const signedInUserId = $derived(clerk.auth.userId ?? null);
+	const clerkSessionState = $derived.by<ClerkSessionState>(() => {
+		if (!clerk.isLoaded) {
+			return 'loading';
+		}
+
+		return signedInUserId ? 'signedIn' : 'signedOut';
+	});
 	const shouldLoadCurrentUser = $derived(
-		clerk.isLoaded && Boolean(signedInUserId) && convexAuthReady
+		clerkSessionState === 'signedIn' && convexAuthState === 'authenticated'
 	);
 	const currentUserAndWorkspaceQuery = useQuery(api.auth.currentUserAndWorkspace, () =>
 		shouldLoadCurrentUser ? {} : 'skip'
 	);
-	const currentUserAndWorkspace = $derived<CurrentUserAndWorkspace>(
-		currentUserAndWorkspaceQuery.data ?? null
-	);
-	const viewer = $derived.by<ViewerWorkspace | null>(() => {
-		const currentViewer = currentUserAndWorkspace;
+	const liveViewerResult = $derived.by<LiveViewerResult>(() => {
+		const payload = currentUserAndWorkspaceQuery.data ?? null;
 
-		if (currentViewer?.workspace) {
+		if (!payload) {
 			return {
-				user: currentViewer.user,
-				workspace: currentViewer.workspace,
-				identityEmail: currentViewer.identityEmail,
-				identityName: currentViewer.identityName
+				raw: null,
+				viewer: null,
+				error: null
 			};
+		}
+
+		try {
+			return {
+				raw: payload,
+				viewer: normalizeViewerWorkspace(payload),
+				error: null
+			};
+		} catch (error) {
+			return {
+				raw: null,
+				viewer: null,
+				error: new Error(getErrorMessage(error, 'Viewer session is malformed.'))
+			};
+		}
+	});
+	const currentUserAndWorkspace = $derived<CurrentUserAndWorkspace>(liveViewerResult.raw);
+	const liveViewer = $derived<ViewerWorkspace | null>(liveViewerResult.viewer);
+	const liveViewerError = $derived<Error | null>(liveViewerResult.error);
+	const viewer = $derived.by<ViewerWorkspace | null>(() => {
+		if (liveViewer) {
+			return liveViewer;
 		}
 
 		return ensuredViewer;
 	});
 	const error = $derived.by<Error | null>(() => {
-		const message = tokenErrorText ?? bootstrapErrorText;
+		const message =
+			tokenErrorText ??
+			convexAuthErrorText ??
+			liveViewerError?.message ??
+			bootstrapErrorText;
 
 		if (message) {
 			return new Error(message);
@@ -70,48 +140,79 @@ export function createViewerSession() {
 
 		return currentUserAndWorkspaceQuery.error ?? null;
 	});
-	const status = $derived.by<ViewerSessionStatus>(() => {
-		if (!clerk.isLoaded) {
-			return 'loading';
-		}
-
-		if (!signedInUserId) {
-			return 'signedOut';
-		}
-
-		if (error) {
+	const viewerBootstrapState = $derived.by<ViewerBootstrapState>(() => {
+		if (bootstrapErrorText || liveViewerError || currentUserAndWorkspaceQuery.error) {
 			return 'error';
 		}
 
-		if (!convexAuthReady || currentUserAndWorkspaceQuery.isLoading) {
-			return 'loading';
+		if (viewer) {
+			return 'ready';
 		}
 
-		if (!viewer) {
+		if (bootstrappingUserId) {
 			return 'bootstrapping';
 		}
 
-		return 'ready';
+		return 'missing';
+	});
+	const status = $derived.by<ViewerSessionStatus>(() => {
+		if (clerkSessionState === 'loading') {
+			return 'loading';
+		}
+
+		if (clerkSessionState === 'signedOut') {
+			return 'signedOut';
+		}
+
+		if (convexAuthState === 'failed') {
+			return 'error';
+		}
+
+		if (viewerBootstrapState === 'error') {
+			return 'error';
+		}
+
+		if (viewerBootstrapState === 'ready') {
+			return 'ready';
+		}
+
+		if (convexAuthState === 'pending') {
+			return 'loading';
+		}
+
+		if (currentUserAndWorkspaceQuery.isLoading) {
+			return 'loading';
+		}
+
+		return 'bootstrapping';
 	});
 
 	function resetBootstrapState() {
 		bootstrappingUserId = null;
-		bootstrappedUserId = null;
+		bootstrapAttemptedUserId = null;
 		bootstrapErrorText = null;
 		ensuredViewer = null;
 	}
 
 	async function bootstrapCurrentUser(userId: string) {
-		if (bootstrappingUserId || bootstrappedUserId === userId) {
+		if (bootstrappingUserId || bootstrapAttemptedUserId === userId) {
 			return;
 		}
 
 		bootstrappingUserId = userId;
-		bootstrappedUserId = userId;
+		bootstrapAttemptedUserId = userId;
 		bootstrapErrorText = null;
 
 		try {
-			ensuredViewer = await client.mutation(api.auth.ensureViewerWorkspace, {});
+			const nextViewer = normalizeViewerWorkspace(
+				await client.mutation(api.auth.ensureViewerWorkspace, {})
+			);
+
+			if (!nextViewer) {
+				throw new Error('Workspace required.');
+			}
+
+			ensuredViewer = nextViewer;
 		} catch (error) {
 			bootstrapErrorText = getErrorMessage(error, 'Unable to create your workspace.');
 		} finally {
@@ -121,16 +222,14 @@ export function createViewerSession() {
 
 	function retry() {
 		tokenErrorText = null;
+		convexAuthErrorText = null;
 		authRetryNonce += 1;
 		resetBootstrapState();
-
-		if (signedInUserId && convexAuthReady) {
-			void bootstrapCurrentUser(signedInUserId);
-		}
 	}
 
 	function reset() {
 		tokenErrorText = null;
+		convexAuthErrorText = null;
 		resetBootstrapState();
 	}
 
@@ -146,8 +245,9 @@ export function createViewerSession() {
 		const version = (authVersion += 1);
 
 		void retryNonce;
-		convexAuthReady = false;
+		convexAuthState = 'pending';
 		tokenErrorText = null;
+		convexAuthErrorText = null;
 
 		if (!clerk.isLoaded) {
 			return;
@@ -155,7 +255,6 @@ export function createViewerSession() {
 
 		if (!userId) {
 			client.setAuth(async () => null);
-			convexAuthReady = true;
 			return;
 		}
 
@@ -180,9 +279,20 @@ export function createViewerSession() {
 
 			return token ?? null;
 		}, (isAuthenticated) => {
-			if (version === authVersion) {
-				convexAuthReady = isAuthenticated;
+			if (version !== authVersion) {
+				return;
 			}
+
+			if (isAuthenticated) {
+				convexAuthState = 'authenticated';
+				convexAuthErrorText = null;
+				return;
+			}
+
+			convexAuthState = 'failed';
+			convexAuthErrorText =
+				tokenErrorText ??
+				'Unable to authenticate with Convex. Check the Clerk JWT template named "convex".';
 		});
 	});
 
@@ -194,7 +304,7 @@ export function createViewerSession() {
 			return;
 		}
 
-		if (bootstrappedUserId && bootstrappedUserId !== userId) {
+		if (bootstrapAttemptedUserId && bootstrapAttemptedUserId !== userId) {
 			resetBootstrapState();
 		}
 	});
@@ -204,8 +314,9 @@ export function createViewerSession() {
 
 		if (
 			!userId ||
-			!convexAuthReady ||
+			convexAuthState !== 'authenticated' ||
 			currentUserAndWorkspaceQuery.isLoading ||
+			liveViewerError ||
 			currentUserAndWorkspaceQuery.error ||
 			currentUserAndWorkspace?.workspace ||
 			ensuredViewer

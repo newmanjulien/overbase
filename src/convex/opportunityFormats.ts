@@ -10,6 +10,7 @@ import {
 	getDefaultFormatRecipientRefs,
 	getFormatRecipients,
 	getUserDisplayName,
+	getViewerUserDisplayName,
 	normalizeFormatRecipientRefs
 } from './formatRecipients';
 import {
@@ -39,14 +40,18 @@ async function getCreator(
 	viewerWorkspace?: ViewerWorkspace
 ) {
 	const user = await ctx.db.get(userId);
-	const identityEmail =
+	const viewerIdentity =
 		viewerWorkspace && userId === viewerWorkspace.user._id
-			? viewerWorkspace.identityEmail
+			? viewerWorkspace.identity
 			: undefined;
 
 	return {
 		id: userId,
-		name: user ? getUserDisplayName(user, identityEmail) : 'Unknown user',
+		name: user
+			? viewerIdentity
+				? getViewerUserDisplayName(user, viewerIdentity)
+				: getUserDisplayName(user)
+			: 'Unknown user',
 		avatarUrl: user?.avatar?.url ?? ''
 	};
 }

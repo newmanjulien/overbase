@@ -74,8 +74,7 @@
 	<AppShell
 		user={session.viewer.user}
 		workspace={session.viewer.workspace}
-		identityEmail={session.viewer.identityEmail}
-		identityName={session.viewer.identityName}
+		identity={session.viewer.identity}
 	>
 		{@render children()}
 	</AppShell>
