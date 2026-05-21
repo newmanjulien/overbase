@@ -1,4 +1,4 @@
-import type { EmailDraft, EmailDraftPatch, EmailDraftState } from './email.js';
+import type { BuilderArtifactPatch, BuilderArtifactSet, BuilderArtifacts } from './artifacts.js';
 import type { TranscriptMessage } from './streams.js';
 import type { GuideDefinition } from './catalog.js';
 export type { BuilderAppManifest } from './catalog.js';
@@ -26,25 +26,29 @@ export type BuilderGuidedRunSetup = {
     guideSetup: BuilderGuideSetup;
 };
 export type BuilderRunSetup = BuilderFreeformRunSetup | BuilderGuidedRunSetup;
-export type BuilderAppTurnHandlers = {
-    onAssistantDelta?: (delta: string) => Promise<void> | void;
-};
 export type BuilderAppStartTurnInput = {
     setup: BuilderRunSetup;
+    artifacts?: BuilderArtifacts;
     appState?: BuilderAppState;
-    handlers: BuilderAppTurnHandlers;
 };
 export type BuilderAppContinueTurnInput = {
     setup: BuilderRunSetup;
     transcript: TranscriptMessage[];
     userMessage: string;
-    emailDraftState?: EmailDraftState;
+    artifacts?: BuilderArtifacts;
     appState?: BuilderAppState;
-    handlers: BuilderAppTurnHandlers;
 };
 export type BuilderAppBackgroundJobInput = {
     setup: BuilderRunSetup;
+    artifacts?: BuilderArtifacts;
     appState?: BuilderAppState;
+};
+export type BuilderRuntimeStreamEvent = {
+    type: 'assistantDelta';
+    text: string;
+};
+export type BuilderRuntimeContext = {
+    emit: (event: BuilderRuntimeStreamEvent) => Promise<void> | void;
 };
 export type CreateGuidedRunSetupInput = {
     title: string;
@@ -58,23 +62,15 @@ export declare function createGuidedRunSetup({ title, description, guide, action
 export declare function normalizeBuilderRunSetup(setup: BuilderRunSetup): BuilderRunSetup;
 export declare function builderRunSetupsEqual(left: BuilderRunSetup, right: BuilderRunSetup): boolean;
 export declare function buildBuilderRunSetupPromptText(setup: BuilderRunSetup): string;
-export type BuilderAppPatchResult = {
-    text: string;
-    patch: EmailDraftPatch | null;
-};
-export type BuilderAppOutputEvent = {
-    type: 'assistantDelta';
-    text: string;
-} | {
+export type BuilderAppFinalEvent = {
     type: 'assistantComplete';
     text: string;
 } | {
-    type: 'emailDraftSet';
-    emailDraft: EmailDraft;
-    visibility: EmailDraftState['visibility'];
+    type: 'artifactSet';
+    artifact: BuilderArtifactSet;
 } | {
-    type: 'emailDraftPatch';
-    patch: EmailDraftPatch | null;
+    type: 'artifactPatch';
+    artifact: BuilderArtifactPatch;
 } | {
     type: 'appStateReplace';
     appState: BuilderAppState;
@@ -91,4 +87,5 @@ export type BuilderAppOutputEvent = {
     type: 'fail';
     errorText: string;
 };
+export type BuilderAppOutputEvent = BuilderRuntimeStreamEvent | BuilderAppFinalEvent;
 //# sourceMappingURL=app-protocol.d.ts.map

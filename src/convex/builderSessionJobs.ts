@@ -1,4 +1,8 @@
 import { v } from 'convex/values';
+import {
+	getPrimaryEmailDraftArtifact,
+	getVisiblePrimaryEmailDraftArtifact
+} from '@overbase/builder-sdk/artifacts';
 import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
 import { internalMutation, type MutationCtx } from './_generated/server';
@@ -21,6 +25,7 @@ import {
 type RunnableTurnContext = {
 	appSlug: string;
 	setup: Doc<'builderSessions'>['setup'];
+	artifacts: Doc<'builderSessions'>['artifacts'];
 	appState?: Doc<'builderSessions'>['appState'];
 };
 
@@ -147,6 +152,7 @@ export const claimStartTurn = internalMutation({
 		return {
 			appSlug: session.appSlug,
 			setup: session.setup,
+			artifacts: session.artifacts,
 			appState: session.appState
 		};
 	}
@@ -194,7 +200,7 @@ export const claimContinueTurn = internalMutation({
 			};
 		}
 
-		if (!session.emailDraftState) {
+		if (!getPrimaryEmailDraftArtifact(session.artifacts)) {
 			const nextAttempt = job.attempts + 1;
 
 			if (nextAttempt >= BACKGROUND_JOB_MAX_ATTEMPTS || now >= job.deadlineAt) {
@@ -229,7 +235,8 @@ export const claimContinueTurn = internalMutation({
 		}
 
 		const messages = await getSessionMessages(ctx, session._id);
-		const userMessage = [...messages].reverse().find((message) => message.role === 'user')?.text ?? '';
+		const userMessage =
+			[...messages].reverse().find((message) => message.role === 'user')?.text ?? '';
 
 		await ctx.db.patch(job._id, {
 			status: 'running',
@@ -241,7 +248,7 @@ export const claimContinueTurn = internalMutation({
 			appSlug: session.appSlug,
 			setup: session.setup,
 			userMessage,
-			emailDraftState: session.emailDraftState,
+			artifacts: session.artifacts,
 			appState: session.appState,
 			transcript: messages
 				.filter((message) => message.status === 'complete' && message.text.trim())
@@ -291,6 +298,7 @@ export const claimBackgroundJob = internalMutation({
 		return {
 			appSlug: session.appSlug,
 			setup: session.setup,
+			artifacts: session.artifacts,
 			appState: session.appState
 		};
 	}
@@ -327,7 +335,9 @@ export const completeBuilderJob = internalMutation({
 		}
 
 		const shouldWaitForUser = events.some((event) => event.type === 'waitForUser');
-		const shouldEnqueueBackgroundJob = events.some((event) => event.type === 'enqueueBackgroundJob');
+		const shouldEnqueueBackgroundJob = events.some(
+			(event) => event.type === 'enqueueBackgroundJob'
+		);
 		const backgroundJobId = shouldEnqueueBackgroundJob
 			? await insertJob(ctx, {
 					sessionId: session._id,
@@ -351,9 +361,9 @@ export const completeBuilderJob = internalMutation({
 		if (backgroundJobId) {
 			controlEvents.push({
 				type: 'sessionPatch',
-					patch: {
-						activeBackgroundJobId: backgroundJobId
-					}
+				patch: {
+					activeBackgroundJobId: backgroundJobId
+				}
 			});
 		}
 
@@ -401,7 +411,7 @@ export const failBuilderJob = internalMutation({
 		}
 
 		const session = await ctx.db.get(job.sessionId);
-		const hasVisibleDraft = session?.emailDraftState?.visibility === 'visible';
+		const hasVisibleDraft = Boolean(getVisiblePrimaryEmailDraftArtifact(session?.artifacts));
 
 		await failJobRecord(ctx, jobId, errorText, now, {
 			status: hasVisibleDraft ? 'ready' : 'failed',

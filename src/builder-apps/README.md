@@ -42,7 +42,7 @@ Files:
 
 - `ids.ts`: app slugs.
 - `presentation.ts`: gallery metadata, categories, artwork, sort order.
-- `runtime-core.ts`: HTTP client for external apps.
+- `runtime-core.ts`: external app registry/env wrapper that calls SDK runtime transport helpers.
 - `runtime.server.ts`: SvelteKit manifest loader.
 - `src/convex/builderRuntime.ts`: Convex runtime selector.
 
@@ -57,7 +57,7 @@ Run path:
 
 - Convex jobs call `src/convex/builderRuntime.ts`.
 - `src/convex/builderRuntime.ts` sends external builder jobs through `runtime-core.ts`.
-- `runtime-core.ts` signs the request and calls the external runtime HTTP endpoint.
+- `runtime-core.ts` uses the SDK transport helpers to sign requests and call the external runtime HTTP endpoint.
 
 Required env per external app:
 
@@ -80,8 +80,8 @@ For example, in Bring the Firm:
 
 - `src/runtime/operations.ts` is the real runtime logic. It is the closest match to
   `custom-opportunity-format/runtime.ts`.
-- `src/runtime/http.ts`, `src/runtime/signing.ts`, and `src/runtime/ndjson.ts` are
-  there because Overbase calls the app over HTTP.
+- The SDK route adapters handle the HTTP signing and NDJSON streaming layer because
+  Overbase calls the app over HTTP.
 - `src/routes/api/builder/*` exposes the runtime endpoints that Overbase calls.
 
 So the difference is not that Bring the Firm has a different kind of builder brain.

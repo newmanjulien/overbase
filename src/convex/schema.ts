@@ -1,9 +1,9 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import {
+	builderArtifacts,
 	builderRunSetup,
-	emailDraft,
-	emailDraftState
+	emailDraft
 } from './builderEmailValidators';
 import { formatRecipientRef } from './formatRecipientValidators';
 import { avatar } from './avatar';
@@ -48,7 +48,7 @@ export default defineSchema({
 		),
 		activeTurnJobId: v.optional(v.id('builderSessionJobs')),
 		activeBackgroundJobId: v.optional(v.id('builderSessionJobs')),
-		emailDraftState: v.optional(emailDraftState),
+		artifacts: builderArtifacts,
 		errorText: v.optional(v.string()),
 		createdAt: v.number(),
 		updatedAt: v.number(),

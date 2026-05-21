@@ -20,6 +20,10 @@
 			"types": "./dist/email.d.ts",
 			"default": "./dist/email.js"
 		},
+		"./artifacts": {
+			"types": "./dist/artifacts.d.ts",
+			"default": "./dist/artifacts.js"
+		},
 		"./catalog": {
 			"types": "./dist/catalog.d.ts",
 			"default": "./dist/catalog.js"
@@ -31,6 +35,10 @@
 		"./host": {
 			"types": "./dist/host.d.ts",
 			"default": "./dist/host.js"
+		},
+		"./transport": {
+			"types": "./dist/transport.d.ts",
+			"default": "./dist/transport.js"
 		},
 		"./streams": {
 			"types": "./dist/streams.d.ts",

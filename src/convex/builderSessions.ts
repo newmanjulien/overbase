@@ -12,25 +12,20 @@ import {
 	builderRunSetup,
 	emailDraft as emailDraftValidator
 } from './builderEmailValidators';
+import { hasEmailDraftChanged, normalizeEmailDraft } from '@overbase/builder-sdk/email';
 import {
-	hasEmailDraftChanged,
-	normalizeEmailDraft
-} from '@overbase/builder-sdk/email';
+	getVisiblePrimaryEmailDraftArtifact,
+	replaceBuilderArtifact
+} from '@overbase/builder-sdk/artifacts';
 import {
 	getBuilderSessionExpiresAt,
 	isBuilderSessionActive,
 	normalizeStartRequestId,
 	normalizeUserText
 } from './builderSessionAccess';
-import {
-	buildSessionSnapshot,
-	getAuthorizedSession,
-	insertJob
-} from './builderSessionCore';
+import { buildSessionSnapshot, getAuthorizedSession, insertJob } from './builderSessionCore';
 import { requireViewerWorkspace } from './auth';
-import {
-	getActiveBuilderAppPresentationEntry
-} from '../builder-apps/registry';
+import { getActiveBuilderAppPresentationEntry } from '../builder-apps/registry';
 
 async function getIdempotentStartSnapshot(
 	ctx: MutationCtx,
@@ -137,6 +132,7 @@ export const startSession = mutation({
 			...(normalizedStartRequestId ? { startRequestId: normalizedStartRequestId } : {}),
 			setup: normalizedSetup,
 			status: 'working',
+			artifacts: {},
 			createdAt: now,
 			updatedAt: now,
 			expiresAt
@@ -172,11 +168,7 @@ export const startSession = mutation({
 			activeTurnJobId: jobId,
 			updatedAt: now
 		});
-		await ctx.scheduler.runAfter(
-			0,
-			internal.builderSessionJobRuns.runStartTurn,
-			{ jobId }
-		);
+		await ctx.scheduler.runAfter(0, internal.builderSessionJobRuns.runStartTurn, { jobId });
 
 		const session = await ctx.db.get(sessionId);
 
@@ -287,11 +279,7 @@ export const sendMessage = mutation({
 			expiresAt,
 			updatedAt: now
 		});
-		await ctx.scheduler.runAfter(
-			0,
-			internal.builderSessionJobRuns.runContinueTurn,
-			{ jobId }
-		);
+		await ctx.scheduler.runAfter(0, internal.builderSessionJobRuns.runContinueTurn, { jobId });
 
 		const updatedSession = await ctx.db.get(session._id);
 
@@ -316,8 +304,9 @@ export const saveEmailDraft = mutation({
 	handler: async (ctx, { sessionId, baseEmailDraftVersion, emailDraft }) => {
 		const now = Date.now();
 		const session = await getAuthorizedSession(ctx, sessionId, now);
+		const artifact = session ? getVisiblePrimaryEmailDraftArtifact(session.artifacts) : null;
 
-		if (!session || !session.emailDraftState || session.emailDraftState.visibility !== 'visible') {
+		if (!session || !artifact) {
 			throw new Error('Email draft not found.');
 		}
 
@@ -325,14 +314,14 @@ export const saveEmailDraft = mutation({
 			throw new Error('Please wait for the assistant response to finish before editing the draft.');
 		}
 
-		if (baseEmailDraftVersion !== session.emailDraftState.version) {
+		if (baseEmailDraftVersion !== artifact.version) {
 			throw new Error(
 				'The draft changed while you were editing. Review the latest version before saving.'
 			);
 		}
 
 		const normalizedDraft = normalizeEmailDraft(emailDraft);
-		const previousDraft = normalizeEmailDraft(session.emailDraftState.draft);
+		const previousDraft = normalizeEmailDraft(artifact.value);
 		const expiresAt = getBuilderSessionExpiresAt(now);
 
 		if (!hasEmailDraftChanged(previousDraft, normalizedDraft)) {
@@ -346,19 +335,20 @@ export const saveEmailDraft = mutation({
 			return {
 				snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession) : null,
 				expiresAt,
-				emailDraftVersion: session.emailDraftState.version,
+				emailDraftVersion: artifact.version,
 				changed: false
 			};
 		}
 
-		const nextEmailDraftVersion = session.emailDraftState.version + 1;
+		const nextArtifact = {
+			...artifact,
+			version: artifact.version + 1,
+			visibility: 'visible' as const,
+			value: normalizedDraft
+		};
 
 		await ctx.db.patch(session._id, {
-			emailDraftState: {
-				version: nextEmailDraftVersion,
-				visibility: 'visible',
-				draft: normalizedDraft
-			},
+			artifacts: replaceBuilderArtifact(session.artifacts, nextArtifact),
 			expiresAt,
 			updatedAt: now
 		});
@@ -368,7 +358,7 @@ export const saveEmailDraft = mutation({
 		return {
 			snapshot: updatedSession ? await buildSessionSnapshot(ctx, updatedSession) : null,
 			expiresAt,
-			emailDraftVersion: nextEmailDraftVersion,
+			emailDraftVersion: nextArtifact.version,
 			changed: true
 		};
 	}

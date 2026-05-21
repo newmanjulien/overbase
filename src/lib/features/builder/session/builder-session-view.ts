@@ -1,4 +1,5 @@
 import type { Doc } from '$convex/_generated/dataModel';
+import { getVisiblePrimaryEmailDraftArtifact } from '@overbase/builder-sdk/artifacts';
 
 type SessionMessageView = {
 	role: 'user' | 'assistant';
@@ -42,19 +43,18 @@ export function getBuilderSessionMessagingView(params: {
 }
 
 export function getBuilderSessionEmailDraftView(session: Doc<'builderSessions'> | null) {
-	const emailDraftState =
-		session?.emailDraftState?.visibility === 'visible' ? session.emailDraftState : null;
-	const emailDraft = emailDraftState?.draft ?? null;
+	const emailDraftArtifact = session ? getVisiblePrimaryEmailDraftArtifact(session.artifacts) : null;
+	const emailDraft = emailDraftArtifact?.value ?? null;
 	const canUseReadyEmailDraft = Boolean(
 		session &&
-			emailDraftState &&
+			emailDraftArtifact &&
 			session.status === 'ready' &&
 			!session.activeTurnJobId
 	);
 
 	return {
 		emailDraft,
-		emailDraftVersion: emailDraftState?.version ?? 0,
+		emailDraftVersion: emailDraftArtifact?.version ?? 0,
 		canEditEmailDraft: canUseReadyEmailDraft,
 		canPublishEmailDraft: canUseReadyEmailDraft
 	};

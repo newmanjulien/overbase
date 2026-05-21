@@ -1,35 +1,39 @@
 import type {
 	BuilderAppBackgroundJobInput,
 	BuilderAppContinueTurnInput,
+	BuilderAppFinalEvent,
 	BuilderAppOutputEvent,
 	BuilderAppStartTurnInput,
-	BuilderAppState
+	BuilderAppState,
+	BuilderRuntimeContext
 } from './app-protocol.js';
 import type { BuilderAppManifest } from './catalog.js';
 import {
-	applyEmailDraftPatch,
-	hasEmailDraftChanged,
-	hasEmailDraftPatchFields,
-	normalizeEmailDraft,
-	type EmailDraftState
-} from './email.js';
+	applyBuilderArtifactPatchEvent,
+	applyBuilderArtifactSetEvent,
+	normalizeBuilderArtifacts,
+	type BuilderArtifacts
+} from './artifacts.js';
 
 export type BuilderAppRuntime = {
 	manifest: BuilderAppManifest;
 	startTurn: (
 		input: BuilderAppStartTurnInput,
-		emit?: (event: BuilderAppOutputEvent) => Promise<void> | void
-	) => Promise<BuilderAppOutputEvent[]>;
+		context: BuilderRuntimeContext
+	) => Promise<BuilderAppFinalEvent[]>;
 	continueTurn: (
 		input: BuilderAppContinueTurnInput,
-		emit?: (event: BuilderAppOutputEvent) => Promise<void> | void
-	) => Promise<BuilderAppOutputEvent[]>;
-	backgroundJob?: (input: BuilderAppBackgroundJobInput) => Promise<BuilderAppOutputEvent[]>;
+		context: BuilderRuntimeContext
+	) => Promise<BuilderAppFinalEvent[]>;
+	backgroundJob?: (
+		input: BuilderAppBackgroundJobInput,
+		context: BuilderRuntimeContext
+	) => Promise<BuilderAppFinalEvent[]>;
 };
 
 export type BuilderHostState = {
 	appState: BuilderAppState;
-	emailDraftState: EmailDraftState | null;
+	artifacts: BuilderArtifacts;
 };
 
 export type BuilderHostEffects = {
@@ -48,11 +52,12 @@ export type BuilderHostReduction = {
 export const BUILDER_HOST_APP_STATE_VERSION = 1;
 
 export function createInitialBuilderHostState(
-	appState: BuilderAppState = { version: BUILDER_HOST_APP_STATE_VERSION, value: {} }
+	appState: BuilderAppState = { version: BUILDER_HOST_APP_STATE_VERSION, value: {} },
+	artifacts: BuilderArtifacts = {}
 ): BuilderHostState {
 	return {
 		appState,
-		emailDraftState: null
+		artifacts: normalizeBuilderArtifacts(artifacts)
 	};
 }
 
@@ -113,42 +118,26 @@ export function applyBuilderHostEvent(
 		return { state: nextState, effects };
 	}
 
-	if (event.type === 'emailDraftSet') {
-		const emailDraft = normalizeEmailDraft(event.emailDraft);
+	if (event.type === 'artifactSet') {
+		const result = applyBuilderArtifactSetEvent(nextState.artifacts, event.artifact);
 
 		nextState = {
 			...nextState,
-			emailDraftState: {
-				version: (nextState.emailDraftState?.version ?? 0) + 1,
-				visibility: event.visibility,
-				draft: emailDraft
-			}
+			artifacts: result.artifacts
 		};
 		return { state: nextState, effects };
 	}
 
-	if (event.type === 'emailDraftPatch') {
-		if (
-			!nextState.emailDraftState ||
-			nextState.emailDraftState.visibility !== 'visible' ||
-			!hasEmailDraftPatchFields(event.patch)
-		) {
-			return { state: nextState, effects };
-		}
+	if (event.type === 'artifactPatch') {
+		const result = applyBuilderArtifactPatchEvent(nextState.artifacts, event.artifact);
 
-		const emailDraft = applyEmailDraftPatch(nextState.emailDraftState.draft, event.patch);
-
-		if (!hasEmailDraftChanged(nextState.emailDraftState.draft, emailDraft)) {
+		if (!result.changed) {
 			return { state: nextState, effects };
 		}
 
 		nextState = {
 			...nextState,
-			emailDraftState: {
-				version: nextState.emailDraftState.version + 1,
-				visibility: 'visible',
-				draft: emailDraft
-			}
+			artifacts: result.artifacts
 		};
 		return { state: nextState, effects };
 	}
@@ -178,7 +167,7 @@ export function applyBuilderHostEvent(
 
 export function applyBuilderHostEvents(
 	state: BuilderHostState,
-	events: BuilderAppOutputEvent[]
+	events: BuilderAppFinalEvent[]
 ): BuilderHostReduction {
 	let nextState = state;
 	const effects = createEmptyBuilderHostEffects();

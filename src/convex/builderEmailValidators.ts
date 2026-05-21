@@ -35,10 +35,23 @@ export const emailDraftPatch = v.object({
 	body: v.optional(v.array(emailBodyBlock))
 });
 
-export const emailDraftState = v.object({
+export const emailDraftArtifact = v.object({
+	id: v.literal('primary'),
+	kind: v.literal('emailDraft'),
 	version: v.number(),
 	visibility: v.union(v.literal('hidden'), v.literal('visible')),
-	draft: emailDraft
+	value: emailDraft
+});
+
+export const emailDraftArtifactSet = v.object({
+	artifactId: v.literal('primary'),
+	kind: v.literal('emailDraft'),
+	visibility: v.union(v.literal('hidden'), v.literal('visible')),
+	value: emailDraft
+});
+
+export const builderArtifacts = v.object({
+	primary: v.optional(emailDraftArtifact)
 });
 
 export const builderAppState = v.object({
@@ -79,13 +92,16 @@ export const builderAppOutputEvent = v.union(
 		text: v.string()
 	}),
 	v.object({
-		type: v.literal('emailDraftSet'),
-		emailDraft,
-		visibility: v.union(v.literal('hidden'), v.literal('visible'))
+		type: v.literal('artifactSet'),
+		artifact: emailDraftArtifactSet
 	}),
 	v.object({
-		type: v.literal('emailDraftPatch'),
-		patch: v.union(v.null(), emailDraftPatch)
+		type: v.literal('artifactPatch'),
+		artifact: v.object({
+			artifactId: v.literal('primary'),
+			kind: v.literal('emailDraft'),
+			patch: v.union(v.null(), emailDraftPatch)
+		})
 	}),
 	v.object({
 		type: v.literal('appStateReplace'),

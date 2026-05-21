@@ -3,6 +3,8 @@ import type {
 	BuilderAppContinueTurnInput,
 	BuilderAppStartTurnInput
 } from '@overbase/builder-sdk/app-protocol';
+import type { BuilderAppRuntime } from '@overbase/builder-sdk/host';
+import { callBuilderRuntime, BUILDER_RUNTIME_ROUTES } from '@overbase/builder-sdk/transport';
 import type { BuilderAppPresentation } from './presentation';
 import { getBuilderAppRegistryEntry } from './manifest-client';
 import {
@@ -10,9 +12,9 @@ import {
 	listBuilderHomeCategories,
 	listBuilderHomePresentationEntries
 } from './registry';
-import { callRuntime, relayAssistantDelta } from './runtime-client';
 import {
 	assertRuntimePresentationCoverage,
+	getRuntimeConfig,
 	hasRuntimeConfig,
 	type BuilderRuntimeEnv
 } from './runtime-config';
@@ -55,7 +57,7 @@ export function createExternalBuilderAppRuntime(env: BuilderRuntimeEnv, fetchImp
 		};
 	};
 
-	const getBuilderAppRuntime = (slug: string) => {
+	const getBuilderAppRuntime = (slug: string): Omit<BuilderAppRuntime, 'manifest'> | null => {
 		assertRuntimePresentationCoverage();
 
 		const presentation = getActiveBuilderAppPresentationEntry(slug);
@@ -65,12 +67,45 @@ export function createExternalBuilderAppRuntime(env: BuilderRuntimeEnv, fetchImp
 		}
 
 		return {
-			startTurn: async (input: BuilderAppStartTurnInput) =>
-				await callRuntime(env, fetchImpl, slug, 'start-turn', input, relayAssistantDelta(input)),
-			continueTurn: async (input: BuilderAppContinueTurnInput) =>
-				await callRuntime(env, fetchImpl, slug, 'continue-turn', input, relayAssistantDelta(input)),
-			backgroundJob: async (input: BuilderAppBackgroundJobInput) =>
-				await callRuntime(env, fetchImpl, slug, 'background-job', input)
+			startTurn: async (input: BuilderAppStartTurnInput, context) => {
+				const { baseUrl, secret } = getRuntimeConfig(env, slug);
+
+				return await callBuilderRuntime({
+					fetchImpl,
+					baseUrl,
+					secret,
+					appSlug: slug,
+					route: BUILDER_RUNTIME_ROUTES.startTurn,
+					input,
+					onStreamEvent: context.emit
+				});
+			},
+			continueTurn: async (input: BuilderAppContinueTurnInput, context) => {
+				const { baseUrl, secret } = getRuntimeConfig(env, slug);
+
+				return await callBuilderRuntime({
+					fetchImpl,
+					baseUrl,
+					secret,
+					appSlug: slug,
+					route: BUILDER_RUNTIME_ROUTES.continueTurn,
+					input,
+					onStreamEvent: context.emit
+				});
+			},
+			backgroundJob: async (input: BuilderAppBackgroundJobInput, context) => {
+				const { baseUrl, secret } = getRuntimeConfig(env, slug);
+
+				return await callBuilderRuntime({
+					fetchImpl,
+					baseUrl,
+					secret,
+					appSlug: slug,
+					route: BUILDER_RUNTIME_ROUTES.backgroundJob,
+					input,
+					onStreamEvent: context.emit
+				});
+			}
 		};
 	};
 

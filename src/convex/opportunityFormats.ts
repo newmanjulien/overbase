@@ -1,4 +1,5 @@
 import { v } from 'convex/values';
+import { getVisiblePrimaryEmailDraftArtifact } from '@overbase/builder-sdk/artifacts';
 import { normalizeEmailDraft } from '@overbase/builder-sdk/email';
 import { mutation, query } from './_generated/server';
 import type { Id } from './_generated/dataModel';
@@ -72,11 +73,13 @@ export const publishFromBuilderSession = mutation({
 			throw new Error('Builder session not found.');
 		}
 
-		if (!session.emailDraftState || session.emailDraftState.visibility !== 'visible') {
+		const artifact = getVisiblePrimaryEmailDraftArtifact(session.artifacts);
+
+		if (!artifact) {
 			throw new Error('Email draft not found.');
 		}
 
-		const emailDraft = normalizeEmailDraft(session.emailDraftState.draft);
+		const emailDraft = normalizeEmailDraft(artifact.value);
 		const opportunityFormatId = await ctx.db.insert('opportunityFormats', {
 			workspaceId: workspace._id,
 			title: opportunityFormatTitle,

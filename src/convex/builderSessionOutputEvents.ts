@@ -1,11 +1,9 @@
-import type { EmailDraftPatch, EmailDraftState } from '@overbase/builder-sdk/email';
 import type { BuilderAppOutputEvent } from '@overbase/builder-sdk/app-protocol';
 import {
-	applyEmailDraftPatch,
-	hasEmailDraftPatchFields,
-	hasEmailDraftChanged,
-	normalizeEmailDraft
-} from '@overbase/builder-sdk/email';
+	applyBuilderArtifactPatchEvent,
+	applyBuilderArtifactSetEvent,
+	type BuilderArtifacts
+} from '@overbase/builder-sdk/artifacts';
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx } from './_generated/server';
 import { completeJobRecord, normalizeAssistantText } from './builderSessionCore';
@@ -13,7 +11,7 @@ import { mergeBuilderSessionAppState } from './builderSessionAppState';
 
 type SessionPatch = {
 	status?: Doc<'builderSessions'>['status'];
-	emailDraftState?: EmailDraftState;
+	artifacts?: BuilderArtifacts;
 	activeTurnJobId?: Id<'builderSessionJobs'> | undefined;
 	activeBackgroundJobId?: Id<'builderSessionJobs'> | undefined;
 	errorText?: string | undefined;
@@ -29,31 +27,6 @@ export type BuilderSessionOutputEvent =
 	| {
 			type: 'completeJob';
 	  };
-
-export function resolveEmailDraftPatchOutput(params: {
-	currentState: EmailDraftState | null | undefined;
-	patch: EmailDraftPatch | null;
-}) {
-	if (
-		!params.currentState ||
-		params.currentState.visibility !== 'visible' ||
-		!hasEmailDraftPatchFields(params.patch)
-	) {
-		return null;
-	}
-
-	const patchedDraft = applyEmailDraftPatch(params.currentState.draft, params.patch);
-
-	if (!hasEmailDraftChanged(params.currentState.draft, patchedDraft)) {
-		return null;
-	}
-
-	return {
-		version: params.currentState.version + 1,
-		visibility: 'visible' as const,
-		draft: patchedDraft
-	};
-}
 
 export async function applyBuilderSessionOutputEvents(
 	ctx: MutationCtx,
@@ -103,33 +76,29 @@ export async function applyBuilderSessionOutputEvents(
 			continue;
 		}
 
-		if (event.type === 'emailDraftSet') {
-			const nextDraft = normalizeEmailDraft(event.emailDraft);
-			const currentVersion =
-				sessionPatch.emailDraftState?.version ?? session.emailDraftState?.version ?? 0;
+		if (event.type === 'artifactSet') {
+			const result = applyBuilderArtifactSetEvent(
+				sessionPatch.artifacts ?? session.artifacts,
+				event.artifact
+			);
 
 			sessionPatch = {
 				...sessionPatch,
-				emailDraftState: {
-					version: currentVersion + 1,
-					visibility: event.visibility,
-					draft: nextDraft
-				}
+				artifacts: result.artifacts
 			};
 			continue;
 		}
 
-		if (event.type === 'emailDraftPatch') {
-			const currentState = sessionPatch.emailDraftState ?? session.emailDraftState;
-			const nextState = resolveEmailDraftPatchOutput({
-				currentState,
-				patch: event.patch
-			});
+		if (event.type === 'artifactPatch') {
+			const result = applyBuilderArtifactPatchEvent(
+				sessionPatch.artifacts ?? session.artifacts,
+				event.artifact
+			);
 
-			if (nextState) {
+			if (result.changed) {
 				sessionPatch = {
 					...sessionPatch,
-					emailDraftState: nextState
+					artifacts: result.artifacts
 				};
 			}
 			continue;
@@ -175,11 +144,4 @@ export async function applyBuilderSessionOutputEvents(
 			updatedAt: now
 		});
 	}
-
-	return {
-		emailDraft:
-			(sessionPatch.emailDraftState ?? session.emailDraftState)?.visibility === 'visible'
-				? (sessionPatch.emailDraftState ?? session.emailDraftState)?.draft ?? null
-				: null
-	};
 }

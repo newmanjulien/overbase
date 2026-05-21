@@ -1,12 +1,59 @@
 import { v } from 'convex/values';
+import type {
+	BuilderAppFinalEvent,
+	BuilderRuntimeContext
+} from '@overbase/builder-sdk/app-protocol';
 import { internal } from './_generated/api';
-import { internalAction } from './_generated/server';
+import type { Id } from './_generated/dataModel';
+import { internalAction, type ActionCtx } from './_generated/server';
 import { getBuilderAppRuntime } from './builderRuntime';
 import {
 	ASSISTANT_STREAM_FLUSH_INTERVAL_MS,
 	ASSISTANT_STREAM_FLUSH_MIN_CHARS,
 	getErrorMessage
 } from './builderSessionCore';
+
+async function flushAssistantDelta(
+	ctx: ActionCtx,
+	jobId: Id<'builderSessionJobs'>,
+	delta: string
+) {
+	await ctx.runMutation(internal.builderSessionJobs.appendAssistantMessageDelta, {
+		jobId,
+		delta
+	});
+}
+
+async function runWithAssistantDeltaFlush(
+	ctx: ActionCtx,
+	jobId: Id<'builderSessionJobs'>,
+	run: (context: BuilderRuntimeContext) => Promise<BuilderAppFinalEvent[]>
+) {
+	let pendingText = '';
+	let lastFlushAt = Date.now();
+	const events = await run({
+		emit: async (event) => {
+			pendingText += event.text;
+			const now = Date.now();
+
+			if (
+				pendingText.length >= ASSISTANT_STREAM_FLUSH_MIN_CHARS ||
+				now - lastFlushAt >= ASSISTANT_STREAM_FLUSH_INTERVAL_MS
+			) {
+				const deltaToFlush = pendingText;
+				pendingText = '';
+				lastFlushAt = now;
+				await flushAssistantDelta(ctx, jobId, deltaToFlush);
+			}
+		}
+	});
+
+	if (pendingText) {
+		await flushAssistantDelta(ctx, jobId, pendingText);
+	}
+
+	return events;
+}
 
 export const runStartTurn = internalAction({
 	args: {
@@ -28,38 +75,16 @@ export const runStartTurn = internalAction({
 				throw new Error('This app is unavailable.');
 			}
 
-			let pendingText = '';
-			let lastFlushAt = Date.now();
-			const events = await runtime.startTurn({
-				setup: context.setup,
-				appState: context.appState,
-				handlers: {
-					onAssistantDelta: async (delta) => {
-						pendingText += delta;
-						const now = Date.now();
-
-						if (
-							pendingText.length >= ASSISTANT_STREAM_FLUSH_MIN_CHARS ||
-							now - lastFlushAt >= ASSISTANT_STREAM_FLUSH_INTERVAL_MS
-						) {
-							const deltaToFlush = pendingText;
-							pendingText = '';
-							lastFlushAt = now;
-							await ctx.runMutation(internal.builderSessionJobs.appendAssistantMessageDelta, {
-								jobId,
-								delta: deltaToFlush
-							});
-						}
-					}
-				}
-			});
-
-			if (pendingText) {
-				await ctx.runMutation(internal.builderSessionJobs.appendAssistantMessageDelta, {
-					jobId,
-					delta: pendingText
-				});
-			}
+			const events = await runWithAssistantDeltaFlush(ctx, jobId, (runtimeContext) =>
+				runtime.startTurn(
+					{
+						setup: context.setup,
+						artifacts: context.artifacts,
+						appState: context.appState
+					},
+					runtimeContext
+				)
+			);
 
 			await ctx.runMutation(internal.builderSessionJobs.completeBuilderJob, {
 				jobId,
@@ -105,41 +130,18 @@ export const runContinueTurn = internalAction({
 				throw new Error('This app is unavailable.');
 			}
 
-			let pendingText = '';
-			let lastFlushAt = Date.now();
-			const events = await runtime.continueTurn({
-				setup: claim.setup,
-				userMessage: claim.userMessage,
-				transcript: claim.transcript,
-				emailDraftState: claim.emailDraftState,
-				appState: claim.appState,
-				handlers: {
-					onAssistantDelta: async (delta) => {
-						pendingText += delta;
-						const now = Date.now();
-
-						if (
-							pendingText.length >= ASSISTANT_STREAM_FLUSH_MIN_CHARS ||
-							now - lastFlushAt >= ASSISTANT_STREAM_FLUSH_INTERVAL_MS
-						) {
-							const deltaToFlush = pendingText;
-							pendingText = '';
-							lastFlushAt = now;
-							await ctx.runMutation(internal.builderSessionJobs.appendAssistantMessageDelta, {
-								jobId,
-								delta: deltaToFlush
-							});
-						}
-					}
-				}
-			});
-
-			if (pendingText) {
-				await ctx.runMutation(internal.builderSessionJobs.appendAssistantMessageDelta, {
-					jobId,
-					delta: pendingText
-				});
-			}
+			const events = await runWithAssistantDeltaFlush(ctx, jobId, (runtimeContext) =>
+				runtime.continueTurn(
+					{
+						setup: claim.setup,
+						userMessage: claim.userMessage,
+						transcript: claim.transcript,
+						artifacts: claim.artifacts,
+						appState: claim.appState
+					},
+					runtimeContext
+				)
+			);
 
 			await ctx.runMutation(internal.builderSessionJobs.completeBuilderJob, {
 				jobId,
@@ -174,10 +176,16 @@ export const runBackgroundJob = internalAction({
 				throw new Error('This app is unavailable.');
 			}
 
-			const events = await runtime.backgroundJob({
-				setup: context.setup,
-				appState: context.appState
-			});
+			const events = await runtime.backgroundJob(
+				{
+					setup: context.setup,
+					artifacts: context.artifacts,
+					appState: context.appState
+				},
+				{
+					emit: async () => {}
+				}
+			);
 
 			await ctx.runMutation(internal.builderSessionJobs.completeBuilderJob, {
 				jobId,

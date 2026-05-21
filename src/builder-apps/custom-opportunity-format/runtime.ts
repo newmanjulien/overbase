@@ -14,17 +14,22 @@ import { buildBuilderRunSetupPromptText } from '@overbase/builder-sdk/app-protoc
 import type {
 	BuilderAppBackgroundJobInput,
 	BuilderAppContinueTurnInput,
-	BuilderAppOutputEvent,
+	BuilderAppFinalEvent,
 	BuilderAppStartTurnInput,
-	BuilderAppState
+	BuilderAppState,
+	BuilderRuntimeContext
 } from '@overbase/builder-sdk/app-protocol';
+import {
+	createPrimaryEmailDraftArtifactSet,
+	getHiddenPrimaryEmailDraftArtifact,
+	getVisiblePrimaryEmailDraftArtifact,
+	PRIMARY_EMAIL_DRAFT_ARTIFACT_ID
+} from '@overbase/builder-sdk/artifacts';
 import type { EmailDraftPatch } from '@overbase/builder-sdk/email';
 import type { BuilderAppRuntime } from '@overbase/builder-sdk/host';
 import type { CustomOpportunityFormatRuntimeDependencies } from './dependencies';
 import { CUSTOM_EMAIL_DEFAULT_AI_CONTEXT } from './rules';
 import type { CustomEmailAiContext } from './types';
-
-type EmitEvent = (event: BuilderAppOutputEvent) => Promise<void> | void;
 
 type CustomEmailAppState = {
 	selectedEmailExamplesSlug?: string;
@@ -115,15 +120,19 @@ function toInitialQuestionExample(examples: {
 function toAssistantPatchResultEvents(result: {
 	text: string;
 	patch: EmailDraftPatch | null;
-}): BuilderAppOutputEvent[] {
+}): BuilderAppFinalEvent[] {
 	return [
 		{
 			type: 'assistantComplete',
 			text: result.text.trim() || (result.patch ? 'Updated the draft.' : 'No changes needed.')
 		},
 		{
-			type: 'emailDraftPatch',
-			patch: result.patch
+			type: 'artifactPatch',
+			artifact: {
+				artifactId: PRIMARY_EMAIL_DRAFT_ARTIFACT_ID,
+				kind: 'emailDraft',
+				patch: result.patch
+			}
 		},
 		{ type: 'complete' }
 	];
@@ -164,21 +173,21 @@ export function createCustomOpportunityFormatRuntime(
 			{ type: 'enqueueBackgroundJob' },
 			{ type: 'waitForUser' },
 			{ type: 'complete' }
-		] satisfies BuilderAppOutputEvent[];
+		] satisfies BuilderAppFinalEvent[];
 	}
 
-	async function continueTurn(input: BuilderAppContinueTurnInput, emit?: EmitEvent) {
+	async function continueTurn(input: BuilderAppContinueTurnInput, context: BuilderRuntimeContext) {
 		const openAIConfig = deps.getOpenAIConfig();
-		const draftState = input.emailDraftState;
+		const hiddenArtifact = getHiddenPrimaryEmailDraftArtifact(input.artifacts);
 
-		if (draftState?.visibility === 'hidden') {
+		if (hiddenArtifact) {
 			const customState = getCustomEmailAppState(input.appState);
 			const setupPromptText = buildBuilderRunSetupPromptText(input.setup);
 			const emailDraft = await applyEmailInitialAnswer({
 				setupPromptText,
 				initialQuestion: customState.initialQuestionText ?? '',
 				initialAnswer: input.userMessage,
-				draft: draftState.draft,
+				draft: hiddenArtifact.value,
 				aiContext: customState.aiContext,
 				openAIConfig
 			});
@@ -188,24 +197,31 @@ export function createCustomOpportunityFormatRuntime(
 					type: 'assistantComplete',
 					text: 'I adjusted the draft based on that and put it in the panel.'
 				},
-				{ type: 'emailDraftSet', emailDraft, visibility: 'visible' },
+				{
+					type: 'artifactSet',
+					artifact: createPrimaryEmailDraftArtifactSet({
+						value: emailDraft,
+						visibility: 'visible'
+					})
+				},
 				{ type: 'complete' }
-			] satisfies BuilderAppOutputEvent[];
+			] satisfies BuilderAppFinalEvent[];
 		}
 
-		if (draftState?.visibility !== 'visible') {
+		const visibleArtifact = getVisiblePrimaryEmailDraftArtifact(input.artifacts);
+
+		if (!visibleArtifact) {
 			throw new Error('The visible email draft is unavailable.');
 		}
 
 		const result = await streamCustomEmailBuilderTurn({
 			transcript: input.transcript,
-			draft: draftState.draft,
+			draft: visibleArtifact.value,
 			aiContext: getCustomEmailAppState(input.appState).aiContext,
 			openAIConfig,
 			handlers: {
 				onTextDelta: async (delta) => {
-					await emit?.({ type: 'assistantDelta', text: delta });
-					await input.handlers.onAssistantDelta?.(delta);
+					await context.emit({ type: 'assistantDelta', text: delta });
 				}
 			}
 		});
@@ -245,9 +261,11 @@ export function createCustomOpportunityFormatRuntime(
 
 		return [
 			{
-				type: 'emailDraftSet',
-				emailDraft: adapted.emailDraft,
-				visibility: 'hidden'
+				type: 'artifactSet',
+				artifact: createPrimaryEmailDraftArtifactSet({
+					value: adapted.emailDraft,
+					visibility: 'hidden'
+				})
 			},
 			{
 				type: 'appStatePatch',
@@ -256,7 +274,7 @@ export function createCustomOpportunityFormatRuntime(
 				}
 			},
 			{ type: 'complete' }
-		] satisfies BuilderAppOutputEvent[];
+		] satisfies BuilderAppFinalEvent[];
 	}
 
 	return {
