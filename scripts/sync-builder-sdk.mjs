@@ -7,18 +7,32 @@ import { fileURLToPath } from 'node:url';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const overbaseRoot = path.resolve(path.dirname(scriptPath), '..');
-const bringTheFirmRoot = path.resolve(overbaseRoot, '..', 'bring-the-firm');
 const canonicalSdkRoot = path.join(overbaseRoot, 'packages', 'builder-sdk');
-const vendoredSdkRoot = path.join(bringTheFirmRoot, 'packages', 'builder-sdk');
+const builderRuntimeRoots = [
+	{
+		name: 'Bring the Firm',
+		root: path.resolve(overbaseRoot, '..', 'bring-the-firm-builder', 'runtime')
+	},
+	{
+		name: 'Custom Opportunity Format',
+		root: path.resolve(overbaseRoot, '..', 'custom-opportunity-format', 'runtime')
+	}
+];
+const vendoredSdks = builderRuntimeRoots.map((runtime) => ({
+	...runtime,
+	sdkRoot: path.join(runtime.root, 'packages', 'builder-sdk')
+}));
 
 const args = new Set(process.argv.slice(2));
 const shouldSync = args.has('--sync');
 const shouldCheck = args.has('--check') || !shouldSync;
 const shouldBuild = args.has('--build');
 
-if (!existsSync(vendoredSdkRoot)) {
-	console.error(`Bring the Firm SDK was not found at ${vendoredSdkRoot}`);
-	process.exit(1);
+for (const sdk of vendoredSdks) {
+	if (!existsSync(sdk.sdkRoot)) {
+		console.error(`${sdk.name} SDK was not found at ${sdk.sdkRoot}`);
+		process.exit(1);
+	}
 }
 
 const rootFiles = ['README.md', 'package.json', 'tsconfig.json', 'tsconfig.build.json'];
@@ -27,38 +41,40 @@ const sourceFiles = (await readdir(path.join(canonicalSdkRoot, 'src')))
 	.map((file) => path.join('src', file));
 const files = [...rootFiles, ...sourceFiles];
 
-async function syncFile(relativePath) {
+async function syncFile(sdk, relativePath) {
 	const source = path.join(canonicalSdkRoot, relativePath);
-	const target = path.join(vendoredSdkRoot, relativePath);
+	const target = path.join(sdk.sdkRoot, relativePath);
 
 	await mkdir(path.dirname(target), { recursive: true });
 	await copyFile(source, target);
 }
 
-async function fileMatches(relativePath) {
+async function fileMatches(sdk, relativePath) {
 	const source = path.join(canonicalSdkRoot, relativePath);
-	const target = path.join(vendoredSdkRoot, relativePath);
+	const target = path.join(sdk.sdkRoot, relativePath);
 	const [sourceContent, targetContent] = await Promise.all([readFile(source), readFile(target)]);
 
 	return sourceContent.equals(targetContent);
 }
 
 if (shouldSync) {
-	await Promise.all(files.map(syncFile));
-	console.log(`Synced ${files.length} SDK source/package files into Bring the Firm.`);
+	await Promise.all(vendoredSdks.flatMap((sdk) => files.map((file) => syncFile(sdk, file))));
+	console.log(`Synced ${files.length} SDK source/package files into ${vendoredSdks.length} builder runtimes.`);
 }
 
 if (shouldCheck) {
 	const mismatches = [];
 
-	for (const file of files) {
-		if (!(await fileMatches(file))) {
-			mismatches.push(file);
+	for (const sdk of vendoredSdks) {
+		for (const file of files) {
+			if (!(await fileMatches(sdk, file))) {
+				mismatches.push(`${sdk.name}: ${file}`);
+			}
 		}
 	}
 
 	if (mismatches.length > 0) {
-		console.error('Bring the Firm builder SDK is out of sync with Overbase:');
+		console.error('Builder SDK copies are out of sync with Overbase:');
 		for (const file of mismatches) {
 			console.error(`- ${file}`);
 		}
@@ -66,7 +82,7 @@ if (shouldCheck) {
 		process.exit(1);
 	}
 
-	console.log('Bring the Firm builder SDK source/package files match Overbase.');
+	console.log('Builder SDK source/package files match Overbase in all builder runtimes.');
 }
 
 if (shouldBuild) {
@@ -74,8 +90,10 @@ if (shouldBuild) {
 		cwd: overbaseRoot,
 		stdio: 'inherit'
 	});
-	execFileSync('npm', ['run', 'builder-sdk:build'], {
-		cwd: bringTheFirmRoot,
-		stdio: 'inherit'
-	});
+	for (const runtime of builderRuntimeRoots) {
+		execFileSync('npm', ['run', 'builder-sdk:build'], {
+			cwd: runtime.root,
+			stdio: 'inherit'
+		});
+	}
 }
