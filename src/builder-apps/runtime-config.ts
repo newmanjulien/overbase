@@ -1,4 +1,4 @@
-import { BRING_THE_FIRM_APP_SLUG } from './ids';
+import { BRING_THE_FIRM_APP_SLUG, CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG } from './ids';
 import { getBuilderAppPresentationEntry } from './registry';
 
 type RuntimeConfig = {
@@ -12,6 +12,10 @@ const RUNTIME_CONFIGS: Record<string, RuntimeConfig> = {
 	[BRING_THE_FIRM_APP_SLUG]: {
 		urlEnv: 'BRING_THE_FIRM_RUNTIME_URL',
 		secretEnv: 'BRING_THE_FIRM_RUNTIME_SECRET'
+	},
+	[CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG]: {
+		urlEnv: 'CUSTOM_OPPORTUNITY_FORMAT_RUNTIME_URL',
+		secretEnv: 'CUSTOM_OPPORTUNITY_FORMAT_RUNTIME_SECRET'
 	}
 };
 
