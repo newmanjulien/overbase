@@ -2,11 +2,10 @@ export function load() {
 	return {
 		headerTitle: 'Format',
 		headerTitleEditable: true,
-		headerParent: {
+		desktopBreadcrumbParent: {
 			label: 'My formats',
 			href: '/formats'
 		},
-		headerParentVisibility: 'desktopOnly',
 		chromeMode: 'focused'
 	};
 }

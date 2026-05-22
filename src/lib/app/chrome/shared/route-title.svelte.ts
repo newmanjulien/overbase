@@ -4,8 +4,6 @@ import type { FloatingActionMenuAction } from '$lib/ui';
 
 const ROUTE_TITLE_STATE_KEY = Symbol('route-title-state');
 
-export type HeaderParentHref = '/builders' | '/formats';
-
 export type RouteTitleState = {
 	title: string;
 	onTitleChange: ((title: string) => void | Promise<void>) | null;

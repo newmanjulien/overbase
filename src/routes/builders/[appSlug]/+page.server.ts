@@ -1,19 +1,25 @@
-import { error } from '@sveltejs/kit';
+import { BUILDER_VIEWPORT_REQUIREMENT } from '$lib/features/builder/paths';
 import { getActiveBuilderAppManifest } from '../../../builder-apps/runtime.server';
 import type { PageServerLoad } from './$types';
+
+const BUILDER_UNAVAILABLE_PAGE_DATA = {
+	app: null,
+	guide: null,
+	headerTitle: 'Builder unavailable',
+	headerTitleEditable: false,
+	chromeMode: 'focused',
+	viewportRequirement: BUILDER_VIEWPORT_REQUIREMENT
+} satisfies App.PageData & {
+	app: null;
+	guide: null;
+};
 
 export const load: PageServerLoad = async ({ params }) => {
 	try {
 		const app = await getActiveBuilderAppManifest(params.appSlug);
 
 		if (!app) {
-			return {
-				app: null,
-				guide: null,
-				headerTitle: 'Format builder',
-				headerTitleEditable: false,
-				chromeMode: 'focused'
-			};
+			return BUILDER_UNAVAILABLE_PAGE_DATA;
 		}
 
 		return {
@@ -27,12 +33,13 @@ export const load: PageServerLoad = async ({ params }) => {
 			headerTitle: app.title,
 			headerTitleEditable: true,
 			chromeMode: 'focused',
-			headerParent: {
+			desktopBreadcrumbParent: {
 				label: 'Format builder',
 				href: '/builders'
-			}
+			},
+			viewportRequirement: BUILDER_VIEWPORT_REQUIREMENT
 		};
-	} catch (loadError) {
-		error(503, loadError instanceof Error ? loadError.message : 'Builder app unavailable.');
+	} catch {
+		return BUILDER_UNAVAILABLE_PAGE_DATA;
 	}
 };

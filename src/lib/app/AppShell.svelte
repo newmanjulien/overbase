@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { APP_CONFIG } from '$lib/app/app-config';
 	import {
@@ -18,13 +20,14 @@
 		provideChromeShellState,
 		type ChromeShellState
 	} from '$lib/app/chrome/shared/shell.svelte';
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
 	type Props = CurrentWorkspaceContext & {
 		children: Snippet;
 	};
 
 	type ChromeMode = NonNullable<App.PageData['chromeMode']>;
+	type ViewportState = 'unknown' | 'mobile' | 'desktop';
 
 	let { user, workspace, identity, children }: Props = $props();
 
@@ -65,14 +68,15 @@
 		actions: null,
 		overflowActions: []
 	});
+	let viewportState = $state<ViewportState>('unknown');
 	const activeRoute = $derived(getActiveNavRoute(page.url.pathname));
+	const viewportRequirement = $derived(page.data.viewportRequirement ?? null);
+	const routeRequiresDesktop = $derived(viewportRequirement?.minWidth === 'desktop');
+	const canRenderRoute = $derived(!routeRequiresDesktop || viewportState === 'desktop');
 	const sourceRouteTitle = $derived(page.data.headerTitle ?? activeRoute?.label ?? APP_CONFIG.name);
 	const routeTitleResetKey = $derived(`${page.url.pathname}:${sourceRouteTitle}`);
 	const routeTitleEditable = $derived(Boolean(page.data.headerTitleEditable));
-	const desktopHeaderParent = $derived(page.data.headerParent ?? null);
-	const mobileHeaderParent = $derived(
-		page.data.headerParentVisibility === 'desktopOnly' ? null : desktopHeaderParent
-	);
+	const desktopBreadcrumbParent = $derived(page.data.desktopBreadcrumbParent ?? null);
 	let customRouteTitle = $state<string | null>(null);
 	let currentRouteTitleResetKey = $state('');
 	const routeTitle = $derived(customRouteTitle ?? sourceRouteTitle);
@@ -109,6 +113,26 @@
 		routeTitleState.title = routeTitle;
 	});
 
+	$effect(() => {
+		if (viewportState === 'mobile' && routeRequiresDesktop && viewportRequirement) {
+			void goto(resolve(viewportRequirement.fallbackHref), { replaceState: true });
+		}
+	});
+
+	onMount(() => {
+		const mediaQuery = window.matchMedia('(max-width: 767px)');
+		const syncViewportState = () => {
+			viewportState = mediaQuery.matches ? 'mobile' : 'desktop';
+		};
+
+		syncViewportState();
+		mediaQuery.addEventListener('change', syncViewportState);
+
+		return () => {
+			mediaQuery.removeEventListener('change', syncViewportState);
+		};
+	});
+
 	provideCurrentWorkspaceContext(currentWorkspace);
 	provideChromeShellState(shellState);
 	provideRouteTitleState(routeTitleState);
@@ -129,27 +153,32 @@
 		<main
 			class="min-w-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-white md:rounded-sm md:border md:border-zinc-100"
 		>
-			<MobileDrawer currentPathname={page.url.pathname} />
-			<MobileHeader
-				title={routeTitleState.title}
-				titleEditable={routeTitleEditable}
-				headerParent={mobileHeaderParent}
-				onTitleChange={handleRouteTitleChange}
-			/>
-
-			<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-				<DesktopHeader
+			{#if canRenderRoute}
+				<MobileDrawer currentPathname={page.url.pathname} />
+				<MobileHeader
 					title={routeTitleState.title}
 					titleEditable={routeTitleEditable}
-					headerParent={desktopHeaderParent}
 					onTitleChange={handleRouteTitleChange}
-					actions={routeTitleState.actions}
-					overflowActions={routeTitleState.overflowActions}
 				/>
+			{/if}
+
+			<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+				{#if canRenderRoute}
+					<DesktopHeader
+						title={routeTitleState.title}
+						titleEditable={routeTitleEditable}
+						breadcrumbParent={desktopBreadcrumbParent}
+						onTitleChange={handleRouteTitleChange}
+						actions={routeTitleState.actions}
+						overflowActions={routeTitleState.overflowActions}
+					/>
+				{/if}
 
 				<div class="dashboard-main-viewport min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
 					<div class="h-full min-h-full min-w-0">
-						{@render children()}
+						{#if canRenderRoute}
+							{@render children()}
+						{/if}
 					</div>
 				</div>
 			</div>

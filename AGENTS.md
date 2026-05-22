@@ -1,6 +1,9 @@
 # Agent Instructions
 
 - Never write or add tests
+- Don't try to use playwright
+- I want to test the screens myself
+
 - All data in the db can be nuked or reseeded
 - Destructive changes are fine
 - Backwards compatibility is not important

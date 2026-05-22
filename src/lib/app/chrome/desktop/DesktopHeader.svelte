@@ -5,19 +5,14 @@
 	import CaretRightIcon from 'phosphor-svelte/lib/CaretRightIcon';
 	import EditableHeaderTitle from '$lib/app/chrome/shared/EditableHeaderTitle.svelte';
 	import HeaderOverflowButton from '$lib/app/chrome/shared/HeaderOverflowButton.svelte';
-	import type { HeaderParentHref } from '$lib/app/chrome/shared/route-title.svelte';
+	import type { BreadcrumbParent } from '$lib/app/chrome/shared/breadcrumb';
 	import { useChromeShellState } from '$lib/app/chrome/shared/shell.svelte';
 	import { IconButton, type FloatingActionMenuAction } from '$lib/ui';
-
-	type HeaderParent = {
-		label: string;
-		href: HeaderParentHref;
-	};
 
 	type Props = {
 		title: string;
 		titleEditable?: boolean;
-		headerParent?: HeaderParent | null;
+		breadcrumbParent?: BreadcrumbParent | null;
 		onTitleChange?: (title: string) => void;
 		actions?: Snippet | null;
 		overflowActions?: FloatingActionMenuAction[];
@@ -26,7 +21,7 @@
 	let {
 		title,
 		titleEditable = false,
-		headerParent = null,
+		breadcrumbParent = null,
 		onTitleChange,
 		actions = null,
 		overflowActions = []
@@ -47,13 +42,13 @@
 			<SidebarSimpleIcon size={14} weight="regular" />
 		</IconButton>
 
-		{#if headerParent}
+		{#if breadcrumbParent}
 			<nav aria-label="Breadcrumb" class="ml-2 flex min-w-0 flex-1 items-center gap-1.5">
 				<a
-					href={headerParent.href === '/builders' ? resolve('/builders') : resolve('/formats')}
+					href={resolve(breadcrumbParent.href)}
 					class="block min-w-0 shrink truncate text-[0.74rem] font-medium tracking-wide text-zinc-400 transition-colors hover:text-zinc-600"
 				>
-					{headerParent.label}
+					{breadcrumbParent.label}
 				</a>
 				<CaretRightIcon size={12} weight="regular" class="shrink-0 text-zinc-300" />
 				<EditableHeaderTitle

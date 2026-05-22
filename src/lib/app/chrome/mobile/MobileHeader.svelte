@@ -1,25 +1,17 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import ListIcon from 'phosphor-svelte/lib/ListIcon';
 	import EditableHeaderTitle from '$lib/app/chrome/shared/EditableHeaderTitle.svelte';
 	import HomeLink from '$lib/app/chrome/shared/HomeLink.svelte';
-	import type { HeaderParentHref } from '$lib/app/chrome/shared/route-title.svelte';
 	import { useChromeShellState } from '$lib/app/chrome/shared/shell.svelte';
 	import { IconButton } from '$lib/ui';
-
-	type HeaderParent = {
-		label: string;
-		href: HeaderParentHref;
-	};
 
 	type Props = {
 		title: string;
 		titleEditable?: boolean;
-		headerParent?: HeaderParent | null;
 		onTitleChange?: (title: string) => void;
 	};
 
-	let { title, titleEditable = false, headerParent = null, onTitleChange }: Props = $props();
+	let { title, titleEditable = false, onTitleChange }: Props = $props();
 	const shellState = useChromeShellState();
 </script>
 
@@ -28,33 +20,14 @@
 		<HomeLink />
 	</div>
 	<div class="min-w-0 flex-1 px-2">
-		{#if headerParent}
-			<div class="flex min-w-0 flex-col items-center gap-0.5">
-				<a
-					href={headerParent.href === '/builders' ? resolve('/builders') : resolve('/formats')}
-					class="block max-w-full truncate text-center text-[0.66rem] font-medium tracking-wide text-zinc-400 transition-colors hover:text-zinc-700"
-				>
-					{headerParent.label}
-				</a>
-				<EditableHeaderTitle
-					{title}
-					editable={titleEditable}
-					align="center"
-					textClass="text-[0.74rem] font-medium text-zinc-700"
-					inputClass="mx-auto max-w-48"
-					{onTitleChange}
-				/>
-			</div>
-		{:else}
-			<EditableHeaderTitle
-				{title}
-				editable={titleEditable}
-				align="center"
-				textClass="text-[0.74rem] font-medium text-zinc-600"
-				inputClass="mx-auto max-w-48"
-				{onTitleChange}
-			/>
-		{/if}
+		<EditableHeaderTitle
+			{title}
+			editable={titleEditable}
+			align="center"
+			textClass="text-[0.74rem] font-medium text-zinc-600"
+			inputClass="mx-auto max-w-48"
+			{onTitleChange}
+		/>
 	</div>
 	<div class="flex w-12 justify-end">
 		<IconButton

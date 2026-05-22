@@ -1,5 +1,5 @@
 import type { BuilderLaunchState } from '$lib/features/builder/session';
-import type { HeaderParentHref } from '$lib/app/chrome/shared/route-title.svelte';
+import type { BreadcrumbParent } from '$lib/app/chrome/shared/breadcrumb';
 import type { AuthObject } from 'svelte-clerk/server';
 
 declare global {
@@ -12,11 +12,11 @@ declare global {
 			chromeMode?: 'dashboard' | 'focused';
 			headerTitle?: string;
 			headerTitleEditable?: boolean;
-			headerParent?: {
-				label: string;
-				href: HeaderParentHref;
+			desktopBreadcrumbParent?: BreadcrumbParent;
+			viewportRequirement?: {
+				minWidth: 'desktop';
+				fallbackHref: '/formats' | '/builders';
 			};
-			headerParentVisibility?: 'all' | 'desktopOnly';
 		}
 
 		interface PageState {
