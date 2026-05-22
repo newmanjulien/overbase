@@ -10,7 +10,7 @@ import UsersIcon from "phosphor-svelte/lib/UsersIcon";
 import type {
   PhosphorIcon,
   PhosphorIconProps,
-} from "$lib/components/icons/types";
+} from "$lib/ui/icons";
 
 export type RouteIconProps = PhosphorIconProps;
 export type RouteIcon = PhosphorIcon;

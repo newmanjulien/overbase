@@ -2,7 +2,7 @@
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
 	import { useQuery } from 'convex-svelte';
-	import { useRouteTitleState } from '$lib/components/chrome/shared/route-title.svelte';
+	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
 	import OpportunityFormatDetailDesktop from './OpportunityFormatDetailDesktop.svelte';
 	import OpportunityFormatDetailMobile from './OpportunityFormatDetailMobile.svelte';
 	import OpportunityFormatDetailRouteActions from './OpportunityFormatDetailRouteActions.svelte';

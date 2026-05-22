@@ -3,8 +3,8 @@
 		ListContentState,
 		ListPage,
 		ListToolbar
-	} from '$lib/components/list-page';
-	import { InfoBar } from '$lib/components/ui';
+	} from '$lib/patterns/list-page';
+	import { InfoBar } from '$lib/ui';
 	import {
 		toBuilderAppRecord,
 		type BuilderAppHomeData,

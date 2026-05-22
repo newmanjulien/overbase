@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { createFreeformRunSetup } from '@overbase/builder-sdk/app-protocol';
-	import { IconButton } from '$lib/components/ui';
+	import { IconButton } from '$lib/ui';
 	import type { BuilderSessionWorkbenchBeforeRunContext } from './BuilderSessionWorkbench.svelte';
 	import ArrowUpIcon from 'phosphor-svelte/lib/ArrowUpIcon';
 

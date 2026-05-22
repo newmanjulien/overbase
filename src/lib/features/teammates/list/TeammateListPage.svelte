@@ -6,7 +6,7 @@
 		ListContentState,
 		ListRoutePage,
 		SelectableList
-	} from '$lib/components/list-page';
+	} from '$lib/patterns/list-page';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import AddTeammatesModal from './AddTeammatesModal.svelte';
 	import TeammateListRow, { type TeammateItem } from './TeammateListRow.svelte';

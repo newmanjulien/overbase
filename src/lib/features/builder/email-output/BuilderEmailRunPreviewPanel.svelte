@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
-	import EmailDraftPanel from '$lib/components/email-draft/EmailDraftPanel.svelte';
+	import EmailDraftPanel from '$lib/domain/email-drafts/EmailDraftPanel.svelte';
 
 	type Props = {
 		draft: EmailDraft;

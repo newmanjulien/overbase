@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ListRoutePage } from '$lib/components/list-page';
+	import { ListRoutePage } from '$lib/patterns/list-page';
 	import AddExternalDataModal from '$lib/features/external-data/AddExternalDataModal.svelte';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 

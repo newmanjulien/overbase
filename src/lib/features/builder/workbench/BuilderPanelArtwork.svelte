@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PhosphorIcon } from '$lib/components/icons/types';
+	import type { PhosphorIcon } from '$lib/ui/icons';
 
 	type Props = {
 		backColor: string;

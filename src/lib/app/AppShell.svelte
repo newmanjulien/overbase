@@ -5,19 +5,19 @@
 		provideCurrentWorkspaceContext,
 		type CurrentWorkspaceContext
 	} from '$lib/app/current-workspace.svelte';
-	import DesktopHeader from '$lib/components/chrome/desktop/DesktopHeader.svelte';
-	import DesktopSidebar from '$lib/components/chrome/desktop/DesktopSidebar.svelte';
-	import MobileDrawer from '$lib/components/chrome/mobile/MobileDrawer.svelte';
-	import MobileHeader from '$lib/components/chrome/mobile/MobileHeader.svelte';
-	import { getActiveNavRoute } from '$lib/components/chrome/shared/nav';
+	import DesktopHeader from '$lib/app/chrome/desktop/DesktopHeader.svelte';
+	import DesktopSidebar from '$lib/app/chrome/desktop/DesktopSidebar.svelte';
+	import MobileDrawer from '$lib/app/chrome/mobile/MobileDrawer.svelte';
+	import MobileHeader from '$lib/app/chrome/mobile/MobileHeader.svelte';
+	import { getActiveNavRoute } from '$lib/app/chrome/shared/nav';
 	import {
 		provideRouteTitleState,
 		type RouteTitleState
-	} from '$lib/components/chrome/shared/route-title.svelte';
+	} from '$lib/app/chrome/shared/route-title.svelte';
 	import {
 		provideChromeShellState,
 		type ChromeShellState
-	} from '$lib/components/chrome/shared/shell.svelte';
+	} from '$lib/app/chrome/shared/shell.svelte';
 	import type { Snippet } from 'svelte';
 
 	type Props = CurrentWorkspaceContext & {

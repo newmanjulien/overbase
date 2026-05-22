@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { Button } from '$lib/components/ui';
-	import type { SelectableListItem } from '$lib/components/list-page';
+	import { Button } from '$lib/ui';
+	import type { SelectableListItem } from '$lib/patterns/list-page';
 
 	export type TeammateItem = SelectableListItem & {
 		email: string;

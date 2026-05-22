@@ -2,7 +2,7 @@
 	import InfoIcon from 'phosphor-svelte/lib/InfoIcon';
 	import { useClerkContext } from 'svelte-clerk';
 	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
-	import { Button, ModalShell } from '$lib/components/ui';
+	import { Button, ModalShell } from '$lib/ui';
 	import SettingsCard from './SettingsCard.svelte';
 
 	const CONFIRMATION_TEXT = 'delete my account';

@@ -2,7 +2,7 @@
 	import FunnelSimpleIcon from 'phosphor-svelte/lib/FunnelSimpleIcon';
 	import PlusIcon from 'phosphor-svelte/lib/PlusIcon';
 	import TrashIcon from 'phosphor-svelte/lib/TrashIcon';
-	import { Button, IconButton, InfoBar, InfoBarAction } from '$lib/components/ui';
+	import { Button, IconButton, InfoBar, InfoBarAction } from '$lib/ui';
 	import LinkDataSourcesModal from './LinkDataSourcesModal.svelte';
 	import type { OpportunityFormatRule } from './opportunity-format-detail-types';
 

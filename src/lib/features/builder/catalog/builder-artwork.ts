@@ -11,7 +11,7 @@ import SparkleIcon from 'phosphor-svelte/lib/SparkleIcon';
 import TargetIcon from 'phosphor-svelte/lib/TargetIcon';
 import UsersIcon from 'phosphor-svelte/lib/UsersIcon';
 import type { BuilderAppArtwork } from '../../../../builder-apps/presentation';
-import type { PhosphorIcon } from '$lib/components/icons/types';
+import type { PhosphorIcon } from '$lib/ui/icons';
 
 type ArtworkIcon = PhosphorIcon;
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, ModalShell } from '$lib/components/ui';
+	import { Button, ModalShell } from '$lib/ui';
 
 	type Props = {
 		error: string | null;

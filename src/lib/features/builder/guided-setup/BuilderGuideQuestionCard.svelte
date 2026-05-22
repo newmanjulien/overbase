@@ -2,7 +2,7 @@
 	import BuilderGuidePager from './BuilderGuidePager.svelte';
 	import BuilderGuideQuestionBody from './BuilderGuideQuestionBody.svelte';
 	import BuilderGuideQuestionFooter from './BuilderGuideQuestionFooter.svelte';
-	import { HelpTooltip } from '$lib/components/ui';
+	import { HelpTooltip } from '$lib/ui';
 	import type { BuilderGuideAnswer } from './guide-answer';
 	import type { BuilderGuideQuestion } from './guide-types';
 

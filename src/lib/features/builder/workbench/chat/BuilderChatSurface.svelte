@@ -3,7 +3,7 @@
 	import ArrowUpIcon from 'phosphor-svelte/lib/ArrowUpIcon';
 	import PlusIcon from 'phosphor-svelte/lib/PlusIcon';
 	import { StickToBottom } from 'stick-to-bottom-svelte';
-	import { IconButton } from '$lib/components/ui';
+	import { IconButton } from '$lib/ui';
 	import BuilderChatError from './BuilderChatError.svelte';
 
 	type ChatMessage = {

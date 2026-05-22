@@ -2,8 +2,8 @@
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
 	import { useCurrentWorkspaceContext } from '$lib/app/current-workspace.svelte';
-	import { CompanyAvatar, PersonAvatar } from '$lib/components/avatar';
-	import PageShell from '$lib/components/layout/PageShell.svelte';
+	import { CompanyAvatar, PersonAvatar } from '$lib/domain/people';
+	import PageShell from '$lib/layout/PageShell.svelte';
 	import { useConvexClient } from 'convex-svelte';
 	import SettingsAvatarCard from './SettingsAvatarCard.svelte';
 	import SettingsDangerCard from './SettingsDangerCard.svelte';

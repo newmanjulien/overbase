@@ -1,8 +1,8 @@
 <script lang="ts">
 	import PauseIcon from 'phosphor-svelte/lib/PauseIcon';
 	import PlayIcon from 'phosphor-svelte/lib/PlayIcon';
-	import { AvatarPersonPicker } from '$lib/components/people';
-	import { Button } from '$lib/components/ui';
+	import { AvatarPersonPicker } from '$lib/domain/people';
+	import { Button } from '$lib/ui';
 	import type { FormatRecipientRef } from './opportunity-format-detail-types';
 	import { getFormatRecipientKey } from './opportunity-format-detail-types';
 

@@ -12,7 +12,7 @@
 	import BuilderChatError from './chat/BuilderChatError.svelte';
 	import BuilderChatSurface from './chat/BuilderChatSurface.svelte';
 	import CustomEmailRightPanel from '$lib/features/builder/email-output/CustomEmailRightPanel.svelte';
-	import SplitPane from '$lib/components/layout/split-pane/SplitPane.svelte';
+	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
 	import { BUILDER_WORKBENCH_SPLIT } from '$lib/features/builder/workbench/split-pane';
 	import NativeBuilderLeaveGuard from '$lib/features/builder/workbench/NativeBuilderLeaveGuard.svelte';
 	import {
@@ -21,7 +21,7 @@
 		type BuilderLaunchState
 	} from '$lib/features/builder/session/builder-launch';
 	import { createBuilderSessionController } from '$lib/features/builder/session/builder-session.svelte';
-	import { useRouteTitleState } from '$lib/components/chrome/shared/route-title.svelte';
+	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
 
 	type BuilderSessionWorkbenchStartRequest = Pick<
 		BuilderLaunchState,

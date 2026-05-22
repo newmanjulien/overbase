@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import type { HTMLTextareaAttributes } from 'svelte/elements';
-	import { cn } from '$lib/components/chrome/shared/cn';
+	import { cn } from '$lib/ui/cn';
 
 	type Props = {
 		label: string;

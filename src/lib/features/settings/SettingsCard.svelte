@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ClassValue } from 'clsx';
 	import type { Snippet } from 'svelte';
-	import { cn } from '$lib/components/chrome/shared/cn';
+	import { cn } from '$lib/ui/cn';
 
 	type Props = {
 		title: string;

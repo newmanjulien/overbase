@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from '$lib/components/chrome/shared/cn';
+	import { cn } from '$lib/ui/cn';
 	import BuilderGuideActions from './BuilderGuideActions.svelte';
 	import OptionalAnswerInput from './inputs/OptionalAnswerInput.svelte';
 	import type { BuilderGuideAnswer, BuilderGuideChoiceAnswer } from './guide-answer';

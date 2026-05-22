@@ -1,6 +1,6 @@
 <script lang="ts">
-	import EmailAttachmentSpreadsheetPreview from '$lib/components/email-draft/EmailAttachmentSpreadsheetPreview.svelte';
-	import EmailComposePreview from '$lib/components/email-draft/EmailComposePreview.svelte';
+	import EmailAttachmentSpreadsheetPreview from '$lib/domain/email-drafts/EmailAttachmentSpreadsheetPreview.svelte';
+	import EmailComposePreview from '$lib/domain/email-drafts/EmailComposePreview.svelte';
 	import OpportunityFormatRulesPanel from './OpportunityFormatRulesPanel.svelte';
 	import type { OpportunityFormatDetailState } from './opportunity-format-detail-state.svelte';
 	import type { OpportunityFormatDetailLoadState } from './opportunity-format-detail-types';

@@ -4,7 +4,7 @@
 		FullHeightModalShell,
 		TallModalCallout,
 		TallModalFeatureGrid
-	} from '$lib/components/ui';
+	} from '$lib/ui';
 	import BuildingsIcon from 'phosphor-svelte/lib/BuildingsIcon';
 	import CalendarDotsIcon from 'phosphor-svelte/lib/CalendarDotsIcon';
 	import FilesIcon from 'phosphor-svelte/lib/FilesIcon';

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import PageShell from '$lib/components/layout/PageShell.svelte';
+	import PageShell from '$lib/layout/PageShell.svelte';
 	import BuilderDesktopOnly from '$lib/features/builder/workbench/BuilderDesktopOnly.svelte';
 	import { BuilderWorkbenchPage } from '$lib/features/builder/workbench';
-	import { Button } from '$lib/components/ui';
+	import { Button } from '$lib/ui';
 	import { toBuilderAppRecord, toBuilderGuideDefinition } from '$lib/features/builder/catalog';
 	import {
 		createBuilderLaunchState,

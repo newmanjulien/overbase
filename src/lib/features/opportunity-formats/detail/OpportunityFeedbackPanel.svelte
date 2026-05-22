@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, InfoBar } from '$lib/components/ui';
+	import { Button, InfoBar } from '$lib/ui';
 
 	type Props = {
 		likedValue: string;

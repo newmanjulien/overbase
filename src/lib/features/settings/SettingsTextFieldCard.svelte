@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui';
+	import { Button } from '$lib/ui';
 	import SettingsCard from './SettingsCard.svelte';
 
 	type Props = {

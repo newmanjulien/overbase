@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
-	import { Button } from '$lib/components/ui';
+	import { Button } from '$lib/ui';
 
 	type Props = {
 		canGoNext: boolean;

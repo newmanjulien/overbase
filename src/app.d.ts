@@ -1,5 +1,5 @@
 import type { BuilderLaunchState } from '$lib/features/builder/session';
-import type { HeaderParentHref } from '$lib/components/chrome/shared/route-title.svelte';
+import type { HeaderParentHref } from '$lib/app/chrome/shared/route-title.svelte';
 import type { AuthObject } from 'svelte-clerk/server';
 
 declare global {

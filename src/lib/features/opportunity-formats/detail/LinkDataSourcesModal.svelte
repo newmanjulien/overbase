@@ -4,7 +4,7 @@
 		FullHeightModalShell,
 		TallModalCallout,
 		TallModalStepList
-	} from '$lib/components/ui';
+	} from '$lib/ui';
 
 	type Props = {
 		open: boolean;

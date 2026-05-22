@@ -1,6 +1,6 @@
 <script lang="ts">
 	import BuilderDesktopOnly from '$lib/features/builder/workbench/BuilderDesktopOnly.svelte';
-	import PageShell from '$lib/components/layout/PageShell.svelte';
+	import PageShell from '$lib/layout/PageShell.svelte';
 	import BuilderHomePage from '$lib/features/builder/home/BuilderHomePage.svelte';
 	import type { PageProps } from './$types';
 

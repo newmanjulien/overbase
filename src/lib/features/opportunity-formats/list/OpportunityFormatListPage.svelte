@@ -7,8 +7,8 @@
 		ListContentState,
 		ListRoutePage,
 		SelectableList
-	} from '$lib/components/list-page';
-	import { InfoBar } from '$lib/components/ui';
+	} from '$lib/patterns/list-page';
+	import { InfoBar } from '$lib/ui';
 	import OpportunityFormatListRow, {
 		type OpportunityFormatListItem
 	} from './OpportunityFormatListRow.svelte';

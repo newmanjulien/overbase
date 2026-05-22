@@ -4,7 +4,7 @@
 		FullHeightModalShell,
 		TallModalCallout,
 		TallModalFeatureGrid
-	} from '$lib/components/ui';
+	} from '$lib/ui';
 	import BuildingsIcon from 'phosphor-svelte/lib/BuildingsIcon';
 	import ChartLineUpIcon from 'phosphor-svelte/lib/ChartLineUpIcon';
 	import IdentificationBadgeIcon from 'phosphor-svelte/lib/IdentificationBadgeIcon';

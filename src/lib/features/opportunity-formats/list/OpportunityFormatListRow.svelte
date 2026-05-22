@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { cn } from '$lib/components/chrome/shared/cn';
-	import type { SelectableListItem } from '$lib/components/list-page';
-	import { PersonAvatar } from '$lib/components/avatar';
+	import { cn } from '$lib/ui/cn';
+	import type { SelectableListItem } from '$lib/patterns/list-page';
+	import { PersonAvatar } from '$lib/domain/people';
 
 	export type OpportunityFormatListItem = SelectableListItem & {
 		title: string;

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
-	import EmailAttachmentSpreadsheetPreview from '$lib/components/email-draft/EmailAttachmentSpreadsheetPreview.svelte';
-	import EmailComposePreview from '$lib/components/email-draft/EmailComposePreview.svelte';
-	import { IconButton } from '$lib/components/ui';
+	import EmailAttachmentSpreadsheetPreview from '$lib/domain/email-drafts/EmailAttachmentSpreadsheetPreview.svelte';
+	import EmailComposePreview from '$lib/domain/email-drafts/EmailComposePreview.svelte';
+	import { IconButton } from '$lib/ui';
 	import type { OpportunityItem } from './opportunity-format-detail-types';
 
 	type Props = {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from '$lib/components/chrome/shared/cn';
+	import { cn } from '$lib/ui/cn';
 	import {
 		type BuilderArtworkCardSymbolSize,
 		type BuilderArtworkCardTone,

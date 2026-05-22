@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import type { Snippet } from 'svelte';
-	import { cn } from '$lib/components/chrome/shared/cn';
+	import { cn } from '$lib/ui/cn';
 
 	type Props = {
 		children: Snippet;
