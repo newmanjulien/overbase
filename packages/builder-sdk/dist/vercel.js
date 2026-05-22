@@ -93,13 +93,20 @@ async function writeResponse(res, response) {
 function writeResponseHeaders(res, headers) {
     const getSetCookie = headers.getSetCookie;
     const setCookieHeaders = getSetCookie?.call(headers);
+    let setCookieHeader;
     headers.forEach((value, name) => {
-        if (name.toLowerCase() !== 'set-cookie') {
-            res.setHeader(name, value);
+        if (name.toLowerCase() === 'set-cookie') {
+            setCookieHeader = value;
+            return;
         }
+        res.setHeader(name, value);
     });
     if (setCookieHeaders && setCookieHeaders.length > 0) {
         res.setHeader('set-cookie', setCookieHeaders);
+        return;
+    }
+    if (setCookieHeaders === undefined && setCookieHeader !== undefined) {
+        res.setHeader('set-cookie', setCookieHeader);
     }
 }
 function writeResponseChunk(res, chunk) {
