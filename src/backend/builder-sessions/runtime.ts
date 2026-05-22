@@ -1,4 +1,4 @@
-import { createExternalBuilderAppRuntime } from '../builder-apps/runtime-core';
+import { createExternalBuilderAppRuntime } from '../../builder-apps/runtime-core';
 
 const externalRuntime = createExternalBuilderAppRuntime(process.env);
 

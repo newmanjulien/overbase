@@ -4,10 +4,10 @@ import {
 	applyBuilderArtifactSetEvent,
 	type BuilderArtifacts
 } from '@overbase/builder-sdk/artifacts';
-import type { Doc, Id } from './_generated/dataModel';
-import type { MutationCtx } from './_generated/server';
-import { completeJobRecord, normalizeAssistantText } from './builderSessionCore';
-import { mergeBuilderSessionAppState } from './builderSessionAppState';
+import type { Doc, Id } from '../../convex/_generated/dataModel';
+import type { MutationCtx } from '../../convex/_generated/server';
+import { mergeBuilderSessionAppState } from './app-state';
+import { completeJobRecord, normalizeAssistantText } from './records';
 
 type SessionPatch = {
 	status?: Doc<'builderSessions'>['status'];

@@ -8,27 +8,15 @@
  * @module
  */
 
-import type * as accountDeletion from "../accountDeletion.js";
 import type * as auth from "../auth.js";
-import type * as avatar from "../avatar.js";
 import type * as builder from "../builder.js";
-import type * as builderEmailValidators from "../builderEmailValidators.js";
-import type * as builderRuntime from "../builderRuntime.js";
-import type * as builderSessionAccess from "../builderSessionAccess.js";
-import type * as builderSessionAppState from "../builderSessionAppState.js";
-import type * as builderSessionCore from "../builderSessionCore.js";
-import type * as builderSessionJobRuns from "../builderSessionJobRuns.js";
-import type * as builderSessionJobs from "../builderSessionJobs.js";
-import type * as builderSessionMaintenance from "../builderSessionMaintenance.js";
-import type * as builderSessionOutputEvents from "../builderSessionOutputEvents.js";
 import type * as builderSessions from "../builderSessions.js";
 import type * as crons from "../crons.js";
 import type * as devSeed from "../devSeed.js";
-import type * as formatRecipientValidators from "../formatRecipientValidators.js";
-import type * as formatRecipients from "../formatRecipients.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
-import type * as opportunityFormatReadiness from "../opportunityFormatReadiness.js";
+import type * as internal_auth from "../internal/auth.js";
+import type * as internal_builderSessions from "../internal/builderSessions.js";
 import type * as opportunityFormats from "../opportunityFormats.js";
 import type * as settings from "../settings.js";
 import type * as teammateIdentity from "../teammateIdentity.js";
@@ -41,27 +29,15 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  accountDeletion: typeof accountDeletion;
   auth: typeof auth;
-  avatar: typeof avatar;
   builder: typeof builder;
-  builderEmailValidators: typeof builderEmailValidators;
-  builderRuntime: typeof builderRuntime;
-  builderSessionAccess: typeof builderSessionAccess;
-  builderSessionAppState: typeof builderSessionAppState;
-  builderSessionCore: typeof builderSessionCore;
-  builderSessionJobRuns: typeof builderSessionJobRuns;
-  builderSessionJobs: typeof builderSessionJobs;
-  builderSessionMaintenance: typeof builderSessionMaintenance;
-  builderSessionOutputEvents: typeof builderSessionOutputEvents;
   builderSessions: typeof builderSessions;
   crons: typeof crons;
   devSeed: typeof devSeed;
-  formatRecipientValidators: typeof formatRecipientValidators;
-  formatRecipients: typeof formatRecipients;
   health: typeof health;
   http: typeof http;
-  opportunityFormatReadiness: typeof opportunityFormatReadiness;
+  "internal/auth": typeof internal_auth;
+  "internal/builderSessions": typeof internal_builderSessions;
   opportunityFormats: typeof opportunityFormats;
   settings: typeof settings;
   teammateIdentity: typeof teammateIdentity;

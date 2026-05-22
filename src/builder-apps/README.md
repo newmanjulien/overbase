@@ -36,7 +36,7 @@ Files:
 - `runtime-config.ts`: runtime URL and secret env names per app slug.
 - `runtime-core.ts`: external app registry/env wrapper that calls SDK runtime transport helpers.
 - `runtime.server.ts`: SvelteKit manifest loader.
-- `src/convex/builderRuntime.ts`: Convex runtime selector.
+- `src/backend/builder-sessions/runtime.ts`: Overbase session job to external runtime adapter.
 
 Load path:
 
@@ -47,8 +47,8 @@ Load path:
 
 Run path:
 
-- Convex jobs call `src/convex/builderRuntime.ts`.
-- `src/convex/builderRuntime.ts` sends builder jobs through `runtime-core.ts`.
+- Convex internal builder-session actions call `src/backend/builder-sessions/runtime.ts`.
+- `src/backend/builder-sessions/runtime.ts` sends builder jobs through `runtime-core.ts`.
 - `runtime-core.ts` uses the SDK transport helpers to sign requests and call the external runtime HTTP endpoint.
 
 Required env per external app:

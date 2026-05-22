@@ -14,7 +14,8 @@ export default tseslint.config(
 		languageOptions: {
 			globals: {
 				...globals.browser,
-				...globals.node
+				...globals.node,
+				App: 'readonly'
 			}
 		}
 	},

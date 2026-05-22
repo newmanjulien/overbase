@@ -1,17 +1,7 @@
-import { v } from 'convex/values';
-import type { Id } from './_generated/dataModel';
-import type { MutationCtx } from './_generated/server';
+import type { Id } from '../../convex/_generated/dataModel';
+import type { MutationCtx } from '../../convex/_generated/server';
 
 export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
-
-export const avatar = v.object({
-	url: v.string(),
-	storageId: v.id('_storage'),
-	contentType: v.string(),
-	fileName: v.optional(v.string()),
-	size: v.number(),
-	updatedAt: v.number()
-});
 
 export type StoredAvatar = {
 	url: string;
@@ -100,5 +90,20 @@ export async function deleteReplacedUploadedAvatar(
 ) {
 	if (previousAvatar?.storageId && previousAvatar.storageId !== nextStorageId) {
 		await ctx.storage.delete(previousAvatar.storageId);
+	}
+}
+
+export async function deleteUploadedAvatar(
+	ctx: MutationCtx,
+	avatar: StoredAvatar | undefined
+) {
+	if (!avatar?.storageId) {
+		return;
+	}
+
+	const metadata = await ctx.db.system.get(avatar.storageId);
+
+	if (metadata) {
+		await ctx.storage.delete(avatar.storageId);
 	}
 }

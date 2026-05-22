@@ -2,60 +2,29 @@ import { v } from 'convex/values';
 import { getVisiblePrimaryEmailDraftArtifact } from '@overbase/builder-sdk/artifacts';
 import { normalizeEmailDraft } from '@overbase/builder-sdk/email';
 import { mutation, query } from './_generated/server';
-import type { Id } from './_generated/dataModel';
-import type { MutationCtx, QueryCtx } from './_generated/server';
-import { getAuthorizedSession } from './builderSessionCore';
-import { emailDraft as emailDraftValidator } from './builderEmailValidators';
-import { formatRecipientRef } from './formatRecipientValidators';
+import { getAuthorizedSession } from '../backend/builder-sessions/records';
+import { emailDraft as emailDraftValidator } from '../backend/validators/email-drafts';
+import { formatRecipientRef } from '../backend/validators/recipients';
 import {
 	getDefaultFormatRecipientRefs,
 	getFormatRecipients,
-	getUserDisplayName,
-	getViewerUserDisplayName,
 	normalizeFormatRecipientRefs
-} from './formatRecipients';
+} from '../backend/opportunity-formats/recipients';
+import { deleteOpportunityFormatRecordTree } from '../backend/opportunity-formats/deletion';
+import {
+	getOpportunityFormatCreator,
+	normalizeOpportunityFormatTitle
+} from '../backend/opportunity-formats/formats';
 import {
 	getOpportunityFormatReadiness,
 	normalizeOpportunityFormatRules
-} from './opportunityFormatReadiness';
-import {
-	getViewerWorkspaceRecord,
-	requireViewerWorkspace,
-	type ViewerWorkspace
-} from './auth';
-
-const DEFAULT_OPPORTUNITY_FORMAT_TITLE = 'Untitled format';
+} from '../backend/opportunity-formats/readiness';
+import { getViewerWorkspaceRecord, requireViewerWorkspace } from '../backend/auth/viewer';
 
 const opportunityFormatRule = v.object({
 	id: v.string(),
 	text: v.string()
 });
-
-function normalizeOpportunityFormatTitle(title: string) {
-	return title.trim() || DEFAULT_OPPORTUNITY_FORMAT_TITLE;
-}
-
-async function getCreator(
-	ctx: QueryCtx | MutationCtx,
-	userId: Id<'users'>,
-	viewerWorkspace?: ViewerWorkspace
-) {
-	const user = await ctx.db.get(userId);
-	const viewerIdentity =
-		viewerWorkspace && userId === viewerWorkspace.user._id
-			? viewerWorkspace.identity
-			: undefined;
-
-	return {
-		id: userId,
-		name: user
-			? viewerIdentity
-				? getViewerUserDisplayName(user, viewerIdentity)
-				: getUserDisplayName(user)
-			: 'Unknown user',
-		avatarUrl: user?.avatar?.url ?? ''
-	};
-}
 
 export const publishFromBuilderSession = mutation({
 	args: {
@@ -167,7 +136,11 @@ export const getOpportunityFormatDetail = query({
 					opportunityFormat.recipientRefs,
 					viewerWorkspace
 				),
-				creator: await getCreator(ctx, opportunityFormat.createdByUserId, viewerWorkspace),
+				creator: await getOpportunityFormatCreator(
+					ctx,
+					opportunityFormat.createdByUserId,
+					viewerWorkspace
+				),
 				createdAt: opportunityFormat.createdAt,
 				updatedAt: opportunityFormat.updatedAt
 			},
@@ -222,7 +195,11 @@ export const listOpportunityFormats = query({
 				title: opportunityFormat.title,
 				status: opportunityFormat.status,
 				readiness: getOpportunityFormatReadiness(opportunityFormat.rules),
-				creator: await getCreator(ctx, opportunityFormat.createdByUserId, viewerWorkspace),
+				creator: await getOpportunityFormatCreator(
+					ctx,
+					opportunityFormat.createdByUserId,
+					viewerWorkspace
+				),
 				createdAt: opportunityFormat.createdAt
 			}))
 		);
@@ -237,36 +214,15 @@ export const deleteOpportunityFormats = mutation({
 		const viewerWorkspace = await requireViewerWorkspace(ctx);
 
 		for (const opportunityFormatId of opportunityFormatIds) {
-			const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
+			const opportunityFormat = await getViewerWorkspaceRecord(
+				viewerWorkspace,
+				await ctx.db.get(opportunityFormatId)
+			);
 			if (!opportunityFormat) {
 				continue;
 			}
-			const feedback = await ctx.db
-				.query('opportunityFeedback')
-				.withIndex('by_workspace_opportunityFormat', (q) =>
-					q
-						.eq('workspaceId', opportunityFormat.workspaceId)
-						.eq('opportunityFormatId', opportunityFormatId)
-				)
-				.collect();
-			const opportunities = await ctx.db
-				.query('opportunities')
-				.withIndex('by_workspace_opportunityFormat_createdAt', (q) =>
-					q
-						.eq('workspaceId', opportunityFormat.workspaceId)
-						.eq('opportunityFormatId', opportunityFormatId)
-				)
-				.collect();
 
-			for (const feedbackItem of feedback) {
-				await ctx.db.delete(feedbackItem._id);
-			}
-
-			for (const opportunity of opportunities) {
-				await ctx.db.delete(opportunity._id);
-			}
-
-			await ctx.db.delete(opportunityFormatId);
+			await deleteOpportunityFormatRecordTree(ctx, opportunityFormat);
 		}
 	}
 });

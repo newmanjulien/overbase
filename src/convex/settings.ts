@@ -3,8 +3,8 @@ import { mutation } from './_generated/server';
 import {
 	createUploadedAvatarOrDelete,
 	deleteReplacedUploadedAvatar
-} from './avatar';
-import { requireViewerWorkspace } from './auth';
+} from '../backend/profiles/avatars';
+import { requireViewerWorkspace } from '../backend/auth/viewer';
 
 const MAX_NAME_LENGTH = 32;
 const MAX_FILE_NAME_LENGTH = 255;

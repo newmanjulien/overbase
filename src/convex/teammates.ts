@@ -8,7 +8,7 @@ import {
 	TEAMMATE_EMAIL_REGEX,
 	TEAMMATE_EMAIL_SEPARATOR_REGEX
 } from './teammateIdentity';
-import { getViewerWorkspaceRecord, requireViewerWorkspace } from './auth';
+import { getViewerWorkspaceRecord, requireViewerWorkspace } from '../backend/auth/viewer';
 
 function toTeammateResult(teammate: {
 	_id: Id<'teammates'>;

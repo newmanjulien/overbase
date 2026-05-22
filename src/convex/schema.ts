@@ -2,11 +2,11 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import {
 	builderArtifacts,
-	builderRunSetup,
-	emailDraft
-} from './builderEmailValidators';
-import { formatRecipientRef } from './formatRecipientValidators';
-import { avatar } from './avatar';
+	builderRunSetup
+} from '../backend/validators/builder-protocol';
+import { emailDraft } from '../backend/validators/email-drafts';
+import { avatar } from '../backend/validators/avatars';
+import { formatRecipientRef } from '../backend/validators/recipients';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 

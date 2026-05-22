@@ -1,13 +1,10 @@
-import type { Doc, Id } from './_generated/dataModel';
-import type { MutationCtx, QueryCtx } from './_generated/server';
-import {
-	isBuilderSessionActive
-} from './builderSessionAccess';
-import { requireViewerWorkspace, type ViewerWorkspace } from './auth';
+import type { Doc, Id } from '../../convex/_generated/dataModel';
+import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
+import { requireViewerWorkspace, type ViewerWorkspace } from '../auth/viewer';
+import { isBuilderSessionActive } from './expiry';
 
 export const ASSISTANT_STREAM_FLUSH_INTERVAL_MS = 150;
 export const ASSISTANT_STREAM_FLUSH_MIN_CHARS = 120;
-export const EXPIRED_SESSION_CLEANUP_LIMIT = 50;
 export const BACKGROUND_JOB_RETRY_MS = 500;
 export const BACKGROUND_JOB_MAX_ATTEMPTS = 80;
 export const JOB_DEADLINE_MS = 45_000;
@@ -38,7 +35,7 @@ export async function getAuthorizedSession(
 
 export async function buildSessionSnapshot(
 	ctx: QueryCtx | MutationCtx,
-	session: Doc<'builderSessions'>,
+	session: Doc<'builderSessions'>
 ) {
 	const messages = await ctx.db
 		.query('builderSessionMessages')

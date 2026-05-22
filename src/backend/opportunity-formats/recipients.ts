@@ -1,8 +1,8 @@
-import type { Doc, Id } from './_generated/dataModel';
-import type { MutationCtx, QueryCtx } from './_generated/server';
-import type { ViewerIdentity } from '../shared/viewer';
-import { requireViewerWorkspace, type ViewerWorkspace } from './auth';
-import { getTeammateDisplayName } from './teammateIdentity';
+import type { Doc, Id } from '../../convex/_generated/dataModel';
+import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
+import { getTeammateDisplayName } from '../../convex/teammateIdentity';
+import type { ViewerIdentity } from '../../shared/viewer';
+import { requireViewerWorkspace, type ViewerWorkspace } from '../auth/viewer';
 
 export type FormatRecipientRef =
 	| {

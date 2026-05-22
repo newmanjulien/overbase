@@ -65,7 +65,7 @@ http.route({
 			});
 		}
 
-		await ctx.runMutation(internal.accountDeletion.deleteAccountForClerkUser, {
+		await ctx.runMutation(internal.internal.auth.deleteAccountForClerkUser, {
 			clerkUserId
 		});
 

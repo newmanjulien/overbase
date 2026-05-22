@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 import { normalizeEmailDraft, type EmailDraft } from '@overbase/builder-sdk/email';
 import { mutation } from './_generated/server';
-import { getViewerWorkspaceRecord, requireViewerWorkspace } from './auth';
+import { getViewerWorkspaceRecord, requireViewerWorkspace } from '../backend/auth/viewer';
 
 function createPipelineAlertDraft(title: string): EmailDraft {
 	return {

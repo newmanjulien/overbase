@@ -6,7 +6,7 @@ const crons = cronJobs();
 crons.interval(
 	'delete expired builder sessions',
 	{ minutes: 15 },
-	internal.builderSessionMaintenance.deleteExpiredSessions
+	internal.internal.builderSessions.deleteExpiredSessions
 );
 
 export default crons;
