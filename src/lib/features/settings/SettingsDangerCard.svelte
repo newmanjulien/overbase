@@ -118,7 +118,7 @@
 
 		<div>
 			<label for="delete-account-confirmation" class="block text-xs text-zinc-950">
-				Type delete my account to continue
+				Type <strong>"delete my account"</strong> to continue
 			</label>
 			<input
 				id="delete-account-confirmation"
