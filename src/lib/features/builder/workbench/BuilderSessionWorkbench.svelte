@@ -163,46 +163,44 @@
 
 <NativeBuilderLeaveGuard active={leaveGuardActive && !isPublishNavigation} />
 
-{#if mode === 'beforeRun'}
-	{@render beforeRun(beforeRunContext)}
-{:else}
-	<SplitPane
-		minPrimary={BUILDER_WORKBENCH_SPLIT.minPrimary}
-		minSecondary={BUILDER_WORKBENCH_SPLIT.minSecondary}
-		defaultRatio={BUILDER_WORKBENCH_SPLIT.defaultRatio}
-		mobileBreakpoint={BUILDER_WORKBENCH_SPLIT.mobileBreakpoint}
-		keyboardStep={BUILDER_WORKBENCH_SPLIT.keyboardStep}
-		handleWidth={BUILDER_WORKBENCH_SPLIT.handleWidth}
-		label="Resize builder panels"
-	>
-		{#snippet primary()}
-			{#if builderSession.error && builderSession.messages.length === 0}
-				<section class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white p-2">
-					<div class="min-h-0 flex-1 overflow-y-auto px-3 py-6 md:px-5">
-						<div class="mx-auto w-full max-w-3xl">
-							<BuilderChatError message={builderSession.error} />
-						</div>
+<SplitPane
+	minPrimary={BUILDER_WORKBENCH_SPLIT.minPrimary}
+	minSecondary={BUILDER_WORKBENCH_SPLIT.minSecondary}
+	defaultRatio={BUILDER_WORKBENCH_SPLIT.defaultRatio}
+	mobileBreakpoint={BUILDER_WORKBENCH_SPLIT.mobileBreakpoint}
+	keyboardStep={BUILDER_WORKBENCH_SPLIT.keyboardStep}
+	handleWidth={BUILDER_WORKBENCH_SPLIT.handleWidth}
+	label="Resize builder panels"
+>
+	{#snippet primary()}
+		{#if mode === 'beforeRun'}
+			{@render beforeRun(beforeRunContext)}
+		{:else if builderSession.error && builderSession.messages.length === 0}
+			<section class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white p-2">
+				<div class="min-h-0 flex-1 overflow-y-auto px-3 py-6 md:px-5">
+					<div class="mx-auto w-full max-w-3xl">
+						<BuilderChatError message={builderSession.error} />
 					</div>
-				</section>
-			{:else if builderSession.handle || builderSession.messages.length > 0}
-				<BuilderChatSurface
-					messages={builderSession.messages}
-					queryError={builderSession.queryError}
-					{runError}
-					canEditDraft={builderSession.canEditDraft}
-					canSubmitDraft={builderSession.canSubmitDraft}
-					onSend={sendMessage}
-				/>
-			{/if}
-		{/snippet}
-
-		{#snippet secondary()}
-			<CustomEmailRightPanel
-				{app}
-				session={builderSession.session}
-				onSaveDraft={saveDraft}
-				onPublish={publishFormat}
+				</div>
+			</section>
+		{:else if builderSession.handle || builderSession.messages.length > 0}
+			<BuilderChatSurface
+				messages={builderSession.messages}
+				queryError={builderSession.queryError}
+				{runError}
+				canEditDraft={builderSession.canEditDraft}
+				canSubmitDraft={builderSession.canSubmitDraft}
+				onSend={sendMessage}
 			/>
-		{/snippet}
-	</SplitPane>
-{/if}
+		{/if}
+	{/snippet}
+
+	{#snippet secondary()}
+		<CustomEmailRightPanel
+			{app}
+			session={builderSession.session}
+			onSaveDraft={saveDraft}
+			onPublish={publishFormat}
+		/>
+	{/snippet}
+</SplitPane>
