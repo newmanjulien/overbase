@@ -72,6 +72,11 @@
 			{:else}
 				<p>Add email body</p>
 			{/if}
+			<img
+				src="/logo_full.png"
+				alt="Overbase"
+				class="mt-9 h-auto w-[128px] max-w-[45%] select-none"
+			/>
 		</div>
 	{/snippet}
 

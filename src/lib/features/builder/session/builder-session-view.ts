@@ -45,17 +45,12 @@ export function getBuilderSessionMessagingView(params: {
 export function getBuilderSessionEmailDraftView(session: Doc<'builderSessions'> | null) {
 	const emailDraftArtifact = session ? getVisiblePrimaryEmailDraftArtifact(session.artifacts) : null;
 	const emailDraft = emailDraftArtifact?.value ?? null;
-	const canUseReadyEmailDraft = Boolean(
-		session &&
-			emailDraftArtifact &&
-			session.status === 'ready' &&
-			!session.activeTurnJobId
-	);
+	const canUseVisibleEmailDraft = Boolean(session && emailDraftArtifact && !session.activeTurnJobId);
 
 	return {
 		emailDraft,
 		emailDraftVersion: emailDraftArtifact?.version ?? 0,
-		canEditEmailDraft: canUseReadyEmailDraft,
-		canPublishEmailDraft: canUseReadyEmailDraft
+		canEditEmailDraft: canUseVisibleEmailDraft,
+		canPublishEmailDraft: canUseVisibleEmailDraft
 	};
 }
