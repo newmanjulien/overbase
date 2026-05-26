@@ -98,7 +98,7 @@
 				value={draftTitle}
 				aria-label="Edit header title"
 				class={cn(
-					'h-7 w-full min-w-0 rounded-sm border border-zinc-200 bg-white px-2 text-xs font-medium tracking-wide text-zinc-700 outline-none transition-colors focus:border-zinc-200',
+					'h-7 w-full min-w-0 rounded-sm border border-stone-200 bg-white px-2 text-xs font-medium tracking-wide text-stone-700 outline-none transition-colors focus:border-stone-200',
 					align === 'center' && 'text-center',
 					inputClass
 				)}
@@ -108,7 +108,7 @@
 			/>
 		</form>
 	{:else}
-		<span class={cn('block min-w-0 truncate text-xs font-medium tracking-wide text-zinc-500', textClass)}>
+		<span class={cn('block min-w-0 truncate text-xs font-medium tracking-wide text-stone-500', textClass)}>
 			{title}
 		</span>
 
@@ -117,7 +117,7 @@
 				aria-label="Edit title"
 				variant="ghost"
 				class={cn(
-					'size-5 shrink-0 text-zinc-400 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300',
+					'size-5 shrink-0 text-stone-400 hover:text-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-300',
 					buttonClass
 				)}
 				onclick={beginEditing}

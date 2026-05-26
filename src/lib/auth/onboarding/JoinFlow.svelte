@@ -332,7 +332,7 @@
 				Already have an account?
 				<a
 					href={resolve(loginHref as '/')}
-					class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
+					class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 				>
 					Log in
 				</a>
@@ -375,7 +375,7 @@
 						By continuing, you accept the
 						<a
 							href="https://overbase.app/legal/terms-of-service"
-							class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
+							class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 							target="_blank"
 							rel="external noopener noreferrer"
 						>
@@ -384,7 +384,7 @@
 						and
 						<a
 							href="https://overbase.app/legal/dpa"
-							class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
+							class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 							target="_blank"
 							rel="external noopener noreferrer"
 						>

@@ -80,7 +80,7 @@
 					{/if}
 					<button
 						type="button"
-						class="mt-5 text-sm text-zinc-400/50 underline underline-offset-2 transition hover:text-zinc-400/70 focus-visible:rounded-sm focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgb(113_113_122_/_20%)] disabled:cursor-not-allowed disabled:text-zinc-300"
+						class="mt-5 text-sm text-stone-400/50 underline underline-offset-2 transition hover:text-stone-400/70 focus-visible:rounded-sm focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgb(120_113_108_/_20%)] disabled:cursor-not-allowed disabled:text-stone-300"
 						disabled={isCompletingOnboarding}
 						onclick={onOpenBuilder}
 					>
@@ -104,7 +104,7 @@
 						{#each apps as app (app.id)}
 							<a
 								href={resolve(BUILDER_FRESH_START_ROUTE, builderAppSlugParams(app.id))}
-								class="flex min-h-70 w-full flex-col rounded-lg border border-zinc-200/60 bg-white p-2 text-left outline-none transition-[border-color,box-shadow,transform,opacity] duration-150 hover:-translate-y-0.5 hover:border-zinc-200 focus-visible:-translate-y-0.5 focus-visible:border-zinc-300 focus-visible:shadow-[0_0_0_3px_rgb(24_24_27_/_14%)] aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-60"
+								class="flex min-h-70 w-full flex-col rounded-lg border border-stone-200/60 bg-white p-2 text-left outline-none transition-[border-color,box-shadow,transform,opacity] duration-150 hover:-translate-y-0.5 hover:border-stone-200 focus-visible:-translate-y-0.5 focus-visible:border-stone-300 focus-visible:shadow-[0_0_0_3px_rgb(28_25_23_/_14%)] aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-60"
 								aria-label={`Start with ${app.title}`}
 								aria-disabled={isCompletingOnboarding}
 								tabindex={isCompletingOnboarding ? -1 : 0}
@@ -112,19 +112,19 @@
 								onfocus={() => preloadApp(app)}
 								onclick={(event) => selectApp(event, app)}
 							>
-								<div class="rounded-[0.45rem] bg-zinc-50 p-1">
+								<div class="rounded-[0.45rem] bg-stone-50 p-1">
 									<BuilderAppCardArtwork artwork={app.artwork.card} />
 								</div>
 
 								<div class="flex min-h-0 flex-1 flex-col px-1.5 pt-3">
-									<h2 class="truncate text-[0.9rem] font-medium text-zinc-950">
+									<h2 class="truncate text-[0.9rem] font-medium text-stone-950">
 										{app.title}
 									</h2>
-									<p class="mt-1.5 line-clamp-2 text-[0.78rem] leading-snug text-zinc-500">
+									<p class="mt-1.5 line-clamp-2 text-[0.78rem] leading-snug text-stone-500">
 										{app.description}
 									</p>
 									<span
-										class="mt-4 inline-flex h-9 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-zinc-200/60 bg-white px-3.5 text-[0.76rem] font-medium text-zinc-800 transition-colors hover:bg-zinc-50"
+										class="mt-4 inline-flex h-9 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-stone-200/60 bg-white px-3.5 text-[0.76rem] font-medium text-stone-800 transition-colors hover:bg-stone-50"
 									>
 										{selectedAppSlug === app.id ? 'Opening...' : 'Create this format'}
 									</span>
@@ -139,7 +139,7 @@
 					{/if}
 					<button
 						type="button"
-						class="mt-7 text-sm text-zinc-400/50 underline underline-offset-2 transition hover:text-zinc-400/70 focus-visible:rounded-sm focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgb(113_113_122_/_20%)] disabled:cursor-not-allowed disabled:text-zinc-300"
+						class="mt-7 text-sm text-stone-400/50 underline underline-offset-2 transition hover:text-stone-400/70 focus-visible:rounded-sm focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgb(120_113_108_/_20%)] disabled:cursor-not-allowed disabled:text-stone-300"
 						disabled={isCompletingOnboarding}
 						onclick={onOpenBuilder}
 					>
@@ -156,7 +156,7 @@
 					{/if}
 					<button
 						type="button"
-						class="mt-4 inline-flex h-8 items-center justify-center rounded-md bg-black px-3.5 text-xs font-semibold text-white outline-none transition hover:bg-[#202124] focus-visible:shadow-[0_0_0_3px_rgb(0_0_0_/_18%)] disabled:cursor-not-allowed disabled:bg-zinc-300"
+						class="mt-4 inline-flex h-8 items-center justify-center rounded-md bg-black px-3.5 text-xs font-semibold text-white outline-none transition hover:bg-[#202124] focus-visible:shadow-[0_0_0_3px_rgb(0_0_0_/_18%)] disabled:cursor-not-allowed disabled:bg-stone-300"
 						disabled={isCompletingOnboarding}
 						onclick={onOpenBuilder}
 					>

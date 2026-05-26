@@ -20,5 +20,5 @@
 		onAnswerChange({ ...answer, value: event.currentTarget.value });
 	}}
 	placeholder={question.placeholder}
-	class="min-h-28 w-full resize-none rounded-sm border border-zinc-100 bg-white px-3 py-2.5 text-[0.76rem] leading-[1.15rem] text-zinc-800 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-200 md:text-[0.8rem]"
+	class="min-h-28 w-full resize-none rounded-sm border border-stone-100 bg-white px-3 py-2.5 text-[0.76rem] leading-[1.15rem] text-stone-800 outline-none transition-colors placeholder:text-stone-400 focus:border-stone-200 md:text-[0.8rem]"
 ></textarea>

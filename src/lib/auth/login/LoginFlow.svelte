@@ -109,7 +109,7 @@
 			Need an account?
 			<a
 				href={resolve(joinHref as '/')}
-				class="text-zinc-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
+				class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 			>
 				Join
 			</a>

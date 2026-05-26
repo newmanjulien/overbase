@@ -16,13 +16,13 @@
 </script>
 
 {#if showPager}
-	<div class="flex shrink-0 items-center gap-1 text-[0.72rem] text-zinc-500">
+	<div class="flex shrink-0 items-center gap-1 text-[0.72rem] text-stone-500">
 		<button
 			type="button"
 			aria-label="Previous question"
 			class={cn(
 				'grid size-5 place-items-center rounded-[6px] disabled:cursor-default disabled:hover:bg-transparent',
-				canGoPrevious ? 'text-zinc-500 hover:bg-zinc-100' : 'text-zinc-300'
+				canGoPrevious ? 'text-stone-500 hover:bg-stone-100' : 'text-stone-300'
 			)}
 			disabled={!canGoPrevious}
 			onclick={onPrevious}
@@ -35,7 +35,7 @@
 			aria-label="Next question"
 			class={cn(
 				'grid size-5 place-items-center rounded-[6px] disabled:cursor-default disabled:hover:bg-transparent',
-				canGoNext ? 'text-zinc-500 hover:bg-zinc-100' : 'text-zinc-300'
+				canGoNext ? 'text-stone-500 hover:bg-stone-100' : 'text-stone-300'
 			)}
 			disabled={!canGoNext}
 			onclick={onNext}

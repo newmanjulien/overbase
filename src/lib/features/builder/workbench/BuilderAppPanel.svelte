@@ -15,15 +15,15 @@
 	const detailsId = `${componentId}-details`;
 	const detailsGridRows = $derived(detailsExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]');
 	const chevronClass = $derived(
-		`size-3.5 text-zinc-500 transition-transform duration-200 ease-out ${
+		`size-3.5 text-stone-500 transition-transform duration-200 ease-out ${
 			detailsExpanded ? 'rotate-180' : ''
 		}`
 	);
 </script>
 
-<aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-zinc-50/50 text-zinc-950">
+<aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-stone-50/50 text-stone-950">
 	<div class="flex min-h-0 flex-1 items-center justify-center px-5 py-10 md:px-8">
-		<article class="w-full max-w-66 rounded-sm bg-white p-4 text-zinc-950 shadow-sm">
+		<article class="w-full max-w-66 rounded-sm bg-white p-4 text-stone-950 shadow-sm">
 			<div class="py-5">
 				<BuilderPanelArtwork
 					backColor={artwork.backColor}
@@ -35,12 +35,12 @@
 			</div>
 
 			<div class="px-1 pt-1 pb-5 text-center">
-				<h2 class="text-xs font-medium tracking-normal text-zinc-950">{app.title}</h2>
-				<p class="mt-1 text-[0.7rem] leading-snug text-zinc-500">{app.description}</p>
+				<h2 class="text-xs font-medium tracking-normal text-stone-950">{app.title}</h2>
+				<p class="mt-1 text-[0.7rem] leading-snug text-stone-500">{app.description}</p>
 
 				<button
 					type="button"
-					class="mt-3 inline-flex items-center justify-center gap-1.5 rounded-sm px-2 py-1 text-[0.7rem] font-normal text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
+					class="mt-3 inline-flex items-center justify-center gap-1.5 rounded-sm px-2 py-1 text-[0.7rem] font-normal text-stone-700 transition-colors hover:bg-stone-100 hover:text-stone-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-950"
 					aria-expanded={detailsExpanded}
 					aria-controls={detailsId}
 					onclick={() => {
@@ -63,7 +63,7 @@
 				>
 					<div class="min-h-0 overflow-hidden">
 						<div
-							class="space-y-2 pt-3 text-center text-[0.7rem] leading-relaxed text-zinc-500 transition-all duration-300 ease-out"
+							class="space-y-2 pt-3 text-center text-[0.7rem] leading-relaxed text-stone-500 transition-all duration-300 ease-out"
 							class:translate-y-0={detailsExpanded}
 							class:opacity-100={detailsExpanded}
 							class:translate-y-1={!detailsExpanded}

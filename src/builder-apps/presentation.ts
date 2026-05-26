@@ -2,7 +2,7 @@ import { BRING_THE_FIRM_APP_SLUG, CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG } from './i
 
 export type AppStatus = 'active';
 
-export type ArtworkCardTone = 'coral' | 'violet' | 'aqua' | 'zinc';
+export type ArtworkCardTone = 'coral' | 'violet' | 'aqua' | 'stone';
 export type ArtworkCardSymbolSize = 'sm' | 'md';
 
 export type BuilderAppArtwork = {

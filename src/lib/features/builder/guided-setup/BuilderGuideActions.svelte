@@ -21,7 +21,7 @@
 		<Button
 			variant="secondary"
 			disabled={isSubmitting}
-			class="text-[0.72rem] text-zinc-900 md:text-[0.74rem]"
+			class="text-[0.72rem] text-stone-900 md:text-[0.74rem]"
 			onclick={() => {
 				void onSkipRemaining();
 			}}

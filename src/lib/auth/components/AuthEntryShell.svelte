@@ -26,7 +26,7 @@
 	}: Props = $props();
 
 	const quote = {
-		text: 'Sharing data with our ecosystem partners increased net new revenue by 10% in the divisions we deployed it to',
+		text: 'Overbase increased partnership revenue by 20% in the divisions we deployed it to',
 		personName: "Alexandre L'Heureux",
 		personTitle: 'CEO at WSP',
 		avatarSrc: '/wsp.jpeg',

@@ -140,7 +140,7 @@
 <section class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white p-2">
 	<div bind:this={scrollElement} class="relative min-h-0 flex-1 overflow-y-auto px-3 py-6 md:px-5">
 		<div bind:this={contentElement} class="mx-auto flex w-full max-w-3xl flex-col gap-4">
-			<p class="w-full pb-1.5 text-center text-xs leading-snug text-zinc-400">
+			<p class="w-full pb-1.5 text-center text-xs leading-snug text-stone-400">
 				Explain the emails you want your team to receive
 			</p>
 
@@ -155,7 +155,7 @@
 			{#each messages as message (message._id)}
 				{#if message.role === 'user'}
 					<div
-						class="ml-auto w-fit max-w-[82%] rounded-2xl bg-zinc-100 px-4 py-2.5 text-[0.82rem] leading-[1.55] whitespace-pre-wrap text-zinc-800"
+						class="ml-auto w-fit max-w-[82%] rounded-2xl bg-stone-100 px-4 py-2.5 text-[0.82rem] leading-[1.55] whitespace-pre-wrap text-stone-800"
 					>
 						{message.text}
 					</div>
@@ -166,19 +166,19 @@
 								'rounded-2xl px-4 py-2.5 text-[0.82rem] leading-[1.55] whitespace-pre-wrap',
 								message.status === 'failed'
 									? 'border border-red-200 bg-red-50 text-red-700'
-									: 'bg-white text-zinc-800'
+									: 'bg-white text-stone-800'
 							]}
 						>
 							{#if (message.status === 'pending' || message.status === 'streaming') && !message.text}
-								<span class="inline-flex items-center gap-0.5 text-zinc-500">
-									<span class="typing-dot size-1 rounded-full bg-zinc-400"></span>
-									<span class="typing-dot size-1 rounded-full bg-zinc-400"></span>
-									<span class="typing-dot size-1 rounded-full bg-zinc-400"></span>
+								<span class="inline-flex items-center gap-0.5 text-stone-500">
+									<span class="typing-dot size-1 rounded-full bg-stone-400"></span>
+									<span class="typing-dot size-1 rounded-full bg-stone-400"></span>
+									<span class="typing-dot size-1 rounded-full bg-stone-400"></span>
 								</span>
 							{:else}
 								{message.text}
 								{#if message.status === 'pending' || message.status === 'streaming'}
-									<span class="ml-0.5 inline-block h-4 w-px translate-y-0.5 bg-zinc-400"></span>
+									<span class="ml-0.5 inline-block h-4 w-px translate-y-0.5 bg-stone-400"></span>
 								{/if}
 							{/if}
 							{#if message.status === 'failed' && message.errorText}
@@ -203,7 +203,7 @@
 				type="button"
 				aria-label="Jump to latest"
 				variant="secondary"
-				class="absolute right-5 bottom-4 size-8 rounded-full text-zinc-700 shadow-sm"
+				class="absolute right-5 bottom-4 size-8 rounded-full text-stone-700 shadow-sm"
 				onclick={() => void stickToBottom.scrollToBottom('instant')}
 			>
 				<PlusIcon size={16} weight="regular" class="rotate-45" />
@@ -219,7 +219,7 @@
 		}}
 	>
 		<div
-			class="flex min-h-11 items-center gap-2 rounded-[1.8rem] border border-zinc-200/90 bg-white px-3.5 md:min-h-11.5 md:gap-2.5 md:px-4"
+			class="flex min-h-11 items-center gap-2 rounded-[1.8rem] border border-stone-200/90 bg-white px-3.5 md:min-h-11.5 md:gap-2.5 md:px-4"
 		>
 			<textarea
 				bind:this={textareaElement}
@@ -229,7 +229,7 @@
 				placeholder="Explain the email you want your team to receive..."
 				readonly={composerReadOnly}
 				style={`height: ${COMPOSER_TEXTAREA_MIN_HEIGHT}px;`}
-				class="min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.8rem] leading-[1.2rem] font-normal text-zinc-800 outline-none placeholder:text-zinc-400 read-only:cursor-default md:text-[0.84rem]"
+				class="min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.8rem] leading-[1.2rem] font-normal text-stone-800 outline-none placeholder:text-stone-400 read-only:cursor-default md:text-[0.84rem]"
 				onkeydown={(event) => {
 					if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
 						event.preventDefault();

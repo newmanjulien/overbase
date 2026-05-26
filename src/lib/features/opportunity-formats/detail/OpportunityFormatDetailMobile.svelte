@@ -30,7 +30,7 @@
 		: 'min-h-full bg-white px-4 py-4 md:hidden'}
 >
 	{#if loadState === 'loading'}
-		<div class="flex min-h-60 items-center justify-center text-[0.74rem] text-zinc-500">
+		<div class="flex min-h-60 items-center justify-center text-[0.74rem] text-stone-500">
 			Loading format...
 		</div>
 	{:else if loadState === 'error'}
@@ -38,7 +38,7 @@
 			Could not load format.
 		</div>
 	{:else if loadState === 'notFound'}
-		<div class="flex min-h-60 items-center justify-center text-[0.74rem] text-zinc-500">
+		<div class="flex min-h-60 items-center justify-center text-[0.74rem] text-stone-500">
 			Format not found.
 		</div>
 	{:else if isAttachmentOpen && detailState.emailDraft.attachment}
@@ -57,7 +57,7 @@
 				/>
 			</section>
 
-			<section class="border-t border-zinc-100 pt-4">
+			<section class="border-t border-stone-100 pt-4">
 				<OpportunityFormatRulesPanel
 					rules={detailState.rulesDraft}
 					canSave={detailState.canSaveRules}

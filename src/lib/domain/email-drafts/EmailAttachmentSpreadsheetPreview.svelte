@@ -70,11 +70,11 @@
 </script>
 
 <div bind:this={spreadsheetRoot} class="flex min-h-full w-full flex-col overflow-hidden bg-white">
-	<div class="flex h-12 shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-2.5">
+	<div class="flex h-12 shrink-0 items-center gap-3 border-b border-stone-200 bg-white px-2.5">
 		<IconButton
 			aria-label="Back to email"
 			variant="ghost"
-			class="size-7 shrink-0 text-zinc-500 hover:text-zinc-900 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
+			class="size-7 shrink-0 text-stone-500 hover:text-stone-900 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
 			onclick={onClose}
 		>
 			<ArrowLeftIcon size={14} weight="regular" />
@@ -86,7 +86,7 @@
 			XLS
 		</div>
 		<div class="min-w-0 flex-1">
-			<p class="truncate text-[0.72rem] font-medium text-zinc-900">{attachment.filename}</p>
+			<p class="truncate text-[0.72rem] font-medium text-stone-900">{attachment.filename}</p>
 		</div>
 	</div>
 
@@ -104,12 +104,12 @@
 			<thead>
 				<tr>
 					<th
-						class="sticky top-0 left-0 z-20 h-8 border-r border-b border-zinc-200 bg-zinc-100"
+						class="sticky top-0 left-0 z-20 h-8 border-r border-b border-stone-200 bg-stone-100"
 						aria-label="Rows"
 					></th>
 					{#each SPREADSHEET_COLUMN_LABELS as column (column)}
 						<th
-							class="sticky top-0 z-10 h-8 overflow-hidden border-r border-b border-zinc-200 bg-emerald-50/70 px-2 text-center text-[0.62rem] font-normal text-ellipsis whitespace-nowrap text-emerald-900"
+							class="sticky top-0 z-10 h-8 overflow-hidden border-r border-b border-stone-200 bg-emerald-50/70 px-2 text-center text-[0.62rem] font-normal text-ellipsis whitespace-nowrap text-emerald-900"
 						>
 							{column}
 						</th>
@@ -120,17 +120,17 @@
 				{#each rowIndexes as rowIndex (rowIndex)}
 					<tr>
 						<th
-							class="sticky left-0 z-10 h-8 border-r border-b border-zinc-200 bg-zinc-50 px-2 text-right text-[0.62rem] font-normal text-zinc-500"
+							class="sticky left-0 z-10 h-8 border-r border-b border-stone-200 bg-stone-50 px-2 text-right text-[0.62rem] font-normal text-stone-500"
 						>
 							{rowIndex + 1}
 						</th>
 						{#each SPREADSHEET_COLUMN_LABELS as column, cellIndex (column)}
 							<td
-								class="h-8 overflow-hidden border-r border-b border-zinc-200 px-2 text-ellipsis whitespace-nowrap"
-								class:bg-zinc-50={rowIndex === 0}
+								class="h-8 overflow-hidden border-r border-b border-stone-200 px-2 text-ellipsis whitespace-nowrap"
+								class:bg-stone-50={rowIndex === 0}
 								class:font-medium={rowIndex === 0}
-								class:text-zinc-900={rowIndex === 0}
-								class:text-zinc-800={rowIndex !== 0}
+								class:text-stone-900={rowIndex === 0}
+								class:text-stone-800={rowIndex !== 0}
 							>
 								{#if editable}
 									<input
@@ -141,8 +141,8 @@
 										{disabled}
 										class="block h-full w-full min-w-0 overflow-hidden border-0 bg-transparent p-0 text-[0.68rem] text-ellipsis whitespace-nowrap outline-none"
 										class:font-medium={rowIndex === 0}
-										class:text-zinc-900={rowIndex === 0}
-										class:text-zinc-800={rowIndex !== 0}
+										class:text-stone-900={rowIndex === 0}
+										class:text-stone-800={rowIndex !== 0}
 										onkeydown={(event) => handleCellKeydown(event, rowIndex, cellIndex)}
 										oninput={(event) => updateCell(rowIndex, cellIndex, event.currentTarget.value)}
 									/>

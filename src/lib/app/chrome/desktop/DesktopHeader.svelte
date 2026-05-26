@@ -29,12 +29,12 @@
 	const shellState = useChromeShellState();
 </script>
 
-<header class="hidden h-11 items-center border-b border-zinc-100 bg-white px-4 md:flex">
+<header class="hidden h-11 items-center border-b border-stone-100 bg-white px-4 md:flex">
 	<div class="flex min-w-0 flex-1 items-center">
 		<IconButton
 			aria-label="Toggle sidebar"
 			variant="ghost"
-			class="mr-1 ml-1 size-5 text-zinc-500 hover:bg-transparent hover:text-zinc-400"
+			class="mr-1 ml-1 size-5 text-stone-500 hover:bg-transparent hover:text-stone-400"
 			onclick={() => {
 				shellState.toggleSidebar();
 			}}
@@ -46,11 +46,11 @@
 			<nav aria-label="Breadcrumb" class="ml-2 flex min-w-0 flex-1 items-center gap-1.5">
 				<a
 					href={resolve(breadcrumbParent.href)}
-					class="block min-w-0 shrink truncate text-[0.74rem] font-medium tracking-wide text-zinc-400 transition-colors hover:text-zinc-600"
+					class="block min-w-0 shrink truncate text-[0.74rem] font-medium tracking-wide text-stone-400 transition-colors hover:text-stone-600"
 				>
 					{breadcrumbParent.label}
 				</a>
-				<CaretRightIcon size={12} weight="regular" class="shrink-0 text-zinc-300" />
+				<CaretRightIcon size={12} weight="regular" class="shrink-0 text-stone-300" />
 				<EditableHeaderTitle
 					{title}
 					editable={titleEditable}

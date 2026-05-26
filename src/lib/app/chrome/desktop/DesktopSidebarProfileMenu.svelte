@@ -142,7 +142,7 @@
 		<button
 			bind:this={triggerElement}
 			type="button"
-			class="inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-zinc-100 bg-zinc-50 px-1.5 text-zinc-500 transition-colors hover:border-transparent hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400"
+			class="inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-stone-100 bg-stone-50 px-1.5 text-stone-500 transition-colors hover:border-transparent hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
 			aria-label="Open profile menu"
 			aria-haspopup="menu"
 			aria-expanded={isOpen}
@@ -152,9 +152,9 @@
 			<PersonAvatar
 				person={profile}
 				size={20}
-				class="border border-zinc-100 bg-white"
+				class="border border-stone-100 bg-white"
 			/>
-			<CaretUpDownIcon aria-hidden="true" size={12} weight="regular" class="text-zinc-400" />
+			<CaretUpDownIcon aria-hidden="true" size={12} weight="regular" class="text-stone-400" />
 		</button>
 	</div>
 
@@ -163,14 +163,14 @@
 			bind:this={menuElement}
 			id={menuId}
 			role="menu"
-			class="fixed z-50 min-w-36 overflow-hidden rounded-sm border border-zinc-200 bg-white py-1 text-left shadow-lg shadow-zinc-950/5"
+			class="fixed z-50 min-w-36 overflow-hidden rounded-sm border border-stone-200 bg-white py-1 text-left shadow-lg shadow-stone-950/5"
 			style={menuStyle}
 			aria-label="Profile menu"
 		>
 			<a
 				role="menuitem"
 				href={resolve('/settings')}
-				class="flex h-8 w-full items-center px-2.5 text-left text-[0.72rem] font-normal text-zinc-700 transition-colors hover:bg-zinc-50 focus-visible:bg-zinc-50 focus-visible:outline-none"
+				class="flex h-8 w-full items-center px-2.5 text-left text-[0.72rem] font-normal text-stone-700 transition-colors hover:bg-stone-50 focus-visible:bg-stone-50 focus-visible:outline-none"
 				onclick={() => {
 					closeMenu();
 				}}
@@ -180,7 +180,7 @@
 			<button
 				type="button"
 				role="menuitem"
-				class="flex h-8 w-full items-center px-2.5 text-left text-[0.72rem] font-normal text-zinc-700 transition-colors hover:bg-zinc-50 focus-visible:bg-zinc-50 focus-visible:outline-none"
+				class="flex h-8 w-full items-center px-2.5 text-left text-[0.72rem] font-normal text-stone-700 transition-colors hover:bg-stone-50 focus-visible:bg-stone-50 focus-visible:outline-none"
 				onclick={logOut}
 			>
 				Log out

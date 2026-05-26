@@ -28,15 +28,15 @@
 
 <article
 	class={cn(
-		'overflow-hidden rounded-sm border border-zinc-200/70 bg-white',
+		'overflow-hidden rounded-sm border border-stone-200/70 bg-white',
 		className
 	)}
 >
 	<div class="flex min-h-36 flex-col gap-5 px-4 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-5">
 		<div class="min-w-0 flex-1">
-			<h2 class="text-[0.82rem] leading-5 text-zinc-950">{title}</h2>
+			<h2 class="text-[0.82rem] leading-5 text-stone-950">{title}</h2>
 			{#if descriptionLines.length > 0}
-				<div class="mt-3 space-y-1.5 text-[0.74rem] leading-5 text-zinc-600">
+				<div class="mt-3 space-y-1.5 text-[0.74rem] leading-5 text-stone-600">
 					{#each descriptionLines as line, index (index)}
 						<p>{line}</p>
 					{/each}
@@ -55,9 +55,9 @@
 
 	{#if footer || action}
 		<footer
-			class="flex min-h-12 flex-col gap-3 border-t border-zinc-200/70 bg-zinc-50/80 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+			class="flex min-h-12 flex-col gap-3 border-t border-stone-200/70 bg-stone-50/80 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5"
 		>
-			<div class="min-w-0 text-[0.74rem] leading-5 text-zinc-500">
+			<div class="min-w-0 text-[0.74rem] leading-5 text-stone-500">
 				{@render footer?.()}
 			</div>
 

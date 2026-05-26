@@ -25,5 +25,5 @@
 	ariaLabel="More options"
 	actions={menuActions}
 	bind:open
-	triggerClass="border border-zinc-200/60 bg-white hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300"
+	triggerClass="border border-stone-200/60 bg-white hover:bg-stone-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-300"
 />

@@ -23,13 +23,13 @@
 <EmailComposeDocument>
 	{#snippet to()}
 		{#if toLine}
-			<p class="truncate text-[0.72rem] text-zinc-800">{toLine}</p>
+			<p class="truncate text-[0.72rem] text-stone-800">{toLine}</p>
 		{/if}
 	{/snippet}
 
 	{#snippet cc()}
 		{#if ccLine}
-			<p class="truncate text-[0.72rem] text-zinc-800">{ccLine}</p>
+			<p class="truncate text-[0.72rem] text-stone-800">{ccLine}</p>
 		{/if}
 	{/snippet}
 
@@ -40,12 +40,12 @@
 				onOpen={onOpenAttachment}
 			/>
 		{:else}
-			<p class="text-[0.72rem] text-zinc-400">No attachment</p>
+			<p class="text-[0.72rem] text-stone-400">No attachment</p>
 		{/if}
 	{/snippet}
 
 	{#snippet body()}
-		<div class={hasBody ? 'text-zinc-900' : 'text-zinc-500'}>
+		<div class={hasBody ? 'text-stone-900' : 'text-stone-500'}>
 			{#if hasBody}
 				<div class="space-y-3.5">
 					{#each draft.body as block, blockIndex (`${block.type}:${blockIndex}`)}

@@ -43,7 +43,7 @@
 >
 	<div class="flex min-h-full flex-col justify-between gap-6 pt-1">
 		<div class="space-y-5">
-			<p class="text-[0.72rem] leading-relaxed text-zinc-600">
+			<p class="text-[0.72rem] leading-relaxed text-stone-600">
 				Overbase's success team will work with your partners to let them easily share data with you
 			</p>
 

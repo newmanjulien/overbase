@@ -137,8 +137,8 @@
 		/>
 		<span
 			class={cn(
-				'flex size-3.5 shrink-0 items-center justify-center rounded border border-zinc-300/70 bg-white text-white transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-zinc-300',
-				isSelected(item.id) && 'border-zinc-950 bg-zinc-950'
+				'flex size-3.5 shrink-0 items-center justify-center rounded border border-stone-300/70 bg-white text-white transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-stone-300',
+				isSelected(item.id) && 'border-stone-950 bg-stone-950'
 			)}
 			aria-hidden="true"
 		>
@@ -166,11 +166,11 @@
 {/snippet}
 
 <div class="bg-white">
-	<div class="border-b border-zinc-200/70 bg-zinc-50">
+	<div class="border-b border-stone-200/70 bg-stone-50">
 		<div
 			class="grid min-h-12 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3.5 py-2.5 pr-4 pl-4 md:pr-5 md:pl-5"
 		>
-			<label class="col-span-2 flex min-w-0 items-center gap-3.5 text-[0.7rem] font-normal text-zinc-700">
+			<label class="col-span-2 flex min-w-0 items-center gap-3.5 text-[0.7rem] font-normal text-stone-700">
 				<input
 					bind:this={selectAllCheckbox}
 					type="checkbox"
@@ -181,8 +181,8 @@
 				/>
 				<span
 					class={cn(
-						'flex size-3.5 shrink-0 items-center justify-center rounded border border-zinc-300/70 bg-white text-white transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-zinc-300',
-						(allSelected || someSelected) && 'border-zinc-950 bg-zinc-950'
+						'flex size-3.5 shrink-0 items-center justify-center rounded border border-stone-300/70 bg-white text-white transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-stone-300',
+						(allSelected || someSelected) && 'border-stone-950 bg-stone-950'
 					)}
 					aria-hidden="true"
 				>
@@ -208,7 +208,7 @@
 		</div>
 	</div>
 
-	<div role="list" class="divide-y divide-zinc-200/70 bg-white">
+	<div role="list" class="divide-y divide-stone-200/70 bg-white">
 		{#each items as item (item.id)}
 			<!-- The nested content owns the real link; this preserves pointer row-click without making the row a fake interactive parent around checkbox/menu controls. -->
 			<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->

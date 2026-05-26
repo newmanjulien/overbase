@@ -74,7 +74,7 @@
 
 <div class="flex h-full min-h-0 min-w-0 flex-col justify-center bg-white px-6">
 	<form
-		class="mx-auto w-full max-w-2xl rounded-2xl border border-zinc-200/90 bg-white px-4 pt-3 pb-2"
+		class="mx-auto w-full max-w-2xl rounded-2xl border border-stone-200/90 bg-white px-4 pt-3 pb-2"
 		onsubmit={(event) => {
 			event.preventDefault();
 			void handleSubmit();
@@ -86,7 +86,7 @@
 			rows={1}
 			aria-label="Custom format description"
 			placeholder="Describe the format you had in mind"
-			class="w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.82rem] leading-[1.4] text-zinc-800 outline-none placeholder:text-zinc-400"
+			class="w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.82rem] leading-[1.4] text-stone-800 outline-none placeholder:text-stone-400"
 			onkeydown={(event) => {
 				if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
 					event.preventDefault();

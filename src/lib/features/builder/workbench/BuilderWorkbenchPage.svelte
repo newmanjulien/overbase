@@ -30,8 +30,8 @@
 			{:else}
 				<div class="flex h-full min-h-0 min-w-0 flex-col justify-center bg-white px-6">
 					<div class="mx-auto max-w-sm text-center">
-						<p class="text-[0.82rem] font-medium text-zinc-950">App unavailable</p>
-						<p class="mt-2 text-[0.72rem] leading-[1.5] text-zinc-500">
+						<p class="text-[0.82rem] font-medium text-stone-950">App unavailable</p>
+						<p class="mt-2 text-[0.72rem] leading-[1.5] text-stone-500">
 							This format does not have a guided setup flow yet.
 						</p>
 					</div>

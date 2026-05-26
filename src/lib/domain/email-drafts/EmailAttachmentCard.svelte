@@ -25,7 +25,7 @@
 		aria-label={EMAIL_ATTACHMENT_FORMAT.label}
 	>
 		<div
-			class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-emerald-100 bg-zinc-50"
+			class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-emerald-100 bg-stone-50"
 		></div>
 		<div
 			class="mb-1 rounded-[2px] bg-emerald-700/70 px-0.5 py-px text-[0.32rem] leading-none font-semibold text-white"
@@ -35,7 +35,7 @@
 	</div>
 
 	<div class="min-w-0">
-		<p class="truncate text-[0.68rem] leading-tight font-medium text-zinc-800">{filename}</p>
+		<p class="truncate text-[0.68rem] leading-tight font-medium text-stone-800">{filename}</p>
 	</div>
 {/snippet}
 
@@ -44,7 +44,7 @@
 		<button
 			type="button"
 			aria-label={`Remove ${filename}`}
-			class="ml-1 inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
+			class="ml-1 inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700"
 			onclick={handleRemove}
 		>
 			<XIcon size={13} weight="regular" />
@@ -55,7 +55,7 @@
 {#if isOpenable}
 	{#if removable}
 		<div
-			class="inline-flex h-9 max-w-full items-center rounded-sm border border-zinc-200 bg-zinc-50 pr-1.5 text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-100/70"
+			class="inline-flex h-9 max-w-full items-center rounded-sm border border-stone-200 bg-stone-50 pr-1.5 text-stone-800 transition-colors hover:border-stone-300 hover:bg-stone-100/70"
 		>
 			<button
 				type="button"
@@ -71,7 +71,7 @@
 		<button
 			type="button"
 			aria-label={`Open ${filename}`}
-			class="inline-flex h-9 max-w-full cursor-pointer items-center gap-2 rounded-sm border border-zinc-200 bg-zinc-50 py-0 pr-3 pl-2 text-left text-zinc-800 transition-colors hover:border-zinc-300 hover:bg-zinc-100/70 focus-visible:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
+			class="inline-flex h-9 max-w-full cursor-pointer items-center gap-2 rounded-sm border border-stone-200 bg-stone-50 py-0 pr-3 pl-2 text-left text-stone-800 transition-colors hover:border-stone-300 hover:bg-stone-100/70 focus-visible:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
 			onclick={onOpen}
 		>
 			{@render attachmentFileContent()}
@@ -79,7 +79,7 @@
 	{/if}
 {:else}
 	<div
-		class={`inline-flex h-9 max-w-full items-center gap-2 rounded-sm border border-zinc-200 bg-zinc-50 py-0 pl-2 ${removable ? 'pr-1.5' : 'pr-3'} text-zinc-800`}
+		class={`inline-flex h-9 max-w-full items-center gap-2 rounded-sm border border-stone-200 bg-stone-50 py-0 pl-2 ${removable ? 'pr-1.5' : 'pr-3'} text-stone-800`}
 	>
 		{@render attachmentFileContent()}
 		{@render removeButton()}

@@ -30,8 +30,8 @@
 				class={cn(
 					'inline-flex h-8 items-center justify-center gap-1.5 rounded-full border px-3 text-[0.76rem] font-normal transition-colors md:px-3.5 md:text-[0.78rem]',
 					selectedId === filter.id
-						? 'border-zinc-950 bg-zinc-950 text-white'
-						: 'border-zinc-200 bg-white text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50'
+						? 'border-stone-950 bg-stone-950 text-white'
+						: 'border-stone-200 bg-white text-stone-900 hover:border-stone-300 hover:bg-stone-50'
 				)}
 				aria-pressed={selectedId === filter.id}
 				onclick={() => {

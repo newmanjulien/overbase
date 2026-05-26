@@ -21,7 +21,7 @@
 			type="text"
 			readonly
 			value={value}
-			class="h-8 w-full rounded-sm border border-zinc-200/70 bg-zinc-50 px-2.5 text-[0.74rem] text-zinc-500 outline-none"
+			class="h-8 w-full rounded-sm border border-stone-200/70 bg-stone-50 px-2.5 text-[0.74rem] text-stone-500 outline-none"
 		/>
 	</div>
 

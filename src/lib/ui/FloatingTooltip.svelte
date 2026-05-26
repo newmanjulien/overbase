@@ -217,7 +217,7 @@
 				id={tooltipId}
 				role="tooltip"
 				class={cn(
-					'fixed z-50 rounded-sm border border-zinc-200 bg-white px-3 py-2 text-left text-[0.74rem] leading-[1.45] text-zinc-700 shadow-sm shadow-zinc-950/8',
+					'fixed z-50 rounded-sm border border-stone-200 bg-white px-3 py-2 text-left text-[0.74rem] leading-[1.45] text-stone-700 shadow-sm shadow-stone-950/8',
 					panelClass
 				)}
 				style={panelStyle}

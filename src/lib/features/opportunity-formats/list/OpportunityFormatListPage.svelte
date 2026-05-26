@@ -77,7 +77,7 @@
 	}
 
 	function getStatusLabelClass(status: OpportunityFormatListRecord['status']) {
-		return status === 'active' ? 'text-zinc-400' : 'text-red-300';
+		return status === 'active' ? 'text-stone-400' : 'text-red-300';
 	}
 
 	function isDeletingFormat(opportunityFormatId: Id<'opportunityFormats'>) {

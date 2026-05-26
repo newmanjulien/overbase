@@ -15,7 +15,7 @@ import type { PhosphorIcon } from '$lib/ui/icons';
 
 type ArtworkIcon = PhosphorIcon;
 
-export type BuilderArtworkCardTone = 'coral' | 'violet' | 'aqua' | 'zinc';
+export type BuilderArtworkCardTone = 'coral' | 'violet' | 'aqua' | 'stone';
 export type BuilderArtworkCardSymbolSize = 'sm' | 'md';
 
 export type BuilderArtworkPreset = {

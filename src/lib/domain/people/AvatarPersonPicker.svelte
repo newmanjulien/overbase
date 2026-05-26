@@ -209,7 +209,7 @@
 			aria-haspopup="dialog"
 			aria-expanded={open}
 			aria-controls={open ? pickerId : undefined}
-			class="relative inline-flex shrink-0 items-center justify-center rounded-full border-[1.5px] border-dotted border-zinc-300 bg-white text-zinc-400 ring-1 ring-white transition-colors hover:bg-zinc-100 hover:text-zinc-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400"
+			class="relative inline-flex shrink-0 items-center justify-center rounded-full border-[1.5px] border-dotted border-stone-300 bg-white text-stone-400 ring-1 ring-white transition-colors hover:bg-stone-100 hover:text-stone-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
 			style={`width:${size}px;height:${size}px;`}
 			onclick={togglePicker}
 		>
@@ -223,16 +223,16 @@
 			id={pickerId}
 			role="dialog"
 			aria-label={ariaLabel}
-			class="fixed z-50 overflow-hidden rounded-sm border border-zinc-200 bg-white text-left shadow-lg shadow-zinc-950/5"
+			class="fixed z-50 overflow-hidden rounded-sm border border-stone-200 bg-white text-left shadow-lg shadow-stone-950/5"
 			style={panelStyle}
 		>
 			<label class="sr-only" for={`${pickerId}-search`}>{searchLabel}</label>
-			<div class="relative border-b border-zinc-100">
+			<div class="relative border-b border-stone-100">
 				<MagnifyingGlassIcon
 					aria-hidden="true"
 					size={14}
 					weight="regular"
-					class="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-zinc-400"
+					class="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-stone-400"
 				/>
 				<input
 					bind:this={searchInputElement}
@@ -240,7 +240,7 @@
 					type="search"
 					bind:value={searchQuery}
 					placeholder={searchPlaceholder}
-					class="h-9 w-full border-0 bg-white pr-3 pl-8 text-[0.72rem] text-zinc-900 outline-none placeholder:text-zinc-400"
+					class="h-9 w-full border-0 bg-white pr-3 pl-8 text-[0.72rem] text-stone-900 outline-none placeholder:text-stone-400"
 				/>
 			</div>
 
@@ -256,15 +256,15 @@
 							aria-disabled={isRemovalBlocked}
 							disabled={isRemovalBlocked}
 							class={cn(
-								'flex h-9 w-full items-center gap-2 px-2.5 text-left transition-colors hover:bg-zinc-50 disabled:cursor-default disabled:hover:bg-white',
-								isSelected ? 'text-zinc-950' : 'text-zinc-700'
+								'flex h-9 w-full items-center gap-2 px-2.5 text-left transition-colors hover:bg-stone-50 disabled:cursor-default disabled:hover:bg-white',
+								isSelected ? 'text-stone-950' : 'text-stone-700'
 							)}
 							onclick={() => togglePerson(person.id)}
 						>
 							<PersonAvatar
 								{person}
 								size={22}
-								class="border border-zinc-100"
+								class="border border-stone-100"
 								alt={`${person.name} avatar`}
 							/>
 							<span class="min-w-0 flex-1 truncate text-[0.72rem] font-normal">{person.name}</span>
@@ -272,8 +272,8 @@
 								class={cn(
 									'inline-flex size-4 shrink-0 items-center justify-center rounded-full border',
 									isSelected
-										? 'border-zinc-950 bg-zinc-950 text-white'
-										: 'border-zinc-200 text-transparent'
+										? 'border-stone-950 bg-stone-950 text-white'
+										: 'border-stone-200 text-transparent'
 								)}
 								aria-hidden="true"
 							>
@@ -282,7 +282,7 @@
 						</button>
 					{/each}
 				{:else}
-					<p class="px-3 py-4 text-center text-[0.72rem] text-zinc-500">{emptyLabel}</p>
+					<p class="px-3 py-4 text-center text-[0.72rem] text-stone-500">{emptyLabel}</p>
 				{/if}
 			</div>
 		</div>

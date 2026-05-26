@@ -65,7 +65,7 @@
 	>
 		<span
 			aria-hidden="true"
-			class="sidebar-nav-indicator pointer-events-none absolute rounded-sm bg-zinc-200/60 transition-[transform,width,height,opacity] duration-200 ease-out will-change-transform"
+			class="sidebar-nav-indicator pointer-events-none absolute rounded-sm bg-stone-200/60 transition-[transform,width,height,opacity] duration-200 ease-out will-change-transform"
 		></span>
 		<DesktopNavList
 			sections={NAV_SECTIONS}

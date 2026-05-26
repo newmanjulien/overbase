@@ -14,27 +14,27 @@
 <div class="email-compose-document flex min-h-full w-full flex-1 flex-col">
 	<div class="flex h-8 items-stretch gap-2.5">
 		<div
-			class="flex h-8 w-12 shrink-0 items-center justify-center rounded-sm border border-zinc-200 bg-white text-[0.64rem] font-medium text-zinc-950"
+			class="flex h-8 w-12 shrink-0 items-center justify-center rounded-sm border border-stone-200 bg-white text-[0.64rem] font-medium text-stone-950"
 		>
 			To
 		</div>
-		<div class="email-compose-line-field flex h-8 min-w-0 flex-1 items-center border-b border-zinc-200">
+		<div class="email-compose-line-field flex h-8 min-w-0 flex-1 items-center border-b border-stone-200">
 			{@render to()}
 		</div>
 	</div>
 
 	<div class="mt-3 flex h-8 items-stretch gap-2.5">
 		<div
-			class="flex h-8 w-12 shrink-0 items-center justify-center rounded-sm border border-zinc-200 bg-white text-[0.64rem] font-medium text-zinc-950"
+			class="flex h-8 w-12 shrink-0 items-center justify-center rounded-sm border border-stone-200 bg-white text-[0.64rem] font-medium text-stone-950"
 		>
 			Cc
 		</div>
-		<div class="email-compose-line-field flex h-8 min-w-0 flex-1 items-center border-b border-zinc-200">
+		<div class="email-compose-line-field flex h-8 min-w-0 flex-1 items-center border-b border-stone-200">
 			{@render cc()}
 		</div>
 	</div>
 
-	<div class="border-b border-zinc-200 py-2 text-[0.76rem] leading-snug">
+	<div class="border-b border-stone-200 py-2 text-[0.76rem] leading-snug">
 		<div class="email-compose-attachment-field flex h-9 min-w-0 items-center">
 			{@render attachment()}
 		</div>

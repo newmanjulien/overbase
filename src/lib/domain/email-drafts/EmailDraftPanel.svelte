@@ -110,7 +110,7 @@
 	}
 </script>
 
-<aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-zinc-950">
+<aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-stone-950">
 	<div
 		class={isAttachmentOpen && openAttachment
 			? 'min-h-0 flex-1 overflow-hidden'
@@ -142,7 +142,7 @@
 		{/if}
 	</div>
 
-	<div class="shrink-0 border-t border-zinc-100 bg-white px-4 py-3 md:px-5">
+	<div class="shrink-0 border-t border-stone-100 bg-white px-4 py-3 md:px-5">
 		{#if saveError}
 			<p class="mb-2 text-[0.68rem] leading-snug text-red-600">{saveError}</p>
 		{/if}
@@ -154,7 +154,7 @@
 			{#if isEditing}
 				<Button
 					variant="secondary"
-					class="px-3 text-[0.74rem] text-zinc-700"
+					class="px-3 text-[0.74rem] text-stone-700"
 					disabled={isSaving}
 					onclick={cancelEdit}
 				>
@@ -171,7 +171,7 @@
 			{:else}
 				<Button
 					variant="secondary"
-					class="px-3 text-[0.74rem] text-zinc-800"
+					class="px-3 text-[0.74rem] text-stone-800"
 					disabled={!canEdit || isPublishing}
 					onclick={beginEdit}
 				>

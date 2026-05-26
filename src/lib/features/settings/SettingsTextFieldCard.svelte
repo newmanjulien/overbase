@@ -89,13 +89,13 @@
 				localErrorText = null;
 				hideServerError = true;
 			}}
-			class="h-8 w-full rounded-sm border border-zinc-200/70 bg-white px-2.5 text-[0.74rem] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-300 focus:ring-2 focus:ring-zinc-100"
+			class="h-8 w-full rounded-sm border border-stone-200/70 bg-white px-2.5 text-[0.74rem] text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-stone-300 focus:ring-2 focus:ring-stone-100"
 		/>
 		<p
 			id={`${fieldId}-message`}
 			class="min-h-5 text-[0.72rem] leading-5 {shownErrorText
 				? 'text-red-600'
-				: 'text-zinc-500'}"
+				: 'text-stone-500'}"
 		>
 			{shownErrorText ?? ''}
 		</p>

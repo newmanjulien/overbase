@@ -56,7 +56,7 @@
 >
 	<div class="flex min-h-full flex-col justify-between gap-6 pt-1">
 		<div class="space-y-5">
-			<p class="text-[0.72rem] leading-relaxed text-zinc-600">
+			<p class="text-[0.72rem] leading-relaxed text-stone-600">
 				Overbase's engineers will work with your IT team to integrate any external data sources you have purchased
 			</p>
 

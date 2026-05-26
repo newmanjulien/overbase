@@ -17,7 +17,7 @@
 	const toneClass = $derived(
 		kind === 'error'
 			? 'border-red-100 bg-red-50/40 text-red-700'
-			: 'border-zinc-200/70 bg-white text-zinc-500'
+			: 'border-stone-200/70 bg-white text-stone-500'
 	);
 </script>
 

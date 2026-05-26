@@ -21,9 +21,9 @@
 		const { isActive, disabled = false } = params;
 
 		return cn(
-			'inline-flex h-10 w-full items-center justify-start gap-2.5 rounded-md px-2 text-xs tracking-wide text-zinc-600 transition-colors hover:bg-zinc-100/70 hover:text-zinc-900',
+			'inline-flex h-10 w-full items-center justify-start gap-2.5 rounded-md px-2 text-xs tracking-wide text-stone-600 transition-colors hover:bg-stone-100/70 hover:text-stone-900',
 			disabled && 'pointer-events-none opacity-40',
-			isActive && 'bg-zinc-100/70 text-zinc-900'
+			isActive && 'bg-stone-100/70 text-stone-900'
 		);
 	}
 </script>
@@ -31,7 +31,7 @@
 <div class="flex min-h-full flex-col">
 	{#each sections as section (section.id)}
 		<div class={cn('flex flex-col', section.mobileSectionClass)}>
-			<p class="px-2 pb-2 text-[11px] uppercase tracking-wide text-zinc-400">{section.heading}</p>
+			<p class="px-2 pb-2 text-[11px] uppercase tracking-wide text-stone-400">{section.heading}</p>
 
 			<ul class="flex flex-col gap-1.5">
 				{#each section.items as item (item.id)}

@@ -19,7 +19,7 @@
 	text={helpText}
 	{ariaLabel}
 	{placement}
-	triggerClass="grid size-5 place-items-center rounded-[6px] text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:bg-zinc-100 focus-visible:text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
+	triggerClass="grid size-5 place-items-center rounded-[6px] text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700 focus-visible:bg-stone-100 focus-visible:text-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-300"
 >
 	{#snippet trigger()}
 		<QuestionIcon size={14} weight="regular" />

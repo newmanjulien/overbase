@@ -13,7 +13,7 @@
 
 	const infoBarClass = $derived(
 		cn(
-			'w-full rounded-[0.45rem] border border-blue-100/60 bg-blue-50/30 px-4 py-3 text-[0.76rem] leading-relaxed text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]',
+			'w-full rounded-[0.45rem] border border-blue-100/60 bg-blue-50/30 px-4 py-3 text-[0.76rem] leading-relaxed text-stone-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]',
 			className
 		)
 	);
@@ -21,7 +21,7 @@
 
 <aside class={infoBarClass}>
 	{#if label}
-		<span class="font-semibold text-zinc-950">{label}</span>
+		<span class="font-semibold text-stone-950">{label}</span>
 	{/if}
 	{#if children}
 		<span class={label ? 'ml-1' : undefined}>

@@ -41,10 +41,10 @@
 	}: Props = $props();
 </script>
 
-<div class="mt-6 rounded-sm border border-zinc-100 bg-white p-4 md:mt-8 md:p-6">
+<div class="mt-6 rounded-sm border border-stone-100 bg-white p-4 md:mt-8 md:p-6">
 	<div class="flex items-start justify-between gap-4">
 		<div class="flex min-w-0 items-center gap-1.5">
-			<h2 class="min-w-0 text-[0.76rem] font-medium text-zinc-950 md:text-[0.8rem]">
+			<h2 class="min-w-0 text-[0.76rem] font-medium text-stone-950 md:text-[0.8rem]">
 				{question.title}
 			</h2>
 			<HelpTooltip

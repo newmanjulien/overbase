@@ -23,7 +23,7 @@
 	const workspaceName = $derived(currentWorkspace.workspace.name);
 	const workspaceAvatarUrl = $derived(currentWorkspace.workspace.avatar?.url ?? '');
 	const avatarPreviewClass =
-		'border border-zinc-200/70 bg-zinc-100 text-xl text-zinc-500';
+		'border border-stone-200/70 bg-stone-100 text-xl text-stone-500';
 
 	let savingUserName = $state(false);
 	let savingWorkspaceName = $state(false);

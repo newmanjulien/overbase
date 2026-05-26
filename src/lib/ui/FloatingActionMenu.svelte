@@ -173,7 +173,7 @@
 		disabled={isDisabled}
 		onclick={toggleMenu}
 		class={cn(
-			'inline-flex size-7 shrink-0 items-center justify-center whitespace-nowrap rounded-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 disabled:cursor-default disabled:opacity-55 disabled:hover:bg-transparent',
+			'inline-flex size-7 shrink-0 items-center justify-center whitespace-nowrap rounded-sm text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 disabled:cursor-default disabled:opacity-55 disabled:hover:bg-transparent',
 			triggerClass
 		)}
 	>
@@ -185,7 +185,7 @@
 			bind:this={panelElement}
 			id={menuId}
 			role="menu"
-			class="fixed z-50 min-w-32 overflow-hidden rounded-sm border border-zinc-200 bg-white py-1 text-left shadow-lg shadow-zinc-950/5"
+			class="fixed z-50 min-w-32 overflow-hidden rounded-sm border border-stone-200 bg-white py-1 text-left shadow-lg shadow-stone-950/5"
 			style={panelStyle}
 		>
 			{#each actions as action, index (`${action.label}-${index}`)}
@@ -196,7 +196,7 @@
 						'flex h-8 w-full items-center gap-2 px-2.5 text-left text-[0.72rem] font-normal transition-colors disabled:cursor-default disabled:opacity-50',
 						action.intent === 'destructive'
 							? 'text-red-700 hover:bg-red-50'
-							: 'text-zinc-700 hover:bg-zinc-50'
+							: 'text-stone-700 hover:bg-stone-50'
 					)}
 					aria-label={action.ariaLabel ?? action.label}
 					disabled={action.disabled}

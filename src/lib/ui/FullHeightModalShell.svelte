@@ -147,7 +147,7 @@
 			type="button"
 			tabindex="-1"
 			aria-label="Close modal"
-			class="absolute inset-0 cursor-default bg-zinc-100/40"
+			class="absolute inset-0 cursor-default bg-stone-100/40"
 			onclick={onClose}
 		></button>
 
@@ -158,7 +158,7 @@
 			aria-labelledby={titleId}
 			tabindex="-1"
 			class={cn(
-				'relative flex h-full w-full max-w-120 flex-col overflow-hidden rounded-lg border border-zinc-200/80 bg-white text-zinc-950 shadow-sm shadow-zinc-400/15 outline-none',
+				'relative flex h-full w-full max-w-120 flex-col overflow-hidden rounded-lg border border-stone-200/80 bg-white text-stone-950 shadow-sm shadow-stone-400/15 outline-none',
 				className
 			)}
 		>
@@ -171,9 +171,9 @@
 			</IconButton>
 
 			<header class="space-y-1 px-4 py-5 pr-12">
-				<h2 id={titleId} class="text-sm leading-tight font-medium text-zinc-950">{title}</h2>
+				<h2 id={titleId} class="text-sm leading-tight font-medium text-stone-950">{title}</h2>
 				{#if subtitle}
-					<p class="text-[11px] leading-5 text-zinc-500">{subtitle}</p>
+					<p class="text-[11px] leading-5 text-stone-500">{subtitle}</p>
 				{/if}
 			</header>
 
@@ -182,7 +182,7 @@
 			</div>
 
 			{#if footer}
-				<footer class="flex shrink-0 items-center justify-between gap-3 border-t border-zinc-200/80 p-4">
+				<footer class="flex shrink-0 items-center justify-between gap-3 border-t border-stone-200/80 p-4">
 					{@render footer()}
 				</footer>
 			{/if}

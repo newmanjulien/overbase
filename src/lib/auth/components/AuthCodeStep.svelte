@@ -57,14 +57,14 @@
 		<div class="flex items-center justify-between gap-3 text-[13px] leading-5">
 			<button
 				type="button"
-				class="text-zinc-500 underline underline-offset-2 transition hover:text-[#202124]"
+				class="text-stone-500 underline underline-offset-2 transition hover:text-[#202124]"
 				onclick={onChangeEmail}
 			>
 				Change email
 			</button>
 			<button
 				type="button"
-				class="text-zinc-500 underline underline-offset-2 transition hover:text-[#202124] disabled:text-zinc-300"
+				class="text-stone-500 underline underline-offset-2 transition hover:text-[#202124] disabled:text-stone-300"
 				disabled={isResending}
 				onclick={onResend}
 			>

@@ -46,18 +46,18 @@
 				size={24}
 				weight="regular"
 				color="currentColor"
-				class="mb-5 text-zinc-950"
+				class="mb-5 text-stone-950"
 			/>
 
-			<h2 class="text-[0.78rem] leading-tight font-medium text-zinc-950">
+			<h2 class="text-[0.78rem] leading-tight font-medium text-stone-950">
 				{title}
 			</h2>
 
-			<p class="mt-2.5 text-[0.67rem] leading-relaxed text-zinc-600 md:text-[0.69rem]">
+			<p class="mt-2.5 text-[0.67rem] leading-relaxed text-stone-600 md:text-[0.69rem]">
 				<InlineText
 					content={description}
 					tooltipIdPrefix={`empty-list-description-tooltip-${title}`}
-					tooltipTriggerClass="inline text-[0.67rem] leading-relaxed text-zinc-400 underline decoration-zinc-200 underline-offset-3 transition-colors hover:text-zinc-600 hover:decoration-zinc-400 focus-visible:text-zinc-700 focus-visible:decoration-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 md:text-[0.69rem]"
+					tooltipTriggerClass="inline text-[0.67rem] leading-relaxed text-stone-400 underline decoration-stone-200 underline-offset-3 transition-colors hover:text-stone-600 hover:decoration-stone-400 focus-visible:text-stone-700 focus-visible:decoration-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-300 md:text-[0.69rem]"
 				/>
 				{#if learnMoreLabel}
 					<button
@@ -74,13 +74,13 @@
 				<ListActionButton label={actionLabel} tone="secondary" class="mt-6" onclick={onAction} />
 				{#if actionHelpText}
 					{#if actionHelpTooltipText}
-						<div class="mt-3 max-w-64 text-[0.66rem] leading-relaxed text-zinc-500">
+						<div class="mt-3 max-w-64 text-[0.66rem] leading-relaxed text-stone-500">
 							<FloatingTooltip
 								id={`empty-list-action-help-${actionLabel}`}
 								text={actionHelpTooltipText}
 								ariaLabel={actionHelpText}
 								placement="bottom-start"
-								triggerClass="inline text-[0.66rem] leading-relaxed text-zinc-400 underline decoration-zinc-200 underline-offset-3 transition-colors hover:text-zinc-600 hover:decoration-zinc-400 focus-visible:text-zinc-700 focus-visible:decoration-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300"
+								triggerClass="inline text-[0.66rem] leading-relaxed text-stone-400 underline decoration-stone-200 underline-offset-3 transition-colors hover:text-stone-600 hover:decoration-stone-400 focus-visible:text-stone-700 focus-visible:decoration-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-300"
 							>
 								{#snippet trigger()}
 									{actionHelpText}
@@ -88,7 +88,7 @@
 							</FloatingTooltip>
 						</div>
 					{:else}
-						<p class="mt-3 max-w-64 text-[0.66rem] leading-relaxed text-zinc-500">
+						<p class="mt-3 max-w-64 text-[0.66rem] leading-relaxed text-stone-500">
 							{actionHelpText}
 						</p>
 					{/if}

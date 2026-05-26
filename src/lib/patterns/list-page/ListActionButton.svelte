@@ -18,7 +18,7 @@
 	variant={tone}
 	class={[
 		'text-[0.72rem] font-normal md:text-[0.74rem]',
-		tone === 'secondary' && 'border-zinc-200/70 text-zinc-950',
+		tone === 'secondary' && 'border-stone-200/70 text-stone-950',
 		className
 	]}
 	{onclick}

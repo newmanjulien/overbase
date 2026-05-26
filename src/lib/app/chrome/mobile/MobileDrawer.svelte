@@ -17,7 +17,7 @@
 {#if shellState.isMobileDrawerOpen}
 	<div class="app-layer-drawer fixed inset-0 pointer-events-auto md:hidden">
 		<aside id="mobile-nav-drawer" class="flex h-full flex-col bg-white">
-			<header class="flex h-11 items-center border-b border-zinc-100 bg-white px-(--shell-gutter-mobile)">
+			<header class="flex h-11 items-center border-b border-stone-100 bg-white px-(--shell-gutter-mobile)">
 				<HomeLink
 					onclick={() => {
 						shellState.isMobileDrawerOpen = false;
@@ -26,7 +26,7 @@
 				<IconButton
 					aria-label="Close navigation menu"
 					variant="ghost"
-					class="ml-auto size-8 text-zinc-700"
+					class="ml-auto size-8 text-stone-700"
 					onclick={() => {
 						shellState.isMobileDrawerOpen = false;
 					}}

@@ -34,7 +34,7 @@
 
 </script>
 
-<aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-zinc-950">
+<aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-stone-950">
 	<div
 		class={isAttachmentOpen && opportunity.draft.attachment
 			? 'min-h-0 flex-1 overflow-hidden'
@@ -57,17 +57,17 @@
 		{/if}
 	</div>
 
-	<div class="shrink-0 border-t border-zinc-100 bg-white px-4 py-3 md:px-5">
+	<div class="shrink-0 border-t border-stone-100 bg-white px-4 py-3 md:px-5">
 		<div class="flex items-center justify-between gap-3">
 			<div class="min-w-0">
-				<p class="truncate text-[0.68rem] font-medium text-zinc-700">{sentDateLabel}</p>
+				<p class="truncate text-[0.68rem] font-medium text-stone-700">{sentDateLabel}</p>
 			</div>
 
 			<div class="flex items-center gap-1.5">
 				<IconButton
 					aria-label="Previous opportunity"
 					variant="secondary"
-					class="size-8 text-zinc-700"
+					class="size-8 text-stone-700"
 					disabled={!canGoPrevious}
 					onclick={onPrevious}
 				>
@@ -76,7 +76,7 @@
 				<IconButton
 					aria-label="Next opportunity"
 					variant="secondary"
-					class="size-8 text-zinc-700"
+					class="size-8 text-stone-700"
 					disabled={!canGoNext}
 					onclick={onNext}
 				>

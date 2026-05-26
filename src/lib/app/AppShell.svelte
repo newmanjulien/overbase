@@ -138,7 +138,7 @@
 	provideRouteTitleState(routeTitleState);
 </script>
 
-<div class="h-dvh min-h-dvh overflow-hidden bg-zinc-50">
+<div class="h-dvh min-h-dvh overflow-hidden bg-stone-50">
 	<div
 		class="dashboard-surface flex h-full min-h-0 md:gap-(--dashboard-surface-gap)"
 		data-sidebar-state={shellState.isSidebarExpanded ? 'expanded' : 'collapsed'}
@@ -151,7 +151,7 @@
 		/>
 
 		<main
-			class="min-w-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-white md:rounded-sm md:border md:border-zinc-100"
+			class="min-w-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-white md:rounded-sm md:border md:border-stone-100"
 		>
 			{#if canRenderRoute}
 				<MobileDrawer currentPathname={page.url.pathname} />

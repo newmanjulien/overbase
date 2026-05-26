@@ -43,7 +43,7 @@
 			aria-label="To recipients"
 			placeholder="Add recipients"
 			{disabled}
-			class="min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.72rem] text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
+			class="min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.72rem] text-stone-800 outline-none placeholder:text-stone-400 disabled:cursor-default disabled:opacity-60"
 			oninput={(event) => updateDraft({ toText: event.currentTarget.value })}
 		/>
 	{/snippet}
@@ -54,7 +54,7 @@
 			aria-label="Cc recipients"
 			placeholder="Add Cc recipients"
 			{disabled}
-			class="min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.72rem] text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
+			class="min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.72rem] text-stone-800 outline-none placeholder:text-stone-400 disabled:cursor-default disabled:opacity-60"
 			oninput={(event) => updateDraft({ ccText: event.currentTarget.value })}
 		/>
 	{/snippet}
@@ -73,7 +73,7 @@
 				aria-label="Spreadsheet attachment"
 				placeholder="Attach a spreadsheet"
 				{disabled}
-				class="w-full min-w-0 border-0 bg-transparent p-0 text-[0.72rem] text-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default disabled:opacity-60"
+				class="w-full min-w-0 border-0 bg-transparent p-0 text-[0.72rem] text-stone-800 outline-none placeholder:text-stone-400 disabled:cursor-default disabled:opacity-60"
 				oninput={(event) => updateDraft({ attachmentInputText: event.currentTarget.value })}
 				onkeydown={(event) => {
 					if (event.key === 'Enter') {
@@ -91,7 +91,7 @@
 			aria-label="Email body"
 			placeholder="Add email body"
 			{disabled}
-			class="w-full resize-none border-0 bg-transparent p-0 text-[0.76rem] leading-[1.52] text-zinc-900 outline-none placeholder:text-zinc-500 disabled:cursor-default disabled:opacity-60"
+			class="w-full resize-none border-0 bg-transparent p-0 text-[0.76rem] leading-[1.52] text-stone-900 outline-none placeholder:text-stone-500 disabled:cursor-default disabled:opacity-60"
 			oninput={(event) => updateDraft({ bodyText: event.currentTarget.value })}
 		></textarea>
 	{/snippet}

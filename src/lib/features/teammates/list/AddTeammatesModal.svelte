@@ -23,12 +23,12 @@
 </script>
 
 <ModalShell {open} title="Add teammates" onClose={onClose}>
-	<label for="teammate-emails" class="block text-xs text-zinc-950">List emails separated by commas</label>
+	<label for="teammate-emails" class="block text-xs text-stone-950">List emails separated by commas</label>
 	<textarea
 		id="teammate-emails"
 		{value}
 		placeholder="alex@example.com, sam@example.com, jordan@example.com"
-		class="mt-2 min-h-44 w-full resize-y rounded-sm border border-zinc-200/80 bg-white px-3 py-3 text-sm leading-[1.45] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-400"
+		class="mt-2 min-h-44 w-full resize-y rounded-sm border border-stone-200/80 bg-white px-3 py-3 text-sm leading-[1.45] text-stone-900 outline-none transition-colors placeholder:text-stone-400 focus:border-stone-400"
 		oninput={(event) => onValueChange(event.currentTarget.value)}
 	></textarea>
 	{#if error}

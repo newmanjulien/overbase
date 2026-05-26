@@ -20,7 +20,7 @@
 
 <span
 	class={cn(
-		'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-zinc-100',
+		'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-stone-100',
 		classProp
 	)}
 	style={`width:${size}px;height:${size}px;`}

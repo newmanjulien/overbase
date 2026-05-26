@@ -34,9 +34,9 @@
 		return cn(
 			'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm tracking-wide transition-colors',
 			expanded
-				? 'h-7 w-full justify-start gap-2.5 rounded-sm border border-transparent px-2 text-xs text-zinc-600 hover:bg-transparent hover:text-zinc-800'
-				: 'size-7 justify-center rounded-sm border border-transparent text-zinc-500 hover:bg-transparent hover:text-zinc-800',
-			isActive && 'text-zinc-900'
+				? 'h-7 w-full justify-start gap-2.5 rounded-sm border border-transparent px-2 text-xs text-stone-600 hover:bg-transparent hover:text-stone-800'
+				: 'size-7 justify-center rounded-sm border border-transparent text-stone-500 hover:bg-transparent hover:text-stone-800',
+			isActive && 'text-stone-900'
 		);
 	}
 
@@ -44,8 +44,8 @@
 		return cn(
 			'inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm tracking-wide transition-colors',
 			expanded
-				? 'h-7 w-full justify-start gap-2.5 rounded-sm border border-transparent px-2 text-xs text-zinc-600 hover:bg-transparent hover:text-zinc-800'
-				: 'size-7 justify-center rounded-full border border-zinc-100 bg-white text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700',
+				? 'h-7 w-full justify-start gap-2.5 rounded-sm border border-transparent px-2 text-xs text-stone-600 hover:bg-transparent hover:text-stone-800'
+				: 'size-7 justify-center rounded-full border border-stone-100 bg-white text-stone-500 hover:bg-stone-100 hover:text-stone-700',
 			disabled && 'pointer-events-none opacity-50'
 		);
 	}
@@ -56,11 +56,11 @@
 		<div class={cn('flex flex-col', expanded && section.desktopSectionClass)}>
 			{#if expanded}
 				<div class="mb-2" in:fly={{ x: -4, duration: 200 }}>
-					<p class="px-2 text-[11px] uppercase tracking-wide text-zinc-400">{section.heading}</p>
+					<p class="px-2 text-[11px] uppercase tracking-wide text-stone-400">{section.heading}</p>
 				</div>
 			{:else if shouldShowCollapsedDivider(sectionIndex)}
 				<div class="py-3">
-					<span aria-hidden="true" class="mx-auto block h-px w-4 bg-zinc-200/50"></span>
+					<span aria-hidden="true" class="mx-auto block h-px w-4 bg-stone-200/50"></span>
 				</div>
 			{/if}
 

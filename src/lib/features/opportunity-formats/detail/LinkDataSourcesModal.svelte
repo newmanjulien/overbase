@@ -41,7 +41,7 @@
 >
 	<div class="flex min-h-full flex-col justify-between gap-6 pt-1">
 		<div class="space-y-5">
-			<p class="text-[0.72rem] leading-relaxed text-zinc-600">
+			<p class="text-[0.72rem] leading-relaxed text-stone-600">
 				You will tell us which data source to use to power each of your rules. But first, you need to set up your data sources
 			</p>
 

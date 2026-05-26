@@ -63,7 +63,7 @@
 		</p>
 	{/if}
 	{#if loadState === 'loading'}
-		<div class="flex h-full items-center justify-center text-[0.74rem] text-zinc-500">
+		<div class="flex h-full items-center justify-center text-[0.74rem] text-stone-500">
 			Loading format...
 		</div>
 	{:else if loadState === 'error'}
@@ -71,7 +71,7 @@
 			Could not load format.
 		</div>
 	{:else if loadState === 'notFound'}
-		<div class="flex h-full items-center justify-center text-[0.74rem] text-zinc-500">
+		<div class="flex h-full items-center justify-center text-[0.74rem] text-stone-500">
 			Format not found.
 		</div>
 	{:else if detailView === 'feedback' && feedbackViewState.kind === 'empty'}

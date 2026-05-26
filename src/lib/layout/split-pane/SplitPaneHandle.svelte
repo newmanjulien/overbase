@@ -153,7 +153,7 @@
 		width: 3px;
 		height: 3.5rem;
 		border-radius: 999px;
-		background: #e4e4e7;
+		background: #e7e5e4;
 		opacity: 0;
 		transform: translate(-50%, -50%);
 		transition:
@@ -165,6 +165,6 @@
 	.split-pane-handle:focus-visible .split-pane-handle__grip,
 	.split-pane-handle--dragging .split-pane-handle__grip {
 		opacity: 1;
-		background: #d4d4d8;
+		background: #d6d3d1;
 	}
 </style>

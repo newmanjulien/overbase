@@ -130,7 +130,7 @@
 		bind:this={triggerElement}
 		type="button"
 		class={cn(
-			'inline-flex h-8 w-full min-w-0 flex-1 shrink-0 items-center justify-between gap-1.5 whitespace-nowrap rounded-sm border border-zinc-200/70 bg-white px-3 text-left text-[0.72rem] font-normal text-zinc-950 transition-colors hover:bg-zinc-50 md:flex-none md:text-[0.74rem]',
+			'inline-flex h-8 w-full min-w-0 flex-1 shrink-0 items-center justify-between gap-1.5 whitespace-nowrap rounded-sm border border-stone-200/70 bg-white px-3 text-left text-[0.72rem] font-normal text-stone-950 transition-colors hover:bg-stone-50 md:flex-none md:text-[0.74rem]',
 			widthClass
 		)}
 		aria-haspopup="menu"
@@ -139,7 +139,7 @@
 		onclick={toggleOpen}
 	>
 		<span class="min-w-0 truncate">{filter.label}</span>
-		<CaretDownIcon aria-hidden="true" size={14} weight="regular" class="shrink-0 text-zinc-600" />
+		<CaretDownIcon aria-hidden="true" size={14} weight="regular" class="shrink-0 text-stone-600" />
 	</button>
 
 	{#if open}
@@ -147,7 +147,7 @@
 			bind:this={panelElement}
 			id={menuId}
 			role="menu"
-			class="fixed z-50 min-w-40 overflow-x-hidden overflow-y-auto rounded-sm border border-zinc-200 bg-white py-1 text-left shadow-lg shadow-zinc-950/5"
+			class="fixed z-50 min-w-40 overflow-x-hidden overflow-y-auto rounded-sm border border-stone-200 bg-white py-1 text-left shadow-lg shadow-stone-950/5"
 			style={panelStyle}
 		>
 			{#each filter.options as option (option.id)}
@@ -155,10 +155,10 @@
 					type="button"
 					role="menuitemradio"
 					aria-checked={option.id === filter.selectedId}
-					class="flex h-8 w-full items-center gap-2 px-2.5 text-left text-[0.72rem] font-normal text-zinc-700 transition-colors hover:bg-zinc-50"
+					class="flex h-8 w-full items-center gap-2 px-2.5 text-left text-[0.72rem] font-normal text-stone-700 transition-colors hover:bg-stone-50"
 					onclick={() => selectOption(option.id)}
 				>
-					<span class="flex size-3.5 shrink-0 items-center justify-center text-zinc-950">
+					<span class="flex size-3.5 shrink-0 items-center justify-center text-stone-950">
 						{#if option.id === filter.selectedId}
 							<CheckIcon aria-hidden="true" size={12} weight="bold" />
 						{/if}

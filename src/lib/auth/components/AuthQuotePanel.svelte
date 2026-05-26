@@ -32,7 +32,7 @@
 	></div>
 
 	<blockquote
-		class="font-quote m-0 max-w-[560px] text-[clamp(25px,1.4vw,38px)] font-medium leading-[1.16] tracking-normal text-[#18181b]"
+		class="font-quote m-0 max-w-[560px] text-[clamp(25px,1.4vw,38px)] font-medium leading-[1.16] tracking-normal text-[#1c1917]"
 	>
 		"{quote.text}"
 	</blockquote>
