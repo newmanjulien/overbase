@@ -4,7 +4,7 @@ import { getTeammateDisplayName } from '../../convex/teammateIdentity';
 import type { ViewerIdentity } from '../../shared/viewer';
 import { requireViewerWorkspace, type ViewerWorkspace } from '../auth/viewer';
 
-export type FormatRecipientRef =
+export type EmailFormatRecipientRef =
 	| {
 			kind: 'user';
 			userId: Id<'users'>;
@@ -25,11 +25,11 @@ export function getUserDisplayName(user: Pick<Doc<'users'>, 'displayName'>) {
 	return user.displayName?.trim() || 'Unknown user';
 }
 
-export function getFormatRecipientKey(ref: FormatRecipientRef) {
+export function getFormatRecipientKey(ref: EmailFormatRecipientRef) {
 	return ref.kind === 'user' ? `user:${ref.userId}` : `teammate:${ref.teammateId}`;
 }
 
-export function getDefaultFormatRecipientRefs(userId: Id<'users'>): FormatRecipientRef[] {
+export function getDefaultEmailFormatRecipientRefs(userId: Id<'users'>): EmailFormatRecipientRef[] {
 	return [{ kind: 'user', userId }];
 }
 
@@ -56,7 +56,7 @@ async function isWorkspaceTeammateRef(
 async function isValidRecipientRef(
 	ctx: QueryCtx | MutationCtx,
 	workspaceId: Id<'workspaces'>,
-	ref: FormatRecipientRef
+	ref: EmailFormatRecipientRef
 ) {
 	if (ref.kind === 'user') {
 		return await isWorkspaceUserRef(ctx, workspaceId, ref.userId);
@@ -97,13 +97,13 @@ export async function getFormatRecipients(
 	];
 }
 
-export async function normalizeFormatRecipientRefs(
+export async function normalizeEmailFormatRecipientRefs(
 	ctx: QueryCtx | MutationCtx,
-	recipientRefs: FormatRecipientRef[],
+	recipientRefs: EmailFormatRecipientRef[],
 	viewerWorkspace?: ViewerWorkspace
 ) {
 	const { user, workspace } = viewerWorkspace ?? (await requireViewerWorkspace(ctx));
-	const normalizedRefs: FormatRecipientRef[] = [];
+	const normalizedRefs: EmailFormatRecipientRef[] = [];
 	const seenKeys = new Set<string>();
 
 	for (const ref of recipientRefs) {
@@ -117,5 +117,5 @@ export async function normalizeFormatRecipientRefs(
 		normalizedRefs.push(ref);
 	}
 
-	return normalizedRefs.length > 0 ? normalizedRefs : getDefaultFormatRecipientRefs(user._id);
+	return normalizedRefs.length > 0 ? normalizedRefs : getDefaultEmailFormatRecipientRefs(user._id);
 }

@@ -4,10 +4,10 @@
 	import EmailAttachmentSpreadsheetPreview from '$lib/domain/email-drafts/EmailAttachmentSpreadsheetPreview.svelte';
 	import EmailComposePreview from '$lib/domain/email-drafts/EmailComposePreview.svelte';
 	import { IconButton } from '$lib/ui';
-	import type { OpportunityItem } from './opportunity-format-detail-types';
+	import type { SentEmail } from './email-format-detail-types';
 
 	type Props = {
-		opportunity: OpportunityItem;
+		sentEmail: SentEmail;
 		canGoPrevious: boolean;
 		canGoNext: boolean;
 		onPrevious: () => void;
@@ -15,7 +15,7 @@
 	};
 
 	let {
-		opportunity,
+		sentEmail,
 		canGoPrevious,
 		canGoNext,
 		onPrevious,
@@ -29,28 +29,28 @@
 			day: 'numeric',
 			hour: 'numeric',
 			minute: '2-digit'
-		}).format(new Date(opportunity.sentAt))
+		}).format(new Date(sentEmail.sentAt))
 	);
 
 </script>
 
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-stone-950">
 	<div
-		class={isAttachmentOpen && opportunity.draft.attachment
+		class={isAttachmentOpen && sentEmail.draft.attachment
 			? 'min-h-0 flex-1 overflow-hidden'
 			: 'min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-5 md:py-5'}
 	>
-		{#if isAttachmentOpen && opportunity.draft.attachment}
+		{#if isAttachmentOpen && sentEmail.draft.attachment}
 			<div class="flex h-full min-h-0 w-full flex-col">
 				<EmailAttachmentSpreadsheetPreview
-					attachment={opportunity.draft.attachment}
+					attachment={sentEmail.draft.attachment}
 					onClose={() => (isAttachmentOpen = false)}
 				/>
 			</div>
 		{:else}
 			<div class="mx-auto flex min-h-full w-full max-w-[820px] flex-col">
 				<EmailComposePreview
-					draft={opportunity.draft}
+					draft={sentEmail.draft}
 					onOpenAttachment={() => (isAttachmentOpen = true)}
 				/>
 			</div>
@@ -65,7 +65,7 @@
 
 			<div class="flex items-center gap-1.5">
 				<IconButton
-					aria-label="Previous opportunity"
+					aria-label="Previous sent email"
 					variant="secondary"
 					class="size-8 text-stone-700"
 					disabled={!canGoPrevious}
@@ -74,7 +74,7 @@
 					<ArrowLeftIcon size={14} weight="regular" />
 				</IconButton>
 				<IconButton
-					aria-label="Next opportunity"
+					aria-label="Next sent email"
 					variant="secondary"
 					class="size-8 text-stone-700"
 					disabled={!canGoNext}

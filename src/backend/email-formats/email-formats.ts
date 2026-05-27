@@ -3,13 +3,13 @@ import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
 import type { ViewerWorkspace } from '../auth/viewer';
 import { getUserDisplayName, getViewerUserDisplayName } from './recipients';
 
-const DEFAULT_OPPORTUNITY_FORMAT_TITLE = 'Untitled format';
+const DEFAULT_EMAIL_FORMAT_TITLE = 'Untitled email format';
 
-export function normalizeOpportunityFormatTitle(title: string) {
-	return title.trim() || DEFAULT_OPPORTUNITY_FORMAT_TITLE;
+export function normalizeEmailFormatTitle(title: string) {
+	return title.trim() || DEFAULT_EMAIL_FORMAT_TITLE;
 }
 
-export async function getOpportunityFormatCreator(
+export async function getEmailFormatCreator(
 	ctx: QueryCtx | MutationCtx,
 	userId: Id<'users'>,
 	viewerWorkspace?: ViewerWorkspace

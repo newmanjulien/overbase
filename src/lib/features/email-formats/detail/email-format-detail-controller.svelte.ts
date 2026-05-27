@@ -6,26 +6,26 @@ import type { EmailDraft } from '@overbase/builder-sdk/email';
 import { useConvexClient } from 'convex-svelte';
 import { APP_LINKS } from '$lib/app/app-links';
 import {
-	areOpportunityFormatRulesFilled,
-	type OpportunityFormatDetailState
-} from './opportunity-format-detail-state.svelte';
+	areEmailFormatRulesFilled,
+	type EmailFormatDetailState
+} from './email-format-detail-state.svelte';
 import type {
-	FormatRecipientRef,
-	OpportunityFeedback,
-	OpportunityFeedbackViewState
-} from './opportunity-format-detail-types';
-import { getFormatRecipientKey } from './opportunity-format-detail-types';
+	EmailFormatRecipientRef,
+	EmailFeedback,
+	EmailFeedbackViewState
+} from './email-format-detail-types';
+import { getFormatRecipientKey } from './email-format-detail-types';
 
-type OpportunityFormatStatus = 'active' | 'paused';
+type EmailFormatStatus = 'active' | 'paused';
 
 type ControllerOptions = {
-	detailState: OpportunityFormatDetailState;
-	getFeedbackViewState: () => OpportunityFeedbackViewState;
-	getOpportunityFormatId: () => Id<'opportunityFormats'>;
+	detailState: EmailFormatDetailState;
+	getFeedbackViewState: () => EmailFeedbackViewState;
+	getEmailFormatId: () => Id<'emailFormats'>;
 	onTitleSaved: (title: string) => void;
 };
 
-function areRecipientRefsEqual(firstValues: FormatRecipientRef[], secondValues: FormatRecipientRef[]) {
+function areRecipientRefsEqual(firstValues: EmailFormatRecipientRef[], secondValues: EmailFormatRecipientRef[]) {
 	return (
 		firstValues.length === secondValues.length &&
 		firstValues.every(
@@ -38,14 +38,14 @@ function getErrorMessage(error: unknown, fallback: string) {
 	return error instanceof Error ? error.message : fallback;
 }
 
-export function createOpportunityFormatDetailController({
+export function createEmailFormatDetailController({
 	detailState,
 	getFeedbackViewState,
-	getOpportunityFormatId,
+	getEmailFormatId,
 	onTitleSaved
 }: ControllerOptions) {
 	const client = useConvexClient();
-	let status = $state<OpportunityFormatStatus>('paused');
+	let status = $state<EmailFormatStatus>('paused');
 	let isDeletingFormat = $state(false);
 	let isUpdatingStatus = $state(false);
 	let isSavingRecipients = $state(false);
@@ -53,7 +53,7 @@ export function createOpportunityFormatDetailController({
 	let deleteError = $state<string | null>(null);
 	let actionError = $state<string | null>(null);
 
-	function syncStatus(nextStatus: OpportunityFormatStatus) {
+	function syncStatus(nextStatus: EmailFormatStatus) {
 		status = nextStatus;
 	}
 
@@ -69,20 +69,20 @@ export function createOpportunityFormatDetailController({
 		isUpdatingStatus = true;
 
 		try {
-			const result = await client.mutation(api.opportunityFormats.setOpportunityFormatStatus, {
-				opportunityFormatId: getOpportunityFormatId(),
+			const result = await client.mutation(api.emailFormats.setEmailFormatStatus, {
+				emailFormatId: getEmailFormatId(),
 				status: nextStatus
 			});
 			status = result.status;
 		} catch (error) {
 			status = previousStatus;
-			actionError = getErrorMessage(error, 'Could not update format status.');
+			actionError = getErrorMessage(error, 'Could not update email format status.');
 		} finally {
 			isUpdatingStatus = false;
 		}
 	}
 
-	async function updateSelectedRecipientRefs(nextRefs: FormatRecipientRef[]) {
+	async function updateSelectedRecipientRefs(nextRefs: EmailFormatRecipientRef[]) {
 		detailState.updateSelectedRecipientRefs(nextRefs);
 		actionError = null;
 		hasPendingRecipientsSave = true;
@@ -101,8 +101,8 @@ export function createOpportunityFormatDetailController({
 				hasPendingRecipientsSave = false;
 				const requestedRecipientRefs = [...detailState.selectedRecipientRefs];
 
-				const result = await client.mutation(api.opportunityFormats.setOpportunityFormatRecipients, {
-					opportunityFormatId: getOpportunityFormatId(),
+				const result = await client.mutation(api.emailFormats.setEmailFormatRecipients, {
+					emailFormatId: getEmailFormatId(),
 					recipientRefs: requestedRecipientRefs
 				});
 
@@ -118,8 +118,8 @@ export function createOpportunityFormatDetailController({
 	}
 
 	async function saveDraft(nextDraft: EmailDraft, baseEmailDraftVersion: number) {
-		const result = await client.mutation(api.opportunityFormats.saveOpportunityFormatEmailDraft, {
-			opportunityFormatId: getOpportunityFormatId(),
+		const result = await client.mutation(api.emailFormats.saveEmailFormatEmailDraft, {
+			emailFormatId: getEmailFormatId(),
 			baseEmailDraftVersion,
 			draft: nextDraft
 		});
@@ -131,13 +131,13 @@ export function createOpportunityFormatDetailController({
 		actionError = null;
 
 		try {
-			const result = await client.mutation(api.opportunityFormats.updateOpportunityFormatTitle, {
-				opportunityFormatId: getOpportunityFormatId(),
+			const result = await client.mutation(api.emailFormats.updateEmailFormatTitle, {
+				emailFormatId: getEmailFormatId(),
 				title
 			});
 			onTitleSaved(result.title);
 		} catch (error) {
-			actionError = getErrorMessage(error, 'Could not update format title.');
+			actionError = getErrorMessage(error, 'Could not update email format title.');
 			throw error;
 		}
 	}
@@ -145,14 +145,14 @@ export function createOpportunityFormatDetailController({
 	async function saveRules() {
 		actionError = null;
 
-		if (!areOpportunityFormatRulesFilled(detailState.rulesDraft)) {
+		if (!areEmailFormatRulesFilled(detailState.rulesDraft)) {
 			actionError = 'Add rule text before saving.';
 			return;
 		}
 
 		try {
-			const result = await client.mutation(api.opportunityFormats.saveOpportunityFormatRules, {
-				opportunityFormatId: getOpportunityFormatId(),
+			const result = await client.mutation(api.emailFormats.saveEmailFormatRules, {
+				emailFormatId: getEmailFormatId(),
 				rules: detailState.rulesDraft
 			});
 			detailState.markRulesSaved(result.rules, result.updatedAt);
@@ -162,14 +162,14 @@ export function createOpportunityFormatDetailController({
 		}
 	}
 
-	function updateSelectedFeedback(patch: Partial<OpportunityFeedback>) {
+	function updateSelectedFeedback(patch: Partial<EmailFeedback>) {
 		const feedbackViewState = getFeedbackViewState();
 
 		if (feedbackViewState.kind === 'empty') {
 			return;
 		}
 
-		detailState.updateFeedback(feedbackViewState.opportunity.id, patch);
+		detailState.updateFeedback(feedbackViewState.sentEmail.id, patch);
 	}
 
 	async function saveSelectedFeedback() {
@@ -182,12 +182,12 @@ export function createOpportunityFormatDetailController({
 		actionError = null;
 
 		try {
-			const result = await client.mutation(api.opportunityFormats.saveOpportunityFeedback, {
-				opportunityId: feedbackViewState.opportunity.id as Id<'opportunities'>,
+			const result = await client.mutation(api.emailFormats.saveEmailFeedback, {
+				sentEmailId: feedbackViewState.sentEmail.id as Id<'sentEmails'>,
 				likedText: feedbackViewState.feedbackDraft.likedText,
 				improvementText: feedbackViewState.feedbackDraft.improvementText
 			});
-			detailState.markFeedbackSaved(feedbackViewState.opportunity.id, result);
+			detailState.markFeedbackSaved(feedbackViewState.sentEmail.id, result);
 		} catch (error) {
 			actionError = getErrorMessage(error, 'Could not save feedback.');
 		}
@@ -202,12 +202,12 @@ export function createOpportunityFormatDetailController({
 		isDeletingFormat = true;
 
 		try {
-			await client.mutation(api.opportunityFormats.deleteOpportunityFormats, {
-				opportunityFormatIds: [getOpportunityFormatId()]
+			await client.mutation(api.emailFormats.deleteEmailFormats, {
+				emailFormatIds: [getEmailFormatId()]
 			});
-			await goto(resolve(APP_LINKS.formats.pathname));
+			await goto(resolve(APP_LINKS.emailFormats.pathname));
 		} catch (error) {
-			deleteError = getErrorMessage(error, 'Could not delete format.');
+			deleteError = getErrorMessage(error, 'Could not delete email format.');
 		} finally {
 			isDeletingFormat = false;
 		}

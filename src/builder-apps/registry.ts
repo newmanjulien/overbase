@@ -6,7 +6,7 @@ import {
 	type BuilderAppPresentation
 } from './presentation';
 
-export { BRING_THE_FIRM_APP_SLUG, CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG } from './ids';
+export { BRING_THE_FIRM_BUILDER_APP_SLUG, CUSTOM_BUILDER_APP_SLUG } from './ids';
 
 export type BuilderAppRegistryEntry = BuilderAppManifest & BuilderAppPresentation;
 

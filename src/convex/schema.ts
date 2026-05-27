@@ -6,7 +6,7 @@ import {
 } from '../backend/validators/builder-protocol';
 import { emailDraft } from '../backend/validators/email-drafts';
 import { avatar } from '../backend/validators/avatars';
-import { formatRecipientRef } from '../backend/validators/recipients';
+import { emailFormatRecipientRef } from '../backend/validators/recipients';
 
 export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
 
@@ -91,7 +91,7 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_session_createdAt', ['sessionId', 'createdAt']),
-	opportunityFormats: defineTable({
+	emailFormats: defineTable({
 		workspaceId: v.id('workspaces'),
 		title: v.string(),
 		status: v.union(v.literal('paused'), v.literal('active')),
@@ -107,7 +107,7 @@ export default defineSchema({
 				text: v.string()
 			})
 		),
-		recipientRefs: v.array(formatRecipientRef),
+		recipientRefs: v.array(emailFormatRecipientRef),
 		createdByUserId: v.id('users'),
 		createdAt: v.number(),
 		updatedAt: v.number()
@@ -124,32 +124,32 @@ export default defineSchema({
 	})
 		.index('by_workspace_email', ['workspaceId', 'email'])
 		.index('by_workspace_createdAt', ['workspaceId', 'createdAt']),
-	opportunities: defineTable({
+	sentEmails: defineTable({
 		workspaceId: v.id('workspaces'),
-		opportunityFormatId: v.id('opportunityFormats'),
+		emailFormatId: v.id('emailFormats'),
 		sentAt: v.number(),
 		emailDraft,
 		createdAt: v.number()
 	})
-		.index('by_workspace_opportunityFormat_sentAt', [
+		.index('by_workspace_emailFormat_sentAt', [
 			'workspaceId',
-			'opportunityFormatId',
+			'emailFormatId',
 			'sentAt'
 		])
-		.index('by_workspace_opportunityFormat_createdAt', [
+		.index('by_workspace_emailFormat_createdAt', [
 			'workspaceId',
-			'opportunityFormatId',
+			'emailFormatId',
 			'createdAt'
 		]),
-	opportunityFeedback: defineTable({
+	emailFeedback: defineTable({
 		workspaceId: v.id('workspaces'),
-		opportunityFormatId: v.id('opportunityFormats'),
-		opportunityId: v.id('opportunities'),
+		emailFormatId: v.id('emailFormats'),
+		sentEmailId: v.id('sentEmails'),
 		likedText: v.string(),
 		improvementText: v.string(),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	})
-		.index('by_workspace_opportunityFormat', ['workspaceId', 'opportunityFormatId'])
-		.index('by_workspace_opportunity', ['workspaceId', 'opportunityId'])
+		.index('by_workspace_emailFormat', ['workspaceId', 'emailFormatId'])
+		.index('by_workspace_sentEmail', ['workspaceId', 'sentEmailId'])
 });

@@ -103,7 +103,7 @@
 		try {
 			await onPublish();
 		} catch (error) {
-			publishError = error instanceof Error ? error.message : 'Could not publish format.';
+			publishError = error instanceof Error ? error.message : 'Could not publish email format.';
 		} finally {
 			isPublishing = false;
 		}
@@ -175,7 +175,7 @@
 					disabled={!canEdit || isPublishing}
 					onclick={beginEdit}
 				>
-					Edit format
+					Edit email
 				</Button>
 				{#if onPublish}
 					<Button

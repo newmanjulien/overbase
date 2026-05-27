@@ -4,7 +4,7 @@
 	import type { SelectableListItem } from '$lib/patterns/list-page';
 	import { PersonAvatar } from '$lib/domain/people';
 
-	export type OpportunityFormatListItem = SelectableListItem & {
+	export type EmailFormatListItem = SelectableListItem & {
 		title: string;
 		status: 'active' | 'paused';
 		statusLabel: string;
@@ -17,7 +17,7 @@
 	};
 
 	type Props = {
-		item: OpportunityFormatListItem;
+		item: EmailFormatListItem;
 	};
 
 	let { item }: Props = $props();

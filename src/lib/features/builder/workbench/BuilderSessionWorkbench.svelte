@@ -138,7 +138,7 @@
 		isPublishNavigation = true;
 
 		try {
-			await goto(resolve(APP_LINKS.formats.pathname));
+			await goto(resolve(APP_LINKS.emailFormats.pathname));
 		} catch (error) {
 			isPublishNavigation = false;
 			throw error;

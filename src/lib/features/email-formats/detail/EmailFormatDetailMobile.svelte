@@ -1,14 +1,14 @@
 <script lang="ts">
 	import EmailAttachmentSpreadsheetPreview from '$lib/domain/email-drafts/EmailAttachmentSpreadsheetPreview.svelte';
 	import EmailComposePreview from '$lib/domain/email-drafts/EmailComposePreview.svelte';
-	import OpportunityFormatRulesPanel from './OpportunityFormatRulesPanel.svelte';
-	import type { OpportunityFormatDetailState } from './opportunity-format-detail-state.svelte';
-	import type { OpportunityFormatDetailLoadState } from './opportunity-format-detail-types';
+	import EmailFormatRulesPanel from './EmailFormatRulesPanel.svelte';
+	import type { EmailFormatDetailState } from './email-format-detail-state.svelte';
+	import type { EmailFormatDetailLoadState } from './email-format-detail-types';
 
 	type Props = {
-		detailState: OpportunityFormatDetailState;
+		detailState: EmailFormatDetailState;
 		isAttachmentOpen: boolean;
-		loadState: OpportunityFormatDetailLoadState;
+		loadState: EmailFormatDetailLoadState;
 		onCloseAttachment: () => void;
 		onOpenAttachment: () => void;
 		onSaveRules: () => void | Promise<void>;
@@ -31,15 +31,15 @@
 >
 	{#if loadState === 'loading'}
 		<div class="flex min-h-60 items-center justify-center text-[0.74rem] text-stone-500">
-			Loading format...
+			Loading email format...
 		</div>
 	{:else if loadState === 'error'}
 		<div class="flex min-h-60 items-center justify-center text-[0.74rem] text-red-600">
-			Could not load format.
+			Could not load email format.
 		</div>
 	{:else if loadState === 'notFound'}
 		<div class="flex min-h-60 items-center justify-center text-[0.74rem] text-stone-500">
-			Format not found.
+			Email format not found.
 		</div>
 	{:else if isAttachmentOpen && detailState.emailDraft.attachment}
 		<div class="flex h-full min-h-0 w-full flex-col">
@@ -58,7 +58,7 @@
 			</section>
 
 			<section class="border-t border-stone-100 pt-4">
-				<OpportunityFormatRulesPanel
+				<EmailFormatRulesPanel
 					rules={detailState.rulesDraft}
 					canSave={detailState.canSaveRules}
 					onRulesChange={detailState.updateRules}

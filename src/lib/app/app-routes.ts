@@ -20,12 +20,12 @@ export type RouteIconProps = PhosphorIconProps;
 export type RouteIcon = PhosphorIcon;
 
 export const APP_ROUTE_IDS = [
-  "formats",
+  "email-formats",
   "builders",
   "data-sources",
   "external-data",
   "team",
-  "team-formats",
+  "team-email-formats",
   "invite-partners",
   "manage-partners",
   "data-access",
@@ -33,7 +33,7 @@ export const APP_ROUTE_IDS = [
 
 export type NavRouteId = (typeof APP_ROUTE_IDS)[number];
 export type NavPath = `/${NavRouteId}`;
-export type NavSectionId = "formats" | "main" | "ecosystem";
+export type NavSectionId = "email-formats" | "main" | "ecosystem";
 
 type NavSectionDefinition = {
   id: NavSectionId;
@@ -52,14 +52,14 @@ export type AppRouteDefinition = StaticAppLink & {
 };
 
 export const APP_ROUTE_REGISTRY = {
-  formats: {
-    ...APP_LINKS.formats,
-    navLabel: "My formats",
+  "email-formats": {
+    ...APP_LINKS.emailFormats,
+    navLabel: "My email formats",
     icon: FolderSimpleIcon,
   },
   builders: {
     ...APP_LINKS.builders,
-    navLabel: "Format builders",
+    navLabel: "Email format builders",
     icon: ChatTeardropIcon,
     hideOnMobile: true,
   },
@@ -78,9 +78,9 @@ export const APP_ROUTE_REGISTRY = {
     navLabel: "Team",
     icon: UsersIcon,
   },
-  "team-formats": {
-    ...APP_LINKS.teamFormats,
-    navLabel: "Team formats",
+  "team-email-formats": {
+    ...APP_LINKS.teamEmailFormats,
+    navLabel: "Team email formats",
     icon: FoldersIcon,
   },
   "invite-partners": {
@@ -102,15 +102,15 @@ export const APP_ROUTE_REGISTRY = {
 
 export const APP_NAV_SECTION_DEFINITIONS = [
   {
-    id: "formats",
-    heading: "Opportunity formats",
-    routeIds: ["builders", "formats"],
+    id: "email-formats",
+    heading: "Email formats",
+    routeIds: ["builders", "email-formats"],
     desktopSectionClass: "pt-2",
   },
   {
     id: "main",
     heading: "Workspace",
-    routeIds: ["data-sources", "external-data", "team", "team-formats"],
+    routeIds: ["data-sources", "external-data", "team", "team-email-formats"],
     desktopSectionClass: "pt-6",
     mobileSectionClass: "pt-6",
     showCollapsedDivider: true,

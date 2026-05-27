@@ -1,7 +1,7 @@
 import type { EmailDraft } from '@overbase/builder-sdk/email';
 import type { Id } from '$convex/_generated/dataModel';
 
-export type FormatRecipientRef =
+export type EmailFormatRecipientRef =
 	| {
 			kind: 'user';
 			userId: Id<'users'>;
@@ -11,37 +11,37 @@ export type FormatRecipientRef =
 			teammateId: Id<'teammates'>;
 	  };
 
-export function getFormatRecipientKey(ref: FormatRecipientRef) {
+export function getFormatRecipientKey(ref: EmailFormatRecipientRef) {
 	return ref.kind === 'user' ? `user:${ref.userId}` : `teammate:${ref.teammateId}`;
 }
 
-export type OpportunityFormatRule = {
+export type EmailFormatRule = {
 	id: string;
 	text: string;
 };
 
-export type OpportunityFeedback = {
+export type EmailFeedback = {
 	likedText: string;
 	improvementText: string;
 };
 
-export type OpportunityItem = {
+export type SentEmail = {
 	id: string;
 	sentAt: string;
 	draft: EmailDraft;
 };
 
-export type OpportunityFormatDetailView = 'rules' | 'feedback';
+export type EmailFormatDetailView = 'rules' | 'feedback';
 
-export type OpportunityFeedbackViewState =
+export type EmailFeedbackViewState =
 	| { kind: 'empty' }
 	| {
 			kind: 'selected';
-			opportunity: OpportunityItem;
-			feedbackDraft: OpportunityFeedback;
+			sentEmail: SentEmail;
+			feedbackDraft: EmailFeedback;
 			canGoPrevious: boolean;
 			canGoNext: boolean;
 			canSave: boolean;
 	  };
 
-export type OpportunityFormatDetailLoadState = 'loading' | 'error' | 'notFound' | 'ready';
+export type EmailFormatDetailLoadState = 'loading' | 'error' | 'notFound' | 'ready';

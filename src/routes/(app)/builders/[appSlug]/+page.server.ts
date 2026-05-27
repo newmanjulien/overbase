@@ -35,7 +35,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			headerTitleEditable: true,
 			chromeMode: 'focused',
 			desktopBreadcrumbParent: {
-				label: 'Format builder',
+				label: 'Email format builder',
 				href: APP_LINKS.builders.pathname
 			},
 			viewportRequirement: BUILDER_VIEWPORT_REQUIREMENT

@@ -3,46 +3,46 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import { useQuery } from 'convex-svelte';
 	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
-	import OpportunityFormatDetailDesktop from './OpportunityFormatDetailDesktop.svelte';
-	import OpportunityFormatDetailMobile from './OpportunityFormatDetailMobile.svelte';
-	import OpportunityFormatDetailRouteActions from './OpportunityFormatDetailRouteActions.svelte';
-	import { createOpportunityFormatDetailController } from './opportunity-format-detail-controller.svelte';
-	import { createOpportunityFormatDetailState } from './opportunity-format-detail-state.svelte';
+	import EmailFormatDetailDesktop from './EmailFormatDetailDesktop.svelte';
+	import EmailFormatDetailMobile from './EmailFormatDetailMobile.svelte';
+	import EmailFormatDetailRouteActions from './EmailFormatDetailRouteActions.svelte';
+	import { createEmailFormatDetailController } from './email-format-detail-controller.svelte';
+	import { createEmailFormatDetailState } from './email-format-detail-state.svelte';
 	import type {
-		OpportunityFeedbackViewState,
-		OpportunityFormatDetailLoadState,
-		OpportunityFormatDetailView
-	} from './opportunity-format-detail-types';
+		EmailFeedbackViewState,
+		EmailFormatDetailLoadState,
+		EmailFormatDetailView
+	} from './email-format-detail-types';
 
 	type Props = {
-		opportunityFormatId: Id<'opportunityFormats'>;
+		emailFormatId: Id<'emailFormats'>;
 	};
 
-	let { opportunityFormatId }: Props = $props();
+	let { emailFormatId }: Props = $props();
 	const routeTitleState = useRouteTitleState();
-	const detailState = createOpportunityFormatDetailState();
-	const controller = createOpportunityFormatDetailController({
+	const detailState = createEmailFormatDetailState();
+	const controller = createEmailFormatDetailController({
 		detailState,
 		getFeedbackViewState,
-		getOpportunityFormatId: () => opportunityFormatId,
+		getEmailFormatId: () => emailFormatId,
 		onTitleSaved: (title) => {
 			routeTitleState.title = title;
 		}
 	});
-	const detailQuery = useQuery(api.opportunityFormats.getOpportunityFormatDetail, () => ({
-		opportunityFormatId
+	const detailQuery = useQuery(api.emailFormats.getEmailFormatDetail, () => ({
+		emailFormatId
 	}));
 	const detail = $derived(detailQuery.data);
-	const opportunityFormat = $derived(detail?.opportunityFormat ?? null);
-	const opportunities = $derived(detail?.opportunities ?? []);
+	const emailFormat = $derived(detail?.emailFormat ?? null);
+	const sentEmails = $derived(detail?.sentEmails ?? []);
 	const people = $derived(detail?.people ?? []);
-	let detailView = $state<OpportunityFormatDetailView>('rules');
+	let detailView = $state<EmailFormatDetailView>('rules');
 	let isMobileAttachmentOpen = $state(false);
 	const detailViewActionLabel = $derived(
-		detailView === 'rules' ? 'Give feedback on opportunities' : 'Set rules'
+		detailView === 'rules' ? 'Give feedback on sent emails' : 'Set rules'
 	);
 	const canToggleStatus = $derived(
-		Boolean(opportunityFormat) &&
+		Boolean(emailFormat) &&
 			!controller.isUpdatingStatus &&
 			controller.status === 'active'
 	);
@@ -58,7 +58,7 @@
 		}
 	]);
 
-	function getLoadState(): OpportunityFormatDetailLoadState {
+	function getLoadState(): EmailFormatDetailLoadState {
 		if (detailQuery.isLoading) {
 			return 'loading';
 		}
@@ -70,21 +70,21 @@
 		return detail ? 'ready' : 'notFound';
 	}
 
-	function getFeedbackViewState(): OpportunityFeedbackViewState {
-		const selectedOpportunity = opportunities[detailState.selectedOpportunityIndex] ?? opportunities[0];
+	function getFeedbackViewState(): EmailFeedbackViewState {
+		const selectedSentEmail = sentEmails[detailState.selectedSentEmailIndex] ?? sentEmails[0];
 
-		if (!selectedOpportunity) {
+		if (!selectedSentEmail) {
 			return { kind: 'empty' };
 		}
 
-		const feedbackDraft = detailState.getFeedbackDraft(selectedOpportunity.id);
+		const feedbackDraft = detailState.getFeedbackDraft(selectedSentEmail.id);
 		return {
 			kind: 'selected',
-			opportunity: selectedOpportunity,
+			sentEmail: selectedSentEmail,
 			feedbackDraft,
-			canGoPrevious: detailState.selectedOpportunityIndex > 0,
-			canGoNext: detailState.selectedOpportunityIndex < opportunities.length - 1,
-			canSave: detailState.canSaveFeedback(selectedOpportunity.id)
+			canGoPrevious: detailState.selectedSentEmailIndex > 0,
+			canGoNext: detailState.selectedSentEmailIndex < sentEmails.length - 1,
+			canSave: detailState.canSaveFeedback(selectedSentEmail.id)
 		};
 	}
 
@@ -104,20 +104,20 @@
 		detailView = 'feedback';
 	}
 
-	function showPreviousOpportunity() {
+	function showPreviousSentEmail() {
 		if (feedbackViewState.kind === 'empty' || !feedbackViewState.canGoPrevious) {
 			return;
 		}
 
-		detailState.selectedOpportunityIndex -= 1;
+		detailState.selectedSentEmailIndex -= 1;
 	}
 
-	function showNextOpportunity() {
+	function showNextSentEmail() {
 		if (feedbackViewState.kind === 'empty' || !feedbackViewState.canGoNext) {
 			return;
 		}
 
-		detailState.selectedOpportunityIndex += 1;
+		detailState.selectedSentEmailIndex += 1;
 	}
 
 	$effect(() => {
@@ -145,16 +145,16 @@
 			return;
 		}
 
-		routeTitleState.title = detail.opportunityFormat.title;
-		controller.syncStatus(detail.opportunityFormat.status);
-		detailState.sync(opportunityFormatId, detail, {
+		routeTitleState.title = detail.emailFormat.title;
+		controller.syncStatus(detail.emailFormat.status);
+		detailState.sync(emailFormatId, detail, {
 			syncRecipients: !controller.isSavingRecipients
 		});
 	});
 </script>
 
 {#snippet routeActions()}
-	<OpportunityFormatDetailRouteActions
+	<EmailFormatDetailRouteActions
 		{canToggleStatus}
 		{detailViewActionLabel}
 		{people}
@@ -166,7 +166,7 @@
 	/>
 {/snippet}
 
-<OpportunityFormatDetailDesktop
+<EmailFormatDetailDesktop
 	actionError={controller.actionError}
 	deleteError={controller.deleteError}
 	{detailState}
@@ -178,11 +178,11 @@
 	onSaveFeedback={controller.saveSelectedFeedback}
 	onSaveRules={controller.saveRules}
 	onShowFeedbackView={showFeedbackView}
-	onShowNextOpportunity={showNextOpportunity}
-	onShowPreviousOpportunity={showPreviousOpportunity}
+	onShowNextSentEmail={showNextSentEmail}
+	onShowPreviousSentEmail={showPreviousSentEmail}
 />
 
-<OpportunityFormatDetailMobile
+<EmailFormatDetailMobile
 	{detailState}
 	isAttachmentOpen={isMobileAttachmentOpen}
 	{loadState}

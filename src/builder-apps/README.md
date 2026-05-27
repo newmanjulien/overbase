@@ -4,28 +4,51 @@ This folder is where Overbase wires builder apps into the product.
 
 Builder apps run outside Overbase. Overbase stores local presentation metadata, then fetches each app's manifest and calls each app's runtime over HTTP.
 
-## Custom Opportunity Format
+## Custom Builder
 
-The custom opportunity format builder lives in:
+The custom email format builder lives in:
 
 ```text
-/Users/juliennewman/Documents/custom
+/Users/juliennewman/Documents/custom-builder
 ```
 
 It uses the app slug:
 
 ```text
-custom-opportunity-format
+custom-builder
 ```
 
 Required Overbase env:
 
 ```text
-CUSTOM_OPPORTUNITY_FORMAT_RUNTIME_URL
-CUSTOM_OPPORTUNITY_FORMAT_RUNTIME_SECRET
+CUSTOM_BUILDER_RUNTIME_URL
+CUSTOM_BUILDER_RUNTIME_SECRET
 ```
 
-The secret must match `CUSTOM_OPPORTUNITY_FORMAT_OVERBASE_SECRET` in the `custom` app.
+The secret must match `CUSTOM_BUILDER_OVERBASE_SECRET` in the custom builder app.
+
+## Bring the Firm Builder
+
+The Bring the Firm builder lives in:
+
+```text
+/Users/juliennewman/Documents/bring-the-firm-builder
+```
+
+It uses the app slug:
+
+```text
+bring-the-firm-builder
+```
+
+Required Overbase env:
+
+```text
+BRING_THE_FIRM_BUILDER_RUNTIME_URL
+BRING_THE_FIRM_BUILDER_RUNTIME_SECRET
+```
+
+The secret must match `BRING_THE_FIRM_BUILDER_OVERBASE_SECRET` in the Bring the Firm builder app.
 
 ## External Builder Apps
 
@@ -54,10 +77,10 @@ Run path:
 Required env per external app:
 
 ```text
-BRING_THE_FIRM_RUNTIME_URL
-BRING_THE_FIRM_RUNTIME_SECRET
-CUSTOM_OPPORTUNITY_FORMAT_RUNTIME_URL
-CUSTOM_OPPORTUNITY_FORMAT_RUNTIME_SECRET
+BRING_THE_FIRM_BUILDER_RUNTIME_URL
+BRING_THE_FIRM_BUILDER_RUNTIME_SECRET
+CUSTOM_BUILDER_RUNTIME_URL
+CUSTOM_BUILDER_RUNTIME_SECRET
 ```
 
 ## Runtime Shape

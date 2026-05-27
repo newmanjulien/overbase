@@ -1,2 +1,2 @@
-export const BRING_THE_FIRM_APP_SLUG = 'bring-the-firm';
-export const CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG = 'custom-opportunity-format';
+export const BRING_THE_FIRM_BUILDER_APP_SLUG = 'bring-the-firm-builder';
+export const CUSTOM_BUILDER_APP_SLUG = 'custom-builder';

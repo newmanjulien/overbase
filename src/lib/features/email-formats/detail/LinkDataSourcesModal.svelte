@@ -23,12 +23,12 @@
 		{
 			title: 'Link to your rule',
 			description:
-				'You will link data sources to each rule in your opportunity format'
+				'You will link data sources to each rule in your email format'
 		},
 		{
-			title: 'Receive opportunities',
+			title: 'Receive sent emails',
 			description:
-				'Start receiving custom revenue opportunities backed by the best data'
+				'Start receiving custom revenue emails backed by the best data'
 		}
 	];
 </script>
@@ -50,7 +50,7 @@
 		</div>
 
 		<TallModalCallout
-			text="Link any data source to this rule and opportunity format"
+			text="Link any data source to this rule and email format"
 		/>
 	</div>
 

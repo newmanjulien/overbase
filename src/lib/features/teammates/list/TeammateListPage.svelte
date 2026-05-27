@@ -293,12 +293,12 @@
 				kind: 'tooltip',
 				label: "won't email them",
 				tooltipText:
-					"We won't email teammates after you add them. They'll only receive emails after you add them to an active opportunity format"
+					"We won't email teammates after you add them. They'll only receive emails after you add them to an active email format"
 			},
-			{ kind: 'text', text: 'until you add them to opportunities' }
+			{ kind: 'text', text: 'until you add them to active email formats' }
 		],
 		nextSteps:
-			'Teammates are the people inside your organization who receive opportunities. Add teammates here, then add them to the right formats',
+			'Teammates are the people inside your organization who receive emails. Add teammates here, then add them to the right email formats',
 		actionLabel: 'Add teammates',
 		onAction: openModal
 	}}

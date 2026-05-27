@@ -4,12 +4,12 @@
 	import TrashIcon from 'phosphor-svelte/lib/TrashIcon';
 	import { Button, IconButton, InfoBar, InfoBarAction } from '$lib/ui';
 	import LinkDataSourcesModal from './LinkDataSourcesModal.svelte';
-	import type { OpportunityFormatRule } from './opportunity-format-detail-types';
+	import type { EmailFormatRule } from './email-format-detail-types';
 
 	type Props = {
-		rules: OpportunityFormatRule[];
+		rules: EmailFormatRule[];
 		canSave: boolean;
-		onRulesChange: (rules: OpportunityFormatRule[]) => void;
+		onRulesChange: (rules: EmailFormatRule[]) => void;
 		onSave: () => void;
 		onGiveEmailFeedback?: () => void;
 	};
@@ -17,7 +17,7 @@
 	let { rules, canSave, onRulesChange, onSave, onGiveEmailFeedback }: Props = $props();
 	let linkDataSourcesModalOpen = $state(false);
 
-	function updateRule(ruleId: string, patch: Partial<OpportunityFormatRule>) {
+	function updateRule(ruleId: string, patch: Partial<EmailFormatRule>) {
 		onRulesChange(rules.map((rule) => (rule.id === ruleId ? { ...rule, ...patch } : rule)));
 	}
 
@@ -39,7 +39,7 @@
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-stone-50/50 text-stone-950">
 	<div class="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 md:px-5">
 		<div class="mb-3 flex items-center justify-between gap-3">
-			<p class="text-[0.72rem] font-medium text-stone-950">Rules for this format</p>
+			<p class="text-[0.72rem] font-medium text-stone-950">Rules for this email format</p>
 			<Button variant="secondary" class="h-7 px-2.5 text-[0.68rem]" onclick={addRule}>
 				{#snippet leading()}
 					<PlusIcon size={14} weight="regular" />
@@ -59,7 +59,7 @@
 										<textarea
 											value={rule.text}
 											aria-label="Rule"
-											placeholder="Explain how this format should behave"
+											placeholder="Explain how this email format should behave"
 											class="min-h-14 w-full resize-y border-0 bg-transparent p-0 text-[0.74rem] leading-[1.45] text-stone-900 outline-none placeholder:text-stone-400"
 											oninput={(event) => updateRule(rule.id, { text: event.currentTarget.value })}
 										></textarea>
@@ -92,10 +92,10 @@
 					Make these rules as precise and detailed as possible, you can also train the AI by
 					{#if onGiveEmailFeedback}
 						<InfoBarAction onclick={onGiveEmailFeedback}>
-							giving feedback on specific opportunities
+							giving feedback on specific sent emails
 						</InfoBarAction>
 					{:else}
-						giving feedback on specific opportunities
+						giving feedback on specific sent emails
 					{/if}
 				</InfoBar>
 			</div>
@@ -107,7 +107,7 @@
 					<h2 class="text-[0.78rem] leading-tight font-medium text-stone-950">No rules yet</h2>
 
 					<p class="mt-2 text-[0.67rem] leading-relaxed text-stone-600">
-						Give details about how this format should behave, when it should fire and what data sources it should use
+						Give details about how this email format should behave, when it should fire and what data sources it should use
 					</p>
 				</div>
 			</div>

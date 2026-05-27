@@ -333,7 +333,7 @@ export function createBuilderSessionController(
 			throw new Error('Builder session not found.');
 		}
 
-		return await client.mutation(api.opportunityFormats.publishFromBuilderSession, {
+		return await client.mutation(api.emailFormats.publishFromBuilderSession, {
 			sessionId: handle.sessionId,
 			title
 		});

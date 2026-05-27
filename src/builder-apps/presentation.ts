@@ -1,4 +1,4 @@
-import { BRING_THE_FIRM_APP_SLUG, CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG } from './ids';
+import { BRING_THE_FIRM_BUILDER_APP_SLUG, CUSTOM_BUILDER_APP_SLUG } from './ids';
 
 export type AppStatus = 'active';
 
@@ -32,7 +32,7 @@ export type BuilderAppPresentation = {
 
 export const builderAppPresentationEntries = [
 	{
-		slug: BRING_THE_FIRM_APP_SLUG,
+		slug: BRING_THE_FIRM_BUILDER_APP_SLUG,
 		categoryIds: ['consulting', 'law'],
 		artwork: {
 			id: 'team-violet',
@@ -54,7 +54,7 @@ export const builderAppPresentationEntries = [
 		status: 'active'
 	},
 	{
-		slug: CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG,
+		slug: CUSTOM_BUILDER_APP_SLUG,
 		categoryIds: [],
 		artwork: {
 			id: 'spark-coral',

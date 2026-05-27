@@ -1,6 +1,6 @@
 import { v } from 'convex/values';
 
-export const formatRecipientRef = v.union(
+export const emailFormatRecipientRef = v.union(
 	v.object({
 		kind: v.literal('user'),
 		userId: v.id('users')

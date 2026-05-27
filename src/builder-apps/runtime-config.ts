@@ -1,4 +1,4 @@
-import { BRING_THE_FIRM_APP_SLUG, CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG } from './ids';
+import { BRING_THE_FIRM_BUILDER_APP_SLUG, CUSTOM_BUILDER_APP_SLUG } from './ids';
 import { getBuilderAppPresentationEntry } from './registry';
 
 type RuntimeConfig = {
@@ -9,13 +9,13 @@ type RuntimeConfig = {
 export type BuilderRuntimeEnv = Record<string, string | undefined>;
 
 const RUNTIME_CONFIGS: Record<string, RuntimeConfig> = {
-	[BRING_THE_FIRM_APP_SLUG]: {
-		urlEnv: 'BRING_THE_FIRM_RUNTIME_URL',
-		secretEnv: 'BRING_THE_FIRM_RUNTIME_SECRET'
+	[BRING_THE_FIRM_BUILDER_APP_SLUG]: {
+		urlEnv: 'BRING_THE_FIRM_BUILDER_RUNTIME_URL',
+		secretEnv: 'BRING_THE_FIRM_BUILDER_RUNTIME_SECRET'
 	},
-	[CUSTOM_OPPORTUNITY_FORMAT_APP_SLUG]: {
-		urlEnv: 'CUSTOM_OPPORTUNITY_FORMAT_RUNTIME_URL',
-		secretEnv: 'CUSTOM_OPPORTUNITY_FORMAT_RUNTIME_SECRET'
+	[CUSTOM_BUILDER_APP_SLUG]: {
+		urlEnv: 'CUSTOM_BUILDER_RUNTIME_URL',
+		secretEnv: 'CUSTOM_BUILDER_RUNTIME_SECRET'
 	}
 };
 

@@ -64,10 +64,10 @@
 >
 	<div class="w-full max-w-120 text-center">
 		<h1 class="mt-5 mb-0 text-[30px] leading-[1.08] font-medium text-[#08090a]">
-			Step 1: Create an opportunity format
+			Step 1: Create an email format
 		</h1>
 		<p class="mx-auto mt-4 max-w-130 text-sm leading-[1.45] text-[#686b73]">
-			Get started quickly with Overbase by creating the format we will use to send revenue opportunities to your team
+			Get started quickly with Overbase by creating the email format we will use to send revenue opportunities to your team
 		</p>
 
 		<div class="mt-10 flex justify-center">
@@ -125,7 +125,7 @@
 									<span
 										class="mt-4 inline-flex h-9 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-stone-200/60 bg-white px-3.5 text-[0.76rem] font-medium text-stone-800 transition-colors hover:bg-stone-50"
 									>
-										{selectedAppSlug === app.id ? 'Opening...' : 'Create this format'}
+										{selectedAppSlug === app.id ? 'Opening...' : 'Create this email format'}
 									</span>
 								</div>
 							</a>

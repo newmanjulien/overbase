@@ -84,8 +84,8 @@
 			bind:this={textareaElement}
 			bind:value
 			rows={1}
-			aria-label="Custom format description"
-			placeholder="Describe the format you had in mind"
+			aria-label="Custom email format description"
+			placeholder="Describe the email format you had in mind"
 			class="w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[0.82rem] leading-[1.4] text-stone-800 outline-none placeholder:text-stone-400"
 			onkeydown={(event) => {
 				if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {

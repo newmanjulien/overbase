@@ -2,35 +2,35 @@
 	import EmailDraftPanel from '$lib/domain/email-drafts/EmailDraftPanel.svelte';
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
-	import OpportunityFeedbackEmptyState from './OpportunityFeedbackEmptyState.svelte';
-	import OpportunityFeedbackPanel from './OpportunityFeedbackPanel.svelte';
-	import OpportunityFormatRulesPanel from './OpportunityFormatRulesPanel.svelte';
-	import OpportunityPreviewPanel from './OpportunityPreviewPanel.svelte';
-	import type { OpportunityFormatDetailState } from './opportunity-format-detail-state.svelte';
+	import EmailFeedbackEmptyState from './EmailFeedbackEmptyState.svelte';
+	import EmailFeedbackPanel from './EmailFeedbackPanel.svelte';
+	import EmailFormatRulesPanel from './EmailFormatRulesPanel.svelte';
+	import SentEmailPreviewPanel from './SentEmailPreviewPanel.svelte';
+	import type { EmailFormatDetailState } from './email-format-detail-state.svelte';
 	import type {
-		OpportunityFeedback,
-		OpportunityFeedbackViewState,
-		OpportunityFormatDetailLoadState,
-		OpportunityFormatDetailView
-	} from './opportunity-format-detail-types';
+		EmailFeedback,
+		EmailFeedbackViewState,
+		EmailFormatDetailLoadState,
+		EmailFormatDetailView
+	} from './email-format-detail-types';
 
 	type Props = {
 		actionError: string | null;
 		deleteError: string | null;
-		detailState: OpportunityFormatDetailState;
-		detailView: OpportunityFormatDetailView;
-		feedbackViewState: OpportunityFeedbackViewState;
-		loadState: OpportunityFormatDetailLoadState;
-		onFeedbackChange: (patch: Partial<OpportunityFeedback>) => void;
+		detailState: EmailFormatDetailState;
+		detailView: EmailFormatDetailView;
+		feedbackViewState: EmailFeedbackViewState;
+		loadState: EmailFormatDetailLoadState;
+		onFeedbackChange: (patch: Partial<EmailFeedback>) => void;
 		onSaveDraft: (nextDraft: EmailDraft, baseEmailDraftVersion: number) => Promise<void>;
 		onSaveFeedback: () => void | Promise<void>;
 		onSaveRules: () => void | Promise<void>;
 		onShowFeedbackView: () => void;
-		onShowNextOpportunity: () => void;
-		onShowPreviousOpportunity: () => void;
+		onShowNextSentEmail: () => void;
+		onShowPreviousSentEmail: () => void;
 	};
 
-	const OPPORTUNITY_FORMAT_DETAIL_SPLIT = {
+	const EMAIL_FORMAT_DETAIL_SPLIT = {
 		minPrimary: 320,
 		minSecondary: 420,
 		defaultRatio: 0,
@@ -51,8 +51,8 @@
 		onSaveFeedback,
 		onSaveRules,
 		onShowFeedbackView,
-		onShowNextOpportunity,
-		onShowPreviousOpportunity
+		onShowNextSentEmail,
+		onShowPreviousSentEmail
 	}: Props = $props();
 </script>
 
@@ -64,27 +64,27 @@
 	{/if}
 	{#if loadState === 'loading'}
 		<div class="flex h-full items-center justify-center text-[0.74rem] text-stone-500">
-			Loading format...
+			Loading email format...
 		</div>
 	{:else if loadState === 'error'}
 		<div class="flex h-full items-center justify-center text-[0.74rem] text-red-600">
-			Could not load format.
+			Could not load email format.
 		</div>
 	{:else if loadState === 'notFound'}
 		<div class="flex h-full items-center justify-center text-[0.74rem] text-stone-500">
-			Format not found.
+			Email format not found.
 		</div>
 	{:else if detailView === 'feedback' && feedbackViewState.kind === 'empty'}
-		<OpportunityFeedbackEmptyState />
+		<EmailFeedbackEmptyState />
 	{:else}
 		<SplitPane
-			minPrimary={OPPORTUNITY_FORMAT_DETAIL_SPLIT.minPrimary}
-			minSecondary={OPPORTUNITY_FORMAT_DETAIL_SPLIT.minSecondary}
-			defaultRatio={OPPORTUNITY_FORMAT_DETAIL_SPLIT.defaultRatio}
-			mobileBreakpoint={OPPORTUNITY_FORMAT_DETAIL_SPLIT.mobileBreakpoint}
-			keyboardStep={OPPORTUNITY_FORMAT_DETAIL_SPLIT.keyboardStep}
-			handleWidth={OPPORTUNITY_FORMAT_DETAIL_SPLIT.handleWidth}
-			label="Resize format detail panels"
+			minPrimary={EMAIL_FORMAT_DETAIL_SPLIT.minPrimary}
+			minSecondary={EMAIL_FORMAT_DETAIL_SPLIT.minSecondary}
+			defaultRatio={EMAIL_FORMAT_DETAIL_SPLIT.defaultRatio}
+			mobileBreakpoint={EMAIL_FORMAT_DETAIL_SPLIT.mobileBreakpoint}
+			keyboardStep={EMAIL_FORMAT_DETAIL_SPLIT.keyboardStep}
+			handleWidth={EMAIL_FORMAT_DETAIL_SPLIT.handleWidth}
+			label="Resize email format detail panels"
 		>
 			{#snippet primary()}
 				{#if detailView === 'rules'}
@@ -95,19 +95,19 @@
 						onSave={onSaveDraft}
 					/>
 				{:else if feedbackViewState.kind === 'selected'}
-					<OpportunityPreviewPanel
-						opportunity={feedbackViewState.opportunity}
+					<SentEmailPreviewPanel
+						sentEmail={feedbackViewState.sentEmail}
 						canGoPrevious={feedbackViewState.canGoPrevious}
 						canGoNext={feedbackViewState.canGoNext}
-						onPrevious={onShowPreviousOpportunity}
-						onNext={onShowNextOpportunity}
+						onPrevious={onShowPreviousSentEmail}
+						onNext={onShowNextSentEmail}
 					/>
 				{/if}
 			{/snippet}
 
 			{#snippet secondary()}
 				{#if detailView === 'rules'}
-					<OpportunityFormatRulesPanel
+					<EmailFormatRulesPanel
 						rules={detailState.rulesDraft}
 						canSave={detailState.canSaveRules}
 						onRulesChange={detailState.updateRules}
@@ -115,7 +115,7 @@
 						onGiveEmailFeedback={onShowFeedbackView}
 					/>
 				{:else if feedbackViewState.kind === 'selected'}
-					<OpportunityFeedbackPanel
+					<EmailFeedbackPanel
 						likedValue={feedbackViewState.feedbackDraft.likedText}
 						improvementValue={feedbackViewState.feedbackDraft.improvementText}
 						canSave={feedbackViewState.canSave}

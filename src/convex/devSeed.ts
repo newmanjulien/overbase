@@ -72,7 +72,7 @@ function createDataQualityDraft(title: string): EmailDraft {
 		body: [
 			{
 				type: 'paragraph',
-				text: `${title}: this opportunity format found a few records that need review before the next partner update.`
+				text: `${title}: this email format found a few records that need review before the next partner update.`
 			},
 			{
 				type: 'bullets',
@@ -90,34 +90,34 @@ function createDataQualityDraft(title: string): EmailDraft {
 	};
 }
 
-export const seedOpportunitiesForFormat = mutation({
+export const seedSentEmailsForFormat = mutation({
 	args: {
-		opportunityFormatId: v.id('opportunityFormats'),
+		emailFormatId: v.id('emailFormats'),
 		replaceExisting: v.optional(v.boolean())
 	},
-	handler: async (ctx, { opportunityFormatId, replaceExisting = true }) => {
+	handler: async (ctx, { emailFormatId, replaceExisting = true }) => {
 		const viewerWorkspace = await requireViewerWorkspace(ctx);
-		const opportunityFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(opportunityFormatId));
+		const emailFormat = await getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(emailFormatId));
 
-		if (!opportunityFormat) {
-			throw new Error('Format not found.');
+		if (!emailFormat) {
+			throw new Error('Email format not found.');
 		}
 
 		if (replaceExisting) {
 			const feedback = await ctx.db
-				.query('opportunityFeedback')
-				.withIndex('by_workspace_opportunityFormat', (q) =>
+				.query('emailFeedback')
+				.withIndex('by_workspace_emailFormat', (q) =>
 					q
-						.eq('workspaceId', opportunityFormat.workspaceId)
-						.eq('opportunityFormatId', opportunityFormatId)
+						.eq('workspaceId', emailFormat.workspaceId)
+						.eq('emailFormatId', emailFormatId)
 				)
 				.collect();
-			const opportunities = await ctx.db
-				.query('opportunities')
-				.withIndex('by_workspace_opportunityFormat_createdAt', (q) =>
+			const sentEmails = await ctx.db
+				.query('sentEmails')
+				.withIndex('by_workspace_emailFormat_createdAt', (q) =>
 					q
-						.eq('workspaceId', opportunityFormat.workspaceId)
-						.eq('opportunityFormatId', opportunityFormatId)
+						.eq('workspaceId', emailFormat.workspaceId)
+						.eq('emailFormatId', emailFormatId)
 				)
 				.collect();
 
@@ -125,35 +125,35 @@ export const seedOpportunitiesForFormat = mutation({
 				await ctx.db.delete(feedbackItem._id);
 			}
 
-			for (const opportunity of opportunities) {
-				await ctx.db.delete(opportunity._id);
+			for (const sentEmail of sentEmails) {
+				await ctx.db.delete(sentEmail._id);
 			}
 		}
 
 		const now = Date.now();
 		const drafts = [
-			createPipelineAlertDraft(opportunityFormat.title),
-			createPartnerSignalDraft(opportunityFormat.title),
-			createDataQualityDraft(opportunityFormat.title)
+			createPipelineAlertDraft(emailFormat.title),
+			createPartnerSignalDraft(emailFormat.title),
+			createDataQualityDraft(emailFormat.title)
 		];
-		const opportunityIds = [];
+		const sentEmailIds = [];
 
 		for (const [index, draft] of drafts.entries()) {
 			const sentAt = now - index * 1000 * 60 * 60 * 18;
-			const opportunityId = await ctx.db.insert('opportunities', {
-				workspaceId: opportunityFormat.workspaceId,
-				opportunityFormatId,
+			const sentEmailId = await ctx.db.insert('sentEmails', {
+				workspaceId: emailFormat.workspaceId,
+				emailFormatId,
 				sentAt,
 				emailDraft: normalizeEmailDraft(draft),
 				createdAt: sentAt
 			});
 
-			opportunityIds.push(opportunityId);
+			sentEmailIds.push(sentEmailId);
 		}
 
 		return {
-			opportunityFormatId,
-			insertedOpportunities: opportunityIds.length
+			emailFormatId,
+			insertedSentEmails: sentEmailIds.length
 		};
 	}
 });

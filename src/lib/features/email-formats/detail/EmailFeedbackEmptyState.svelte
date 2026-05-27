@@ -7,11 +7,11 @@
 		<ChatCircleIcon aria-hidden="true" size={20} weight="regular" class="mb-4 text-stone-950" />
 
 		<h2 class="text-[0.78rem] leading-tight font-medium text-stone-950">
-			No opportunities sent yet
+			No sent emails yet
 		</h2>
 
 		<p class="mt-2 text-[0.67rem] leading-relaxed text-stone-600">
-			Once this format sends opportunities, you can give feedback on specific opportunities and train the AI on what to improve.
+			Once this email format sends emails, you can give feedback on specific sent emails and train the AI on what to improve.
 		</p>
 	</div>
 </section>

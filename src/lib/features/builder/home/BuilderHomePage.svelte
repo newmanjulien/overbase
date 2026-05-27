@@ -87,7 +87,7 @@
 
 	{#snippet footer()}
 		<InfoBar label="Next steps:">
-			Start from a builder to create the opportunities your team receives
+			Start from a builder to create the email formats your team receives
 		</InfoBar>
 	{/snippet}
 </ListPage>

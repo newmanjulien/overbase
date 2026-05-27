@@ -3,12 +3,12 @@
 	import PlayIcon from 'phosphor-svelte/lib/PlayIcon';
 	import { AvatarPersonPicker } from '$lib/domain/people';
 	import { Button } from '$lib/ui';
-	import type { FormatRecipientRef } from './opportunity-format-detail-types';
-	import { getFormatRecipientKey } from './opportunity-format-detail-types';
+	import type { EmailFormatRecipientRef } from './email-format-detail-types';
+	import { getFormatRecipientKey } from './email-format-detail-types';
 
 	type RecipientPickerPerson = {
 		id: string;
-		ref: FormatRecipientRef;
+		ref: EmailFormatRecipientRef;
 		name: string;
 		avatarUrl: string;
 	};
@@ -17,9 +17,9 @@
 		canToggleStatus: boolean;
 		detailViewActionLabel: string;
 		people: RecipientPickerPerson[];
-		selectedRecipientRefs: FormatRecipientRef[];
+		selectedRecipientRefs: EmailFormatRecipientRef[];
 		status: 'active' | 'paused';
-		onSelectedRecipientRefsChange: (nextRefs: FormatRecipientRef[]) => void | Promise<void>;
+		onSelectedRecipientRefsChange: (nextRefs: EmailFormatRecipientRef[]) => void | Promise<void>;
 		onToggleDetailView: () => void;
 		onToggleStatus: () => void | Promise<void>;
 	};
@@ -70,7 +70,7 @@
 		selectedIds={selectedRecipientIds}
 		minSelected={1}
 		onSelectedIdsChange={handleSelectedRecipientIdsChange}
-		altBase="Format recipient"
+		altBase="Email format recipient"
 		ariaLabel="Manage recipients"
 		searchPlaceholder="Search recipients..."
 		emptyLabel="No recipients found"

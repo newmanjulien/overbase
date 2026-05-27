@@ -21,9 +21,9 @@ export const APP_LINKS = {
 		pathname: '/builders',
 		routeId: '/(app)/builders'
 	},
-	formats: {
-		pathname: '/formats',
-		routeId: '/(app)/formats'
+	emailFormats: {
+		pathname: '/email-formats',
+		routeId: '/(app)/email-formats'
 	},
 	dataSources: {
 		pathname: '/data-sources',
@@ -37,9 +37,9 @@ export const APP_LINKS = {
 		pathname: '/team',
 		routeId: '/(app)/team'
 	},
-	teamFormats: {
-		pathname: '/team-formats',
-		routeId: '/(app)/team-formats'
+	teamEmailFormats: {
+		pathname: '/team-email-formats',
+		routeId: '/(app)/team-email-formats'
 	},
 	invitePartners: {
 		pathname: '/invite-partners',
@@ -72,7 +72,7 @@ export const AUTH_LINKS = {
 
 export const APP_DYNAMIC_ROUTE_IDS = {
 	builder: '/(app)/builders/[appSlug]',
-	format: '/(app)/formats/[formatId]'
+	emailFormat: '/(app)/email-formats/[emailFormatId]'
 } as const;
 
 export const DEFAULT_APP_LINK = APP_LINKS.builders;
@@ -83,12 +83,12 @@ export type StaticAppPathname = (typeof APP_LINKS)[AppLinkKey]['pathname'];
 export type AuthEntryPathname = (typeof AUTH_LINKS)[AuthLinkKey]['pathname'];
 export type BuilderPathname = `/builders/${string}`;
 export type FreshBuilderHref = `${BuilderPathname}?fresh=1`;
-export type FormatPathname = `/formats/${string}`;
-export type AppPathname = StaticAppPathname | BuilderPathname | FormatPathname;
+export type EmailFormatPathname = `/email-formats/${string}`;
+export type AppPathname = StaticAppPathname | BuilderPathname | EmailFormatPathname;
 export type AppHref = AppPathname | FreshBuilderHref;
 export type AuthEntryHref = AuthEntryPathname | `${AuthEntryPathname}?${string}`;
 export type BuilderViewportFallbackPathname =
-	| typeof APP_LINKS.formats.pathname
+	| typeof APP_LINKS.emailFormats.pathname
 	| typeof APP_LINKS.builders.pathname;
 
 const STATIC_APP_PATHNAMES = new Set<string>(
@@ -127,15 +127,15 @@ export function freshBuilderHref(appSlug: string): FreshBuilderHref {
 	return freshBuilderLink(appSlug).href;
 }
 
-export function formatPathname(formatId: string): FormatPathname {
-	return `/formats/${encodePathSegment(formatId)}`;
+export function emailFormatPathname(emailFormatId: string): EmailFormatPathname {
+	return `/email-formats/${encodePathSegment(emailFormatId)}`;
 }
 
-export function formatLink(formatId: string): DynamicAppLink<FormatPathname, typeof APP_DYNAMIC_ROUTE_IDS.format> {
+export function emailFormatLink(emailFormatId: string): DynamicAppLink<EmailFormatPathname, typeof APP_DYNAMIC_ROUTE_IDS.emailFormat> {
 	return {
-		pathname: formatPathname(formatId),
-		routeId: APP_DYNAMIC_ROUTE_IDS.format,
-		href: resolve(APP_DYNAMIC_ROUTE_IDS.format, { formatId }) as FormatPathname
+		pathname: emailFormatPathname(emailFormatId),
+		routeId: APP_DYNAMIC_ROUTE_IDS.emailFormat,
+		href: resolve(APP_DYNAMIC_ROUTE_IDS.emailFormat, { emailFormatId }) as EmailFormatPathname
 	};
 }
 
@@ -143,7 +143,7 @@ export function isCanonicalAppPathname(pathname: string): pathname is AppPathnam
 	return (
 		STATIC_APP_PATHNAMES.has(pathname) ||
 		/^\/builders\/[^/?#]+$/.test(pathname) ||
-		/^\/formats\/[^/?#]+$/.test(pathname)
+		/^\/email-formats\/[^/?#]+$/.test(pathname)
 	);
 }
 
