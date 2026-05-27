@@ -5,6 +5,7 @@
 	import type { BuilderRunSetup } from '@overbase/builder-sdk/app-protocol';
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import { APP_LINKS, builderLink } from '$lib/app/app-links';
 	import {
 		getCurrentWorkspaceStorageScope,
 		useCurrentWorkspaceContext
@@ -75,12 +76,7 @@
 
 	function clearLaunchState() {
 		clearPendingBuilderLaunch(app.id, storageScope);
-		replaceState(
-			resolve('/builders/[appSlug]', {
-				appSlug: app.id
-			}),
-			{}
-		);
+		replaceState(builderLink(app.id).href, {});
 	}
 
 	async function startRun(
@@ -142,7 +138,7 @@
 		isPublishNavigation = true;
 
 		try {
-			await goto(resolve('/formats'));
+			await goto(resolve(APP_LINKS.formats.pathname));
 		} catch (error) {
 			isPublishNavigation = false;
 			throw error;

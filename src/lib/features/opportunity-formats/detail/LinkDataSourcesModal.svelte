@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { APP_LINKS } from '$lib/app/app-links';
 	import {
 		Button,
 		FullHeightModalShell,
@@ -55,6 +56,6 @@
 
 	{#snippet footer()}
 		<Button variant="secondary" onclick={onClose}>Cancel</Button>
-		<Button href="/data-sources">Link data sources</Button>
+		<Button href={APP_LINKS.dataSources.pathname}>Link data sources</Button>
 	{/snippet}
 </FullHeightModalShell>

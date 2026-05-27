@@ -1,6 +1,13 @@
-import { DEFAULT_ROUTE_HREF } from '$lib/app/app-routes';
+import {
+	AUTH_LINKS,
+	DEFAULT_APP_LINK,
+	isCanonicalAppHref,
+	type AppHref,
+	type AuthEntryHref,
+	type AuthEntryPathname
+} from '$lib/app/app-links';
 
-export type AuthEntryPathname = '/login' | '/join';
+export type { AuthEntryPathname };
 
 const DEFAULT_AUTH_EXIT_HREF = 'https://overbase.app/';
 const TRUSTED_MARKETING_ORIGINS = new Set(['https://overbase.app', 'https://www.overbase.app']);
@@ -17,28 +24,23 @@ function isSafeRelativeReturnHref(value: string) {
 }
 
 export function isAuthEntryPathname(pathname: string): pathname is AuthEntryPathname {
-	return pathname === '/login' || pathname === '/join';
+	return pathname === AUTH_LINKS.login.pathname || pathname === AUTH_LINKS.join.pathname;
 }
 
-function isSafeInAppReturnHref(value: string) {
+function isSafeInAppReturnHref(value: string): value is AppHref {
 	if (!isSafeRelativeReturnHref(value)) {
 		return false;
 	}
 
-	try {
-		const parsedReturnHref = new URL(value, DEFAULT_AUTH_EXIT_HREF);
-		return !isAuthEntryPathname(parsedReturnHref.pathname);
-	} catch {
-		return false;
-	}
+	return isCanonicalAppHref(value);
 }
 
-function getCurrentInAppHref(url: URL) {
+function getCurrentInAppHref(url: URL): AppHref | undefined {
 	const href = `${url.pathname}${url.search}${url.hash}`;
 	return isSafeInAppReturnHref(href) ? href : undefined;
 }
 
-export function resolveAuthReturnTo(url: URL) {
+export function resolveAuthReturnTo(url: URL): AppHref | undefined {
 	const returnTo = url.searchParams.get(AUTH_RETURN_TO_PARAM)?.trim();
 
 	if (returnTo && isSafeInAppReturnHref(returnTo)) {
@@ -49,7 +51,7 @@ export function resolveAuthReturnTo(url: URL) {
 }
 
 export function resolvePostAuthHref(url: URL) {
-	return resolveAuthReturnTo(url) ?? DEFAULT_ROUTE_HREF;
+	return resolveAuthReturnTo(url) ?? DEFAULT_APP_LINK.pathname;
 }
 
 export function resolveAuthExitHref(
@@ -82,9 +84,10 @@ export function resolveAuthExitHref(
 
 export function resolveAuthEntryReturnHref(url: URL) {
 	const fromAuth = url.searchParams.get(AUTH_ENTRY_RETURN_PARAM)?.trim();
+	const fromAuthPathname = fromAuth ?? '';
 
-	if (fromAuth === '/login' || fromAuth === '/join') {
-		return buildAuthEntryHref(fromAuth, {
+	if (isAuthEntryPathname(fromAuthPathname)) {
+		return buildAuthEntryHref(fromAuthPathname, {
 			returnTo: resolveAuthReturnTo(url)
 		});
 	}
@@ -98,13 +101,13 @@ export function buildAuthEntryHref(
 		returnTo,
 		fromAuth
 	}: {
-		returnTo?: string;
+		returnTo?: AppHref;
 		fromAuth?: AuthEntryPathname;
 	} = {}
 ) {
 	const params = new URLSearchParams();
 
-	if (returnTo) {
+	if (returnTo && isSafeInAppReturnHref(returnTo)) {
 		params.set(AUTH_RETURN_TO_PARAM, returnTo);
 	}
 
@@ -113,5 +116,5 @@ export function buildAuthEntryHref(
 	}
 
 	const query = params.toString();
-	return query ? `${pathname}?${query}` : pathname;
+	return (query ? `${pathname}?${query}` : pathname) as AuthEntryHref;
 }

@@ -38,9 +38,9 @@
 					{@const Icon = item.icon}
 					<li>
 						<a
-							href={resolve(item.href)}
+							href={resolve(item.pathname)}
 							class={getItemClassName({
-								isActive: isNavItemActive(item.href, currentPathname)
+								isActive: isNavItemActive(item.pathname, currentPathname)
 							})}
 							onclick={() => {
 								onRouteSelect?.(item);

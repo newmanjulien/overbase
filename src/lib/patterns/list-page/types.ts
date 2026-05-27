@@ -1,5 +1,6 @@
 import type { PhosphorIcon } from '$lib/ui/icons';
 import type { InlineTextContent } from '$lib/ui/inline-text';
+import type { AppHref } from '$lib/app/app-links';
 
 export type ListIcon = PhosphorIcon;
 
@@ -34,7 +35,7 @@ export type EmptyListNextStepsPart =
 	| {
 			kind: 'link';
 			text: string;
-			href: `/${string}`;
+			href: AppHref;
 	  };
 
 export type EmptyListNextStepsContent = string | readonly EmptyListNextStepsPart[];
@@ -53,7 +54,7 @@ export type EmptyListStateConfig = {
 
 export type SelectableListItem = {
 	id: string;
-	href?: `/${string}`;
+	href?: AppHref;
 	selectAriaLabel?: string;
 	actionsAriaLabel?: string;
 	actions?: SelectableListItemAction[];

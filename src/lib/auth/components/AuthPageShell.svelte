@@ -1,7 +1,12 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import type { Snippet } from 'svelte';
+	import {
+		isAuthEntryHref,
+		isCanonicalAppHref,
+		resolveAppHref,
+		resolveAuthHref
+	} from '$lib/app/app-links';
 	import { cn } from '$lib/ui/cn';
 
 	type Props = {
@@ -30,6 +35,19 @@
 	const isExternalReturnButtonHref = $derived(
 		Boolean(returnButtonHref && !returnButtonHref.startsWith('/'))
 	);
+	const returnButtonResolvedHref = $derived.by(() => {
+		if (!returnButtonHref) {
+			return undefined;
+		}
+
+		if (isCanonicalAppHref(returnButtonHref)) {
+			return resolveAppHref(returnButtonHref);
+		}
+
+		return isAuthEntryHref(returnButtonHref)
+			? resolveAuthHref(returnButtonHref)
+			: returnButtonHref;
+	});
 </script>
 
 <section class="relative min-h-dvh overflow-auto bg-[#f7f7f7] p-0 text-[#202124] sm:p-2 lg:overflow-hidden">
@@ -55,7 +73,7 @@
 				{:else}
 					<a
 						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
-						href={resolve(returnButtonHref as '/')}
+						href={returnButtonResolvedHref}
 					>
 						<ArrowLeftIcon aria-hidden="true" size={14} weight="regular" />
 						<span>{returnLabel}</span>

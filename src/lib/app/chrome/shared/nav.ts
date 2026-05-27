@@ -14,7 +14,7 @@ export type NavRouteItem = {
 	kind: 'route';
 	id: NavRouteId;
 	label: string;
-	href: NavPath;
+	pathname: NavPath;
 	icon: NavIcon;
 	hideOnMobile: boolean;
 };
@@ -51,7 +51,7 @@ export const NAV_ROUTE_ITEMS: readonly NavRouteItem[] = (
 	kind: 'route' as const,
 	id,
 	label: route.navLabel,
-	href: route.href as NavPath,
+	pathname: route.pathname as NavPath,
 	icon: route.icon,
 	hideOnMobile: Boolean(route.hideOnMobile)
 }));
@@ -84,10 +84,10 @@ export const NAV_FOOTER_ITEMS: readonly NavFooterItem[] = [
 
 export type { NavRouteId, NavSectionId };
 
-export function isNavItemActive(href: string, pathname: string) {
-	return pathname === href || pathname.startsWith(`${href}/`);
+export function isNavItemActive(routePathname: string, currentPathname: string) {
+	return currentPathname === routePathname || currentPathname.startsWith(`${routePathname}/`);
 }
 
 export function getActiveNavRoute(pathname: string) {
-	return NAV_ROUTE_ITEMS.find((item) => isNavItemActive(item.href, pathname)) ?? null;
+	return NAV_ROUTE_ITEMS.find((item) => isNavItemActive(item.pathname, pathname)) ?? null;
 }

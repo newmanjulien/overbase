@@ -11,6 +11,10 @@ import type {
   PhosphorIcon,
   PhosphorIconProps,
 } from "$lib/ui/icons";
+import {
+  APP_LINKS,
+  type StaticAppLink,
+} from "$lib/app/app-links";
 
 export type RouteIconProps = PhosphorIconProps;
 export type RouteIcon = PhosphorIcon;
@@ -40,8 +44,8 @@ type NavSectionDefinition = {
   showCollapsedDivider?: boolean;
 };
 
-export type AppRouteDefinition = {
-  href: NavPath;
+export type AppRouteDefinition = StaticAppLink & {
+  pathname: NavPath;
   navLabel: string;
   icon: RouteIcon;
   hideOnMobile?: boolean;
@@ -49,48 +53,48 @@ export type AppRouteDefinition = {
 
 export const APP_ROUTE_REGISTRY = {
   formats: {
-    href: "/formats",
+    ...APP_LINKS.formats,
     navLabel: "My formats",
     icon: FolderSimpleIcon,
   },
   builders: {
-    href: "/builders",
+    ...APP_LINKS.builders,
     navLabel: "Format builders",
     icon: ChatTeardropIcon,
     hideOnMobile: true,
   },
   "data-sources": {
-    href: "/data-sources",
+    ...APP_LINKS.dataSources,
     navLabel: "Data sources",
     icon: HardDriveIcon,
   },
   "external-data": {
-    href: "/external-data",
+    ...APP_LINKS.externalData,
     navLabel: "External data",
     icon: CloudIcon,
   },
   team: {
-    href: "/team",
+    ...APP_LINKS.team,
     navLabel: "Team",
     icon: UsersIcon,
   },
   "team-formats": {
-    href: "/team-formats",
+    ...APP_LINKS.teamFormats,
     navLabel: "Team formats",
     icon: FoldersIcon,
   },
   "invite-partners": {
-    href: "/invite-partners",
+    ...APP_LINKS.invitePartners,
     navLabel: "Invite partners",
     icon: ListPlusIcon,
   },
   "manage-partners": {
-    href: "/manage-partners",
+    ...APP_LINKS.managePartners,
     navLabel: "Manage partners",
     icon: BuildingIcon,
   },
   "data-access": {
-    href: "/data-access",
+    ...APP_LINKS.dataAccess,
     navLabel: "Data access",
     icon: KeyIcon,
   },
@@ -120,7 +124,3 @@ export const APP_NAV_SECTION_DEFINITIONS = [
     showCollapsedDivider: true,
   },
 ] as const satisfies readonly NavSectionDefinition[];
-
-export const DEFAULT_ROUTE_ID: NavRouteId = "builders";
-export const DEFAULT_ROUTE_HREF: NavPath =
-  APP_ROUTE_REGISTRY[DEFAULT_ROUTE_ID].href;

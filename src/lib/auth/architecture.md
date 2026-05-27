@@ -30,7 +30,11 @@ presentation sources of truth.
 
 ## Client Modules
 
-- `AppAuthGate.svelte` decides whether to show the app, login, onboarding, loading, or error state.
+- `AppProviders.svelte` owns global Clerk and Convex setup for both auth entry and app routes.
+- `AppSessionGate.svelte` owns authenticated app loading, error, signed-out redirects, viewer context, and app shell rendering.
+- `AuthEntryGate.svelte` owns shared auth-entry session loading, errors, signed-in redirects, return hrefs, and the signed-in onboarding decision.
+- `src/routes/(app)` owns authenticated product routes and app chrome.
+- `src/routes/(auth)` owns `/login` and `/join` route flow selection without app chrome.
 - `login/` owns credential entry for existing users.
 - `onboarding/` owns join, workspace onboarding, and first builder selection.
 - `components/` owns shared auth UI primitives used by login and onboarding.

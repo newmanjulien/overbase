@@ -4,6 +4,7 @@ import { api } from '$convex/_generated/api';
 import type { Id } from '$convex/_generated/dataModel';
 import type { EmailDraft } from '@overbase/builder-sdk/email';
 import { useConvexClient } from 'convex-svelte';
+import { APP_LINKS } from '$lib/app/app-links';
 import {
 	areOpportunityFormatRulesFilled,
 	type OpportunityFormatDetailState
@@ -204,7 +205,7 @@ export function createOpportunityFormatDetailController({
 			await client.mutation(api.opportunityFormats.deleteOpportunityFormats, {
 				opportunityFormatIds: [getOpportunityFormatId()]
 			});
-			await goto(resolve('/formats'));
+			await goto(resolve(APP_LINKS.formats.pathname));
 		} catch (error) {
 			deleteError = getErrorMessage(error, 'Could not delete format.');
 		} finally {

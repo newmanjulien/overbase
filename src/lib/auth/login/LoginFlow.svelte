@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
+	import { AUTH_LINKS, resolveAuthHref, type AppHref, type AuthEntryHref } from '$lib/app/app-links';
 	import AuthCodeStep from '$lib/auth/components/AuthCodeStep.svelte';
 	import AuthEntryShell from '$lib/auth/components/AuthEntryShell.svelte';
 	import AuthHotkeyButton from '$lib/auth/components/AuthHotkeyButton.svelte';
@@ -12,9 +12,9 @@
 	type LoginStep = 'login' | 'code';
 
 	type Props = {
-		returnTo?: string;
+		returnTo?: AppHref;
 		returnButtonHref?: string;
-		entryReturnHref?: string;
+		entryReturnHref?: AuthEntryHref;
 	};
 
 	let { returnTo, returnButtonHref, entryReturnHref }: Props = $props();
@@ -34,7 +34,12 @@
 	let isSubmittingCode = $state(false);
 	let isResendingCode = $state(false);
 
-	const joinHref = $derived(buildAuthEntryHref('/join', { returnTo, fromAuth: '/login' }));
+	const joinHref = $derived(
+		buildAuthEntryHref(AUTH_LINKS.join.pathname, {
+			returnTo,
+			fromAuth: AUTH_LINKS.login.pathname
+		})
+	);
 	const currentReturnButtonHref = $derived(
 		step === 'login' ? (entryReturnHref ?? returnButtonHref) : undefined
 	);
@@ -108,7 +113,7 @@
 		<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
 			Need an account?
 			<a
-				href={resolve(joinHref as '/')}
+				href={resolveAuthHref(joinHref)}
 				class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 			>
 				Join

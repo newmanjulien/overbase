@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { resolveAppHref } from '$lib/app/app-links';
 	import { cn } from '$lib/ui/cn';
 	import type { SelectableListItem } from '$lib/patterns/list-page';
 	import { PersonAvatar } from '$lib/domain/people';
@@ -27,7 +27,7 @@
 	<div class="min-w-0">
 		{#if item.href}
 			<a
-				href={resolve(item.href as '/')}
+				href={resolveAppHref(item.href)}
 				class="flex min-w-0 flex-col gap-0.5 rounded-sm focus-visible:ring-2 focus-visible:ring-stone-300 focus-visible:outline-none"
 			>
 				<span class="truncate text-[0.7rem] text-stone-950">

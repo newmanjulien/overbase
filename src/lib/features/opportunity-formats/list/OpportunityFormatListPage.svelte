@@ -2,6 +2,7 @@
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
 	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { APP_LINKS, formatLink } from '$lib/app/app-links';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import {
 		ListContentState,
@@ -158,7 +159,7 @@
 			id: format.id,
 			title: format.title,
 			status: format.status,
-			href: `/formats/${format.id}`,
+			href: formatLink(format.id).pathname,
 			selectAriaLabel: `Select ${format.title}`,
 			statusLabel: formatStatus(format.status),
 			statusLabelClass: getStatusLabelClass(format.status),
@@ -212,7 +213,7 @@
 		title: 'No formats found',
 		description: 'Build your first format with the format builder.',
 		nextSteps: [
-			{ kind: 'link', text: 'Build', href: '/builders' },
+			{ kind: 'link', text: 'Build', href: APP_LINKS.builders.pathname },
 			{
 				kind: 'text',
 				text: ' your first format using the format builder then you will fine tune, add teammates and manage it here'

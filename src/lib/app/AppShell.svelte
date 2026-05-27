@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { APP_CONFIG } from '$lib/app/app-config';
+	import { resolveAppHref } from '$lib/app/app-links';
 	import {
 		provideCurrentWorkspaceContext,
 		type CurrentWorkspaceContext
@@ -115,7 +115,7 @@
 
 	$effect(() => {
 		if (viewportState === 'mobile' && routeRequiresDesktop && viewportRequirement) {
-			void goto(resolve(viewportRequirement.fallbackHref), { replaceState: true });
+			void goto(resolveAppHref(viewportRequirement.fallbackHref), { replaceState: true });
 		}
 	});
 

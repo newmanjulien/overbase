@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { APP_CONFIG } from '$lib/app/app-config';
 	import AppProviders from '$lib/app/AppProviders.svelte';
-	import AuthenticatedApp from '$lib/app/AuthenticatedApp.svelte';
 	import '../app.css';
 	import type { LayoutProps } from './$types';
 
@@ -13,7 +12,5 @@
 </svelte:head>
 
 <AppProviders>
-	<AuthenticatedApp>
-		{@render children()}
-	</AuthenticatedApp>
+	{@render children()}
 </AppProviders>

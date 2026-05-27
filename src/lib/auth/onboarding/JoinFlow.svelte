@@ -1,8 +1,15 @@
 <script lang="ts">
 	import { goto, preloadData } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
-	import { BUILDER_FRESH_START_ROUTE, builderAppSlugParams } from '$lib/features/builder/paths';
+	import {
+		APP_LINKS,
+		AUTH_LINKS,
+		freshBuilderHref,
+		resolveAppHref,
+		resolveAuthHref,
+		type AppHref,
+		type AuthEntryHref
+	} from '$lib/app/app-links';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 	import { useConvexClient } from 'convex-svelte';
 	import { SvelteMap } from 'svelte/reactivity';
@@ -23,9 +30,9 @@
 	type JoinStep = 'welcome' | 'join' | 'code' | 'company' | 'partner' | 'builder';
 
 	type Props = {
-		returnTo?: string;
+		returnTo?: AppHref;
 		returnButtonHref?: string;
-		entryReturnHref?: string;
+		entryReturnHref?: AuthEntryHref;
 		initialStep?: JoinStep;
 		isSignedIn?: boolean;
 	};
@@ -75,7 +82,12 @@
 	let builderLoadPromise: Promise<void> | null = null;
 	const builderRoutePreloadPromises = new SvelteMap<string, Promise<void>>();
 
-	const loginHref = $derived(buildAuthEntryHref('/login', { returnTo, fromAuth: '/join' }));
+	const loginHref = $derived(
+		buildAuthEntryHref(AUTH_LINKS.login.pathname, {
+			returnTo,
+			fromAuth: AUTH_LINKS.join.pathname
+		})
+	);
 	const currentReturnButtonHref = $derived.by(() => {
 		if (step === 'welcome') {
 			return entryReturnHref ?? returnButtonHref;
@@ -186,7 +198,7 @@
 			return builderHomePreloadPromise;
 		}
 
-		builderHomePreloadPromise = preloadData(resolve('/builders')).then(
+		builderHomePreloadPromise = preloadData(resolveAppHref(APP_LINKS.builders.pathname)).then(
 			() => undefined,
 			() => undefined
 		);
@@ -202,7 +214,7 @@
 		}
 
 		const routePreload = preloadBuildersHome()
-			.then(() => preloadData(resolve(BUILDER_FRESH_START_ROUTE, builderAppSlugParams(appSlug))))
+			.then(() => preloadData(freshBuilderHref(appSlug)))
 			.then(
 				() => undefined,
 				() => undefined
@@ -249,7 +261,7 @@
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(resolve(BUILDER_FRESH_START_ROUTE, builderAppSlugParams(appSlug)));
+			await goto(freshBuilderHref(appSlug));
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
@@ -265,7 +277,7 @@
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(resolve('/builders'));
+			await goto(resolveAppHref(APP_LINKS.builders.pathname));
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
@@ -331,7 +343,7 @@
 			<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
 				Already have an account?
 				<a
-					href={resolve(loginHref as '/')}
+					href={resolveAuthHref(loginHref)}
 					class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 				>
 					Log in

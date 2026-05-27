@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	import { BUILDER_FRESH_START_ROUTE, builderAppSlugParams } from '$lib/features/builder/paths';
+	import { freshBuilderHref } from '$lib/app/app-links';
 	import BuilderAppCardArtwork from './artwork/BuilderAppCardArtwork.svelte';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 
@@ -12,7 +11,7 @@
 </script>
 
 <a
-	href={resolve(BUILDER_FRESH_START_ROUTE, builderAppSlugParams(app.id))}
+	href={freshBuilderHref(app.id)}
 	class="group block w-full rounded-lg p-1.5 text-left outline-none hover:bg-stone-100/80 focus-visible:bg-stone-100/80"
 	aria-label={`Start with ${app.title}`}
 >

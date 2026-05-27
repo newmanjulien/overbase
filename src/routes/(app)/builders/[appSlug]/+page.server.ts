@@ -1,5 +1,6 @@
-import { BUILDER_VIEWPORT_REQUIREMENT } from '$lib/features/builder/paths';
-import { getActiveBuilderAppManifest } from '../../../builder-apps/runtime.server';
+import { APP_LINKS } from '$lib/app/app-links';
+import { BUILDER_VIEWPORT_REQUIREMENT } from '$lib/features/builder/builder-route-data';
+import { getActiveBuilderAppManifest } from '../../../../builder-apps/runtime.server';
 import type { PageServerLoad } from './$types';
 
 const BUILDER_UNAVAILABLE_PAGE_DATA = {
@@ -35,7 +36,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			chromeMode: 'focused',
 			desktopBreadcrumbParent: {
 				label: 'Format builder',
-				href: '/builders'
+				href: APP_LINKS.builders.pathname
 			},
 			viewportRequirement: BUILDER_VIEWPORT_REQUIREMENT
 		};

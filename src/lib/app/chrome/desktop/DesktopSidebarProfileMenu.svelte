@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { onMount, tick } from 'svelte';
 	import CaretUpDownIcon from 'phosphor-svelte/lib/CaretUpDownIcon';
+	import { APP_LINKS } from '$lib/app/app-links';
 	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
 	import { cn } from '$lib/ui/cn';
 	import { PersonAvatar } from '$lib/domain/people';
@@ -169,7 +170,7 @@
 		>
 			<a
 				role="menuitem"
-				href={resolve('/settings')}
+				href={resolve(APP_LINKS.settings.pathname)}
 				class="flex h-8 w-full items-center px-2.5 text-left text-[0.72rem] font-normal text-stone-700 transition-colors hover:bg-stone-50 focus-visible:bg-stone-50 focus-visible:outline-none"
 				onclick={() => {
 					closeMenu();

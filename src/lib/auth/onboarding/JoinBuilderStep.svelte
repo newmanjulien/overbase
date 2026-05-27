@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	import { BUILDER_FRESH_START_ROUTE, builderAppSlugParams } from '$lib/features/builder/paths';
+	import { freshBuilderHref } from '$lib/app/app-links';
 	import BuilderAppCardArtwork from '$lib/features/builder/home/artwork/BuilderAppCardArtwork.svelte';
 	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 
@@ -103,7 +102,7 @@
 					<div class="grid w-full grid-cols-1 justify-items-center gap-x-5 gap-y-5 sm:grid-cols-[repeat(auto-fit,minmax(250px,280px))] sm:justify-center">
 						{#each apps as app (app.id)}
 							<a
-								href={resolve(BUILDER_FRESH_START_ROUTE, builderAppSlugParams(app.id))}
+								href={freshBuilderHref(app.id)}
 								class="flex min-h-70 w-full flex-col rounded-lg border border-stone-200/60 bg-white p-2 text-left outline-none transition-[border-color,box-shadow,transform,opacity] duration-150 hover:-translate-y-0.5 hover:border-stone-200 focus-visible:-translate-y-0.5 focus-visible:border-stone-300 focus-visible:shadow-[0_0_0_3px_rgb(28_25_23_/_14%)] aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-60"
 								aria-label={`Start with ${app.title}`}
 								aria-disabled={isCompletingOnboarding}

@@ -4,6 +4,7 @@
 	import BuilderDesktopOnly from '$lib/features/builder/workbench/BuilderDesktopOnly.svelte';
 	import { BuilderWorkbenchPage } from '$lib/features/builder/workbench';
 	import { Button } from '$lib/ui';
+	import { APP_LINKS } from '$lib/app/app-links';
 	import { toBuilderAppRecord, toBuilderGuideDefinition } from '$lib/features/builder/catalog';
 	import {
 		createBuilderLaunchState,
@@ -48,7 +49,7 @@
 					</p>
 					<Button
 						variant="primary"
-						href="/builders"
+						href={APP_LINKS.builders.pathname}
 						class="mt-4 rounded-full text-xs"
 					>
 						Back to builder

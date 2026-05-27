@@ -70,9 +70,9 @@
 					<li>
 						<span class={cn('relative', expanded ? 'block w-full' : 'inline-flex')}>
 							<a
-								href={resolve(item.href)}
+								href={resolve(item.pathname)}
 								data-sidebar-indicator-key={item.id}
-								class={getRouteItemClassName(isNavItemActive(item.href, currentPathname))}
+								class={getRouteItemClassName(isNavItemActive(item.pathname, currentPathname))}
 								onmouseenter={() => {
 									onRouteHover?.(item);
 								}}
