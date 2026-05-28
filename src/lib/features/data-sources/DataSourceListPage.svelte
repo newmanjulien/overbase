@@ -4,36 +4,34 @@
 	import AddDataSourceModal from './AddDataSourceModal.svelte';
 	import DataSourceListRow, { type DataSourceListItem } from './DataSourceListRow.svelte';
 
-	const DATA_SOURCE_LOGO_SRC = '/logo.png';
-
 	const sampleDataSources = [
 		{
-			id: 'mongodb-atlas',
-			name: 'MongoDB Atlas',
-			type: 'Storage',
+			id: 'gong',
+			name: 'Gong',
+			type: 'Call recorder',
 			shared: true,
-			logoSrc: DATA_SOURCE_LOGO_SRC
+			logoSrc: '/gong.png'
 		},
 		{
-			id: 'hubspot',
-			name: 'HubSpot',
+			id: 'salesforce',
+			name: 'Salesforce',
 			type: 'CRM',
-			shared: false,
-			logoSrc: DATA_SOURCE_LOGO_SRC
+			shared: true,
+			logoSrc: '/salesforce.png'
 		},
 		{
-			id: 'google-drive',
-			name: 'Google Drive',
+			id: 'onedrive',
+			name: 'OneDrive',
 			type: 'Files',
 			shared: false,
-			logoSrc: DATA_SOURCE_LOGO_SRC
+			logoSrc: '/onedrive.png'
 		},
 		{
-			id: 'slack',
-			name: 'Slack',
-			type: 'Messaging',
+			id: 'outlook-calendar',
+			name: 'Outlook Calendar',
+			type: 'Calendar',
 			shared: false,
-			logoSrc: DATA_SOURCE_LOGO_SRC
+			logoSrc: '/calendar.png'
 		}
 	] as const;
 
