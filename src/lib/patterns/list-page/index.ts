@@ -5,6 +5,7 @@ export { default as ListPage } from './ListPage.svelte';
 export { default as ListRoutePage } from './ListRoutePage.svelte';
 export { default as ListFilterControl } from './ListFilterControl.svelte';
 export { default as ListSearchInput } from './ListSearchInput.svelte';
+export { default as ListRows } from './ListRows.svelte';
 export { default as SelectableList } from './SelectableList.svelte';
 export { default as ListToolbar } from './ListToolbar.svelte';
 export type {
@@ -12,6 +13,8 @@ export type {
 	ListFilterConfig,
 	ListFilterOption,
 	ListIcon,
+	ListRowItem,
+	ListRowItemAction,
 	ListToolbarConfig,
 	SelectableListItemAction,
 	SelectableListSelectedAction,

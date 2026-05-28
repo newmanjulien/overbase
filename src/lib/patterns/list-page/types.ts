@@ -52,21 +52,26 @@ export type EmptyListStateConfig = {
 	icon?: ListIcon;
 };
 
-export type SelectableListItem = {
+export type ListRowItem = {
 	id: string;
 	href?: AppHref;
-	selectAriaLabel?: string;
 	actionsAriaLabel?: string;
-	actions?: SelectableListItemAction[];
+	actions?: ListRowItemAction[];
 };
 
-export type SelectableListItemAction = {
+export type ListRowItemAction = {
 	label: string;
 	ariaLabel?: string;
 	intent?: 'default' | 'destructive';
 	disabled?: boolean;
 	onSelect: () => void | Promise<void>;
 };
+
+export type SelectableListItem = ListRowItem & {
+	selectAriaLabel?: string;
+};
+
+export type SelectableListItemAction = ListRowItemAction;
 
 export type SelectableListSelectedAction = {
 	label: string;
