@@ -1,7 +1,7 @@
 <script lang="ts">
 	import EmailDraftPanel from '$lib/domain/email-drafts/EmailDraftPanel.svelte';
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
-	import type { EmailDraft } from '@overbase/builder-sdk/email';
+	import type { EmailDraft } from '$shared/email-drafts';
 	import EmailFeedbackEmptyState from './EmailFeedbackEmptyState.svelte';
 	import EmailFeedbackPanel from './EmailFeedbackPanel.svelte';
 	import EmailFormatRulesPanel from './EmailFormatRulesPanel.svelte';

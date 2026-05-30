@@ -27,10 +27,3 @@ export const emailDraft = v.object({
 	attachment: v.union(v.null(), emailSpreadsheetAttachment),
 	body: v.array(emailBodyBlock)
 });
-
-export const emailDraftPatch = v.object({
-	to: v.optional(v.array(v.string())),
-	cc: v.optional(v.array(v.string())),
-	attachment: v.optional(v.union(v.null(), emailSpreadsheetAttachment)),
-	body: v.optional(v.array(emailBodyBlock))
-});

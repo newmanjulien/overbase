@@ -4,18 +4,14 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"builder-sdk:build": "npm --prefix packages/builder-sdk run build",
-		"builder-sdk:check": "npm run builder-sdk:build && git diff --exit-code -- packages/builder-sdk/dist",
-		"builder-sdk:sync-bring": "node scripts/sync-builder-sdk.mjs --sync --check --build",
-		"builder-sdk:check-bring": "node scripts/sync-builder-sdk.mjs --check",
-		"dev": "npm run builder-sdk:build && vite dev",
-		"build": "npm run builder-sdk:build && vite build",
-		"convex:deploy": "npm run builder-sdk:build && convex deploy",
-		"convex:dev": "npm run builder-sdk:build && convex dev",
+		"dev": "vite dev",
+		"build": "vite build",
+		"convex:deploy": "convex deploy",
+		"convex:dev": "convex dev",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"check": "npm run builder-sdk:check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"lint": "npm run builder-sdk:build && eslint ."
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"lint": "eslint ."
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.39.2",
@@ -36,7 +32,6 @@
 	},
 	"dependencies": {
 		"@fontsource/newsreader": "^5.2.10",
-		"@overbase/builder-sdk": "file:packages/builder-sdk",
 		"clsx": "^2.1.1",
 		"convex": "^1.37.0",
 		"convex-svelte": "^0.0.12",

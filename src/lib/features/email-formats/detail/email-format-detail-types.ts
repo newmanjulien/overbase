@@ -1,4 +1,4 @@
-import type { EmailDraft } from '@overbase/builder-sdk/email';
+import type { EmailDraft } from '$shared/email-drafts';
 import type { Id } from '$convex/_generated/dataModel';
 
 export type EmailFormatRecipientRef =

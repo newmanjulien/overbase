@@ -1,7 +1,7 @@
 import {
 	createDefaultEmailDraft,
 	type EmailDraft
-} from '@overbase/builder-sdk/email';
+} from '$shared/email-drafts';
 import type {
 	EmailFormatRecipientRef,
 	EmailFeedback,

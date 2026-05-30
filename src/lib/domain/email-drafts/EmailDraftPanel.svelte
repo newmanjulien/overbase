@@ -2,7 +2,7 @@
 	import {
 		createDefaultEmailDraft,
 		type EmailDraft
-	} from '@overbase/builder-sdk/email';
+	} from '$shared/email-drafts';
 	import {
 		fromEditableEmailDraft,
 		toEditableEmailDraft,
@@ -17,29 +17,19 @@
 		draft: EmailDraft;
 		emailDraftVersion?: number;
 		canEdit?: boolean;
-		canPublish?: boolean;
-		publishLabel?: string;
-		publishingLabel?: string;
 		onSave: (draft: EmailDraft, baseEmailDraftVersion: number) => void | Promise<void>;
-		onPublish?: () => void | Promise<void>;
 	};
 
 	let {
 		draft,
 		emailDraftVersion = 0,
 		canEdit = false,
-		canPublish = false,
-		publishLabel = 'Publish',
-		publishingLabel = 'Publishing...',
-		onSave,
-		onPublish
+		onSave
 	}: Props = $props();
 
 	let isEditing = $state(false);
 	let isSaving = $state(false);
-	let isPublishing = $state(false);
 	let saveError = $state<string | null>(null);
-	let publishError = $state<string | null>(null);
 	let editableDraft = $state<EditableEmailDraft>(toEditableEmailDraft(createDefaultEmailDraft()));
 	let editingBaseEmailDraftVersion = $state(0);
 	let isAttachmentOpen = $state(false);
@@ -49,7 +39,6 @@
 		editableDraft = toEditableEmailDraft(draft);
 		editingBaseEmailDraftVersion = emailDraftVersion;
 		saveError = null;
-		publishError = null;
 		isEditing = true;
 	}
 
@@ -91,23 +80,6 @@
 			isSaving = false;
 		}
 	}
-
-	async function publishDraft() {
-		if (isPublishing || !canPublish || !onPublish) {
-			return;
-		}
-
-		isPublishing = true;
-		publishError = null;
-
-		try {
-			await onPublish();
-		} catch (error) {
-			publishError = error instanceof Error ? error.message : 'Could not publish email format.';
-		} finally {
-			isPublishing = false;
-		}
-	}
 </script>
 
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white text-stone-950">
@@ -146,9 +118,6 @@
 		{#if saveError}
 			<p class="mb-2 text-[0.68rem] leading-snug text-red-600">{saveError}</p>
 		{/if}
-		{#if publishError}
-			<p class="mb-2 text-[0.68rem] leading-snug text-red-600">{publishError}</p>
-		{/if}
 
 		<div class="flex items-center justify-end gap-2">
 			{#if isEditing}
@@ -172,21 +141,11 @@
 				<Button
 					variant="secondary"
 					class="px-3 text-[0.74rem] text-stone-800"
-					disabled={!canEdit || isPublishing}
+					disabled={!canEdit}
 					onclick={beginEdit}
 				>
 					Edit email
 				</Button>
-				{#if onPublish}
-					<Button
-						variant="primary"
-						class="px-3 text-[0.74rem]"
-						disabled={!canPublish || isPublishing}
-						onclick={() => void publishDraft()}
-					>
-						{isPublishing ? publishingLabel : publishLabel}
-					</Button>
-				{/if}
 			{/if}
 		</div>
 	</div>

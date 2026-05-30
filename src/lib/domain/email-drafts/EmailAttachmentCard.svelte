@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EMAIL_ATTACHMENT_FORMAT } from '@overbase/builder-sdk/email';
+	import { EMAIL_ATTACHMENT_FORMAT } from '$shared/email-drafts';
 	import XIcon from 'phosphor-svelte/lib/XIcon';
 
 	type Props = {

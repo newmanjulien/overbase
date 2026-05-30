@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { normalizeEmailDraft, type EmailDraft } from '@overbase/builder-sdk/email';
+import { normalizeEmailDraft, type EmailDraft } from '../shared/email-drafts';
 import { mutation } from './_generated/server';
 import { getViewerWorkspaceRecord, requireViewerWorkspace } from '../backend/auth/viewer';
 

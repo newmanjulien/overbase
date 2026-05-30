@@ -17,13 +17,9 @@ export type DynamicAppLink<Pathname extends `/${string}`, RouteId extends `/(app
 };
 
 export const APP_LINKS = {
-	builders: {
-		pathname: '/builders',
-		routeId: '/(app)/(desktop-only)/builders'
-	},
-	blueprints: {
-		pathname: '/blueprints',
-		routeId: '/(app)/(desktop-only)/blueprints'
+	buildFormats: {
+		pathname: '/build-formats',
+		routeId: '/(app)/build-formats'
 	},
 	emailFormats: {
 		pathname: '/email-formats',
@@ -75,32 +71,24 @@ export const AUTH_LINKS = {
 } as const satisfies Record<string, AuthEntryLink>;
 
 export const APP_DYNAMIC_ROUTE_IDS = {
-	builder: '/(app)/(desktop-only)/builders/[appSlug]',
-	blueprint: '/(app)/(desktop-only)/blueprints/[blueprintSlug]',
+	buildFormat: '/(app)/build-formats/[builderSlug]',
 	emailFormat: '/(app)/email-formats/[emailFormatId]'
 } as const;
 
-export const DEFAULT_APP_LINK = APP_LINKS.builders;
+export const DEFAULT_APP_LINK = APP_LINKS.buildFormats;
 
 export type AppLinkKey = keyof typeof APP_LINKS;
 export type AuthLinkKey = keyof typeof AUTH_LINKS;
 export type StaticAppPathname = (typeof APP_LINKS)[AppLinkKey]['pathname'];
 export type AuthEntryPathname = (typeof AUTH_LINKS)[AuthLinkKey]['pathname'];
-export type BuilderPathname = `/builders/${string}`;
-export type FreshBuilderHref = `${BuilderPathname}?fresh=1`;
-export type BlueprintPathname = `/blueprints/${string}`;
+export type BuildFormatsPathname = `/build-formats/${string}`;
 export type EmailFormatPathname = `/email-formats/${string}`;
-export type AppPathname =
-	| StaticAppPathname
-	| BuilderPathname
-	| BlueprintPathname
-	| EmailFormatPathname;
-export type AppHref = AppPathname | FreshBuilderHref;
+export type AppPathname = StaticAppPathname | BuildFormatsPathname | EmailFormatPathname;
+export type AppHref = AppPathname;
 export type AuthEntryHref = AuthEntryPathname | `${AuthEntryPathname}?${string}`;
-export type BuilderViewportFallbackPathname =
+export type BuildFormatsViewportFallbackPathname =
 	| typeof APP_LINKS.emailFormats.pathname
-	| typeof APP_LINKS.blueprints.pathname
-	| typeof APP_LINKS.builders.pathname;
+	| typeof APP_LINKS.buildFormats.pathname;
 
 const STATIC_APP_PATHNAMES = new Set<string>(
 	Object.values(APP_LINKS).map((link) => link.pathname)
@@ -111,44 +99,17 @@ function encodePathSegment(value: string) {
 	return encodeURIComponent(value);
 }
 
-export function builderPathname(appSlug: string): BuilderPathname {
-	return `/builders/${encodePathSegment(appSlug)}`;
+export function buildFormatPathname(builderSlug: string): BuildFormatsPathname {
+	return `/build-formats/${encodePathSegment(builderSlug)}`;
 }
 
-export function builderLink(appSlug: string): DynamicAppLink<BuilderPathname, typeof APP_DYNAMIC_ROUTE_IDS.builder> {
+export function buildFormatLink(
+	builderSlug: string
+): DynamicAppLink<BuildFormatsPathname, typeof APP_DYNAMIC_ROUTE_IDS.buildFormat> {
 	return {
-		pathname: builderPathname(appSlug),
-		routeId: APP_DYNAMIC_ROUTE_IDS.builder,
-		href: resolve(APP_DYNAMIC_ROUTE_IDS.builder, { appSlug }) as BuilderPathname
-	};
-}
-
-export function freshBuilderLink(appSlug: string) {
-	const link = builderLink(appSlug);
-
-	return {
-		pathname: link.pathname,
-		routeId: link.routeId,
-		search: '?fresh=1' as const,
-		href: `${link.href}?fresh=1` as FreshBuilderHref
-	};
-}
-
-export function freshBuilderHref(appSlug: string): FreshBuilderHref {
-	return freshBuilderLink(appSlug).href;
-}
-
-export function blueprintPathname(blueprintSlug: string): BlueprintPathname {
-	return `/blueprints/${encodePathSegment(blueprintSlug)}`;
-}
-
-export function blueprintLink(
-	blueprintSlug: string
-): DynamicAppLink<BlueprintPathname, typeof APP_DYNAMIC_ROUTE_IDS.blueprint> {
-	return {
-		pathname: blueprintPathname(blueprintSlug),
-		routeId: APP_DYNAMIC_ROUTE_IDS.blueprint,
-		href: resolve(APP_DYNAMIC_ROUTE_IDS.blueprint, { blueprintSlug }) as BlueprintPathname
+		pathname: buildFormatPathname(builderSlug),
+		routeId: APP_DYNAMIC_ROUTE_IDS.buildFormat,
+		href: resolve(APP_DYNAMIC_ROUTE_IDS.buildFormat, { builderSlug }) as BuildFormatsPathname
 	};
 }
 
@@ -167,8 +128,7 @@ export function emailFormatLink(emailFormatId: string): DynamicAppLink<EmailForm
 export function isCanonicalAppPathname(pathname: string): pathname is AppPathname {
 	return (
 		STATIC_APP_PATHNAMES.has(pathname) ||
-		/^\/builders\/[^/?#]+$/.test(pathname) ||
-		/^\/blueprints\/[^/?#]+$/.test(pathname) ||
+		/^\/build-formats\/[^/?#]+$/.test(pathname) ||
 		/^\/email-formats\/[^/?#]+$/.test(pathname)
 	);
 }
@@ -180,9 +140,7 @@ export function isCanonicalAppHref(value: string): value is AppHref {
 		return (
 			isCanonicalAppPathname(parsedHref.pathname) &&
 			parsedHref.hash === '' &&
-			(parsedHref.search === '' ||
-				(parsedHref.pathname.startsWith(`${APP_LINKS.builders.pathname}/`) &&
-					parsedHref.search === '?fresh=1'))
+			parsedHref.search === ''
 		);
 	} catch {
 		return false;

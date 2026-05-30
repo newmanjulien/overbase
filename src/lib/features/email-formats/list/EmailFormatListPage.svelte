@@ -211,12 +211,12 @@
 	empty={{
 		icon: APP_ROUTE_REGISTRY["email-formats"].icon,
 		title: 'No email formats found',
-		description: 'Build your first email format with an email format builder.',
+		description: 'Use a build format to shape your first local email draft.',
 		nextSteps: [
-			{ kind: 'link', text: 'Build', href: APP_LINKS.builders.pathname },
+			{ kind: 'link', text: 'Build', href: APP_LINKS.buildFormats.pathname },
 			{
 				kind: 'text',
-				text: ' your first email format using an email format builder, then fine tune, add teammates, and manage it here'
+				text: ' the format of the emails your team will receive'
 			}
 		],
 		learnMoreLabel: 'Learn more'

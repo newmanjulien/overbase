@@ -3,7 +3,7 @@
 		EMAIL_DRAFT_LIMITS,
 		SPREADSHEET_COLUMN_LABELS,
 		type EmailSpreadsheetAttachment
-	} from '@overbase/builder-sdk/email';
+	} from '$shared/email-drafts';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import { IconButton } from '$lib/ui';
 

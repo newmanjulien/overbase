@@ -2,7 +2,7 @@ import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
 import { api } from '$convex/_generated/api';
 import type { Id } from '$convex/_generated/dataModel';
-import type { EmailDraft } from '@overbase/builder-sdk/email';
+import type { EmailDraft } from '$shared/email-drafts';
 import { useConvexClient } from 'convex-svelte';
 import { APP_LINKS } from '$lib/app/app-links';
 import {

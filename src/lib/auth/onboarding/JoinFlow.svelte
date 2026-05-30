@@ -4,13 +4,13 @@
 	import {
 		APP_LINKS,
 		AUTH_LINKS,
-		freshBuilderHref,
+		buildFormatLink,
 		resolveAppHref,
 		resolveAuthHref,
 		type AppHref,
 		type AuthEntryHref
 	} from '$lib/app/app-links';
-	import type { BuilderCatalogRecord } from '$lib/features/builder/catalog';
+	import { listBuilderGalleryEntries } from '../../../builders/registry';
 	import { useConvexClient } from 'convex-svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
@@ -25,7 +25,6 @@
 	import JoinCompanyStep from './JoinCompanyStep.svelte';
 	import JoinPartnerStep from './JoinPartnerStep.svelte';
 	import JoinWelcomeStep from './JoinWelcomeStep.svelte';
-	import { loadOnboardingBuilders } from './onboarding-builders';
 
 	type JoinStep = 'welcome' | 'join' | 'code' | 'company' | 'partner' | 'builder';
 
@@ -71,15 +70,11 @@
 	});
 	let companyErrorText = $state<string | null>(null);
 	let isSavingCompany = $state(false);
-	let builderApps = $state<BuilderCatalogRecord[]>([]);
-	let isLoadingBuilders = $state(false);
-	let builderErrorText = $state<string | null>(null);
-	let hasStartedBuilderLoad = $state(false);
+	const builders = listBuilderGalleryEntries();
 	let completionErrorText = $state<string | null>(null);
-	let completingAppSlug = $state<string | null>(null);
+	let completingBuilderSlug = $state<string | null>(null);
 	let isOpeningBuilder = $state(false);
 	let builderHomePreloadPromise: Promise<void> | null = null;
-	let builderLoadPromise: Promise<void> | null = null;
 	const builderRoutePreloadPromises = new SvelteMap<string, Promise<void>>();
 
 	const loginHref = $derived(
@@ -119,7 +114,7 @@
 		return undefined;
 	});
 	const canContinue = $derived(email.trim().length > 0 && !isSubmittingEmail);
-	const isCompletingOnboarding = $derived(Boolean(completingAppSlug) || isOpeningBuilder);
+	const isCompletingOnboarding = $derived(Boolean(completingBuilderSlug) || isOpeningBuilder);
 
 	async function submitEmail() {
 		const normalizedEmail = email.trim().toLowerCase();
@@ -198,7 +193,7 @@
 			return builderHomePreloadPromise;
 		}
 
-		builderHomePreloadPromise = preloadData(resolveAppHref(APP_LINKS.builders.pathname)).then(
+		builderHomePreloadPromise = preloadData(resolveAppHref(APP_LINKS.buildFormats.pathname)).then(
 			() => undefined,
 			() => undefined
 		);
@@ -206,66 +201,38 @@
 		return builderHomePreloadPromise;
 	}
 
-	function preloadBuilderRoute(appSlug: string) {
-		const existingPreload = builderRoutePreloadPromises.get(appSlug);
+	function preloadBuilderRoute(builderSlug: string) {
+		const existingPreload = builderRoutePreloadPromises.get(builderSlug);
 
 		if (existingPreload) {
 			return existingPreload;
 		}
 
 		const routePreload = preloadBuildersHome()
-			.then(() => preloadData(freshBuilderHref(appSlug)))
+			.then(() => preloadData(buildFormatLink(builderSlug).href))
 			.then(
 				() => undefined,
 				() => undefined
 			);
 
-		builderRoutePreloadPromises.set(appSlug, routePreload);
+		builderRoutePreloadPromises.set(builderSlug, routePreload);
 
 		return routePreload;
 	}
 
-	function preloadOnboardingBuilders() {
-		return loadBuilders();
-	}
-
-	async function loadBuilders() {
-		if (builderLoadPromise) {
-			return builderLoadPromise;
-		}
-
-		hasStartedBuilderLoad = true;
-		isLoadingBuilders = true;
-		builderErrorText = null;
-
-		builderLoadPromise = (async () => {
-			try {
-				builderApps = await loadOnboardingBuilders();
-			} catch (error) {
-				builderErrorText = error instanceof Error ? error.message : 'Unable to load builders.';
-				builderApps = [];
-			} finally {
-				isLoadingBuilders = false;
-				builderLoadPromise = null;
-			}
-		})();
-
-		return builderLoadPromise;
-	}
-
-	async function selectBuilder(appSlug: string) {
+	async function selectBuilder(builderSlug: string) {
 		if (isCompletingOnboarding) return;
 
 		completionErrorText = null;
-		completingAppSlug = appSlug;
+		completingBuilderSlug = builderSlug;
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(freshBuilderHref(appSlug));
+			await goto(buildFormatLink(builderSlug).href);
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
-			completingAppSlug = null;
+			completingBuilderSlug = null;
 		}
 	}
 
@@ -277,7 +244,7 @@
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(resolveAppHref(APP_LINKS.builders.pathname));
+			await goto(resolveAppHref(APP_LINKS.buildFormats.pathname));
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
@@ -301,36 +268,26 @@
 	}
 
 	$effect(() => {
-		if (step === 'builder' && !hasStartedBuilderLoad) {
-			void preloadOnboardingBuilders();
-		}
-
 		if (step === 'partner') {
 			void preloadBuildersHome();
-			void preloadOnboardingBuilders();
 		}
 	});
 </script>
 
 {#if step === 'builder'}
 	<JoinBuilderStep
-		apps={builderApps}
-		isLoading={isLoadingBuilders}
-		errorText={builderErrorText}
+		{builders}
 		completionErrorText={completionErrorText}
-		selectedAppSlug={completingAppSlug}
+		selectedBuilderSlug={completingBuilderSlug}
 		isOpeningBuilder={isOpeningBuilder}
-		onSelect={(appSlug) => {
-			void selectBuilder(appSlug);
+		onSelect={(builderSlug) => {
+			void selectBuilder(builderSlug);
 		}}
-		onPreload={(appSlug) => {
-			void preloadBuilderRoute(appSlug);
+		onPreload={(builderSlug) => {
+			void preloadBuilderRoute(builderSlug);
 		}}
 		onOpenBuilder={() => {
 			void openBuilder();
-		}}
-		onRetry={() => {
-			void loadBuilders();
 		}}
 	/>
 {:else}

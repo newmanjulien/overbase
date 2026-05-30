@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { EmailBodyBlock, EmailDraft } from '@overbase/builder-sdk/email';
+	import type { EmailBodyBlock, EmailDraft } from '$shared/email-drafts';
 	import EmailComposeDocument from '$lib/domain/email-drafts/EmailComposeDocument.svelte';
 	import { formatRecipients } from '$lib/domain/email-drafts/email-editable-draft';
 	import EmailAttachmentCard from '$lib/domain/email-drafts/EmailAttachmentCard.svelte';

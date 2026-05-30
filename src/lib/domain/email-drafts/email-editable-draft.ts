@@ -5,7 +5,7 @@ import {
 	type EmailBodyBlock,
 	type EmailDraft,
 	type EmailSpreadsheetAttachment
-} from '@overbase/builder-sdk/email';
+} from '$shared/email-drafts';
 
 export type EditableEmailDraft = {
 	toText: string;

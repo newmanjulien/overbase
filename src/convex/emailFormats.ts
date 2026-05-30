@@ -1,12 +1,9 @@
 import { v } from 'convex/values';
-import { getVisiblePrimaryEmailDraftArtifact } from '@overbase/builder-sdk/artifacts';
-import { normalizeEmailDraft } from '@overbase/builder-sdk/email';
+import { normalizeEmailDraft } from '../shared/email-drafts';
 import { mutation, query } from './_generated/server';
-import { getAuthorizedSession } from '../backend/builder-sessions/records';
 import { emailDraft as emailDraftValidator } from '../backend/validators/email-drafts';
 import { emailFormatRecipientRef } from '../backend/validators/recipients';
 import {
-	getDefaultEmailFormatRecipientRefs,
 	getFormatRecipients,
 	normalizeEmailFormatRecipientRefs
 } from '../backend/email-formats/recipients';
@@ -24,55 +21,6 @@ import { getViewerWorkspaceRecord, requireViewerWorkspace } from '../backend/aut
 const emailFormatRule = v.object({
 	id: v.string(),
 	text: v.string()
-});
-
-export const publishFromBuilderSession = mutation({
-	args: {
-		sessionId: v.id('builderSessions'),
-		title: v.string()
-	},
-	handler: async (ctx, { sessionId, title }) => {
-		const viewerWorkspace = await requireViewerWorkspace(ctx);
-		const { user, workspace } = viewerWorkspace;
-		const now = Date.now();
-		const emailFormatTitle = normalizeEmailFormatTitle(title);
-		const session = await getAuthorizedSession(ctx, sessionId, now, viewerWorkspace);
-
-		if (!session) {
-			throw new Error('Builder session not found.');
-		}
-
-		const artifact = getVisiblePrimaryEmailDraftArtifact(session.artifacts);
-
-		if (!artifact) {
-			throw new Error('Email draft not found.');
-		}
-
-		const emailDraft = normalizeEmailDraft(artifact.value);
-		const emailFormatId = await ctx.db.insert('emailFormats', {
-			workspaceId: workspace._id,
-			title: emailFormatTitle,
-			status: 'paused',
-			definition: {
-				kind: 'customEmail',
-				builderAppSlug: session.appSlug
-			},
-			emailDraft,
-			emailDraftVersion: 1,
-			rules: [],
-			recipientRefs: getDefaultEmailFormatRecipientRefs(user._id),
-			createdByUserId: user._id,
-			createdAt: now,
-			updatedAt: now
-		});
-		const emailFormat = await ctx.db.get(emailFormatId);
-
-		if (!emailFormat) {
-			throw new Error('Email format not found after publish.');
-		}
-
-		return emailFormat;
-	}
 });
 
 export const getEmailFormatDetail = query({
@@ -126,7 +74,6 @@ export const getEmailFormatDetail = query({
 				id: emailFormat._id,
 				title: emailFormat.title,
 				status: emailFormat.status,
-				definition: emailFormat.definition,
 				emailDraft: emailFormat.emailDraft,
 				emailDraftVersion: emailFormat.emailDraftVersion,
 				rules,
