@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Doc } from '$convex/_generated/dataModel';
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
-	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import type { BuilderCatalogRecord } from '$lib/features/builder/catalog';
 	import BuilderAppPanel from '$lib/features/builder/workbench/BuilderAppPanel.svelte';
 	import BuilderEmailRunPreviewPanel from './BuilderEmailRunPreviewPanel.svelte';
 	import { getBuilderSessionEmailDraftView } from '$lib/features/builder/session/builder-session-view';
 
 	type Props = {
-		app: BuilderAppRecord;
+		app: BuilderCatalogRecord;
 		session: Doc<'builderSessions'> | null;
 		onSaveDraft: (draft: EmailDraft, baseEmailDraftVersion: number) => Promise<void>;
 		onPublish: () => Promise<void>;

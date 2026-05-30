@@ -4,7 +4,7 @@
 	import { untrack, type Snippet } from 'svelte';
 	import type { BuilderRunSetup } from '@overbase/builder-sdk/app-protocol';
 	import type { EmailDraft } from '@overbase/builder-sdk/email';
-	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import type { BuilderCatalogRecord } from '$lib/features/builder/catalog';
 	import { APP_LINKS, builderLink } from '$lib/app/app-links';
 	import {
 		getCurrentWorkspaceStorageScope,
@@ -30,7 +30,7 @@
 	>;
 
 	export type BuilderSessionWorkbenchBeforeRunContext = {
-		app: BuilderAppRecord;
+		app: BuilderCatalogRecord;
 		startRun: (
 			setup: BuilderRunSetup,
 			request?: BuilderSessionWorkbenchStartRequest
@@ -38,7 +38,7 @@
 	};
 
 	type Props = {
-		app: BuilderAppRecord;
+		app: BuilderCatalogRecord;
 		launch?: BuilderLaunchState | null;
 		beforeRun: Snippet<[BuilderSessionWorkbenchBeforeRunContext]>;
 	};

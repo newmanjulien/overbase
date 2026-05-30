@@ -1,10 +1,10 @@
 <script lang="ts">
 	import CaretDownIcon from 'phosphor-svelte/lib/CaretDownIcon';
-	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import type { BuilderCatalogRecord } from '$lib/features/builder/catalog';
 	import BuilderPanelArtwork from '$lib/features/builder/workbench/BuilderPanelArtwork.svelte';
 
 	type Props = {
-		app: BuilderAppRecord;
+		app: BuilderCatalogRecord;
 	};
 
 	let { app }: Props = $props();

@@ -5,6 +5,7 @@
 	type Props = {
 		primary?: Snippet;
 		secondary?: Snippet;
+		primarySide?: 'left' | 'right';
 		minPrimary?: number;
 		minSecondary?: number;
 		defaultRatio?: number;
@@ -17,6 +18,7 @@
 	let {
 		primary,
 		secondary,
+		primarySide = 'left',
 		minPrimary = 360,
 		minSecondary = 320,
 		defaultRatio = 0.5,
@@ -33,7 +35,9 @@
 	let hasMeasured = $state(false);
 
 	const isDesktop = $derived(containerWidth >= mobileBreakpoint);
+	const primaryIsRight = $derived(primarySide === 'right');
 	const maxPrimaryWidth = $derived(Math.max(minPrimary, containerWidth - handleWidth - minSecondary));
+	const dragDirection = $derived(primaryIsRight ? -1 : 1);
 
 	function clampPrimaryWidth(width: number, totalWidth: number) {
 		const maxWidth = Math.max(minPrimary, totalWidth - handleWidth - minSecondary);
@@ -95,26 +99,40 @@
 	bind:this={containerElement}
 	class="split-pane"
 	class:split-pane--desktop={hasMeasured && isDesktop}
+	class:split-pane--primary-right={hasMeasured && isDesktop && primaryIsRight}
 	style={`--split-pane-primary-width: ${primaryWidth}px; --split-pane-handle-width: ${handleWidth}px;`}
 >
 	{#if hasMeasured}
 		{#if isDesktop}
-			<section class="split-pane__primary">
-				{@render primary?.()}
-			</section>
+			{#if primaryIsRight}
+				<section class="split-pane__secondary">
+					{@render secondary?.()}
+				</section>
+			{:else}
+				<section class="split-pane__primary">
+					{@render primary?.()}
+				</section>
+			{/if}
 
 			<SplitPaneHandle
 				value={primaryWidth}
 				min={minPrimary}
 				max={maxPrimaryWidth}
 				step={keyboardStep}
+				{dragDirection}
 				{label}
 				onValueChange={handlePrimaryWidthChange}
 			/>
 
-			<section class="split-pane__secondary">
-				{@render secondary?.()}
-			</section>
+			{#if primaryIsRight}
+				<section class="split-pane__primary">
+					{@render primary?.()}
+				</section>
+			{:else}
+				<section class="split-pane__secondary">
+					{@render secondary?.()}
+				</section>
+			{/if}
 		{:else}
 			<section class="split-pane__primary">
 				{@render primary?.()}
@@ -139,6 +157,13 @@
 			minmax(0, var(--split-pane-primary-width))
 			var(--split-pane-handle-width)
 			minmax(0, 1fr);
+	}
+
+	.split-pane--primary-right {
+		grid-template-columns:
+			minmax(0, 1fr)
+			var(--split-pane-handle-width)
+			minmax(0, var(--split-pane-primary-width));
 	}
 
 	.split-pane__primary,

@@ -1,4 +1,4 @@
-import { toBuilderAppRecord, type BuilderAppRecord } from '$lib/features/builder/catalog';
+import { toBuilderCatalogRecord, type BuilderCatalogRecord } from '$lib/features/builder/catalog';
 import type { BuilderAppRegistryEntry } from '../../../builder-apps/registry';
 
 type OnboardingBuildersResponse = {
@@ -25,7 +25,7 @@ function parseOnboardingBuildersResponse(body: unknown): OnboardingBuildersRespo
 	return { builders: builders as BuilderAppRegistryEntry[] };
 }
 
-export async function loadOnboardingBuilders(): Promise<BuilderAppRecord[]> {
+export async function loadOnboardingBuilders(): Promise<BuilderCatalogRecord[]> {
 	const response = await fetch('/api/onboarding/builders');
 	const body = (await response.json()) as unknown;
 
@@ -35,5 +35,5 @@ export async function loadOnboardingBuilders(): Promise<BuilderAppRecord[]> {
 
 	const { builders } = parseOnboardingBuildersResponse(body);
 
-	return builders.map(toBuilderAppRecord);
+	return builders.map((builder) => toBuilderCatalogRecord({ ...builder, kind: 'externalApp' }));
 }

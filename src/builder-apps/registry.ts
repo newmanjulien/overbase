@@ -1,4 +1,4 @@
-import { builderAppCategories } from './categories';
+import { builderCategories } from '../builders/categories';
 import type { BuilderAppManifest } from '@overbase/builder-sdk/app-protocol';
 import type { GuideDefinition } from '@overbase/builder-sdk/catalog';
 import {
@@ -39,7 +39,7 @@ export function mergeBuilderAppManifest(
 }
 
 export function listBuilderHomeCategories() {
-	return [...builderAppCategories].sort((left, right) => left.sortOrder - right.sortOrder);
+	return [...builderCategories].sort((left, right) => left.sortOrder - right.sortOrder);
 }
 
 export function listActiveBuilderAppPresentationEntries() {

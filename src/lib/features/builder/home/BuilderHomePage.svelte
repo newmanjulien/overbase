@@ -6,20 +6,20 @@
 	} from '$lib/patterns/list-page';
 	import { InfoBar } from '$lib/ui';
 	import {
-		toBuilderAppRecord,
-		type BuilderAppHomeData,
-		type BuilderAppFilterId,
-		type BuilderAppRecord
+		toBuilderCatalogRecord,
+		type BuilderCatalogHomeData,
+		type BuilderCatalogFilterId,
+		type BuilderCatalogRecord
 	} from '$lib/features/builder/catalog';
 	import BuilderAppCard from './BuilderAppCard.svelte';
 
 	type Props = {
-		builderHome: BuilderAppHomeData;
+		builderHome: BuilderCatalogHomeData;
 	};
 
 	let { builderHome }: Props = $props();
 	let searchQuery = $state('');
-	let selectedFilterId = $state<BuilderAppFilterId>('all');
+	let selectedFilterId = $state<BuilderCatalogFilterId>('all');
 
 	const filterOptions = $derived([
 		{ id: 'all', label: 'Recommended for you' },
@@ -28,7 +28,7 @@
 			label: category.label
 		}))
 	]);
-	const apps = $derived(builderHome.apps.map(toBuilderAppRecord));
+	const apps = $derived(builderHome.apps.map(toBuilderCatalogRecord));
 	const selectedFilterLabel = $derived(
 		filterOptions.find((option) => option.id === selectedFilterId)?.label ?? 'Recommended for you'
 	);
@@ -40,15 +40,15 @@
 		}
 	}
 
-	function appMatchesCategory(app: BuilderAppRecord) {
+	function appMatchesCategory(app: BuilderCatalogRecord) {
 		return selectedFilterId === 'all' || app.categoryIds.includes(selectedFilterId);
 	}
 
-	function getSearchableCardText(app: BuilderAppRecord) {
+	function getSearchableCardText(app: BuilderCatalogRecord) {
 		return [app.id, app.title, app.description, ...app.details.paragraphs].join(' ');
 	}
 
-	function matchesFilters(app: BuilderAppRecord) {
+	function matchesFilters(app: BuilderCatalogRecord) {
 		if (!appMatchesCategory(app)) {
 			return false;
 		}

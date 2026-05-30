@@ -1,34 +1,17 @@
 import { BRING_THE_FIRM_BUILDER_APP_SLUG, CUSTOM_BUILDER_APP_SLUG } from './ids';
+import type {
+	BuilderArtwork,
+	BuilderArtworkCardSymbolSize,
+	BuilderArtworkCardTone,
+	BuilderPresentation,
+	BuilderStatus
+} from '../builders/presentation';
 
-export type AppStatus = 'active';
-
-export type ArtworkCardTone = 'coral' | 'violet' | 'aqua' | 'stone';
-export type ArtworkCardSymbolSize = 'sm' | 'md';
-
-export type BuilderAppArtwork = {
-	id: string;
-	card: {
-		tone: ArtworkCardTone;
-		iconId: string;
-		symbolSize: ArtworkCardSymbolSize;
-	};
-	panel: {
-		backColor: string;
-		frontColor: string;
-		iconId: string;
-		iconCenterX: string;
-		iconCenterY: string;
-	};
-};
-
-export type BuilderAppPresentation = {
-	slug: string;
-	categoryIds: readonly string[];
-	artwork: BuilderAppArtwork;
-	showInGallery: boolean;
-	sortOrder: number;
-	status: AppStatus;
-};
+export type AppStatus = BuilderStatus;
+export type ArtworkCardTone = BuilderArtworkCardTone;
+export type ArtworkCardSymbolSize = BuilderArtworkCardSymbolSize;
+export type BuilderAppArtwork = BuilderArtwork;
+export type BuilderAppPresentation = BuilderPresentation;
 
 export const builderAppPresentationEntries = [
 	{

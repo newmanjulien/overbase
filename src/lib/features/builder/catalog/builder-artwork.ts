@@ -10,7 +10,7 @@ import QuotesIcon from 'phosphor-svelte/lib/QuotesIcon';
 import SparkleIcon from 'phosphor-svelte/lib/SparkleIcon';
 import TargetIcon from 'phosphor-svelte/lib/TargetIcon';
 import UsersIcon from 'phosphor-svelte/lib/UsersIcon';
-import type { BuilderAppArtwork } from '../../../../builder-apps/presentation';
+import type { BuilderArtwork } from '../../../../builders/presentation';
 import type { PhosphorIcon } from '$lib/ui/icons';
 
 type ArtworkIcon = PhosphorIcon;
@@ -55,7 +55,7 @@ function getArtworkIcon(iconId: string) {
 	return ARTWORK_ICONS[iconId] ?? FlagIcon;
 }
 
-export function toBuilderArtworkPreset(artwork: BuilderAppArtwork): BuilderArtworkPreset {
+export function toBuilderArtworkPreset(artwork: BuilderArtwork): BuilderArtworkPreset {
 	return {
 		id: artwork.id,
 		card: {

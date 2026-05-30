@@ -6,6 +6,7 @@
 		min: number;
 		max: number;
 		step: number;
+		dragDirection?: 1 | -1;
 		label: string;
 		onValueChange: (value: number) => void;
 	};
@@ -15,6 +16,7 @@
 		min,
 		max,
 		step,
+		dragDirection = 1,
 		label,
 		onValueChange
 	}: Props = $props();
@@ -45,7 +47,7 @@
 			return;
 		}
 
-		onValueChange(clampValue(startValue + event.clientX - startClientX));
+		onValueChange(clampValue(startValue + (event.clientX - startClientX) * dragDirection));
 	}
 
 	function handlePointerEnd() {

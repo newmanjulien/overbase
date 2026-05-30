@@ -1,16 +1,3 @@
-export const builderAppCategories = [
-	{
-		slug: 'consulting',
-		label: 'Consulting',
-		iconId: 'briefcase-business',
-		sortOrder: 0
-	},
-	{
-		slug: 'law',
-		label: 'Law',
-		iconId: 'scale',
-		sortOrder: 10
-	}
-] as const;
+export { builderCategories as builderAppCategories } from '../builders/categories';
 
-export type BuilderAppCategory = (typeof builderAppCategories)[number];
+export type { BuilderCategory as BuilderAppCategory } from '../builders/categories';

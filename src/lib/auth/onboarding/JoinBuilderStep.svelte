@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { freshBuilderHref } from '$lib/app/app-links';
 	import BuilderAppCardArtwork from '$lib/features/builder/home/artwork/BuilderAppCardArtwork.svelte';
-	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import type { BuilderCatalogRecord } from '$lib/features/builder/catalog';
 
 	type Props = {
-		apps: BuilderAppRecord[];
+		apps: BuilderCatalogRecord[];
 		isLoading: boolean;
 		errorText: string | null;
 		completionErrorText: string | null;
@@ -30,7 +30,7 @@
 	}: Props = $props();
 	const isCompletingOnboarding = $derived(Boolean(selectedAppSlug) || isOpeningBuilder);
 
-	function selectApp(event: MouseEvent, app: BuilderAppRecord) {
+	function selectApp(event: MouseEvent, app: BuilderCatalogRecord) {
 		if (isCompletingOnboarding) {
 			event.preventDefault();
 			return;
@@ -51,7 +51,7 @@
 		onSelect(app.id);
 	}
 
-	function preloadApp(app: BuilderAppRecord) {
+	function preloadApp(app: BuilderCatalogRecord) {
 		if (!isCompletingOnboarding) {
 			onPreload(app.id);
 		}

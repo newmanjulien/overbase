@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { freshBuilderHref } from '$lib/app/app-links';
 	import BuilderAppCardArtwork from './artwork/BuilderAppCardArtwork.svelte';
-	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import type { BuilderCatalogRecord } from '$lib/features/builder/catalog';
 
 	type Props = {
-		app: BuilderAppRecord;
+		app: BuilderCatalogRecord;
 	};
 
 	let { app }: Props = $props();

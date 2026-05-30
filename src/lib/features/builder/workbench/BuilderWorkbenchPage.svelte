@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import type { BuilderCatalogRecord } from '$lib/features/builder/catalog';
 	import BuilderSetupFlow from '$lib/features/builder/guided-setup/BuilderSetupFlow.svelte';
 	import type { BuilderGuideDefinition } from '$lib/features/builder/guided-setup/guide-types';
 	import type { BuilderLaunchState } from '$lib/features/builder/session/builder-launch';
@@ -7,7 +7,7 @@
 	import CustomBuilderStarter from '$lib/features/builder/workbench/CustomBuilderStarter.svelte';
 
 	type Props = {
-		app: BuilderAppRecord;
+		app: BuilderCatalogRecord;
 		guide: BuilderGuideDefinition | null;
 		launch?: BuilderLaunchState | null;
 	};

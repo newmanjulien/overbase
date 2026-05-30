@@ -10,7 +10,7 @@
 		type AppHref,
 		type AuthEntryHref
 	} from '$lib/app/app-links';
-	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
+	import type { BuilderCatalogRecord } from '$lib/features/builder/catalog';
 	import { useConvexClient } from 'convex-svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
@@ -71,7 +71,7 @@
 	});
 	let companyErrorText = $state<string | null>(null);
 	let isSavingCompany = $state(false);
-	let builderApps = $state<BuilderAppRecord[]>([]);
+	let builderApps = $state<BuilderCatalogRecord[]>([]);
 	let isLoadingBuilders = $state(false);
 	let builderErrorText = $state<string | null>(null);
 	let hasStartedBuilderLoad = $state(false);

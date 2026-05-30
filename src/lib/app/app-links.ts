@@ -19,7 +19,11 @@ export type DynamicAppLink<Pathname extends `/${string}`, RouteId extends `/(app
 export const APP_LINKS = {
 	builders: {
 		pathname: '/builders',
-		routeId: '/(app)/builders'
+		routeId: '/(app)/(desktop-only)/builders'
+	},
+	blueprints: {
+		pathname: '/blueprints',
+		routeId: '/(app)/(desktop-only)/blueprints'
 	},
 	emailFormats: {
 		pathname: '/email-formats',
@@ -71,7 +75,8 @@ export const AUTH_LINKS = {
 } as const satisfies Record<string, AuthEntryLink>;
 
 export const APP_DYNAMIC_ROUTE_IDS = {
-	builder: '/(app)/builders/[appSlug]',
+	builder: '/(app)/(desktop-only)/builders/[appSlug]',
+	blueprint: '/(app)/(desktop-only)/blueprints/[blueprintSlug]',
 	emailFormat: '/(app)/email-formats/[emailFormatId]'
 } as const;
 
@@ -83,12 +88,18 @@ export type StaticAppPathname = (typeof APP_LINKS)[AppLinkKey]['pathname'];
 export type AuthEntryPathname = (typeof AUTH_LINKS)[AuthLinkKey]['pathname'];
 export type BuilderPathname = `/builders/${string}`;
 export type FreshBuilderHref = `${BuilderPathname}?fresh=1`;
+export type BlueprintPathname = `/blueprints/${string}`;
 export type EmailFormatPathname = `/email-formats/${string}`;
-export type AppPathname = StaticAppPathname | BuilderPathname | EmailFormatPathname;
+export type AppPathname =
+	| StaticAppPathname
+	| BuilderPathname
+	| BlueprintPathname
+	| EmailFormatPathname;
 export type AppHref = AppPathname | FreshBuilderHref;
 export type AuthEntryHref = AuthEntryPathname | `${AuthEntryPathname}?${string}`;
 export type BuilderViewportFallbackPathname =
 	| typeof APP_LINKS.emailFormats.pathname
+	| typeof APP_LINKS.blueprints.pathname
 	| typeof APP_LINKS.builders.pathname;
 
 const STATIC_APP_PATHNAMES = new Set<string>(
@@ -127,6 +138,20 @@ export function freshBuilderHref(appSlug: string): FreshBuilderHref {
 	return freshBuilderLink(appSlug).href;
 }
 
+export function blueprintPathname(blueprintSlug: string): BlueprintPathname {
+	return `/blueprints/${encodePathSegment(blueprintSlug)}`;
+}
+
+export function blueprintLink(
+	blueprintSlug: string
+): DynamicAppLink<BlueprintPathname, typeof APP_DYNAMIC_ROUTE_IDS.blueprint> {
+	return {
+		pathname: blueprintPathname(blueprintSlug),
+		routeId: APP_DYNAMIC_ROUTE_IDS.blueprint,
+		href: resolve(APP_DYNAMIC_ROUTE_IDS.blueprint, { blueprintSlug }) as BlueprintPathname
+	};
+}
+
 export function emailFormatPathname(emailFormatId: string): EmailFormatPathname {
 	return `/email-formats/${encodePathSegment(emailFormatId)}`;
 }
@@ -143,6 +168,7 @@ export function isCanonicalAppPathname(pathname: string): pathname is AppPathnam
 	return (
 		STATIC_APP_PATHNAMES.has(pathname) ||
 		/^\/builders\/[^/?#]+$/.test(pathname) ||
+		/^\/blueprints\/[^/?#]+$/.test(pathname) ||
 		/^\/email-formats\/[^/?#]+$/.test(pathname)
 	);
 }

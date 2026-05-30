@@ -1,3 +1,3 @@
 export * from './builder-artwork';
-export * from './builder-apps';
+export * from './builder-records';
 export * from './builder-guides';
