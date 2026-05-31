@@ -1,17 +1,22 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { api } from '$convex/_generated/api';
 	import { onDestroy, onMount, untrack } from 'svelte';
+	import { APP_LINKS } from '$lib/app/app-links';
 	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
 	import { Button } from '$lib/ui';
 	import { watchMediaQuery } from '$lib/ui/viewport';
+	import { useConvexClient } from 'convex-svelte';
 	import {
 		EmailFormatRulePanel,
 		LinkDataSourcesModal
 	} from '$lib/domain/email-format-rules';
 	import type { BuilderRegistryEntry } from '$lib/features/builder/catalog';
-	import BuilderActionBar from './layout/BuilderActionBar.svelte';
 	import BuilderEditorSidePanel from './layout/BuilderEditorSidePanel.svelte';
 	import BuilderEmailEditorPanel from './editor/BuilderEmailEditorPanel.svelte';
+	import BuilderPublishActionBar from './layout/BuilderPublishActionBar.svelte';
 	import { BuilderWorkbenchState } from './state/builder-workbench-state.svelte';
 	import BuilderOverviewPanel from './layout/BuilderOverviewPanel.svelte';
 	import BuilderStartingPointSelectionPanel from './starting-point-selection/BuilderStartingPointSelectionPanel.svelte';
@@ -19,12 +24,14 @@
 	import { BuilderVariableDragCoordinator } from './variables/builder-variable-drag-coordinator.svelte';
 	import { BUILDER_WORKBENCH_SPLIT } from './layout/split-pane';
 	import ReconnectLinkedinContactsModal from './reconnect-linkedin/ReconnectLinkedinContactsModal.svelte';
+	import type { ContactImport } from './reconnect-linkedin/linkedin-contacts-csv';
 
 	type Props = {
 		builder: BuilderRegistryEntry;
 	};
 
 	let { builder }: Props = $props();
+	const client = useConvexClient();
 	const routeTitleState = useRouteTitleState();
 	const workbench = new BuilderWorkbenchState(untrack(() => builder));
 	const variableDragCoordinator = new BuilderVariableDragCoordinator();
@@ -33,6 +40,38 @@
 	);
 	let isMobileWorkbench = $state(false);
 	let linkDataSourcesModalOpen = $state(false);
+	let publishing = $state(false);
+	let publishError = $state<string | null>(null);
+	let publishStateBuilderSlug = $state('');
+	let linkedinContactsImport = $state<ContactImport | null>(null);
+	const linkedinContactsAttachmentStatus = $derived(
+		linkedinContactsImport
+			? {
+					count: linkedinContactsImport.contacts.length,
+					fileName: linkedinContactsImport.fileName
+				}
+			: null
+	);
+	const requiresLinkedinContacts = $derived(
+		builder.slug === 'reconnect-linkedin' &&
+			workbench.selectedStartingPointId === 'linkedin-reconnect'
+	);
+	const publishPrerequisiteHint = $derived(
+		requiresLinkedinContacts && !linkedinContactsImport
+			? {
+					text: 'Add your LinkedIn contacts CSV to enable Publish',
+					actionLabel: 'Add contacts',
+					onAction: openLinkedinContactsModal
+				}
+			: null
+	);
+	const publishDisabled = $derived(
+		publishing || !workbench.canPublish || (requiresLinkedinContacts && !linkedinContactsImport)
+	);
+	const publishLabel = $derived(publishing ? 'Publishing...' : 'Publish');
+
+	const linkedinContactsRequiredError =
+		'Upload your LinkedIn contacts CSV before publishing this format.';
 
 	onMount(() => {
 		return watchMediaQuery(
@@ -49,6 +88,15 @@
 
 	$effect(() => {
 		workbench.syncBuilder(builder);
+	});
+
+	$effect(() => {
+		if (publishStateBuilderSlug !== builder.slug) {
+			publishStateBuilderSlug = builder.slug;
+			publishing = false;
+			publishError = null;
+			linkedinContactsImport = null;
+		}
 	});
 
 	$effect(() => {
@@ -69,6 +117,54 @@
 	$effect(() => {
 		routeTitleState.title = workbench.title;
 	});
+
+	function getErrorMessage(error: unknown) {
+		return error instanceof Error ? error.message : 'Could not publish email format.';
+	}
+
+	function openLinkedinContactsModal() {
+		linkDataSourcesModalOpen = true;
+	}
+
+	function acceptLinkedinContactsImport(contactsImport: ContactImport) {
+		linkedinContactsImport = contactsImport;
+
+		if (publishError === linkedinContactsRequiredError) {
+			publishError = null;
+		}
+	}
+
+	async function publishEmailFormat() {
+		if (publishing) {
+			return;
+		}
+
+		const input = workbench.createPublishInput();
+
+		if (!input) {
+			return;
+		}
+
+		if (requiresLinkedinContacts && !linkedinContactsImport) {
+			publishError = linkedinContactsRequiredError;
+			linkDataSourcesModalOpen = true;
+			return;
+		}
+
+		input.linkedinContactsSource = linkedinContactsImport;
+
+		publishing = true;
+		publishError = null;
+
+		try {
+			await client.mutation(api.emailFormats.publishEmailFormat, input);
+			await goto(resolve(APP_LINKS.emailFormats.pathname));
+		} catch (error) {
+			publishError = getErrorMessage(error);
+		} finally {
+			publishing = false;
+		}
+	}
 </script>
 
 {#key builder.slug}
@@ -104,13 +200,16 @@
 						canEditRuleList={false}
 					/>
 				</div>
-				<BuilderActionBar>
-					{#snippet primary()}
-						<Button variant="primary" disabled={true} class="h-10 w-full text-[0.8rem]">
-							Publish
-						</Button>
-					{/snippet}
-				</BuilderActionBar>
+				<BuilderPublishActionBar
+					disabled={publishDisabled}
+					label={publishLabel}
+					error={publishError}
+					onPublish={publishEmailFormat}
+					{publishPrerequisiteHint}
+					contactAttachmentStatus={linkedinContactsAttachmentStatus}
+					onOpenContactAttachment={openLinkedinContactsModal}
+					buttonClass="h-10 w-full text-[0.8rem]"
+				/>
 			</section>
 		{:else if workbench.editor && builder.mode === 'internal-data'}
 			<section
@@ -135,8 +234,15 @@
 					onSelect={workbench.requestVariableInsertion}
 					onClose={workbench.closeVariablePicker}
 				/>
-				<BuilderActionBar mobileOrder="secondary-first">
-					{#snippet secondary()}
+				<BuilderPublishActionBar
+					disabled={publishDisabled}
+					label={publishLabel}
+					error={publishError}
+					onPublish={publishEmailFormat}
+					buttonClass="h-10 w-full text-[0.8rem]"
+					mobileOrder="secondary-first"
+				>
+					{#snippet secondaryAction()}
 						<Button
 							variant="secondary"
 							class="h-10 w-full text-[0.8rem]"
@@ -145,17 +251,7 @@
 							Add variable
 						</Button>
 					{/snippet}
-
-					{#snippet primary()}
-						<Button
-							variant="primary"
-							disabled={true}
-							class="h-10 w-full text-[0.8rem]"
-						>
-							Publish
-						</Button>
-					{/snippet}
-				</BuilderActionBar>
+				</BuilderPublishActionBar>
 			</section>
 		{/if}
 	{:else}
@@ -188,22 +284,24 @@
 								canEditRuleText={false}
 								canEditRuleList={false}
 							/>
-							<BuilderActionBar>
-								{#snippet primary()}
-									<Button
-										variant="primary"
-										disabled={true}
-										class="h-10 w-full text-[0.8rem] md:h-8 md:w-auto md:text-[0.74rem]"
-									>
-										Publish
-									</Button>
-								{/snippet}
-							</BuilderActionBar>
+							<BuilderPublishActionBar
+								disabled={publishDisabled}
+								label={publishLabel}
+								error={publishError}
+								onPublish={publishEmailFormat}
+								{publishPrerequisiteHint}
+								contactAttachmentStatus={linkedinContactsAttachmentStatus}
+								onOpenContactAttachment={openLinkedinContactsModal}
+							/>
 						</aside>
 					{:else}
 						<BuilderEditorSidePanel
 							variables={builder.variables}
 							dragCoordinator={variableDragCoordinator}
+							{publishDisabled}
+							{publishLabel}
+							{publishError}
+							onPublish={publishEmailFormat}
 						/>
 					{/if}
 				{/if}
@@ -239,7 +337,9 @@
 {#if ruleDataSourceModal === 'reconnect-linkedin'}
 	<ReconnectLinkedinContactsModal
 		open={linkDataSourcesModalOpen}
+		contactsImport={linkedinContactsImport}
 		onClose={() => (linkDataSourcesModalOpen = false)}
+		onContactsImported={acceptLinkedinContactsImport}
 	/>
 {:else}
 	<LinkDataSourcesModal

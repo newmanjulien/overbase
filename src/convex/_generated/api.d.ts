@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
+import type * as emailFormats from "../emailFormats.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as internal_auth from "../internal/auth.js";
@@ -26,6 +27,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   crons: typeof crons;
+  emailFormats: typeof emailFormats;
   health: typeof health;
   http: typeof http;
   "internal/auth": typeof internal_auth;

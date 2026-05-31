@@ -1,6 +1,13 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import { avatar } from '../backend/validators/avatars';
+import {
+	emailFormatBodyBlock,
+	emailFormatBuilderMode,
+	emailFormatRule,
+	emailFormatSpreadsheetAttachment,
+	emailFormatStatus
+} from '../backend/validators/email-formats';
 
 export default defineSchema({
 	users: defineTable({
@@ -29,5 +36,46 @@ export default defineSchema({
 		updatedAt: v.number()
 	})
 		.index('by_workspace_email', ['workspaceId', 'email'])
-		.index('by_workspace_createdAt', ['workspaceId', 'createdAt'])
+		.index('by_workspace_createdAt', ['workspaceId', 'createdAt']),
+	emailFormats: defineTable({
+		workspaceId: v.id('workspaces'),
+		creatorUserId: v.id('users'),
+		builderSlug: v.string(),
+		builderMode: emailFormatBuilderMode,
+		startingPointId: v.union(v.string(), v.null()),
+		selectedAnswers: v.record(v.string(), v.string()),
+		status: emailFormatStatus,
+		title: v.string(),
+		to: v.array(v.string()),
+		cc: v.array(v.string()),
+		attachment: v.union(emailFormatSpreadsheetAttachment, v.null()),
+		body: v.array(emailFormatBodyBlock),
+		rules: v.array(emailFormatRule),
+		linkedinContactsSummary: v.union(
+			v.object({
+				contactCount: v.number(),
+				sourceFileName: v.string(),
+				importedAt: v.number()
+			}),
+			v.null()
+		),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	}).index('by_workspace_createdAt', ['workspaceId', 'createdAt']),
+	emailFormatLinkedinContacts: defineTable({
+		workspaceId: v.id('workspaces'),
+		emailFormatId: v.id('emailFormats'),
+		firstName: v.string(),
+		lastName: v.string(),
+		fullName: v.string(),
+		company: v.string(),
+		position: v.string(),
+		profileUrl: v.string(),
+		email: v.string(),
+		connectedOn: v.string(),
+		sourceRowNumber: v.number(),
+		createdAt: v.number()
+	})
+		.index('by_emailFormat', ['emailFormatId'])
+		.index('by_workspace_emailFormat', ['workspaceId', 'emailFormatId'])
 });

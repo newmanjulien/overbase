@@ -3,7 +3,11 @@ import {
 	type BuilderRuleDataSourceAction,
 	type BuilderRegistryEntry
 } from '$lib/features/builder/catalog';
-import type { BuilderStartingPointSelectionAnswers } from '$lib/features/builder/domain';
+import type {
+	BuilderInlineNode,
+	BuilderSpreadsheetAttachment,
+	BuilderStartingPointSelectionAnswers
+} from '$lib/features/builder/domain';
 import type { EmailFormatRule } from '$lib/domain/email-format-rules';
 import { BuilderEditorState } from './builder-editor-state.svelte';
 
@@ -38,6 +42,40 @@ export type BuilderWorkbenchRulesState = {
 	rulesDraft: EmailFormatRule[];
 };
 
+export type BuilderEmailFormatPublishInput = {
+	builderSlug: string;
+	builderMode: BuilderRegistryEntry['mode'];
+	startingPointId: string | null;
+	selectedAnswers: BuilderStartingPointSelectionAnswers;
+	title: string;
+	to: string[];
+	cc: string[];
+	attachment: {
+		filename: string;
+		cellsByKey: Record<string, BuilderInlineNode[]>;
+	} | null;
+	body: Array<{
+		id: string;
+		type: 'paragraph';
+		content: BuilderInlineNode[];
+	}>;
+	rules: EmailFormatRule[];
+	linkedinContactsSource: {
+		fileName: string;
+		contacts: Array<{
+			firstName: string;
+			lastName: string;
+			fullName: string;
+			company: string;
+			position: string;
+			profileUrl: string;
+			email: string;
+			connectedOn: string;
+			sourceRowNumber: number;
+		}>;
+	} | null;
+};
+
 export class BuilderWorkbenchState {
 	private workbench = $state<BuilderWorkbenchSnapshot>({
 		activeBuilderSlug: '',
@@ -61,6 +99,10 @@ export class BuilderWorkbenchState {
 
 	get selectedAnswers() {
 		return this.workbench.selectedAnswers;
+	}
+
+	get selectedStartingPointId() {
+		return this.workbench.selectedStartingPointId;
 	}
 
 	get editor() {
@@ -93,6 +135,10 @@ export class BuilderWorkbenchState {
 
 	get title() {
 		return this.workbench.editor?.activeEmailContent.title ?? this.builder.title;
+	}
+
+	get canPublish() {
+		return this.workbench.step === 'editor' && this.workbench.editor !== null;
 	}
 
 	syncBuilder(builder: BuilderRegistryEntry) {
@@ -140,6 +186,34 @@ export class BuilderWorkbenchState {
 		if (this.workbench.mode === 'public-data') {
 			this.workbench.rulesDraft = cloneRules(rules);
 		}
+	};
+
+	createPublishInput = (): BuilderEmailFormatPublishInput | null => {
+		const editor = this.workbench.editor;
+
+		if (!editor) {
+			return null;
+		}
+
+		const content = editor.activeEmailContent;
+
+		return {
+			builderSlug: this.builder.slug,
+			builderMode: this.builder.mode,
+			startingPointId: this.workbench.selectedStartingPointId,
+			selectedAnswers: { ...this.workbench.selectedAnswers },
+			title: content.title,
+			to: [...content.to],
+			cc: [...content.cc],
+			attachment: clonePublishAttachment(content.attachment),
+			body: content.body.map((block) => ({
+				id: block.id,
+				type: block.type,
+				content: cloneInlineNodes(block.content)
+			})),
+			rules: this.workbench.mode === 'public-data' ? cloneRules(this.workbench.rulesDraft) : [],
+			linkedinContactsSource: null
+		};
 	};
 
 	openVariablePicker = () => {
@@ -233,4 +307,32 @@ export class BuilderWorkbenchState {
 
 function cloneRules(rules: readonly EmailFormatRule[]) {
 	return rules.map((rule) => ({ ...rule }));
+}
+
+function cloneInlineNodes(nodes: readonly BuilderInlineNode[]): BuilderInlineNode[] {
+	return nodes.map((node) =>
+		node.type === 'text'
+			? {
+					type: 'text',
+					text: node.text
+				}
+			: {
+					type: 'variable',
+					variableId: node.variableId
+				}
+	);
+}
+
+function clonePublishAttachment(attachment: BuilderSpreadsheetAttachment | null) {
+	return attachment
+		? {
+				filename: attachment.filename,
+				cellsByKey: Object.fromEntries(
+					Object.entries(attachment.cellsByKey).map(([key, cell]) => [
+						key,
+						cloneInlineNodes(cell)
+					])
+				) as Record<string, BuilderInlineNode[]>
+			}
+		: null;
 }

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { APP_LINKS } from '$lib/app/app-links';
 	import {
 		Button,
 		FileUploadField,
@@ -8,15 +7,25 @@
 		TallModalStepList,
 		inlineLinkClass
 	} from '$lib/ui';
+	import {
+		parseContactCsv,
+		type ContactImport
+	} from './linkedin-contacts-csv';
 
 	type Props = {
 		open: boolean;
+		contactsImport: ContactImport | null;
 		onClose: () => void;
+		onContactsImported: (contactsImport: ContactImport) => void;
 	};
 
-	let { open, onClose }: Props = $props();
-	let selectedLinkedinExportFile = $state<File | null>(null);
+	let { open, contactsImport, onClose, onContactsImported }: Props = $props();
+	let selectedContactCsvFile = $state<File | null>(null);
+	let parsedContactsImport = $state<ContactImport | null>(null);
 	let uploadErrorText = $state<string | null>(null);
+	let parsing = $state(false);
+	let syncedContactsImport = $state<ContactImport | null>(null);
+	const activeContactsImport = $derived(parsedContactsImport ?? contactsImport);
 
 	const linkedinContactSteps = [
 		{
@@ -37,13 +46,11 @@
 	];
 
 	const linkedinSettingsUrl = 'https://www.linkedin.com/settings/member-data';
-	const linkedinExportAccept = '.csv,.zip';
-	const linkedinExportMimeTypes = new Set([
+	const contactCsvAccept = '.csv';
+	const csvMimeTypes = new Set([
 		'text/csv',
 		'application/csv',
 		'application/vnd.ms-excel',
-		'application/zip',
-		'application/x-zip-compressed',
 		'application/octet-stream'
 	]);
 
@@ -51,22 +58,58 @@
 		return fileName.split('.').pop()?.toLowerCase() ?? '';
 	}
 
-	function isLinkedinExportFile(file: File) {
+	function isCsvFile(file: File) {
 		const extension = getFileExtension(file.name);
-		const hasAllowedExtension = extension === 'csv' || extension === 'zip';
-		const hasAllowedType = !file.type || linkedinExportMimeTypes.has(file.type);
+		const hasAllowedExtension = extension === 'csv';
+		const hasAllowedType = !file.type || csvMimeTypes.has(file.type);
 
 		return hasAllowedExtension && hasAllowedType;
 	}
 
-	function selectLinkedinExportFile(file: File) {
-		if (!isLinkedinExportFile(file)) {
-			uploadErrorText = 'Upload a CSV or ZIP file from LinkedIn.';
+	$effect(() => {
+		if (contactsImport === syncedContactsImport) {
 			return;
 		}
 
-		selectedLinkedinExportFile = file;
+		syncedContactsImport = contactsImport;
+
+		if (!contactsImport) {
+			selectedContactCsvFile = null;
+			parsedContactsImport = null;
+			uploadErrorText = null;
+			parsing = false;
+		}
+	});
+
+	async function selectContactCsvFile(file: File) {
+		if (!isCsvFile(file)) {
+			uploadErrorText = 'Upload a CSV file.';
+			return;
+		}
+
+		selectedContactCsvFile = file;
 		uploadErrorText = null;
+		parsing = true;
+
+		try {
+			parsedContactsImport = parseContactCsv(file.name, await file.text());
+		} catch (error) {
+			parsedContactsImport = null;
+			uploadErrorText =
+				error instanceof Error ? error.message : 'Could not read this CSV.';
+		} finally {
+			parsing = false;
+		}
+	}
+
+	function addContacts() {
+		if (!activeContactsImport) {
+			uploadErrorText = 'Upload a contacts CSV first.';
+			return;
+		}
+
+		onContactsImported(activeContactsImport);
+		onClose();
 	}
 </script>
 
@@ -103,13 +146,19 @@
 
 			<div class="pt-1">
 				<FileUploadField
-					label="Upload your LinkedIn export"
-					description="CSV or ZIP export from LinkedIn"
-					accept={linkedinExportAccept}
-					selectedFile={selectedLinkedinExportFile}
+					label="Upload a contacts CSV"
+					description="Any CSV with people, companies, emails, or profile links"
+					accept={contactCsvAccept}
+					disabled={parsing}
+					selectedFile={selectedContactCsvFile}
 					errorText={uploadErrorText}
-					onFileSelected={selectLinkedinExportFile}
+					onFileSelected={selectContactCsvFile}
 				/>
+				{#if activeContactsImport}
+					<p class="mt-2 text-[0.68rem] leading-relaxed text-stone-500">
+						{activeContactsImport.contacts.length} contacts ready from {activeContactsImport.fileName}
+					</p>
+				{/if}
 			</div>
 		</div>
 
@@ -118,6 +167,8 @@
 
 	{#snippet footer()}
 		<Button variant="secondary" onclick={onClose}>Cancel</Button>
-		<Button href={APP_LINKS.dataSources.pathname}>Add contacts</Button>
+		<Button disabled={parsing || !activeContactsImport} onclick={addContacts}>
+			{parsing ? 'Reading...' : 'Add contacts'}
+		</Button>
 	{/snippet}
 </FullHeightModalShell>
