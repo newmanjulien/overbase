@@ -1,5 +1,5 @@
 import { APP_LINKS } from '$lib/app/app-links';
-import { getBuilder } from '../../../../builders/registry';
+import { getBuilder } from '$lib/features/builder/catalog';
 import type { PageServerLoad } from './$types';
 
 const BUILDER_UNAVAILABLE_PAGE_DATA = {
@@ -21,10 +21,10 @@ export const load: PageServerLoad = async ({ params }) => {
 	return {
 		builder,
 		headerTitle: builder.title,
-		headerTitleEditable: true,
+		headerTitleEditable: builder.mode === 'internal-data',
 		chromeMode: 'focused',
 		desktopBreadcrumbParent: {
-			label: 'Build formats',
+			label: 'Build my formats',
 			href: APP_LINKS.buildFormats.pathname
 		}
 	};

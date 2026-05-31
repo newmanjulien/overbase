@@ -1,13 +1,22 @@
+import {
+	SPREADSHEET_CELL_MAX_LENGTH,
+	SPREADSHEET_COLUMN_COUNT,
+	SPREADSHEET_COLUMN_LABELS,
+	SPREADSHEET_ROW_COUNT,
+	cellKey,
+	parseCellKey,
+	type SpreadsheetCellKey
+} from './spreadsheets';
+
 export const EMAIL_DRAFT_LIMITS = {
 	recipient: 140,
 	recipients: 12,
 	attachmentFilename: 160,
-	spreadsheetColumns: 26,
-	spreadsheetRows: 100,
-	spreadsheetCell: 200,
+	spreadsheetColumns: SPREADSHEET_COLUMN_COUNT,
+	spreadsheetRows: SPREADSHEET_ROW_COUNT,
+	spreadsheetCell: SPREADSHEET_CELL_MAX_LENGTH,
 	bodyBlocks: 12,
 	bodyText: 1_000,
-	bulletItems: 8,
 	linkLabel: 120,
 	linkHref: 500
 } as const;
@@ -18,19 +27,11 @@ export const EMAIL_ATTACHMENT_FORMAT = {
 	label: 'Excel workbook'
 } as const;
 
-export const SPREADSHEET_COLUMN_LABELS = Array.from(
-	{ length: EMAIL_DRAFT_LIMITS.spreadsheetColumns },
-	(_, index) => String.fromCharCode('A'.charCodeAt(0) + index)
-) as string[];
+export { SPREADSHEET_COLUMN_LABELS };
 
 export type EmailParagraphBlock = {
 	type: 'paragraph';
 	text: string;
-};
-
-export type EmailBulletsBlock = {
-	type: 'bullets';
-	items: string[];
 };
 
 export type EmailLinkBlock = {
@@ -39,11 +40,11 @@ export type EmailLinkBlock = {
 	href: string;
 };
 
-export type EmailBodyBlock = EmailParagraphBlock | EmailBulletsBlock | EmailLinkBlock;
+export type EmailBodyBlock = EmailParagraphBlock | EmailLinkBlock;
 
 export type EmailSpreadsheetAttachment = {
 	filename: string;
-	cells: string[][];
+	cellsByKey: Record<SpreadsheetCellKey, string>;
 };
 
 export type EmailDraft = {
@@ -102,13 +103,11 @@ export function createDefaultEmailSpreadsheetAttachment(
 ): EmailSpreadsheetAttachment {
 	return {
 		filename,
-		cells: Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetRows }, () =>
-			Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetColumns }, () => '')
-		)
+		cellsByKey: {}
 	};
 }
 
-function normalizeSpreadsheetCell(value: string) {
+export function normalizeEmailSpreadsheetCell(value: string) {
 	return clampText(value, EMAIL_DRAFT_LIMITS.spreadsheetCell);
 }
 
@@ -127,11 +126,18 @@ export function normalizeEmailSpreadsheetAttachment(
 
 	return {
 		filename,
-		cells: Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetRows }, (_, rowIndex) =>
-			Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetColumns }, (_, columnIndex) =>
-				normalizeSpreadsheetCell(attachment.cells[rowIndex]?.[columnIndex] ?? '')
-			)
-		)
+		cellsByKey: Object.fromEntries(
+			Object.entries(attachment.cellsByKey)
+				.map(([key, value]) => {
+					const address = parseCellKey(key);
+					const normalizedValue = normalizeEmailSpreadsheetCell(value);
+
+					return address && normalizedValue
+						? [cellKey(address.rowIndex, address.columnIndex), normalizedValue]
+						: null;
+				})
+				.filter((entry): entry is [SpreadsheetCellKey, string] => entry !== null)
+		) as Record<SpreadsheetCellKey, string>
 	};
 }
 
@@ -140,15 +146,6 @@ function normalizeEmailBodyBlock(block: EmailBodyBlock): EmailBodyBlock | null {
 		const text = clampMultilineText(block.text, EMAIL_DRAFT_LIMITS.bodyText);
 
 		return text ? { type: 'paragraph', text } : null;
-	}
-
-	if (block.type === 'bullets') {
-		const items = block.items
-			.slice(0, EMAIL_DRAFT_LIMITS.bulletItems)
-			.map((item) => clampMultilineText(item, EMAIL_DRAFT_LIMITS.bodyText))
-			.filter(Boolean);
-
-		return items.length > 0 ? { type: 'bullets', items } : null;
 	}
 
 	const label = clampText(block.label, EMAIL_DRAFT_LIMITS.linkLabel);

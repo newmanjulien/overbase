@@ -3,6 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'clsx';
 	import { cn } from '$lib/ui/cn';
+	import { inlineLinkClass } from '$lib/ui/link-styles';
 	import type { ButtonHref, ButtonType } from '$lib/ui/types';
 
 	type InfoBarActionHref = ButtonHref | `/${string}`;
@@ -19,7 +20,7 @@
 
 	const actionClass = $derived(
 		cn(
-			'inline text-blue-400 outline-none hover:text-blue-500 focus-visible:rounded-sm focus-visible:text-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-50',
+			inlineLinkClass,
 			!href && 'cursor-pointer border-0 bg-transparent p-0 text-left font-[inherit]',
 			className
 		)

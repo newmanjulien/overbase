@@ -2,6 +2,7 @@
 
 - Never write or add tests
 - Don't try to use playwright
+- Don't add documentation
 
 - All data in the db can be nuked or reseeded
 - Don't cut corners

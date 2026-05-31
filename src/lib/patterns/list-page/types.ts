@@ -1,5 +1,5 @@
 import type { PhosphorIcon } from '$lib/ui/icons';
-import type { InlineTextContent } from '$lib/ui/inline-text';
+import type { InlineTextContent } from '$lib/domain/inline-text';
 import type { AppHref } from '$lib/app/app-links';
 
 export type ListIcon = PhosphorIcon;

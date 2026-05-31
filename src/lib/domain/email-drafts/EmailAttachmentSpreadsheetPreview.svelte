@@ -2,8 +2,10 @@
 	import {
 		EMAIL_DRAFT_LIMITS,
 		SPREADSHEET_COLUMN_LABELS,
+		normalizeEmailSpreadsheetCell,
 		type EmailSpreadsheetAttachment
 	} from '$shared/email-drafts';
+	import { getSpreadsheetCell, updateSparseSpreadsheetCell } from '$shared/spreadsheets';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import { IconButton } from '$lib/ui';
 
@@ -35,14 +37,16 @@
 			return;
 		}
 
+		const normalizedValue = normalizeEmailSpreadsheetCell(value);
+
 		onAttachmentChange?.({
 			...attachment,
-			cells: Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetRows }, (_, nextRowIndex) =>
-				Array.from({ length: EMAIL_DRAFT_LIMITS.spreadsheetColumns }, (_, nextColumnIndex) =>
-					nextRowIndex === rowIndex && nextColumnIndex === columnIndex
-						? value
-						: (attachment.cells[nextRowIndex]?.[nextColumnIndex] ?? '')
-				)
+			cellsByKey: updateSparseSpreadsheetCell(
+				attachment.cellsByKey,
+				rowIndex,
+				columnIndex,
+				normalizedValue,
+				(cellValue) => cellValue.length === 0
 			)
 		});
 	}
@@ -134,7 +138,7 @@
 							>
 								{#if editable}
 									<input
-										value={attachment.cells[rowIndex]?.[cellIndex] ?? ''}
+										value={getSpreadsheetCell(attachment.cellsByKey, rowIndex, cellIndex) ?? ''}
 										aria-label={`Row ${rowIndex + 1}, column ${cellIndex + 1}`}
 										data-row={rowIndex}
 										data-column={cellIndex}
@@ -147,7 +151,7 @@
 										oninput={(event) => updateCell(rowIndex, cellIndex, event.currentTarget.value)}
 									/>
 								{:else}
-									{attachment.cells[rowIndex]?.[cellIndex] ?? ''}
+									{getSpreadsheetCell(attachment.cellsByKey, rowIndex, cellIndex) ?? ''}
 								{/if}
 							</td>
 						{/each}

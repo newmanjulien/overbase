@@ -86,13 +86,15 @@ export type EmailFormatPathname = `/email-formats/${string}`;
 export type AppPathname = StaticAppPathname | BuildFormatsPathname | EmailFormatPathname;
 export type AppHref = AppPathname;
 export type AuthEntryHref = AuthEntryPathname | `${AuthEntryPathname}?${string}`;
+export type BuildFormatsModeFilterId = 'all' | 'internal-data' | 'public-data';
+export type BuildFormatsGalleryHref =
+	| typeof APP_LINKS.buildFormats.pathname
+	| `${typeof APP_LINKS.buildFormats.pathname}?mode=${Exclude<BuildFormatsModeFilterId, 'all'>}`;
 export type BuildFormatsViewportFallbackPathname =
 	| typeof APP_LINKS.emailFormats.pathname
 	| typeof APP_LINKS.buildFormats.pathname;
 
-const STATIC_APP_PATHNAMES = new Set<string>(
-	Object.values(APP_LINKS).map((link) => link.pathname)
-);
+const STATIC_APP_PATHNAMES = new Set<string>(Object.values(APP_LINKS).map((link) => link.pathname));
 const resolveHref = resolve as (href: string) => string;
 
 function encodePathSegment(value: string) {
@@ -109,19 +111,39 @@ export function buildFormatLink(
 	return {
 		pathname: buildFormatPathname(builderSlug),
 		routeId: APP_DYNAMIC_ROUTE_IDS.buildFormat,
-		href: resolve(APP_DYNAMIC_ROUTE_IDS.buildFormat, { builderSlug }) as BuildFormatsPathname
+		href: resolve(APP_DYNAMIC_ROUTE_IDS.buildFormat, {
+			builderSlug
+		}) as BuildFormatsPathname
 	};
+}
+
+export function normalizeBuildFormatsModeFilter(
+	value: string | null | undefined
+): BuildFormatsModeFilterId {
+	return value === 'internal-data' || value === 'public-data' ? value : 'all';
+}
+
+export function buildFormatsGalleryHref(mode: BuildFormatsModeFilterId): BuildFormatsGalleryHref {
+	if (mode === 'all') {
+		return APP_LINKS.buildFormats.pathname;
+	}
+
+	return `${APP_LINKS.buildFormats.pathname}?mode=${mode}`;
 }
 
 export function emailFormatPathname(emailFormatId: string): EmailFormatPathname {
 	return `/email-formats/${encodePathSegment(emailFormatId)}`;
 }
 
-export function emailFormatLink(emailFormatId: string): DynamicAppLink<EmailFormatPathname, typeof APP_DYNAMIC_ROUTE_IDS.emailFormat> {
+export function emailFormatLink(
+	emailFormatId: string
+): DynamicAppLink<EmailFormatPathname, typeof APP_DYNAMIC_ROUTE_IDS.emailFormat> {
 	return {
 		pathname: emailFormatPathname(emailFormatId),
 		routeId: APP_DYNAMIC_ROUTE_IDS.emailFormat,
-		href: resolve(APP_DYNAMIC_ROUTE_IDS.emailFormat, { emailFormatId }) as EmailFormatPathname
+		href: resolve(APP_DYNAMIC_ROUTE_IDS.emailFormat, {
+			emailFormatId
+		}) as EmailFormatPathname
 	};
 }
 

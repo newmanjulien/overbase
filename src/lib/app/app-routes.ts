@@ -1,124 +1,118 @@
-import BuildingIcon from "phosphor-svelte/lib/BuildingIcon";
-import CloudIcon from "phosphor-svelte/lib/CloudIcon";
-import FolderSimpleIcon from "phosphor-svelte/lib/FolderSimpleIcon";
-import FoldersIcon from "phosphor-svelte/lib/FoldersIcon";
-import HardDriveIcon from "phosphor-svelte/lib/HardDriveIcon";
-import KeyIcon from "phosphor-svelte/lib/KeyIcon";
-import ListPlusIcon from "phosphor-svelte/lib/ListPlusIcon";
-import UsersIcon from "phosphor-svelte/lib/UsersIcon";
-import type {
-  PhosphorIcon,
-  PhosphorIconProps,
-} from "$lib/ui/icons";
-import {
-  APP_LINKS,
-  type StaticAppLink,
-} from "$lib/app/app-links";
+import BuildingIcon from 'phosphor-svelte/lib/BuildingIcon';
+import CloudIcon from 'phosphor-svelte/lib/CloudIcon';
+import FolderSimpleIcon from 'phosphor-svelte/lib/FolderSimpleIcon';
+import FoldersIcon from 'phosphor-svelte/lib/FoldersIcon';
+import HardDriveIcon from 'phosphor-svelte/lib/HardDriveIcon';
+import KeyIcon from 'phosphor-svelte/lib/KeyIcon';
+import ListPlusIcon from 'phosphor-svelte/lib/ListPlusIcon';
+import UsersIcon from 'phosphor-svelte/lib/UsersIcon';
+import type { PhosphorIcon, PhosphorIconProps } from '$lib/ui/icons';
+import { APP_LINKS, type StaticAppLink } from '$lib/app/app-links';
 
 export type RouteIconProps = PhosphorIconProps;
 export type RouteIcon = PhosphorIcon;
 
 export const APP_ROUTE_IDS = [
-  "build-formats",
-  "email-formats",
-  "data-sources",
-  "external-data",
-  "team",
-  "team-email-formats",
-  "invite-partners",
-  "manage-partners",
-  "data-access",
+	'build-formats',
+	'email-formats',
+	'data-sources',
+	'external-data',
+	'team',
+	'team-email-formats',
+	'invite-partners',
+	'manage-partners',
+	'data-access'
 ] as const;
 
 export type NavRouteId = (typeof APP_ROUTE_IDS)[number];
 export type NavPath = `/${NavRouteId}`;
-export type NavSectionId = "email-formats" | "main" | "ecosystem";
+export type NavSectionId = 'email-formats' | 'main' | 'ecosystem';
 
 type NavSectionDefinition = {
-  id: NavSectionId;
-  heading: string;
-  routeIds: readonly NavRouteId[];
-  desktopSectionClass?: string;
-  mobileSectionClass?: string;
-  showCollapsedDivider?: boolean;
+	id: NavSectionId;
+	heading: string;
+	routeIds: readonly NavRouteId[];
+	desktopSectionClass?: string;
+	mobileSectionClass?: string;
+	showCollapsedDivider?: boolean;
 };
 
 export type AppRouteDefinition = StaticAppLink & {
-  pathname: NavPath;
-  navLabel: string;
-  icon: RouteIcon;
-  hideOnMobile?: boolean;
+	pathname: NavPath;
+	navLabel: string;
+	icon: RouteIcon;
+	hideOnMobile?: boolean;
 };
 
 export const APP_ROUTE_REGISTRY = {
-  "email-formats": {
-    ...APP_LINKS.emailFormats,
-    navLabel: "My email formats",
-    icon: FolderSimpleIcon,
-  },
-  "build-formats": {
-    ...APP_LINKS.buildFormats,
-    navLabel: "Build formats",
-    icon: FolderSimpleIcon,
-  },
-  "data-sources": {
-    ...APP_LINKS.dataSources,
-    navLabel: "Data sources",
-    icon: HardDriveIcon,
-  },
-  "external-data": {
-    ...APP_LINKS.externalData,
-    navLabel: "External data",
-    icon: CloudIcon,
-  },
-  team: {
-    ...APP_LINKS.team,
-    navLabel: "Team",
-    icon: UsersIcon,
-  },
-  "team-email-formats": {
-    ...APP_LINKS.teamEmailFormats,
-    navLabel: "Team email formats",
-    icon: FoldersIcon,
-  },
-  "invite-partners": {
-    ...APP_LINKS.invitePartners,
-    navLabel: "Invite partners",
-    icon: ListPlusIcon,
-  },
-  "manage-partners": {
-    ...APP_LINKS.managePartners,
-    navLabel: "Manage partners",
-    icon: BuildingIcon,
-  },
-  "data-access": {
-    ...APP_LINKS.dataAccess,
-    navLabel: "Data access",
-    icon: KeyIcon,
-  },
+	'email-formats': {
+		...APP_LINKS.emailFormats,
+		navLabel: 'My email formats',
+		icon: FolderSimpleIcon
+	},
+	'build-formats': {
+		...APP_LINKS.buildFormats,
+		navLabel: 'Build my formats',
+		icon: FolderSimpleIcon
+	},
+	'data-sources': {
+		...APP_LINKS.dataSources,
+		navLabel: 'Data sources',
+		icon: HardDriveIcon
+	},
+	'external-data': {
+		...APP_LINKS.externalData,
+		navLabel: 'External data',
+		icon: CloudIcon
+	},
+	team: {
+		...APP_LINKS.team,
+		navLabel: 'Team',
+		icon: UsersIcon
+	},
+	'team-email-formats': {
+		...APP_LINKS.teamEmailFormats,
+		navLabel: 'Team email formats',
+		icon: FoldersIcon
+	},
+	'invite-partners': {
+		...APP_LINKS.invitePartners,
+		navLabel: 'Invite partners',
+		icon: ListPlusIcon
+	},
+	'manage-partners': {
+		...APP_LINKS.managePartners,
+		navLabel: 'Manage partners',
+		icon: BuildingIcon
+	},
+	'data-access': {
+		...APP_LINKS.dataAccess,
+		navLabel: 'Data access',
+		icon: KeyIcon
+	}
 } as const satisfies Record<NavRouteId, AppRouteDefinition>;
 
 export const APP_NAV_SECTION_DEFINITIONS = [
-  {
-    id: "email-formats",
-    heading: "Email formats",
-    routeIds: ["build-formats", "email-formats"],
-    desktopSectionClass: "pt-2",
-  },
-  {
-    id: "main",
-    heading: "Workspace",
-    routeIds: ["data-sources", "external-data", "team", "team-email-formats"],
-    desktopSectionClass: "pt-6",
-    mobileSectionClass: "pt-6",
-    showCollapsedDivider: true,
-  },
-  {
-    id: "ecosystem",
-    heading: "Ecosystem",
-    routeIds: ["invite-partners", "manage-partners", "data-access"],
-    desktopSectionClass: "pt-6",
-    mobileSectionClass: "pt-6",
-    showCollapsedDivider: true,
-  },
+	{
+		id: 'email-formats',
+		heading: 'Email formats',
+		routeIds: ['build-formats', 'email-formats'],
+		desktopSectionClass: 'pt-2'
+	},
+	{
+		id: 'main',
+		heading: 'Workspace',
+		routeIds: ['data-sources', 'external-data', 'team', 'team-email-formats'],
+		desktopSectionClass: 'pt-6',
+		mobileSectionClass: 'pt-6',
+		showCollapsedDivider: true
+	},
+	{
+		id: 'ecosystem',
+		heading: 'Ecosystem',
+		routeIds: ['invite-partners', 'manage-partners', 'data-access'],
+		desktopSectionClass: 'pt-6',
+		mobileSectionClass: 'pt-6',
+		showCollapsedDivider: true
+	}
 ] as const satisfies readonly NavSectionDefinition[];

@@ -1,12 +1,2 @@
-export type InlineTextPart =
-	| {
-			kind: 'text';
-			text: string;
-	  }
-	| {
-			kind: 'tooltip';
-			label: string;
-			tooltipText: string;
-	  };
-
-export type InlineTextContent = string | readonly InlineTextPart[];
+export type { InlineTextContent, InlineTextPart } from '$lib/domain/inline-text';
+export { hasInlineTextContent } from '$lib/domain/inline-text';

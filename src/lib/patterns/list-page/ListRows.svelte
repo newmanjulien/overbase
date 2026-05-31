@@ -1,7 +1,7 @@
 <script lang="ts" generics="Item extends ListRowItem">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { Snippet } from 'svelte';
-	import { resolveAppHref } from '$lib/app/app-links';
 	import { FloatingActionMenu } from '$lib/ui';
 	import { cn } from '$lib/ui/cn';
 	import type { ListRowItem } from '$lib/patterns/list-page/types';
@@ -39,7 +39,7 @@
 			return;
 		}
 
-		void goto(resolveAppHref(item.href));
+		void goto(resolve(item.href));
 	}
 
 	function rowClass(item: Item) {

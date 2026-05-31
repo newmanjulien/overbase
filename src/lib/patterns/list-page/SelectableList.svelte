@@ -1,9 +1,9 @@
 <script lang="ts" generics="Item extends SelectableListItem">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { Snippet } from 'svelte';
 	import CheckIcon from 'phosphor-svelte/lib/CheckIcon';
 	import MinusIcon from 'phosphor-svelte/lib/MinusIcon';
-	import { resolveAppHref } from '$lib/app/app-links';
 	import { cn } from '$lib/ui/cn';
 	import { FloatingActionMenu, type FloatingActionMenuAction } from '$lib/ui';
 	import type {
@@ -115,7 +115,7 @@
 			return;
 		}
 
-		void goto(resolveAppHref(item.href));
+		void goto(resolve(item.href));
 	}
 
 	function rowClass(item: Item) {

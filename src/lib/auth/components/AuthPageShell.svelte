@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import type { Snippet } from 'svelte';
 	import {
 		isAuthEntryHref,
 		isCanonicalAppHref,
-		resolveAppHref,
-		resolveAuthHref
+		type AppHref,
+		type AuthEntryHref
 	} from '$lib/app/app-links';
 	import { cn } from '$lib/ui/cn';
 
@@ -35,18 +36,16 @@
 	const isExternalReturnButtonHref = $derived(
 		Boolean(returnButtonHref && !returnButtonHref.startsWith('/'))
 	);
-	const returnButtonResolvedHref = $derived.by(() => {
+	const returnButtonInternalHref = $derived.by((): AppHref | AuthEntryHref | null => {
 		if (!returnButtonHref) {
-			return undefined;
+			return null;
 		}
 
-		if (isCanonicalAppHref(returnButtonHref)) {
-			return resolveAppHref(returnButtonHref);
+		if (isCanonicalAppHref(returnButtonHref) || isAuthEntryHref(returnButtonHref)) {
+			return returnButtonHref;
 		}
 
-		return isAuthEntryHref(returnButtonHref)
-			? resolveAuthHref(returnButtonHref)
-			: returnButtonHref;
+		return null;
 	});
 </script>
 
@@ -70,10 +69,10 @@
 						<ArrowLeftIcon aria-hidden="true" size={14} weight="regular" />
 						<span>{returnLabel}</span>
 					</a>
-				{:else}
+				{:else if returnButtonInternalHref}
 					<a
 						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
-						href={returnButtonResolvedHref}
+						href={resolve(returnButtonInternalHref)}
 					>
 						<ArrowLeftIcon aria-hidden="true" size={14} weight="regular" />
 						<span>{returnLabel}</span>

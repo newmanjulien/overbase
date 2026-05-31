@@ -1,24 +1,21 @@
 import type { EmailDraft } from '$shared/email-drafts';
-import type { Id } from '$convex/_generated/dataModel';
+import type { EmailFormatRule } from '$lib/domain/email-format-rules';
 
 export type EmailFormatRecipientRef =
 	| {
 			kind: 'user';
-			userId: Id<'users'>;
+			userId: string;
 	  }
 	| {
 			kind: 'teammate';
-			teammateId: Id<'teammates'>;
+			teammateId: string;
 	  };
 
 export function getFormatRecipientKey(ref: EmailFormatRecipientRef) {
 	return ref.kind === 'user' ? `user:${ref.userId}` : `teammate:${ref.teammateId}`;
 }
 
-export type EmailFormatRule = {
-	id: string;
-	text: string;
-};
+export type { EmailFormatRule };
 
 export type EmailFeedback = {
 	likedText: string;

@@ -5,7 +5,7 @@
 	import InlineText from '$lib/ui/InlineText.svelte';
 	import ListActionButton from '$lib/patterns/list-page/ListActionButton.svelte';
 	import FloatingTooltip from '$lib/ui/FloatingTooltip.svelte';
-	import type { InlineTextContent } from '$lib/ui/inline-text';
+	import type { InlineTextContent } from '$lib/domain/inline-text';
 	import type { ListIcon } from '$lib/patterns/list-page/types';
 
 	type Props = {

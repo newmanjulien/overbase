@@ -51,12 +51,6 @@
 					{#each draft.body as block, blockIndex (`${block.type}:${blockIndex}`)}
 						{#if isParagraphBlock(block)}
 							<p class="whitespace-pre-wrap">{block.text}</p>
-						{:else if block.type === 'bullets'}
-							<ul class="list-disc space-y-1.5 pl-5">
-								{#each block.items as item, itemIndex (`${item}:${itemIndex}`)}
-									<li class="pl-1">{item}</li>
-								{/each}
-							</ul>
 						{:else if block.type === 'link'}
 							<p>
 								<span
