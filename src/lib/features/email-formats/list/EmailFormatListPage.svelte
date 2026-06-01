@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { api } from '$convex/_generated/api';
+	import type { Id } from '$convex/_generated/dataModel';
 	import { APP_LINKS, emailFormatLink } from '$lib/app/app-links';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import {
@@ -7,34 +9,37 @@
 		SelectableList
 	} from '$lib/patterns/list-page';
 	import { InfoBar } from '$lib/ui';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 	import EmailFormatListRow, {
 		type EmailFormatListItem
 	} from './EmailFormatListRow.svelte';
 
 	type EmailFormatStatus = 'active' | 'paused';
-	type EmailFormatListRecord = {
-		id: string;
-		title: string;
-		status: EmailFormatStatus;
-		createdAt: number;
-		creator: {
-			name: string;
-			avatarUrl: string;
-		};
-	};
 	type FormatStatusFilterId = 'all' | EmailFormatStatus;
 
+	const client = useConvexClient();
+	const formatsQuery = useQuery(api.emailFormats.listEmailFormats);
 	const dateFormatter = new Intl.DateTimeFormat(undefined, {
 		month: 'short',
 		day: 'numeric',
 		year: 'numeric'
 	});
-	const formats = $state<EmailFormatListRecord[]>([]);
+	let updatingFormatIds = $state<Id<'emailFormats'>[]>([]);
+	let deletingFormatIds = $state<Id<'emailFormats'>[]>([]);
+	let actionError = $state<string | null>(null);
 	let searchQuery = $state('');
 	let selectedStatusFilter = $state<FormatStatusFilterId>('all');
-	const formatItems = $derived(formats.map(toFormatItem));
+	const formatItems = $derived((formatsQuery.data ?? []).map(toFormatItem));
 	const filteredFormatItems = $derived(formatItems.filter(matchesFormatFilters));
-	const listState = $derived(formatItems.length === 0 ? 'empty' : 'ready');
+	const listState = $derived(
+		formatsQuery.isLoading
+			? 'loading'
+			: formatsQuery.error
+				? 'error'
+				: formatItems.length === 0
+					? 'empty'
+					: 'ready'
+	);
 
 	const statusFilterOptions: { id: FormatStatusFilterId; label: string }[] = [
 		{ id: 'all', label: 'All email formats' },
@@ -45,6 +50,8 @@
 	const selectedStatusFilterLabel = $derived(
 		statusFilterOptions.find((option) => option.id === selectedStatusFilter)?.label ?? 'All email formats'
 	);
+
+	type EmailFormatListRecord = NonNullable<typeof formatsQuery.data>[number];
 
 	function formatStatus(status: EmailFormatListRecord['status']) {
 		return status === 'active' ? 'Active' : 'Paused';
@@ -76,7 +83,77 @@
 		return status === 'active' ? 'text-stone-400' : 'text-red-300';
 	}
 
+	function isUpdatingFormat(formatId: Id<'emailFormats'>) {
+		return updatingFormatIds.includes(formatId);
+	}
+
+	function isDeletingFormat(formatId: Id<'emailFormats'>) {
+		return deletingFormatIds.includes(formatId);
+	}
+
+	function areAnyBusy(formatIds: string[]) {
+		return formatIds.some((formatId) =>
+			[...updatingFormatIds, ...deletingFormatIds].includes(formatId as Id<'emailFormats'>)
+		);
+	}
+
+	async function setFormatStatus(formatIds: Id<'emailFormats'>[], status: EmailFormatStatus) {
+		const idsToUpdate = formatIds.filter(
+			(formatId) => !isUpdatingFormat(formatId) && !isDeletingFormat(formatId)
+		);
+
+		if (idsToUpdate.length === 0) {
+			return;
+		}
+
+		actionError = null;
+		updatingFormatIds = [...updatingFormatIds, ...idsToUpdate];
+
+		try {
+			for (const emailFormatId of idsToUpdate) {
+				await client.mutation(api.emailFormats.setEmailFormatStatus, {
+					emailFormatId,
+					status
+				});
+			}
+		} catch (error) {
+			actionError =
+				error instanceof Error
+					? error.message
+					: `Could not ${status === 'active' ? 'activate' : 'pause'} email format.`;
+		} finally {
+			updatingFormatIds = updatingFormatIds.filter((id) => !idsToUpdate.includes(id));
+		}
+	}
+
+	async function deleteFormats(formatIds: Id<'emailFormats'>[]) {
+		const idsToDelete = formatIds.filter(
+			(formatId) => !isDeletingFormat(formatId) && !isUpdatingFormat(formatId)
+		);
+
+		if (idsToDelete.length === 0) {
+			return;
+		}
+
+		actionError = null;
+		deletingFormatIds = [...deletingFormatIds, ...idsToDelete];
+
+		try {
+			await client.mutation(api.emailFormats.deleteEmailFormats, {
+				emailFormatIds: idsToDelete
+			});
+		} catch (error) {
+			actionError = error instanceof Error ? error.message : 'Could not delete email format.';
+		} finally {
+			deletingFormatIds = deletingFormatIds.filter((id) => !idsToDelete.includes(id));
+		}
+	}
+
 	function toFormatItem(format: EmailFormatListRecord): EmailFormatListItem {
+		const isUpdating = isUpdatingFormat(format.id);
+		const isDeleting = isDeletingFormat(format.id);
+		const isBusy = isUpdating || isDeleting;
+
 		return {
 			id: format.id,
 			title: format.title,
@@ -94,23 +171,23 @@
 			actions: [
 				format.status === 'active'
 					? {
-							label: 'Pause',
+							label: isUpdating ? 'Pausing...' : 'Pause',
 							ariaLabel: `Pause ${format.title}`,
-							disabled: true,
-							onSelect: () => {}
+							disabled: isBusy,
+							onSelect: () => setFormatStatus([format.id], 'paused')
 						}
 					: {
-							label: 'Activate',
+							label: isUpdating ? 'Activating...' : 'Activate',
 							ariaLabel: `Activate ${format.title}`,
-							disabled: true,
-							onSelect: () => {}
+							disabled: isBusy,
+							onSelect: () => setFormatStatus([format.id], 'active')
 						},
 				{
-					label: 'Delete',
+					label: isDeleting ? 'Deleting...' : 'Delete',
 					ariaLabel: `Delete ${format.title}`,
 					intent: 'destructive',
-					disabled: true,
-					onSelect: () => {}
+					disabled: isBusy,
+					onSelect: () => deleteFormats([format.id])
 				}
 			]
 		};
@@ -145,34 +222,45 @@
 	}}
 	hasItems={listState !== 'empty'}
 >
-	{#if listState === 'ready'}
+	{#if listState === 'loading'}
+		<ListContentState kind="loading" message="Loading email formats..." />
+	{:else if listState === 'error'}
+		<ListContentState kind="error" message="Could not load email formats." />
+	{:else if listState === 'ready'}
+		{#if actionError}
+			<p class="border-b border-red-100 bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-5">
+				{actionError}
+			</p>
+		{/if}
 		{#if filteredFormatItems.length === 0}
 			<ListContentState kind="empty" message="No matching email formats." />
 		{:else}
 			<SelectableList
 				items={filteredFormatItems}
-			selectAllAriaLabel="Select all email formats"
-			selectedActionsAriaLabel="Selected email format actions"
-			selectedActions={[
-				{
-					label: 'Pause selected',
-					ariaLabel: 'Pause selected email formats',
-					disabled: true,
-					onSelect: () => {}
-				},
-				{
-					label: 'Delete',
-					ariaLabel: 'Delete selected email formats',
-					intent: 'destructive',
-					disabled: true,
-					onSelect: () => {}
-				}
-			]}
-			rowActionsAriaLabel="Email format actions"
-		>
-			{#snippet rowCells(item)}
-				<EmailFormatListRow {item} />
-			{/snippet}
+				selectAllAriaLabel="Select all email formats"
+				selectedActionsAriaLabel="Selected email format actions"
+				selectedActions={[
+					{
+						label: 'Pause selected',
+						ariaLabel: 'Pause selected email formats',
+						disabled: areAnyBusy,
+						onSelect: (selectedFormatIds) =>
+							setFormatStatus(selectedFormatIds as Id<'emailFormats'>[], 'paused')
+					},
+					{
+						label: 'Delete',
+						ariaLabel: 'Delete selected email formats',
+						intent: 'destructive',
+						disabled: areAnyBusy,
+						onSelect: (selectedFormatIds) =>
+							deleteFormats(selectedFormatIds as Id<'emailFormats'>[])
+					}
+				]}
+				rowActionsAriaLabel="Email format actions"
+			>
+				{#snippet rowCells(item)}
+					<EmailFormatListRow {item} />
+				{/snippet}
 			</SelectableList>
 		{/if}
 	{/if}

@@ -1,172 +1,78 @@
-import { SPREADSHEET_CELL_MAX_LENGTH, cellKey, parseCellKey } from '../shared/spreadsheets';
-import { requireViewerWorkspace } from '../backend/auth/viewer';
+import {
+	getViewerWorkspaceRecord,
+	requireViewerWorkspace,
+	type ViewerWorkspace
+} from '../backend/auth/viewer';
+import {
+	normalizeEmailFormatContent,
+	normalizeEmailFormatRules,
+	normalizeSelectedAnswers,
+	toEditableEmailFormatContent
+} from '../backend/email-formats/content';
 import {
 	insertLinkedinContactsForEmailFormat,
 	normalizeLinkedinContactsSource
 } from '../backend/email-formats/linkedin-contacts';
-import { emailFormatPublishInput } from '../backend/validators/email-formats';
-import { mutation } from './_generated/server';
+import {
+	collectEmailFormatRecipientRows,
+	deleteEmailFormatRecipientRows,
+	replaceEmailFormatRecipientRows
+} from '../backend/email-formats/recipients';
+import {
+	deleteEmailFormatsInput,
+	emailFormatCreateFromBuilderInput,
+	emailFormatId,
+	setEmailFormatStatusInput,
+	updateEmailFormatContentInput,
+	updateEmailFormatRecipientsInput,
+	updateEmailFormatRulesInput
+} from '../backend/validators/email-formats';
+import type { Doc, Id } from './_generated/dataModel';
+import type { MutationCtx, QueryCtx } from './_generated/server';
+import { mutation, query } from './_generated/server';
+import { getTeammateDisplayName } from './teammateIdentity';
 
-const MAX_TITLE_LENGTH = 120;
-const MAX_RECIPIENT_LENGTH = 140;
-const MAX_RECIPIENTS = 12;
-const MAX_BODY_BLOCKS = 12;
-const MAX_INLINE_NODES = 80;
-const MAX_BODY_TEXT_LENGTH = 1_000;
-const MAX_VARIABLE_ID_LENGTH = 80;
-const MAX_RULES = 20;
-const MAX_RULE_ID_LENGTH = 80;
-const MAX_RULE_TEXT_LENGTH = 1_500;
-const MAX_SELECTED_ANSWERS = 20;
-const MAX_SELECTED_ANSWER_ID_LENGTH = 80;
-
-type InlineNode =
-	| {
-			type: 'text';
-			text: string;
-	  }
-	| {
-			type: 'variable';
-			variableId: string;
-	  };
-
-function clampText(value: string, maxLength: number) {
-	const normalized = value.trim();
-
-	return normalized.length > maxLength ? normalized.slice(0, maxLength).trim() : normalized;
+function getCreatorDisplayName(creator: Doc<'users'> | null) {
+	return creator?.displayName?.trim() || 'Unknown user';
 }
 
-function normalizeRecipients(recipients: string[]) {
-	return [
-		...new Set(
-			recipients
-				.slice(0, MAX_RECIPIENTS)
-				.map((recipient) => clampText(recipient, MAX_RECIPIENT_LENGTH).replace(/\s+/g, ' '))
-				.filter(Boolean)
+async function getEmailFormatInViewerWorkspace(
+	ctx: QueryCtx | MutationCtx,
+	viewerWorkspace: ViewerWorkspace,
+	emailFormatId: Id<'emailFormats'>
+) {
+	return getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(emailFormatId));
+}
+
+async function deleteLinkedinContactRows(
+	ctx: MutationCtx,
+	workspaceId: Id<'workspaces'>,
+	emailFormatId: Id<'emailFormats'>
+) {
+	const contacts = await ctx.db
+		.query('emailFormatLinkedinContacts')
+		.withIndex('by_workspace_emailFormat', (q) =>
+			q.eq('workspaceId', workspaceId).eq('emailFormatId', emailFormatId)
 		)
-	];
-}
+		.collect();
 
-function normalizeInlineNodes(nodes: InlineNode[], maxTextLength: number) {
-	const normalized: InlineNode[] = [];
-	let remainingTextLength = maxTextLength;
-
-	for (const node of nodes) {
-		if (normalized.length >= MAX_INLINE_NODES || remainingTextLength <= 0) {
-			break;
-		}
-
-		const previous = normalized.at(-1);
-
-		if (node.type === 'variable') {
-			const variableId = clampText(node.variableId, MAX_VARIABLE_ID_LENGTH);
-			const tokenLength = `{${variableId}}`.length;
-
-			if (variableId && tokenLength <= remainingTextLength) {
-				normalized.push({ type: 'variable', variableId });
-				remainingTextLength -= tokenLength;
-			}
-			continue;
-		}
-
-		const text = node.text.slice(0, remainingTextLength);
-
-		if (!text) {
-			continue;
-		}
-
-		if (previous?.type === 'text') {
-			previous.text += text;
-		} else {
-			normalized.push({ type: 'text', text });
-		}
-
-		remainingTextLength -= text.length;
+	for (const contact of contacts) {
+		await ctx.db.delete(contact._id);
 	}
-
-	return normalized;
 }
 
-function normalizeBody(
-	body: Array<{
-		id: string;
-		type: 'paragraph';
-		content: InlineNode[];
-	}>
-) {
-	return body
-		.slice(0, MAX_BODY_BLOCKS)
-		.map((block) => ({
-			id: block.id.trim(),
-			type: 'paragraph' as const,
-			content: normalizeInlineNodes(block.content, MAX_BODY_TEXT_LENGTH)
-		}))
-		.filter((block) => block.id && block.content.length > 0);
-}
-
-function normalizeAttachment(
-	attachment: {
-		filename: string;
-		cellsByKey: Record<string, InlineNode[]>;
-	} | null
-) {
-	if (!attachment) {
-		return null;
-	}
-
-	const filename = clampText(attachment.filename, 160);
-
-	if (!filename) {
-		return null;
-	}
-
-	const cellsByKey: Record<string, InlineNode[]> = {};
-
-	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
-		const address = parseCellKey(key);
-		const normalizedCell = normalizeInlineNodes(cell, SPREADSHEET_CELL_MAX_LENGTH);
-
-		if (address && normalizedCell.length > 0) {
-			cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = normalizedCell;
-		}
-	}
-
-	return {
-		filename,
-		cellsByKey
-	};
-}
-
-function normalizeRules(rules: Array<{ id: string; text: string }>) {
-	return rules
-		.slice(0, MAX_RULES)
-		.map((rule) => ({
-			id: clampText(rule.id, MAX_RULE_ID_LENGTH),
-			text: clampText(rule.text, MAX_RULE_TEXT_LENGTH)
-		}))
-		.filter((rule) => rule.id && rule.text);
-}
-
-function normalizeSelectedAnswers(selectedAnswers: Record<string, string>) {
-	return Object.fromEntries(
-		Object.entries(selectedAnswers)
-			.slice(0, MAX_SELECTED_ANSWERS)
-			.map(([questionId, answerId]) => [questionId.trim(), answerId.trim()] as const)
-			.map(([questionId, answerId]) => [
-				clampText(questionId, MAX_SELECTED_ANSWER_ID_LENGTH),
-				clampText(answerId, MAX_SELECTED_ANSWER_ID_LENGTH)
-			])
-			.filter(([questionId, answerId]) => questionId && answerId)
-	);
-}
-
-export const publishEmailFormat = mutation({
-	args: emailFormatPublishInput,
+export const createEmailFormatFromBuilder = mutation({
+	args: emailFormatCreateFromBuilderInput,
 	handler: async (ctx, args) => {
 		const { user, workspace } = await requireViewerWorkspace(ctx);
 		const builderSlug = args.builderSlug.trim();
-		const title = clampText(args.title, MAX_TITLE_LENGTH);
-		const body = normalizeBody(args.body);
+		const content = normalizeEmailFormatContent({
+			title: args.title,
+			to: args.to,
+			cc: args.cc,
+			attachment: args.attachment,
+			body: args.body
+		});
 		const now = Date.now();
 		const linkedinContactsSource = normalizeLinkedinContactsSource(
 			args.linkedinContactsSource,
@@ -177,11 +83,11 @@ export const publishEmailFormat = mutation({
 			throw new Error('Builder slug is required.');
 		}
 
-		if (!title) {
+		if (!content.title) {
 			throw new Error('Email format title is required.');
 		}
 
-		if (body.length === 0) {
+		if (content.body.length === 0) {
 			throw new Error('Email format body is required.');
 		}
 
@@ -193,12 +99,14 @@ export const publishEmailFormat = mutation({
 			startingPointId: args.startingPointId?.trim() || null,
 			selectedAnswers: normalizeSelectedAnswers(args.selectedAnswers),
 			status: 'paused',
-			title,
-			to: normalizeRecipients(args.to),
-			cc: normalizeRecipients(args.cc),
-			attachment: normalizeAttachment(args.attachment),
-			body,
-			rules: normalizeRules(args.rules),
+			title: content.title,
+			to: content.to,
+			cc: content.cc,
+			attachment: content.attachment,
+			body: content.body,
+			emailDraftVersion: 1,
+			recipientCount: 0,
+			rules: args.builderMode === 'internal-data' ? [] : normalizeEmailFormatRules(args.rules),
 			linkedinContactsSummary: linkedinContactsSource?.summary ?? null,
 			createdAt: now,
 			updatedAt: now
@@ -212,5 +120,264 @@ export const publishEmailFormat = mutation({
 		});
 
 		return { emailFormatId };
+	}
+});
+
+export const listEmailFormats = query({
+	args: {},
+	handler: async (ctx) => {
+		const { workspace } = await requireViewerWorkspace(ctx);
+		const formats = await ctx.db
+			.query('emailFormats')
+			.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
+			.order('desc')
+			.collect();
+
+		return await Promise.all(
+			formats.map(async (format) => {
+				const creator = await ctx.db.get(format.creatorUserId);
+
+				return {
+					id: format._id,
+					title: format.title,
+					status: format.status,
+					createdAt: format.createdAt,
+					creator: {
+						name: getCreatorDisplayName(creator),
+						avatarUrl: creator?.avatar?.url ?? ''
+					}
+				};
+			})
+		);
+	}
+});
+
+export const getEmailFormatDetail = query({
+	args: {
+		emailFormatId
+	},
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const { user, workspace, identity } = viewerWorkspace;
+		const format = await getEmailFormatInViewerWorkspace(
+			ctx,
+			viewerWorkspace,
+			args.emailFormatId
+		);
+
+		if (!format) {
+			return null;
+		}
+
+		const [recipientRows, teammates] = await Promise.all([
+			collectEmailFormatRecipientRows(ctx, workspace._id, format._id),
+			ctx.db
+				.query('teammates')
+				.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
+				.order('desc')
+				.collect()
+		]);
+
+		return {
+			emailFormat: {
+				id: format._id,
+				builderSlug: format.builderSlug,
+				builderMode: format.builderMode,
+				status: format.status,
+				content: toEditableEmailFormatContent(format),
+				emailDraftVersion: format.emailDraftVersion,
+				rules: format.rules,
+				recipientRefs: recipientRows.map((row) => row.recipient),
+				linkedinContactsSummary: format.linkedinContactsSummary,
+				updatedAt: format.updatedAt
+			},
+			recipientPickerPeople: [
+				{
+					id: `user:${user._id}`,
+					name: user.displayName?.trim() || identity.email,
+					avatarUrl: user.avatar?.url ?? ''
+				},
+				...teammates.map((teammate) => ({
+					id: `teammate:${teammate._id}`,
+					name: getTeammateDisplayName(teammate),
+					avatarUrl: ''
+				}))
+			],
+			feedback: [],
+			feedbackUpdatedAt: 0,
+			sentEmails: []
+		};
+	}
+});
+
+export const updateEmailFormatContent = mutation({
+	args: updateEmailFormatContentInput,
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const format = await getEmailFormatInViewerWorkspace(
+			ctx,
+			viewerWorkspace,
+			args.emailFormatId
+		);
+
+		if (!format) {
+			throw new Error('Email format not found.');
+		}
+
+		if (format.emailDraftVersion !== args.baseEmailDraftVersion) {
+			throw new Error('Email format has changed. Reload and try again.');
+		}
+
+		const content = normalizeEmailFormatContent({
+			title: args.title,
+			to: args.to,
+			cc: args.cc,
+			attachment: args.attachment,
+			body: args.body
+		});
+
+		if (!content.title) {
+			throw new Error('Email format title is required.');
+		}
+
+		if (content.body.length === 0) {
+			throw new Error('Email format body is required.');
+		}
+
+		const now = Date.now();
+		const emailDraftVersion = format.emailDraftVersion + 1;
+
+		await ctx.db.patch(args.emailFormatId, {
+			title: content.title,
+			to: content.to,
+			cc: content.cc,
+			attachment: content.attachment,
+			body: content.body,
+			emailDraftVersion,
+			updatedAt: now
+		});
+
+		const updatedFormat = await ctx.db.get(args.emailFormatId);
+
+		if (!updatedFormat) {
+			throw new Error('Unable to save email format.');
+		}
+
+		return {
+			content: toEditableEmailFormatContent(updatedFormat),
+			emailDraftVersion,
+			updatedAt: now
+		};
+	}
+});
+
+export const updateEmailFormatRules = mutation({
+	args: updateEmailFormatRulesInput,
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const format = await getEmailFormatInViewerWorkspace(
+			ctx,
+			viewerWorkspace,
+			args.emailFormatId
+		);
+
+		if (!format) {
+			throw new Error('Email format not found.');
+		}
+
+		const rules = normalizeEmailFormatRules(args.rules);
+		const now = Date.now();
+
+		await ctx.db.patch(args.emailFormatId, {
+			rules,
+			updatedAt: now
+		});
+
+		return { rules, updatedAt: now };
+	}
+});
+
+export const updateEmailFormatRecipients = mutation({
+	args: updateEmailFormatRecipientsInput,
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const format = await getEmailFormatInViewerWorkspace(
+			ctx,
+			viewerWorkspace,
+			args.emailFormatId
+		);
+
+		if (!format) {
+			throw new Error('Email format not found.');
+		}
+
+		const now = Date.now();
+		const recipientRefs = await replaceEmailFormatRecipientRows(
+			ctx,
+			viewerWorkspace,
+			args.emailFormatId,
+			args.recipientRefs,
+			now
+		);
+
+		return { recipientRefs, updatedAt: now };
+	}
+});
+
+export const setEmailFormatStatus = mutation({
+	args: setEmailFormatStatusInput,
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const format = await getEmailFormatInViewerWorkspace(
+			ctx,
+			viewerWorkspace,
+			args.emailFormatId
+		);
+
+		if (!format) {
+			throw new Error('Email format not found.');
+		}
+
+		if (args.status === 'active') {
+			if (format.recipientCount === 0) {
+				throw new Error('Add at least one recipient before activating this format.');
+			}
+
+			if (normalizeEmailFormatRules(format.rules).length === 0) {
+				throw new Error('Add at least one rule before activating this format.');
+			}
+		}
+
+		const now = Date.now();
+
+		await ctx.db.patch(args.emailFormatId, {
+			status: args.status,
+			updatedAt: now
+		});
+
+		return { status: args.status, updatedAt: now };
+	}
+});
+
+export const deleteEmailFormats = mutation({
+	args: deleteEmailFormatsInput,
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+
+		for (const emailFormatId of new Set(args.emailFormatIds)) {
+			const format = await getEmailFormatInViewerWorkspace(
+				ctx,
+				viewerWorkspace,
+				emailFormatId
+			);
+
+			if (!format) {
+				throw new Error('Email format not found.');
+			}
+
+			await deleteEmailFormatRecipientRows(ctx, viewerWorkspace.workspace._id, emailFormatId);
+			await deleteLinkedinContactRows(ctx, viewerWorkspace.workspace._id, emailFormatId);
+			await ctx.db.delete(emailFormatId);
+		}
 	}
 });

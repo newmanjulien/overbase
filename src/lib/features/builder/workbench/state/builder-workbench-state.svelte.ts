@@ -42,7 +42,7 @@ export type BuilderWorkbenchRulesState = {
 	rulesDraft: EmailFormatRule[];
 };
 
-export type BuilderEmailFormatPublishInput = {
+export type BuilderEmailFormatCreateInput = {
 	builderSlug: string;
 	builderMode: BuilderRegistryEntry['mode'];
 	startingPointId: string | null;
@@ -137,7 +137,7 @@ export class BuilderWorkbenchState {
 		return this.workbench.editor?.activeEmailContent.title ?? this.builder.title;
 	}
 
-	get canPublish() {
+	get canCreateFormat() {
 		return this.workbench.step === 'editor' && this.workbench.editor !== null;
 	}
 
@@ -188,7 +188,7 @@ export class BuilderWorkbenchState {
 		}
 	};
 
-	createPublishInput = (): BuilderEmailFormatPublishInput | null => {
+	createFormatInput = (): BuilderEmailFormatCreateInput | null => {
 		const editor = this.workbench.editor;
 
 		if (!editor) {

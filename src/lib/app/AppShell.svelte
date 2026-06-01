@@ -159,6 +159,7 @@
 					title={routeTitleState.title}
 					titleEditable={routeTitleEditable}
 					onTitleChange={handleRouteTitleChange}
+					actions={routeTitleState.actions}
 				/>
 			{/if}
 

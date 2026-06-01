@@ -1,9 +1,10 @@
 <script lang="ts">
-	import EmailDraftPanel from '$lib/domain/email-drafts/EmailDraftPanel.svelte';
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
-	import type { EmailDraft } from '$shared/email-drafts';
+	import type { BuilderEmailContent, BuilderVariableDefinition } from '$lib/features/builder/domain';
+	import type { BuilderVariableDragCoordinator } from '$lib/features/builder/workbench/variables/builder-variable-drag-coordinator.svelte';
 	import EmailFeedbackEmptyState from './EmailFeedbackEmptyState.svelte';
 	import EmailFeedbackPanel from './EmailFeedbackPanel.svelte';
+	import EmailFormatContentPanel from './EmailFormatContentPanel.svelte';
 	import EmailFormatRulesPanel from './EmailFormatRulesPanel.svelte';
 	import SentEmailPreviewPanel from './SentEmailPreviewPanel.svelte';
 	import type { EmailFormatDetailState } from './email-format-detail-state.svelte';
@@ -20,9 +21,14 @@
 		detailState: EmailFormatDetailState;
 		detailView: EmailFormatDetailView;
 		feedbackViewState: EmailFeedbackViewState;
+		canShowFeedbackView: boolean;
+		contentError: string | null;
+		contentVariables: readonly BuilderVariableDefinition[];
+		dragCoordinator: BuilderVariableDragCoordinator;
+		isSavingContent: boolean;
 		loadState: EmailFormatDetailLoadState;
 		onFeedbackChange: (patch: Partial<EmailFeedback>) => void;
-		onSaveDraft: (nextDraft: EmailDraft, baseEmailDraftVersion: number) => Promise<void>;
+		onSaveContent: (content: BuilderEmailContent, baseEmailDraftVersion: number) => Promise<void>;
 		onSaveFeedback: () => void | Promise<void>;
 		onSaveRules: () => void | Promise<void>;
 		onShowFeedbackView: () => void;
@@ -32,8 +38,8 @@
 
 	const EMAIL_FORMAT_DETAIL_SPLIT = {
 		minPrimary: 320,
-		minSecondary: 420,
-		defaultRatio: 0,
+		minSecondary: 400,
+		defaultRatio: 0.35,
 		mobileBreakpoint: 741,
 		keyboardStep: 24,
 		handleWidth: 1
@@ -45,9 +51,14 @@
 		detailState,
 		detailView,
 		feedbackViewState,
+		canShowFeedbackView,
+		contentError,
+		contentVariables,
+		dragCoordinator,
+		isSavingContent,
 		loadState,
 		onFeedbackChange,
-		onSaveDraft,
+		onSaveContent,
 		onSaveFeedback,
 		onSaveRules,
 		onShowFeedbackView,
@@ -88,11 +99,14 @@
 		>
 			{#snippet primary()}
 				{#if detailView === 'rules'}
-					<EmailDraftPanel
-						draft={detailState.emailDraft}
+					<EmailFormatContentPanel
+						editor={detailState.contentEditor}
+						variables={contentVariables}
+						{dragCoordinator}
 						emailDraftVersion={detailState.emailDraftVersion}
-						canEdit
-						onSave={onSaveDraft}
+						isSaving={isSavingContent}
+						error={contentError}
+						onSave={onSaveContent}
 					/>
 				{:else if feedbackViewState.kind === 'selected'}
 					<SentEmailPreviewPanel
@@ -112,7 +126,7 @@
 						canSave={detailState.canSaveRules}
 						onRulesChange={detailState.updateRules}
 						onSave={() => void onSaveRules()}
-						onGiveEmailFeedback={onShowFeedbackView}
+						onGiveEmailFeedback={canShowFeedbackView ? onShowFeedbackView : undefined}
 					/>
 				{:else if feedbackViewState.kind === 'selected'}
 					<EmailFeedbackPanel

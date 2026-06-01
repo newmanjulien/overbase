@@ -17,7 +17,7 @@
 		variables,
 		dragCoordinator,
 		publishDisabled = true,
-		publishLabel = 'Publish',
+		publishLabel = 'Create format',
 		publishError = null,
 		onPublish
 	}: Props = $props();

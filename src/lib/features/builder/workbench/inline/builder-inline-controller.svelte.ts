@@ -61,6 +61,11 @@ type BuilderSurfaceActionParams<Context extends object> = {
 	nodes: readonly BuilderInlineNode[];
 };
 
+type BuilderSurfaceActionMapper<Context extends object, Params> = (
+	element: HTMLElement,
+	params: Params
+) => BuilderSurfaceActionParams<Context>;
+
 type BuilderCaretBookmark = {
 	surface: HTMLElement;
 	range: Range;
@@ -81,7 +86,20 @@ export class BuilderInlineController<Context extends object> {
 		this.adapter = adapter;
 	}
 
-	surfaceAction = (
+	createSurfaceAction = <Params>(mapParams: BuilderSurfaceActionMapper<Context, Params>) => {
+		return (element: HTMLElement, params: Params) => {
+			const action = this.surfaceAction(element, mapParams(element, params));
+
+			return {
+				update: (nextParams: Params) => {
+					action.update(mapParams(element, nextParams));
+				},
+				destroy: action.destroy
+			};
+		};
+	};
+
+	private surfaceAction = (
 		element: HTMLElement,
 		params: BuilderSurfaceActionParams<Context>
 	) => {

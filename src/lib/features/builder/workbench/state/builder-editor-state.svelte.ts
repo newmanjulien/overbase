@@ -8,8 +8,24 @@ import {
 	type BuilderEmailContent
 } from '$lib/features/builder/domain';
 
+type BuilderEditorStateOptions = {
+	onContentChange?: () => void;
+};
+
+type EmailContentFieldUpdateOptions = {
+	notify?: boolean;
+};
+
+type ReplaceEmailContentOptions = {
+	resetDirty?: boolean;
+};
+
 export class BuilderEditorState {
 	private emailContentState: { activeEmailContent: BuilderEmailContent };
+	private dirtyState = $state({
+		contentDirty: false
+	});
+	private onContentChange: (() => void) | null;
 	private recipientsUi = $state({
 		toInputText: '',
 		ccInputText: '',
@@ -21,7 +37,8 @@ export class BuilderEditorState {
 		isOpen: false
 	});
 
-	constructor(content: BuilderEmailContent) {
+	constructor(content: BuilderEmailContent, options: BuilderEditorStateOptions = {}) {
+		this.onContentChange = options.onContentChange ?? null;
 		this.emailContentState = $state({
 			activeEmailContent: normalizeBuilderEmailContent(content)
 		});
@@ -72,20 +89,39 @@ export class BuilderEditorState {
 		return this.attachmentUi.isOpen;
 	}
 
-	replaceEmailContent = (nextContent: BuilderEmailContent) => {
+	get contentDirty() {
+		return this.dirtyState.contentDirty;
+	}
+
+	setContentChangeHandler = (onContentChange: (() => void) | null) => {
+		this.onContentChange = onContentChange;
+	};
+
+	replaceEmailContent = (
+		nextContent: BuilderEmailContent,
+		{ resetDirty = false }: ReplaceEmailContentOptions = {}
+	) => {
 		this.emailContentState.activeEmailContent = normalizeBuilderEmailContent(nextContent);
 		this.syncRecipientInputs();
+		if (resetDirty) {
+			this.dirtyState.contentDirty = false;
+		}
 	};
 
 	setEmailContentField = <Key extends keyof BuilderEmailContent>(
 		field: Key,
-		value: BuilderEmailContent[Key]
+		value: BuilderEmailContent[Key],
+		{ notify = true }: EmailContentFieldUpdateOptions = {}
 	) => {
 		this.replaceEmailContent(updateBuilderEmailContentField(this.activeEmailContent, field, value));
+		if (notify) {
+			this.dirtyState.contentDirty = true;
+			this.onContentChange?.();
+		}
 	};
 
-	updateTitle = (nextTitle: string) => {
-		this.setEmailContentField('title', nextTitle);
+	updateTitle = (nextTitle: string, options: EmailContentFieldUpdateOptions = {}) => {
+		this.setEmailContentField('title', nextTitle, options);
 	};
 
 	setRecipientInput = (field: 'to' | 'cc', value: string) => {
@@ -138,11 +174,12 @@ export class BuilderEditorState {
 			!this.activeEmailContent.attachment ||
 			!confirmDelete(this.activeEmailContent.attachment.filename)
 		) {
-			return;
+			return false;
 		}
 
 		this.setEmailContentField('attachment', null);
 		this.attachmentUi.isOpen = false;
+		return true;
 	};
 
 	setOpenAttachment = (attachment: NonNullable<BuilderEmailContent['attachment']>) => {

@@ -25,9 +25,9 @@
 
 <div class="grid min-w-0 grid-cols-1 items-center gap-x-4 sm:grid-cols-[minmax(0,1fr)_max-content_auto]">
 	<div class="min-w-0">
-			{#if item.href}
-				<a
-					href={resolve(item.href)}
+		{#if item.href}
+			<a
+				href={resolve(item.href)}
 				class="flex min-w-0 flex-col gap-0.5 rounded-sm focus-visible:ring-2 focus-visible:ring-stone-300 focus-visible:outline-none"
 			>
 				<span class="truncate text-[0.7rem] text-stone-950">

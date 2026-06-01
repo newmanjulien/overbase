@@ -87,6 +87,20 @@
 		fallbackInsertionSurface: getFirstCellSurface
 	});
 
+	const cellSurface = controller.createSurfaceAction<CellSurfaceParams>((element, params) => {
+		element.dataset.builderSpreadsheetCellKey = cellKey(params.rowIndex, params.columnIndex);
+		element.dataset.builderSpreadsheetRowIndex = String(params.rowIndex);
+		element.dataset.builderSpreadsheetColumnIndex = String(params.columnIndex);
+
+		return {
+			context: {
+				rowIndex: params.rowIndex,
+				columnIndex: params.columnIndex
+			},
+			nodes: params.nodes
+		};
+	});
+
 	$effect(() => {
 		return dragCoordinator.registerRegion({
 			id: 'spreadsheet',
@@ -151,39 +165,6 @@
 
 	function normalizeInlineNodes(nodes: readonly BuilderInlineNode[]) {
 		return normalizeBuilderSpreadsheetCell(nodes);
-	}
-
-	function cellSurface(element: HTMLElement, params: CellSurfaceParams) {
-		element.dataset.builderSpreadsheetCellKey = cellKey(params.rowIndex, params.columnIndex);
-		element.dataset.builderSpreadsheetRowIndex = String(params.rowIndex);
-		element.dataset.builderSpreadsheetColumnIndex = String(params.columnIndex);
-
-		const action = controller.surfaceAction(element, {
-			context: {
-				rowIndex: params.rowIndex,
-				columnIndex: params.columnIndex
-			},
-			nodes: params.nodes
-		});
-
-		return {
-			update(nextParams: CellSurfaceParams) {
-				element.dataset.builderSpreadsheetCellKey = cellKey(
-					nextParams.rowIndex,
-					nextParams.columnIndex
-				);
-				element.dataset.builderSpreadsheetRowIndex = String(nextParams.rowIndex);
-				element.dataset.builderSpreadsheetColumnIndex = String(nextParams.columnIndex);
-				action.update({
-					context: {
-						rowIndex: nextParams.rowIndex,
-						columnIndex: nextParams.columnIndex
-					},
-					nodes: nextParams.nodes
-				});
-			},
-			destroy: action.destroy
-		};
 	}
 
 	function normalizedAttachmentWithCells(
@@ -422,7 +403,7 @@
 									role="textbox"
 									tabindex={disabled ? -1 : 0}
 									aria-label={`Row ${rowIndex + 1}, column ${cellIndex + 1}`}
-									class="builder-spreadsheet-cell-surface flex h-8 w-full min-w-0 items-center overflow-hidden text-ellipsis whitespace-nowrap outline-none"
+									class="builder-spreadsheet-cell-surface"
 									class:font-medium={rowIndex === 0}
 									class:text-stone-900={rowIndex === 0}
 									class:text-stone-800={rowIndex !== 0}
@@ -443,7 +424,17 @@
 <style>
 	.builder-spreadsheet-cell-surface {
 		box-sizing: border-box;
+		caret-color: rgb(28 25 23);
+		display: block;
+		height: 2rem;
 		line-height: 1rem;
+		min-width: 1ch;
+		outline: none;
+		overflow: hidden;
+		padding-block: 0.5rem;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		width: 100%;
 	}
 
 	.builder-spreadsheet-cell-surface[contenteditable='false'] {

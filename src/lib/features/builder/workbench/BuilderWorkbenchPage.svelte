@@ -3,7 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
 	import { onDestroy, onMount, untrack } from 'svelte';
-	import { APP_LINKS } from '$lib/app/app-links';
+	import { emailFormatLink } from '$lib/app/app-links';
 	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
 	import { Button } from '$lib/ui';
@@ -40,9 +40,9 @@
 	);
 	let isMobileWorkbench = $state(false);
 	let linkDataSourcesModalOpen = $state(false);
-	let publishing = $state(false);
-	let publishError = $state<string | null>(null);
-	let publishStateBuilderSlug = $state('');
+	let creatingFormat = $state(false);
+	let createFormatError = $state<string | null>(null);
+	let createFormatStateBuilderSlug = $state('');
 	let linkedinContactsImport = $state<ContactImport | null>(null);
 	const linkedinContactsAttachmentStatus = $derived(
 		linkedinContactsImport
@@ -56,22 +56,24 @@
 		builder.slug === 'reconnect-linkedin' &&
 			workbench.selectedStartingPointId === 'linkedin-reconnect'
 	);
-	const publishPrerequisiteHint = $derived(
+	const createFormatPrerequisiteHint = $derived(
 		requiresLinkedinContacts && !linkedinContactsImport
 			? {
-					text: 'Add your LinkedIn contacts CSV to enable Publish',
+					text: 'Add your LinkedIn contacts CSV to enable Create format',
 					actionLabel: 'Add contacts',
 					onAction: openLinkedinContactsModal
 				}
 			: null
 	);
-	const publishDisabled = $derived(
-		publishing || !workbench.canPublish || (requiresLinkedinContacts && !linkedinContactsImport)
+	const createFormatDisabled = $derived(
+		creatingFormat ||
+			!workbench.canCreateFormat ||
+			(requiresLinkedinContacts && !linkedinContactsImport)
 	);
-	const publishLabel = $derived(publishing ? 'Publishing...' : 'Publish');
+	const createFormatLabel = $derived(creatingFormat ? 'Creating...' : 'Create format');
 
 	const linkedinContactsRequiredError =
-		'Upload your LinkedIn contacts CSV before publishing this format.';
+		'Upload your LinkedIn contacts CSV before creating this format.';
 
 	onMount(() => {
 		return watchMediaQuery(
@@ -91,10 +93,10 @@
 	});
 
 	$effect(() => {
-		if (publishStateBuilderSlug !== builder.slug) {
-			publishStateBuilderSlug = builder.slug;
-			publishing = false;
-			publishError = null;
+		if (createFormatStateBuilderSlug !== builder.slug) {
+			createFormatStateBuilderSlug = builder.slug;
+			creatingFormat = false;
+			createFormatError = null;
 			linkedinContactsImport = null;
 		}
 	});
@@ -119,7 +121,7 @@
 	});
 
 	function getErrorMessage(error: unknown) {
-		return error instanceof Error ? error.message : 'Could not publish email format.';
+		return error instanceof Error ? error.message : 'Could not create email format.';
 	}
 
 	function openLinkedinContactsModal() {
@@ -129,40 +131,40 @@
 	function acceptLinkedinContactsImport(contactsImport: ContactImport) {
 		linkedinContactsImport = contactsImport;
 
-		if (publishError === linkedinContactsRequiredError) {
-			publishError = null;
+		if (createFormatError === linkedinContactsRequiredError) {
+			createFormatError = null;
 		}
 	}
 
-	async function publishEmailFormat() {
-		if (publishing) {
+	async function createEmailFormat() {
+		if (creatingFormat) {
 			return;
 		}
 
-		const input = workbench.createPublishInput();
+		const input = workbench.createFormatInput();
 
 		if (!input) {
 			return;
 		}
 
 		if (requiresLinkedinContacts && !linkedinContactsImport) {
-			publishError = linkedinContactsRequiredError;
+			createFormatError = linkedinContactsRequiredError;
 			linkDataSourcesModalOpen = true;
 			return;
 		}
 
 		input.linkedinContactsSource = linkedinContactsImport;
 
-		publishing = true;
-		publishError = null;
+		creatingFormat = true;
+		createFormatError = null;
 
 		try {
-			await client.mutation(api.emailFormats.publishEmailFormat, input);
-			await goto(resolve(APP_LINKS.emailFormats.pathname));
+			const result = await client.mutation(api.emailFormats.createEmailFormatFromBuilder, input);
+			await goto(resolve(emailFormatLink(result.emailFormatId).pathname));
 		} catch (error) {
-			publishError = getErrorMessage(error);
+			createFormatError = getErrorMessage(error);
 		} finally {
-			publishing = false;
+			creatingFormat = false;
 		}
 	}
 </script>
@@ -201,11 +203,11 @@
 					/>
 				</div>
 				<BuilderPublishActionBar
-					disabled={publishDisabled}
-					label={publishLabel}
-					error={publishError}
-					onPublish={publishEmailFormat}
-					{publishPrerequisiteHint}
+					disabled={createFormatDisabled}
+					label={createFormatLabel}
+					error={createFormatError}
+					onPublish={createEmailFormat}
+					publishPrerequisiteHint={createFormatPrerequisiteHint}
 					contactAttachmentStatus={linkedinContactsAttachmentStatus}
 					onOpenContactAttachment={openLinkedinContactsModal}
 					buttonClass="h-10 w-full text-[0.8rem]"
@@ -235,10 +237,10 @@
 					onClose={workbench.closeVariablePicker}
 				/>
 				<BuilderPublishActionBar
-					disabled={publishDisabled}
-					label={publishLabel}
-					error={publishError}
-					onPublish={publishEmailFormat}
+					disabled={createFormatDisabled}
+					label={createFormatLabel}
+					error={createFormatError}
+					onPublish={createEmailFormat}
 					buttonClass="h-10 w-full text-[0.8rem]"
 					mobileOrder="secondary-first"
 				>
@@ -285,11 +287,11 @@
 								canEditRuleList={false}
 							/>
 							<BuilderPublishActionBar
-								disabled={publishDisabled}
-								label={publishLabel}
-								error={publishError}
-								onPublish={publishEmailFormat}
-								{publishPrerequisiteHint}
+								disabled={createFormatDisabled}
+								label={createFormatLabel}
+								error={createFormatError}
+								onPublish={createEmailFormat}
+								publishPrerequisiteHint={createFormatPrerequisiteHint}
 								contactAttachmentStatus={linkedinContactsAttachmentStatus}
 								onOpenContactAttachment={openLinkedinContactsModal}
 							/>
@@ -298,10 +300,10 @@
 						<BuilderEditorSidePanel
 							variables={builder.variables}
 							dragCoordinator={variableDragCoordinator}
-							{publishDisabled}
-							{publishLabel}
-							{publishError}
-							onPublish={publishEmailFormat}
+							publishDisabled={createFormatDisabled}
+							publishLabel={createFormatLabel}
+							publishError={createFormatError}
+							onPublish={createEmailFormat}
 						/>
 					{/if}
 				{/if}

@@ -1,17 +1,20 @@
 import {
-	createDefaultEmailDraft,
-	type EmailDraft
-} from '$shared/email-drafts';
+	cloneBuilderEmailContent,
+	type BuilderEmailContent
+} from '$lib/features/builder/domain';
+import { BuilderEditorState } from '$lib/features/builder/workbench/state/builder-editor-state.svelte';
 import type {
+	EmailFormatContent,
 	EmailFormatRecipientRef,
 	EmailFeedback,
 	EmailFormatRule
 } from './email-format-detail-types';
+import { getFormatRecipientKey } from './email-format-detail-types';
 
 type EmailFormatDetailSnapshot = {
 	emailFormat: {
 		id: string;
-		emailDraft: EmailDraft;
+		content: EmailFormatContent;
 		emailDraftVersion: number;
 		rules: EmailFormatRule[];
 		recipientRefs: EmailFormatRecipientRef[];
@@ -43,6 +46,20 @@ function areRulesEqual(firstRules: EmailFormatRule[], secondRules: EmailFormatRu
 	return JSON.stringify(firstRules) === JSON.stringify(secondRules);
 }
 
+function cloneRecipientRefs(refs: EmailFormatRecipientRef[]) {
+	return refs.map((ref) => ({ ...ref }));
+}
+
+function areRecipientRefsEqual(
+	firstRefs: EmailFormatRecipientRef[],
+	secondRefs: EmailFormatRecipientRef[]
+) {
+	const firstKeys = firstRefs.map(getFormatRecipientKey);
+	const secondKeys = secondRefs.map(getFormatRecipientKey);
+
+	return JSON.stringify(firstKeys) === JSON.stringify(secondKeys);
+}
+
 export function areEmailFormatRulesFilled(rules: EmailFormatRule[]) {
 	return rules.every((rule) => rule.text.trim().length > 0);
 }
@@ -63,11 +80,14 @@ export function createEmailFormatDetailState() {
 	let syncedRulesUpdatedAt = $state(0);
 	let syncedRecipientsUpdatedAt = $state(0);
 	let syncedFeedbackUpdatedAt = $state(-1);
-	let emailDraft = $state<EmailDraft>(createDefaultEmailDraft());
+	let contentEditor = $state<BuilderEditorState | null>(null);
+	let savedContent = $state<BuilderEmailContent | null>(null);
+	let contentDirty = $state(false);
 	let emailDraftVersion = $state(0);
 	let rulesDraft = $state<EmailFormatRule[]>([]);
 	let savedRules = $state<EmailFormatRule[]>([]);
 	let selectedRecipientRefs = $state<EmailFormatRecipientRef[]>([]);
+	let savedRecipientRefs = $state<EmailFormatRecipientRef[]>([]);
 	let selectedSentEmailIndex = $state(0);
 	let feedbackDraftsBySentEmailId = $state<Record<string, EmailFeedback>>({});
 	let savedFeedbackBySentEmailId = $state<Record<string, EmailFeedback>>({});
@@ -78,6 +98,23 @@ export function createEmailFormatDetailState() {
 
 	function canSaveRules() {
 		return hasRuleChanges() && areEmailFormatRulesFilled(rulesDraft);
+	}
+
+	function hasRecipientChanges() {
+		return !areRecipientRefsEqual(selectedRecipientRefs, savedRecipientRefs);
+	}
+
+	function createContentEditor(content: BuilderEmailContent) {
+		return new BuilderEditorState(content, { onContentChange: markContentChanged });
+	}
+
+	function replaceEditorContent(nextContent: BuilderEmailContent) {
+		if (contentEditor) {
+			contentEditor.setContentChangeHandler(markContentChanged);
+			contentEditor.replaceEmailContent(nextContent, { resetDirty: true });
+		} else {
+			contentEditor = createContentEditor(nextContent);
+		}
 	}
 
 	function sync(
@@ -95,7 +132,10 @@ export function createEmailFormatDetailState() {
 		}
 
 		if (detail.emailFormat.emailDraftVersion > syncedEmailDraftVersion) {
-			emailDraft = detail.emailFormat.emailDraft;
+			const nextContent = cloneBuilderEmailContent(detail.emailFormat.content);
+			replaceEditorContent(nextContent);
+			savedContent = cloneBuilderEmailContent(nextContent);
+			contentDirty = false;
 			emailDraftVersion = detail.emailFormat.emailDraftVersion;
 			syncedEmailDraftVersion = detail.emailFormat.emailDraftVersion;
 		}
@@ -106,8 +146,13 @@ export function createEmailFormatDetailState() {
 			syncedRulesUpdatedAt = detail.emailFormat.updatedAt;
 		}
 
-		if (syncRecipients && detail.emailFormat.updatedAt > syncedRecipientsUpdatedAt) {
-			selectedRecipientRefs = [...detail.emailFormat.recipientRefs];
+		if (
+			syncRecipients &&
+			detail.emailFormat.updatedAt > syncedRecipientsUpdatedAt &&
+			!hasRecipientChanges()
+		) {
+			selectedRecipientRefs = cloneRecipientRefs(detail.emailFormat.recipientRefs);
+			savedRecipientRefs = cloneRecipientRefs(detail.emailFormat.recipientRefs);
 			syncedRecipientsUpdatedAt = detail.emailFormat.updatedAt;
 		}
 
@@ -131,10 +176,25 @@ export function createEmailFormatDetailState() {
 		}
 	}
 
-	function markEmailDraftSaved(nextEmailDraft: EmailDraft, nextEmailDraftVersion: number) {
-		emailDraft = nextEmailDraft;
+	function markContentSaved(nextContent: BuilderEmailContent, nextEmailDraftVersion: number) {
+		const normalizedContent = cloneBuilderEmailContent(nextContent);
+		replaceEditorContent(normalizedContent);
+		savedContent = cloneBuilderEmailContent(normalizedContent);
+		contentDirty = false;
 		emailDraftVersion = nextEmailDraftVersion;
 		syncedEmailDraftVersion = nextEmailDraftVersion;
+	}
+
+	function replaceContentDraft(nextContent: BuilderEmailContent) {
+		replaceEditorContent(nextContent);
+	}
+
+	function markContentChanged() {
+		contentDirty = true;
+	}
+
+	function updateContentTitle(nextTitle: string) {
+		contentEditor?.updateTitle(nextTitle, { notify: false });
 	}
 
 	function updateRules(nextRules: EmailFormatRule[]) {
@@ -148,11 +208,12 @@ export function createEmailFormatDetailState() {
 	}
 
 	function updateSelectedRecipientRefs(nextRefs: EmailFormatRecipientRef[]) {
-		selectedRecipientRefs = nextRefs;
+		selectedRecipientRefs = cloneRecipientRefs(nextRefs);
 	}
 
 	function markRecipientsSaved(nextRefs: EmailFormatRecipientRef[], updatedAt: number) {
-		selectedRecipientRefs = [...nextRefs];
+		selectedRecipientRefs = cloneRecipientRefs(nextRefs);
+		savedRecipientRefs = cloneRecipientRefs(nextRefs);
 		syncedRecipientsUpdatedAt = updatedAt;
 	}
 
@@ -197,11 +258,20 @@ export function createEmailFormatDetailState() {
 	}
 
 	return {
-		get emailDraft() {
-			return emailDraft;
+		get contentEditor() {
+			return contentEditor;
 		},
 		get emailDraftVersion() {
 			return emailDraftVersion;
+		},
+		get emailContent() {
+			return contentEditor?.activeEmailContent ?? null;
+		},
+		get savedContent() {
+			return savedContent;
+		},
+		get contentDirty() {
+			return contentEditor?.contentDirty ?? contentDirty;
 		},
 		get rulesDraft() {
 			return rulesDraft;
@@ -220,11 +290,14 @@ export function createEmailFormatDetailState() {
 		},
 		canSaveFeedback,
 		getFeedbackDraft,
-		markEmailDraftSaved,
+		markContentSaved,
+		markContentChanged,
 		markFeedbackSaved,
 		markRulesSaved,
 		markRecipientsSaved,
+		replaceContentDraft,
 		sync,
+		updateContentTitle,
 		updateFeedback,
 		updateRules,
 		updateSelectedRecipientRefs

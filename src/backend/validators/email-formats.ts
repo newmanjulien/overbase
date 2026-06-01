@@ -30,6 +30,13 @@ export const emailFormatRule = v.object({
 	text: v.string()
 });
 
+export const emailFormatId = v.id('emailFormats');
+
+export const emailFormatRecipientRef = v.union(
+	v.object({ kind: v.literal('user'), userId: v.id('users') }),
+	v.object({ kind: v.literal('teammate'), teammateId: v.id('teammates') })
+);
+
 export const emailFormatLinkedinContactInput = v.object({
 	firstName: v.string(),
 	lastName: v.string(),
@@ -42,7 +49,7 @@ export const emailFormatLinkedinContactInput = v.object({
 	sourceRowNumber: v.number()
 });
 
-export const emailFormatPublishInput = {
+export const emailFormatCreateFromBuilderInput = {
 	builderSlug: v.string(),
 	builderMode: emailFormatBuilderMode,
 	startingPointId: v.union(v.string(), v.null()),
@@ -60,4 +67,33 @@ export const emailFormatPublishInput = {
 		}),
 		v.null()
 	)
+};
+
+export const updateEmailFormatContentInput = {
+	emailFormatId,
+	baseEmailDraftVersion: v.number(),
+	title: v.string(),
+	to: v.array(v.string()),
+	cc: v.array(v.string()),
+	attachment: v.union(emailFormatSpreadsheetAttachment, v.null()),
+	body: v.array(emailFormatBodyBlock)
+};
+
+export const updateEmailFormatRulesInput = {
+	emailFormatId,
+	rules: v.array(emailFormatRule)
+};
+
+export const updateEmailFormatRecipientsInput = {
+	emailFormatId,
+	recipientRefs: v.array(emailFormatRecipientRef)
+};
+
+export const setEmailFormatStatusInput = {
+	emailFormatId,
+	status: emailFormatStatus
+};
+
+export const deleteEmailFormatsInput = {
+	emailFormatIds: v.array(emailFormatId)
 };

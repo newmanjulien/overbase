@@ -78,6 +78,11 @@
 		insertIntoEmptyDocument: insertVariableIntoEmptyBody
 	});
 
+	const inlineSurface = controller.createSurfaceAction<InlineSurfaceParams>((_element, params) => ({
+		context: { blockId: params.blockId },
+		nodes: params.nodes
+	}));
+
 	$effect(() => {
 		return dragCoordinator.registerRegion({
 			id: 'body',
@@ -140,13 +145,6 @@
 				block.id === selected.blockId &&
 				block.content[selected.nodeIndex]?.type === 'variable'
 		);
-	}
-
-	function inlineSurface(element: HTMLElement, params: InlineSurfaceParams) {
-		return controller.surfaceAction(element, {
-			context: { blockId: params.blockId },
-			nodes: params.nodes
-		});
 	}
 
 	function updateInlineContent(blockId: string, content: BuilderInlineNode[]) {
