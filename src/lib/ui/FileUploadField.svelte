@@ -30,7 +30,7 @@
 
 	const fieldClass = $derived(
 		cn(
-			'w-full rounded-sm border border-dashed border-stone-200 bg-stone-50/45 p-3 text-left transition-colors',
+			'w-full rounded-sm border border-dashed border-stone-200 bg-stone-50/45 p-2.5 text-left transition-colors',
 			!disabled && 'cursor-pointer hover:border-stone-300 hover:bg-stone-50/80',
 			disabled && 'cursor-default opacity-60',
 			isDragging && !disabled && 'border-info-200 bg-info-50',
@@ -112,12 +112,12 @@
 		ondragleave={handleDragLeave}
 		ondrop={handleDrop}
 	>
-		<span class="flex items-start gap-3">
+		<span class="flex items-start gap-2.5">
 			<span
-				class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-sm border border-stone-200 bg-white text-stone-500"
+				class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-sm border border-stone-200 bg-white text-stone-500"
 				aria-hidden="true"
 			>
-				<UploadSimpleIcon size={16} weight="regular" />
+				<UploadSimpleIcon size={14} weight="regular" />
 			</span>
 			<span class="min-w-0 flex-1">
 				<span class="block text-[0.76rem] leading-tight font-medium text-stone-950">

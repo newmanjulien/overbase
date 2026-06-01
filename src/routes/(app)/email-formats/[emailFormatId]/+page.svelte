@@ -1,11 +1,17 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
+	import { APP_LINKS } from '$lib/app/app-links';
 	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
+	import type { FloatingActionMenuAction } from '$lib/ui';
 	import { FormatVariableDragCoordinator } from '$lib/features/format-starters/creator/variables/format-variable-drag-coordinator.svelte';
 	import EmailFormatConfigureDesktop from '$lib/features/email-formats/configure/EmailFormatConfigureDesktop.svelte';
+	import EmailFormatDeleteModal from '$lib/features/email-formats/configure/EmailFormatDeleteModal.svelte';
 	import EmailFormatHeaderActions from '$lib/features/email-formats/configure/EmailFormatHeaderActions.svelte';
 	import EmailFormatConfigureMobile from '$lib/features/email-formats/configure/EmailFormatConfigureMobile.svelte';
+	import ReconnectLinkedinContactsModal from '$lib/features/format-starters/creator/reconnect-linkedin/ReconnectLinkedinContactsModal.svelte';
 	import {
 		createTimedNotice,
 		getActivationSuccessMessage
@@ -20,13 +26,14 @@
 		EmailFormatContent,
 		EmailFormatConfigureLoadState,
 		EmailFormatConfigureView,
+		EmailFormatRule,
 		SentEmail
 	} from '$lib/features/email-formats/configure/email-format-configure-types';
+	import type { ContactImport } from '$lib/features/external-data/linkedin-contacts-csv';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { onDestroy, untrack } from 'svelte';
 	import {
-		getEmailFormatActivationMissingMessageFromError,
-		getEmailFormatActivationReadiness
+		getEmailFormatActivationMissingMessageFromError
 	} from '$shared/email-format-activation';
 	import type { PageProps } from './$types';
 
@@ -43,6 +50,13 @@
 	let configureView = $state<EmailFormatConfigureView>('rules');
 	let actionError = $state<string | null>(null);
 	let contentError = $state<string | null>(null);
+	let deleteModalOpen = $state(false);
+	let deleteError = $state<string | null>(null);
+	let isDeleting = $state(false);
+	let linkedinContactsModalOpen = $state(false);
+	let activeLinkedinContactsRule = $state<EmailFormatRule | null>(null);
+	let linkedinContactsImport = $state<ContactImport | null>(null);
+	let isAddingLinkedinContacts = $state(false);
 	let isSavingRecipients = $state(false);
 	let isUpdatingStatus = $state(false);
 	const activationSuccessNotice = createTimedNotice();
@@ -66,20 +80,29 @@
 	const contentEditPolicy = $derived(formatDefinition?.contentEditPolicy ?? null);
 	const rulesEditPolicy = $derived(formatDefinition?.rulesEditPolicy ?? null);
 	const ruleDataSourceAction = $derived(formatDefinition?.ruleDataSourceAction ?? undefined);
+	const ruleDataSourceModal = $derived(formatDefinition?.ruleDataSourceModal ?? 'default');
+	const requiredLinkedinContactsRuleId = $derived(
+		formatDefinition?.requiredLinkedinContactsRuleId ?? null
+	);
 	const ruleInfoCard = $derived(formatDefinition?.ruleInfoCard ?? null);
 	const titleEditable = $derived(Boolean(contentEditPolicy?.title));
-	const activationReadiness = $derived.by(() =>
+	const activationReadiness = $derived(
 		emailFormatStatus === 'paused'
-			? getEmailFormatActivationReadiness({
-					recipientCount: configureState.savedRecipientRefs.length,
-					rules: configureState.savedRules
-				})
+			? (configureQuery.data?.emailFormat.activation ?? null)
 			: null
 	);
 	const activationBlockerMessage = $derived(activationReadiness?.message ?? null);
+	const activationNeedsLinkedinContacts = $derived(
+		Boolean(activationReadiness?.missingRequirements.includes('linkedinContacts'))
+	);
+	const activationBlockerActionLabel = $derived(
+		activationNeedsLinkedinContacts && ruleDataSourceModal === 'reconnect-linkedin'
+			? 'Add contacts'
+			: null
+	);
 	const activationReadyMessage = $derived(
 		activationReadiness?.canActivate && lastActivatedAt === null
-			? "This format is ready to activate. Click on the 'Paused' button"
+			? "This format is ready. When you activate it, recipients will start receiving emails"
 			: null
 	);
 	const statusToggleDisabled = $derived(Boolean(activationBlockerMessage));
@@ -149,6 +172,25 @@
 		};
 	});
 
+	$effect(() => {
+		const overflowActions: FloatingActionMenuAction[] = [
+			{
+				label: 'Delete',
+				intent: 'destructive',
+				disabled: isDeleting,
+				onSelect: openDeleteModal
+			}
+		];
+
+		routeTitleState.overflowActions = overflowActions;
+
+		return () => {
+			if (routeTitleState.overflowActions === overflowActions) {
+				routeTitleState.overflowActions = [];
+			}
+		};
+	});
+
 	onDestroy(() => {
 		dragCoordinator.endDrag();
 		activationSuccessNotice.destroy();
@@ -160,6 +202,112 @@
 
 	function getContentSaveError(error: unknown) {
 		return error instanceof Error ? error.message : 'Could not save email format.';
+	}
+
+	function openDeleteModal() {
+		deleteError = null;
+		deleteModalOpen = true;
+	}
+
+	function closeDeleteModal() {
+		if (isDeleting) {
+			return;
+		}
+
+		deleteModalOpen = false;
+		deleteError = null;
+	}
+
+	function openRuleDataSources(rule: EmailFormatRule) {
+		if (ruleDataSourceModal !== 'reconnect-linkedin') {
+			return;
+		}
+
+		actionError = null;
+		activeLinkedinContactsRule = rule;
+		linkedinContactsImport = null;
+		linkedinContactsModalOpen = true;
+	}
+
+	function openActivationLinkedinContacts() {
+		if (!requiredLinkedinContactsRuleId) {
+			return;
+		}
+
+		const rule = configureState.savedRules.find(
+			(savedRule) => savedRule.id === requiredLinkedinContactsRuleId
+		);
+
+		if (rule) {
+			openRuleDataSources(rule);
+		}
+	}
+
+	function closeLinkedinContactsModal() {
+		if (isAddingLinkedinContacts) {
+			return;
+		}
+
+		linkedinContactsModalOpen = false;
+		activeLinkedinContactsRule = null;
+		linkedinContactsImport = null;
+	}
+
+	async function addLinkedinContactsToActiveRule(contactsImport: ContactImport) {
+		const rule = activeLinkedinContactsRule;
+
+		if (!rule || isAddingLinkedinContacts) {
+			return;
+		}
+
+		linkedinContactsImport = contactsImport;
+		actionError = null;
+		isAddingLinkedinContacts = true;
+
+		try {
+			await client.mutation(api.emailFormats.addLinkedinContactsSourceToEmailFormatRule, {
+				emailFormatId,
+				ruleId: rule.id,
+				externalDataImport: {
+					kind: 'linkedinContacts',
+					fileName: contactsImport.fileName,
+					contacts: contactsImport.contacts
+				}
+			});
+			linkedinContactsModalOpen = false;
+			activeLinkedinContactsRule = null;
+			linkedinContactsImport = null;
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : 'Could not add LinkedIn contacts.';
+			actionError = message;
+			throw new Error(message);
+		} finally {
+			isAddingLinkedinContacts = false;
+		}
+	}
+
+	async function deleteEmailFormat() {
+		if (isDeleting) {
+			return;
+		}
+
+		deleteError = null;
+		actionError = null;
+		isDeleting = true;
+
+		try {
+			await client.mutation(api.emailFormats.deleteEmailFormats, {
+				emailFormatIds: [emailFormatId]
+			});
+			await goto(resolve(APP_LINKS.emailFormats.pathname), { replaceState: true });
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Could not delete email format.';
+			deleteError = message;
+			actionError = message;
+		} finally {
+			isDeleting = false;
+		}
 	}
 
 	function toEmailContentInput(content: EmailFormatContent) {
@@ -450,13 +598,15 @@
 
 <EmailFormatConfigureDesktop
 	{actionError}
-	deleteError={null}
+	{deleteError}
 	{configureState}
 	{configureView}
 	{feedbackViewState}
 	{activationBlockerMessage}
+	{activationBlockerActionLabel}
 	{activationReadyMessage}
 	activationSuccessMessage={activationSuccessNotice.message}
+	{isUpdatingStatus}
 	{contentError}
 	{contentEditPolicy}
 	{contentVariables}
@@ -469,9 +619,16 @@
 	onKeepMineContent={keepMineContent}
 	onKeepMineRules={keepMineRules}
 	onKeepMineTitle={keepMineTitle}
+	onLinkRuleDataSources={ruleDataSourceModal === 'reconnect-linkedin'
+		? openRuleDataSources
+		: undefined}
 	onSaveContent={saveContent}
 	onSaveFeedback={saveFeedback}
 	onSaveRules={saveRules}
+	onActivationBlockerAction={activationBlockerActionLabel
+		? openActivationLinkedinContacts
+		: undefined}
+	onActivateFormat={toggleStatus}
 	onShowNextSentEmail={showNextSentEmail}
 	onShowPreviousSentEmail={showPreviousSentEmail}
 	onUseLatestContent={useLatestContent}
@@ -479,11 +636,22 @@
 	onUseLatestTitle={useLatestTitle}
 />
 
+<EmailFormatDeleteModal
+	open={deleteModalOpen}
+	title={configureState.titleDraft}
+	deleting={isDeleting}
+	error={deleteError}
+	onClose={closeDeleteModal}
+	onConfirm={deleteEmailFormat}
+/>
+
 <EmailFormatConfigureMobile
 	{actionError}
 	{activationBlockerMessage}
+	{activationBlockerActionLabel}
 	{activationReadyMessage}
 	activationSuccessMessage={activationSuccessNotice.message}
+	{isUpdatingStatus}
 	{contentError}
 	{contentEditPolicy}
 	{contentVariables}
@@ -496,9 +664,26 @@
 	onKeepMineContent={keepMineContent}
 	onKeepMineRules={keepMineRules}
 	onKeepMineTitle={keepMineTitle}
+	onLinkRuleDataSources={ruleDataSourceModal === 'reconnect-linkedin'
+		? openRuleDataSources
+		: undefined}
 	onSaveContent={saveContent}
 	onSaveRules={saveRules}
+	onActivationBlockerAction={activationBlockerActionLabel
+		? openActivationLinkedinContacts
+		: undefined}
+	onActivateFormat={toggleStatus}
 	onUseLatestContent={useLatestContent}
 	onUseLatestRules={useLatestRules}
 	onUseLatestTitle={useLatestTitle}
 />
+
+{#if ruleDataSourceModal === 'reconnect-linkedin'}
+	<ReconnectLinkedinContactsModal
+		open={linkedinContactsModalOpen}
+		contactsImport={linkedinContactsImport}
+		submitting={isAddingLinkedinContacts}
+		onClose={closeLinkedinContactsModal}
+		onContactsImported={addLinkedinContactsToActiveRule}
+	/>
+{/if}

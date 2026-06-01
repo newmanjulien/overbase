@@ -25,8 +25,10 @@
 	import { FormatVariableDragCoordinator } from './variables/format-variable-drag-coordinator.svelte';
 	import { FORMAT_CREATOR_SPLIT } from './layout/split-pane';
 	import ReconnectLinkedinContactsModal from './reconnect-linkedin/ReconnectLinkedinContactsModal.svelte';
-	import type { ContactImport } from './reconnect-linkedin/linkedin-contacts-csv';
-	import { getEmailFormatDefinition } from '$shared/email-format-definitions';
+	import type { ContactImport } from '$lib/features/external-data/linkedin-contacts-csv';
+	import {
+		getEmailFormatLinkedinContactsRequirement
+	} from '$shared/email-format-definitions';
 
 	type Props = {
 		formatStarter: FormatStarter;
@@ -38,12 +40,10 @@
 	const routeTitleState = useRouteTitleState();
 	const creator = new FormatCreatorState(untrack(() => formatStarter));
 	const variableDragCoordinator = new FormatVariableDragCoordinator();
-	const formatDefinition = $derived(getEmailFormatDefinition(formatStarter.formatDefinitionSlug));
 	const viewerUserId = $derived(viewerSession.viewer?.user._id ?? null);
-	const titleEditable = $derived(Boolean(formatDefinition?.contentEditPolicy.title));
-	const ruleDataSourceModal = $derived(
-		formatStarter.mode === 'public-data' ? (formatStarter.ruleDataSourceModal ?? 'default') : 'default'
-	);
+	const selectedFormatSpec = $derived(creator.selectedFormatSpec);
+	const titleEditable = $derived(Boolean(selectedFormatSpec?.contentEditPolicy.title));
+	const ruleDataSourceModal = $derived(selectedFormatSpec?.ruleDataSourceModal ?? 'default');
 	let isMobileCreator = $state(false);
 	let linkDataSourcesModalOpen = $state(false);
 	let creatingFormat = $state(false);
@@ -59,13 +59,14 @@
 			: null
 	);
 	const requiresLinkedinContacts = $derived(
-		formatStarter.slug === 'reconnect-linkedin' &&
-			creator.selectedStartingPointId === 'linkedin-reconnect'
+		selectedFormatSpec
+			? Boolean(getEmailFormatLinkedinContactsRequirement(selectedFormatSpec))
+			: false
 	);
 	const createFormatPrerequisiteHint = $derived(
 		requiresLinkedinContacts && !linkedinContactsImport
 			? {
-					text: 'Add your LinkedIn contacts CSV to enable Create format',
+					text: 'Add your LinkedIn contacts to create this format',
 					actionLabel: 'Add contacts',
 					onAction: openLinkedinContactsModal
 				}
@@ -140,6 +141,7 @@
 
 	function acceptLinkedinContactsImport(contactsImport: ContactImport) {
 		linkedinContactsImport = contactsImport;
+		linkDataSourcesModalOpen = false;
 
 		if (createFormatError === linkedinContactsRequiredError) {
 			createFormatError = null;
@@ -159,11 +161,17 @@
 
 		const input = creator.createFormatInput({
 			viewerUserId,
-			linkedinContactsSource: linkedinContactsImport
+			externalDataImport: linkedinContactsImport
+				? {
+						kind: 'linkedinContacts',
+						fileName: linkedinContactsImport.fileName,
+						contacts: linkedinContactsImport.contacts
+					}
+				: null
 		});
 
 		if (!input) {
-			createFormatError = 'Could not create email format from the selected starting point.';
+			createFormatError = 'Could not create email format from the selected variant.';
 			return;
 		}
 
@@ -200,7 +208,7 @@
 						editor={creator.editor}
 						variables={formatStarter.variables}
 						dragCoordinator={variableDragCoordinator}
-						editPolicy={formatDefinition?.contentEditPolicy}
+						editPolicy={selectedFormatSpec?.contentEditPolicy}
 					/>
 				</div>
 				<div class="shrink-0">
@@ -210,8 +218,8 @@
 						onLinkDataSources={() => (linkDataSourcesModalOpen = true)}
 						ruleDataSourceAction={creator.ruleDataSourceAction ?? undefined}
 						infoCard={formatStarter.ruleInfoCard}
-						canEditRuleText={formatDefinition?.rulesEditPolicy.text ?? false}
-						canEditRuleList={formatDefinition?.rulesEditPolicy.list ?? false}
+						canEditRuleText={selectedFormatSpec?.rulesEditPolicy.text ?? false}
+						canEditRuleList={selectedFormatSpec?.rulesEditPolicy.list ?? false}
 					/>
 				</div>
 				<FormatCreateActionBar
@@ -295,8 +303,8 @@
 								onLinkDataSources={() => (linkDataSourcesModalOpen = true)}
 								ruleDataSourceAction={creator.ruleDataSourceAction ?? undefined}
 								infoCard={formatStarter.ruleInfoCard}
-								canEditRuleText={formatDefinition?.rulesEditPolicy.text ?? false}
-								canEditRuleList={formatDefinition?.rulesEditPolicy.list ?? false}
+								canEditRuleText={selectedFormatSpec?.rulesEditPolicy.text ?? false}
+								canEditRuleList={selectedFormatSpec?.rulesEditPolicy.list ?? false}
 							/>
 							<FormatCreateActionBar
 								disabled={createFormatDisabled}
@@ -337,7 +345,7 @@
 								editor={creator.editor}
 								variables={formatStarter.variables}
 								dragCoordinator={variableDragCoordinator}
-								editPolicy={formatDefinition?.contentEditPolicy}
+								editPolicy={selectedFormatSpec?.contentEditPolicy}
 								onVariableInsertionRequestHandled={creator.clearVariableInsertionRequest}
 							/>
 						</div>

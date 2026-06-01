@@ -28,6 +28,7 @@
 			label: string;
 			content: EmailFormatInlineTextContent;
 		} | null;
+		onLinkDataSources?: (rule: EmailFormatRule) => void;
 		onRulesChange: (rules: EmailFormatRule[]) => void;
 		onSave: () => void;
 		onKeepMine: () => void | Promise<void>;
@@ -42,6 +43,7 @@
 		isSaving = false,
 		ruleDataSourceAction = { label: 'Link data sources' },
 		ruleInfoCard = null,
+		onLinkDataSources,
 		onRulesChange,
 		onSave,
 		onKeepMine,
@@ -49,6 +51,15 @@
 	}: Props = $props();
 	let linkDataSourcesModalOpen = $state(false);
 	const activeEditPolicy = $derived(editPolicy ?? EDIT_ALL_RULE_FIELDS);
+
+	function linkRuleDataSources(rule: EmailFormatRule) {
+		if (onLinkDataSources) {
+			onLinkDataSources(rule);
+			return;
+		}
+
+		linkDataSourcesModalOpen = true;
+	}
 </script>
 
 <div class="flex h-full min-h-0 min-w-0 flex-col">
@@ -59,7 +70,7 @@
 			{onRulesChange}
 			{onSave}
 			onLinkDataSources={activeEditPolicy.dataSources
-				? () => (linkDataSourcesModalOpen = true)
+				? linkRuleDataSources
 				: undefined}
 			{ruleDataSourceAction}
 			infoCard={ruleInfoCard ?? undefined}

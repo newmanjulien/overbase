@@ -90,7 +90,7 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 		{
 			id: 'kickoff-plan',
 			label: 'Kickoff plan',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Implementation kickoff plan',
 				to: ['Implementation team'],
@@ -123,7 +123,7 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 		{
 			id: 'migration-plan',
 			label: 'Migration plan',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Migration implementation plan',
 				to: ['Implementation team'],
@@ -155,7 +155,7 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 		{
 			id: 'risk-controlled-plan',
 			label: 'Risk-controlled plan',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Implementation risk plan',
 				to: ['Implementation leads'],

@@ -2,6 +2,11 @@ import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import { avatar } from '../backend/validators/avatars';
 import {
+	externalDataSourceKind,
+	externalDataSourceStatus,
+	linkedinContactFields
+} from '../backend/validators/external-data';
+import {
 	emailFormatBodyBlock,
 	emailFormatRule,
 	emailFormatSpreadsheetAttachment,
@@ -41,7 +46,7 @@ export default defineSchema({
 		creatorUserId: v.id('users'),
 		formatDefinitionSlug: v.string(),
 		createdFromStarterSlug: v.string(),
-		startingPointId: v.union(v.string(), v.null()),
+		variantSlug: v.string(),
 		selectedAnswers: v.record(v.string(), v.string()),
 		status: emailFormatStatus,
 		lastActivatedAt: v.union(v.number(), v.null()),
@@ -55,14 +60,6 @@ export default defineSchema({
 		recipientCount: v.number(),
 		rules: v.array(emailFormatRule),
 		rulesVersion: v.number(),
-		linkedinContactsSummary: v.union(
-			v.object({
-				contactCount: v.number(),
-				sourceFileName: v.string(),
-				importedAt: v.number()
-			}),
-			v.null()
-		),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_workspace_createdAt', ['workspaceId', 'createdAt']),
@@ -77,20 +74,35 @@ export default defineSchema({
 	})
 		.index('by_emailFormat', ['emailFormatId'])
 		.index('by_workspace_emailFormat', ['workspaceId', 'emailFormatId']),
-	emailFormatLinkedinContacts: defineTable({
+	externalDataSources: defineTable({
+		workspaceId: v.id('workspaces'),
+		createdByUserId: v.id('users'),
+		kind: externalDataSourceKind,
+		name: v.string(),
+		sourceFileName: v.string(),
+		recordCount: v.number(),
+		status: externalDataSourceStatus,
+		createdAt: v.number(),
+		updatedAt: v.number()
+	})
+		.index('by_workspace_createdAt', ['workspaceId', 'createdAt'])
+		.index('by_workspace_kind_createdAt', ['workspaceId', 'kind', 'createdAt']),
+	externalDataSourceLinkedinContacts: defineTable({
+		workspaceId: v.id('workspaces'),
+		externalDataSourceId: v.id('externalDataSources'),
+		...linkedinContactFields,
+		createdAt: v.number()
+	})
+		.index('by_externalDataSource', ['externalDataSourceId'])
+		.index('by_workspace_externalDataSource', ['workspaceId', 'externalDataSourceId']),
+	emailFormatExternalDataLinks: defineTable({
 		workspaceId: v.id('workspaces'),
 		emailFormatId: v.id('emailFormats'),
-		firstName: v.string(),
-		lastName: v.string(),
-		fullName: v.string(),
-		company: v.string(),
-		position: v.string(),
-		profileUrl: v.string(),
-		email: v.string(),
-		connectedOn: v.string(),
-		sourceRowNumber: v.number(),
+		ruleId: v.string(),
+		externalDataSourceId: v.id('externalDataSources'),
 		createdAt: v.number()
 	})
 		.index('by_emailFormat', ['emailFormatId'])
 		.index('by_workspace_emailFormat', ['workspaceId', 'emailFormatId'])
+		.index('by_externalDataSource', ['externalDataSourceId'])
 });

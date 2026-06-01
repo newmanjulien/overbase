@@ -3,7 +3,7 @@ import type { FormatStarterArtwork } from '$lib/features/format-starters/domain'
 
 const JOIN_FLOW_FORMAT_STARTER = {
 	formatStarterSlug: 'reconnect-linkedin',
-	startingPointId: 'linkedin-reconnect'
+	variantSlug: 'personal'
 } as const;
 
 export type JoinFormatStarterRecommendation = {
@@ -21,12 +21,12 @@ export function getJoinFormatStarterRecommendation(): JoinFormatStarterRecommend
 	}
 
 	const startingPoint = formatStarter.startingPoints.find(
-		(entry) => entry.id === JOIN_FLOW_FORMAT_STARTER.startingPointId
+		(entry) => entry.variantSlug === JOIN_FLOW_FORMAT_STARTER.variantSlug
 	);
 
 	if (!startingPoint) {
 		throw new Error(
-			`Join format starter "${JOIN_FLOW_FORMAT_STARTER.formatStarterSlug}" does not define starting point "${JOIN_FLOW_FORMAT_STARTER.startingPointId}".`
+			`Join format starter "${JOIN_FLOW_FORMAT_STARTER.formatStarterSlug}" does not define variant "${JOIN_FLOW_FORMAT_STARTER.variantSlug}".`
 		);
 	}
 

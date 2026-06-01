@@ -79,10 +79,7 @@ function cloneFormatStartingPoint(
 	return {
 		id: startingPoint.id,
 		label: startingPoint.label,
-		initialRecipients: startingPoint.initialRecipients,
-		ruleDataSourceAction: startingPoint.ruleDataSourceAction
-			? { ...startingPoint.ruleDataSourceAction }
-			: undefined,
+		variantSlug: startingPoint.variantSlug,
 		emailContent: cloneFormatEmailContent(startingPoint.emailContent)
 	};
 }

@@ -3,23 +3,30 @@
 		Button,
 		FileUploadField,
 		FullHeightModalShell,
-		TallModalCallout,
 		TallModalStepList,
 		inlineLinkClass
 	} from '$lib/ui';
 	import {
-		parseContactCsv,
+		linkedinContactsCsvAccept,
+		readLinkedinContactsCsvFile,
 		type ContactImport
-	} from './linkedin-contacts-csv';
+	} from '$lib/features/external-data/linkedin-contacts-upload';
 
 	type Props = {
 		open: boolean;
 		contactsImport: ContactImport | null;
+		submitting?: boolean;
 		onClose: () => void;
-		onContactsImported: (contactsImport: ContactImport) => void;
+		onContactsImported: (contactsImport: ContactImport) => void | Promise<void>;
 	};
 
-	let { open, contactsImport, onClose, onContactsImported }: Props = $props();
+	let {
+		open,
+		contactsImport,
+		submitting = false,
+		onClose,
+		onContactsImported
+	}: Props = $props();
 	let selectedContactCsvFile = $state<File | null>(null);
 	let parsedContactsImport = $state<ContactImport | null>(null);
 	let uploadErrorText = $state<string | null>(null);
@@ -46,25 +53,6 @@
 	];
 
 	const linkedinSettingsUrl = 'https://www.linkedin.com/settings/member-data';
-	const contactCsvAccept = '.csv';
-	const csvMimeTypes = new Set([
-		'text/csv',
-		'application/csv',
-		'application/vnd.ms-excel',
-		'application/octet-stream'
-	]);
-
-	function getFileExtension(fileName: string) {
-		return fileName.split('.').pop()?.toLowerCase() ?? '';
-	}
-
-	function isCsvFile(file: File) {
-		const extension = getFileExtension(file.name);
-		const hasAllowedExtension = extension === 'csv';
-		const hasAllowedType = !file.type || csvMimeTypes.has(file.type);
-
-		return hasAllowedExtension && hasAllowedType;
-	}
 
 	$effect(() => {
 		if (contactsImport === syncedContactsImport) {
@@ -82,17 +70,12 @@
 	});
 
 	async function selectContactCsvFile(file: File) {
-		if (!isCsvFile(file)) {
-			uploadErrorText = 'Upload a CSV file.';
-			return;
-		}
-
 		selectedContactCsvFile = file;
 		uploadErrorText = null;
 		parsing = true;
 
 		try {
-			parsedContactsImport = parseContactCsv(file.name, await file.text());
+			parsedContactsImport = await readLinkedinContactsCsvFile(file);
 		} catch (error) {
 			parsedContactsImport = null;
 			uploadErrorText =
@@ -102,14 +85,24 @@
 		}
 	}
 
-	function addContacts() {
-		if (!activeContactsImport) {
+	async function addContacts() {
+		if (submitting) {
+			return;
+		}
+
+		const contactsToImport = activeContactsImport;
+
+		if (!contactsToImport) {
 			uploadErrorText = 'Upload a contacts CSV first.';
 			return;
 		}
 
-		onContactsImported(activeContactsImport);
-		onClose();
+		try {
+			await onContactsImported(contactsToImport);
+		} catch (error) {
+			uploadErrorText =
+				error instanceof Error ? error.message : 'Could not add LinkedIn contacts.';
+		}
 	}
 </script>
 
@@ -120,7 +113,7 @@
 	placement="right"
 	{onClose}
 >
-	<div class="flex min-h-full flex-col justify-between gap-6 pt-1">
+	<div class="flex min-h-full flex-col justify-between gap-8 pt-1">
 		<div class="space-y-5">
 			<p class="text-[0.72rem] leading-relaxed text-stone-600">
 				LinkedIn contacts are publicly available. But you'll need to export and upload them here so Overbase can process your contacts
@@ -143,32 +136,30 @@
 					{/if}
 				{/snippet}
 			</TallModalStepList>
-
-			<div class="pt-1">
-				<FileUploadField
-					label="Upload a contacts CSV"
-					description="Any CSV with people, companies, emails, or profile links"
-					accept={contactCsvAccept}
-					disabled={parsing}
-					selectedFile={selectedContactCsvFile}
-					errorText={uploadErrorText}
-					onFileSelected={selectContactCsvFile}
-				/>
-				{#if activeContactsImport}
-					<p class="mt-2 text-[0.68rem] leading-relaxed text-stone-500">
-						{activeContactsImport.contacts.length} contacts ready from {activeContactsImport.fileName}
-					</p>
-				{/if}
-			</div>
 		</div>
 
-		<TallModalCallout text="You aren't sharing anything sensitive. LinkedIn contacts are public and available to anyone who is connected to you" />
+		<div>
+			<FileUploadField
+				label="Upload your LinkedIn export"
+				description="Upload the Connections.csv file provided by LinkedIn"
+				accept={linkedinContactsCsvAccept}
+				disabled={parsing || submitting}
+				selectedFile={selectedContactCsvFile}
+				errorText={uploadErrorText}
+				onFileSelected={selectContactCsvFile}
+			/>
+			{#if activeContactsImport}
+				<p class="mt-2 text-[0.68rem] leading-relaxed text-stone-500">
+					{activeContactsImport.contacts.length} contacts ready from {activeContactsImport.fileName}
+				</p>
+			{/if}
+		</div>
 	</div>
 
 	{#snippet footer()}
-		<Button variant="secondary" onclick={onClose}>Cancel</Button>
-		<Button disabled={parsing || !activeContactsImport} onclick={addContacts}>
-			{parsing ? 'Reading...' : 'Add contacts'}
+		<Button variant="secondary" disabled={submitting} onclick={onClose}>Cancel</Button>
+		<Button disabled={parsing || submitting || !activeContactsImport} onclick={addContacts}>
+			{parsing ? 'Reading...' : submitting ? 'Adding...' : 'Add contacts'}
 		</Button>
 	{/snippet}
 </FullHeightModalShell>

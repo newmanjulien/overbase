@@ -41,6 +41,7 @@ export type EmailFormatDefinitionConfigure = {
 	rulesEditPolicy: EmailFormatRulesEditPolicy;
 	ruleDataSourceAction: EmailFormatRuleDataSourceAction;
 	ruleDataSourceModal: 'default' | 'reconnect-linkedin';
+	requiredLinkedinContactsRuleId: string | null;
 	ruleInfoCard: {
 		label: string;
 		content: EmailFormatInlineTextContent;

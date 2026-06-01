@@ -116,21 +116,19 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
 		{
 			id: 'linkedin-reconnect',
 			label: 'Reconnect with contacts',
-			initialRecipients: 'viewer',
+			variantSlug: 'personal',
 			emailContent: personalReconnectEmailContent
 		},
 		{
 			id: 'linkedin-reconnect-team',
 			label: 'Reconnect with contacts for team members',
-			initialRecipients: 'none',
-			ruleDataSourceAction: { label: 'No data needed', disabled: true },
+			variantSlug: 'team',
 			emailContent: teamMemberReconnectEmailContent
 		},
 		{
 			id: 'linkedin-reconnect-senior-leadership',
 			label: 'Reconnect with contacts for senior leadership',
-			initialRecipients: 'none',
-			ruleDataSourceAction: { label: 'No data needed', disabled: true },
+			variantSlug: 'senior-leadership',
 			emailContent: {
 				title: 'Reconnect with contacts',
 				to: ["Senior leader's assistant"],

@@ -4,6 +4,7 @@ import {
 	type FormatInlineNode
 } from '$lib/features/format-starters/domain';
 import { hasInlineTextContent } from '$lib/domain/inline-text';
+import { getEmailFormatDefinition } from '$shared/email-format-definitions';
 import type { FormatStarter } from './types';
 
 export type FormatStarterCatalogValidationIssue = {
@@ -65,53 +66,31 @@ function validateFormatStarterEntry(
 
 	const startingPointIds = new Set(entry.startingPoints.map((startingPoint) => startingPoint.id));
 	const variableIds = new Set(entry.variables.map((variable) => variable.id));
+	const definition = getEmailFormatDefinition(entry.formatDefinitionSlug);
+	const variantSlugs: Set<string> = new Set(
+		definition?.variants.map((variant) => variant.slug) ?? []
+	);
 
 	validateFormatStarterSelection(issues, entry, startingPointIds);
 
+	if (!definition) {
+		issues.push({
+			formatStarterSlug: entry.slug,
+			message: `References unknown email format definition "${entry.formatDefinitionSlug}".`
+		});
+	} else if (entry.mode !== definition.dataMode) {
+		issues.push({
+			formatStarterSlug: entry.slug,
+			message: `Mode "${entry.mode}" does not match email format definition mode "${definition.dataMode}".`
+		});
+	}
+
 	if (entry.mode === 'public-data') {
-		addDuplicateIdIssues(
-			issues,
-			entry.slug,
-			'initial email-format rule',
-			entry.initialRules.map((rule) => rule.id)
-		);
-
-		if (!entry.ruleDataSourceAction.label.trim()) {
-			issues.push({
-				formatStarterSlug: entry.slug,
-				message: 'Public-data format starters must define a rule data-source action label.'
-			});
-		}
-
 		if (!entry.ruleInfoCard.label.trim() || !hasInlineTextContent(entry.ruleInfoCard.content)) {
 			issues.push({
 				formatStarterSlug: entry.slug,
 				message: 'Public-data format starters must define rule info-card copy.'
 			});
-		}
-
-		if (entry.initialRules.length === 0) {
-			issues.push({
-				formatStarterSlug: entry.slug,
-				message: 'Public-data format starters must define at least one initial email-format rule.'
-			});
-		}
-
-		for (const rule of entry.initialRules) {
-			if (!rule.id.trim()) {
-				issues.push({
-					formatStarterSlug: entry.slug,
-					message:
-						'Public-data format starters cannot define an initial email-format rule with an empty id.'
-				});
-			}
-
-			if (!rule.text.trim()) {
-				issues.push({
-					formatStarterSlug: entry.slug,
-					message: `Initial email-format rule "${rule.id}" must include text.`
-				});
-			}
 		}
 	}
 
@@ -123,17 +102,10 @@ function validateFormatStarterEntry(
 	}
 
 	for (const startingPoint of entry.startingPoints) {
-		if (startingPoint.ruleDataSourceAction && entry.mode !== 'public-data') {
+		if (!variantSlugs.has(startingPoint.variantSlug)) {
 			issues.push({
 				formatStarterSlug: entry.slug,
-				message: `Starting point "${startingPoint.id}" defines a rule data-source action override on a non-public-data format starter.`
-			});
-		}
-
-		if (startingPoint.ruleDataSourceAction && !startingPoint.ruleDataSourceAction.label.trim()) {
-			issues.push({
-				formatStarterSlug: entry.slug,
-				message: `Starting point "${startingPoint.id}" must define a rule data-source action override label.`
+				message: `Starting point "${startingPoint.id}" references unknown variant "${startingPoint.variantSlug}".`
 			});
 		}
 

@@ -1,76 +1,139 @@
-export type EmailFormatActivationMissingRequirement = "recipients" | "rules";
+import type {
+	EmailFormatActivationRequirement,
+	EmailFormatExternalDataRequirement
+} from './email-format-definitions';
+
+export type EmailFormatActivationMissingRequirement =
+	| 'recipients'
+	| 'rules'
+	| 'linkedinContacts';
 
 export type EmailFormatActivationRule = {
-  text: string;
+	text: string;
 };
 
 export type EmailFormatActivationReadiness = {
-  canActivate: boolean;
-  missingRequirements: EmailFormatActivationMissingRequirement[];
-  message: string | null;
+	canActivate: boolean;
+	missingRequirements: EmailFormatActivationMissingRequirement[];
+	message: string | null;
 };
 
 type EmailFormatActivationReadinessInput = {
-  recipientCount: number;
-  rules: readonly EmailFormatActivationRule[];
+	recipientCount: number;
+	rules: readonly EmailFormatActivationRule[];
+	requirements: readonly EmailFormatActivationRequirement[];
+	externalData: EmailFormatActivationExternalDataState;
+};
+
+export type EmailFormatActivationExternalDataState = {
+	linkedinContactsRuleIds: readonly string[];
 };
 
 function hasSavedRule(rules: readonly EmailFormatActivationRule[]) {
-  return rules.some((rule) => rule.text.trim().length > 0);
+	return rules.some((rule) => rule.text.trim().length > 0);
+}
+
+function hasExternalDataRequirement(
+	externalData: EmailFormatActivationExternalDataState,
+	requirement: EmailFormatExternalDataRequirement
+) {
+	switch (requirement.kind) {
+		case 'linkedinContacts':
+			return externalData.linkedinContactsRuleIds.includes(requirement.ruleId);
+	}
 }
 
 export function getEmailFormatActivationReadiness({
-  recipientCount,
-  rules,
+	recipientCount,
+	rules,
+	requirements,
+	externalData
 }: EmailFormatActivationReadinessInput): EmailFormatActivationReadiness {
-  const missingRequirements: EmailFormatActivationMissingRequirement[] = [];
+	const missingRequirements: EmailFormatActivationMissingRequirement[] = [];
 
-  if (recipientCount <= 0) {
-    missingRequirements.push("recipients");
-  }
+	for (const requirement of requirements) {
+		if (requirement.kind === 'recipients' && recipientCount <= 0) {
+			missingRequirements.push('recipients');
+		}
 
-  if (!hasSavedRule(rules)) {
-    missingRequirements.push("rules");
-  }
+		if (requirement.kind === 'rules' && !hasSavedRule(rules)) {
+			missingRequirements.push('rules');
+		}
 
-  return {
-    canActivate: missingRequirements.length === 0,
-    missingRequirements,
-    message: getEmailFormatActivationMissingMessage(missingRequirements),
-  };
+		if (
+			requirement.kind === 'externalData' &&
+			!hasExternalDataRequirement(externalData, requirement.externalData)
+		) {
+			missingRequirements.push('linkedinContacts');
+		}
+	}
+
+	const uniqueMissingRequirements = [...new Set(missingRequirements)];
+
+	return {
+		canActivate: uniqueMissingRequirements.length === 0,
+		missingRequirements: uniqueMissingRequirements,
+		message: getEmailFormatActivationMissingMessage(uniqueMissingRequirements)
+	};
 }
 
 export function getEmailFormatActivationMissingMessage(
-  missingRequirements: readonly EmailFormatActivationMissingRequirement[],
+	missingRequirements: readonly EmailFormatActivationMissingRequirement[],
 ) {
-  const missing = new Set(missingRequirements);
+	const missing = new Set(missingRequirements);
 
-  if (missing.has("recipients") && missing.has("rules")) {
-    return "Add at least one recipient and save at least one rule before activating this format";
-  }
+	if (missing.size === 0) {
+		return null;
+	}
 
-  if (missing.has("recipients")) {
-    return "Add at least one recipient before activating this format";
-  }
+	if (missing.size === 1 && missing.has('recipients')) {
+		return 'Add at least one recipient before activating this format';
+	}
 
-  if (missing.has("rules")) {
-    return "Add and save at least one rule before activating this format";
-  }
+	if (missing.size === 1 && missing.has('rules')) {
+		return 'Add and save at least one rule before activating this format';
+	}
 
-  return null;
+	if (missing.size === 1 && missing.has('linkedinContacts')) {
+		return 'Add LinkedIn contacts to activate this format';
+	}
+
+	const labels = [
+		missing.has('recipients') ? 'at least one recipient' : null,
+		missing.has('rules') ? 'at least one saved rule' : null,
+		missing.has('linkedinContacts') ? 'LinkedIn contacts' : null
+	].filter((label): label is string => label !== null);
+
+	return `Add ${formatList(labels)} before activating this format`;
 }
 
 export function getEmailFormatActivationMissingMessageFromError(
-  error: unknown,
+	error: unknown,
 ) {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  const activationMessages = [
-    getEmailFormatActivationMissingMessage(["recipients", "rules"]),
-    getEmailFormatActivationMissingMessage(["recipients"]),
-    getEmailFormatActivationMissingMessage(["rules"]),
-  ].filter((message): message is string => message !== null);
+	const errorMessage = error instanceof Error ? error.message : String(error);
+	const activationMessages = [
+		getEmailFormatActivationMissingMessage(['recipients', 'rules', 'linkedinContacts']),
+		getEmailFormatActivationMissingMessage(['recipients', 'rules']),
+		getEmailFormatActivationMissingMessage(['recipients', 'linkedinContacts']),
+		getEmailFormatActivationMissingMessage(['rules', 'linkedinContacts']),
+		getEmailFormatActivationMissingMessage(['recipients']),
+		getEmailFormatActivationMissingMessage(['rules']),
+		getEmailFormatActivationMissingMessage(['linkedinContacts'])
+	].filter((message): message is string => message !== null);
 
-  return (
-    activationMessages.find((message) => errorMessage.includes(message)) ?? null
-  );
+	return (
+		activationMessages.find((message) => errorMessage.includes(message)) ?? null
+	);
+}
+
+function formatList(labels: readonly string[]) {
+	if (labels.length <= 1) {
+		return labels[0] ?? '';
+	}
+
+	if (labels.length === 2) {
+		return `${labels[0]} and ${labels[1]}`;
+	}
+
+	return `${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
 }

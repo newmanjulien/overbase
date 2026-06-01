@@ -94,7 +94,7 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 		{
 			id: 'conversation-recap',
 			label: 'Conversation recap',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Follow-up from our conversation',
 				to: ['Buyer'],
@@ -130,7 +130,7 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 		{
 			id: 'proposal-review',
 			label: 'Proposal review',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Proposal follow-up',
 				to: ['Buying committee'],
@@ -162,7 +162,7 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 		{
 			id: 'procurement-follow-up',
 			label: 'Procurement follow-up',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Procurement follow-up',
 				to: ['Procurement'],

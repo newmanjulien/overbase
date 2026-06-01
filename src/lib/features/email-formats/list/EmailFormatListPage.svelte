@@ -108,8 +108,8 @@
 		);
 	}
 
-	function showActivationSuccessNotice(count: number) {
-		activationSuccessNotice.show(getActivationSuccessMessage(count));
+	function showActivationSuccessNotice() {
+		activationSuccessNotice.show(getActivationSuccessMessage());
 	}
 
 	async function setFormatStatus(formatIds: Id<'emailFormats'>[], status: EmailFormatStatus) {
@@ -133,7 +133,7 @@
 				});
 			}
 			if (status === 'active') {
-				showActivationSuccessNotice(idsToUpdate.length);
+				showActivationSuccessNotice();
 			}
 		} catch (error) {
 			actionError =

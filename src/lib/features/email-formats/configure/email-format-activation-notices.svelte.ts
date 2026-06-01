@@ -1,9 +1,7 @@
 export const ACTIVATION_SUCCESS_NOTICE_MS = 4000;
 
-export function getActivationSuccessMessage(count = 1) {
-	return count === 1
-		? 'Recipients will start receiving this format.'
-		: 'Recipients will start receiving these formats.';
+export function getActivationSuccessMessage() {
+	return 'Recipients will start receiving emails';
 }
 
 export function createTimedNotice(defaultDurationMs = ACTIVATION_SUCCESS_NOTICE_MS) {

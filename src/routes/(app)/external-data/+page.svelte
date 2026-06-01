@@ -1,16 +1,190 @@
 <script lang="ts">
-	import { ListRoutePage } from '$lib/patterns/list-page';
+	import { api } from '$convex/_generated/api';
+	import type { Id } from '$convex/_generated/dataModel';
+	import { ListContentState, ListRows, ListRoutePage } from '$lib/patterns/list-page';
 	import AddExternalDataModal from '$lib/features/external-data/AddExternalDataModal.svelte';
+	import ExternalDataDetailsModal, {
+		type ExternalDataDetails
+	} from '$lib/features/external-data/ExternalDataDetailsModal.svelte';
+	import type { ContactImport } from '$lib/features/external-data/linkedin-contacts-csv';
+	import DataSourceListRow, {
+		type DataSourceListItem
+	} from '$lib/features/data-sources/DataSourceListRow.svelte';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
+	import { useConvexClient, useQuery } from 'convex-svelte';
+
+	const client = useConvexClient();
+	const externalDataQuery = useQuery(api.externalData.listExternalDataSources, () => ({}));
+	const LINKEDIN_CONTACTS_LOGO_SRC = '/logos/linkedin.png';
+
+	type ExternalDataSourceListRecord = NonNullable<typeof externalDataQuery.data>[number];
+	type ExternalDataTypeFilterId = 'all' | 'linkedin-contacts';
 
 	let modalOpen = $state(false);
+	let detailsSource = $state<ExternalDataDetails | null>(null);
+	let searchQuery = $state('');
+	let selectedTypeFilter = $state<ExternalDataTypeFilterId>('all');
+	let actionError = $state<string | null>(null);
+	let deletingSourceId = $state<Id<'externalDataSources'> | null>(null);
+	let replacingSourceId = $state<Id<'externalDataSources'> | null>(null);
+
+	const externalDataSources = $derived(externalDataQuery.data ?? []);
+	const typeFilterOptions: { id: ExternalDataTypeFilterId; label: string }[] = [
+		{ id: 'all', label: 'All types' },
+		{ id: 'linkedin-contacts', label: 'LinkedIn contacts' }
+	];
+	const selectedTypeFilterLabel = $derived(
+		typeFilterOptions.find((option) => option.id === selectedTypeFilter)?.label ?? 'All types'
+	);
+	const externalDataItems = $derived(externalDataSources.map(toExternalDataItem));
+	const filteredExternalDataItems = $derived(
+		externalDataItems.filter(matchesExternalDataFilters)
+	);
+	const listState = $derived(
+		externalDataQuery.isLoading
+			? 'loading'
+			: externalDataQuery.error
+				? 'error'
+				: externalDataItems.length === 0
+					? 'empty'
+					: 'ready'
+	);
+
+	function normalizeSearchText(value: string) {
+		return value.trim().toLowerCase();
+	}
+
+	function getExternalDataType(source: ExternalDataSourceListRecord) {
+		return source.kind === 'linkedinContacts' ? 'LinkedIn contacts' : 'External data';
+	}
+
+	function getExternalDataTypeFilterId(item: DataSourceListItem): ExternalDataTypeFilterId {
+		return item.type === 'LinkedIn contacts' ? 'linkedin-contacts' : 'all';
+	}
+
+	function matchesExternalDataFilters(item: DataSourceListItem) {
+		const normalizedQuery = normalizeSearchText(searchQuery);
+
+		return (
+			(selectedTypeFilter === 'all' ||
+				getExternalDataTypeFilterId(item) === selectedTypeFilter) &&
+			(!normalizedQuery ||
+				[item.name, item.type, item.shared ? 'shared' : ''].some((value) =>
+					value.toLowerCase().includes(normalizedQuery)
+				))
+		);
+	}
+
+	function openDetails(source: ExternalDataDetails) {
+		actionError = null;
+		detailsSource = source;
+	}
+
+	function toExternalDataDetails(source: ExternalDataSourceListRecord): ExternalDataDetails {
+		return {
+			id: source.id,
+			name: source.name,
+			type: getExternalDataType(source),
+			sourceFileName: source.sourceFileName
+		};
+	}
+
+	function toExternalDataItem(source: ExternalDataSourceListRecord): DataSourceListItem {
+		const details = toExternalDataDetails(source);
+
+		return {
+			id: source.id,
+			name: source.name,
+			type: details.type,
+			shared: false,
+			logoSrc: LINKEDIN_CONTACTS_LOGO_SRC,
+			onManage: () => openDetails(details)
+		};
+	}
+
+	function closeDetails() {
+		if (deletingSourceId || replacingSourceId) {
+			return;
+		}
+
+		detailsSource = null;
+		actionError = null;
+	}
+
+	async function deleteExternalDataSource(sourceId: Id<'externalDataSources'>) {
+		if (deletingSourceId || replacingSourceId) {
+			return;
+		}
+
+		actionError = null;
+		deletingSourceId = sourceId;
+
+		try {
+			await client.mutation(api.externalData.deleteExternalDataSource, {
+				externalDataSourceId: sourceId
+			});
+			detailsSource = null;
+		} catch (error) {
+			actionError =
+				error instanceof Error ? error.message : 'Could not delete external data source.';
+		} finally {
+			deletingSourceId = null;
+		}
+	}
+
+	async function replaceExternalDataSource(
+		sourceId: Id<'externalDataSources'>,
+		contactsImport: ContactImport
+	) {
+		if (deletingSourceId || replacingSourceId) {
+			return;
+		}
+
+		actionError = null;
+		replacingSourceId = sourceId;
+
+		try {
+			await client.mutation(api.externalData.replaceExternalDataSource, {
+				externalDataSourceId: sourceId,
+				externalDataImport: {
+					kind: 'linkedinContacts',
+					fileName: contactsImport.fileName,
+					contacts: contactsImport.contacts
+				}
+			});
+
+			if (detailsSource?.id === sourceId) {
+				detailsSource = {
+					...detailsSource,
+					sourceFileName: contactsImport.fileName
+				};
+			}
+		} catch (error) {
+			actionError =
+				error instanceof Error ? error.message : 'Could not replace external data source.';
+			throw error;
+		} finally {
+			replacingSourceId = null;
+		}
+	}
 </script>
 
 <ListRoutePage
 	toolbar={{
 		searchPlaceholder: 'Search external data...',
 		searchAriaLabel: 'Search external data',
-		filter: { label: 'All types', selectedId: 'all', options: [{ id: 'all', label: 'All types' }], onSelect: () => {} },
+		searchValue: searchQuery,
+		onSearchValueChange: (value) => (searchQuery = value),
+		filter: {
+			label: selectedTypeFilterLabel,
+			selectedId: selectedTypeFilter,
+			options: typeFilterOptions,
+			onSelect: (optionId) => {
+				if (optionId === 'all' || optionId === 'linkedin-contacts') {
+					selectedTypeFilter = optionId;
+				}
+			}
+		},
 		actionLabel: 'Add external data',
 		onAction: () => (modalOpen = true)
 	}}
@@ -24,6 +198,34 @@
 		actionLabel: 'Add external data',
 		onAction: () => (modalOpen = true)
 	}}
-/>
+	hasItems={listState !== 'empty'}
+>
+	{#if listState === 'loading'}
+		<ListContentState kind="loading" message="Loading external data..." />
+	{:else if listState === 'error'}
+		<ListContentState kind="error" message="Could not load external data." />
+	{:else if filteredExternalDataItems.length === 0}
+		<ListContentState kind="empty" message="No matching external data." />
+	{:else}
+		<ListRows
+			items={filteredExternalDataItems}
+			rowActionsAriaLabel="External data actions"
+		>
+			{#snippet rowCells(item)}
+				<DataSourceListRow {item} />
+			{/snippet}
+		</ListRows>
+	{/if}
+</ListRoutePage>
 
 <AddExternalDataModal open={modalOpen} onClose={() => (modalOpen = false)} />
+<ExternalDataDetailsModal
+	open={Boolean(detailsSource)}
+	source={detailsSource}
+	deleting={deletingSourceId === detailsSource?.id}
+	replacing={replacingSourceId === detailsSource?.id}
+	error={actionError}
+	onClose={closeDetails}
+	onDelete={deleteExternalDataSource}
+	onReplace={replaceExternalDataSource}
+/>

@@ -19,7 +19,8 @@
 		EmailFeedback,
 		EmailFeedbackViewState,
 		EmailFormatConfigureLoadState,
-		EmailFormatConfigureView
+		EmailFormatConfigureView,
+		EmailFormatRule
 	} from './email-format-configure-types';
 	import SectionConflictActions from './SectionConflictActions.svelte';
 
@@ -30,8 +31,10 @@
 		configureView: EmailFormatConfigureView;
 		feedbackViewState: EmailFeedbackViewState;
 		activationBlockerMessage: string | null;
+		activationBlockerActionLabel?: string | null;
 		activationReadyMessage: string | null;
 		activationSuccessMessage: string | null;
+		isUpdatingStatus: boolean;
 		contentError: string | null;
 		contentEditPolicy: EmailFormatContentEditPolicy | null;
 		contentVariables: readonly FormatVariableDefinition[];
@@ -47,9 +50,12 @@
 		onKeepMineContent: () => void | Promise<void>;
 		onKeepMineRules: () => void | Promise<void>;
 		onKeepMineTitle: () => void | Promise<void>;
+		onLinkRuleDataSources?: (rule: EmailFormatRule) => void;
 		onSaveContent: () => Promise<void>;
 		onSaveFeedback: () => void | Promise<void>;
 		onSaveRules: () => void | Promise<void>;
+		onActivationBlockerAction?: () => void | Promise<void>;
+		onActivateFormat: () => void | Promise<void>;
 		onShowNextSentEmail: () => void;
 		onShowPreviousSentEmail: () => void;
 		onUseLatestContent: () => void;
@@ -73,8 +79,10 @@
 		configureView,
 		feedbackViewState,
 		activationBlockerMessage,
+		activationBlockerActionLabel = null,
 		activationReadyMessage,
 		activationSuccessMessage,
+		isUpdatingStatus,
 		contentError,
 		contentEditPolicy,
 		contentVariables,
@@ -87,9 +95,12 @@
 		onKeepMineContent,
 		onKeepMineRules,
 		onKeepMineTitle,
+		onLinkRuleDataSources,
 		onSaveContent,
 		onSaveFeedback,
 		onSaveRules,
+		onActivationBlockerAction,
+		onActivateFormat,
 		onShowNextSentEmail,
 		onShowPreviousSentEmail,
 		onUseLatestContent,
@@ -101,11 +112,18 @@
 <div class="hidden h-full min-h-0 flex-col overflow-hidden md:flex">
 	<div class="shrink-0">
 		{#if activationBlockerMessage}
-			<EmailFormatActivationStatusBar message={activationBlockerMessage} />
+			<EmailFormatActivationStatusBar
+				message={activationBlockerMessage}
+				actionLabel={activationBlockerActionLabel}
+				onAction={onActivationBlockerAction}
+			/>
 		{:else if activationReadyMessage}
 			<EmailFormatActivationStatusBar
 				message={activationReadyMessage}
 				kind="ready"
+				actionLabel="Activate this format"
+				actionDisabled={isUpdatingStatus}
+				onAction={onActivateFormat}
 			/>
 		{:else if activationSuccessMessage}
 			<EmailFormatActivationStatusBar
@@ -193,6 +211,7 @@
 							isSaving={configureState.isSavingRules}
 							onRulesChange={configureState.updateRules}
 							onSave={() => void onSaveRules()}
+							onLinkDataSources={onLinkRuleDataSources}
 							onKeepMine={onKeepMineRules}
 							onUseLatest={onUseLatestRules}
 						/>

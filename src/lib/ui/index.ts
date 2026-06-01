@@ -19,3 +19,4 @@ export { default as TallModalFeatureGrid } from './TallModalFeatureGrid.svelte';
 export { default as TallModalStepList } from './TallModalStepList.svelte';
 export { inlineLinkClass } from './link-styles';
 export type { ButtonSize, ButtonType, ButtonVariant } from './types';
+export { destructiveButtonClass } from './button-styles';

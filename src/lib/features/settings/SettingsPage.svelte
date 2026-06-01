@@ -182,7 +182,7 @@
 		/>
 
 		<SettingsTextFieldCard
-			title="Company Name"
+			title="Company name"
 			description="This is your company's visible name in Overbase."
 			fieldId="settings-company-name"
 			label="Company name"
@@ -194,7 +194,7 @@
 		/>
 
 		<SettingsAvatarCard
-			title="User Avatar"
+			title="User avatar"
 			description={["This is your personal avatar."]}
 			footerText="An avatar is optional but helps teammates recognize you."
 			ariaLabel="Upload user avatar"
@@ -212,7 +212,7 @@
 		</SettingsAvatarCard>
 
 		<SettingsAvatarCard
-			title="Company Avatar"
+			title="Company avatar"
 			description={["This is your company's avatar."]}
 			footerText="An avatar is optional but strongly recommended."
 			ariaLabel="Upload company avatar"

@@ -24,6 +24,11 @@ type EmailFormatConfigureSnapshot = {
 		emailContent: VersionedSnapshot<EmailFormatContent>;
 		rules: VersionedSnapshot<EmailFormatRule[]>;
 		recipientRefs: EmailFormatRecipientRef[];
+		activation: {
+			canActivate: boolean;
+			missingRequirements: readonly string[];
+			message: string | null;
+		};
 		updatedAt: number;
 	};
 	feedback: Array<{

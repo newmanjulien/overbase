@@ -1,5 +1,6 @@
 import type { Id } from '../../convex/_generated/dataModel';
 import type { MutationCtx } from '../../convex/_generated/server';
+import type { ViewerWorkspace } from '../auth/viewer';
 
 const MAX_LINKEDIN_CONTACTS = 5_000;
 const MAX_CONTACT_FIELD_LENGTH = 240;
@@ -7,7 +8,8 @@ const MAX_CONTACT_URL_LENGTH = 1_000;
 const MAX_CONTACT_EMAIL_LENGTH = 320;
 const MAX_SOURCE_FILE_NAME_LENGTH = 160;
 
-export type LinkedinContactSource = {
+export type LinkedinContactsImport = {
+	kind: 'linkedinContacts';
 	fileName: string;
 	contacts: Array<{
 		firstName: string;
@@ -22,19 +24,22 @@ export type LinkedinContactSource = {
 	}>;
 } | null;
 
-type NormalizedLinkedinContact = NonNullable<
-	ReturnType<typeof normalizeLinkedinContact>
->;
+type NormalizedLinkedinContact = NonNullable<ReturnType<typeof normalizeLinkedinContact>>;
 
 export type NormalizedLinkedinContactsSource = {
+	kind: 'linkedinContacts';
 	fileName: string;
 	contacts: NormalizedLinkedinContact[];
-	summary: {
-		contactCount: number;
-		sourceFileName: string;
-		importedAt: number;
-	};
 };
+
+export function getLinkedinContactsSourceName({
+	user,
+	identity
+}: Pick<ViewerWorkspace, 'user' | 'identity'>) {
+	const ownerLabel = user.displayName?.trim() || identity.email.trim();
+
+	return `${ownerLabel}'s LinkedIn contacts`;
+}
 
 function clampText(value: string, maxLength: number) {
 	const normalized = value.trim();
@@ -42,7 +47,9 @@ function clampText(value: string, maxLength: number) {
 	return normalized.length > maxLength ? normalized.slice(0, maxLength).trim() : normalized;
 }
 
-function normalizeLinkedinContact(contact: NonNullable<LinkedinContactSource>['contacts'][number]) {
+function normalizeLinkedinContact(
+	contact: NonNullable<LinkedinContactsImport>['contacts'][number]
+) {
 	const firstName = clampText(contact.firstName, MAX_CONTACT_FIELD_LENGTH);
 	const lastName = clampText(contact.lastName, MAX_CONTACT_FIELD_LENGTH);
 	const fullName =
@@ -69,8 +76,7 @@ function normalizeLinkedinContact(contact: NonNullable<LinkedinContactSource>['c
 }
 
 export function normalizeLinkedinContactsSource(
-	source: LinkedinContactSource,
-	importedAt: number
+	source: LinkedinContactsImport
 ): NormalizedLinkedinContactsSource | null {
 	if (!source) {
 		return null;
@@ -89,32 +95,73 @@ export function normalizeLinkedinContactsSource(
 
 	return contacts.length > 0
 		? {
+				kind: 'linkedinContacts',
 				fileName,
-				contacts,
-				summary: {
-					contactCount: contacts.length,
-					sourceFileName: fileName,
-					importedAt
-				}
+				contacts
 			}
 		: null;
 }
 
-export async function insertLinkedinContactsForEmailFormat(
+export async function insertLinkedinContactsForExternalDataSource(
 	ctx: MutationCtx,
 	args: {
 		workspaceId: Id<'workspaces'>;
-		emailFormatId: Id<'emailFormats'>;
-		contactsSource: NormalizedLinkedinContactsSource | null;
+		externalDataSourceId: Id<'externalDataSources'>;
+		contactsSource: NormalizedLinkedinContactsSource;
 		createdAt: number;
 	}
 ) {
-	for (const contact of args.contactsSource?.contacts ?? []) {
-		await ctx.db.insert('emailFormatLinkedinContacts', {
+	for (const contact of args.contactsSource.contacts) {
+		await ctx.db.insert('externalDataSourceLinkedinContacts', {
 			workspaceId: args.workspaceId,
-			emailFormatId: args.emailFormatId,
+			externalDataSourceId: args.externalDataSourceId,
 			...contact,
 			createdAt: args.createdAt
 		});
+	}
+}
+
+export async function createLinkedinContactsExternalDataSource(
+	ctx: MutationCtx,
+	viewerWorkspace: ViewerWorkspace,
+	contactsSource: NormalizedLinkedinContactsSource,
+	createdAt: number
+) {
+	const { user, workspace } = viewerWorkspace;
+	const externalDataSourceId = await ctx.db.insert('externalDataSources', {
+		workspaceId: workspace._id,
+		createdByUserId: user._id,
+		kind: 'linkedinContacts',
+		name: getLinkedinContactsSourceName(viewerWorkspace),
+		sourceFileName: contactsSource.fileName,
+		recordCount: contactsSource.contacts.length,
+		status: 'ready',
+		createdAt,
+		updatedAt: createdAt
+	});
+
+	await insertLinkedinContactsForExternalDataSource(ctx, {
+		workspaceId: workspace._id,
+		externalDataSourceId,
+		contactsSource,
+		createdAt
+	});
+
+	return externalDataSourceId;
+}
+
+export async function deleteExternalDataSourceRows(
+	ctx: MutationCtx,
+	externalDataSourceId: Id<'externalDataSources'>
+) {
+	const contacts = await ctx.db
+		.query('externalDataSourceLinkedinContacts')
+		.withIndex('by_externalDataSource', (q) =>
+			q.eq('externalDataSourceId', externalDataSourceId)
+		)
+		.collect();
+
+	for (const contact of contacts) {
+		await ctx.db.delete(contact._id);
 	}
 }

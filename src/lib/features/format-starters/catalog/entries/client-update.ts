@@ -96,7 +96,7 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 		{
 			id: 'steady-progress',
 			label: 'Steady progress update',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Client update',
 				to: ['Client team'],
@@ -140,7 +140,7 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 		{
 			id: 'decision-request',
 			label: 'Decision request',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Decision needed',
 				to: ['Client lead'],
@@ -182,7 +182,7 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 		{
 			id: 'risk-escalation',
 			label: 'Risk escalation',
-			initialRecipients: 'none',
+			variantSlug: 'default',
 			emailContent: {
 				title: 'Risk update',
 				to: ['Client sponsor'],

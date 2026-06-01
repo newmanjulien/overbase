@@ -2,12 +2,10 @@
 	import InfoIcon from 'phosphor-svelte/lib/InfoIcon';
 	import { useClerkContext } from 'svelte-clerk';
 	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
-	import { Button, ModalShell } from '$lib/ui';
+	import { Button, destructiveButtonClass, ModalShell } from '$lib/ui';
 	import SettingsCard from './SettingsCard.svelte';
 
 	const CONFIRMATION_TEXT = 'delete my account';
-	const DESTRUCTIVE_BUTTON_CLASS =
-		'bg-red-600 text-white hover:bg-red-700 disabled:bg-stone-100 disabled:text-stone-400';
 
 	const clerk = useClerkContext();
 	const viewerSession = useViewerSession();
@@ -85,7 +83,7 @@
 </script>
 
 <SettingsCard
-	title="Delete Account"
+	title="Delete account"
 	description="Permanently remove your account and all workspace access from Overbase. This action is not reversible."
 >
 	<div
@@ -101,7 +99,7 @@
 
 	{#snippet action()}
 		<Button
-			class={DESTRUCTIVE_BUTTON_CLASS}
+			class={destructiveButtonClass}
 			onclick={openDeleteModal}
 		>
 			Delete account
@@ -142,7 +140,7 @@
 		<Button variant="secondary" disabled={deleting} onclick={closeDeleteModal}>Cancel</Button>
 		<Button
 			disabled={!canDeleteAccount || deleting}
-			class={DESTRUCTIVE_BUTTON_CLASS}
+			class={destructiveButtonClass}
 			onclick={deleteAccount}
 		>
 			{deleting ? 'Deleting...' : 'Delete account'}

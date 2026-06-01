@@ -1,4 +1,8 @@
 import { v } from 'convex/values';
+import {
+	externalDataImport,
+	linkedinContactsExternalDataImport
+} from './external-data';
 
 export const emailFormatStatus = v.union(v.literal('active'), v.literal('paused'));
 export const emailFormatDataMode = v.union(v.literal('internal-data'), v.literal('public-data'));
@@ -37,22 +41,10 @@ export const emailFormatRecipientRef = v.union(
 	v.object({ kind: v.literal('teammate'), teammateId: v.id('teammates') })
 );
 
-export const emailFormatLinkedinContactInput = v.object({
-	firstName: v.string(),
-	lastName: v.string(),
-	fullName: v.string(),
-	company: v.string(),
-	position: v.string(),
-	profileUrl: v.string(),
-	email: v.string(),
-	connectedOn: v.string(),
-	sourceRowNumber: v.number()
-});
-
 export const emailFormatCreateFromStarterInput = {
 	formatDefinitionSlug: v.string(),
 	createdFromStarterSlug: v.string(),
-	startingPointId: v.union(v.string(), v.null()),
+	variantSlug: v.string(),
 	selectedAnswers: v.record(v.string(), v.string()),
 	title: v.string(),
 	to: v.array(v.string()),
@@ -61,13 +53,13 @@ export const emailFormatCreateFromStarterInput = {
 	body: v.array(emailFormatBodyBlock),
 	recipientRefs: v.array(emailFormatRecipientRef),
 	rules: v.array(emailFormatRule),
-	linkedinContactsSource: v.union(
-		v.object({
-			fileName: v.string(),
-			contacts: v.array(emailFormatLinkedinContactInput)
-		}),
-		v.null()
-	)
+	externalDataImport
+};
+
+export const addLinkedinContactsSourceToEmailFormatRuleInput = {
+	emailFormatId,
+	ruleId: v.string(),
+	externalDataImport: linkedinContactsExternalDataImport
 };
 
 export const updateEmailFormatContentInput = {

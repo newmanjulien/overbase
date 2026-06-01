@@ -9,7 +9,10 @@ import {
 	type FormatSpreadsheetCell
 } from '$lib/features/format-starters/domain';
 import { cellKey } from '$shared/spreadsheets';
-import { getEmailFormatDefinition } from '$shared/email-format-definitions';
+import {
+	getEmailFormatDefinition,
+	getEmailFormatSpec
+} from '$shared/email-format-definitions';
 import type {
 	FormatStarter,
 	InternalDataFormatStarter,
@@ -31,9 +34,6 @@ type PublicDataFormatStarterInput = Omit<
 	| 'artwork'
 	| 'mode'
 	| 'variables'
-	| 'initialRules'
-	| 'ruleDataSourceAction'
-	| 'ruleDataSourceModal'
 	| 'ruleInfoCard'
 > & {
 	artwork: FormatStarterArtworkInput;
@@ -65,14 +65,22 @@ export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
 	};
 
 	if (definition.dataMode === 'public-data') {
+		const firstStartingPoint = entry.startingPoints[0];
+		const initialSpec = firstStartingPoint
+			? getEmailFormatSpec(definition.slug, firstStartingPoint.variantSlug)
+			: null;
+
+		if (!initialSpec?.ruleInfoCard) {
+			throw new Error(
+				`Format starter "${entry.slug}" references definition "${definition.slug}" without rule info-card copy.`
+			);
+		}
+
 		return {
 			...normalizedEntry,
 			mode: definition.dataMode,
 			variables: definition.variables,
-			initialRules: definition.initialRules,
-			ruleDataSourceAction: definition.ruleDataSourceAction,
-			ruleDataSourceModal: definition.ruleDataSourceModal,
-			ruleInfoCard: definition.ruleInfoCard
+			ruleInfoCard: initialSpec.ruleInfoCard
 		};
 	}
 

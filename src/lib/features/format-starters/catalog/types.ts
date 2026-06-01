@@ -6,21 +6,14 @@ import type {
 } from '$lib/features/format-starters/domain';
 import type {
 	EmailFormatDataMode,
-	EmailFormatInlineTextContent,
-	EmailFormatRule,
-	EmailFormatRuleDataSourceAction
+	EmailFormatInlineTextContent
 } from '$shared/email-format-definitions';
-
-export type FormatStarterRuleDataSourceAction = EmailFormatRuleDataSourceAction;
-export type FormatStarterRuleDataSourceModal = 'default' | 'reconnect-linkedin';
-export type FormatStartingPointInitialRecipients = 'viewer' | 'none';
 
 export type FormatStartingPoint = {
 	id: string;
 	label: string;
-	initialRecipients: FormatStartingPointInitialRecipients;
+	variantSlug: string;
 	emailContent: FormatEmailContent;
-	ruleDataSourceAction?: FormatStarterRuleDataSourceAction;
 };
 
 type FormatStarterBase = {
@@ -47,9 +40,6 @@ export type InternalDataFormatStarter = FormatStarterBase & {
 
 export type PublicDataFormatStarter = FormatStarterBase & {
 	mode: 'public-data';
-	initialRules: readonly EmailFormatRule[];
-	ruleDataSourceAction: FormatStarterRuleDataSourceAction;
-	ruleDataSourceModal?: FormatStarterRuleDataSourceModal;
 	ruleInfoCard: {
 		label: string;
 		content: EmailFormatInlineTextContent;

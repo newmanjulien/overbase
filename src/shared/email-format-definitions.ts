@@ -29,6 +29,59 @@ export type EmailFormatRuleDataSourceAction = {
 	disabled?: boolean;
 };
 
+export type EmailFormatExternalDataRequirement = {
+	kind: 'linkedinContacts';
+	ruleId: string;
+};
+
+export type EmailFormatActivationRequirement =
+	| {
+			kind: 'recipients';
+	  }
+	| {
+			kind: 'rules';
+	  }
+	| {
+			kind: 'externalData';
+			externalData: EmailFormatExternalDataRequirement;
+	  };
+
+export type EmailFormatVariantInitialRecipients = 'viewer' | 'none';
+
+export type EmailFormatVariant = {
+	slug: string;
+	label: string;
+	initialRecipients: EmailFormatVariantInitialRecipients;
+	activationRequirements: readonly EmailFormatActivationRequirement[];
+	contentEditPolicy?: EmailFormatContentEditPolicy;
+	rulesEditPolicy?: EmailFormatRulesEditPolicy;
+	initialRules?: readonly EmailFormatRule[];
+	ruleDataSourceAction?: EmailFormatRuleDataSourceAction;
+	ruleDataSourceModal?: 'default' | 'reconnect-linkedin';
+	ruleInfoCard?: {
+		label: string;
+		content: EmailFormatInlineTextContent;
+	};
+};
+
+export type EmailFormatSpec = {
+	definitionSlug: string;
+	variantSlug: string;
+	dataMode: EmailFormatDataMode;
+	variables: readonly EmailFormatVariableDefinition[];
+	contentEditPolicy: EmailFormatContentEditPolicy;
+	rulesEditPolicy: EmailFormatRulesEditPolicy;
+	initialRecipients: EmailFormatVariantInitialRecipients;
+	activationRequirements: readonly EmailFormatActivationRequirement[];
+	initialRules: readonly EmailFormatRule[];
+	ruleDataSourceAction: EmailFormatRuleDataSourceAction;
+	ruleDataSourceModal: 'default' | 'reconnect-linkedin';
+	ruleInfoCard: {
+		label: string;
+		content: EmailFormatInlineTextContent;
+	} | null;
+};
+
 export type EmailFormatInlineTextContent = string | readonly EmailFormatInlineTextPart[];
 
 export type EmailFormatInlineTextPart =
@@ -48,6 +101,7 @@ type EmailFormatDefinitionBase = {
 	variables: readonly EmailFormatVariableDefinition[];
 	contentEditPolicy: EmailFormatContentEditPolicy;
 	rulesEditPolicy: EmailFormatRulesEditPolicy;
+	variants: readonly EmailFormatVariant[];
 	ruleInfoCard?: {
 		label: string;
 		content: EmailFormatInlineTextContent;
@@ -60,9 +114,6 @@ export type InternalDataEmailFormatDefinition = EmailFormatDefinitionBase & {
 
 export type PublicDataEmailFormatDefinition = EmailFormatDefinitionBase & {
 	dataMode: 'public-data';
-	initialRules: readonly EmailFormatRule[];
-	ruleDataSourceAction: EmailFormatRuleDataSourceAction;
-	ruleDataSourceModal?: 'default' | 'reconnect-linkedin';
 	ruleInfoCard: NonNullable<EmailFormatDefinitionBase['ruleInfoCard']>;
 };
 
@@ -103,6 +154,13 @@ const INTERNAL_DATA_RULE_INFO_CARD = {
 	content:
 		'Make these rules as precise and detailed as possible, you can also train the AI by giving feedback on specific sent emails'
 } as const satisfies NonNullable<EmailFormatDefinitionBase['ruleInfoCard']>;
+
+const DEFAULT_ACTIVATION_REQUIREMENTS = [
+	{ kind: 'recipients' },
+	{ kind: 'rules' }
+] as const satisfies readonly EmailFormatActivationRequirement[];
+
+const LINKEDIN_CONTACTS_RULE_ID = 'only-rule';
 
 export const reconnectLinkedinFormatVariables = [
 	{ id: 'assistant', label: 'Assistant' },
@@ -211,8 +269,6 @@ export const emailFormatDefinitionEntries = [
 		variables: reconnectLinkedinFormatVariables,
 		contentEditPolicy: PUBLIC_DATA_CONTENT_EDIT_POLICY,
 		rulesEditPolicy: PUBLIC_DATA_RULES_EDIT_POLICY,
-		ruleDataSourceAction: { label: 'Add LinkedIn contacts' },
-		ruleDataSourceModal: 'reconnect-linkedin',
 		ruleInfoCard: {
 			label: 'Tip:',
 			content: [
@@ -231,10 +287,55 @@ export const emailFormatDefinitionEntries = [
 				}
 			]
 		},
-		initialRules: [
+		variants: [
 			{
-				id: 'only-rule',
-				text: 'Ask team members about their relationship with each person in their LinkedIn contacts. When you find someone worth reconnecting with, look for news or content that would make it easy'
+				slug: 'personal',
+				label: 'Reconnect with contacts',
+				initialRecipients: 'viewer',
+				activationRequirements: [
+					...DEFAULT_ACTIVATION_REQUIREMENTS,
+					{
+						kind: 'externalData',
+						externalData: {
+							kind: 'linkedinContacts',
+							ruleId: LINKEDIN_CONTACTS_RULE_ID
+						}
+					}
+				],
+				initialRules: [
+					{
+						id: LINKEDIN_CONTACTS_RULE_ID,
+						text: 'Ask team members about their relationship with each person in their LinkedIn contacts. When you find someone worth reconnecting with, look for news or content that would make it easy'
+					}
+				],
+				ruleDataSourceAction: { label: 'Add LinkedIn contacts' },
+				ruleDataSourceModal: 'reconnect-linkedin'
+			},
+			{
+				slug: 'team',
+				label: 'Reconnect with contacts for team members',
+				initialRecipients: 'none',
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS,
+				initialRules: [
+					{
+						id: LINKEDIN_CONTACTS_RULE_ID,
+						text: 'Ask team members about their relationship with each person in their LinkedIn contacts. When you find someone worth reconnecting with, look for news or content that would make it easy'
+					}
+				],
+				ruleDataSourceAction: { label: 'No data needed', disabled: true }
+			},
+			{
+				slug: 'senior-leadership',
+				label: 'Reconnect with contacts for senior leadership',
+				initialRecipients: 'none',
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS,
+				initialRules: [
+					{
+						id: LINKEDIN_CONTACTS_RULE_ID,
+						text: 'Ask team members about their relationship with each person in their LinkedIn contacts. When you find someone worth reconnecting with, look for news or content that would make it easy'
+					}
+				],
+				ruleDataSourceAction: { label: 'No data needed', disabled: true }
 			}
 		]
 	},
@@ -244,7 +345,15 @@ export const emailFormatDefinitionEntries = [
 		variables: clientUpdateFormatVariables,
 		contentEditPolicy: INTERNAL_DATA_CONTENT_EDIT_POLICY,
 		rulesEditPolicy: INTERNAL_DATA_RULES_EDIT_POLICY,
-		ruleInfoCard: INTERNAL_DATA_RULE_INFO_CARD
+		ruleInfoCard: INTERNAL_DATA_RULE_INFO_CARD,
+		variants: [
+			{
+				slug: 'default',
+				label: 'Client update',
+				initialRecipients: 'none',
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS
+			}
+		]
 	},
 	{
 		slug: 'deal-follow-up',
@@ -252,7 +361,15 @@ export const emailFormatDefinitionEntries = [
 		variables: dealFollowUpFormatVariables,
 		contentEditPolicy: INTERNAL_DATA_CONTENT_EDIT_POLICY,
 		rulesEditPolicy: INTERNAL_DATA_RULES_EDIT_POLICY,
-		ruleInfoCard: INTERNAL_DATA_RULE_INFO_CARD
+		ruleInfoCard: INTERNAL_DATA_RULE_INFO_CARD,
+		variants: [
+			{
+				slug: 'default',
+				label: 'Deal follow-up',
+				initialRecipients: 'none',
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS
+			}
+		]
 	},
 	{
 		slug: 'implementation-plan',
@@ -260,9 +377,319 @@ export const emailFormatDefinitionEntries = [
 		variables: implementationPlanFormatVariables,
 		contentEditPolicy: INTERNAL_DATA_CONTENT_EDIT_POLICY,
 		rulesEditPolicy: INTERNAL_DATA_RULES_EDIT_POLICY,
-		ruleInfoCard: INTERNAL_DATA_RULE_INFO_CARD
+		ruleInfoCard: INTERNAL_DATA_RULE_INFO_CARD,
+		variants: [
+			{
+				slug: 'default',
+				label: 'Implementation plan',
+				initialRecipients: 'none',
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS
+			}
+		]
 	}
 ] as const satisfies readonly EmailFormatDefinition[];
+
+export type EmailFormatDefinitionValidationIssue = {
+	definitionSlug?: string;
+	variantSlug?: string;
+	message: string;
+};
+
+export function validateEmailFormatDefinitions(
+	definitions: readonly EmailFormatDefinition[]
+): EmailFormatDefinitionValidationIssue[] {
+	const issues: EmailFormatDefinitionValidationIssue[] = [];
+	const definitionSlugs = new Set<string>();
+
+	for (const definition of definitions) {
+		if (!definition.slug.trim()) {
+			issues.push({ message: 'Email format definitions cannot use an empty slug.' });
+		}
+
+		if (definitionSlugs.has(definition.slug)) {
+			issues.push({
+				definitionSlug: definition.slug,
+				message: `Duplicate email format definition slug "${definition.slug}".`
+			});
+		}
+
+		definitionSlugs.add(definition.slug);
+
+		if (definition.variants.length === 0) {
+			issues.push({
+				definitionSlug: definition.slug,
+				message: 'Email format definitions must define at least one variant.'
+			});
+		}
+
+		if (
+			definition.dataMode === 'public-data' &&
+			(!definition.ruleInfoCard.label.trim() ||
+				!hasEmailFormatInlineTextContent(definition.ruleInfoCard.content))
+		) {
+			issues.push({
+				definitionSlug: definition.slug,
+				message: 'Public-data email format definitions must define rule info-card copy.'
+			});
+		}
+
+		validateEmailFormatDefinitionVariants(issues, definition);
+	}
+
+	return issues;
+}
+
+function validateEmailFormatDefinitionVariants(
+	issues: EmailFormatDefinitionValidationIssue[],
+	definition: EmailFormatDefinition
+) {
+	const variantSlugs = new Set<string>();
+
+	for (const variant of definition.variants) {
+		if (!variant.slug.trim()) {
+			issues.push({
+				definitionSlug: definition.slug,
+				message: 'Email format variants cannot use an empty slug.'
+			});
+		}
+
+		if (variantSlugs.has(variant.slug)) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `Duplicate email format variant slug "${variant.slug}".`
+			});
+		}
+
+		variantSlugs.add(variant.slug);
+
+		if (!variant.label.trim()) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'Email format variants must define a label.'
+			});
+		}
+
+		if (variant.activationRequirements.length === 0) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'Email format variants must define at least one activation requirement.'
+			});
+		}
+
+		validateEmailFormatVariantRules(issues, definition, variant);
+		validateEmailFormatVariantActivationRequirements(issues, definition, variant);
+		validateEmailFormatVariantDataSourceAction(issues, definition, variant);
+	}
+}
+
+function validateEmailFormatVariantRules(
+	issues: EmailFormatDefinitionValidationIssue[],
+	definition: EmailFormatDefinition,
+	variant: EmailFormatVariant
+) {
+	const rules = variant.initialRules ?? [];
+	const ruleIds = new Set<string>();
+
+	for (const rule of rules) {
+		if (ruleIds.has(rule.id)) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `Duplicate initial email-format rule id "${rule.id}".`
+			});
+		}
+
+		ruleIds.add(rule.id);
+
+		if (!rule.id.trim()) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'Initial email-format rules cannot use an empty id.'
+			});
+		}
+
+		if (!rule.text.trim()) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `Initial email-format rule "${rule.id}" must include text.`
+			});
+		}
+	}
+
+	if (
+		definition.dataMode === 'public-data' &&
+		hasActivationRequirement(variant, 'rules') &&
+		rules.length === 0
+	) {
+		issues.push({
+			definitionSlug: definition.slug,
+			variantSlug: variant.slug,
+			message:
+				'Public-data email format variants with rule activation must define at least one initial rule.'
+		});
+	}
+}
+
+function validateEmailFormatVariantActivationRequirements(
+	issues: EmailFormatDefinitionValidationIssue[],
+	definition: EmailFormatDefinition,
+	variant: EmailFormatVariant
+) {
+	const initialRuleIds = new Set((variant.initialRules ?? []).map((rule) => rule.id));
+
+	for (const requirement of variant.activationRequirements) {
+		const requirementKind = (requirement as { kind: string }).kind;
+
+		if (
+			requirementKind !== 'recipients' &&
+			requirementKind !== 'rules' &&
+			requirementKind !== 'externalData'
+		) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `Email format variant uses unknown activation requirement "${String(
+					requirementKind
+				)}".`
+			});
+			continue;
+		}
+
+		if (requirement.kind !== 'externalData') {
+			continue;
+		}
+
+		const externalDataKind = (requirement.externalData as { kind: string }).kind;
+
+		if (externalDataKind !== 'linkedinContacts') {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `Email format variant uses unknown external data requirement "${String(
+					externalDataKind
+				)}".`
+			});
+			continue;
+		}
+
+		if (!requirement.externalData.ruleId.trim()) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'LinkedIn contacts requirements must reference a rule id.'
+			});
+			continue;
+		}
+
+		if (!initialRuleIds.has(requirement.externalData.ruleId)) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `LinkedIn contacts requirement references missing initial rule "${requirement.externalData.ruleId}".`
+			});
+		}
+	}
+}
+
+function validateEmailFormatVariantDataSourceAction(
+	issues: EmailFormatDefinitionValidationIssue[],
+	definition: EmailFormatDefinition,
+	variant: EmailFormatVariant
+) {
+	if (
+		variant.ruleDataSourceAction &&
+		!variant.ruleDataSourceAction.label.trim()
+	) {
+		issues.push({
+			definitionSlug: definition.slug,
+			variantSlug: variant.slug,
+			message: 'Rule data-source actions must define a label.'
+		});
+	}
+
+	if (
+		variant.ruleDataSourceModal &&
+		variant.ruleDataSourceModal !== 'default' &&
+		variant.ruleDataSourceModal !== 'reconnect-linkedin'
+	) {
+		issues.push({
+			definitionSlug: definition.slug,
+			variantSlug: variant.slug,
+			message: `Email format variant uses unknown rule data-source modal "${String(
+				variant.ruleDataSourceModal
+			)}".`
+		});
+	}
+
+	const requiresLinkedinContacts = variant.activationRequirements.some(
+		(requirement) =>
+			requirement.kind === 'externalData' &&
+			requirement.externalData.kind === 'linkedinContacts'
+	);
+
+	if (requiresLinkedinContacts && variant.ruleDataSourceModal !== 'reconnect-linkedin') {
+		issues.push({
+			definitionSlug: definition.slug,
+			variantSlug: variant.slug,
+			message:
+				'Variants with LinkedIn contacts requirements must use the LinkedIn contacts data-source modal.'
+		});
+	}
+
+	if (variant.ruleDataSourceModal === 'reconnect-linkedin' && !requiresLinkedinContacts) {
+		issues.push({
+			definitionSlug: definition.slug,
+			variantSlug: variant.slug,
+			message:
+				'The LinkedIn contacts data-source modal requires a LinkedIn contacts activation requirement.'
+		});
+	}
+}
+
+function hasActivationRequirement(
+	variant: EmailFormatVariant,
+	kind: EmailFormatActivationRequirement['kind']
+) {
+	return variant.activationRequirements.some((requirement) => requirement.kind === kind);
+}
+
+function hasEmailFormatInlineTextContent(content: EmailFormatInlineTextContent) {
+	if (typeof content === 'string') {
+		return Boolean(content.trim());
+	}
+
+	return content.some((part) => {
+		if (part.kind === 'text') {
+			return Boolean(part.text.trim());
+		}
+
+		return Boolean(part.label.trim());
+	});
+}
+
+const emailFormatDefinitionValidationIssues =
+	validateEmailFormatDefinitions(emailFormatDefinitionEntries);
+
+if (emailFormatDefinitionValidationIssues.length > 0) {
+	throw new Error(
+		`Invalid email format definitions:\n${emailFormatDefinitionValidationIssues
+			.map(
+				(issue) =>
+					`- ${[
+						issue.definitionSlug,
+						issue.variantSlug
+					]
+						.filter(Boolean)
+						.join('/')}${issue.definitionSlug ? ': ' : ''}${issue.message}`
+			)
+			.join('\n')}`
+	);
+}
 
 export function listEmailFormatDefinitions() {
 	return [...emailFormatDefinitionEntries];
@@ -270,4 +697,63 @@ export function listEmailFormatDefinitions() {
 
 export function getEmailFormatDefinition(slug: string) {
 	return emailFormatDefinitionEntries.find((definition) => definition.slug === slug) ?? null;
+}
+
+export function getDefaultEmailFormatVariant(definition: EmailFormatDefinition) {
+	return definition.variants[0] ?? null;
+}
+
+export function getEmailFormatVariant(
+	definition: EmailFormatDefinition,
+	variantSlug: string
+) {
+	return definition.variants.find((variant) => variant.slug === variantSlug) ?? null;
+}
+
+export function getEmailFormatSpec(
+	definitionSlug: string,
+	variantSlug: string
+): EmailFormatSpec | null {
+	const definition = getEmailFormatDefinition(definitionSlug);
+
+	if (!definition) {
+		return null;
+	}
+
+	const variant = getEmailFormatVariant(definition, variantSlug);
+
+	if (!variant) {
+		return null;
+	}
+
+	return {
+		definitionSlug: definition.slug,
+		variantSlug: variant.slug,
+		dataMode: definition.dataMode,
+		variables: definition.variables,
+		contentEditPolicy: variant.contentEditPolicy ?? definition.contentEditPolicy,
+		rulesEditPolicy: variant.rulesEditPolicy ?? definition.rulesEditPolicy,
+		initialRecipients: variant.initialRecipients,
+		activationRequirements: variant.activationRequirements,
+		initialRules: variant.initialRules ?? [],
+		ruleDataSourceAction:
+			variant.ruleDataSourceAction ?? { label: 'Link data sources' },
+		ruleDataSourceModal: variant.ruleDataSourceModal ?? 'default',
+		ruleInfoCard: variant.ruleInfoCard ?? definition.ruleInfoCard ?? null
+	};
+}
+
+export function getEmailFormatLinkedinContactsRequirement(
+	spec: Pick<EmailFormatSpec, 'activationRequirements'>
+) {
+	for (const requirement of spec.activationRequirements) {
+		if (
+			requirement.kind === 'externalData' &&
+			requirement.externalData.kind === 'linkedinContacts'
+		) {
+			return requirement.externalData;
+		}
+	}
+
+	return null;
 }
