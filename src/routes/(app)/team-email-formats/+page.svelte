@@ -19,7 +19,7 @@
 >
 	{#snippet footer()}
 		<InfoBar label="Next steps:">
-			Ask your team to build their own email formats and manage them here
+			Ask your team to create their own email formats and manage them here
 		</InfoBar>
 	{/snippet}
 </ListRoutePage>

@@ -1,8 +1,9 @@
 import {
-	cloneBuilderEmailContent,
-	type BuilderEmailContent
-} from '$lib/features/builder/domain';
-import { BuilderEditorState } from '$lib/features/builder/workbench/state/builder-editor-state.svelte';
+	cloneFormatAttachment,
+	cloneFormatBody,
+	type FormatEmailContent
+} from '$lib/features/format-starters/domain';
+import { FormatContentEditorState } from '$lib/features/format-starters/creator/state/format-content-editor-state.svelte';
 import type {
 	EmailFormatContent,
 	EmailFormatRecipientRef,
@@ -11,12 +12,17 @@ import type {
 } from './email-format-detail-types';
 import { getFormatRecipientKey } from './email-format-detail-types';
 
+type VersionedSnapshot<Value> = {
+	value: Value;
+	version: number;
+};
+
 type EmailFormatDetailSnapshot = {
 	emailFormat: {
 		id: string;
-		content: EmailFormatContent;
-		emailDraftVersion: number;
-		rules: EmailFormatRule[];
+		title: VersionedSnapshot<string>;
+		emailContent: VersionedSnapshot<EmailFormatContent>;
+		rules: VersionedSnapshot<EmailFormatRule[]>;
 		recipientRefs: EmailFormatRecipientRef[];
 		updatedAt: number;
 	};
@@ -34,12 +40,44 @@ const EMPTY_FEEDBACK: EmailFeedback = {
 	improvementText: ''
 };
 
+function cloneEmailContent(content: EmailFormatContent): EmailFormatContent {
+	return {
+		to: [...content.to],
+		cc: [...content.cc],
+		attachment: cloneFormatAttachment(content.attachment),
+		body: cloneFormatBody(content.body)
+	};
+}
+
+function toEmailContent(content: FormatEmailContent): EmailFormatContent {
+	return cloneEmailContent({
+		to: content.to,
+		cc: content.cc,
+		attachment: content.attachment,
+		body: content.body
+	});
+}
+
+function toEditorContent(title: string, content: EmailFormatContent): FormatEmailContent {
+	return {
+		title,
+		to: [...content.to],
+		cc: [...content.cc],
+		attachment: cloneFormatAttachment(content.attachment),
+		body: cloneFormatBody(content.body)
+	};
+}
+
 function cloneRules(rules: EmailFormatRule[]) {
 	return rules.map((rule) => ({ ...rule }));
 }
 
 function cloneFeedback(feedback: EmailFeedback) {
 	return { ...feedback };
+}
+
+function areEmailContentsEqual(firstContent: EmailFormatContent, secondContent: EmailFormatContent) {
+	return JSON.stringify(firstContent) === JSON.stringify(secondContent);
 }
 
 function areRulesEqual(firstRules: EmailFormatRule[], secondRules: EmailFormatRule[]) {
@@ -74,47 +112,191 @@ function areFeedbackEqual(
 	);
 }
 
+class VersionedDraftSection<Value> {
+	baseValue = $state<Value | null>(null);
+	baseVersion = $state(0);
+	draftValue = $state<Value | null>(null);
+	dirty = $state(false);
+	saving = $state(false);
+	pendingRemoteValue = $state<Value | null>(null);
+	pendingRemoteVersion = $state<number | null>(null);
+	conflict = $state(false);
+
+	constructor(
+		private readonly clone: (value: Value) => Value,
+		private readonly equals: (first: Value, second: Value) => boolean
+	) {}
+
+	reset() {
+		this.baseValue = null;
+		this.baseVersion = 0;
+		this.draftValue = null;
+		this.dirty = false;
+		this.saving = false;
+		this.pendingRemoteValue = null;
+		this.pendingRemoteVersion = null;
+		this.conflict = false;
+	}
+
+	sync(snapshot: VersionedSnapshot<Value>) {
+		const remoteValue = this.clone(snapshot.value);
+
+		if (
+			this.baseValue === null ||
+			!this.dirty ||
+			(this.draftValue !== null && this.equals(remoteValue, this.draftValue))
+		) {
+			this.acceptRemote(snapshot);
+			return;
+		}
+
+		if (snapshot.version > this.baseVersion) {
+			this.pendingRemoteValue = remoteValue;
+			this.pendingRemoteVersion = snapshot.version;
+			this.conflict = true;
+		}
+	}
+
+	updateDraft(value: Value, { forceDirty = false } = {}) {
+		const draftValue = this.clone(value);
+		this.draftValue = draftValue;
+		this.dirty =
+			forceDirty || this.baseValue === null || !this.equals(draftValue, this.baseValue);
+
+		if (this.dirty && this.pendingRemoteVersion !== null && this.pendingRemoteVersion > this.baseVersion) {
+			this.conflict = true;
+		}
+	}
+
+	markSaved(snapshot: VersionedSnapshot<Value>) {
+		this.acceptRemote(snapshot);
+	}
+
+	useLatest() {
+		if (this.pendingRemoteValue === null || this.pendingRemoteVersion === null) {
+			return;
+		}
+
+		this.acceptRemote({
+			value: this.pendingRemoteValue,
+			version: this.pendingRemoteVersion
+		});
+	}
+
+	getSaveVersion({ overwriteConflict = false } = {}) {
+		if (overwriteConflict && this.conflict && this.pendingRemoteVersion !== null) {
+			return this.pendingRemoteVersion;
+		}
+
+		return this.baseVersion;
+	}
+
+	private acceptRemote(snapshot: VersionedSnapshot<Value>) {
+		const nextValue = this.clone(snapshot.value);
+
+		if (
+			this.baseValue !== null &&
+			this.draftValue !== null &&
+			this.baseVersion === snapshot.version &&
+			this.equals(this.baseValue, nextValue) &&
+			this.equals(this.draftValue, nextValue) &&
+			!this.dirty &&
+			this.pendingRemoteValue === null &&
+			this.pendingRemoteVersion === null &&
+			!this.conflict
+		) {
+			return;
+		}
+
+		this.baseValue = nextValue;
+		this.baseVersion = snapshot.version;
+		this.draftValue = this.clone(nextValue);
+		this.dirty = false;
+		this.pendingRemoteValue = null;
+		this.pendingRemoteVersion = null;
+		this.conflict = false;
+	}
+}
+
 export function createEmailFormatDetailState() {
 	let syncedEmailFormatId = $state<string | null>(null);
-	let syncedEmailDraftVersion = $state(0);
-	let syncedRulesUpdatedAt = $state(0);
 	let syncedRecipientsUpdatedAt = $state(0);
 	let syncedFeedbackUpdatedAt = $state(-1);
-	let contentEditor = $state<BuilderEditorState | null>(null);
-	let savedContent = $state<BuilderEmailContent | null>(null);
-	let contentDirty = $state(false);
-	let emailDraftVersion = $state(0);
-	let rulesDraft = $state<EmailFormatRule[]>([]);
-	let savedRules = $state<EmailFormatRule[]>([]);
+	let contentEditor = $state<FormatContentEditorState | null>(null);
+	const titleSection = new VersionedDraftSection<string>((value) => value, (first, second) => first === second);
+	const emailContentSection = new VersionedDraftSection<EmailFormatContent>(
+		cloneEmailContent,
+		areEmailContentsEqual
+	);
+	const rulesSection = new VersionedDraftSection<EmailFormatRule[]>(cloneRules, areRulesEqual);
 	let selectedRecipientRefs = $state<EmailFormatRecipientRef[]>([]);
 	let savedRecipientRefs = $state<EmailFormatRecipientRef[]>([]);
 	let selectedSentEmailIndex = $state(0);
 	let feedbackDraftsBySentEmailId = $state<Record<string, EmailFeedback>>({});
 	let savedFeedbackBySentEmailId = $state<Record<string, EmailFeedback>>({});
 
-	function hasRuleChanges() {
-		return !areRulesEqual(rulesDraft, savedRules);
+	function getTitleDraft() {
+		return titleSection.draftValue ?? '';
+	}
+
+	function getEmailContentDraft() {
+		return emailContentSection.draftValue
+			? cloneEmailContent(emailContentSection.draftValue)
+			: null;
+	}
+
+	function getContentDraft() {
+		const emailContent = getEmailContentDraft();
+
+		return emailContent ? toEditorContent(getTitleDraft(), emailContent) : null;
+	}
+
+	function updateEmailContentDraftFromEditor() {
+		if (contentEditor) {
+			emailContentSection.updateDraft(toEmailContent(contentEditor.activeEmailContent));
+		}
+	}
+
+	function canSaveContent() {
+		return emailContentSection.dirty && !emailContentSection.conflict;
 	}
 
 	function canSaveRules() {
-		return hasRuleChanges() && areEmailFormatRulesFilled(rulesDraft);
+		return (
+			rulesSection.dirty &&
+			!rulesSection.conflict &&
+			areEmailFormatRulesFilled(rulesSection.draftValue ?? [])
+		);
 	}
 
 	function hasRecipientChanges() {
 		return !areRecipientRefsEqual(selectedRecipientRefs, savedRecipientRefs);
 	}
 
-	function createContentEditor(content: BuilderEmailContent) {
-		return new BuilderEditorState(content, { onContentChange: markContentChanged });
+	function replaceEditorContent(nextContent: FormatEmailContent) {
+		if (contentEditor) {
+			contentEditor.setEmailContentChangeHandler(updateEmailContentDraftFromEditor);
+			contentEditor.replaceEmailContent(nextContent);
+		} else {
+			contentEditor = new FormatContentEditorState(nextContent, {
+				onEmailContentChange: updateEmailContentDraftFromEditor
+			});
+		}
 	}
 
-	function replaceEditorContent(nextContent: BuilderEmailContent) {
-		if (contentEditor) {
-			contentEditor.setContentChangeHandler(markContentChanged);
-			contentEditor.replaceEmailContent(nextContent, { resetDirty: true });
-		} else {
-			contentEditor = createContentEditor(nextContent);
+	function syncEditorFromSections() {
+		const nextContent = getContentDraft();
+
+		if (!nextContent) {
+			return;
 		}
+
+		if (!contentEditor || !emailContentSection.dirty) {
+			replaceEditorContent(nextContent);
+			return;
+		}
+
+		contentEditor.updateTitle(nextContent.title, { notify: false });
 	}
 
 	function sync(
@@ -124,27 +306,19 @@ export function createEmailFormatDetailState() {
 	) {
 		if (syncedEmailFormatId !== emailFormatId) {
 			syncedEmailFormatId = emailFormatId;
-			syncedEmailDraftVersion = 0;
-			syncedRulesUpdatedAt = 0;
 			syncedRecipientsUpdatedAt = 0;
 			syncedFeedbackUpdatedAt = -1;
 			selectedSentEmailIndex = 0;
+			contentEditor = null;
+			titleSection.reset();
+			emailContentSection.reset();
+			rulesSection.reset();
 		}
 
-		if (detail.emailFormat.emailDraftVersion > syncedEmailDraftVersion) {
-			const nextContent = cloneBuilderEmailContent(detail.emailFormat.content);
-			replaceEditorContent(nextContent);
-			savedContent = cloneBuilderEmailContent(nextContent);
-			contentDirty = false;
-			emailDraftVersion = detail.emailFormat.emailDraftVersion;
-			syncedEmailDraftVersion = detail.emailFormat.emailDraftVersion;
-		}
-
-		if (detail.emailFormat.updatedAt > syncedRulesUpdatedAt && !hasRuleChanges()) {
-			rulesDraft = cloneRules(detail.emailFormat.rules);
-			savedRules = cloneRules(detail.emailFormat.rules);
-			syncedRulesUpdatedAt = detail.emailFormat.updatedAt;
-		}
+		titleSection.sync(detail.emailFormat.title);
+		emailContentSection.sync(detail.emailFormat.emailContent);
+		rulesSection.sync(detail.emailFormat.rules);
+		syncEditorFromSections();
 
 		if (
 			syncRecipients &&
@@ -176,35 +350,55 @@ export function createEmailFormatDetailState() {
 		}
 	}
 
-	function markContentSaved(nextContent: BuilderEmailContent, nextEmailDraftVersion: number) {
-		const normalizedContent = cloneBuilderEmailContent(nextContent);
-		replaceEditorContent(normalizedContent);
-		savedContent = cloneBuilderEmailContent(normalizedContent);
-		contentDirty = false;
-		emailDraftVersion = nextEmailDraftVersion;
-		syncedEmailDraftVersion = nextEmailDraftVersion;
-	}
-
-	function replaceContentDraft(nextContent: BuilderEmailContent) {
-		replaceEditorContent(nextContent);
-	}
-
-	function markContentChanged() {
-		contentDirty = true;
-	}
-
-	function updateContentTitle(nextTitle: string) {
+	function updateTitleDraft(nextTitle: string) {
+		titleSection.updateDraft(nextTitle, { forceDirty: true });
 		contentEditor?.updateTitle(nextTitle, { notify: false });
 	}
 
-	function updateRules(nextRules: EmailFormatRule[]) {
-		rulesDraft = nextRules;
+	function markTitleSaved(nextTitle: VersionedSnapshot<string>) {
+		titleSection.markSaved(nextTitle);
+		contentEditor?.updateTitle(nextTitle.value, { notify: false });
 	}
 
-	function markRulesSaved(nextRules: EmailFormatRule[], updatedAt: number) {
-		rulesDraft = cloneRules(nextRules);
-		savedRules = cloneRules(nextRules);
-		syncedRulesUpdatedAt = updatedAt;
+	function syncTitleRemote(nextTitle: VersionedSnapshot<string>) {
+		titleSection.sync(nextTitle);
+		contentEditor?.updateTitle(getTitleDraft(), { notify: false });
+	}
+
+	function markContentSaved(nextContent: VersionedSnapshot<EmailFormatContent>) {
+		emailContentSection.markSaved(nextContent);
+		syncEditorFromSections();
+	}
+
+	function syncContentRemote(nextContent: VersionedSnapshot<EmailFormatContent>) {
+		emailContentSection.sync(nextContent);
+		syncEditorFromSections();
+	}
+
+	function updateRules(nextRules: EmailFormatRule[]) {
+		rulesSection.updateDraft(nextRules);
+	}
+
+	function markRulesSaved(nextRules: VersionedSnapshot<EmailFormatRule[]>) {
+		rulesSection.markSaved(nextRules);
+	}
+
+	function syncRulesRemote(nextRules: VersionedSnapshot<EmailFormatRule[]>) {
+		rulesSection.sync(nextRules);
+	}
+
+	function useLatestTitle() {
+		titleSection.useLatest();
+		contentEditor?.updateTitle(getTitleDraft(), { notify: false });
+	}
+
+	function useLatestContent() {
+		emailContentSection.useLatest();
+		syncEditorFromSections();
+	}
+
+	function useLatestRules() {
+		rulesSection.useLatest();
 	}
 
 	function updateSelectedRecipientRefs(nextRefs: EmailFormatRecipientRef[]) {
@@ -261,20 +455,47 @@ export function createEmailFormatDetailState() {
 		get contentEditor() {
 			return contentEditor;
 		},
-		get emailDraftVersion() {
-			return emailDraftVersion;
+		get titleDraft() {
+			return getTitleDraft();
 		},
-		get emailContent() {
-			return contentEditor?.activeEmailContent ?? null;
+		get titleConflict() {
+			return titleSection.conflict;
 		},
-		get savedContent() {
-			return savedContent;
+		get isSavingTitle() {
+			return titleSection.saving;
 		},
-		get contentDirty() {
-			return contentEditor?.contentDirty ?? contentDirty;
+		set isSavingTitle(value: boolean) {
+			titleSection.saving = value;
+		},
+		get emailContentDraft() {
+			return getEmailContentDraft();
+		},
+		get contentConflict() {
+			return emailContentSection.conflict;
+		},
+		get isSavingContent() {
+			return emailContentSection.saving;
+		},
+		set isSavingContent(value: boolean) {
+			emailContentSection.saving = value;
+		},
+		get canSaveContent() {
+			return canSaveContent();
+		},
+		get contentDraft() {
+			return getContentDraft();
 		},
 		get rulesDraft() {
-			return rulesDraft;
+			return rulesSection.draftValue ?? [];
+		},
+		get rulesConflict() {
+			return rulesSection.conflict;
+		},
+		get isSavingRules() {
+			return rulesSection.saving;
+		},
+		set isSavingRules(value: boolean) {
+			rulesSection.saving = value;
 		},
 		get canSaveRules() {
 			return canSaveRules();
@@ -289,18 +510,29 @@ export function createEmailFormatDetailState() {
 			selectedSentEmailIndex = index;
 		},
 		canSaveFeedback,
+		getContentSaveVersion: (options?: { overwriteConflict?: boolean }) =>
+			emailContentSection.getSaveVersion(options),
 		getFeedbackDraft,
+		getRulesSaveVersion: (options?: { overwriteConflict?: boolean }) =>
+			rulesSection.getSaveVersion(options),
+		getTitleSaveVersion: (options?: { overwriteConflict?: boolean }) =>
+			titleSection.getSaveVersion(options),
 		markContentSaved,
-		markContentChanged,
 		markFeedbackSaved,
 		markRulesSaved,
+		markTitleSaved,
 		markRecipientsSaved,
-		replaceContentDraft,
 		sync,
-		updateContentTitle,
+		syncContentRemote,
+		syncRulesRemote,
+		syncTitleRemote,
 		updateFeedback,
 		updateRules,
-		updateSelectedRecipientRefs
+		updateSelectedRecipientRefs,
+		updateTitleDraft,
+		useLatestContent,
+		useLatestRules,
+		useLatestTitle
 	};
 }
 

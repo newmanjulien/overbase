@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import { avatar } from '../backend/validators/avatars';
 import {
 	emailFormatBodyBlock,
-	emailFormatBuilderMode,
+	emailFormatDataMode,
 	emailFormatRule,
 	emailFormatSpreadsheetAttachment,
 	emailFormatStatus
@@ -40,19 +40,21 @@ export default defineSchema({
 	emailFormats: defineTable({
 		workspaceId: v.id('workspaces'),
 		creatorUserId: v.id('users'),
-		builderSlug: v.string(),
-		builderMode: emailFormatBuilderMode,
+		formatStarterSlug: v.string(),
+		dataMode: emailFormatDataMode,
 		startingPointId: v.union(v.string(), v.null()),
 		selectedAnswers: v.record(v.string(), v.string()),
 		status: emailFormatStatus,
 		title: v.string(),
+		titleVersion: v.number(),
 		to: v.array(v.string()),
 		cc: v.array(v.string()),
 		attachment: v.union(emailFormatSpreadsheetAttachment, v.null()),
 		body: v.array(emailFormatBodyBlock),
-		emailDraftVersion: v.number(),
+		emailContentVersion: v.number(),
 		recipientCount: v.number(),
 		rules: v.array(emailFormatRule),
+		rulesVersion: v.number(),
 		linkedinContactsSummary: v.union(
 			v.object({
 				contactCount: v.number(),

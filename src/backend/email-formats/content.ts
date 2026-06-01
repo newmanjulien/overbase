@@ -20,7 +20,6 @@ type EmailFormatBody = Doc<'emailFormats'>['body'];
 type EmailFormatRule = Doc<'emailFormats'>['rules'][number];
 
 export type EmailFormatContentInput = {
-	title: string;
 	to: string[];
 	cc: string[];
 	attachment: EmailFormatAttachment;
@@ -133,7 +132,6 @@ export function normalizeEmailFormatAttachment(attachment: EmailFormatAttachment
 
 export function normalizeEmailFormatContent(content: EmailFormatContentInput) {
 	return {
-		title: normalizeEmailFormatTitle(content.title),
 		to: normalizeEmailFormatRecipients(content.to),
 		cc: normalizeEmailFormatRecipients(content.cc),
 		attachment: normalizeEmailFormatAttachment(content.attachment),
@@ -143,7 +141,6 @@ export function normalizeEmailFormatContent(content: EmailFormatContentInput) {
 
 export function toEditableEmailFormatContent(format: Doc<'emailFormats'>) {
 	return {
-		title: format.title,
 		to: [...format.to],
 		cc: [...format.cc],
 		attachment: format.attachment

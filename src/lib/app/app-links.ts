@@ -17,9 +17,9 @@ export type DynamicAppLink<Pathname extends `/${string}`, RouteId extends `/(app
 };
 
 export const APP_LINKS = {
-	buildFormats: {
-		pathname: '/build-formats',
-		routeId: '/(app)/build-formats'
+	createFormats: {
+		pathname: '/create-formats',
+		routeId: '/(app)/create-formats'
 	},
 	emailFormats: {
 		pathname: '/email-formats',
@@ -71,28 +71,28 @@ export const AUTH_LINKS = {
 } as const satisfies Record<string, AuthEntryLink>;
 
 export const APP_DYNAMIC_ROUTE_IDS = {
-	buildFormat: '/(app)/build-formats/[builderSlug]',
+	createFormat: '/(app)/create-formats/[formatStarterSlug]',
 	emailFormat: '/(app)/email-formats/[emailFormatId]'
 } as const;
 
-export const DEFAULT_APP_LINK = APP_LINKS.buildFormats;
+export const DEFAULT_APP_LINK = APP_LINKS.createFormats;
 
 export type AppLinkKey = keyof typeof APP_LINKS;
 export type AuthLinkKey = keyof typeof AUTH_LINKS;
 export type StaticAppPathname = (typeof APP_LINKS)[AppLinkKey]['pathname'];
 export type AuthEntryPathname = (typeof AUTH_LINKS)[AuthLinkKey]['pathname'];
-export type BuildFormatsPathname = `/build-formats/${string}`;
+export type CreateFormatsPathname = `/create-formats/${string}`;
 export type EmailFormatPathname = `/email-formats/${string}`;
-export type AppPathname = StaticAppPathname | BuildFormatsPathname | EmailFormatPathname;
+export type AppPathname = StaticAppPathname | CreateFormatsPathname | EmailFormatPathname;
 export type AppHref = AppPathname;
 export type AuthEntryHref = AuthEntryPathname | `${AuthEntryPathname}?${string}`;
-export type BuildFormatsModeFilterId = 'all' | 'internal-data' | 'public-data';
-export type BuildFormatsGalleryHref =
-	| typeof APP_LINKS.buildFormats.pathname
-	| `${typeof APP_LINKS.buildFormats.pathname}?mode=${Exclude<BuildFormatsModeFilterId, 'all'>}`;
-export type BuildFormatsViewportFallbackPathname =
+export type CreateFormatsModeFilterId = 'all' | 'internal-data' | 'public-data';
+export type CreateFormatsGalleryHref =
+	| typeof APP_LINKS.createFormats.pathname
+	| `${typeof APP_LINKS.createFormats.pathname}?mode=${Exclude<CreateFormatsModeFilterId, 'all'>}`;
+export type CreateFormatsViewportFallbackPathname =
 	| typeof APP_LINKS.emailFormats.pathname
-	| typeof APP_LINKS.buildFormats.pathname;
+	| typeof APP_LINKS.createFormats.pathname;
 
 const STATIC_APP_PATHNAMES = new Set<string>(Object.values(APP_LINKS).map((link) => link.pathname));
 const resolveHref = resolve as (href: string) => string;
@@ -101,34 +101,34 @@ function encodePathSegment(value: string) {
 	return encodeURIComponent(value);
 }
 
-export function buildFormatPathname(builderSlug: string): BuildFormatsPathname {
-	return `/build-formats/${encodePathSegment(builderSlug)}`;
+export function createFormatPathname(formatStarterSlug: string): CreateFormatsPathname {
+	return `/create-formats/${encodePathSegment(formatStarterSlug)}`;
 }
 
-export function buildFormatLink(
-	builderSlug: string
-): DynamicAppLink<BuildFormatsPathname, typeof APP_DYNAMIC_ROUTE_IDS.buildFormat> {
+export function createFormatLink(
+	formatStarterSlug: string
+): DynamicAppLink<CreateFormatsPathname, typeof APP_DYNAMIC_ROUTE_IDS.createFormat> {
 	return {
-		pathname: buildFormatPathname(builderSlug),
-		routeId: APP_DYNAMIC_ROUTE_IDS.buildFormat,
-		href: resolve(APP_DYNAMIC_ROUTE_IDS.buildFormat, {
-			builderSlug
-		}) as BuildFormatsPathname
+		pathname: createFormatPathname(formatStarterSlug),
+		routeId: APP_DYNAMIC_ROUTE_IDS.createFormat,
+		href: resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, {
+			formatStarterSlug
+		}) as CreateFormatsPathname
 	};
 }
 
-export function normalizeBuildFormatsModeFilter(
+export function normalizeCreateFormatsModeFilter(
 	value: string | null | undefined
-): BuildFormatsModeFilterId {
+): CreateFormatsModeFilterId {
 	return value === 'internal-data' || value === 'public-data' ? value : 'all';
 }
 
-export function buildFormatsGalleryHref(mode: BuildFormatsModeFilterId): BuildFormatsGalleryHref {
+export function createFormatsGalleryHref(mode: CreateFormatsModeFilterId): CreateFormatsGalleryHref {
 	if (mode === 'all') {
-		return APP_LINKS.buildFormats.pathname;
+		return APP_LINKS.createFormats.pathname;
 	}
 
-	return `${APP_LINKS.buildFormats.pathname}?mode=${mode}`;
+	return `${APP_LINKS.createFormats.pathname}?mode=${mode}`;
 }
 
 export function emailFormatPathname(emailFormatId: string): EmailFormatPathname {
@@ -150,7 +150,7 @@ export function emailFormatLink(
 export function isCanonicalAppPathname(pathname: string): pathname is AppPathname {
 	return (
 		STATIC_APP_PATHNAMES.has(pathname) ||
-		/^\/build-formats\/[^/?#]+$/.test(pathname) ||
+		/^\/create-formats\/[^/?#]+$/.test(pathname) ||
 		/^\/email-formats\/[^/?#]+$/.test(pathname)
 	);
 }

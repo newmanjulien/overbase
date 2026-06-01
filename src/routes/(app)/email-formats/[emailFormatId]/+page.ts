@@ -7,7 +7,7 @@ export const load: PageLoad = ({ params }) => {
 		headerTitle: 'Email format',
 		headerTitleEditable: true,
 		desktopBreadcrumbParent: {
-			label: 'My email formats',
+			label: 'My formats',
 			href: APP_LINKS.emailFormats.pathname
 		},
 		chromeMode: 'focused'

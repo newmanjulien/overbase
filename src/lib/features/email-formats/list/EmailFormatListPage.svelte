@@ -210,9 +210,9 @@
 	empty={{
 		icon: APP_ROUTE_REGISTRY["email-formats"].icon,
 		title: 'No email formats found',
-		description: 'Use a build format to shape your first local email draft.',
+		description: 'Create your first local email draft from a format.',
 		nextSteps: [
-			{ kind: 'link', text: 'Build', href: APP_LINKS.buildFormats.pathname },
+			{ kind: 'link', text: 'Create', href: APP_LINKS.createFormats.pathname },
 			{
 				kind: 'text',
 				text: ' the format of the emails your team will receive'

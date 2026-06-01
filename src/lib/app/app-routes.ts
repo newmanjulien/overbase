@@ -1,3 +1,4 @@
+import ArticleIcon from 'phosphor-svelte/lib/ArticleIcon';
 import BuildingIcon from 'phosphor-svelte/lib/BuildingIcon';
 import CloudIcon from 'phosphor-svelte/lib/CloudIcon';
 import FolderSimpleIcon from 'phosphor-svelte/lib/FolderSimpleIcon';
@@ -13,7 +14,7 @@ export type RouteIconProps = PhosphorIconProps;
 export type RouteIcon = PhosphorIcon;
 
 export const APP_ROUTE_IDS = [
-	'build-formats',
+	'create-formats',
 	'email-formats',
 	'data-sources',
 	'external-data',
@@ -47,13 +48,13 @@ export type AppRouteDefinition = StaticAppLink & {
 export const APP_ROUTE_REGISTRY = {
 	'email-formats': {
 		...APP_LINKS.emailFormats,
-		navLabel: 'My email formats',
+		navLabel: 'My formats',
 		icon: FolderSimpleIcon
 	},
-	'build-formats': {
-		...APP_LINKS.buildFormats,
-		navLabel: 'Build my formats',
-		icon: FolderSimpleIcon
+	'create-formats': {
+		...APP_LINKS.createFormats,
+		navLabel: 'Create formats',
+		icon: ArticleIcon
 	},
 	'data-sources': {
 		...APP_LINKS.dataSources,
@@ -96,7 +97,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
 	{
 		id: 'email-formats',
 		heading: 'Email formats',
-		routeIds: ['build-formats', 'email-formats'],
+		routeIds: ['create-formats', 'email-formats'],
 		desktopSectionClass: 'pt-2'
 	},
 	{

@@ -1,7 +1,7 @@
 import type { EmailDraft } from '$shared/email-drafts';
 import type { Id } from '$convex/_generated/dataModel';
 import type { EmailFormatRule } from '$lib/domain/email-format-rules';
-import type { BuilderEmailContent } from '$lib/features/builder/domain';
+import type { FormatEmailContent } from '$lib/features/format-starters/domain';
 
 export type EmailFormatRecipientRef =
 	| {
@@ -24,7 +24,7 @@ export type EmailFormatRecipientPickerPerson = {
 };
 
 export type { EmailFormatRule };
-export type EmailFormatContent = BuilderEmailContent;
+export type EmailFormatContent = Omit<FormatEmailContent, 'title'>;
 
 export type EmailFeedback = {
 	likedText: string;

@@ -1,21 +1,27 @@
 <script lang="ts">
-	import type { BuilderEmailContent, BuilderVariableDefinition } from '$lib/features/builder/domain';
-	import type { BuilderVariableDragCoordinator } from '$lib/features/builder/workbench/variables/builder-variable-drag-coordinator.svelte';
+	import type { FormatVariableDefinition } from '$lib/features/format-starters/domain';
+	import type { FormatVariableDragCoordinator } from '$lib/features/format-starters/creator/variables/format-variable-drag-coordinator.svelte';
 	import EmailFormatContentPanel from './EmailFormatContentPanel.svelte';
 	import EmailFormatRulesPanel from './EmailFormatRulesPanel.svelte';
 	import type { EmailFormatDetailState } from './email-format-detail-state.svelte';
 	import type { EmailFormatDetailLoadState } from './email-format-detail-types';
+	import SectionConflictActions from './SectionConflictActions.svelte';
 
 	type Props = {
 		actionError: string | null;
 		contentError: string | null;
-		contentVariables: readonly BuilderVariableDefinition[];
+		contentVariables: readonly FormatVariableDefinition[];
 		detailState: EmailFormatDetailState;
-		dragCoordinator: BuilderVariableDragCoordinator;
-		isSavingContent: boolean;
+		dragCoordinator: FormatVariableDragCoordinator;
 		loadState: EmailFormatDetailLoadState;
-		onSaveContent: (content: BuilderEmailContent, baseEmailDraftVersion: number) => Promise<void>;
+		onKeepMineContent: () => void | Promise<void>;
+		onKeepMineRules: () => void | Promise<void>;
+		onKeepMineTitle: () => void | Promise<void>;
+		onSaveContent: () => Promise<void>;
 		onSaveRules: () => void | Promise<void>;
+		onUseLatestContent: () => void;
+		onUseLatestRules: () => void;
+		onUseLatestTitle: () => void;
 	};
 
 	let {
@@ -24,10 +30,15 @@
 		contentVariables,
 		detailState,
 		dragCoordinator,
-		isSavingContent,
 		loadState,
+		onKeepMineContent,
+		onKeepMineRules,
+		onKeepMineTitle,
 		onSaveContent,
-		onSaveRules
+		onSaveRules,
+		onUseLatestContent,
+		onUseLatestRules,
+		onUseLatestTitle
 	}: Props = $props();
 </script>
 
@@ -36,6 +47,16 @@
 		<p class="mb-4 rounded-sm border border-red-100 bg-red-50 px-3 py-2 text-[0.72rem] text-red-700">
 			{actionError}
 		</p>
+	{/if}
+	{#if detailState.titleConflict}
+		<div class="mb-4 rounded-sm border border-amber-100 bg-amber-50 px-3 py-2">
+			<SectionConflictActions
+				conflict={detailState.titleConflict}
+				isSaving={detailState.isSavingTitle}
+				onKeepMine={onKeepMineTitle}
+				onUseLatest={onUseLatestTitle}
+			/>
+		</div>
 	{/if}
 
 	{#if loadState === 'loading'}
@@ -57,10 +78,13 @@
 					editor={detailState.contentEditor}
 					variables={contentVariables}
 					{dragCoordinator}
-					emailDraftVersion={detailState.emailDraftVersion}
-					isSaving={isSavingContent}
+					canSave={detailState.canSaveContent}
+					conflict={detailState.contentConflict}
+					isSaving={detailState.isSavingContent}
 					error={contentError}
 					onSave={onSaveContent}
+					onKeepMine={onKeepMineContent}
+					onUseLatest={onUseLatestContent}
 				/>
 			</section>
 
@@ -68,8 +92,12 @@
 				<EmailFormatRulesPanel
 					rules={detailState.rulesDraft}
 					canSave={detailState.canSaveRules}
+					conflict={detailState.rulesConflict}
+					isSaving={detailState.isSavingRules}
 					onRulesChange={detailState.updateRules}
 					onSave={() => void onSaveRules()}
+					onKeepMine={onKeepMineRules}
+					onUseLatest={onUseLatestRules}
 				/>
 			</section>
 		</div>

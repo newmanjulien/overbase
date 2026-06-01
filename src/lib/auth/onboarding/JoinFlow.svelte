@@ -18,13 +18,13 @@
 	import AuthTextInput from '$lib/auth/components/AuthTextInput.svelte';
 	import { createClerkEmailCodeAuthController, getClerkErrorCode } from '$lib/auth/email-code-auth';
 	import { buildAuthEntryHref } from '$lib/auth/navigation';
-	import JoinBuilderStep from './JoinBuilderStep.svelte';
+	import JoinFormatStarterStep from './JoinFormatStarterStep.svelte';
 	import JoinCompanyStep from './JoinCompanyStep.svelte';
 	import JoinPartnerStep from './JoinPartnerStep.svelte';
 	import JoinWelcomeStep from './JoinWelcomeStep.svelte';
-	import { getJoinBuilderRecommendation } from './join-builder';
+	import { getJoinFormatStarterRecommendation } from './join-format-starter';
 
-	type JoinStep = 'welcome' | 'join' | 'code' | 'company' | 'partner' | 'builder';
+	type JoinStep = 'welcome' | 'join' | 'code' | 'company' | 'partner' | 'formatStarter';
 
 	type Props = {
 		returnTo?: AppHref;
@@ -68,11 +68,11 @@
 	});
 	let companyErrorText = $state<string | null>(null);
 	let isSavingCompany = $state(false);
-	const joinBuilder = getJoinBuilderRecommendation();
+	const joinFormatStarter = getJoinFormatStarterRecommendation();
 	let completionErrorText = $state<string | null>(null);
-	let completingBuilderSlug = $state<string | null>(null);
-	let isOpeningBuilder = $state(false);
-	let builderRoutePreloadPromise: Promise<void> | null = null;
+	let completingFormatStarterSlug = $state<string | null>(null);
+	let isOpeningFormatStarter = $state(false);
+	let formatStarterRoutePreloadPromise: Promise<void> | null = null;
 
 	const loginHref = $derived(
 		buildAuthEntryHref(AUTH_LINKS.login.pathname, {
@@ -111,7 +111,7 @@
 		return undefined;
 	});
 	const canContinue = $derived(email.trim().length > 0 && !isSubmittingEmail);
-	const isCompletingOnboarding = $derived(Boolean(completingBuilderSlug) || isOpeningBuilder);
+	const isCompletingOnboarding = $derived(Boolean(completingFormatStarterSlug) || isOpeningFormatStarter);
 
 	async function submitEmail() {
 		const normalizedEmail = email.trim().toLowerCase();
@@ -185,51 +185,51 @@
 		}
 	}
 
-	function preloadBuilderRoute() {
-		if (builderRoutePreloadPromise) {
-			return builderRoutePreloadPromise;
+	function preloadFormatStarterRoute() {
+		if (formatStarterRoutePreloadPromise) {
+			return formatStarterRoutePreloadPromise;
 		}
 
-		builderRoutePreloadPromise = preloadData(
-			resolve(APP_DYNAMIC_ROUTE_IDS.buildFormat, { builderSlug: joinBuilder.slug })
+		formatStarterRoutePreloadPromise = preloadData(
+			resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, { formatStarterSlug: joinFormatStarter.slug })
 		).then(
 			() => undefined,
 			() => undefined
 		);
 
-		return builderRoutePreloadPromise;
+		return formatStarterRoutePreloadPromise;
 	}
 
-	async function selectBuilder() {
+	async function selectFormatStarter() {
 		if (isCompletingOnboarding) return;
 
-	completionErrorText = null;
-	completingBuilderSlug = joinBuilder.slug;
+		completionErrorText = null;
+		completingFormatStarterSlug = joinFormatStarter.slug;
 
-	try {
-		await client.mutation(api.auth.markOnboardingComplete, {});
-		await goto(resolve(APP_DYNAMIC_ROUTE_IDS.buildFormat, { builderSlug: joinBuilder.slug }));
-	} catch (error) {
-		completionErrorText = authController.getErrorMessage(error);
-	} finally {
-		completingBuilderSlug = null;
-	}
+		try {
+			await client.mutation(api.auth.markOnboardingComplete, {});
+			await goto(resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, { formatStarterSlug: joinFormatStarter.slug }));
+		} catch (error) {
+			completionErrorText = authController.getErrorMessage(error);
+		} finally {
+			completingFormatStarterSlug = null;
+		}
 	}
 
-	async function openBuilder() {
+	async function openFormatStarter() {
 		if (isCompletingOnboarding) return;
 
-	completionErrorText = null;
-	isOpeningBuilder = true;
+		completionErrorText = null;
+		isOpeningFormatStarter = true;
 
-	try {
-		await client.mutation(api.auth.markOnboardingComplete, {});
-		await goto(resolve(APP_LINKS.buildFormats.pathname));
-	} catch (error) {
-		completionErrorText = authController.getErrorMessage(error);
-	} finally {
-		isOpeningBuilder = false;
-	}
+		try {
+			await client.mutation(api.auth.markOnboardingComplete, {});
+			await goto(resolve(APP_LINKS.createFormats.pathname));
+		} catch (error) {
+			completionErrorText = authController.getErrorMessage(error);
+		} finally {
+			isOpeningFormatStarter = false;
+		}
 	}
 
 	function showEmailStep() {
@@ -249,20 +249,20 @@
 
 	$effect(() => {
 		if (step === 'partner') {
-			void preloadBuilderRoute();
+			void preloadFormatStarterRoute();
 		}
 	});
 </script>
 
-{#if step === 'builder'}
-	<JoinBuilderStep
-		builder={joinBuilder}
+{#if step === 'formatStarter'}
+	<JoinFormatStarterStep
+		formatStarter={joinFormatStarter}
 		completionErrorText={completionErrorText}
-		selectedBuilderSlug={completingBuilderSlug}
-		isOpeningBuilder={isOpeningBuilder}
-		onSelect={() => void selectBuilder()}
-		onPreload={() => void preloadBuilderRoute()}
-		onOpenBuilder={() => void openBuilder()}
+		selectedFormatStarterSlug={completingFormatStarterSlug}
+		isOpeningFormatStarter={isOpeningFormatStarter}
+		onSelect={() => void selectFormatStarter()}
+		onPreload={() => void preloadFormatStarterRoute()}
+		onOpenFormatStarter={() => void openFormatStarter()}
 	/>
 {:else}
 	<AuthEntryShell
@@ -362,7 +362,7 @@
 				bind:name={partner.name}
 				bind:collaboration={partner.collaboration}
 				onContinue={() => {
-					step = 'builder';
+					step = 'formatStarter';
 				}}
 			/>
 		{/if}

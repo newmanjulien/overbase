@@ -2,12 +2,8 @@
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
 	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
-	import { getBuilder } from '$lib/features/builder/catalog';
-	import {
-		cloneBuilderEmailContent,
-		type BuilderEmailContent
-	} from '$lib/features/builder/domain';
-	import { BuilderVariableDragCoordinator } from '$lib/features/builder/workbench/variables/builder-variable-drag-coordinator.svelte';
+	import { getFormatStarter } from '$lib/features/format-starters/catalog';
+	import { FormatVariableDragCoordinator } from '$lib/features/format-starters/creator/variables/format-variable-drag-coordinator.svelte';
 	import EmailFormatDetailDesktop from '$lib/features/email-formats/detail/EmailFormatDetailDesktop.svelte';
 	import EmailFormatHeaderActions from '$lib/features/email-formats/detail/EmailFormatHeaderActions.svelte';
 	import EmailFormatDetailMobile from '$lib/features/email-formats/detail/EmailFormatDetailMobile.svelte';
@@ -18,12 +14,13 @@
 	import type {
 		EmailFeedback,
 		EmailFeedbackViewState,
+		EmailFormatContent,
 		EmailFormatDetailLoadState,
 		EmailFormatDetailView,
 		SentEmail
 	} from '$lib/features/email-formats/detail/email-format-detail-types';
 	import { useConvexClient, useQuery } from 'convex-svelte';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -32,12 +29,11 @@
 	const routeTitleState = useRouteTitleState();
 	const emailFormatId = $derived(data.emailFormatId as Id<'emailFormats'>);
 	const detailState: EmailFormatDetailState = createEmailFormatDetailState();
-	const dragCoordinator = new BuilderVariableDragCoordinator();
+	const dragCoordinator = new FormatVariableDragCoordinator();
 	const detailQuery = useQuery(api.emailFormats.getEmailFormatDetail, () => ({ emailFormatId }));
 	let detailView = $state<EmailFormatDetailView>('rules');
 	let actionError = $state<string | null>(null);
 	let contentError = $state<string | null>(null);
-	let isSavingContent = $state(false);
 	let isSavingRecipients = $state(false);
 	let isUpdatingStatus = $state(false);
 
@@ -56,7 +52,7 @@
 	const emailFormatStatus = $derived(detailQuery.data?.emailFormat.status ?? null);
 	const contentVariables = $derived(
 		detailQuery.data
-			? (getBuilder(detailQuery.data.emailFormat.builderSlug)?.variables ?? [])
+			? (getFormatStarter(detailQuery.data.emailFormat.formatStarterSlug)?.variables ?? [])
 			: []
 	);
 	const sentEmails = $derived((detailQuery.data?.sentEmails ?? []) as SentEmail[]);
@@ -78,32 +74,28 @@
 	});
 
 	$effect(() => {
-		if (detailQuery.data) {
-			detailState.sync(emailFormatId, detailQuery.data);
-			routeTitleState.title =
-				detailState.emailContent?.title ?? detailQuery.data.emailFormat.content.title;
+		const detail = detailQuery.data;
+		const currentEmailFormatId = emailFormatId;
+
+		if (detail) {
+			untrack(() => {
+				detailState.sync(currentEmailFormatId, detail);
+				routeTitleState.title = detailState.titleDraft;
+			});
 		}
 	});
 
 	$effect(() => {
 		const saveTitle = async (nextTitle: string) => {
-			const currentContent = detailState.emailContent;
+			detailState.updateTitleDraft(nextTitle);
 
-			if (!currentContent) {
+			if (!detailQuery.data) {
 				return;
 			}
 
-			const previousContent = cloneBuilderEmailContent(currentContent);
-			detailState.updateContentTitle(nextTitle);
-
-			try {
-				await saveContent(detailState.emailContent, detailState.emailDraftVersion, {
-					rethrow: true
-				});
-			} catch (error) {
-				detailState.replaceContentDraft(previousContent);
-				throw error;
-			}
+			await saveTitleDraft({
+				rethrow: true
+			});
 		};
 
 		routeTitleState.onTitleChange = saveTitle;
@@ -127,20 +119,85 @@
 		return error instanceof Error ? error.message : 'Could not save email format.';
 	}
 
-	async function saveContent(
-		nextContent: BuilderEmailContent | null,
-		baseEmailDraftVersion: number,
-		{ rethrow = false } = {}
-	) {
+	function toEmailContentInput(content: EmailFormatContent) {
+		return {
+			to: [...content.to],
+			cc: [...content.cc],
+			attachment: content.attachment
+				? {
+						filename: content.attachment.filename,
+						cellsByKey: Object.fromEntries(
+							Object.entries(content.attachment.cellsByKey).map(([key, cell]) => [
+								key,
+								cell.map((node) => ({ ...node }))
+							])
+						)
+					}
+				: null,
+			body: content.body.map((block) => ({
+				id: block.id,
+				type: block.type,
+				content: block.content.map((node) => ({ ...node }))
+			}))
+		};
+	}
+
+	async function saveTitleDraft({
+		rethrow = false,
+		overwriteConflict = false
+	}: { rethrow?: boolean; overwriteConflict?: boolean } = {}) {
+		if (!detailQuery.data || detailState.isSavingTitle) {
+			return;
+		}
+
+		actionError = null;
+		detailState.isSavingTitle = true;
+
+		try {
+			const result = await client.mutation(api.emailFormats.updateEmailFormatTitle, {
+				emailFormatId,
+				baseTitleVersion: detailState.getTitleSaveVersion({ overwriteConflict }),
+				title: detailState.titleDraft
+			});
+
+			if (result.kind === 'stale') {
+				detailState.syncTitleRemote(result.title);
+				routeTitleState.title = detailState.titleDraft;
+				return;
+			}
+
+			detailState.markTitleSaved(result.title);
+			routeTitleState.title = result.title.value;
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Could not save title.';
+			actionError = message;
+			if (detailQuery.data) {
+				detailState.sync(emailFormatId, detailQuery.data);
+			}
+
+			if (rethrow && !detailState.titleConflict) {
+				throw error;
+			}
+		} finally {
+			detailState.isSavingTitle = false;
+		}
+	}
+
+	async function saveContent({
+		rethrow = false,
+		overwriteConflict = false
+	}: { rethrow?: boolean; overwriteConflict?: boolean } = {}) {
 		if (!detailQuery.data) {
 			return;
 		}
 
-		if (!nextContent) {
+		const contentDraft = detailState.emailContentDraft;
+
+		if (!contentDraft) {
 			return;
 		}
 
-		if (isSavingContent) {
+		if (detailState.isSavingContent) {
 			const error = new Error('Email format is already saving.');
 			contentError = error.message;
 			actionError = error.message;
@@ -153,59 +210,66 @@
 
 		actionError = null;
 		contentError = null;
-		isSavingContent = true;
+		detailState.isSavingContent = true;
 
 		try {
+			const contentInput = toEmailContentInput(contentDraft);
 			const result = await client.mutation(api.emailFormats.updateEmailFormatContent, {
 				emailFormatId,
-				baseEmailDraftVersion,
-				title: nextContent.title,
-				to: [...nextContent.to],
-				cc: [...nextContent.cc],
-				attachment: nextContent.attachment
-					? {
-							filename: nextContent.attachment.filename,
-							cellsByKey: Object.fromEntries(
-								Object.entries(nextContent.attachment.cellsByKey).map(([key, cell]) => [
-									key,
-									cell.map((node) => ({ ...node }))
-								])
-							)
-						}
-					: null,
-				body: nextContent.body.map((block) => ({
-					id: block.id,
-					type: block.type,
-					content: block.content.map((node) => ({ ...node }))
-				}))
+				baseEmailContentVersion: detailState.getContentSaveVersion({ overwriteConflict }),
+				...contentInput
 			});
 
-			detailState.markContentSaved(result.content, result.emailDraftVersion);
-			routeTitleState.title = result.content.title;
+			if (result.kind === 'stale') {
+				detailState.syncContentRemote(result.emailContent);
+				return;
+			}
+
+			detailState.markContentSaved(result.emailContent);
 		} catch (error) {
 			const message = getContentSaveError(error);
 			contentError = message;
 			actionError = message;
+			if (detailQuery.data) {
+				detailState.sync(emailFormatId, detailQuery.data);
+			}
 
 			if (rethrow) {
 				throw error;
 			}
 		} finally {
-			isSavingContent = false;
+			detailState.isSavingContent = false;
 		}
 	}
 
-	async function saveRules() {
+	async function saveRules({ overwriteConflict = false } = {}) {
+		if (detailState.isSavingRules) {
+			return;
+		}
+
 		actionError = null;
+		detailState.isSavingRules = true;
 
 		try {
 			const result = await client.mutation(api.emailFormats.updateEmailFormatRules, {
 				emailFormatId,
+				baseRulesVersion: detailState.getRulesSaveVersion({ overwriteConflict }),
 				rules: detailState.rulesDraft
 			});
-			detailState.markRulesSaved(result.rules, result.updatedAt);
+
+			if (result.kind === 'stale') {
+				detailState.syncRulesRemote(result.rules);
+				return;
+			}
+
+			detailState.markRulesSaved(result.rules);
 		} catch (error) {
 			actionError = error instanceof Error ? error.message : 'Could not save rules.';
+			if (detailQuery.data) {
+				detailState.sync(emailFormatId, detailQuery.data);
+			}
+		} finally {
+			detailState.isSavingRules = false;
 		}
 	}
 
@@ -288,6 +352,35 @@
 			detailState.selectedSentEmailIndex + 1
 		);
 	}
+
+	function keepMineTitle() {
+		return saveTitleDraft({ overwriteConflict: true });
+	}
+
+	function useLatestTitle() {
+		detailState.useLatestTitle();
+		routeTitleState.title = detailState.titleDraft;
+		actionError = null;
+	}
+
+	function keepMineContent() {
+		return saveContent({ overwriteConflict: true });
+	}
+
+	function useLatestContent() {
+		detailState.useLatestContent();
+		contentError = null;
+		actionError = null;
+	}
+
+	function keepMineRules() {
+		return saveRules({ overwriteConflict: true });
+	}
+
+	function useLatestRules() {
+		detailState.useLatestRules();
+		actionError = null;
+	}
 </script>
 
 {#snippet headerActions()}
@@ -312,15 +405,20 @@
 	{contentError}
 	{contentVariables}
 	{dragCoordinator}
-	{isSavingContent}
 	{loadState}
 	onFeedbackChange={updateFeedback}
+	onKeepMineContent={keepMineContent}
+	onKeepMineRules={keepMineRules}
+	onKeepMineTitle={keepMineTitle}
 	onSaveContent={saveContent}
 	onSaveFeedback={saveFeedback}
 	onSaveRules={saveRules}
 	onShowFeedbackView={showFeedbackView}
 	onShowNextSentEmail={showNextSentEmail}
 	onShowPreviousSentEmail={showPreviousSentEmail}
+	onUseLatestContent={useLatestContent}
+	onUseLatestRules={useLatestRules}
+	onUseLatestTitle={useLatestTitle}
 />
 
 <EmailFormatDetailMobile
@@ -329,8 +427,13 @@
 	{contentVariables}
 	{detailState}
 	{dragCoordinator}
-	{isSavingContent}
 	{loadState}
+	onKeepMineContent={keepMineContent}
+	onKeepMineRules={keepMineRules}
+	onKeepMineTitle={keepMineTitle}
 	onSaveContent={saveContent}
 	onSaveRules={saveRules}
+	onUseLatestContent={useLatestContent}
+	onUseLatestRules={useLatestRules}
+	onUseLatestTitle={useLatestTitle}
 />

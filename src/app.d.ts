@@ -1,5 +1,5 @@
 import type { BreadcrumbParent } from '$lib/app/chrome/shared/breadcrumb';
-import type { BuildFormatsViewportFallbackPathname } from '$lib/app/app-links';
+import type { CreateFormatsViewportFallbackPathname } from '$lib/app/app-links';
 import type { AuthObject } from 'svelte-clerk/server';
 
 declare global {
@@ -15,7 +15,7 @@ declare global {
 			desktopBreadcrumbParent?: BreadcrumbParent;
 			viewportRequirement?: {
 				minWidth: 'desktop';
-				fallbackHref: BuildFormatsViewportFallbackPathname;
+				fallbackHref: CreateFormatsViewportFallbackPathname;
 			};
 		}
 

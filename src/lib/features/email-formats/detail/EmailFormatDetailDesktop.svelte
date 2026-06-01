@@ -1,7 +1,7 @@
 <script lang="ts">
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
-	import type { BuilderEmailContent, BuilderVariableDefinition } from '$lib/features/builder/domain';
-	import type { BuilderVariableDragCoordinator } from '$lib/features/builder/workbench/variables/builder-variable-drag-coordinator.svelte';
+	import type { FormatVariableDefinition } from '$lib/features/format-starters/domain';
+	import type { FormatVariableDragCoordinator } from '$lib/features/format-starters/creator/variables/format-variable-drag-coordinator.svelte';
 	import EmailFeedbackEmptyState from './EmailFeedbackEmptyState.svelte';
 	import EmailFeedbackPanel from './EmailFeedbackPanel.svelte';
 	import EmailFormatContentPanel from './EmailFormatContentPanel.svelte';
@@ -14,6 +14,7 @@
 		EmailFormatDetailLoadState,
 		EmailFormatDetailView
 	} from './email-format-detail-types';
+	import SectionConflictActions from './SectionConflictActions.svelte';
 
 	type Props = {
 		actionError: string | null;
@@ -23,17 +24,22 @@
 		feedbackViewState: EmailFeedbackViewState;
 		canShowFeedbackView: boolean;
 		contentError: string | null;
-		contentVariables: readonly BuilderVariableDefinition[];
-		dragCoordinator: BuilderVariableDragCoordinator;
-		isSavingContent: boolean;
+		contentVariables: readonly FormatVariableDefinition[];
+		dragCoordinator: FormatVariableDragCoordinator;
 		loadState: EmailFormatDetailLoadState;
 		onFeedbackChange: (patch: Partial<EmailFeedback>) => void;
-		onSaveContent: (content: BuilderEmailContent, baseEmailDraftVersion: number) => Promise<void>;
+		onKeepMineContent: () => void | Promise<void>;
+		onKeepMineRules: () => void | Promise<void>;
+		onKeepMineTitle: () => void | Promise<void>;
+		onSaveContent: () => Promise<void>;
 		onSaveFeedback: () => void | Promise<void>;
 		onSaveRules: () => void | Promise<void>;
 		onShowFeedbackView: () => void;
 		onShowNextSentEmail: () => void;
 		onShowPreviousSentEmail: () => void;
+		onUseLatestContent: () => void;
+		onUseLatestRules: () => void;
+		onUseLatestTitle: () => void;
 	};
 
 	const EMAIL_FORMAT_DETAIL_SPLIT = {
@@ -55,15 +61,20 @@
 		contentError,
 		contentVariables,
 		dragCoordinator,
-		isSavingContent,
 		loadState,
 		onFeedbackChange,
+		onKeepMineContent,
+		onKeepMineRules,
+		onKeepMineTitle,
 		onSaveContent,
 		onSaveFeedback,
 		onSaveRules,
 		onShowFeedbackView,
 		onShowNextSentEmail,
-		onShowPreviousSentEmail
+		onShowPreviousSentEmail,
+		onUseLatestContent,
+		onUseLatestRules,
+		onUseLatestTitle
 	}: Props = $props();
 </script>
 
@@ -72,6 +83,16 @@
 		<p class="border-b border-red-100 bg-red-50 px-5 py-2 text-[0.72rem] text-red-700">
 			{deleteError ?? actionError}
 		</p>
+	{/if}
+	{#if detailState.titleConflict}
+		<div class="border-b border-amber-100 bg-amber-50 px-5 py-2">
+			<SectionConflictActions
+				conflict={detailState.titleConflict}
+				isSaving={detailState.isSavingTitle}
+				onKeepMine={onKeepMineTitle}
+				onUseLatest={onUseLatestTitle}
+			/>
+		</div>
 	{/if}
 	{#if loadState === 'loading'}
 		<div class="flex h-full items-center justify-center text-[0.74rem] text-stone-500">
@@ -103,10 +124,13 @@
 						editor={detailState.contentEditor}
 						variables={contentVariables}
 						{dragCoordinator}
-						emailDraftVersion={detailState.emailDraftVersion}
-						isSaving={isSavingContent}
+						canSave={detailState.canSaveContent}
+						conflict={detailState.contentConflict}
+						isSaving={detailState.isSavingContent}
 						error={contentError}
 						onSave={onSaveContent}
+						onKeepMine={onKeepMineContent}
+						onUseLatest={onUseLatestContent}
 					/>
 				{:else if feedbackViewState.kind === 'selected'}
 					<SentEmailPreviewPanel
@@ -124,8 +148,12 @@
 					<EmailFormatRulesPanel
 						rules={detailState.rulesDraft}
 						canSave={detailState.canSaveRules}
+						conflict={detailState.rulesConflict}
+						isSaving={detailState.isSavingRules}
 						onRulesChange={detailState.updateRules}
 						onSave={() => void onSaveRules()}
+						onKeepMine={onKeepMineRules}
+						onUseLatest={onUseLatestRules}
 						onGiveEmailFeedback={canShowFeedbackView ? onShowFeedbackView : undefined}
 					/>
 				{:else if feedbackViewState.kind === 'selected'}

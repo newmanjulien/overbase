@@ -6,6 +6,7 @@ import {
 import {
 	normalizeEmailFormatContent,
 	normalizeEmailFormatRules,
+	normalizeEmailFormatTitle,
 	normalizeSelectedAnswers,
 	toEditableEmailFormatContent
 } from '../backend/email-formats/content';
@@ -20,12 +21,13 @@ import {
 } from '../backend/email-formats/recipients';
 import {
 	deleteEmailFormatsInput,
-	emailFormatCreateFromBuilderInput,
+	emailFormatCreateFromStarterInput,
 	emailFormatId,
 	setEmailFormatStatusInput,
 	updateEmailFormatContentInput,
 	updateEmailFormatRecipientsInput,
-	updateEmailFormatRulesInput
+	updateEmailFormatRulesInput,
+	updateEmailFormatTitleInput
 } from '../backend/validators/email-formats';
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
@@ -61,13 +63,13 @@ async function deleteLinkedinContactRows(
 	}
 }
 
-export const createEmailFormatFromBuilder = mutation({
-	args: emailFormatCreateFromBuilderInput,
+export const createEmailFormatFromStarter = mutation({
+	args: emailFormatCreateFromStarterInput,
 	handler: async (ctx, args) => {
 		const { user, workspace } = await requireViewerWorkspace(ctx);
-		const builderSlug = args.builderSlug.trim();
+		const formatStarterSlug = args.formatStarterSlug.trim();
+		const title = normalizeEmailFormatTitle(args.title);
 		const content = normalizeEmailFormatContent({
-			title: args.title,
 			to: args.to,
 			cc: args.cc,
 			attachment: args.attachment,
@@ -79,11 +81,11 @@ export const createEmailFormatFromBuilder = mutation({
 			now
 		);
 
-		if (!builderSlug) {
-			throw new Error('Builder slug is required.');
+		if (!formatStarterSlug) {
+			throw new Error('Format starter slug is required.');
 		}
 
-		if (!content.title) {
+		if (!title) {
 			throw new Error('Email format title is required.');
 		}
 
@@ -94,19 +96,21 @@ export const createEmailFormatFromBuilder = mutation({
 		const emailFormatId = await ctx.db.insert('emailFormats', {
 			workspaceId: workspace._id,
 			creatorUserId: user._id,
-			builderSlug,
-			builderMode: args.builderMode,
+			formatStarterSlug,
+			dataMode: args.dataMode,
 			startingPointId: args.startingPointId?.trim() || null,
 			selectedAnswers: normalizeSelectedAnswers(args.selectedAnswers),
 			status: 'paused',
-			title: content.title,
+			title,
+			titleVersion: 1,
 			to: content.to,
 			cc: content.cc,
 			attachment: content.attachment,
 			body: content.body,
-			emailDraftVersion: 1,
+			emailContentVersion: 1,
 			recipientCount: 0,
-			rules: args.builderMode === 'internal-data' ? [] : normalizeEmailFormatRules(args.rules),
+			rules: args.dataMode === 'internal-data' ? [] : normalizeEmailFormatRules(args.rules),
+			rulesVersion: 1,
 			linkedinContactsSummary: linkedinContactsSource?.summary ?? null,
 			createdAt: now,
 			updatedAt: now
@@ -181,12 +185,21 @@ export const getEmailFormatDetail = query({
 		return {
 			emailFormat: {
 				id: format._id,
-				builderSlug: format.builderSlug,
-				builderMode: format.builderMode,
+				formatStarterSlug: format.formatStarterSlug,
+				dataMode: format.dataMode,
 				status: format.status,
-				content: toEditableEmailFormatContent(format),
-				emailDraftVersion: format.emailDraftVersion,
-				rules: format.rules,
+				title: {
+					value: format.title,
+					version: format.titleVersion
+				},
+				emailContent: {
+					value: toEditableEmailFormatContent(format),
+					version: format.emailContentVersion
+				},
+				rules: {
+					value: format.rules,
+					version: format.rulesVersion
+				},
 				recipientRefs: recipientRows.map((row) => row.recipient),
 				linkedinContactsSummary: format.linkedinContactsSummary,
 				updatedAt: format.updatedAt
@@ -210,6 +223,55 @@ export const getEmailFormatDetail = query({
 	}
 });
 
+export const updateEmailFormatTitle = mutation({
+	args: updateEmailFormatTitleInput,
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const format = await getEmailFormatInViewerWorkspace(
+			ctx,
+			viewerWorkspace,
+			args.emailFormatId
+		);
+
+		if (!format) {
+			throw new Error('Email format not found.');
+		}
+
+		if (format.titleVersion !== args.baseTitleVersion) {
+			return {
+				kind: 'stale' as const,
+				title: {
+					value: format.title,
+					version: format.titleVersion
+				}
+			};
+		}
+
+		const title = normalizeEmailFormatTitle(args.title);
+
+		if (!title) {
+			throw new Error('Email format title is required.');
+		}
+
+		const now = Date.now();
+		const titleVersion = format.titleVersion + 1;
+
+		await ctx.db.patch(args.emailFormatId, {
+			title,
+			titleVersion,
+			updatedAt: now
+		});
+
+		return {
+			kind: 'saved' as const,
+			title: {
+				value: title,
+				version: titleVersion
+			}
+		};
+	}
+});
+
 export const updateEmailFormatContent = mutation({
 	args: updateEmailFormatContentInput,
 	handler: async (ctx, args) => {
@@ -224,49 +286,45 @@ export const updateEmailFormatContent = mutation({
 			throw new Error('Email format not found.');
 		}
 
-		if (format.emailDraftVersion !== args.baseEmailDraftVersion) {
-			throw new Error('Email format has changed. Reload and try again.');
+		if (format.emailContentVersion !== args.baseEmailContentVersion) {
+			return {
+				kind: 'stale' as const,
+				emailContent: {
+					value: toEditableEmailFormatContent(format),
+					version: format.emailContentVersion
+				}
+			};
 		}
 
 		const content = normalizeEmailFormatContent({
-			title: args.title,
 			to: args.to,
 			cc: args.cc,
 			attachment: args.attachment,
 			body: args.body
 		});
 
-		if (!content.title) {
-			throw new Error('Email format title is required.');
-		}
-
 		if (content.body.length === 0) {
 			throw new Error('Email format body is required.');
 		}
 
 		const now = Date.now();
-		const emailDraftVersion = format.emailDraftVersion + 1;
+		const emailContentVersion = format.emailContentVersion + 1;
 
 		await ctx.db.patch(args.emailFormatId, {
-			title: content.title,
 			to: content.to,
 			cc: content.cc,
 			attachment: content.attachment,
 			body: content.body,
-			emailDraftVersion,
+			emailContentVersion,
 			updatedAt: now
 		});
 
-		const updatedFormat = await ctx.db.get(args.emailFormatId);
-
-		if (!updatedFormat) {
-			throw new Error('Unable to save email format.');
-		}
-
 		return {
-			content: toEditableEmailFormatContent(updatedFormat),
-			emailDraftVersion,
-			updatedAt: now
+			kind: 'saved' as const,
+			emailContent: {
+				value: content,
+				version: emailContentVersion
+			}
 		};
 	}
 });
@@ -285,15 +343,33 @@ export const updateEmailFormatRules = mutation({
 			throw new Error('Email format not found.');
 		}
 
+		if (format.rulesVersion !== args.baseRulesVersion) {
+			return {
+				kind: 'stale' as const,
+				rules: {
+					value: format.rules,
+					version: format.rulesVersion
+				}
+			};
+		}
+
 		const rules = normalizeEmailFormatRules(args.rules);
 		const now = Date.now();
+		const rulesVersion = format.rulesVersion + 1;
 
 		await ctx.db.patch(args.emailFormatId, {
 			rules,
+			rulesVersion,
 			updatedAt: now
 		});
 
-		return { rules, updatedAt: now };
+		return {
+			kind: 'saved' as const,
+			rules: {
+				value: rules,
+				version: rulesVersion
+			}
+		};
 	}
 });
 

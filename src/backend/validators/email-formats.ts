@@ -1,7 +1,7 @@
 import { v } from 'convex/values';
 
 export const emailFormatStatus = v.union(v.literal('active'), v.literal('paused'));
-export const emailFormatBuilderMode = v.union(v.literal('internal-data'), v.literal('public-data'));
+export const emailFormatDataMode = v.union(v.literal('internal-data'), v.literal('public-data'));
 
 export const emailFormatInlineNode = v.union(
 	v.object({
@@ -49,9 +49,9 @@ export const emailFormatLinkedinContactInput = v.object({
 	sourceRowNumber: v.number()
 });
 
-export const emailFormatCreateFromBuilderInput = {
-	builderSlug: v.string(),
-	builderMode: emailFormatBuilderMode,
+export const emailFormatCreateFromStarterInput = {
+	formatStarterSlug: v.string(),
+	dataMode: emailFormatDataMode,
 	startingPointId: v.union(v.string(), v.null()),
 	selectedAnswers: v.record(v.string(), v.string()),
 	title: v.string(),
@@ -71,16 +71,22 @@ export const emailFormatCreateFromBuilderInput = {
 
 export const updateEmailFormatContentInput = {
 	emailFormatId,
-	baseEmailDraftVersion: v.number(),
-	title: v.string(),
+	baseEmailContentVersion: v.number(),
 	to: v.array(v.string()),
 	cc: v.array(v.string()),
 	attachment: v.union(emailFormatSpreadsheetAttachment, v.null()),
 	body: v.array(emailFormatBodyBlock)
 };
 
+export const updateEmailFormatTitleInput = {
+	emailFormatId,
+	baseTitleVersion: v.number(),
+	title: v.string()
+};
+
 export const updateEmailFormatRulesInput = {
 	emailFormatId,
+	baseRulesVersion: v.number(),
 	rules: v.array(emailFormatRule)
 };
 
