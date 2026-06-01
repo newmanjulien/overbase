@@ -1,19 +1,36 @@
 <script lang="ts">
 	import type { FormatVariableDefinition } from '$lib/features/format-starters/domain';
 	import type { FormatVariableDragCoordinator } from '$lib/features/format-starters/creator/variables/format-variable-drag-coordinator.svelte';
+	import type {
+		EmailFormatContentEditPolicy,
+		EmailFormatInlineTextContent,
+		EmailFormatRuleDataSourceAction,
+		EmailFormatRulesEditPolicy
+	} from '$shared/email-format-definitions';
+	import EmailFormatActivationStatusBar from './EmailFormatActivationStatusBar.svelte';
 	import EmailFormatContentPanel from './EmailFormatContentPanel.svelte';
 	import EmailFormatRulesPanel from './EmailFormatRulesPanel.svelte';
-	import type { EmailFormatDetailState } from './email-format-detail-state.svelte';
-	import type { EmailFormatDetailLoadState } from './email-format-detail-types';
+	import type { EmailFormatConfigureState } from './email-format-configure-state.svelte';
+	import type { EmailFormatConfigureLoadState } from './email-format-configure-types';
 	import SectionConflictActions from './SectionConflictActions.svelte';
 
 	type Props = {
 		actionError: string | null;
+		activationBlockerMessage: string | null;
+		activationReadyMessage: string | null;
+		activationSuccessMessage: string | null;
 		contentError: string | null;
+		contentEditPolicy: EmailFormatContentEditPolicy | null;
 		contentVariables: readonly FormatVariableDefinition[];
-		detailState: EmailFormatDetailState;
+		configureState: EmailFormatConfigureState;
 		dragCoordinator: FormatVariableDragCoordinator;
-		loadState: EmailFormatDetailLoadState;
+		loadState: EmailFormatConfigureLoadState;
+		ruleDataSourceAction?: EmailFormatRuleDataSourceAction;
+		ruleInfoCard: {
+			label: string;
+			content: EmailFormatInlineTextContent;
+		} | null;
+		rulesEditPolicy: EmailFormatRulesEditPolicy | null;
 		onKeepMineContent: () => void | Promise<void>;
 		onKeepMineRules: () => void | Promise<void>;
 		onKeepMineTitle: () => void | Promise<void>;
@@ -26,11 +43,18 @@
 
 	let {
 		actionError,
+		activationBlockerMessage,
+		activationReadyMessage,
+		activationSuccessMessage,
 		contentError,
+		contentEditPolicy,
 		contentVariables,
-		detailState,
+		configureState,
 		dragCoordinator,
 		loadState,
+		ruleDataSourceAction,
+		ruleInfoCard,
+		rulesEditPolicy,
 		onKeepMineContent,
 		onKeepMineRules,
 		onKeepMineTitle,
@@ -43,16 +67,34 @@
 </script>
 
 <div class="min-h-full bg-white px-4 py-4 md:hidden">
+	{#if activationBlockerMessage}
+		<EmailFormatActivationStatusBar
+			message={activationBlockerMessage}
+			class="mb-4 rounded-sm"
+		/>
+	{:else if activationReadyMessage}
+		<EmailFormatActivationStatusBar
+			message={activationReadyMessage}
+			kind="ready"
+			class="mb-4 rounded-sm"
+		/>
+	{:else if activationSuccessMessage}
+		<EmailFormatActivationStatusBar
+			message={activationSuccessMessage}
+			kind="success"
+			class="mb-4 rounded-sm"
+		/>
+	{/if}
 	{#if actionError}
-		<p class="mb-4 rounded-sm border border-red-100 bg-red-50 px-3 py-2 text-[0.72rem] text-red-700">
+		<p class="mb-4 rounded-sm bg-red-50 px-3 py-2 text-[0.72rem] text-red-700">
 			{actionError}
 		</p>
 	{/if}
-	{#if detailState.titleConflict}
-		<div class="mb-4 rounded-sm border border-amber-100 bg-amber-50 px-3 py-2">
+	{#if configureState.titleConflict}
+		<div class="mb-4 rounded-sm bg-amber-50 px-3 py-2">
 			<SectionConflictActions
-				conflict={detailState.titleConflict}
-				isSaving={detailState.isSavingTitle}
+				conflict={configureState.titleConflict}
+				isSaving={configureState.isSavingTitle}
 				onKeepMine={onKeepMineTitle}
 				onUseLatest={onUseLatestTitle}
 			/>
@@ -75,12 +117,13 @@
 		<div class="space-y-5">
 			<section class="h-[72vh] min-h-[520px] overflow-hidden">
 				<EmailFormatContentPanel
-					editor={detailState.contentEditor}
+					editor={configureState.contentEditor}
 					variables={contentVariables}
 					{dragCoordinator}
-					canSave={detailState.canSaveContent}
-					conflict={detailState.contentConflict}
-					isSaving={detailState.isSavingContent}
+					editPolicy={contentEditPolicy}
+					canSave={configureState.canSaveContent}
+					conflict={configureState.contentConflict}
+					isSaving={configureState.isSavingContent}
 					error={contentError}
 					onSave={onSaveContent}
 					onKeepMine={onKeepMineContent}
@@ -90,11 +133,14 @@
 
 			<section class="border-t border-stone-100 pt-4">
 				<EmailFormatRulesPanel
-					rules={detailState.rulesDraft}
-					canSave={detailState.canSaveRules}
-					conflict={detailState.rulesConflict}
-					isSaving={detailState.isSavingRules}
-					onRulesChange={detailState.updateRules}
+					rules={configureState.rulesDraft}
+					editPolicy={rulesEditPolicy}
+					{ruleDataSourceAction}
+					{ruleInfoCard}
+					canSave={configureState.canSaveRules}
+					conflict={configureState.rulesConflict}
+					isSaving={configureState.isSavingRules}
+					onRulesChange={configureState.updateRules}
 					onSave={() => void onSaveRules()}
 					onKeepMine={onKeepMineRules}
 					onUseLatest={onUseLatestRules}

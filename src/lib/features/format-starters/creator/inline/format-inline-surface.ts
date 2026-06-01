@@ -125,7 +125,7 @@ export function createVariablePill<Source>({
 	pill.contentEditable = 'false';
 	pill.draggable = !disabled;
 	pill.className =
-		'format-variable-pill inline-flex items-center rounded-full border border-transparent bg-emerald-50/80 px-1.5 py-[0.125rem] align-baseline text-[0.73rem] font-normal leading-none text-emerald-900' +
+		'format-variable-pill inline-flex items-center rounded-full border border-transparent bg-positive-50 px-1.5 py-[0.125rem] align-baseline text-[0.73rem] font-normal leading-none text-positive-900' +
 		(selected ? ' format-variable-pill--selected' : '');
 	renderVariablePillContents(pill, label, selected, () => onRemove(source));
 

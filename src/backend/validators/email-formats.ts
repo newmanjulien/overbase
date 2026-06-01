@@ -50,8 +50,8 @@ export const emailFormatLinkedinContactInput = v.object({
 });
 
 export const emailFormatCreateFromStarterInput = {
-	formatStarterSlug: v.string(),
-	dataMode: emailFormatDataMode,
+	formatDefinitionSlug: v.string(),
+	createdFromStarterSlug: v.string(),
 	startingPointId: v.union(v.string(), v.null()),
 	selectedAnswers: v.record(v.string(), v.string()),
 	title: v.string(),
@@ -59,6 +59,7 @@ export const emailFormatCreateFromStarterInput = {
 	cc: v.array(v.string()),
 	attachment: v.union(emailFormatSpreadsheetAttachment, v.null()),
 	body: v.array(emailFormatBodyBlock),
+	recipientRefs: v.array(emailFormatRecipientRef),
 	rules: v.array(emailFormatRule),
 	linkedinContactsSource: v.union(
 		v.object({

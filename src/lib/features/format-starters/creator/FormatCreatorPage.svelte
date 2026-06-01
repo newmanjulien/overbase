@@ -3,8 +3,9 @@
 	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
 	import { onDestroy, onMount, untrack } from 'svelte';
-	import { emailFormatLink } from '$lib/app/app-links';
+	import { APP_LINKS } from '$lib/app/app-links';
 	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
+	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
 	import { Button } from '$lib/ui';
 	import { watchMediaQuery } from '$lib/ui/viewport';
@@ -25,6 +26,7 @@
 	import { FORMAT_CREATOR_SPLIT } from './layout/split-pane';
 	import ReconnectLinkedinContactsModal from './reconnect-linkedin/ReconnectLinkedinContactsModal.svelte';
 	import type { ContactImport } from './reconnect-linkedin/linkedin-contacts-csv';
+	import { getEmailFormatDefinition } from '$shared/email-format-definitions';
 
 	type Props = {
 		formatStarter: FormatStarter;
@@ -32,9 +34,13 @@
 
 	let { formatStarter }: Props = $props();
 	const client = useConvexClient();
+	const viewerSession = useViewerSession();
 	const routeTitleState = useRouteTitleState();
 	const creator = new FormatCreatorState(untrack(() => formatStarter));
 	const variableDragCoordinator = new FormatVariableDragCoordinator();
+	const formatDefinition = $derived(getEmailFormatDefinition(formatStarter.formatDefinitionSlug));
+	const viewerUserId = $derived(viewerSession.viewer?.user._id ?? null);
+	const titleEditable = $derived(Boolean(formatDefinition?.contentEditPolicy.title));
 	const ruleDataSourceModal = $derived(
 		formatStarter.mode === 'public-data' ? (formatStarter.ruleDataSourceModal ?? 'default') : 'default'
 	);
@@ -107,11 +113,15 @@
 			routeTitleState.title = creator.title;
 		};
 
-		routeTitleState.onTitleChange = updateTitle;
+		routeTitleState.editable = titleEditable;
+		routeTitleState.onTitleChange = titleEditable ? updateTitle : null;
 
 		return () => {
 			if (routeTitleState.onTitleChange === updateTitle) {
 				routeTitleState.onTitleChange = null;
+			}
+			if (routeTitleState.editable === titleEditable) {
+				routeTitleState.editable = null;
 			}
 		};
 	});
@@ -141,26 +151,28 @@
 			return;
 		}
 
-		const input = creator.createFormatInput();
-
-		if (!input) {
-			return;
-		}
-
 		if (requiresLinkedinContacts && !linkedinContactsImport) {
 			createFormatError = linkedinContactsRequiredError;
 			linkDataSourcesModalOpen = true;
 			return;
 		}
 
-		input.linkedinContactsSource = linkedinContactsImport;
+		const input = creator.createFormatInput({
+			viewerUserId,
+			linkedinContactsSource: linkedinContactsImport
+		});
+
+		if (!input) {
+			createFormatError = 'Could not create email format from the selected starting point.';
+			return;
+		}
 
 		creatingFormat = true;
 		createFormatError = null;
 
 		try {
-			const result = await client.mutation(api.emailFormats.createEmailFormatFromStarter, input);
-			await goto(resolve(emailFormatLink(result.emailFormatId).pathname));
+			await client.mutation(api.emailFormats.createEmailFormatFromStarter, input);
+			await goto(resolve(APP_LINKS.emailFormats.pathname));
 		} catch (error) {
 			createFormatError = getErrorMessage(error);
 		} finally {
@@ -188,7 +200,7 @@
 						editor={creator.editor}
 						variables={formatStarter.variables}
 						dragCoordinator={variableDragCoordinator}
-						readOnly
+						editPolicy={formatDefinition?.contentEditPolicy}
 					/>
 				</div>
 				<div class="shrink-0">
@@ -198,8 +210,8 @@
 						onLinkDataSources={() => (linkDataSourcesModalOpen = true)}
 						ruleDataSourceAction={creator.ruleDataSourceAction ?? undefined}
 						infoCard={formatStarter.ruleInfoCard}
-						canEditRuleText={false}
-						canEditRuleList={false}
+						canEditRuleText={formatDefinition?.rulesEditPolicy.text ?? false}
+						canEditRuleList={formatDefinition?.rulesEditPolicy.list ?? false}
 					/>
 				</div>
 				<FormatCreateActionBar
@@ -283,8 +295,8 @@
 								onLinkDataSources={() => (linkDataSourcesModalOpen = true)}
 								ruleDataSourceAction={creator.ruleDataSourceAction ?? undefined}
 								infoCard={formatStarter.ruleInfoCard}
-								canEditRuleText={false}
-								canEditRuleList={false}
+								canEditRuleText={formatDefinition?.rulesEditPolicy.text ?? false}
+								canEditRuleList={formatDefinition?.rulesEditPolicy.list ?? false}
 							/>
 							<FormatCreateActionBar
 								disabled={createFormatDisabled}
@@ -325,7 +337,7 @@
 								editor={creator.editor}
 								variables={formatStarter.variables}
 								dragCoordinator={variableDragCoordinator}
-								readOnly={formatStarter.mode === 'public-data'}
+								editPolicy={formatDefinition?.contentEditPolicy}
 								onVariableInsertionRequestHandled={creator.clearVariableInsertionRequest}
 							/>
 						</div>

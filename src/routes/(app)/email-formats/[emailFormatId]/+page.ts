@@ -5,7 +5,6 @@ export const load: PageLoad = ({ params }) => {
 	return {
 		emailFormatId: params.emailFormatId,
 		headerTitle: 'Email format',
-		headerTitleEditable: true,
 		desktopBreadcrumbParent: {
 			label: 'My formats',
 			href: APP_LINKS.emailFormats.pathname

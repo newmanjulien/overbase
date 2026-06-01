@@ -20,7 +20,7 @@
 
 <div
 	class={cn(
-		'sticky bottom-0 z-10 shrink-0 border-t border-stone-100 bg-white px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_24px_rgba(28,25,23,0.04)] md:static md:px-7 md:py-3 md:shadow-none',
+		'sticky bottom-0 z-10 shrink-0 bg-white px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-10px_24px_rgba(28,25,23,0.04)] md:static md:px-7 md:py-3 md:shadow-none',
 		className
 	)}
 >

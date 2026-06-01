@@ -54,7 +54,7 @@
 						{:else if block.type === 'link'}
 							<p>
 								<span
-									class="cursor-default font-medium text-blue-600 underline decoration-blue-600/70 underline-offset-2"
+									class="cursor-default font-medium text-link-600 underline decoration-link-600/70 underline-offset-2"
 									title={block.href}
 								>
 									{block.label}

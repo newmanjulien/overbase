@@ -57,7 +57,7 @@
 		rows="4"
 		onkeydown={handleKeydown}
 		class={cn(
-			'box-border min-h-24 w-full resize-none rounded-md border border-[#e2e3e6] bg-white px-3.5 py-3 text-sm leading-5 text-[#202124] outline-none transition-[background-color,border-color,box-shadow,color] duration-150 placeholder:text-[#8f9297] focus:border-[#6bbdf8] focus:shadow-[0_0_0_0.5px_#6bbdf8]'
+			'box-border min-h-24 w-full resize-none rounded-md border border-[#e2e3e6] bg-white px-3.5 py-3 text-sm leading-5 text-[#202124] outline-none transition-[background-color,border-color,box-shadow,color] duration-150 placeholder:text-[#8f9297] focus:border-info-400 focus:shadow-[0_0_0_0.5px_var(--info-400)]'
 		)}
 	></textarea>
 </label>

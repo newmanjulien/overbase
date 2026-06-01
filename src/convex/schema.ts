@@ -3,7 +3,6 @@ import { v } from 'convex/values';
 import { avatar } from '../backend/validators/avatars';
 import {
 	emailFormatBodyBlock,
-	emailFormatDataMode,
 	emailFormatRule,
 	emailFormatSpreadsheetAttachment,
 	emailFormatStatus
@@ -40,11 +39,12 @@ export default defineSchema({
 	emailFormats: defineTable({
 		workspaceId: v.id('workspaces'),
 		creatorUserId: v.id('users'),
-		formatStarterSlug: v.string(),
-		dataMode: emailFormatDataMode,
+		formatDefinitionSlug: v.string(),
+		createdFromStarterSlug: v.string(),
 		startingPointId: v.union(v.string(), v.null()),
 		selectedAnswers: v.record(v.string(), v.string()),
 		status: emailFormatStatus,
+		lastActivatedAt: v.union(v.number(), v.null()),
 		title: v.string(),
 		titleVersion: v.number(),
 		to: v.array(v.string()),

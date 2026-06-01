@@ -10,39 +10,9 @@ import {
 	spreadsheetVariable as sheetVariable
 } from './helpers';
 
-const variables = [
-	{ id: 'client_name', label: 'Client name' },
-	{ id: 'program_name', label: 'Program name' },
-	{ id: 'environment_name', label: 'Environment name' },
-	{ id: 'implementation_owner', label: 'Implementation owner' },
-	{ id: 'executive_sponsor', label: 'Executive sponsor' },
-	{ id: 'technical_owner', label: 'Technical owner' },
-	{ id: 'project_manager', label: 'Project manager' },
-	{ id: 'integration_owner', label: 'Integration owner' },
-	{ id: 'system_owner', label: 'System owner' },
-	{ id: 'support_contact', label: 'Support contact' },
-	{ id: 'target_launch_date', label: 'Target launch date' },
-	{ id: 'kickoff_date', label: 'Kickoff date' },
-	{ id: 'go_live_date', label: 'Go-live date' },
-	{ id: 'training_date', label: 'Training date' },
-	{ id: 'cutover_window', label: 'Cutover window' },
-	{ id: 'migration_scope', label: 'Migration scope' },
-	{ id: 'data_source', label: 'Data source' },
-	{ id: 'integration_name', label: 'Integration name' },
-	{ id: 'dependency', label: 'Dependency' },
-	{ id: 'risk_mitigation', label: 'Risk mitigation' },
-	{ id: 'rollback_plan', label: 'Rollback plan' },
-	{ id: 'launch_risk', label: 'Launch risk' },
-	{ id: 'workstream_owner', label: 'Workstream owner' },
-	{ id: 'success_metric', label: 'Success metric' },
-	{ id: 'acceptance_criteria', label: 'Acceptance criteria' },
-	{ id: 'readiness_status', label: 'Readiness status' },
-	{ id: 'post_launch_check', label: 'Post-launch check' }
-] as const;
-
 export const implementationPlanFormatStarter = defineFormatStarter({
-	mode: 'internal-data',
 	slug: 'implementation-plan',
+	formatDefinitionSlug: 'implementation-plan',
 	title: 'Implementation plan',
 	description: 'Start an implementation email with a seeded project plan attachment.',
 	details: {
@@ -116,11 +86,11 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 			{ id: 'default', startingPointId: 'kickoff-plan', answers: {} }
 		]
 	},
-	variables,
 	startingPoints: [
 		{
 			id: 'kickoff-plan',
 			label: 'Kickoff plan',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Implementation kickoff plan',
 				to: ['Implementation team'],
@@ -153,6 +123,7 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 		{
 			id: 'migration-plan',
 			label: 'Migration plan',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Migration implementation plan',
 				to: ['Implementation team'],
@@ -184,6 +155,7 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 		{
 			id: 'risk-controlled-plan',
 			label: 'Risk-controlled plan',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Implementation risk plan',
 				to: ['Implementation leads'],

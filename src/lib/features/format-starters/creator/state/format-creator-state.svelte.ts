@@ -1,8 +1,10 @@
 import {
 	resolveFormatStarterContent,
 	type FormatStarterRuleDataSourceAction,
+	type FormatStartingPoint,
 	type FormatStarter
 } from '$lib/features/format-starters/catalog';
+import type { Id } from '$convex/_generated/dataModel';
 import type {
 	FormatInlineNode,
 	FormatSpreadsheetAttachment,
@@ -42,9 +44,19 @@ export type FormatCreatorRulesState = {
 	rulesDraft: EmailFormatRule[];
 };
 
+export type CreateEmailFormatRecipientRef =
+	| {
+			kind: 'user';
+			userId: Id<'users'>;
+	  }
+	| {
+			kind: 'teammate';
+			teammateId: Id<'teammates'>;
+	  };
+
 export type CreateEmailFormatFromStarterInput = {
-	formatStarterSlug: string;
-	dataMode: FormatStarter['mode'];
+	formatDefinitionSlug: string;
+	createdFromStarterSlug: string;
 	startingPointId: string | null;
 	selectedAnswers: FormatStarterSelectionAnswers;
 	title: string;
@@ -59,6 +71,7 @@ export type CreateEmailFormatFromStarterInput = {
 		type: 'paragraph';
 		content: FormatInlineNode[];
 	}>;
+	recipientRefs: CreateEmailFormatRecipientRef[];
 	rules: EmailFormatRule[];
 	linkedinContactsSource: {
 		fileName: string;
@@ -74,6 +87,11 @@ export type CreateEmailFormatFromStarterInput = {
 			sourceRowNumber: number;
 		}>;
 	} | null;
+};
+
+export type CreateFormatInputOptions = {
+	viewerUserId: Id<'users'> | null;
+	linkedinContactsSource: CreateEmailFormatFromStarterInput['linkedinContactsSource'];
 };
 
 export class FormatCreatorState {
@@ -188,7 +206,10 @@ export class FormatCreatorState {
 		}
 	};
 
-	createFormatInput = (): CreateEmailFormatFromStarterInput | null => {
+	createFormatInput = ({
+		viewerUserId,
+		linkedinContactsSource
+	}: CreateFormatInputOptions): CreateEmailFormatFromStarterInput | null => {
 		const editor = this.creator.editor;
 
 		if (!editor) {
@@ -196,10 +217,15 @@ export class FormatCreatorState {
 		}
 
 		const content = editor.activeEmailContent;
+		const recipientRefs = this.createInitialRecipientRefs(viewerUserId);
+
+		if (!recipientRefs) {
+			return null;
+		}
 
 		return {
-			formatStarterSlug: this.formatStarter.slug,
-			dataMode: this.formatStarter.mode,
+			formatDefinitionSlug: this.formatStarter.formatDefinitionSlug,
+			createdFromStarterSlug: this.formatStarter.slug,
 			startingPointId: this.creator.selectedStartingPointId,
 			selectedAnswers: { ...this.creator.selectedAnswers },
 			title: content.title,
@@ -211,8 +237,9 @@ export class FormatCreatorState {
 				type: block.type,
 				content: cloneInlineNodes(block.content)
 			})),
+			recipientRefs,
 			rules: this.creator.mode === 'public-data' ? cloneRules(this.creator.rulesDraft) : [],
-			linkedinContactsSource: null
+			linkedinContactsSource
 		};
 	};
 
@@ -294,6 +321,24 @@ export class FormatCreatorState {
 					startingPointId: startingPoint.id
 				}
 			: null;
+	}
+
+	private getSelectedStartingPoint(): FormatStartingPoint | null {
+		return (
+			this.formatStarter.startingPoints.find(
+				(startingPoint) => startingPoint.id === this.creator.selectedStartingPointId
+			) ?? null
+		);
+	}
+
+	private createInitialRecipientRefs(
+		viewerUserId: Id<'users'> | null
+	): CreateEmailFormatRecipientRef[] | null {
+		if (this.getSelectedStartingPoint()?.initialRecipients !== 'viewer') {
+			return [];
+		}
+
+		return viewerUserId ? [{ kind: 'user', userId: viewerUserId }] : null;
 	}
 
 	private getVariableInsertionTarget(): FormatVariableInsertionTarget {

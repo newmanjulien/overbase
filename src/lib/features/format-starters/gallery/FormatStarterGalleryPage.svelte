@@ -32,7 +32,7 @@
 		'internal-data': {
 			label: 'Internal data',
 			infoLabel: 'Internal data:',
-			infoText: 'These formats use data which you and your ecosystem connect'
+			infoText: 'These formats use data which you and your ecosystem partners connect'
 		},
 		'public-data': {
 			label: 'Public data',

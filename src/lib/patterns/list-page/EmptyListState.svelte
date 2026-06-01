@@ -62,7 +62,7 @@
 				{#if learnMoreLabel}
 					<button
 						type="button"
-						class="ml-1 inline-flex items-center gap-1 text-blue-400 hover:text-blue-500"
+						class="ml-1 inline-flex items-center gap-1 text-link-500 hover:text-link-600"
 					>
 						<span>{learnMoreLabel}</span>
 						<ArrowSquareOutIcon aria-hidden="true" size={12} weight="regular" />

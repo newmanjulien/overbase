@@ -32,7 +32,7 @@
 				<span class="truncate text-[0.7rem] font-medium text-stone-950">{item.name}</span>
 				{#if item.shared}
 					<span
-						class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[0.68rem] leading-none text-green-800"
+						class="shrink-0 rounded-full bg-positive-100 px-2 py-0.5 text-[0.68rem] leading-none text-positive-800"
 					>
 						Shared
 					</span>

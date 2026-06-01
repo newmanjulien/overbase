@@ -5,23 +5,28 @@ import type {
 	FormatVariableDefinition
 } from '$lib/features/format-starters/domain';
 import type {
+	EmailFormatDataMode,
+	EmailFormatInlineTextContent,
 	EmailFormatRule,
 	EmailFormatRuleDataSourceAction
-} from '$lib/domain/email-format-rules';
-import type { InlineTextContent } from '$lib/domain/inline-text';
+} from '$shared/email-format-definitions';
 
 export type FormatStarterRuleDataSourceAction = EmailFormatRuleDataSourceAction;
 export type FormatStarterRuleDataSourceModal = 'default' | 'reconnect-linkedin';
+export type FormatStartingPointInitialRecipients = 'viewer' | 'none';
 
 export type FormatStartingPoint = {
 	id: string;
 	label: string;
+	initialRecipients: FormatStartingPointInitialRecipients;
 	emailContent: FormatEmailContent;
 	ruleDataSourceAction?: FormatStarterRuleDataSourceAction;
 };
 
 type FormatStarterBase = {
 	slug: string;
+	formatDefinitionSlug: string;
+	mode: EmailFormatDataMode;
 	title: string;
 	description: string;
 	details: {
@@ -47,7 +52,7 @@ export type PublicDataFormatStarter = FormatStarterBase & {
 	ruleDataSourceModal?: FormatStarterRuleDataSourceModal;
 	ruleInfoCard: {
 		label: string;
-		content: InlineTextContent;
+		content: EmailFormatInlineTextContent;
 	};
 };
 

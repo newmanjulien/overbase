@@ -33,7 +33,7 @@
 			'w-full rounded-sm border border-dashed border-stone-200 bg-stone-50/45 p-3 text-left transition-colors',
 			!disabled && 'cursor-pointer hover:border-stone-300 hover:bg-stone-50/80',
 			disabled && 'cursor-default opacity-60',
-			isDragging && !disabled && 'border-blue-200 bg-blue-50/40',
+			isDragging && !disabled && 'border-info-200 bg-info-50',
 			className
 		)
 	);

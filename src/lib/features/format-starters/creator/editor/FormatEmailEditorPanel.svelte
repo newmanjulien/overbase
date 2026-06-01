@@ -8,14 +8,32 @@
 	} from '$lib/features/format-starters/domain';
 	import FormatEmailBodyEditor from './FormatEmailBodyEditor.svelte';
 	import FormatSpreadsheetAttachmentEditor from './FormatSpreadsheetAttachmentEditor.svelte';
+	import type { EmailFormatContentEditPolicy } from '$shared/email-format-definitions';
 	import type { FormatContentEditorState } from '../state/format-content-editor-state.svelte';
 	import type { FormatVariableInsertionRequest } from '../state/format-creator-state.svelte';
 	import type { FormatVariableDragCoordinator } from '../variables/format-variable-drag-coordinator.svelte';
+
+	const EDIT_ALL_CONTENT_FIELDS = {
+		title: true,
+		to: true,
+		cc: true,
+		attachment: true,
+		body: true
+	} satisfies EmailFormatContentEditPolicy;
+
+	const EDIT_NO_CONTENT_FIELDS = {
+		title: false,
+		to: false,
+		cc: false,
+		attachment: false,
+		body: false
+	} satisfies EmailFormatContentEditPolicy;
 
 	type Props = {
 		editor: FormatContentEditorState;
 		variables: readonly FormatVariableDefinition[];
 		dragCoordinator: FormatVariableDragCoordinator;
+		editPolicy?: EmailFormatContentEditPolicy;
 		readOnly?: boolean;
 		variableInsertionRequest?: FormatVariableInsertionRequest | null;
 		onVariableInsertionRequestHandled?: (requestId: number) => void;
@@ -25,10 +43,12 @@
 		editor,
 		variables,
 		dragCoordinator,
+		editPolicy = EDIT_ALL_CONTENT_FIELDS,
 		readOnly = false,
 		variableInsertionRequest = null,
 		onVariableInsertionRequestHandled
 	}: Props = $props();
+	const activeEditPolicy = $derived(readOnly ? EDIT_NO_CONTENT_FIELDS : editPolicy);
 	const bodyInsertionRequest = $derived(
 		variableInsertionRequest?.target === 'body' ? variableInsertionRequest : null
 	);
@@ -70,7 +90,7 @@
 					attachment={editor.activeEmailContent.attachment}
 					{variables}
 					{dragCoordinator}
-					disabled={readOnly}
+					disabled={!activeEditPolicy.attachment}
 					variableInsertionRequest={spreadsheetInsertionRequest}
 					{onVariableInsertionRequestHandled}
 					onAttachmentChange={editor.setOpenAttachment}
@@ -81,7 +101,7 @@
 			<div class="mx-auto flex min-h-full w-full max-w-[820px] flex-col">
 				<EmailComposeDocument>
 					{#snippet to()}
-						{#if readOnly}
+						{#if !activeEditPolicy.to}
 							<p class="min-w-0 flex-1 truncate text-[0.79rem] text-stone-800">
 								{formatRecipients(editor.activeEmailContent.to)}
 							</p>
@@ -103,7 +123,7 @@
 					{/snippet}
 
 					{#snippet cc()}
-						{#if readOnly}
+						{#if !activeEditPolicy.cc}
 							<p class="min-w-0 flex-1 truncate text-[0.79rem] text-stone-800">
 								{formatRecipients(editor.activeEmailContent.cc)}
 							</p>
@@ -128,11 +148,11 @@
 						{#if editor.activeEmailContent.attachment}
 							<EmailAttachmentCard
 								filename={editor.activeEmailContent.attachment.filename}
-								removable={!readOnly}
+								removable={activeEditPolicy.attachment}
 								onOpen={editor.openAttachment}
-								onRemove={readOnly ? undefined : removeAttachment}
+								onRemove={activeEditPolicy.attachment ? removeAttachment : undefined}
 							/>
-						{:else if readOnly}
+						{:else if !activeEditPolicy.attachment}
 							<p class="min-w-0 text-[0.79rem] text-stone-400">No attachment</p>
 						{:else}
 							<input
@@ -158,7 +178,7 @@
 							body={editor.activeEmailContent.body}
 							{variables}
 							{dragCoordinator}
-							disabled={readOnly}
+							disabled={!activeEditPolicy.body}
 							variableInsertionRequest={bodyInsertionRequest}
 							{onVariableInsertionRequestHandled}
 							onBodyChange={editor.updateBody}

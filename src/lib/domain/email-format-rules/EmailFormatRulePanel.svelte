@@ -2,7 +2,7 @@
 	import FunnelSimpleIcon from 'phosphor-svelte/lib/FunnelSimpleIcon';
 	import PlusIcon from 'phosphor-svelte/lib/PlusIcon';
 	import TrashIcon from 'phosphor-svelte/lib/TrashIcon';
-	import { Button, IconButton, InfoBar, InfoBarAction, InlineText } from '$lib/ui';
+	import { Button, IconButton, InfoBar, InlineText } from '$lib/ui';
 	import { cn } from '$lib/ui/cn';
 	import type { InlineTextContent } from '$lib/domain/inline-text';
 	import type { EmailFormatRule, EmailFormatRuleDataSourceAction } from './types';
@@ -12,14 +12,12 @@
 		onRulesChange: (rules: EmailFormatRule[]) => void;
 		canSave?: boolean;
 		onSave?: () => void;
-		onGiveEmailFeedback?: () => void;
 		onLinkDataSources?: (rule: EmailFormatRule) => void;
 		ruleDataSourceAction?: EmailFormatRuleDataSourceAction;
 		infoCard?: {
 			label: string;
 			content: InlineTextContent;
 		};
-		showFeedbackHint?: boolean;
 		canEditRuleText?: boolean;
 		canEditRuleList?: boolean;
 	};
@@ -29,11 +27,9 @@
 		onRulesChange,
 		canSave = false,
 		onSave,
-		onGiveEmailFeedback,
 		onLinkDataSources,
 		ruleDataSourceAction = { label: 'Link data sources' },
 		infoCard,
-		showFeedbackHint = false,
 		canEditRuleText = true,
 		canEditRuleList = true
 	}: Props = $props();
@@ -148,19 +144,6 @@
 							content={infoCard.content}
 							tooltipIdPrefix={`email-format-rule-info-${infoCard.label}`}
 						/>
-					</InfoBar>
-				{/if}
-
-				{#if showFeedbackHint}
-					<InfoBar label="Next steps:">
-						Make these rules as precise and detailed as possible, you can also train the AI by
-						{#if onGiveEmailFeedback}
-							<InfoBarAction onclick={onGiveEmailFeedback}>
-								giving feedback on specific sent emails
-							</InfoBarAction>
-						{:else}
-							giving feedback on specific sent emails
-						{/if}
 					</InfoBar>
 				{/if}
 			</div>

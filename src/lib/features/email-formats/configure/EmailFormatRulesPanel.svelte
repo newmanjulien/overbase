@@ -3,33 +3,52 @@
 		EmailFormatRulePanel,
 		LinkDataSourcesModal
 	} from '$lib/domain/email-format-rules';
-	import type { EmailFormatRule } from './email-format-detail-types';
+	import type { EmailFormatRule } from './email-format-configure-types';
+	import type {
+		EmailFormatInlineTextContent,
+		EmailFormatRuleDataSourceAction,
+		EmailFormatRulesEditPolicy
+	} from '$shared/email-format-definitions';
 	import SectionConflictActions from './SectionConflictActions.svelte';
+
+	const EDIT_ALL_RULE_FIELDS = {
+		text: true,
+		list: true,
+		dataSources: true
+	} satisfies EmailFormatRulesEditPolicy;
 
 	type Props = {
 		rules: EmailFormatRule[];
+		editPolicy: EmailFormatRulesEditPolicy | null;
 		canSave: boolean;
 		conflict: boolean;
 		isSaving?: boolean;
+		ruleDataSourceAction?: EmailFormatRuleDataSourceAction;
+		ruleInfoCard?: {
+			label: string;
+			content: EmailFormatInlineTextContent;
+		} | null;
 		onRulesChange: (rules: EmailFormatRule[]) => void;
 		onSave: () => void;
 		onKeepMine: () => void | Promise<void>;
 		onUseLatest: () => void;
-		onGiveEmailFeedback?: () => void;
 	};
 
 	let {
 		rules,
+		editPolicy,
 		canSave,
 		conflict,
 		isSaving = false,
+		ruleDataSourceAction = { label: 'Link data sources' },
+		ruleInfoCard = null,
 		onRulesChange,
 		onSave,
 		onKeepMine,
-		onUseLatest,
-		onGiveEmailFeedback
+		onUseLatest
 	}: Props = $props();
 	let linkDataSourcesModalOpen = $state(false);
+	const activeEditPolicy = $derived(editPolicy ?? EDIT_ALL_RULE_FIELDS);
 </script>
 
 <div class="flex h-full min-h-0 min-w-0 flex-col">
@@ -39,13 +58,17 @@
 			canSave={canSave && !isSaving}
 			{onRulesChange}
 			{onSave}
-			{onGiveEmailFeedback}
-			onLinkDataSources={() => (linkDataSourcesModalOpen = true)}
-			showFeedbackHint
+			onLinkDataSources={activeEditPolicy.dataSources
+				? () => (linkDataSourcesModalOpen = true)
+				: undefined}
+			{ruleDataSourceAction}
+			infoCard={ruleInfoCard ?? undefined}
+			canEditRuleText={activeEditPolicy.text}
+			canEditRuleList={activeEditPolicy.list}
 		/>
 	</div>
 	{#if conflict}
-		<div class="shrink-0 border-t border-stone-100 bg-white px-4 py-3 md:px-5">
+		<div class="shrink-0 bg-white px-4 py-3 md:px-5">
 			<SectionConflictActions
 				{conflict}
 				{isSaving}

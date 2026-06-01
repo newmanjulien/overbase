@@ -10,39 +10,9 @@ import {
 	spreadsheetVariable as sheetVariable
 } from './helpers';
 
-const variables = [
-	{ id: 'client_name', label: 'Client name' },
-	{ id: 'client_company', label: 'Client company' },
-	{ id: 'sponsor_name', label: 'Sponsor name' },
-	{ id: 'account_owner', label: 'Account owner' },
-	{ id: 'customer_success_manager', label: 'Customer success manager' },
-	{ id: 'project_name', label: 'Project name' },
-	{ id: 'workstream_name', label: 'Workstream name' },
-	{ id: 'milestone_name', label: 'Milestone name' },
-	{ id: 'reporting_period', label: 'Reporting period' },
-	{ id: 'current_status', label: 'Current status' },
-	{ id: 'timeline_status', label: 'Timeline status' },
-	{ id: 'budget_status', label: 'Budget status' },
-	{ id: 'completed_work', label: 'Completed work' },
-	{ id: 'upcoming_work', label: 'Upcoming work' },
-	{ id: 'priority_update', label: 'Priority update' },
-	{ id: 'decision_needed', label: 'Decision needed' },
-	{ id: 'decision_due_date', label: 'Decision due date' },
-	{ id: 'requested_feedback', label: 'Requested feedback' },
-	{ id: 'risk_summary', label: 'Risk summary' },
-	{ id: 'risk_owner', label: 'Risk owner' },
-	{ id: 'blocker', label: 'Blocker' },
-	{ id: 'blocker_owner', label: 'Blocker owner' },
-	{ id: 'blocker_due_date', label: 'Blocker due date' },
-	{ id: 'escalation_path', label: 'Escalation path' },
-	{ id: 'next_meeting_date', label: 'Next meeting date' },
-	{ id: 'action_owner', label: 'Action owner' },
-	{ id: 'action_due_date', label: 'Action due date' }
-] as const;
-
 export const clientUpdateFormatStarter = defineFormatStarter({
-	mode: 'internal-data',
 	slug: 'client-update',
+	formatDefinitionSlug: 'client-update',
 	title: 'Client update',
 	description: 'Draft a client-facing update with the right level of detail and a seeded tracker.',
 	details: {
@@ -122,11 +92,11 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 			{ id: 'default', startingPointId: 'steady-progress', answers: {} }
 		]
 	},
-	variables,
 	startingPoints: [
 		{
 			id: 'steady-progress',
 			label: 'Steady progress update',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Client update',
 				to: ['Client team'],
@@ -170,6 +140,7 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 		{
 			id: 'decision-request',
 			label: 'Decision request',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Decision needed',
 				to: ['Client lead'],
@@ -211,6 +182,7 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 		{
 			id: 'risk-escalation',
 			label: 'Risk escalation',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Risk update',
 				to: ['Client sponsor'],

@@ -2,6 +2,13 @@ import type { EmailDraft } from '$shared/email-drafts';
 import type { Id } from '$convex/_generated/dataModel';
 import type { EmailFormatRule } from '$lib/domain/email-format-rules';
 import type { FormatEmailContent } from '$lib/features/format-starters/domain';
+import type {
+	EmailFormatContentEditPolicy,
+	EmailFormatInlineTextContent,
+	EmailFormatRuleDataSourceAction,
+	EmailFormatRulesEditPolicy,
+	EmailFormatVariableDefinition
+} from '$shared/email-format-definitions';
 
 export type EmailFormatRecipientRef =
 	| {
@@ -26,6 +33,20 @@ export type EmailFormatRecipientPickerPerson = {
 export type { EmailFormatRule };
 export type EmailFormatContent = Omit<FormatEmailContent, 'title'>;
 
+export type EmailFormatDefinitionConfigure = {
+	slug: string;
+	dataMode: 'internal-data' | 'public-data';
+	variables: readonly EmailFormatVariableDefinition[];
+	contentEditPolicy: EmailFormatContentEditPolicy;
+	rulesEditPolicy: EmailFormatRulesEditPolicy;
+	ruleDataSourceAction: EmailFormatRuleDataSourceAction;
+	ruleDataSourceModal: 'default' | 'reconnect-linkedin';
+	ruleInfoCard: {
+		label: string;
+		content: EmailFormatInlineTextContent;
+	} | null;
+};
+
 export type EmailFeedback = {
 	likedText: string;
 	improvementText: string;
@@ -37,7 +58,7 @@ export type SentEmail = {
 	draft: EmailDraft;
 };
 
-export type EmailFormatDetailView = 'rules' | 'feedback';
+export type EmailFormatConfigureView = 'rules' | 'feedback';
 
 export type EmailFeedbackViewState =
 	| { kind: 'empty' }
@@ -50,4 +71,4 @@ export type EmailFeedbackViewState =
 			canSave: boolean;
 	  };
 
-export type EmailFormatDetailLoadState = 'loading' | 'error' | 'notFound' | 'ready';
+export type EmailFormatConfigureLoadState = 'loading' | 'error' | 'notFound' | 'ready';

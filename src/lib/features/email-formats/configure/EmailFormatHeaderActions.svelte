@@ -5,8 +5,8 @@
 	import type {
 		EmailFormatRecipientPickerPerson,
 		EmailFormatRecipientRef
-	} from './email-format-detail-types';
-	import { getFormatRecipientKey } from './email-format-detail-types';
+	} from './email-format-configure-types';
+	import { getFormatRecipientKey } from './email-format-configure-types';
 
 	type EmailFormatStatus = 'active' | 'paused';
 
@@ -16,6 +16,7 @@
 		selectedRecipientRefs: EmailFormatRecipientRef[];
 		isSavingRecipients: boolean;
 		isUpdatingStatus: boolean;
+		statusToggleDisabled?: boolean;
 		onSelectedRecipientRefsChange: (nextRefs: EmailFormatRecipientRef[]) => void | Promise<void>;
 		onToggleStatus: () => void | Promise<void>;
 	};
@@ -26,6 +27,7 @@
 		selectedRecipientRefs,
 		isSavingRecipients,
 		isUpdatingStatus,
+		statusToggleDisabled = false,
 		onSelectedRecipientRefsChange,
 		onToggleStatus
 	}: Props = $props();
@@ -83,7 +85,7 @@
 	<Button
 		variant="secondary"
 		class="h-7 px-2.5 text-[0.72rem]"
-		disabled={!status || isUpdatingStatus}
+		disabled={!status || isUpdatingStatus || statusToggleDisabled}
 		onclick={() => void onToggleStatus()}
 	>
 		{statusLabel}

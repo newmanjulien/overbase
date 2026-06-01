@@ -9,7 +9,12 @@ import {
 	type FormatSpreadsheetCell
 } from '$lib/features/format-starters/domain';
 import { cellKey } from '$shared/spreadsheets';
-import type { FormatStarter } from '../types';
+import { getEmailFormatDefinition } from '$shared/email-format-definitions';
+import type {
+	FormatStarter,
+	InternalDataFormatStarter,
+	PublicDataFormatStarter
+} from '../types';
 
 type FormatStarterArtworkInput = Omit<FormatStarterArtwork, 'card'> & {
 	card: Omit<FormatStarterArtwork['card'], 'symbolSize'> & {
@@ -17,16 +22,37 @@ type FormatStarterArtworkInput = Omit<FormatStarterArtwork, 'card'> & {
 	};
 };
 
-type FormatStarterInput = FormatStarter extends infer Entry
-	? Entry extends FormatStarter
-		? Omit<Entry, 'artwork'> & { artwork: FormatStarterArtworkInput }
-		: never
-	: never;
+type InternalDataFormatStarterInput = Omit<InternalDataFormatStarter, 'artwork' | 'mode' | 'variables'> & {
+	artwork: FormatStarterArtworkInput;
+};
+
+type PublicDataFormatStarterInput = Omit<
+	PublicDataFormatStarter,
+	| 'artwork'
+	| 'mode'
+	| 'variables'
+	| 'initialRules'
+	| 'ruleDataSourceAction'
+	| 'ruleDataSourceModal'
+	| 'ruleInfoCard'
+> & {
+	artwork: FormatStarterArtworkInput;
+};
+
+type FormatStarterInput = InternalDataFormatStarterInput | PublicDataFormatStarterInput;
 
 const DEFAULT_FORMAT_STARTER_ARTWORK_CARD_SYMBOL_SIZE: FormatStarterArtworkCardSymbolSize = 'md';
 
 export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
-	return {
+	const definition = getEmailFormatDefinition(entry.formatDefinitionSlug);
+
+	if (!definition) {
+		throw new Error(
+			`Format starter "${entry.slug}" references missing format definition "${entry.formatDefinitionSlug}".`
+		);
+	}
+
+	const normalizedEntry = {
 		...entry,
 		artwork: {
 			...entry.artwork,
@@ -36,6 +62,24 @@ export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
 					entry.artwork.card.symbolSize ?? DEFAULT_FORMAT_STARTER_ARTWORK_CARD_SYMBOL_SIZE
 			}
 		}
+	};
+
+	if (definition.dataMode === 'public-data') {
+		return {
+			...normalizedEntry,
+			mode: definition.dataMode,
+			variables: definition.variables,
+			initialRules: definition.initialRules,
+			ruleDataSourceAction: definition.ruleDataSourceAction,
+			ruleDataSourceModal: definition.ruleDataSourceModal,
+			ruleInfoCard: definition.ruleInfoCard
+		};
+	}
+
+	return {
+		...normalizedEntry,
+		mode: definition.dataMode,
+		variables: definition.variables
 	};
 }
 

@@ -35,7 +35,7 @@
 					type="button"
 					draggable={!isSelectable}
 					title={variable.label}
-					class={`inline-flex select-none items-center rounded-full border border-transparent bg-emerald-50/80 px-1.5 py-[0.125rem] text-[0.73rem] font-normal leading-none text-emerald-900 transition-colors hover:bg-emerald-100/80 ${isSelectable ? 'cursor-pointer active:bg-emerald-100' : 'cursor-grab active:cursor-grabbing'}`}
+					class={`inline-flex select-none items-center rounded-full border border-transparent bg-positive-50 px-1.5 py-[0.125rem] text-[0.73rem] font-normal leading-none text-positive-900 transition-colors hover:bg-positive-100 ${isSelectable ? 'cursor-pointer active:bg-positive-100' : 'cursor-grab active:cursor-grabbing'}`}
 					ondragstart={(event) => startDrag(event, variable)}
 					ondragend={() => dragCoordinator.endDrag()}
 					onclick={() => onVariableSelect?.(variable.id)}

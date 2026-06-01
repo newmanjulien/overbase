@@ -72,7 +72,7 @@ async function validateRecipientRefs(
 	return dedupedRefs;
 }
 
-export async function replaceEmailFormatRecipientRows(
+export async function insertEmailFormatRecipientRows(
 	ctx: MutationCtx,
 	viewerWorkspace: ViewerWorkspace,
 	emailFormatId: Id<'emailFormats'>,
@@ -80,8 +80,6 @@ export async function replaceEmailFormatRecipientRows(
 	updatedAt: number
 ) {
 	const recipientRefs = await validateRecipientRefs(ctx, viewerWorkspace, refs);
-
-	await deleteEmailFormatRecipientRows(ctx, viewerWorkspace.workspace._id, emailFormatId);
 
 	for (const recipient of recipientRefs) {
 		await ctx.db.insert('emailFormatRecipients', {
@@ -98,4 +96,22 @@ export async function replaceEmailFormatRecipientRows(
 	});
 
 	return recipientRefs;
+}
+
+export async function replaceEmailFormatRecipientRows(
+	ctx: MutationCtx,
+	viewerWorkspace: ViewerWorkspace,
+	emailFormatId: Id<'emailFormats'>,
+	refs: EmailFormatRecipientRef[],
+	updatedAt: number
+) {
+	await deleteEmailFormatRecipientRows(ctx, viewerWorkspace.workspace._id, emailFormatId);
+
+	return await insertEmailFormatRecipientRows(
+		ctx,
+		viewerWorkspace,
+		emailFormatId,
+		refs,
+		updatedAt
+	);
 }

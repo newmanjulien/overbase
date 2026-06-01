@@ -1,20 +1,9 @@
-import { createFormatsGalleryHref } from '$lib/app/app-links';
 import {
 	formatParagraph as paragraph,
 	formatText as text,
 	formatVariable as variable
 } from '$lib/features/format-starters/domain';
 import { defineFormatStarter, seededSpreadsheetAttachment, spreadsheetCell as cell } from './helpers';
-
-const variables = [
-	{ id: 'assistant', label: 'Assistant' },
-	{ id: 'senior_leader', label: 'Senior leader' },
-	{ id: 'team_member', label: 'Team member' },
-	{ id: 'email', label: 'Email' },
-	{ id: 'linkedin_url', label: 'LinkedIn URL' },
-	{ id: 'link', label: 'Link' },
-	{ id: 'yesno', label: 'Yes/No' }
-] as const;
 
 const teamMemberReconnectEmailContent = {
 	title: 'Reconnect with contacts',
@@ -58,8 +47,8 @@ const personalReconnectEmailContent = {
 };
 
 export const reconnectLinkedinFormatStarter = defineFormatStarter({
-	mode: 'public-data',
 	slug: 'reconnect-linkedin',
+	formatDefinitionSlug: 'reconnect-linkedin',
 	title: 'Reconnect with contacts',
 	description: 'Find news that lets your team reconnect with their LinkedIn contacts',
 	details: {
@@ -123,48 +112,24 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
 			}
 		]
 	},
-	variables,
-	ruleDataSourceAction: { label: 'Add LinkedIn contacts' },
-	ruleDataSourceModal: 'reconnect-linkedin',
-	ruleInfoCard: {
-		label: 'Tip:',
-		content: [
-			{
-				kind: 'text',
-				text: 'Everything is preset because this format starter only uses public data. Format starters that '
-			},
-			{
-				kind: 'link',
-				label: 'use internal data',
-				href: createFormatsGalleryHref('internal-data')
-			},
-			{
-				kind: 'text',
-				text: ' let you customize'
-			}
-		]
-	},
-	initialRules: [
-		{
-			id: 'only-rule',
-			text: 'Ask team members about their relationship with each person in their LinkedIn contacts. When you find someone worth reconnecting with, look for news or content that would make it easy'
-		}
-	],
 	startingPoints: [
 		{
 			id: 'linkedin-reconnect',
 			label: 'Reconnect with contacts',
+			initialRecipients: 'viewer',
 			emailContent: personalReconnectEmailContent
 		},
 		{
 			id: 'linkedin-reconnect-team',
 			label: 'Reconnect with contacts for team members',
+			initialRecipients: 'none',
 			ruleDataSourceAction: { label: 'No data needed', disabled: true },
 			emailContent: teamMemberReconnectEmailContent
 		},
 		{
 			id: 'linkedin-reconnect-senior-leadership',
 			label: 'Reconnect with contacts for senior leadership',
+			initialRecipients: 'none',
 			ruleDataSourceAction: { label: 'No data needed', disabled: true },
 			emailContent: {
 				title: 'Reconnect with contacts',

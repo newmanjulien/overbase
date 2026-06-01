@@ -59,7 +59,7 @@
 		</div>
 	</div>
 
-	<div class="shrink-0 border-t border-stone-100 bg-white px-4 py-3 md:px-5">
+	<div class="shrink-0 bg-white px-4 py-3 md:px-5">
 		<div class="flex items-center justify-end">
 			<Button
 				variant="secondary"

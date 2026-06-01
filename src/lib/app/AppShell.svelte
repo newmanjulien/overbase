@@ -64,6 +64,7 @@
 	});
 	const routeTitleState = $state<RouteTitleState>({
 		title: APP_CONFIG.name,
+		editable: null,
 		onTitleChange: null,
 		actions: null,
 		overflowActions: []
@@ -75,7 +76,9 @@
 	const canRenderRoute = $derived(!routeRequiresDesktop || viewportState === 'desktop');
 	const sourceRouteTitle = $derived(page.data.headerTitle ?? activeRoute?.label ?? APP_CONFIG.name);
 	const routeTitleResetKey = $derived(`${page.url.pathname}:${sourceRouteTitle}`);
-	const routeTitleEditable = $derived(Boolean(page.data.headerTitleEditable));
+	const routeTitleEditable = $derived(
+		routeTitleState.editable ?? Boolean(page.data.headerTitleEditable)
+	);
 	const desktopBreadcrumbParent = $derived(page.data.desktopBreadcrumbParent ?? null);
 	let customRouteTitle = $state<string | null>(null);
 	let currentRouteTitleResetKey = $state('');
@@ -98,6 +101,7 @@
 		if (currentRouteTitleResetKey !== routeTitleResetKey) {
 			currentRouteTitleResetKey = routeTitleResetKey;
 			customRouteTitle = null;
+			routeTitleState.editable = null;
 		}
 	});
 

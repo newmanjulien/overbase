@@ -10,6 +10,12 @@
 	} from '$lib/patterns/list-page';
 	import { InfoBar } from '$lib/ui';
 	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { onDestroy } from 'svelte';
+	import EmailFormatActivationStatusBar from '../configure/EmailFormatActivationStatusBar.svelte';
+	import {
+		createTimedNotice,
+		getActivationSuccessMessage
+	} from '../configure/email-format-activation-notices.svelte';
 	import EmailFormatListRow, {
 		type EmailFormatListItem
 	} from './EmailFormatListRow.svelte';
@@ -27,6 +33,7 @@
 	let updatingFormatIds = $state<Id<'emailFormats'>[]>([]);
 	let deletingFormatIds = $state<Id<'emailFormats'>[]>([]);
 	let actionError = $state<string | null>(null);
+	const activationSuccessNotice = createTimedNotice();
 	let searchQuery = $state('');
 	let selectedStatusFilter = $state<FormatStatusFilterId>('all');
 	const formatItems = $derived((formatsQuery.data ?? []).map(toFormatItem));
@@ -52,6 +59,10 @@
 	);
 
 	type EmailFormatListRecord = NonNullable<typeof formatsQuery.data>[number];
+
+	onDestroy(() => {
+		activationSuccessNotice.destroy();
+	});
 
 	function formatStatus(status: EmailFormatListRecord['status']) {
 		return status === 'active' ? 'Active' : 'Paused';
@@ -97,6 +108,10 @@
 		);
 	}
 
+	function showActivationSuccessNotice(count: number) {
+		activationSuccessNotice.show(getActivationSuccessMessage(count));
+	}
+
 	async function setFormatStatus(formatIds: Id<'emailFormats'>[], status: EmailFormatStatus) {
 		const idsToUpdate = formatIds.filter(
 			(formatId) => !isUpdatingFormat(formatId) && !isDeletingFormat(formatId)
@@ -107,6 +122,7 @@
 		}
 
 		actionError = null;
+		activationSuccessNotice.clear();
 		updatingFormatIds = [...updatingFormatIds, ...idsToUpdate];
 
 		try {
@@ -115,6 +131,9 @@
 					emailFormatId,
 					status
 				});
+			}
+			if (status === 'active') {
+				showActivationSuccessNotice(idsToUpdate.length);
 			}
 		} catch (error) {
 			actionError =
@@ -136,6 +155,7 @@
 		}
 
 		actionError = null;
+		activationSuccessNotice.clear();
 		deletingFormatIds = [...deletingFormatIds, ...idsToDelete];
 
 		try {
@@ -153,6 +173,7 @@
 		const isUpdating = isUpdatingFormat(format.id);
 		const isDeleting = isDeletingFormat(format.id);
 		const isBusy = isUpdating || isDeleting;
+		const activateDisabled = isBusy || !format.activation.canActivate;
 
 		return {
 			id: format.id,
@@ -179,7 +200,7 @@
 					: {
 							label: isUpdating ? 'Activating...' : 'Activate',
 							ariaLabel: `Activate ${format.title}`,
-							disabled: isBusy,
+							disabled: activateDisabled,
 							onSelect: () => setFormatStatus([format.id], 'active')
 						},
 				{
@@ -231,6 +252,12 @@
 			<p class="border-b border-red-100 bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-5">
 				{actionError}
 			</p>
+		{:else if activationSuccessNotice.message}
+			<EmailFormatActivationStatusBar
+				message={activationSuccessNotice.message}
+				kind="success"
+				class="border-b"
+			/>
 		{/if}
 		{#if filteredFormatItems.length === 0}
 			<ListContentState kind="empty" message="No matching email formats." />

@@ -4,7 +4,7 @@
 	import EmailAttachmentSpreadsheetPreview from '$lib/domain/email-drafts/EmailAttachmentSpreadsheetPreview.svelte';
 	import EmailComposePreview from '$lib/domain/email-drafts/EmailComposePreview.svelte';
 	import { IconButton } from '$lib/ui';
-	import type { SentEmail } from './email-format-detail-types';
+	import type { SentEmail } from './email-format-configure-types';
 
 	type Props = {
 		sentEmail: SentEmail;
@@ -57,7 +57,7 @@
 		{/if}
 	</div>
 
-	<div class="shrink-0 border-t border-stone-100 bg-white px-4 py-3 md:px-5">
+	<div class="shrink-0 bg-white px-4 py-3 md:px-5">
 		<div class="flex items-center justify-between gap-3">
 			<div class="min-w-0">
 				<p class="truncate text-[0.68rem] font-medium text-stone-700">{sentDateLabel}</p>

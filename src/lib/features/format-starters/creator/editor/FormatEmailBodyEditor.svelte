@@ -388,7 +388,7 @@
 	}
 
 	.format-inline-surface:not([contenteditable='false']) :global(.format-variable-pill:hover) {
-		background: rgb(209 250 229 / 0.8);
+		background: var(--positive-100);
 	}
 
 	.format-inline-surface:not([contenteditable='false']) :global(.format-variable-pill:active) {
@@ -397,7 +397,7 @@
 
 	.format-email-body-editor :global(.format-variable-pill--selected) {
 		border-color: transparent;
-		background: rgb(209 250 229);
+		background: var(--positive-100);
 	}
 
 	.format-email-body-editor :global(.format-variable-pill__label) {
@@ -413,7 +413,7 @@
 		border: 0;
 		border-radius: 999px;
 		background: transparent;
-		color: rgb(4 120 87);
+		color: var(--positive-700);
 		font: inherit;
 		font-size: 0.68rem;
 		font-weight: 600;
@@ -423,7 +423,7 @@
 	}
 
 	.format-email-body-editor :global(.format-variable-pill__remove:hover) {
-		background: rgb(209 250 229 / 0.75);
+		background: var(--positive-100);
 	}
 
 	.format-inline-surface:focus :global(.format-variable-pill) {

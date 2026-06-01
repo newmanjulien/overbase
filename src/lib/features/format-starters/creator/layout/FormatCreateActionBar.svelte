@@ -46,13 +46,13 @@
 </script>
 
 {#if error}
-	<p class="border-t border-red-100 bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-7">
+	<p class="bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-7">
 		{error}
 	</p>
 {/if}
 {#if publishPrerequisiteHint}
 	<div
-		class="flex flex-col gap-2 border-t border-stone-100 bg-stone-50 px-4 py-2 text-[0.72rem] leading-relaxed text-stone-700 md:flex-row md:items-center md:justify-between md:px-7"
+		class="flex flex-col gap-2 bg-stone-50 px-4 py-2 text-[0.72rem] leading-relaxed text-stone-700 md:flex-row md:items-center md:justify-between md:px-7"
 	>
 		<p>{publishPrerequisiteHint.text}</p>
 		<button
@@ -66,7 +66,7 @@
 {/if}
 {#if contactAttachmentStatus}
 	<div
-		class="flex flex-col gap-2 border-t border-stone-100 bg-stone-50 px-4 py-2 text-[0.72rem] leading-relaxed text-stone-700 md:flex-row md:items-center md:justify-between md:px-7"
+		class="flex flex-col gap-2 bg-stone-50 px-4 py-2 text-[0.72rem] leading-relaxed text-stone-700 md:flex-row md:items-center md:justify-between md:px-7"
 	>
 		<p>
 			<span class="font-medium">{contactCountLabel}</span> attached from

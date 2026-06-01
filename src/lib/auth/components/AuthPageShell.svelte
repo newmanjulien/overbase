@@ -62,7 +62,7 @@
 			{#if returnButtonHref}
 				{#if isExternalReturnButtonHref}
 					<a
-						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
+						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-info-200"
 						href={returnButtonHref}
 						rel="external"
 					>
@@ -71,7 +71,7 @@
 					</a>
 				{:else if returnButtonInternalHref}
 					<a
-						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
+						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-info-200"
 						href={resolve(returnButtonInternalHref)}
 					>
 						<ArrowLeftIcon aria-hidden="true" size={14} weight="regular" />
@@ -81,7 +81,7 @@
 			{:else if onReturnButtonClick}
 				<button
 					type="button"
-					class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:shadow-[0_0_0_3px_rgb(18_150_247_/_22%)]"
+					class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-info-200"
 					onclick={onReturnButtonClick}
 				>
 					<ArrowLeftIcon aria-hidden="true" size={14} weight="regular" />

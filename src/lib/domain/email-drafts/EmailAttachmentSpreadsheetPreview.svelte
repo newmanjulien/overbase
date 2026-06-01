@@ -78,13 +78,13 @@
 		<IconButton
 			aria-label="Back to email"
 			variant="ghost"
-			class="size-7 shrink-0 text-stone-500 hover:text-stone-900 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
+			class="size-7 shrink-0 text-stone-500 hover:text-stone-900 focus-visible:ring-2 focus-visible:ring-positive-200 focus-visible:outline-none"
 			onclick={onClose}
 		>
 			<ArrowLeftIcon size={14} weight="regular" />
 		</IconButton>
 		<div
-			class="flex size-7 shrink-0 items-center justify-center rounded-sm border border-emerald-200 bg-emerald-50/60 text-[0.54rem] font-normal text-emerald-700"
+			class="flex size-7 shrink-0 items-center justify-center rounded-sm border border-positive-200 bg-positive-50 text-[0.54rem] font-normal text-positive-700"
 			aria-hidden="true"
 		>
 			XLS
@@ -113,7 +113,7 @@
 					></th>
 					{#each SPREADSHEET_COLUMN_LABELS as column (column)}
 						<th
-							class="sticky top-0 z-10 h-8 overflow-hidden border-r border-b border-stone-200 bg-emerald-50/70 px-2 text-center text-[0.62rem] font-normal text-ellipsis whitespace-nowrap text-emerald-900"
+							class="sticky top-0 z-10 h-8 overflow-hidden border-r border-b border-stone-200 bg-positive-50 px-2 text-center text-[0.62rem] font-normal text-ellipsis whitespace-nowrap text-positive-900"
 						>
 							{column}
 						</th>

@@ -21,14 +21,14 @@
 
 {#snippet attachmentFileContent()}
 	<div
-		class="relative flex h-6 w-5 shrink-0 items-end justify-center rounded-sm border border-emerald-200 bg-white"
+		class="relative flex h-6 w-5 shrink-0 items-end justify-center rounded-sm border border-positive-200 bg-white"
 		aria-label={EMAIL_ATTACHMENT_FORMAT.label}
 	>
 		<div
-			class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-emerald-100 bg-stone-50"
+			class="absolute top-0 right-0 h-1.5 w-1.5 border-b border-l border-positive-100 bg-stone-50"
 		></div>
 		<div
-			class="mb-1 rounded-[2px] bg-emerald-700/70 px-0.5 py-px text-[0.32rem] leading-none font-semibold text-white"
+			class="mb-1 rounded-[2px] bg-positive-700 px-0.5 py-px text-[0.32rem] leading-none font-semibold text-white"
 		>
 			{EMAIL_ATTACHMENT_FORMAT.shortLabel}
 		</div>
@@ -60,7 +60,7 @@
 			<button
 				type="button"
 				aria-label={`Open ${filename}`}
-				class="flex h-full min-w-0 cursor-pointer items-center gap-2 rounded-sm py-0 pr-1 pl-2 text-left focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
+				class="flex h-full min-w-0 cursor-pointer items-center gap-2 rounded-sm py-0 pr-1 pl-2 text-left focus-visible:ring-2 focus-visible:ring-positive-200 focus-visible:outline-none"
 				onclick={onOpen}
 			>
 				{@render attachmentFileContent()}
@@ -71,7 +71,7 @@
 		<button
 			type="button"
 			aria-label={`Open ${filename}`}
-			class="inline-flex h-9 max-w-full cursor-pointer items-center gap-2 rounded-sm border border-stone-200 bg-stone-50 py-0 pr-3 pl-2 text-left text-stone-800 transition-colors hover:border-stone-300 hover:bg-stone-100/70 focus-visible:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-200 focus-visible:outline-none"
+			class="inline-flex h-9 max-w-full cursor-pointer items-center gap-2 rounded-sm border border-stone-200 bg-stone-50 py-0 pr-3 pl-2 text-left text-stone-800 transition-colors hover:border-stone-300 hover:bg-stone-100/70 focus-visible:border-positive-400 focus-visible:ring-2 focus-visible:ring-positive-200 focus-visible:outline-none"
 			onclick={onOpen}
 		>
 			{@render attachmentFileContent()}

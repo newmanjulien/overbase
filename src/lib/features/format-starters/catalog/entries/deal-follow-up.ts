@@ -10,39 +10,9 @@ import {
 	spreadsheetVariable as sheetVariable
 } from './helpers';
 
-const variables = [
-	{ id: 'prospect_company', label: 'Prospect company' },
-	{ id: 'primary_contact_email', label: 'Primary contact email' },
-	{ id: 'buyer_name', label: 'Buyer name' },
-	{ id: 'champion_name', label: 'Champion name' },
-	{ id: 'economic_buyer', label: 'Economic buyer' },
-	{ id: 'deal_owner', label: 'Deal owner' },
-	{ id: 'procurement_owner', label: 'Procurement owner' },
-	{ id: 'legal_owner', label: 'Legal owner' },
-	{ id: 'security_owner', label: 'Security owner' },
-	{ id: 'opportunity_name', label: 'Opportunity name' },
-	{ id: 'deal_stage', label: 'Deal stage' },
-	{ id: 'business_goal', label: 'Business goal' },
-	{ id: 'pain_point', label: 'Pain point' },
-	{ id: 'use_case', label: 'Use case' },
-	{ id: 'success_criteria', label: 'Success criteria' },
-	{ id: 'competitor', label: 'Competitor' },
-	{ id: 'decision_criteria', label: 'Decision criteria' },
-	{ id: 'mutual_action_plan', label: 'Mutual action plan' },
-	{ id: 'meeting_date', label: 'Meeting date' },
-	{ id: 'close_date', label: 'Close date' },
-	{ id: 'renewal_date', label: 'Renewal date' },
-	{ id: 'proposal_link', label: 'Proposal link' },
-	{ id: 'contract_value', label: 'Contract value' },
-	{ id: 'budget_owner', label: 'Budget owner' },
-	{ id: 'next_step', label: 'Next step' },
-	{ id: 'next_step_date', label: 'Next step date' },
-	{ id: 'commercial_question', label: 'Commercial question' }
-] as const;
-
 export const dealFollowUpFormatStarter = defineFormatStarter({
-	mode: 'internal-data',
 	slug: 'deal-follow-up',
+	formatDefinitionSlug: 'deal-follow-up',
 	title: 'Deal follow-up',
 	description: 'Follow up after a sales conversation with the right ask and attached deal tracker.',
 	details: {
@@ -120,11 +90,11 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 			{ id: 'default', startingPointId: 'conversation-recap', answers: {} }
 		]
 	},
-	variables,
 	startingPoints: [
 		{
 			id: 'conversation-recap',
 			label: 'Conversation recap',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Follow-up from our conversation',
 				to: ['Buyer'],
@@ -160,6 +130,7 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 		{
 			id: 'proposal-review',
 			label: 'Proposal review',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Proposal follow-up',
 				to: ['Buying committee'],
@@ -191,6 +162,7 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 		{
 			id: 'procurement-follow-up',
 			label: 'Procurement follow-up',
+			initialRecipients: 'none',
 			emailContent: {
 				title: 'Procurement follow-up',
 				to: ['Procurement'],
