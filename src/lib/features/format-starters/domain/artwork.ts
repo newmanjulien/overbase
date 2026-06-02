@@ -3,6 +3,8 @@ export const FORMAT_STARTER_ARTWORK_ICON_IDS = [
 	'gavel',
 	'handshake',
 	'linkedin-logo',
+	'phone-call',
+	'presentation-chart',
 	'trend-up'
 ] as const;
 export type FormatStarterArtworkIconId = (typeof FORMAT_STARTER_ARTWORK_ICON_IDS)[number];

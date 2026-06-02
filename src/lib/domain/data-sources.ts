@@ -1,4 +1,8 @@
 export const DATA_SOURCE_LOGO_REGISTRY = {
+	bloomberg: {
+		label: 'Bloomberg',
+		logoSrc: '/logos/bloomberg.jpg'
+	},
 	calendar: {
 		label: 'Calendar',
 		logoSrc: '/logos/calendar.png'

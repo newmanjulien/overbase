@@ -1,11 +1,15 @@
+import { callIntelligenceFormatStarter } from './call-intelligence';
+import { pitchContextFormatStarter } from './pitch-context';
 import { reconnectLinkedinFormatStarter } from './reconnect-linkedin';
-import { clientUpdateFormatStarter } from './client-update';
-import { dealFollowUpFormatStarter } from './deal-follow-up';
-import { implementationPlanFormatStarter } from './implementation-plan';
+import { topOfMindFormatStarter } from './top-of-mind';
+import { warmUpFormatStarter } from './warm-up';
+import { whitespaceAnalysisFormatStarter } from './whitespace-analysis';
 
 export const formatStarterEntries = [
-	clientUpdateFormatStarter,
-	dealFollowUpFormatStarter,
-	implementationPlanFormatStarter,
+	warmUpFormatStarter,
+	whitespaceAnalysisFormatStarter,
+	pitchContextFormatStarter,
+	callIntelligenceFormatStarter,
+	topOfMindFormatStarter,
 	reconnectLinkedinFormatStarter
 ] as const;

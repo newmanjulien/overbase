@@ -110,6 +110,6 @@
 	}
 
 	.format-starter-email-preview__body p + p {
-		margin-top: 3.35cqw;
+		margin-top: 1.5cqw;
 	}
 </style>

@@ -4,6 +4,8 @@
 	import GavelIcon from 'phosphor-svelte/lib/GavelIcon';
 	import HandshakeIcon from 'phosphor-svelte/lib/HandshakeIcon';
 	import LinkedinLogoIcon from 'phosphor-svelte/lib/LinkedinLogoIcon';
+	import PhoneCallIcon from 'phosphor-svelte/lib/PhoneCallIcon';
+	import PresentationChartIcon from 'phosphor-svelte/lib/PresentationChartIcon';
 	import TrendUpIcon from 'phosphor-svelte/lib/TrendUpIcon';
 	import type { FormatStarterArtworkIconId } from '$lib/features/format-starters/domain';
 	import type { PhosphorIcon } from '$lib/ui/icons';
@@ -21,6 +23,8 @@
 		gavel: GavelIcon,
 		handshake: HandshakeIcon,
 		'linkedin-logo': LinkedinLogoIcon,
+		'phone-call': PhoneCallIcon,
+		'presentation-chart': PresentationChartIcon,
 		'trend-up': TrendUpIcon
 	} as const satisfies Record<FormatStarterArtworkIconId, PhosphorIcon>;
 
