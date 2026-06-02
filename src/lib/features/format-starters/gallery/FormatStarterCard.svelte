@@ -44,6 +44,7 @@
 	<FormatStarterArtworkCard
 		title={formatStarter.title}
 		description={formatStarter.description}
+		dataSourceIds={formatStarter.dataSourceIds}
 		sampleEmail={formatStarter.sampleEmail}
 	/>
 </a>

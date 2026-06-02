@@ -3,6 +3,7 @@ import {
 	type FormatEmailContent,
 	type FormatInlineNode
 } from '$lib/features/format-starters/domain';
+import { isDataSourceId } from '$lib/domain/data-sources';
 import { hasInlineTextContent } from '$lib/domain/inline-text';
 import { getEmailFormatDefinition } from '$shared/email-format-definitions';
 import type { FormatStarter } from './types';
@@ -60,7 +61,24 @@ function validateFormatStarterEntry(
 	issues: FormatStarterCatalogValidationIssue[],
 	entry: FormatStarter
 ) {
+	addDuplicateIdIssues(issues, entry.slug, 'data source', entry.dataSourceIds);
 	addDuplicateIdIssues(issues, entry.slug, 'industry tag', entry.industryTags);
+
+	for (const dataSourceId of entry.dataSourceIds) {
+		if (!isDataSourceId(dataSourceId)) {
+			issues.push({
+				formatStarterSlug: entry.slug,
+				message: `References unknown data source "${dataSourceId}".`
+			});
+		}
+	}
+
+	if (entry.showInGallery && entry.dataSourceIds.length === 0) {
+		issues.push({
+			formatStarterSlug: entry.slug,
+			message: 'Gallery format starters must define at least one data source.'
+		});
+	}
 
 	for (const industryTag of entry.industryTags) {
 		if (!isFormatStarterIndustryTagId(industryTag)) {

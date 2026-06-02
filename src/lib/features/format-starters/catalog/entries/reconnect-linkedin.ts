@@ -58,8 +58,8 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
   slug: "reconnect-linkedin",
   formatDefinitionSlug: "reconnect-linkedin",
   title: "Reconnect with contacts",
-  description:
-    "Find news that lets your team reconnect with their LinkedIn contacts",
+  description: "Find news that lets your team reconnect with LinkedIn contacts",
+  dataSourceIds: ["linkedin"],
   industryTags: [],
   sampleEmail: {
     subject: "Reconnect with Ajay Agrawal",

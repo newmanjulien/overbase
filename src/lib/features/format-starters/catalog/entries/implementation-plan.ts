@@ -15,6 +15,7 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 	formatDefinitionSlug: 'implementation-plan',
 	title: 'Implementation plan',
 	description: 'Start an implementation email with a seeded project plan attachment.',
+	dataSourceIds: ['foundation', 'flowcase', 'calendar'],
 	industryTags: ['consulting'],
 	sampleEmail: {
 		subject: 'Implementation kickoff plan',

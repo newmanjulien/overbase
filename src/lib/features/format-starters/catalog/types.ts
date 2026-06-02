@@ -8,6 +8,7 @@ import type {
 	EmailFormatDataMode,
 	EmailFormatInlineTextContent
 } from '$shared/email-format-definitions';
+import type { DataSourceId } from '$lib/domain/data-sources';
 import type { FormatStarterIndustryTagId } from './industry-tags';
 
 export type FormatStartingPoint = {
@@ -28,6 +29,7 @@ type FormatStarterBase = {
 	mode: EmailFormatDataMode;
 	title: string;
 	description: string;
+	dataSourceIds: readonly DataSourceId[];
 	industryTags: readonly FormatStarterIndustryTagId[];
 	sampleEmail: FormatStarterSampleEmail;
 	details: {
@@ -60,5 +62,5 @@ export type FormatStarter =
 
 export type FormatStarterGalleryEntry = Pick<
 	FormatStarter,
-	'mode' | 'slug' | 'title' | 'description' | 'industryTags' | 'sampleEmail'
+	'mode' | 'slug' | 'title' | 'description' | 'dataSourceIds' | 'industryTags' | 'sampleEmail'
 >;

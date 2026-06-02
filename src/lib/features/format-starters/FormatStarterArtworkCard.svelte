@@ -2,17 +2,20 @@
 	import type { ClassValue } from 'clsx';
 	import ArrowUpRightIcon from 'phosphor-svelte/lib/ArrowUpRightIcon';
 	import FormatStarterEmailPreview from '$lib/features/format-starters/FormatStarterEmailPreview.svelte';
+	import DataSourceLogoStack from '$lib/features/format-starters/DataSourceLogoStack.svelte';
 	import type { FormatStarterSampleEmail } from '$lib/features/format-starters/catalog';
+	import type { DataSourceId } from '$lib/domain/data-sources';
 	import { cn } from '$lib/ui/cn';
 
 	type Props = {
 		title: string;
 		description?: string;
+		dataSourceIds?: readonly DataSourceId[];
 		sampleEmail: FormatStarterSampleEmail;
 		class?: ClassValue;
 	};
 
-	let { title, description, sampleEmail, class: className }: Props = $props();
+	let { title, description, dataSourceIds = [], sampleEmail, class: className }: Props = $props();
 </script>
 
 <div
@@ -21,6 +24,10 @@
 		className
 	)}
 >
+	<DataSourceLogoStack
+		{dataSourceIds}
+		class="absolute right-[4%] top-[5.5%] z-10"
+	/>
 	<div class="starter-artwork-card__document">
 		<FormatStarterEmailPreview content={sampleEmail} />
 	</div>
@@ -67,7 +74,7 @@
 		position: absolute;
 		top: 6%;
 		left: 5.5%;
-		max-width: 78%;
+		max-width: calc(100% - 5.5% - 4.75rem);
 	}
 
 	.starter-artwork-card__title-row {

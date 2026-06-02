@@ -35,6 +35,7 @@ export function getJoinFormatStarterRecommendation(): JoinFormatStarterRecommend
     title: "Try with only public data",
     description:
       "Try Overbase without sharing any of your internal data and with only public data",
+    dataSourceIds: formatStarter.dataSourceIds,
     industryTags: formatStarter.industryTags,
     sampleEmail: formatStarter.sampleEmail,
   };

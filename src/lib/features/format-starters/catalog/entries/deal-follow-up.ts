@@ -15,6 +15,7 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 	formatDefinitionSlug: 'deal-follow-up',
 	title: 'Deal follow-up',
 	description: 'Follow up after a sales conversation with the right ask and attached deal tracker.',
+	dataSourceIds: ['salesforce', 'gong', 'onedrive'],
 	industryTags: ['insurance'],
 	sampleEmail: {
 		subject: 'Follow-up from today',

@@ -15,6 +15,7 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 	formatDefinitionSlug: 'client-update',
 	title: 'Client update',
 	description: 'Draft a client-facing update with the right level of detail and a seeded tracker.',
+	dataSourceIds: ['salesforce', 'onedrive', 'calendar'],
 	industryTags: ['law'],
 	sampleEmail: {
 		subject: 'Weekly launch update',
