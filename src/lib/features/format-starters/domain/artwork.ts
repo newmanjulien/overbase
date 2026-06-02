@@ -1,5 +1,3 @@
-export type FormatStarterArtworkCardTone = 'coral' | 'violet' | 'aqua' | 'mint' | 'blush' | 'stone';
-export type FormatStarterArtworkCardSymbolSize = 'sm' | 'md';
 export const FORMAT_STARTER_ARTWORK_ICON_IDS = [
 	'clipboard-text',
 	'gavel',
@@ -12,10 +10,6 @@ export type FormatStarterArtworkIconId = (typeof FORMAT_STARTER_ARTWORK_ICON_IDS
 export type FormatStarterArtwork = {
 	id: string;
 	iconId: FormatStarterArtworkIconId;
-	card: {
-		tone: FormatStarterArtworkCardTone;
-		symbolSize: FormatStarterArtworkCardSymbolSize;
-	};
 	panel: {
 		backColor: string;
 		frontColor: string;

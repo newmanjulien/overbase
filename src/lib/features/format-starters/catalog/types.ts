@@ -52,5 +52,5 @@ export type FormatStarter =
 
 export type FormatStarterGalleryEntry = Pick<
 	FormatStarter,
-	'mode' | 'slug' | 'title' | 'description' | 'artwork'
+	'mode' | 'slug' | 'title' | 'description'
 >;

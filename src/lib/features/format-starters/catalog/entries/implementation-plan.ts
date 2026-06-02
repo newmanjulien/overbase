@@ -24,9 +24,6 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 	artwork: {
 		id: 'implementation-plan-violet',
 		iconId: 'clipboard-text',
-		card: {
-			tone: 'violet'
-		},
 		panel: {
 			backColor: '#D8C7FF',
 			frontColor: '#BFE9D2',

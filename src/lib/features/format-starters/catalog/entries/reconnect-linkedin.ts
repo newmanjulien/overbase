@@ -60,9 +60,6 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
 	artwork: {
 		id: 'reconnect-linkedin-mint',
 		iconId: 'linkedin-logo',
-		card: {
-			tone: 'mint'
-		},
 		panel: {
 			backColor: '#B7E4C7',
 			frontColor: '#E4F7D2',

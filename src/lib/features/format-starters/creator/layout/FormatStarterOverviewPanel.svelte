@@ -1,6 +1,5 @@
 <script lang="ts">
 	import CaretDownIcon from 'phosphor-svelte/lib/CaretDownIcon';
-	import { toFormatStarterArtworkPreset } from '$lib/features/format-starters/artwork';
 	import type { FormatStarter } from '$lib/features/format-starters/catalog';
 	import FormatStarterPanelArtwork from './FormatStarterPanelArtwork.svelte';
 
@@ -11,7 +10,7 @@
 	let { formatStarter }: Props = $props();
 	let detailsExpanded = $state(false);
 
-	const artwork = $derived(toFormatStarterArtworkPreset(formatStarter.artwork));
+	const artwork = $derived(formatStarter.artwork);
 	const componentId = $props.id();
 	const detailsId = `${componentId}-details`;
 	const detailsGridRows = $derived(detailsExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]');

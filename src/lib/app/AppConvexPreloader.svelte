@@ -7,6 +7,7 @@
 	} from '$lib/app/app-convex-preloader.svelte';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { onDestroy, type Snippet } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	type Props = {
 		children: Snippet<[AppConvexPreloaderRenderState]>;
@@ -24,7 +25,7 @@
 	const emailFormatsQuery = useQuery(api.emailFormats.listEmailFormats);
 	const externalDataQuery = useQuery(api.externalData.listExternalDataSources, () => ({}));
 	const teammatesQuery = useQuery(api.teammates.listTeammates);
-	const detailWarmSubscriptions = new Map<string, WarmSubscription>();
+	const detailWarmSubscriptions = new SvelteMap<string, WarmSubscription>();
 	const renderState = $derived<AppConvexPreloaderRenderState>({
 		showPublicDataCard: Boolean(externalDataQuery.data && externalDataQuery.data.length === 0)
 	});

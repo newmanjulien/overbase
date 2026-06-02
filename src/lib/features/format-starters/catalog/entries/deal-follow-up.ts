@@ -24,9 +24,6 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 	artwork: {
 		id: 'deal-follow-up-coral',
 		iconId: 'handshake',
-		card: {
-			tone: 'coral'
-		},
 		panel: {
 			backColor: '#FFD0C2',
 			frontColor: '#F8E27B',

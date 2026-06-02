@@ -2,8 +2,6 @@ import {
 	formatText,
 	formatVariable,
 	normalizeFormatSpreadsheetAttachment,
-	type FormatStarterArtwork,
-	type FormatStarterArtworkCardSymbolSize,
 	type FormatInlineNode,
 	type FormatSpreadsheetAttachment,
 	type FormatSpreadsheetCell
@@ -19,29 +17,13 @@ import type {
 	PublicDataFormatStarter
 } from '../types';
 
-type FormatStarterArtworkInput = Omit<FormatStarterArtwork, 'card'> & {
-	card: Omit<FormatStarterArtwork['card'], 'symbolSize'> & {
-		symbolSize?: FormatStarterArtworkCardSymbolSize;
-	};
-};
-
-type InternalDataFormatStarterInput = Omit<InternalDataFormatStarter, 'artwork' | 'mode' | 'variables'> & {
-	artwork: FormatStarterArtworkInput;
-};
-
+type InternalDataFormatStarterInput = Omit<InternalDataFormatStarter, 'mode' | 'variables'>;
 type PublicDataFormatStarterInput = Omit<
 	PublicDataFormatStarter,
-	| 'artwork'
-	| 'mode'
-	| 'variables'
-	| 'ruleInfoCard'
-> & {
-	artwork: FormatStarterArtworkInput;
-};
+	'mode' | 'variables' | 'ruleInfoCard'
+>;
 
 type FormatStarterInput = InternalDataFormatStarterInput | PublicDataFormatStarterInput;
-
-const DEFAULT_FORMAT_STARTER_ARTWORK_CARD_SYMBOL_SIZE: FormatStarterArtworkCardSymbolSize = 'md';
 
 export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
 	const definition = getEmailFormatDefinition(entry.formatDefinitionSlug);
@@ -51,18 +33,6 @@ export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
 			`Format starter "${entry.slug}" references missing format definition "${entry.formatDefinitionSlug}".`
 		);
 	}
-
-	const normalizedEntry = {
-		...entry,
-		artwork: {
-			...entry.artwork,
-			card: {
-				...entry.artwork.card,
-				symbolSize:
-					entry.artwork.card.symbolSize ?? DEFAULT_FORMAT_STARTER_ARTWORK_CARD_SYMBOL_SIZE
-			}
-		}
-	};
 
 	if (definition.dataMode === 'public-data') {
 		const firstStartingPoint = entry.startingPoints[0];
@@ -77,7 +47,7 @@ export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
 		}
 
 		return {
-			...normalizedEntry,
+			...entry,
 			mode: definition.dataMode,
 			variables: definition.variables,
 			ruleInfoCard: initialSpec.ruleInfoCard
@@ -85,7 +55,7 @@ export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
 	}
 
 	return {
-		...normalizedEntry,
+		...entry,
 		mode: definition.dataMode,
 		variables: definition.variables
 	};

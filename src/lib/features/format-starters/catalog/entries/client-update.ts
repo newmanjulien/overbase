@@ -24,9 +24,6 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 	artwork: {
 		id: 'client-update-aqua',
 		iconId: 'trend-up',
-		card: {
-			tone: 'aqua'
-		},
 		panel: {
 			backColor: '#DDFB93',
 			frontColor: '#9DE5F3',

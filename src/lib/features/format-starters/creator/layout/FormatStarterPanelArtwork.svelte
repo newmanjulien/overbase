@@ -5,7 +5,7 @@
 	import HandshakeIcon from 'phosphor-svelte/lib/HandshakeIcon';
 	import LinkedinLogoIcon from 'phosphor-svelte/lib/LinkedinLogoIcon';
 	import TrendUpIcon from 'phosphor-svelte/lib/TrendUpIcon';
-	import type { FormatStarterArtworkIconId } from '$lib/features/format-starters/artwork';
+	import type { FormatStarterArtworkIconId } from '$lib/features/format-starters/domain';
 	import type { PhosphorIcon } from '$lib/ui/icons';
 
 	type Props = {

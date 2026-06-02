@@ -1,17 +1,12 @@
 import { getFormatStarter } from '$lib/features/format-starters/catalog';
-import type { FormatStarterArtwork } from '$lib/features/format-starters/domain';
+import type { FormatStarterGalleryEntry } from '$lib/features/format-starters/catalog';
 
 const JOIN_FLOW_FORMAT_STARTER = {
 	formatStarterSlug: 'reconnect-linkedin',
 	variantSlug: 'personal'
 } as const;
 
-export type JoinFormatStarterRecommendation = {
-	slug: string;
-	title: string;
-	description: string;
-	artwork: FormatStarterArtwork;
-};
+export type JoinFormatStarterRecommendation = FormatStarterGalleryEntry;
 
 export function getJoinFormatStarterRecommendation(): JoinFormatStarterRecommendation {
 	const formatStarter = getFormatStarter(JOIN_FLOW_FORMAT_STARTER.formatStarterSlug);
@@ -31,9 +26,9 @@ export function getJoinFormatStarterRecommendation(): JoinFormatStarterRecommend
 	}
 
 	return {
+		mode: formatStarter.mode,
 		slug: formatStarter.slug,
 		title: startingPoint.label,
-		description: formatStarter.description,
-		artwork: formatStarter.artwork
+		description: formatStarter.description
 	};
 }
