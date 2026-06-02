@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
-	import { ListContentState, ListRows, ListRoutePage } from '$lib/patterns/list-page';
+	import {
+		ListRows,
+		ListRoutePage,
+		type EmptyListStateConfig,
+		type ListRouteStatus,
+		type NoResultsListStateConfig
+	} from '$lib/patterns/list-page';
 	import AddExternalDataModal from '$lib/features/external-data/AddExternalDataModal.svelte';
 	import ExternalDataDetailsModal, {
 		type ExternalDataDetails
@@ -41,15 +47,29 @@
 	const filteredExternalDataItems = $derived(
 		externalDataItems.filter(matchesExternalDataFilters)
 	);
-	const listState = $derived(
+	const emptyListState = {
+		icon: APP_ROUTE_REGISTRY['external-data'].icon,
+		title: 'No external data found',
+		description: 'Connect external data sources to enrich your opportunities.',
+		nextSteps:
+			'Overbase can pull from external data sources you purchase. Connect external data sources, then use them to power your opportunities',
+		actionLabel: 'Add external data',
+		onAction: () => (modalOpen = true)
+	} satisfies EmptyListStateConfig;
+	const noResultsState = {
+		title: 'No matching external data sources',
+		description: 'Try a different search term or data type'
+	} satisfies NoResultsListStateConfig;
+	const listStatus = $derived<ListRouteStatus>(
 		externalDataQuery.isLoading
 			? 'loading'
 			: externalDataQuery.error
 				? 'error'
-				: externalDataItems.length === 0
-					? 'empty'
-					: 'ready'
+				: 'ready'
 	);
+	const totalRecords = $derived(externalDataItems.length);
+	const visibleRecords = $derived(filteredExternalDataItems.length);
+	const isQueryActive = $derived(Boolean(searchQuery.trim()) || selectedTypeFilter !== 'all');
 
 	function normalizeSearchText(value: string) {
 		return value.trim().toLowerCase();
@@ -221,33 +241,23 @@
 		actionLabel: 'Add external data',
 		onAction: () => (modalOpen = true)
 	}}
-	empty={{
-		icon: APP_ROUTE_REGISTRY['external-data'].icon,
-		title: 'No external data found',
-		description: 'Connect external data sources to enrich your opportunities.',
-		nextSteps:
-			'Overbase can pull from external data sources you purchase. Connect external data sources, then use them to power your opportunities',
-		actionLabel: 'Add external data',
-		onAction: () => (modalOpen = true)
-	}}
-	hasItems={listState !== 'empty'}
+	empty={emptyListState}
+	noResults={noResultsState}
+	status={listStatus}
+	{totalRecords}
+	{visibleRecords}
+	{isQueryActive}
+	loadingMessage="Loading external data sources..."
+	errorMessage="Could not load external data sources."
 >
-	{#if listState === 'loading'}
-		<ListContentState kind="loading" message="Loading external data sources..." />
-	{:else if listState === 'error'}
-		<ListContentState kind="error" message="Could not load external data sources." />
-	{:else if filteredExternalDataItems.length === 0}
-		<ListContentState kind="empty" message="No matching external data sources." />
-	{:else}
-		<ListRows
-			items={filteredExternalDataItems}
-			rowActionsAriaLabel="External data actions"
-		>
-			{#snippet rowCells(item)}
-				<ExternalDataListRow {item} />
-			{/snippet}
-		</ListRows>
-	{/if}
+	<ListRows
+		items={filteredExternalDataItems}
+		rowActionsAriaLabel="External data actions"
+	>
+		{#snippet rowCells(item)}
+			<ExternalDataListRow {item} />
+		{/snippet}
+	</ListRows>
 </ListRoutePage>
 
 <AddExternalDataModal open={modalOpen} onClose={() => (modalOpen = false)} />

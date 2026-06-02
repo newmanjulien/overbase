@@ -1,12 +1,15 @@
-import type {
-	EmailFormatActivationRequirement,
-	EmailFormatDataSourceRequirement
-} from './email-format-definitions';
+import type { EmailFormatActivationRequirement } from './email-format-definitions';
+import type { EmailFormatDataSourceRequirement } from './email-format-data-source-requirements';
+import {
+	getUnsatisfiedEmailFormatDataSourceRequirements,
+	type EmailFormatDataSourceLinkState
+} from './email-format-data-source-link-state';
 
 export type EmailFormatActivationMissingRequirement =
 	| 'recipients'
 	| 'rules'
-	| 'linkedinContacts';
+	| 'linkedinContacts'
+	| 'dataSources';
 
 export type EmailFormatActivationRule = {
 	text: string;
@@ -23,25 +26,11 @@ type EmailFormatActivationReadinessInput = {
 	rules: readonly EmailFormatActivationRule[];
 	requirements: readonly EmailFormatActivationRequirement[];
 	dataSourceRequirements: readonly EmailFormatDataSourceRequirement[];
-	externalData: EmailFormatActivationExternalDataState;
-};
-
-export type EmailFormatActivationExternalDataState = {
-	linkedinContactsRuleIds: readonly string[];
+	dataSourceLinkState: EmailFormatDataSourceLinkState;
 };
 
 function hasSavedRule(rules: readonly EmailFormatActivationRule[]) {
 	return rules.some((rule) => rule.text.trim().length > 0);
-}
-
-function hasExternalDataRequirement(
-	externalData: EmailFormatActivationExternalDataState,
-	requirement: EmailFormatDataSourceRequirement
-) {
-	switch (requirement.kind) {
-		case 'linkedinContacts':
-			return externalData.linkedinContactsRuleIds.includes(requirement.ruleId);
-	}
 }
 
 export function getEmailFormatActivationReadiness({
@@ -49,7 +38,7 @@ export function getEmailFormatActivationReadiness({
 	rules,
 	requirements,
 	dataSourceRequirements,
-	externalData
+	dataSourceLinkState
 }: EmailFormatActivationReadinessInput): EmailFormatActivationReadiness {
 	const missingRequirements: EmailFormatActivationMissingRequirement[] = [];
 
@@ -61,17 +50,19 @@ export function getEmailFormatActivationReadiness({
 		if (requirement.kind === 'rules' && !hasSavedRule(rules)) {
 			missingRequirements.push('rules');
 		}
-
 	}
 
-	for (const requirement of dataSourceRequirements) {
-		if (requirement.requiredAt !== 'activation') {
-			continue;
-		}
+	if (dataSourceRequirements.length === 0) {
+		missingRequirements.push('dataSources');
+	}
 
-		if (!hasExternalDataRequirement(externalData, requirement)) {
-			missingRequirements.push('linkedinContacts');
-		}
+	for (const requirement of getUnsatisfiedEmailFormatDataSourceRequirements(
+		dataSourceRequirements,
+		dataSourceLinkState
+	)) {
+		missingRequirements.push(
+			requirement.kind === 'linkedinContacts' ? 'linkedinContacts' : 'dataSources'
+		);
 	}
 
 	const uniqueMissingRequirements = [...new Set(missingRequirements)];
@@ -84,7 +75,7 @@ export function getEmailFormatActivationReadiness({
 }
 
 export function getEmailFormatActivationMissingMessage(
-	missingRequirements: readonly EmailFormatActivationMissingRequirement[],
+	missingRequirements: readonly EmailFormatActivationMissingRequirement[]
 ) {
 	const missing = new Set(missingRequirements);
 
@@ -104,32 +95,52 @@ export function getEmailFormatActivationMissingMessage(
 		return 'Add LinkedIn contacts to activate this format';
 	}
 
+	if (missing.size === 1 && missing.has('dataSources')) {
+		return 'Link data sources before activating this format';
+	}
+
 	const labels = [
 		missing.has('recipients') ? 'at least one recipient' : null,
 		missing.has('rules') ? 'at least one saved rule' : null,
-		missing.has('linkedinContacts') ? 'LinkedIn contacts' : null
+		missing.has('linkedinContacts') ? 'LinkedIn contacts' : null,
+		missing.has('dataSources') ? 'one linked data source' : null
 	].filter((label): label is string => label !== null);
 
 	return `Add ${formatList(labels)} before activating this format`;
 }
 
-export function getEmailFormatActivationMissingMessageFromError(
-	error: unknown,
-) {
+export function normalizeEmailFormatActivationMissingMessage(message: string | null) {
+	return message?.replace('linked data sources', 'one linked data source') ?? null;
+}
+
+export function getEmailFormatActivationMissingMessageFromError(error: unknown) {
 	const errorMessage = error instanceof Error ? error.message : String(error);
-	const activationMessages = [
-		getEmailFormatActivationMissingMessage(['recipients', 'rules', 'linkedinContacts']),
-		getEmailFormatActivationMissingMessage(['recipients', 'rules']),
-		getEmailFormatActivationMissingMessage(['recipients', 'linkedinContacts']),
-		getEmailFormatActivationMissingMessage(['rules', 'linkedinContacts']),
-		getEmailFormatActivationMissingMessage(['recipients']),
-		getEmailFormatActivationMissingMessage(['rules']),
-		getEmailFormatActivationMissingMessage(['linkedinContacts'])
-	].filter((message): message is string => message !== null);
+	const requirementKinds: EmailFormatActivationMissingRequirement[] = [
+		'recipients',
+		'rules',
+		'linkedinContacts',
+		'dataSources'
+	];
+	const activationMessages = getRequirementCombinations(requirementKinds)
+		.map(getEmailFormatActivationMissingMessage)
+		.filter((message): message is string => message !== null);
 
 	return (
-		activationMessages.find((message) => errorMessage.includes(message)) ?? null
+		activationMessages.find((message) => errorMessage.includes(message)) ??
+		normalizeEmailFormatActivationMissingMessage(errorMessage)
 	);
+}
+
+function getRequirementCombinations(
+	requirements: readonly EmailFormatActivationMissingRequirement[]
+) {
+	const combinations: EmailFormatActivationMissingRequirement[][] = [];
+
+	for (let mask = 1; mask < 1 << requirements.length; mask += 1) {
+		combinations.push(requirements.filter((_, index) => Boolean(mask & (1 << index))));
+	}
+
+	return combinations;
 }
 
 function formatList(labels: readonly string[]) {

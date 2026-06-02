@@ -5,9 +5,11 @@
 	import { APP_LINKS, emailFormatLink } from '$lib/app/app-links';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import {
-		ListContentState,
 		ListRoutePage,
-		SelectableList
+		SelectableList,
+		type EmptyListStateConfig,
+		type ListRouteStatus,
+		type NoResultsListStateConfig
 	} from '$lib/patterns/list-page';
 	import { InfoBar } from '$lib/ui';
 	import { useConvexClient, useQuery } from 'convex-svelte';
@@ -40,15 +42,33 @@
 	let selectedStatusFilter = $state<FormatStatusFilterId>('all');
 	const formatItems = $derived((formatsQuery.data ?? []).map(toFormatItem));
 	const filteredFormatItems = $derived(formatItems.filter(matchesFormatFilters));
-	const listState = $derived(
+	const emptyListState = {
+		icon: APP_ROUTE_REGISTRY['email-formats'].icon,
+		title: 'No email formats found',
+		description: 'Create your first local email draft from a format.',
+		nextSteps: [
+			{ kind: 'link', text: 'Create', href: APP_LINKS.createFormats.pathname },
+			{
+				kind: 'text',
+				text: ' the format of the emails your team will receive'
+			}
+		],
+		learnMoreLabel: 'Learn more'
+	} satisfies EmptyListStateConfig;
+	const noResultsState = {
+		title: 'No matching email formats',
+		description: 'Try a different search term, creator, or status'
+	} satisfies NoResultsListStateConfig;
+	const listStatus = $derived<ListRouteStatus>(
 		formatsQuery.isLoading
 			? 'loading'
 			: formatsQuery.error
 				? 'error'
-				: formatItems.length === 0
-					? 'empty'
-					: 'ready'
+				: 'ready'
 	);
+	const totalRecords = $derived(formatItems.length);
+	const visibleRecords = $derived(filteredFormatItems.length);
+	const isQueryActive = $derived(Boolean(searchQuery.trim()) || selectedStatusFilter !== 'all');
 
 	const statusFilterOptions: { id: FormatStatusFilterId; label: string }[] = [
 		{ id: 'all', label: 'All email formats' },
@@ -231,26 +251,16 @@
 			onSelect: setSelectedStatusFilter
 		}
 	}}
-	empty={{
-		icon: APP_ROUTE_REGISTRY["email-formats"].icon,
-		title: 'No email formats found',
-		description: 'Create your first local email draft from a format.',
-		nextSteps: [
-			{ kind: 'link', text: 'Create', href: APP_LINKS.createFormats.pathname },
-			{
-				kind: 'text',
-				text: ' the format of the emails your team will receive'
-			}
-		],
-		learnMoreLabel: 'Learn more'
-	}}
-	hasItems={listState !== 'empty'}
+	empty={emptyListState}
+	noResults={noResultsState}
+	status={listStatus}
+	{totalRecords}
+	{visibleRecords}
+	{isQueryActive}
+	loadingMessage="Loading email formats..."
+	errorMessage="Could not load email formats."
 >
-	{#if listState === 'loading'}
-		<ListContentState kind="loading" message="Loading email formats..." />
-	{:else if listState === 'error'}
-		<ListContentState kind="error" message="Could not load email formats." />
-	{:else if listState === 'ready'}
+	{#snippet contentHeader()}
 		{#if actionError}
 			<p class="border-b border-red-100 bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-5">
 				{actionError}
@@ -262,44 +272,39 @@
 				class="border-b"
 			/>
 		{/if}
-		{#if filteredFormatItems.length === 0}
-			<ListContentState kind="empty" message="No matching email formats." />
-		{:else}
-			<SelectableList
-				items={filteredFormatItems}
-				selectAllAriaLabel="Select all email formats"
-				selectedActionsAriaLabel="Selected email format actions"
-				selectedActions={[
-					{
-						label: 'Pause selected',
-						ariaLabel: 'Pause selected email formats',
-						disabled: areAnyBusy,
-						onSelect: (selectedFormatIds) =>
-							setFormatStatus(selectedFormatIds as Id<'emailFormats'>[], 'paused')
-					},
-					{
-						label: 'Delete',
-						ariaLabel: 'Delete selected email formats',
-						intent: 'destructive',
-						disabled: areAnyBusy,
-						onSelect: (selectedFormatIds) =>
-							deleteFormats(selectedFormatIds as Id<'emailFormats'>[])
-					}
-				]}
-				rowActionsAriaLabel="Email format actions"
-			>
-				{#snippet rowCells(item)}
-					<EmailFormatListRow {item} />
-				{/snippet}
-			</SelectableList>
-		{/if}
-	{/if}
+	{/snippet}
+
+	<SelectableList
+		items={filteredFormatItems}
+		selectAllAriaLabel="Select all email formats"
+		selectedActionsAriaLabel="Selected email format actions"
+		selectedActions={[
+			{
+				label: 'Pause selected',
+				ariaLabel: 'Pause selected email formats',
+				disabled: areAnyBusy,
+				onSelect: (selectedFormatIds) =>
+					setFormatStatus(selectedFormatIds as Id<'emailFormats'>[], 'paused')
+			},
+			{
+				label: 'Delete',
+				ariaLabel: 'Delete selected email formats',
+				intent: 'destructive',
+				disabled: areAnyBusy,
+				onSelect: (selectedFormatIds) =>
+					deleteFormats(selectedFormatIds as Id<'emailFormats'>[])
+			}
+		]}
+		rowActionsAriaLabel="Email format actions"
+	>
+		{#snippet rowCells(item)}
+			<EmailFormatListRow {item} />
+		{/snippet}
+	</SelectableList>
 
 	{#snippet footer()}
-		{#if listState === 'ready'}
-			<InfoBar label="Next steps:">
-				Click an email format to set its rules and configure which team members should receive it
-			</InfoBar>
-		{/if}
+		<InfoBar label="Next steps:">
+			Click an email format to set its rules and configure which team members should receive it
+		</InfoBar>
 	{/snippet}
 </ListRoutePage>

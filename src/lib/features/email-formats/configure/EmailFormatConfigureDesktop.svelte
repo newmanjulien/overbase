@@ -49,7 +49,7 @@
 		contentVariables,
 		dragCoordinator,
 		loadState,
-		dataSourceControls = [],
+		dataSourceActions = [],
 		ruleInfoCard,
 		rulesEditPolicy,
 		onFeedbackChange,
@@ -135,7 +135,7 @@
 						<EmailFormatRulesPanel
 							rules={configureState.rulesDraft}
 							editPolicy={rulesEditPolicy}
-							{dataSourceControls}
+							{dataSourceActions}
 							{ruleInfoCard}
 							canSave={configureState.canSaveRules}
 							conflict={configureState.rulesConflict}

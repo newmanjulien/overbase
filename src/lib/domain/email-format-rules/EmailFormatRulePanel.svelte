@@ -8,7 +8,7 @@
 	import type {
 		EmailFormatRule,
 		EmailFormatRuleDataSourceAction,
-		EmailFormatRuleDataSourceControl
+		EmailFormatRuleDataSourceButtonAction
 	} from './types';
 
 	type Props = {
@@ -17,8 +17,8 @@
 		canSave?: boolean;
 		onSave?: () => void;
 		onLinkDataSources?: (rule: EmailFormatRule) => void;
-		defaultDataSourceAction?: EmailFormatRuleDataSourceAction;
-		ruleDataSourceControls?: readonly EmailFormatRuleDataSourceControl[];
+		defaultDataSourceAction?: EmailFormatRuleDataSourceButtonAction;
+		ruleDataSourceActions?: readonly EmailFormatRuleDataSourceAction[];
 		infoCard?: {
 			label: string;
 			content: InlineTextContent;
@@ -33,15 +33,15 @@
 		canSave = false,
 		onSave,
 		onLinkDataSources,
-		defaultDataSourceAction = { label: 'Link data' },
-		ruleDataSourceControls = [],
+		defaultDataSourceAction = { label: 'Link data source' },
+		ruleDataSourceActions = [],
 		infoCard,
 		canEditRuleText = true,
 		canEditRuleList = true
 	}: Props = $props();
 
-	const ruleDataSourceControlsByRuleId = $derived(
-		new Map(ruleDataSourceControls.map((control) => [control.ruleId, control]))
+	const ruleDataSourceActionsByRuleId = $derived(
+		new Map(ruleDataSourceActions.map((action) => [action.ruleId, action]))
 	);
 
 	function updateRule(ruleId: string, patch: Partial<EmailFormatRule>) {
@@ -74,16 +74,16 @@
 		]);
 	}
 
-	function getRuleDataSourceAction(rule: EmailFormatRule): EmailFormatRuleDataSourceAction {
-		const control = ruleDataSourceControlsByRuleId.get(rule.id);
+	function getRuleDataSourceButtonAction(rule: EmailFormatRule): EmailFormatRuleDataSourceButtonAction {
+		const action = ruleDataSourceActionsByRuleId.get(rule.id);
 
-		return control
-			? { label: control.actionLabel, disabled: control.disabled }
+		return action
+			? { label: action.label, disabled: action.disabled }
 			: defaultDataSourceAction;
 	}
 
 	function linkRuleDataSources(rule: EmailFormatRule) {
-		if (getRuleDataSourceAction(rule).disabled) {
+		if (getRuleDataSourceButtonAction(rule).disabled) {
 			return;
 		}
 
@@ -109,7 +109,7 @@
 			<div class="space-y-3">
 				<div class="space-y-3.5">
 					{#each rules as rule (rule.id)}
-						{@const dataSourceAction = getRuleDataSourceAction(rule)}
+						{@const dataSourceAction = getRuleDataSourceButtonAction(rule)}
 						<section class="overflow-hidden rounded-sm border border-stone-200/60 bg-white">
 							<div class="px-3 py-3">
 								<div class="flex items-start gap-2">

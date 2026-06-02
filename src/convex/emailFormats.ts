@@ -24,10 +24,10 @@ import {
 	collectEmailFormatExternalDataLinks,
 	getRequiredDataSourceRequirementForRule,
 	getEmailFormatActivationState,
-	getEmailFormatExternalDataState,
+	getEmailFormatDataSourceLinkState,
 	getInitialRulesForEmailFormatSpec,
 	getLinkedinContactsCreateLinkForEmailFormatSpec,
-	getRuleDataSourceControls,
+	getRuleDataSourceActions,
 	requireEmailFormatSpecForFormat
 } from '../backend/email-formats/activation';
 import {
@@ -306,7 +306,7 @@ export const getEmailFormatConfiguration = query({
 				.collect()
 		]);
 		const formatSpec = requireEmailFormatSpecForFormat(format);
-		const externalDataState = await getEmailFormatExternalDataState(
+		const dataSourceLinkState = await getEmailFormatDataSourceLinkState(
 			ctx,
 			workspace._id,
 			format._id
@@ -315,7 +315,7 @@ export const getEmailFormatConfiguration = query({
 			ctx,
 			workspace._id,
 			format,
-			{ externalData: externalDataState }
+			{ dataSourceLinkState }
 		);
 
 		return {
@@ -349,7 +349,7 @@ export const getEmailFormatConfiguration = query({
 				variables: formatSpec.variables,
 				contentEditPolicy: formatSpec.contentEditPolicy,
 				rulesEditPolicy: formatSpec.rulesEditPolicy,
-				dataSourceControls: getRuleDataSourceControls(formatSpec, externalDataState),
+				dataSourceActions: getRuleDataSourceActions(formatSpec, dataSourceLinkState),
 				ruleInfoCard: formatSpec.ruleInfoCard
 			},
 			recipientPickerPeople: [

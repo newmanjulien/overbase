@@ -28,7 +28,7 @@
 	import type { ContactImport } from '$lib/features/external-data/linkedin-contacts-csv';
 	import {
 		getEmailFormatCreationDataSourceRequirement
-	} from '$shared/email-format-definitions';
+	} from '$shared/email-format-data-source-requirements';
 
 	type Props = {
 		formatStarter: FormatStarter;
@@ -63,17 +63,17 @@
 	const requiresLinkedinContactsBeforeCreate = $derived(
 		creationDataSourceRequirement?.kind === 'linkedinContacts'
 	);
-	const dataSourceControls = $derived(
-		creator.dataSourceControls
-			.filter((control) => control.ruleId === creationDataSourceRequirement?.ruleId)
-			.map((control) =>
+	const dataSourceActions = $derived(
+		creator.dataSourceActions
+			.filter((action) => action.ruleId === creationDataSourceRequirement?.ruleId)
+			.map((action) =>
 				linkedinContactsImport && creationDataSourceRequirement
 					? {
-							...control,
-							actionLabel: creationDataSourceRequirement.linkedLabel,
+							...action,
+							label: creationDataSourceRequirement.linkedLabel,
 							disabled: true
 						}
-					: control
+					: action
 			)
 	);
 	const createFormatPrerequisiteHint = $derived(
@@ -233,7 +233,7 @@
 						onLinkDataSources={creationDataSourceRequirement
 							? openLinkedinContactsModal
 							: undefined}
-						ruleDataSourceControls={dataSourceControls}
+						ruleDataSourceActions={dataSourceActions}
 						infoCard={formatStarter.ruleInfoCard}
 						canEditRuleText={selectedFormatSpec?.rulesEditPolicy.text ?? false}
 						canEditRuleList={selectedFormatSpec?.rulesEditPolicy.list ?? false}
@@ -320,7 +320,7 @@
 								onLinkDataSources={creationDataSourceRequirement
 									? openLinkedinContactsModal
 									: undefined}
-								ruleDataSourceControls={dataSourceControls}
+								ruleDataSourceActions={dataSourceActions}
 								infoCard={formatStarter.ruleInfoCard}
 								canEditRuleText={selectedFormatSpec?.rulesEditPolicy.text ?? false}
 								canEditRuleList={selectedFormatSpec?.rulesEditPolicy.list ?? false}

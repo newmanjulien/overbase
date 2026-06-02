@@ -3,9 +3,9 @@ import type { FormatVariableDragCoordinator } from '$lib/features/format-starter
 import type {
 	EmailFormatContentEditPolicy,
 	EmailFormatInlineTextContent,
-	EmailFormatRuleDataSourceControl,
 	EmailFormatRulesEditPolicy
 } from '$shared/email-format-definitions';
+import type { EmailFormatRuleDataSourceAction } from '$shared/email-format-data-source-actions';
 import type { EmailFormatConfigureState } from './email-format-configure-state.svelte';
 import type {
 	EmailFormatConfigureLoadState,
@@ -25,7 +25,7 @@ export type EmailFormatConfigureSharedProps = {
 	configureState: EmailFormatConfigureState;
 	dragCoordinator: FormatVariableDragCoordinator;
 	loadState: EmailFormatConfigureLoadState;
-	dataSourceControls?: readonly EmailFormatRuleDataSourceControl[];
+	dataSourceActions?: readonly EmailFormatRuleDataSourceAction[];
 	ruleInfoCard: {
 		label: string;
 		content: EmailFormatInlineTextContent;

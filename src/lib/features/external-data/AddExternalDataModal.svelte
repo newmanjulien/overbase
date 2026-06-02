@@ -8,6 +8,7 @@
 	import BuildingsIcon from 'phosphor-svelte/lib/BuildingsIcon';
 	import ChartLineUpIcon from 'phosphor-svelte/lib/ChartLineUpIcon';
 	import IdentificationBadgeIcon from 'phosphor-svelte/lib/IdentificationBadgeIcon';
+	import ShieldCheckIcon from 'phosphor-svelte/lib/ShieldCheckIcon';
 	import StackSimpleIcon from 'phosphor-svelte/lib/StackSimpleIcon';
 
 	type Props = {
@@ -63,7 +64,10 @@
 			<TallModalFeatureGrid features={externalDataCategories} />
 		</div>
 
-		<TallModalCallout text="Connect any of your external data sources quickly and securely" />
+		<TallModalCallout
+			icon={ShieldCheckIcon}
+			text="Connect any of your external data sources quickly and securely"
+		/>
 	</div>
 
 	{#snippet footer()}

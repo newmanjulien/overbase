@@ -7,8 +7,16 @@
 		normalizeCreateFormatsModeFilter,
 		type CreateFormatsModeFilterId
 	} from '$lib/app/app-links';
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import { InfoBar } from '$lib/ui';
-	import { ListContentState, ListPage, ListToolbar } from '$lib/patterns/list-page';
+	import {
+		ListContentState,
+		ListPage,
+		ListToolbar,
+		ListNoResultsState,
+		type EmptyListStateConfig,
+		type NoResultsListStateConfig
+	} from '$lib/patterns/list-page';
 	import type { FormatStarterGalleryEntry } from '$lib/features/format-starters/catalog';
 	import FormatStarterCard from './FormatStarterCard.svelte';
 
@@ -27,7 +35,7 @@
 		all: {
 			label: 'All formats',
 			infoLabel: 'Tip:',
-			infoText: 'These are emails your team receives, not your clients'
+			infoText: "You're creating emails that your team will receive, not clients"
 		},
 		'internal-data': {
 			label: 'Internal data',
@@ -53,6 +61,18 @@
 	}));
 	const selectedModeFilterContent = $derived(modeFilterContent[selectedModeFilter]);
 	const filteredFormatStarters = $derived(formatStarters.filter(matchesFormatStarterFilters));
+	const totalRecords = $derived(formatStarters.length);
+	const visibleRecords = $derived(filteredFormatStarters.length);
+	const isQueryActive = $derived(Boolean(searchQuery.trim()) || selectedModeFilter !== 'all');
+	const emptyListState = {
+		icon: APP_ROUTE_REGISTRY['create-formats'].icon,
+		title: 'No formats available',
+		description: 'Create a format from one of the available starting points.'
+	} satisfies EmptyListStateConfig;
+	const noResultsState = {
+		title: 'No matching formats',
+		description: 'Try a different search term or starter name'
+	} satisfies NoResultsListStateConfig;
 
 	function normalizeSearchText(value: string) {
 		return value.trim().toLowerCase();
@@ -108,10 +128,20 @@
 		/>
 	{/snippet}
 
-	{#if formatStarters.length === 0}
+	{#if totalRecords === 0 && isQueryActive}
+		<ListNoResultsState
+			empty={emptyListState}
+			{...noResultsState}
+			class="rounded-sm border border-stone-200/70 bg-white"
+		/>
+	{:else if totalRecords === 0}
 		<ListContentState kind="empty" message="No formats available." class="rounded-sm border" />
-	{:else if filteredFormatStarters.length === 0}
-		<ListContentState kind="empty" message="No matching formats." class="rounded-sm border" />
+	{:else if visibleRecords === 0}
+		<ListNoResultsState
+			empty={emptyListState}
+			{...noResultsState}
+			class="rounded-sm border border-stone-200/70 bg-white"
+		/>
 	{:else}
 		<div class="grid grid-cols-2 gap-x-3 gap-y-4 lg:grid-cols-3 xl:grid-cols-4">
 			{#each filteredFormatStarters as formatStarter (formatStarter.slug)}
@@ -121,8 +151,10 @@
 	{/if}
 
 	{#snippet footer()}
-		<InfoBar label={selectedModeFilterContent.infoLabel}>
-			{selectedModeFilterContent.infoText}
-		</InfoBar>
+		{#if totalRecords > 0}
+			<InfoBar label={selectedModeFilterContent.infoLabel}>
+				{selectedModeFilterContent.infoText}
+			</InfoBar>
+		{/if}
 	{/snippet}
 </ListPage>

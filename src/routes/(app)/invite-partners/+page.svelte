@@ -4,12 +4,15 @@
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
 	let modalOpen = $state(false);
+	let searchQuery = $state('');
 </script>
 
 <ListRoutePage
 	toolbar={{
 		searchPlaceholder: 'Search invitations...',
 		searchAriaLabel: 'Search invitations',
+		searchValue: searchQuery,
+		onSearchValueChange: (value) => (searchQuery = value),
 		filter: { label: 'All statuses', selectedId: 'all', options: [{ id: 'all', label: 'All statuses' }], onSelect: () => {} },
 		actionLabel: 'Invite partners',
 		onAction: () => (modalOpen = true)
@@ -24,6 +27,14 @@
 		actionLabel: 'Invite partners',
 		onAction: () => (modalOpen = true)
 	}}
+	noResults={{
+		title: 'No matching invitations',
+		description: 'Try a different search term or invitation status'
+	}}
+	status="ready"
+	totalRecords={0}
+	visibleRecords={0}
+	isQueryActive={Boolean(searchQuery.trim())}
 />
 
 <AddInvitePartnerModal open={modalOpen} onClose={() => (modalOpen = false)} />

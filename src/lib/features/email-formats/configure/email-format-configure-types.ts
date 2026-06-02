@@ -5,10 +5,10 @@ import type { FormatEmailContent } from '$lib/features/format-starters/domain';
 import type {
 	EmailFormatContentEditPolicy,
 	EmailFormatInlineTextContent,
-	EmailFormatRuleDataSourceControl,
 	EmailFormatRulesEditPolicy,
 	EmailFormatVariableDefinition
 } from '$shared/email-format-definitions';
+import type { EmailFormatRuleDataSourceAction } from '$shared/email-format-data-source-actions';
 
 export type EmailFormatRecipientRef =
 	| {
@@ -39,7 +39,7 @@ export type EmailFormatDefinitionConfigure = {
 	variables: readonly EmailFormatVariableDefinition[];
 	contentEditPolicy: EmailFormatContentEditPolicy;
 	rulesEditPolicy: EmailFormatRulesEditPolicy;
-	dataSourceControls: EmailFormatRuleDataSourceControl[];
+	dataSourceActions: EmailFormatRuleDataSourceAction[];
 	ruleInfoCard: {
 		label: string;
 		content: EmailFormatInlineTextContent;

@@ -2,12 +2,16 @@
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import { ListRoutePage } from '$lib/patterns/list-page';
 	import { InfoBar } from '$lib/ui';
+
+	let searchQuery = $state('');
 </script>
 
 <ListRoutePage
 	toolbar={{
 		searchPlaceholder: 'Search team email formats...',
 		searchAriaLabel: 'Search team email formats',
+		searchValue: searchQuery,
+		onSearchValueChange: (value) => (searchQuery = value),
 		filter: { label: 'All team members', selectedId: 'all', options: [{ id: 'all', label: 'All team members' }], onSelect: () => {} }
 	}}
 	empty={{
@@ -16,6 +20,14 @@
 		description: 'Manage the email formats that your team created for themselves.',
 		learnMoreLabel: 'Learn more'
 	}}
+	noResults={{
+		title: 'No matching team email formats',
+		description: 'Try a different search term or team member'
+	}}
+	status="ready"
+	totalRecords={0}
+	visibleRecords={0}
+	isQueryActive={Boolean(searchQuery.trim())}
 >
 	{#snippet footer()}
 		<InfoBar label="Next steps:">

@@ -1,3 +1,8 @@
+import {
+	isEmailFormatDataSourceRequirementRequiredAt,
+	type EmailFormatDataSourceRequirement
+} from './email-format-data-source-requirements';
+
 export type EmailFormatDataMode = 'internal-data' | 'public-data';
 
 export type EmailFormatVariableDefinition = {
@@ -24,21 +29,6 @@ export type EmailFormatRule = {
 	text: string;
 };
 
-export type EmailFormatRuleDataSourceAction = {
-	label: string;
-	disabled?: boolean;
-};
-
-export type EmailFormatDataSourceRequirement = {
-	id: string;
-	kind: 'linkedinContacts';
-	ruleId: string;
-	requiredAt: 'creation' | 'activation';
-	attachMode: 'upload-new' | 'link-existing';
-	actionLabel: string;
-	linkedLabel: string;
-};
-
 export type EmailFormatActivationRequirement =
 	| {
 			kind: 'recipients';
@@ -57,7 +47,7 @@ export type EmailFormatVariant = {
 	contentEditPolicy?: EmailFormatContentEditPolicy;
 	rulesEditPolicy?: EmailFormatRulesEditPolicy;
 	initialRules?: readonly EmailFormatRule[];
-	dataSourceRequirements?: readonly EmailFormatDataSourceRequirement[];
+	dataSourceRequirements: readonly EmailFormatDataSourceRequirement[];
 	ruleInfoCard?: {
 		label: string;
 		content: EmailFormatInlineTextContent;
@@ -79,14 +69,6 @@ export type EmailFormatSpec = {
 		label: string;
 		content: EmailFormatInlineTextContent;
 	} | null;
-};
-
-export type EmailFormatRuleDataSourceControl = {
-	ruleId: string;
-	kind: 'linkedinContacts';
-	attachMode: 'upload-new' | 'link-existing';
-	actionLabel: string;
-	disabled: boolean;
 };
 
 export type EmailFormatInlineTextContent = string | readonly EmailFormatInlineTextPart[];
@@ -167,13 +149,21 @@ const DEFAULT_ACTIVATION_REQUIREMENTS = [
 	{ kind: 'rules' }
 ] as const satisfies readonly EmailFormatActivationRequirement[];
 
+const LINKED_DATA_SOURCE_ACTIVATION_REQUIREMENT = {
+	id: 'linked-data-sources',
+	kind: 'linkedDataSources',
+	scope: 'format',
+	requiredAt: ['activation']
+} as const satisfies EmailFormatDataSourceRequirement;
+
 const LINKEDIN_CONTACTS_RULE_ID = 'only-rule';
 
 const RECONNECT_LINKEDIN_CONTACTS_CREATION_REQUIREMENT = {
 	id: 'linkedin-contacts',
 	kind: 'linkedinContacts',
+	scope: 'rule',
 	ruleId: LINKEDIN_CONTACTS_RULE_ID,
-	requiredAt: 'creation',
+	requiredAt: ['creation', 'activation'],
 	attachMode: 'upload-new',
 	actionLabel: 'Add LinkedIn contacts',
 	linkedLabel: 'LinkedIn contacts added'
@@ -181,7 +171,7 @@ const RECONNECT_LINKEDIN_CONTACTS_CREATION_REQUIREMENT = {
 
 const RECONNECT_LINKEDIN_CONTACTS_ACTIVATION_REQUIREMENT = {
 	...RECONNECT_LINKEDIN_CONTACTS_CREATION_REQUIREMENT,
-	requiredAt: 'activation',
+	requiredAt: ['activation'],
 	attachMode: 'link-existing'
 } as const satisfies EmailFormatDataSourceRequirement;
 
@@ -364,7 +354,8 @@ export const emailFormatDefinitionEntries = [
 				slug: 'default',
 				label: 'Client update',
 				initialRecipients: 'none',
-				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS,
+				dataSourceRequirements: [LINKED_DATA_SOURCE_ACTIVATION_REQUIREMENT]
 			}
 		]
 	},
@@ -380,7 +371,8 @@ export const emailFormatDefinitionEntries = [
 				slug: 'default',
 				label: 'Deal follow-up',
 				initialRecipients: 'none',
-				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS,
+				dataSourceRequirements: [LINKED_DATA_SOURCE_ACTIVATION_REQUIREMENT]
 			}
 		]
 	},
@@ -396,7 +388,8 @@ export const emailFormatDefinitionEntries = [
 				slug: 'default',
 				label: 'Implementation plan',
 				initialRecipients: 'none',
-				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS,
+				dataSourceRequirements: [LINKED_DATA_SOURCE_ACTIVATION_REQUIREMENT]
 			}
 		]
 	}
@@ -573,12 +566,30 @@ function validateEmailFormatVariantDataSourceRequirements(
 	definition: EmailFormatDefinition,
 	variant: EmailFormatVariant
 ) {
+	const dataSourceRequirements = variant.dataSourceRequirements;
 	const initialRuleIds = new Set((variant.initialRules ?? []).map((rule) => rule.id));
 	const requirementIds = new Set<string>();
 	const requirementRuleIds = new Set<string>();
 	let creationRequirementCount = 0;
 
-	for (const requirement of variant.dataSourceRequirements ?? []) {
+	if (dataSourceRequirements.length === 0) {
+		issues.push({
+			definitionSlug: definition.slug,
+			variantSlug: variant.slug,
+			message: 'Email format variants must define at least one data-source requirement.'
+		});
+	}
+
+	for (const requirement of dataSourceRequirements) {
+		const requirementKind = (requirement as { kind: string }).kind;
+		const requirementScope = (requirement as { scope?: string }).scope;
+		const requirementTimings = (requirement as { requiredAt?: readonly string[] }).requiredAt;
+		const requiresCreation = isEmailFormatDataSourceRequirementRequiredAt(requirement, 'creation');
+		const requiresActivation = isEmailFormatDataSourceRequirementRequiredAt(
+			requirement,
+			'activation'
+		);
+
 		if (requirementIds.has(requirement.id)) {
 			issues.push({
 				definitionSlug: definition.slug,
@@ -587,6 +598,56 @@ function validateEmailFormatVariantDataSourceRequirements(
 			});
 		}
 		requirementIds.add(requirement.id);
+
+		if (!requirement.id.trim()) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'Data-source requirements must define an id.'
+			});
+		}
+
+		if (!Array.isArray(requirementTimings) || requirementTimings.length === 0) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'Data-source requirements must define when they are required.'
+			});
+		}
+
+		if (requiresCreation) {
+			creationRequirementCount += 1;
+		}
+
+		if (requirement.kind === 'linkedDataSources') {
+			if (requirementScope !== 'format') {
+				issues.push({
+					definitionSlug: definition.slug,
+					variantSlug: variant.slug,
+					message: 'Linked data-source requirements must be format-scoped.'
+				});
+			}
+
+			if (!requiresActivation || requirement.requiredAt.length !== 1) {
+				issues.push({
+					definitionSlug: definition.slug,
+					variantSlug: variant.slug,
+					message: 'Linked data-source requirements must be required at activation.'
+				});
+			}
+			continue;
+		}
+
+		if (requirementKind !== 'linkedinContacts') {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `Email format variant uses unknown data-source requirement "${String(
+					requirementKind
+				)}".`
+			});
+			continue;
+		}
 
 		if (requirementRuleIds.has(requirement.ruleId)) {
 			issues.push({
@@ -597,25 +658,11 @@ function validateEmailFormatVariantDataSourceRequirements(
 		}
 		requirementRuleIds.add(requirement.ruleId);
 
-		if (requirement.requiredAt === 'creation') {
-			creationRequirementCount += 1;
-		}
-
-		if (!requirement.id.trim()) {
+		if (requirementScope !== 'rule') {
 			issues.push({
 				definitionSlug: definition.slug,
 				variantSlug: variant.slug,
-				message: 'Data-source requirements must define an id.'
-			});
-		}
-
-		if ((requirement as { kind: string }).kind !== 'linkedinContacts') {
-			issues.push({
-				definitionSlug: definition.slug,
-				variantSlug: variant.slug,
-				message: `Email format variant uses unknown data-source requirement "${String(
-					requirement.kind
-				)}".`
+				message: 'LinkedIn contacts requirements must be rule-scoped.'
 			});
 		}
 
@@ -637,8 +684,8 @@ function validateEmailFormatVariantDataSourceRequirements(
 		}
 
 		if (
-			(requirement.requiredAt === 'creation' && requirement.attachMode !== 'upload-new') ||
-			(requirement.requiredAt === 'activation' && requirement.attachMode !== 'link-existing')
+			(requiresCreation && requirement.attachMode !== 'upload-new') ||
+			(!requiresCreation && requiresActivation && requirement.attachMode !== 'link-existing')
 		) {
 			issues.push({
 				definitionSlug: definition.slug,
@@ -749,32 +796,8 @@ export function getEmailFormatSpec(
 		rulesEditPolicy: variant.rulesEditPolicy ?? definition.rulesEditPolicy,
 		initialRecipients: variant.initialRecipients,
 		activationRequirements: variant.activationRequirements,
-		dataSourceRequirements: variant.dataSourceRequirements ?? [],
+		dataSourceRequirements: variant.dataSourceRequirements,
 		initialRules: variant.initialRules ?? [],
 		ruleInfoCard: variant.ruleInfoCard ?? definition.ruleInfoCard ?? null
 	};
-}
-
-export function getEmailFormatDataSourceRequirementForRule(
-	spec: Pick<EmailFormatSpec, 'dataSourceRequirements'>,
-	ruleId: string
-) {
-	return spec.dataSourceRequirements.find((requirement) => requirement.ruleId === ruleId) ?? null;
-}
-
-export function getEmailFormatCreationDataSourceRequirement(
-	spec: Pick<EmailFormatSpec, 'dataSourceRequirements'>
-) {
-	return (
-		spec.dataSourceRequirements.find((requirement) => requirement.requiredAt === 'creation') ??
-		null
-	);
-}
-
-export function getEmailFormatActivationDataSourceRequirements(
-	spec: Pick<EmailFormatSpec, 'dataSourceRequirements'>
-) {
-	return spec.dataSourceRequirements.filter(
-		(requirement) => requirement.requiredAt === 'activation'
-	);
 }

@@ -12,7 +12,6 @@
 	import EmailFormatHeaderActions from '$lib/features/email-formats/configure/EmailFormatHeaderActions.svelte';
 	import EmailFormatConfigureMobile from '$lib/features/email-formats/configure/EmailFormatConfigureMobile.svelte';
 	import { LinkDataSourcesModal } from '$lib/domain/email-format-rules';
-	import ReconnectLinkedinContactsModal from '$lib/features/format-starters/creator/reconnect-linkedin/ReconnectLinkedinContactsModal.svelte';
 	import {
 		createTimedNotice,
 		getActivationSuccessMessage
@@ -32,11 +31,11 @@
 		EmailFormatRule,
 		SentEmail
 	} from '$lib/features/email-formats/configure/email-format-configure-types';
-	import type { ContactImport } from '$lib/features/external-data/linkedin-contacts-csv';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { onDestroy, untrack } from 'svelte';
 	import {
-		getEmailFormatActivationMissingMessageFromError
+		getEmailFormatActivationMissingMessageFromError,
+		normalizeEmailFormatActivationMissingMessage
 	} from '$shared/email-format-activation';
 	import type { PageProps } from './$types';
 
@@ -51,7 +50,6 @@
 	const configureQuery = useQuery(api.emailFormats.getEmailFormatConfiguration, () => ({
 		emailFormatId
 	}));
-	const externalDataQuery = useQuery(api.externalData.listExternalDataSources, () => ({}));
 	let configureView = $state<EmailFormatConfigureView>('rules');
 	let actionError = $state<string | null>(null);
 	let contentError = $state<string | null>(null);
@@ -74,17 +72,14 @@
 		return configureQuery.data ? 'ready' : 'notFound';
 	});
 	const recipientPickerPeople = $derived(configureQuery.data?.recipientPickerPeople ?? []);
-	const linkedinContactsSources = $derived(
-		dataSourceController.getLinkedinContactsSources(externalDataQuery.data ?? [])
-	);
 	const emailFormatStatus = $derived(configureQuery.data?.emailFormat.status ?? null);
 	const lastActivatedAt = $derived(configureQuery.data?.emailFormat.lastActivatedAt ?? null);
 	const formatDefinition = $derived(configureQuery.data?.formatDefinition ?? null);
 	const contentVariables = $derived(formatDefinition?.variables ?? []);
 	const contentEditPolicy = $derived(formatDefinition?.contentEditPolicy ?? null);
 	const rulesEditPolicy = $derived(formatDefinition?.rulesEditPolicy ?? null);
-	const dataSourceControls = $derived(formatDefinition?.dataSourceControls ?? []);
-	const hasPolicyBackedDataSourceControls = $derived(dataSourceControls.length > 0);
+	const dataSourceActions = $derived(formatDefinition?.dataSourceActions ?? []);
+	const hasPolicyBackedDataSourceActions = $derived(dataSourceActions.length > 0);
 	const ruleInfoCard = $derived(formatDefinition?.ruleInfoCard ?? null);
 	const titleEditable = $derived(Boolean(contentEditPolicy?.title));
 	const activationReadiness = $derived(
@@ -92,17 +87,19 @@
 			? (configureQuery.data?.emailFormat.activation ?? null)
 			: null
 	);
-	const activationBlockerMessage = $derived(activationReadiness?.message ?? null);
+	const activationBlockerMessage = $derived(
+		normalizeEmailFormatActivationMissingMessage(activationReadiness?.message ?? null)
+	);
 	const activationNeedsLinkedinContacts = $derived(
 		Boolean(activationReadiness?.missingRequirements.includes('linkedinContacts'))
 	);
-	const activationDataSourceControl = $derived(
+	const activationDataSourceAction = $derived(
 		activationNeedsLinkedinContacts
-			? dataSourceController.getActivationBlockerActionControl(dataSourceControls)
+			? dataSourceController.getActivationBlockerAction(dataSourceActions)
 			: null
 	);
 	const activationBlockerActionLabel = $derived(
-		activationDataSourceControl?.actionLabel ?? null
+		activationDataSourceAction?.label ?? null
 	);
 	const activationReadyMessage = $derived(
 		activationReadiness?.canActivate && lastActivatedAt === null
@@ -140,13 +137,13 @@
 		configureState,
 		dragCoordinator,
 		loadState,
-		dataSourceControls,
+		dataSourceActions,
 		ruleInfoCard,
 		rulesEditPolicy,
 		onKeepMineContent: keepMineContent,
 		onKeepMineRules: keepMineRules,
 		onKeepMineTitle: keepMineTitle,
-		onLinkRuleDataSources: hasPolicyBackedDataSourceControls
+		onLinkRuleDataSources: hasPolicyBackedDataSourceActions
 			? openRuleDataSources
 			: undefined,
 		onSaveContent: saveContent,
@@ -256,84 +253,19 @@
 
 	function openRuleDataSources(rule: EmailFormatRule) {
 		actionError = null;
-		dataSourceController.openRule(dataSourceControls, rule);
+		dataSourceController.openRule(dataSourceActions, rule);
 	}
 
 	function openActivationLinkedinContacts() {
 		actionError = null;
 		dataSourceController.openActivationBlockerAction(
-			dataSourceControls,
+			dataSourceActions,
 			configureState.savedRules
 		);
 	}
 
-	function closeLinkedinContactsModal() {
-		dataSourceController.closeUploadNewModal();
-	}
-
 	function closeLinkDataSourcesModal() {
 		dataSourceController.closeLinkExistingModal();
-	}
-
-	async function linkLinkedinContactsSourceToActiveRule(
-		externalDataSourceId: Id<'externalDataSources'>
-	) {
-		const rule = dataSourceController.activeRule;
-		const control = dataSourceController.getControl(dataSourceControls, rule?.id ?? null);
-
-		if (!rule || !control || control.attachMode !== 'link-existing' || dataSourceController.linkingSourceId) {
-			return;
-		}
-
-		dataSourceController.linkError = null;
-		dataSourceController.linkingSourceId = externalDataSourceId;
-
-		try {
-			await client.mutation(api.emailFormats.linkExternalDataSourceToEmailFormatRule, {
-				emailFormatId,
-				ruleId: rule.id,
-				externalDataSourceId
-			});
-			dataSourceController.markLinkedExistingComplete();
-		} catch (error) {
-			dataSourceController.linkError =
-				error instanceof Error ? error.message : 'Could not link LinkedIn contacts.';
-		} finally {
-			dataSourceController.linkingSourceId = null;
-		}
-	}
-
-	async function addLinkedinContactsToActiveRule(contactsImport: ContactImport) {
-		const rule = dataSourceController.activeRule;
-		const control = dataSourceController.getControl(dataSourceControls, rule?.id ?? null);
-
-		if (!rule || !control || control.attachMode !== 'upload-new' || dataSourceController.isUploading) {
-			return;
-		}
-
-		dataSourceController.contactsImport = contactsImport;
-		actionError = null;
-		dataSourceController.isUploading = true;
-
-		try {
-			await client.mutation(api.emailFormats.addLinkedinContactsSourceToEmailFormatRule, {
-				emailFormatId,
-				ruleId: rule.id,
-				externalDataImport: {
-					kind: 'linkedinContacts',
-					fileName: contactsImport.fileName,
-					contacts: contactsImport.contacts
-				}
-			});
-			dataSourceController.markUploadNewComplete();
-		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : 'Could not add LinkedIn contacts.';
-			actionError = message;
-			throw new Error(message);
-		} finally {
-			dataSourceController.isUploading = false;
-		}
 	}
 
 	async function deleteEmailFormat() {
@@ -667,26 +599,9 @@
 
 <EmailFormatConfigureMobile {...configureSharedProps} />
 
-{#if dataSourceController.uploadNewModalOpen}
-	<ReconnectLinkedinContactsModal
-		open={dataSourceController.uploadNewModalOpen}
-		contactsImport={dataSourceController.contactsImport}
-		submitting={dataSourceController.isUploading}
-		onClose={closeLinkedinContactsModal}
-		onContactsImported={addLinkedinContactsToActiveRule}
-	/>
-{:else if dataSourceController.linkExistingModalOpen}
+{#if dataSourceController.linkExistingModalOpen}
 	<LinkDataSourcesModal
 		open={dataSourceController.linkExistingModalOpen}
-		linkedinContactsSources={linkedinContactsSources}
-		linkingLinkedinContactsSourceId={dataSourceController.linkingSourceId}
-		linkError={dataSourceController.linkError}
 		onClose={closeLinkDataSourcesModal}
-		onLinkLinkedinContactsSource={dataSourceController.getControl(
-			dataSourceControls,
-			dataSourceController.activeRuleId
-		)?.attachMode === 'link-existing'
-			? linkLinkedinContactsSourceToActiveRule
-			: undefined}
 	/>
 {/if}

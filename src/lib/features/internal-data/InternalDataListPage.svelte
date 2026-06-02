@@ -37,6 +37,14 @@
 		actionLabel: 'Add internal data',
 		onAction: () => (modalOpen = true)
 	}}
+	noResults={{
+		title: 'No matching internal data sources',
+		description: 'Try a different search term or data type'
+	}}
+	status="ready"
+	totalRecords={0}
+	visibleRecords={0}
+	isQueryActive={Boolean(searchQuery.trim()) || selectedTypeFilter !== 'all'}
 />
 
 <AddInternalDataModal open={modalOpen} onClose={() => (modalOpen = false)} />

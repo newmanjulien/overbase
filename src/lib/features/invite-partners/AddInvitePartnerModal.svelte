@@ -5,6 +5,7 @@
 		TallModalCallout,
 		TallModalStepList
 	} from '$lib/ui';
+	import ShieldCheckIcon from 'phosphor-svelte/lib/ShieldCheckIcon';
 
 	type Props = {
 		open: boolean;
@@ -50,7 +51,10 @@
 			<TallModalStepList steps={invitePartnerSteps} />
 		</div>
 
-		<TallModalCallout text="Share sales data with your ecosystem partners quickly and securely" />
+		<TallModalCallout
+			icon={ShieldCheckIcon}
+			text="Share sales data with your ecosystem partners quickly and securely"
+		/>
 	</div>
 
 	{#snippet footer()}

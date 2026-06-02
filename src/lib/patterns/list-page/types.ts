@@ -52,6 +52,13 @@ export type EmptyListStateConfig = {
 	icon?: ListIcon;
 };
 
+export type NoResultsListStateConfig = {
+	title: string;
+	description: NonLinkInlineTextContent;
+};
+
+export type ListRouteStatus = 'loading' | 'error' | 'ready';
+
 export type ListRowItem = {
 	id: string;
 	href?: AppHref;

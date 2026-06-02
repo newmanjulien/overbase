@@ -1,19 +1,18 @@
 import type { Doc, Id } from '../../convex/_generated/dataModel';
 import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
 import {
-	getEmailFormatActivationDataSourceRequirements,
-	getEmailFormatCreationDataSourceRequirement,
-	getEmailFormatDataSourceRequirementForRule,
 	getEmailFormatSpec,
 	type EmailFormatRule,
-	type EmailFormatRuleDataSourceControl,
-	type EmailFormatDataSourceRequirement,
 	type EmailFormatSpec
 } from '../../shared/email-format-definitions';
+import { getEmailFormatRuleDataSourceActions } from '../../shared/email-format-data-source-actions';
 import {
-	getEmailFormatActivationReadiness,
-	type EmailFormatActivationExternalDataState
-} from '../../shared/email-format-activation';
+	getEmailFormatActivationDataSourceRequirements,
+	getEmailFormatCreationDataSourceRequirement,
+	getEmailFormatDataSourceRequirementForRule
+} from '../../shared/email-format-data-source-requirements';
+import type { EmailFormatDataSourceLinkState } from '../../shared/email-format-data-source-link-state';
+import { getEmailFormatActivationReadiness } from '../../shared/email-format-activation';
 import {
 	normalizeLinkedinContactsSource,
 	type LinkedinContactsImport,
@@ -57,11 +56,11 @@ export async function collectEmailFormatExternalDataLinks(
 		.collect();
 }
 
-export async function getEmailFormatExternalDataState(
+export async function getEmailFormatDataSourceLinkState(
 	ctx: DbCtx,
 	workspaceId: Id<'workspaces'>,
 	emailFormatId: Id<'emailFormats'>
-): Promise<EmailFormatActivationExternalDataState> {
+): Promise<EmailFormatDataSourceLinkState> {
 	const links = await collectEmailFormatExternalDataLinks(ctx, workspaceId, emailFormatId);
 	const linkedinContactsRuleIds = new Set<string>();
 
@@ -91,22 +90,23 @@ export async function getEmailFormatActivationState(
 	> &
 		StoredEmailFormatIdentity,
 	options: {
-		externalData?: EmailFormatActivationExternalDataState;
+		dataSourceLinkState?: EmailFormatDataSourceLinkState;
 	} = {}
 ) {
 	const spec = requireEmailFormatSpecForFormat(format);
-	const externalData =
-		options.externalData ?? (await getEmailFormatExternalDataState(ctx, workspaceId, format._id));
+	const dataSourceLinkState =
+		options.dataSourceLinkState ??
+		(await getEmailFormatDataSourceLinkState(ctx, workspaceId, format._id));
 
 	return {
 		spec,
-		externalData,
+		dataSourceLinkState,
 		readiness: getEmailFormatActivationReadiness({
 			recipientCount: format.recipientCount,
 			rules: format.rules,
 			requirements: spec.activationRequirements,
 			dataSourceRequirements: getEmailFormatActivationDataSourceRequirements(spec),
-			externalData
+			dataSourceLinkState
 		})
 	};
 }
@@ -122,31 +122,11 @@ export function getCreationDataSourceRequirement(spec: EmailFormatSpec) {
 	return getEmailFormatCreationDataSourceRequirement(spec);
 }
 
-export function isDataSourceRequirementLinked(
-	requirement: EmailFormatDataSourceRequirement,
-	externalData: EmailFormatActivationExternalDataState
-) {
-	switch (requirement.kind) {
-		case 'linkedinContacts':
-			return externalData.linkedinContactsRuleIds.includes(requirement.ruleId);
-	}
-}
-
-export function getRuleDataSourceControls(
+export function getRuleDataSourceActions(
 	spec: EmailFormatSpec,
-	externalData: EmailFormatActivationExternalDataState
-): EmailFormatRuleDataSourceControl[] {
-	return spec.dataSourceRequirements.map((requirement) => {
-		const linked = isDataSourceRequirementLinked(requirement, externalData);
-
-		return {
-			ruleId: requirement.ruleId,
-			kind: requirement.kind,
-			attachMode: requirement.attachMode,
-			actionLabel: linked ? requirement.linkedLabel : requirement.actionLabel,
-			disabled: linked
-		};
-	});
+	dataSourceLinkState: EmailFormatDataSourceLinkState
+) {
+	return getEmailFormatRuleDataSourceActions(spec.dataSourceRequirements, dataSourceLinkState);
 }
 
 export function getInitialRulesForEmailFormatSpec(spec: EmailFormatSpec): EmailFormatRule[] {

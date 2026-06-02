@@ -4,8 +4,12 @@ import {
 } from '$lib/features/format-starters/catalog';
 import type { Id } from '$convex/_generated/dataModel';
 import {
+	getEmailFormatRuleDataSourceActions,
+	type EmailFormatRuleDataSourceAction
+} from '$shared/email-format-data-source-actions';
+import { createEmptyEmailFormatDataSourceLinkState } from '$shared/email-format-data-source-link-state';
+import {
 	getEmailFormatSpec,
-	type EmailFormatRuleDataSourceControl,
 	type EmailFormatSpec
 } from '$shared/email-format-definitions';
 import type {
@@ -153,20 +157,17 @@ export class FormatCreatorState {
 			: null;
 	}
 
-	get dataSourceControls(): EmailFormatRuleDataSourceControl[] {
+	get dataSourceActions(): EmailFormatRuleDataSourceAction[] {
 		if (this.creator.mode !== 'public-data' || this.formatStarter.mode !== 'public-data') {
 			return [];
 		}
 
-		return (
-			this.selectedFormatSpec?.dataSourceRequirements.map((requirement) => ({
-				ruleId: requirement.ruleId,
-				kind: requirement.kind,
-				attachMode: requirement.attachMode,
-				actionLabel: requirement.actionLabel,
-				disabled: false
-			})) ?? []
-		);
+		return this.selectedFormatSpec
+			? getEmailFormatRuleDataSourceActions(
+					this.selectedFormatSpec.dataSourceRequirements,
+					createEmptyEmailFormatDataSourceLinkState()
+				)
+			: [];
 	}
 
 	get variableInsertionRequest() {

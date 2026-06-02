@@ -6,9 +6,9 @@
 	import type { EmailFormatRule } from './email-format-configure-types';
 	import type {
 		EmailFormatInlineTextContent,
-		EmailFormatRuleDataSourceControl,
 		EmailFormatRulesEditPolicy
 	} from '$shared/email-format-definitions';
+	import type { EmailFormatRuleDataSourceAction } from '$shared/email-format-data-source-actions';
 	import SectionConflictActions from './SectionConflictActions.svelte';
 
 	const EDIT_ALL_RULE_FIELDS = {
@@ -23,7 +23,7 @@
 		canSave: boolean;
 		conflict: boolean;
 		isSaving?: boolean;
-		dataSourceControls?: readonly EmailFormatRuleDataSourceControl[];
+		dataSourceActions?: readonly EmailFormatRuleDataSourceAction[];
 		ruleInfoCard?: {
 			label: string;
 			content: EmailFormatInlineTextContent;
@@ -41,7 +41,7 @@
 		canSave,
 		conflict,
 		isSaving = false,
-		dataSourceControls = [],
+		dataSourceActions = [],
 		ruleInfoCard = null,
 		onLinkDataSources,
 		onRulesChange,
@@ -72,7 +72,7 @@
 			onLinkDataSources={activeEditPolicy.dataSources
 				? linkRuleDataSources
 				: undefined}
-			ruleDataSourceControls={dataSourceControls}
+			ruleDataSourceActions={dataSourceActions}
 			infoCard={ruleInfoCard ?? undefined}
 			canEditRuleText={activeEditPolicy.text}
 			canEditRuleList={activeEditPolicy.list}

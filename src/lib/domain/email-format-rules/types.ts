@@ -3,9 +3,9 @@ export type EmailFormatRule = {
 	text: string;
 };
 
-export type EmailFormatRuleDataSourceAction = {
+export type EmailFormatRuleDataSourceButtonAction = {
 	label: string;
 	disabled?: boolean;
 };
 
-export type { EmailFormatRuleDataSourceControl } from '$shared/email-format-definitions';
+export type { EmailFormatRuleDataSourceAction } from '$shared/email-format-data-source-actions';
