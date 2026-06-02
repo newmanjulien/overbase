@@ -11,8 +11,7 @@
 		searchPlaceholder: 'Search team email formats...',
 		searchAriaLabel: 'Search team email formats',
 		searchValue: searchQuery,
-		onSearchValueChange: (value) => (searchQuery = value),
-		filter: { label: 'All team members', selectedId: 'all', options: [{ id: 'all', label: 'All team members' }], onSelect: () => {} }
+		onSearchValueChange: (value) => (searchQuery = value)
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['team-email-formats'].icon,

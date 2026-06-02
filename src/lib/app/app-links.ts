@@ -89,7 +89,7 @@ export type AuthEntryHref = AuthEntryPathname | `${AuthEntryPathname}?${string}`
 export type CreateFormatsModeFilterId = 'all' | 'internal-data' | 'public-data';
 export type CreateFormatsGalleryHref =
 	| typeof APP_LINKS.createFormats.pathname
-	| `${typeof APP_LINKS.createFormats.pathname}?mode=${Exclude<CreateFormatsModeFilterId, 'all'>}`;
+	| `${typeof APP_LINKS.createFormats.pathname}?${string}`;
 export type CreateFormatsViewportFallbackPathname =
 	| typeof APP_LINKS.emailFormats.pathname
 	| typeof APP_LINKS.createFormats.pathname;
@@ -123,12 +123,30 @@ export function normalizeCreateFormatsModeFilter(
 	return value === 'internal-data' || value === 'public-data' ? value : 'all';
 }
 
-export function createFormatsGalleryHref(mode: CreateFormatsModeFilterId): CreateFormatsGalleryHref {
-	if (mode === 'all') {
+export function createFormatsGalleryHref({
+	mode = 'all',
+	industry = 'all'
+}: {
+	mode?: CreateFormatsModeFilterId;
+	industry?: string;
+} = {}): CreateFormatsGalleryHref {
+	const searchParams = new URLSearchParams();
+
+	if (mode !== 'all') {
+		searchParams.set('mode', mode);
+	}
+
+	if (industry !== 'all') {
+		searchParams.set('industry', industry);
+	}
+
+	const query = searchParams.toString();
+
+	if (!query) {
 		return APP_LINKS.createFormats.pathname;
 	}
 
-	return `${APP_LINKS.createFormats.pathname}?mode=${mode}`;
+	return `${APP_LINKS.createFormats.pathname}?${query}`;
 }
 
 export function emailFormatPathname(emailFormatId: string): EmailFormatPathname {

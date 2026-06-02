@@ -11,8 +11,7 @@
 		searchPlaceholder: 'Search partners...',
 		searchAriaLabel: 'Search partners',
 		searchValue: searchQuery,
-		onSearchValueChange: (value) => (searchQuery = value),
-		filter: { label: 'All partners', selectedId: 'all', options: [{ id: 'all', label: 'All partners' }], onSelect: () => {} }
+		onSearchValueChange: (value) => (searchQuery = value)
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['manage-partners'].icon,

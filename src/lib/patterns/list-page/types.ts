@@ -9,16 +9,17 @@ export type ListToolbarConfig = {
 	searchAriaLabel?: string;
 	searchValue?: string;
 	onSearchValueChange?: (value: string) => void;
-	filter?: ListFilterConfig;
+	filters?: readonly ListFilterConfig[];
 	actionLabel?: string;
 	onAction?: () => void;
 };
 
 export type ListFilterConfig = {
+	id: string;
 	label: string;
 	selectedId: string;
 	width?: 'default' | 'wide';
-	options: ListFilterOption[];
+	options: readonly ListFilterOption[];
 	onSelect: (optionId: string) => void;
 };
 

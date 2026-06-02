@@ -244,12 +244,15 @@
 		searchAriaLabel: 'Search email formats',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
-		filter: {
-			label: selectedStatusFilterLabel,
-			selectedId: selectedStatusFilter,
-			options: statusFilterOptions,
-			onSelect: setSelectedStatusFilter
-		}
+		filters: [
+			{
+				id: 'status',
+				label: selectedStatusFilterLabel,
+				selectedId: selectedStatusFilter,
+				options: statusFilterOptions,
+				onSelect: setSelectedStatusFilter
+			}
+		]
 	}}
 	empty={emptyListState}
 	noResults={noResultsState}

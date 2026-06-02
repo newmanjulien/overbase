@@ -13,7 +13,6 @@
 		searchAriaLabel: 'Search invitations',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
-		filter: { label: 'All statuses', selectedId: 'all', options: [{ id: 'all', label: 'All statuses' }], onSelect: () => {} },
 		actionLabel: 'Invite partners',
 		onAction: () => (modalOpen = true)
 	}}

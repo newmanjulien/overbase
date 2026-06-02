@@ -228,16 +228,19 @@
 		searchAriaLabel: 'Search external data sources',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
-		filter: {
-			label: selectedTypeFilterLabel,
-			selectedId: selectedTypeFilter,
-			options: typeFilterOptions,
-			onSelect: (optionId) => {
-				if (optionId === 'all' || optionId === 'linkedin-contacts') {
-					selectedTypeFilter = optionId;
+		filters: [
+			{
+				id: 'type',
+				label: selectedTypeFilterLabel,
+				selectedId: selectedTypeFilter,
+				options: typeFilterOptions,
+				onSelect: (optionId) => {
+					if (optionId === 'all' || optionId === 'linkedin-contacts') {
+						selectedTypeFilter = optionId;
+					}
 				}
 			}
-		},
+		],
 		actionLabel: 'Add external data',
 		onAction: () => (modalOpen = true)
 	}}

@@ -5,12 +5,6 @@
 
 	let modalOpen = $state(false);
 	let searchQuery = $state('');
-	let selectedTypeFilter = $state('all');
-
-	const typeFilterOptions = [{ id: 'all', label: 'All types' }];
-	const selectedTypeFilterLabel = $derived(
-		typeFilterOptions.find((option) => option.id === selectedTypeFilter)?.label ?? 'All types'
-	);
 </script>
 
 <ListRoutePage
@@ -19,12 +13,6 @@
 		searchAriaLabel: 'Search internal data sources',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
-		filter: {
-			label: selectedTypeFilterLabel,
-			selectedId: selectedTypeFilter,
-			options: typeFilterOptions,
-			onSelect: (optionId) => (selectedTypeFilter = optionId)
-		},
 		actionLabel: 'Add internal data',
 		onAction: () => (modalOpen = true)
 	}}
@@ -44,7 +32,7 @@
 	status="ready"
 	totalRecords={0}
 	visibleRecords={0}
-	isQueryActive={Boolean(searchQuery.trim()) || selectedTypeFilter !== 'all'}
+	isQueryActive={Boolean(searchQuery.trim())}
 />
 
 <AddInternalDataModal open={modalOpen} onClose={() => (modalOpen = false)} />

@@ -292,13 +292,16 @@
 		searchAriaLabel: 'Search team members',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
-		filter: {
-			label: selectedRoleFilterLabel,
-			selectedId: selectedRoleFilter,
-			width: 'wide',
-			options: roleFilterOptions,
-			onSelect: (optionId) => (selectedRoleFilter = optionId)
-		},
+		filters: [
+			{
+				id: 'role',
+				label: selectedRoleFilterLabel,
+				selectedId: selectedRoleFilter,
+				width: 'wide',
+				options: roleFilterOptions,
+				onSelect: (optionId) => (selectedRoleFilter = optionId)
+			}
+		],
 		actionLabel: 'Add team members',
 		onAction: openModal
 	}}

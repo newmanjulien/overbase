@@ -60,6 +60,7 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
   title: "Reconnect with contacts",
   description:
     "Find news that lets your team reconnect with their LinkedIn contacts",
+  industryTags: [],
   sampleEmail: {
     subject: "Worth reconnecting with Ajay",
     paragraphs: [

@@ -6,6 +6,7 @@ import {
 import { hasInlineTextContent } from '$lib/domain/inline-text';
 import { getEmailFormatDefinition } from '$shared/email-format-definitions';
 import type { FormatStarter } from './types';
+import { isFormatStarterIndustryTagId } from './industry-tags';
 
 export type FormatStarterCatalogValidationIssue = {
 	formatStarterSlug?: string;
@@ -20,6 +21,14 @@ export function validateFormatStarterCatalog(
 	const modeSortOrders = new Map<FormatStarter['mode'], Map<number, string>>();
 
 	for (const entry of entries) {
+		if (!isFormatStarterDataMode(entry.mode)) {
+			issues.push({
+				formatStarterSlug: entry.slug,
+				message: 'Format starter mode must be "internal-data" or "public-data".'
+			});
+			continue;
+		}
+
 		if (formatStarterSlugs.has(entry.slug)) {
 			issues.push({
 				formatStarterSlug: entry.slug,
@@ -51,6 +60,17 @@ function validateFormatStarterEntry(
 	issues: FormatStarterCatalogValidationIssue[],
 	entry: FormatStarter
 ) {
+	addDuplicateIdIssues(issues, entry.slug, 'industry tag', entry.industryTags);
+
+	for (const industryTag of entry.industryTags) {
+		if (!isFormatStarterIndustryTagId(industryTag)) {
+			issues.push({
+				formatStarterSlug: entry.slug,
+				message: `References unknown industry tag "${industryTag}".`
+			});
+		}
+	}
+
 	addDuplicateIdIssues(
 		issues,
 		entry.slug,
@@ -132,6 +152,10 @@ function validateFormatStarterEntry(
 			}
 		}
 	}
+}
+
+function isFormatStarterDataMode(value: string): value is FormatStarter['mode'] {
+	return value === 'internal-data' || value === 'public-data';
 }
 
 function validateFormatStarterSelection(

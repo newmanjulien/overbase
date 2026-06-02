@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
@@ -15,10 +14,30 @@
 		ListToolbar,
 		ListNoResultsState,
 		type EmptyListStateConfig,
+		type ListFilterConfig,
 		type NoResultsListStateConfig
 	} from '$lib/patterns/list-page';
-	import type { FormatStarterGalleryEntry } from '$lib/features/format-starters/catalog';
+	import {
+		FORMAT_STARTER_INDUSTRY_TAGS,
+		isFormatStarterIndustryTagId,
+		type FormatStarterGalleryEntry,
+		type FormatStarterIndustryTagId
+	} from '$lib/features/format-starters/catalog';
 	import FormatStarterCard from './FormatStarterCard.svelte';
+
+	type CreateFormatsIndustryFilterId = 'all' | FormatStarterIndustryTagId;
+
+	type CreateFormatsDataTypeFilterOption = {
+		id: CreateFormatsModeFilterId;
+		label: string;
+		infoLabel: string;
+		infoText: string;
+	};
+
+	type CreateFormatsIndustryFilterOption = {
+		id: CreateFormatsIndustryFilterId;
+		label: string;
+	};
 
 	type Props = {
 		formatStarters: readonly FormatStarterGalleryEntry[];
@@ -29,41 +48,65 @@
 	const selectedModeFilter = $derived(
 		normalizeCreateFormatsModeFilter(page.url.searchParams.get('mode'))
 	);
+	const selectedIndustryFilter = $derived(
+		normalizeCreateFormatsIndustryFilter(page.url.searchParams.get('industry'))
+	);
 	const currentGalleryHref = $derived(`${page.url.pathname}${page.url.search}`);
 
-	const modeFilterContent = {
-		all: {
-			label: 'All formats',
+	const dataTypeFilterOptions = [
+		{
+			id: 'all',
+			label: 'All data types',
 			infoLabel: 'Tip:',
-			infoText: "You're creating emails that your team will receive, not clients"
+			infoText: "You're creating the format of emails your team will receive, not clients"
 		},
-		'internal-data': {
+		{
+			id: 'internal-data',
 			label: 'Internal data',
 			infoLabel: 'Internal data:',
 			infoText: 'These formats use data which you and your ecosystem partners connect'
 		},
-		'public-data': {
+		{
+			id: 'public-data',
 			label: 'Public data',
 			infoLabel: 'Public data:',
 			infoText: "These formats use public data and don't use any of your internal data"
 		}
-	} satisfies Record<
-		CreateFormatsModeFilterId,
+	] satisfies readonly CreateFormatsDataTypeFilterOption[];
+	const industryFilterOptions = [
+		{ id: 'all', label: 'All industries' },
+		...FORMAT_STARTER_INDUSTRY_TAGS
+	] satisfies readonly CreateFormatsIndustryFilterOption[];
+	const selectedDataTypeFilterOption = $derived(
+		dataTypeFilterOptions.find((option) => option.id === selectedModeFilter) ??
+			dataTypeFilterOptions[0]
+	);
+	const selectedIndustryFilterOption = $derived(
+		industryFilterOptions.find((option) => option.id === selectedIndustryFilter) ??
+			industryFilterOptions[0]
+	);
+	const galleryFilters = $derived([
 		{
-			label: string;
-			infoLabel: string;
-			infoText: string;
+			id: 'industry',
+			label: selectedIndustryFilterOption.label,
+			selectedId: selectedIndustryFilter,
+			options: industryFilterOptions,
+			onSelect: setSelectedIndustryFilter
+		},
+		{
+			id: 'data-type',
+			label: selectedDataTypeFilterOption.label,
+			selectedId: selectedModeFilter,
+			options: dataTypeFilterOptions,
+			onSelect: setSelectedModeFilter
 		}
-	>;
-	const modeFilterOptions = Object.entries(modeFilterContent).map(([id, content]) => ({
-		id,
-		label: content.label
-	}));
-	const selectedModeFilterContent = $derived(modeFilterContent[selectedModeFilter]);
+	] satisfies readonly ListFilterConfig[]);
 	const filteredFormatStarters = $derived(formatStarters.filter(matchesFormatStarterFilters));
 	const totalRecords = $derived(formatStarters.length);
 	const visibleRecords = $derived(filteredFormatStarters.length);
-	const isQueryActive = $derived(Boolean(searchQuery.trim()) || selectedModeFilter !== 'all');
+	const isQueryActive = $derived(
+		Boolean(searchQuery.trim()) || selectedModeFilter !== 'all' || selectedIndustryFilter !== 'all'
+	);
 	const emptyListState = {
 		icon: APP_ROUTE_REGISTRY['create-formats'].icon,
 		title: 'No formats available',
@@ -83,20 +126,60 @@
 			return;
 		}
 
-		const href = createFormatsGalleryHref(optionId);
+		const href = createFormatsGalleryHref({
+			mode: optionId,
+			industry: selectedIndustryFilter
+		});
 
+		updateGalleryHref(href);
+	}
+
+	function setSelectedIndustryFilter(optionId: string) {
+		if (!isFormatStarterIndustryFilterId(optionId)) {
+			return;
+		}
+
+		const href = createFormatsGalleryHref({
+			mode: selectedModeFilter,
+			industry: optionId
+		});
+
+		updateGalleryHref(href);
+	}
+
+	function updateGalleryHref(href: string) {
 		if (href === currentGalleryHref) {
 			return;
 		}
 
-		void goto(resolve(href), {
+		void goto(href, {
 			keepFocus: true,
 			noScroll: true
 		});
 	}
 
 	function isFormatStarterDataModeFilterId(optionId: string): optionId is CreateFormatsModeFilterId {
-		return optionId in modeFilterContent;
+		return dataTypeFilterOptions.some((option) => option.id === optionId);
+	}
+
+	function isFormatStarterIndustryFilterId(
+		optionId: string
+	): optionId is CreateFormatsIndustryFilterId {
+		return optionId === 'all' || isFormatStarterIndustryTagId(optionId);
+	}
+
+	function normalizeCreateFormatsIndustryFilter(
+		value: string | null | undefined
+	): CreateFormatsIndustryFilterId {
+		return value && isFormatStarterIndustryTagId(value) ? value : 'all';
+	}
+
+	function matchesIndustryFilter(formatStarter: FormatStarterGalleryEntry) {
+		return (
+			selectedIndustryFilter === 'all' ||
+			formatStarter.industryTags.length === 0 ||
+			formatStarter.industryTags.includes(selectedIndustryFilter)
+		);
 	}
 
 	function matchesFormatStarterFilters(formatStarter: FormatStarterGalleryEntry) {
@@ -104,6 +187,7 @@
 
 		return (
 			(selectedModeFilter === 'all' || formatStarter.mode === selectedModeFilter) &&
+			matchesIndustryFilter(formatStarter) &&
 			(!normalizedQuery ||
 				[formatStarter.title, formatStarter.description].some((value) =>
 					value.toLowerCase().includes(normalizedQuery)
@@ -119,12 +203,7 @@
 			searchAriaLabel="Search formats"
 			searchValue={searchQuery}
 			onSearchValueChange={(value) => (searchQuery = value)}
-			filter={{
-				label: selectedModeFilterContent.label,
-				selectedId: selectedModeFilter,
-				options: modeFilterOptions,
-				onSelect: setSelectedModeFilter
-			}}
+			filters={galleryFilters}
 		/>
 	{/snippet}
 
@@ -152,8 +231,8 @@
 
 	{#snippet footer()}
 		{#if totalRecords > 0}
-			<InfoBar label={selectedModeFilterContent.infoLabel}>
-				{selectedModeFilterContent.infoText}
+			<InfoBar label={selectedDataTypeFilterOption.infoLabel}>
+				{selectedDataTypeFilterOption.infoText}
 			</InfoBar>
 		{/if}
 	{/snippet}
