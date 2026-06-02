@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
 	import { fly } from 'svelte/transition';
 	import { cn } from '$lib/ui/cn';
 	import {
@@ -14,10 +15,18 @@
 		footerItems: readonly NavFooterItem[];
 		currentPathname: string;
 		expanded: boolean;
+		showPublicDataCard: boolean;
 		onRouteHover?: (route: NavRouteItem) => void;
 	};
 
-	let { sections, footerItems, currentPathname, expanded, onRouteHover }: Props = $props();
+	let {
+		sections,
+		footerItems,
+		currentPathname,
+		expanded,
+		showPublicDataCard,
+		onRouteHover
+	}: Props = $props();
 
 	function shouldShowCollapsedDivider(sectionIndex: number) {
 		if (expanded) {
@@ -98,6 +107,26 @@
 
 	{#if footerItems.length}
 		<div class={cn('mt-auto flex flex-col pt-3', expanded ? '' : 'pb-1')}>
+			{#if expanded && showPublicDataCard}
+				<a
+					href={`${resolve('/create-formats')}?mode=public-data`}
+					class="group mb-3 flex items-start justify-between gap-2 rounded-sm bg-stone-900 px-3 py-2.5 text-left transition-colors hover:bg-stone-800 focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:outline-none"
+				>
+					<span class="min-w-0">
+						<p class="text-xs leading-4 text-white">Try with public data</p>
+						<p class="mt-1 text-[11px] text-stone-300">
+							See Overbase in action using only public data
+						</p>
+					</span>
+					<span
+						class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-stone-200 transition-transform group-hover:translate-x-0.5"
+						aria-hidden="true"
+					>
+						<ArrowRightIcon size={12} weight="regular" />
+					</span>
+				</a>
+			{/if}
+
 			<ul class="flex flex-col gap-1.5">
 				{#each footerItems as item (item.id)}
 					{@const Icon = item.icon}

@@ -8,9 +8,9 @@
 	} from '$lib/ui';
 	import {
 		linkedinContactsCsvAccept,
-		readLinkedinContactsCsvFile,
 		type ContactImport
 	} from '$lib/features/external-data/linkedin-contacts-upload';
+	import { LinkedinContactsUploadState } from '$lib/features/external-data/linkedin-contacts-upload-state.svelte';
 
 	type Props = {
 		open: boolean;
@@ -27,12 +27,9 @@
 		onClose,
 		onContactsImported
 	}: Props = $props();
-	let selectedContactCsvFile = $state<File | null>(null);
-	let parsedContactsImport = $state<ContactImport | null>(null);
-	let uploadErrorText = $state<string | null>(null);
-	let parsing = $state(false);
+	const contactsUpload = new LinkedinContactsUploadState();
 	let syncedContactsImport = $state<ContactImport | null>(null);
-	const activeContactsImport = $derived(parsedContactsImport ?? contactsImport);
+	const activeContactsImport = $derived(contactsUpload.contactsImport ?? contactsImport);
 
 	const linkedinContactSteps = [
 		{
@@ -62,27 +59,12 @@
 		syncedContactsImport = contactsImport;
 
 		if (!contactsImport) {
-			selectedContactCsvFile = null;
-			parsedContactsImport = null;
-			uploadErrorText = null;
-			parsing = false;
+			contactsUpload.reset();
 		}
 	});
 
 	async function selectContactCsvFile(file: File) {
-		selectedContactCsvFile = file;
-		uploadErrorText = null;
-		parsing = true;
-
-		try {
-			parsedContactsImport = await readLinkedinContactsCsvFile(file);
-		} catch (error) {
-			parsedContactsImport = null;
-			uploadErrorText =
-				error instanceof Error ? error.message : 'Could not read this CSV.';
-		} finally {
-			parsing = false;
-		}
+		await contactsUpload.selectFile(file);
 	}
 
 	async function addContacts() {
@@ -93,15 +75,16 @@
 		const contactsToImport = activeContactsImport;
 
 		if (!contactsToImport) {
-			uploadErrorText = 'Upload a contacts CSV first.';
+			contactsUpload.setErrorText('Upload a contacts CSV first.');
 			return;
 		}
 
 		try {
 			await onContactsImported(contactsToImport);
 		} catch (error) {
-			uploadErrorText =
-				error instanceof Error ? error.message : 'Could not add LinkedIn contacts.';
+			contactsUpload.setErrorText(
+				error instanceof Error ? error.message : 'Could not add LinkedIn contacts.'
+			);
 		}
 	}
 </script>
@@ -143,9 +126,9 @@
 				label="Upload your LinkedIn export"
 				description="Upload the Connections.csv file provided by LinkedIn"
 				accept={linkedinContactsCsvAccept}
-				disabled={parsing || submitting}
-				selectedFile={selectedContactCsvFile}
-				errorText={uploadErrorText}
+				disabled={contactsUpload.parsing || submitting}
+				selectedFile={contactsUpload.selectedFile}
+				errorText={contactsUpload.errorText}
 				onFileSelected={selectContactCsvFile}
 			/>
 			{#if activeContactsImport}
@@ -158,8 +141,8 @@
 
 	{#snippet footer()}
 		<Button variant="secondary" disabled={submitting} onclick={onClose}>Cancel</Button>
-		<Button disabled={parsing || submitting || !activeContactsImport} onclick={addContacts}>
-			{parsing ? 'Reading...' : submitting ? 'Adding...' : 'Add contacts'}
+		<Button disabled={contactsUpload.parsing || submitting || !activeContactsImport} onclick={addContacts}>
+			{contactsUpload.parsing ? 'Reading...' : submitting ? 'Adding...' : 'Add contacts'}
 		</Button>
 	{/snippet}
 </FullHeightModalShell>

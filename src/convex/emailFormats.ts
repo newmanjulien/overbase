@@ -22,18 +22,19 @@ import {
 } from '../backend/email-formats/recipients';
 import {
 	collectEmailFormatExternalDataLinks,
+	getRequiredDataSourceRequirementForRule,
 	getEmailFormatActivationState,
 	getEmailFormatExternalDataState,
 	getInitialRulesForEmailFormatSpec,
 	getLinkedinContactsCreateLinkForEmailFormatSpec,
-	getRequiredLinkedinContactsRuleId,
-	getRuleDataSourceAction,
+	getRuleDataSourceControls,
 	requireEmailFormatSpecForFormat
 } from '../backend/email-formats/activation';
 import {
 	addLinkedinContactsSourceToEmailFormatRuleInput,
 	deleteEmailFormatsInput,
 	emailFormatCreateFromStarterInput,
+	linkExternalDataSourceToEmailFormatRuleInput,
 	emailFormatId,
 	setEmailFormatStatusInput,
 	updateEmailFormatContentInput,
@@ -67,6 +68,22 @@ function requireEmailFormatDefinition(formatDefinitionSlug: string): EmailFormat
 
 function areJsonEqual(first: unknown, second: unknown) {
 	return JSON.stringify(first) === JSON.stringify(second);
+}
+
+type VersionedValue<Value> = {
+	value: Value;
+	version: number;
+};
+
+function versionedMutationResult<
+	const Kind extends 'stale' | 'saved',
+	const Key extends string,
+	Value
+>(kind: Kind, key: Key, value: Value, version: number) {
+	return {
+		kind,
+		[key]: { value, version }
+	} as { kind: Kind } & Record<Key, VersionedValue<Value>>;
 }
 
 function assertLockedFieldUnchanged(
@@ -332,10 +349,7 @@ export const getEmailFormatConfiguration = query({
 				variables: formatSpec.variables,
 				contentEditPolicy: formatSpec.contentEditPolicy,
 				rulesEditPolicy: formatSpec.rulesEditPolicy,
-				ruleDataSourceAction:
-					getRuleDataSourceAction(formatSpec, externalDataState),
-				ruleDataSourceModal: formatSpec.ruleDataSourceModal,
-				requiredLinkedinContactsRuleId: getRequiredLinkedinContactsRuleId(formatSpec),
+				dataSourceControls: getRuleDataSourceControls(formatSpec, externalDataState),
 				ruleInfoCard: formatSpec.ruleInfoCard
 			},
 			recipientPickerPeople: [
@@ -373,12 +387,12 @@ export const addLinkedinContactsSourceToEmailFormatRule = mutation({
 		}
 
 		const formatSpec = requireEmailFormatSpecForFormat(format);
-		const requiredLinkedinContactsRuleId = getRequiredLinkedinContactsRuleId(formatSpec);
+		const requirement = getRequiredDataSourceRequirementForRule(formatSpec, args.ruleId);
 
 		if (
-			formatSpec.dataMode !== 'public-data' ||
-			formatSpec.ruleDataSourceModal !== 'reconnect-linkedin' ||
-			requiredLinkedinContactsRuleId !== args.ruleId
+			!requirement ||
+			requirement.kind !== 'linkedinContacts' ||
+			requirement.attachMode !== 'upload-new'
 		) {
 			throw new Error('This email format does not use LinkedIn contacts.');
 		}
@@ -424,6 +438,72 @@ export const addLinkedinContactsSourceToEmailFormatRule = mutation({
 	}
 });
 
+export const linkExternalDataSourceToEmailFormatRule = mutation({
+	args: linkExternalDataSourceToEmailFormatRuleInput,
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const { workspace } = viewerWorkspace;
+		const format = await getEmailFormatInViewerWorkspace(
+			ctx,
+			viewerWorkspace,
+			args.emailFormatId
+		);
+
+		if (!format) {
+			throw new Error('Email format not found.');
+		}
+
+		const formatSpec = requireEmailFormatSpecForFormat(format);
+		const requirement = getRequiredDataSourceRequirementForRule(formatSpec, args.ruleId);
+
+		if (
+			!requirement ||
+			requirement.kind !== 'linkedinContacts' ||
+			requirement.attachMode !== 'link-existing'
+		) {
+			throw new Error('This email format rule does not require LinkedIn contacts.');
+		}
+
+		if (!format.rules.some((rule) => rule.id === args.ruleId)) {
+			throw new Error('Email format rule not found.');
+		}
+
+		const source = await ctx.db.get(args.externalDataSourceId);
+
+		if (
+			!source ||
+			source.workspaceId !== workspace._id ||
+			source.kind !== 'linkedinContacts' ||
+			source.status !== 'ready'
+		) {
+			throw new Error('LinkedIn contacts source not found.');
+		}
+
+		const existingLinks = await collectEmailFormatExternalDataLinks(
+			ctx,
+			workspace._id,
+			format._id
+		);
+
+		if (existingLinks.some((link) => link.ruleId === args.ruleId)) {
+			throw new Error('This rule already has linked external data.');
+		}
+
+		const now = Date.now();
+
+		await insertEmailFormatExternalDataLink(ctx, {
+			workspaceId: workspace._id,
+			emailFormatId: format._id,
+			ruleId: args.ruleId,
+			externalDataSourceId: source._id,
+			createdAt: now
+		});
+		await ctx.db.patch(format._id, { updatedAt: now });
+
+		return { externalDataSourceId: source._id };
+	}
+});
+
 export const updateEmailFormatTitle = mutation({
 	args: updateEmailFormatTitleInput,
 	handler: async (ctx, args) => {
@@ -445,13 +525,7 @@ export const updateEmailFormatTitle = mutation({
 		}
 
 		if (format.titleVersion !== args.baseTitleVersion) {
-			return {
-				kind: 'stale' as const,
-				title: {
-					value: format.title,
-					version: format.titleVersion
-				}
-			};
+			return versionedMutationResult('stale', 'title', format.title, format.titleVersion);
 		}
 
 		const title = normalizeEmailFormatTitle(args.title);
@@ -469,13 +543,7 @@ export const updateEmailFormatTitle = mutation({
 			updatedAt: now
 		});
 
-		return {
-			kind: 'saved' as const,
-			title: {
-				value: title,
-				version: titleVersion
-			}
-		};
+		return versionedMutationResult('saved', 'title', title, titleVersion);
 	}
 });
 
@@ -496,13 +564,12 @@ export const updateEmailFormatContent = mutation({
 		const formatSpec = requireEmailFormatSpecForFormat(format);
 
 		if (format.emailContentVersion !== args.baseEmailContentVersion) {
-			return {
-				kind: 'stale' as const,
-				emailContent: {
-					value: toEditableEmailFormatContent(format),
-					version: format.emailContentVersion
-				}
-			};
+			return versionedMutationResult(
+				'stale',
+				'emailContent',
+				toEditableEmailFormatContent(format),
+				format.emailContentVersion
+			);
 		}
 
 		const content = normalizeEmailFormatContent({
@@ -559,13 +626,7 @@ export const updateEmailFormatContent = mutation({
 			updatedAt: now
 		});
 
-		return {
-			kind: 'saved' as const,
-			emailContent: {
-				value: content,
-				version: emailContentVersion
-			}
-		};
+		return versionedMutationResult('saved', 'emailContent', content, emailContentVersion);
 	}
 });
 
@@ -586,13 +647,7 @@ export const updateEmailFormatRules = mutation({
 		const formatSpec = requireEmailFormatSpecForFormat(format);
 
 		if (format.rulesVersion !== args.baseRulesVersion) {
-			return {
-				kind: 'stale' as const,
-				rules: {
-					value: format.rules,
-					version: format.rulesVersion
-				}
-			};
+			return versionedMutationResult('stale', 'rules', format.rules, format.rulesVersion);
 		}
 
 		const rules = normalizeEmailFormatRules(args.rules);
@@ -613,13 +668,7 @@ export const updateEmailFormatRules = mutation({
 		}
 
 		if (areJsonEqual(currentRules, rules)) {
-			return {
-				kind: 'saved' as const,
-				rules: {
-					value: currentRules,
-					version: format.rulesVersion
-				}
-			};
+			return versionedMutationResult('saved', 'rules', currentRules, format.rulesVersion);
 		}
 
 		const now = Date.now();
@@ -631,13 +680,7 @@ export const updateEmailFormatRules = mutation({
 			updatedAt: now
 		});
 
-		return {
-			kind: 'saved' as const,
-			rules: {
-				value: rules,
-				version: rulesVersion
-			}
-		};
+		return versionedMutationResult('saved', 'rules', rules, rulesVersion);
 	}
 });
 

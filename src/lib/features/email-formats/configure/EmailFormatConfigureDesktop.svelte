@@ -1,66 +1,27 @@
 <script lang="ts">
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
-	import type { FormatVariableDefinition } from '$lib/features/format-starters/domain';
-	import type { FormatVariableDragCoordinator } from '$lib/features/format-starters/creator/variables/format-variable-drag-coordinator.svelte';
-	import type {
-		EmailFormatContentEditPolicy,
-		EmailFormatInlineTextContent,
-		EmailFormatRuleDataSourceAction,
-		EmailFormatRulesEditPolicy
-	} from '$shared/email-format-definitions';
 	import EmailFeedbackEmptyState from './EmailFeedbackEmptyState.svelte';
-	import EmailFormatActivationStatusBar from './EmailFormatActivationStatusBar.svelte';
+	import EmailFormatConfigureLoadState from './EmailFormatConfigureLoadState.svelte';
+	import EmailFormatConfigureTopStatus from './EmailFormatConfigureTopStatus.svelte';
 	import EmailFeedbackPanel from './EmailFeedbackPanel.svelte';
 	import EmailFormatContentPanel from './EmailFormatContentPanel.svelte';
 	import EmailFormatRulesPanel from './EmailFormatRulesPanel.svelte';
 	import SentEmailPreviewPanel from './SentEmailPreviewPanel.svelte';
-	import type { EmailFormatConfigureState } from './email-format-configure-state.svelte';
+	import type { EmailFormatConfigureSharedProps } from './email-format-configure-shared-props';
 	import type {
 		EmailFeedback,
 		EmailFeedbackViewState,
-		EmailFormatConfigureLoadState,
-		EmailFormatConfigureView,
-		EmailFormatRule
+		EmailFormatConfigureView
 	} from './email-format-configure-types';
-	import SectionConflictActions from './SectionConflictActions.svelte';
 
-	type Props = {
-		actionError: string | null;
+	type Props = EmailFormatConfigureSharedProps & {
 		deleteError: string | null;
-		configureState: EmailFormatConfigureState;
 		configureView: EmailFormatConfigureView;
 		feedbackViewState: EmailFeedbackViewState;
-		activationBlockerMessage: string | null;
-		activationBlockerActionLabel?: string | null;
-		activationReadyMessage: string | null;
-		activationSuccessMessage: string | null;
-		isUpdatingStatus: boolean;
-		contentError: string | null;
-		contentEditPolicy: EmailFormatContentEditPolicy | null;
-		contentVariables: readonly FormatVariableDefinition[];
-		dragCoordinator: FormatVariableDragCoordinator;
-		loadState: EmailFormatConfigureLoadState;
-		ruleDataSourceAction?: EmailFormatRuleDataSourceAction;
-		ruleInfoCard: {
-			label: string;
-			content: EmailFormatInlineTextContent;
-		} | null;
-		rulesEditPolicy: EmailFormatRulesEditPolicy | null;
 		onFeedbackChange: (patch: Partial<EmailFeedback>) => void;
-		onKeepMineContent: () => void | Promise<void>;
-		onKeepMineRules: () => void | Promise<void>;
-		onKeepMineTitle: () => void | Promise<void>;
-		onLinkRuleDataSources?: (rule: EmailFormatRule) => void;
-		onSaveContent: () => Promise<void>;
 		onSaveFeedback: () => void | Promise<void>;
-		onSaveRules: () => void | Promise<void>;
-		onActivationBlockerAction?: () => void | Promise<void>;
-		onActivateFormat: () => void | Promise<void>;
 		onShowNextSentEmail: () => void;
 		onShowPreviousSentEmail: () => void;
-		onUseLatestContent: () => void;
-		onUseLatestRules: () => void;
-		onUseLatestTitle: () => void;
 	};
 
 	const EMAIL_FORMAT_CONFIGURE_SPLIT = {
@@ -88,7 +49,7 @@
 		contentVariables,
 		dragCoordinator,
 		loadState,
-		ruleDataSourceAction,
+		dataSourceControls = [],
 		ruleInfoCard,
 		rulesEditPolicy,
 		onFeedbackChange,
@@ -111,56 +72,26 @@
 
 <div class="hidden h-full min-h-0 flex-col overflow-hidden md:flex">
 	<div class="shrink-0">
-		{#if activationBlockerMessage}
-			<EmailFormatActivationStatusBar
-				message={activationBlockerMessage}
-				actionLabel={activationBlockerActionLabel}
-				onAction={onActivationBlockerAction}
-			/>
-		{:else if activationReadyMessage}
-			<EmailFormatActivationStatusBar
-				message={activationReadyMessage}
-				kind="ready"
-				actionLabel="Activate this format"
-				actionDisabled={isUpdatingStatus}
-				onAction={onActivateFormat}
-			/>
-		{:else if activationSuccessMessage}
-			<EmailFormatActivationStatusBar
-				message={activationSuccessMessage}
-				kind="success"
-			/>
-		{/if}
-		{#if deleteError || actionError}
-			<p class="bg-red-50 px-5 py-2 text-[0.72rem] text-red-700">
-				{deleteError ?? actionError}
-			</p>
-		{/if}
-		{#if configureState.titleConflict}
-			<div class="bg-amber-50 px-5 py-2">
-				<SectionConflictActions
-					conflict={configureState.titleConflict}
-					isSaving={configureState.isSavingTitle}
-					onKeepMine={onKeepMineTitle}
-					onUseLatest={onUseLatestTitle}
-				/>
-			</div>
-		{/if}
+		<EmailFormatConfigureTopStatus
+			variant="desktop"
+			{actionError}
+			{deleteError}
+			{configureState}
+			{activationBlockerMessage}
+			{activationBlockerActionLabel}
+			{activationReadyMessage}
+			{activationSuccessMessage}
+			{isUpdatingStatus}
+			{onActivationBlockerAction}
+			{onActivateFormat}
+			{onKeepMineTitle}
+			{onUseLatestTitle}
+		/>
 	</div>
 
 	<div class="min-h-0 flex-1 overflow-hidden">
-		{#if loadState === 'loading'}
-			<div class="flex h-full items-center justify-center text-[0.74rem] text-stone-500">
-				Loading email format...
-			</div>
-		{:else if loadState === 'error'}
-			<div class="flex h-full items-center justify-center text-[0.74rem] text-red-600">
-				Could not load email format.
-			</div>
-		{:else if loadState === 'notFound'}
-			<div class="flex h-full items-center justify-center text-[0.74rem] text-stone-500">
-				Email format not found.
-			</div>
+		{#if loadState !== 'ready'}
+			<EmailFormatConfigureLoadState {loadState} variant="desktop" />
 		{:else if configureView === 'feedback' && feedbackViewState.kind === 'empty'}
 			<EmailFeedbackEmptyState />
 		{:else}
@@ -204,7 +135,7 @@
 						<EmailFormatRulesPanel
 							rules={configureState.rulesDraft}
 							editPolicy={rulesEditPolicy}
-							{ruleDataSourceAction}
+							{dataSourceControls}
 							{ruleInfoCard}
 							canSave={configureState.canSaveRules}
 							conflict={configureState.rulesConflict}

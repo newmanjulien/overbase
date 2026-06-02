@@ -148,7 +148,7 @@
 			teammateEmails = '';
 			modalOpen = false;
 		} catch (error) {
-			modalError = error instanceof Error ? error.message : 'Could not add teammates.';
+			modalError = error instanceof Error ? error.message : 'Could not add team members.';
 		} finally {
 			isAddingTeammates = false;
 		}
@@ -198,7 +198,7 @@
 			});
 			closeTeammateEditor();
 		} catch (error) {
-			actionError = error instanceof Error ? error.message : 'Could not update teammate.';
+			actionError = error instanceof Error ? error.message : 'Could not update team member.';
 		} finally {
 			savingTeammateId = null;
 		}
@@ -219,7 +219,7 @@
 				teammateIds: idsToDelete
 			});
 		} catch (error) {
-			actionError = error instanceof Error ? error.message : 'Could not delete teammates.';
+			actionError = error instanceof Error ? error.message : 'Could not delete team members.';
 		} finally {
 			deletingTeammateIds = deletingTeammateIds.filter((id) => !idsToDelete.includes(id));
 		}
@@ -252,7 +252,7 @@
 			onEmailDraftChange: (email) => updateTeammateDraft({ email }),
 			onRoleDraftChange: (role) => updateTeammateDraft({ role }),
 			selectAriaLabel: `Select ${teammate.displayName}`,
-			actionsAriaLabel: 'Teammate actions',
+			actionsAriaLabel: 'Team member actions',
 			actions: isEditing
 				? undefined
 				: [
@@ -270,8 +270,8 @@
 
 <ListRoutePage
 	toolbar={{
-		searchPlaceholder: 'Search teammates...',
-		searchAriaLabel: 'Search teammates',
+		searchPlaceholder: 'Search team members...',
+		searchAriaLabel: 'Search team members',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
 		filter: {
@@ -281,33 +281,26 @@
 			options: roleFilterOptions,
 			onSelect: (optionId) => (selectedRoleFilter = optionId)
 		},
-		actionLabel: 'Add teammates',
+		actionLabel: 'Add team members',
 		onAction: openModal
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY.team.icon,
-		title: 'No teammates found',
+		title: 'No team members found',
 		description: [
-			{ kind: 'text', text: 'Add teammates and we ' },
-			{
-				kind: 'tooltip',
-				label: "won't email them",
-				tooltipText:
-					"We won't email teammates after you add them. They'll only receive emails after you add them to an active email format"
-			},
-			{ kind: 'text', text: 'until you add them to active email formats' }
+			{ kind: 'text', text: 'Add team members so you can assign them to email formats' }
 		],
 		nextSteps:
-			'Teammates are the people inside your organization who receive emails. Add teammates here, then add them to the right email formats',
-		actionLabel: 'Add teammates',
+			'Team members are the people inside your organization who receive emails. Add team members here, then add them to the right email formats',
+		actionLabel: 'Add team members',
 		onAction: openModal
 	}}
 	hasItems={listState !== 'empty'}
 >
 	{#if listState === 'loading'}
-		<ListContentState kind="loading" message="Loading teammates..." />
+		<ListContentState kind="loading" message="Loading team members..." />
 	{:else if listState === 'error'}
-		<ListContentState kind="error" message="Could not load teammates." />
+		<ListContentState kind="error" message="Could not load team members." />
 	{:else if listState === 'ready'}
 		{#if actionError}
 			<p class="border-b border-red-100 bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-5">
@@ -315,23 +308,23 @@
 			</p>
 		{/if}
 		{#if filteredTeammateItems.length === 0}
-			<ListContentState kind="empty" message="No matching teammates." />
+			<ListContentState kind="empty" message="No matching team members." />
 		{:else}
 			<SelectableList
 				items={filteredTeammateItems}
-			selectAllAriaLabel="Select all teammates"
-			selectedActionsAriaLabel="Selected teammate actions"
+			selectAllAriaLabel="Select all team members"
+			selectedActionsAriaLabel="Selected team member actions"
 			selectedActions={[
 				{
 					label: deletingTeammateIds.length > 0 ? 'Deleting...' : 'Delete',
-					ariaLabel: 'Delete selected teammates',
+					ariaLabel: 'Delete selected team members',
 					intent: 'destructive',
 					disabled: deletingTeammateIds.length > 0,
 					onSelect: (selectedTeammateIds) =>
 						deleteTeammates(selectedTeammateIds as Id<'teammates'>[])
 				}
 			]}
-			rowActionsAriaLabel="Teammate actions"
+			rowActionsAriaLabel="Team member actions"
 		>
 			{#snippet rowCells(item)}
 				<TeammateListRow {item} />

@@ -25,9 +25,9 @@ export const APP_LINKS = {
 		pathname: '/email-formats',
 		routeId: '/(app)/email-formats'
 	},
-	dataSources: {
-		pathname: '/data-sources',
-		routeId: '/(app)/data-sources'
+	internalData: {
+		pathname: '/internal-data',
+		routeId: '/(app)/internal-data'
 	},
 	externalData: {
 		pathname: '/external-data',

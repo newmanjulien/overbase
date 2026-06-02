@@ -8,7 +8,7 @@
 	toolbar={{
 		searchPlaceholder: 'Search team email formats...',
 		searchAriaLabel: 'Search team email formats',
-		filter: { label: 'All teammates', selectedId: 'all', options: [{ id: 'all', label: 'All teammates' }], onSelect: () => {} }
+		filter: { label: 'All team members', selectedId: 'all', options: [{ id: 'all', label: 'All team members' }], onSelect: () => {} }
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['team-email-formats'].icon,

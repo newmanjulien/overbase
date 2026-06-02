@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
+	import { useAppConvexPreloader } from '$lib/app/app-convex-preloader.svelte';
 	import { APP_LINKS, emailFormatLink } from '$lib/app/app-links';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import {
@@ -24,6 +25,7 @@
 	type FormatStatusFilterId = 'all' | EmailFormatStatus;
 
 	const client = useConvexClient();
+	const appConvexPreloader = useAppConvexPreloader();
 	const formatsQuery = useQuery(api.emailFormats.listEmailFormats);
 	const dateFormatter = new Intl.DateTimeFormat(undefined, {
 		month: 'short',
@@ -180,6 +182,7 @@
 			title: format.title,
 			status: format.status,
 			href: emailFormatLink(format.id).pathname,
+			onPreload: () => appConvexPreloader?.preloadEmailFormatConfiguration(format.id),
 			selectAriaLabel: `Select ${format.title}`,
 			statusLabel: formatStatus(format.status),
 			statusLabelClass: getStatusLabelClass(format.status),
@@ -295,7 +298,7 @@
 	{#snippet footer()}
 		{#if listState === 'ready'}
 			<InfoBar label="Next steps:">
-				Click an email format to set its rules and configure which teammates should receive it
+				Click an email format to set its rules and configure which team members should receive it
 			</InfoBar>
 		{/if}
 	{/snippet}

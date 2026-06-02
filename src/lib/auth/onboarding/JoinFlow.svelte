@@ -266,6 +266,7 @@
 	/>
 {:else}
 	<AuthEntryShell
+		accent="link"
 		onReturnButtonClick={currentReturnButtonClick}
 		returnButtonHref={currentReturnButtonHref}
 		showFooter={step === 'join'}

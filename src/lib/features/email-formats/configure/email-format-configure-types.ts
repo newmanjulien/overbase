@@ -5,7 +5,7 @@ import type { FormatEmailContent } from '$lib/features/format-starters/domain';
 import type {
 	EmailFormatContentEditPolicy,
 	EmailFormatInlineTextContent,
-	EmailFormatRuleDataSourceAction,
+	EmailFormatRuleDataSourceControl,
 	EmailFormatRulesEditPolicy,
 	EmailFormatVariableDefinition
 } from '$shared/email-format-definitions';
@@ -39,9 +39,7 @@ export type EmailFormatDefinitionConfigure = {
 	variables: readonly EmailFormatVariableDefinition[];
 	contentEditPolicy: EmailFormatContentEditPolicy;
 	rulesEditPolicy: EmailFormatRulesEditPolicy;
-	ruleDataSourceAction: EmailFormatRuleDataSourceAction;
-	ruleDataSourceModal: 'default' | 'reconnect-linkedin';
-	requiredLinkedinContactsRuleId: string | null;
+	dataSourceControls: EmailFormatRuleDataSourceControl[];
 	ruleInfoCard: {
 		label: string;
 		content: EmailFormatInlineTextContent;

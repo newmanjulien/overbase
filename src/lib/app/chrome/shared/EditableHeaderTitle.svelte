@@ -45,6 +45,10 @@
 	}
 
 	function commitTitle() {
+		if (!isEditing) {
+			return;
+		}
+
 		const nextTitle = draftTitle.trim();
 
 		if (nextTitle && nextTitle !== title) {
@@ -67,6 +71,7 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			event.preventDefault();
+			event.stopPropagation();
 			cancelEditing();
 		}
 	}

@@ -1,15 +1,10 @@
-<script module lang="ts">
-	let activeScrollLocks = 0;
-	let previousBodyOverflow = '';
-</script>
-
 <script lang="ts">
 	import XIcon from 'phosphor-svelte/lib/XIcon';
-	import { tick } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import type { ClassValue } from 'clsx';
 	import { cn } from '$lib/ui/cn';
 	import IconButton from '$lib/ui/IconButton.svelte';
+	import { createModalBehavior } from '$lib/ui/modal-behavior.svelte';
 
 	export type FullHeightModalPlacement = 'right' | 'center';
 
@@ -20,6 +15,7 @@
 		onClose: () => void;
 		placement?: FullHeightModalPlacement;
 		class?: ClassValue;
+		titleContent?: Snippet;
 		footer?: Snippet;
 		children?: Snippet;
 	};
@@ -31,6 +27,7 @@
 		onClose,
 		placement = 'right',
 		class: className = '',
+		titleContent,
 		footer,
 		children
 	}: Props = $props();
@@ -40,105 +37,11 @@
 		center: 'justify-center'
 	};
 
-	let dialogElement = $state<HTMLDivElement | null>(null);
-	let previouslyFocusedElement: HTMLElement | null = null;
 	const titleId = $props.id();
-
-	$effect(() => {
-		if (!open) {
-			return;
-		}
-
-		previouslyFocusedElement =
-			document.activeElement instanceof HTMLElement ? document.activeElement : null;
-		lockBodyScroll();
-		void focusDialogAfterRender();
-
-		return () => {
-			unlockBodyScroll();
-			previouslyFocusedElement?.focus();
-			previouslyFocusedElement = null;
-		};
+	const modalBehavior = createModalBehavior({
+		isOpen: () => open,
+		onClose: () => onClose()
 	});
-
-	async function focusDialogAfterRender() {
-		await tick();
-		(getFocusableElements()[0] ?? dialogElement)?.focus();
-	}
-
-	function getFocusableElements() {
-		if (!dialogElement) {
-			return [];
-		}
-
-		return Array.from(
-			dialogElement.querySelectorAll<HTMLElement>(
-				'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-			)
-		).filter((element) => element.tabIndex >= 0);
-	}
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (!open) {
-			return;
-		}
-
-		if (event.key === 'Escape') {
-			event.preventDefault();
-			onClose();
-			return;
-		}
-
-		if (event.key === 'Tab') {
-			trapFocus(event);
-		}
-	}
-
-	function trapFocus(event: KeyboardEvent) {
-		const focusableElements = getFocusableElements();
-		const firstElement = focusableElements[0] ?? dialogElement;
-		const lastElement = focusableElements.at(-1) ?? dialogElement;
-		const activeElement = document.activeElement;
-
-		if (!dialogElement || !firstElement || !lastElement) {
-			return;
-		}
-
-		if (!dialogElement.contains(activeElement)) {
-			event.preventDefault();
-			firstElement.focus();
-			return;
-		}
-
-		if (event.shiftKey && activeElement === firstElement) {
-			event.preventDefault();
-			lastElement.focus();
-			return;
-		}
-
-		if (!event.shiftKey && activeElement === lastElement) {
-			event.preventDefault();
-			firstElement.focus();
-		}
-	}
-
-	function lockBodyScroll() {
-		if (activeScrollLocks === 0) {
-			previousBodyOverflow = document.body.style.overflow;
-			document.body.style.overflow = 'hidden';
-		}
-
-		activeScrollLocks += 1;
-	}
-
-	function unlockBodyScroll() {
-		activeScrollLocks = Math.max(0, activeScrollLocks - 1);
-
-		if (activeScrollLocks === 0) {
-			document.body.style.overflow = previousBodyOverflow;
-			previousBodyOverflow = '';
-		}
-	}
 </script>
 
 {#if open}
@@ -152,7 +55,7 @@
 		></button>
 
 		<div
-			bind:this={dialogElement}
+			bind:this={modalBehavior.dialogElement}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby={titleId}
@@ -170,8 +73,15 @@
 				<XIcon size={16} weight="regular" />
 			</IconButton>
 
-			<header class="space-y-1 px-4 py-5 pr-12">
-				<h2 id={titleId} class="text-sm leading-tight font-medium text-stone-950">{title}</h2>
+			<header class="min-w-0 space-y-1 px-4 py-5 pr-12">
+				{#if titleContent}
+					<h2 id={titleId} class="sr-only">{title}</h2>
+					<div class="min-w-0">
+						{@render titleContent()}
+					</div>
+				{:else}
+					<h2 id={titleId} class="text-sm leading-tight font-medium text-stone-950">{title}</h2>
+				{/if}
 				{#if subtitle}
 					<p class="text-[11px] leading-5 text-stone-500">{subtitle}</p>
 				{/if}
@@ -190,4 +100,4 @@
 	</div>
 {/if}
 
-<svelte:document onkeydown={handleKeydown} />
+<svelte:document onkeydown={modalBehavior.handleKeydown} />

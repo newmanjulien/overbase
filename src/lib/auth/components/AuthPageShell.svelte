@@ -14,6 +14,7 @@
 		children: Snippet;
 		background: Snippet;
 		aside: Snippet;
+		accent?: 'info' | 'link';
 		footer?: Snippet;
 		showFooter?: boolean;
 		onReturnButtonClick?: () => void;
@@ -26,6 +27,7 @@
 		children,
 		background,
 		aside,
+		accent = 'info',
 		footer,
 		showFooter = Boolean(footer),
 		onReturnButtonClick,
@@ -47,9 +49,20 @@
 
 		return null;
 	});
+	const accentStyle = $derived(
+		[
+			`--auth-accent-200: var(--${accent}-200)`,
+			`--auth-accent-400: var(--${accent}-400, var(--${accent}-500))`,
+			`--auth-accent-500: var(--${accent}-500)`,
+			`--auth-accent-600: var(--${accent}-600)`
+		].join('; ')
+	);
 </script>
 
-<section class="relative min-h-dvh overflow-auto bg-[#f7f7f7] p-0 text-[#202124] sm:p-2 lg:overflow-hidden">
+<section
+	class="relative min-h-dvh overflow-auto bg-[#f7f7f7] p-0 text-[#202124] sm:p-2 lg:overflow-hidden"
+	style={accentStyle}
+>
 	{@render background()}
 
 	<div
@@ -62,7 +75,7 @@
 			{#if returnButtonHref}
 				{#if isExternalReturnButtonHref}
 					<a
-						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-info-200"
+						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--auth-accent-200)]"
 						href={returnButtonHref}
 						rel="external"
 					>
@@ -71,7 +84,7 @@
 					</a>
 				{:else if returnButtonInternalHref}
 					<a
-						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-info-200"
+						class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--auth-accent-200)]"
 						href={resolve(returnButtonInternalHref)}
 					>
 						<ArrowLeftIcon aria-hidden="true" size={14} weight="regular" />
@@ -81,7 +94,7 @@
 			{:else if onReturnButtonClick}
 				<button
 					type="button"
-					class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-info-200"
+					class="inline-flex w-fit cursor-pointer items-center gap-2.5 border-0 bg-transparent p-0 text-sm leading-none text-[#8f9297] outline-none transition-colors hover:text-[#666a70] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--auth-accent-200)]"
 					onclick={onReturnButtonClick}
 				>
 					<ArrowLeftIcon aria-hidden="true" size={14} weight="regular" />

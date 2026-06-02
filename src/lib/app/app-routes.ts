@@ -16,7 +16,7 @@ export type RouteIcon = PhosphorIcon;
 export const APP_ROUTE_IDS = [
 	'create-formats',
 	'email-formats',
-	'data-sources',
+	'internal-data',
 	'external-data',
 	'team',
 	'team-email-formats',
@@ -41,6 +41,7 @@ type NavSectionDefinition = {
 export type AppRouteDefinition = StaticAppLink & {
 	pathname: NavPath;
 	navLabel: string;
+	headerLabel?: string;
 	icon: RouteIcon;
 	hideOnMobile?: boolean;
 };
@@ -49,31 +50,35 @@ export const APP_ROUTE_REGISTRY = {
 	'email-formats': {
 		...APP_LINKS.emailFormats,
 		navLabel: 'My formats',
+		headerLabel: 'My email formats',
 		icon: FolderSimpleIcon
 	},
 	'create-formats': {
 		...APP_LINKS.createFormats,
 		navLabel: 'Create formats',
+		headerLabel: 'Create email formats',
 		icon: ArticleIcon
 	},
-	'data-sources': {
-		...APP_LINKS.dataSources,
-		navLabel: 'Data sources',
+	'internal-data': {
+		...APP_LINKS.internalData,
+		navLabel: 'Internal data',
+		headerLabel: 'Internal data sources',
 		icon: HardDriveIcon
 	},
 	'external-data': {
 		...APP_LINKS.externalData,
 		navLabel: 'External data',
+		headerLabel: 'External data sources',
 		icon: CloudIcon
 	},
 	team: {
 		...APP_LINKS.team,
-		navLabel: 'Team',
+		navLabel: 'My team',
 		icon: UsersIcon
 	},
 	'team-email-formats': {
 		...APP_LINKS.teamEmailFormats,
-		navLabel: 'Team email formats',
+		navLabel: 'Team formats',
 		icon: FoldersIcon
 	},
 	'invite-partners': {
@@ -103,7 +108,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
 	{
 		id: 'main',
 		heading: 'Workspace',
-		routeIds: ['data-sources', 'external-data', 'team', 'team-email-formats'],
+		routeIds: ['internal-data', 'external-data', 'team', 'team-email-formats'],
 		desktopSectionClass: 'pt-6',
 		mobileSectionClass: 'pt-6',
 		showCollapsedDivider: true

@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { APP_CONFIG } from '$lib/app/app-config';
+	import AppConvexPreloader from '$lib/app/AppConvexPreloader.svelte';
 	import {
 		provideCurrentWorkspaceContext,
 		type CurrentWorkspaceContext
@@ -29,7 +30,7 @@
 	type ChromeMode = NonNullable<App.PageData['chromeMode']>;
 	type ViewportState = 'unknown' | 'mobile' | 'desktop';
 
-	let { user, workspace, identity, children }: Props = $props();
+	let { user, workspace, identity, children: routeChildren }: Props = $props();
 
 	function getChromeMode(chromeMode?: ChromeMode) {
 		return chromeMode ?? 'dashboard';
@@ -74,7 +75,9 @@
 	const viewportRequirement = $derived(page.data.viewportRequirement ?? null);
 	const routeRequiresDesktop = $derived(viewportRequirement?.minWidth === 'desktop');
 	const canRenderRoute = $derived(!routeRequiresDesktop || viewportState === 'desktop');
-	const sourceRouteTitle = $derived(page.data.headerTitle ?? activeRoute?.label ?? APP_CONFIG.name);
+	const sourceRouteTitle = $derived(
+		page.data.headerTitle ?? activeRoute?.headerLabel ?? APP_CONFIG.name
+	);
 	const routeTitleResetKey = $derived(`${page.url.pathname}:${sourceRouteTitle}`);
 	const routeTitleEditable = $derived(
 		routeTitleState.editable ?? Boolean(page.data.headerTitleEditable)
@@ -142,51 +145,56 @@
 	provideRouteTitleState(routeTitleState);
 </script>
 
-<div class="h-dvh min-h-dvh overflow-hidden bg-stone-50">
-	<div
-		class="dashboard-surface flex h-full min-h-0 md:gap-(--dashboard-surface-gap)"
-		data-sidebar-state={shellState.isSidebarExpanded ? 'expanded' : 'collapsed'}
-	>
-		<DesktopSidebar
-			currentPathname={page.url.pathname}
-			user={currentWorkspace.user}
-			identity={currentWorkspace.identity}
-			class="hidden md:flex"
-		/>
-
-		<main
-			class="min-w-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-white md:rounded-sm md:border md:border-stone-100"
+<AppConvexPreloader>
+	{#snippet children(preloader)}
+	<div class="h-dvh min-h-dvh overflow-hidden bg-stone-50">
+		<div
+			class="dashboard-surface flex h-full min-h-0 md:gap-(--dashboard-surface-gap)"
+			data-sidebar-state={shellState.isSidebarExpanded ? 'expanded' : 'collapsed'}
 		>
-			{#if canRenderRoute}
-				<MobileDrawer currentPathname={page.url.pathname} />
-				<MobileHeader
-					title={routeTitleState.title}
-					titleEditable={routeTitleEditable}
-					onTitleChange={handleRouteTitleChange}
-					actions={routeTitleState.actions}
-				/>
-			{/if}
+			<DesktopSidebar
+				currentPathname={page.url.pathname}
+				user={currentWorkspace.user}
+				identity={currentWorkspace.identity}
+				showPublicDataCard={preloader.showPublicDataCard}
+				class="hidden md:flex"
+			/>
 
-			<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+			<main
+				class="min-w-0 flex min-h-0 flex-1 flex-col overflow-hidden bg-white md:rounded-sm md:border md:border-stone-100"
+			>
 				{#if canRenderRoute}
-					<DesktopHeader
+					<MobileDrawer currentPathname={page.url.pathname} />
+					<MobileHeader
 						title={routeTitleState.title}
 						titleEditable={routeTitleEditable}
-						breadcrumbParent={desktopBreadcrumbParent}
 						onTitleChange={handleRouteTitleChange}
 						actions={routeTitleState.actions}
-						overflowActions={routeTitleState.overflowActions}
 					/>
 				{/if}
 
-				<div class="dashboard-main-viewport min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-					<div class="h-full min-h-full min-w-0">
-						{#if canRenderRoute}
-							{@render children()}
-						{/if}
+				<div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+					{#if canRenderRoute}
+						<DesktopHeader
+							title={routeTitleState.title}
+							titleEditable={routeTitleEditable}
+							breadcrumbParent={desktopBreadcrumbParent}
+							onTitleChange={handleRouteTitleChange}
+							actions={routeTitleState.actions}
+							overflowActions={routeTitleState.overflowActions}
+						/>
+					{/if}
+
+					<div class="dashboard-main-viewport min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+						<div class="h-full min-h-full min-w-0">
+							{#if canRenderRoute}
+								{@render routeChildren()}
+							{/if}
+						</div>
 					</div>
 				</div>
-			</div>
-		</main>
+			</main>
+		</div>
 	</div>
-</div>
+	{/snippet}
+</AppConvexPreloader>

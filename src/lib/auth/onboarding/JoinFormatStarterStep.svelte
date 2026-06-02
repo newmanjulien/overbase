@@ -64,7 +64,7 @@
 			Try Overbase with public data
 		</h1>
 		<p class="mx-auto mt-4 max-w-sm text-sm leading-[1.45] text-[#686b73]">
-			See how Overbase works without sharing any of your internal data and with only public LinkedIn data
+			See how Overbase works without sharing any of your internal data and with only public data
 		</p>
 
 		<div class="mt-10 flex justify-center">
@@ -93,7 +93,7 @@
 						<span
 							class="mt-4 inline-flex h-9 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-md border border-stone-200/60 bg-white px-3.5 text-[0.76rem] font-medium text-stone-800 transition-colors hover:bg-stone-50"
 						>
-							{selectedFormatStarterSlug === formatStarter.slug ? 'Opening...' : 'Try with only LinkedIn data'}
+							{selectedFormatStarterSlug === formatStarter.slug ? 'Opening...' : 'Try with only public data'}
 						</span>
 					</div>
 				</a>

@@ -5,7 +5,11 @@
 	import { Button, IconButton, InfoBar, InlineText } from '$lib/ui';
 	import { cn } from '$lib/ui/cn';
 	import type { InlineTextContent } from '$lib/domain/inline-text';
-	import type { EmailFormatRule, EmailFormatRuleDataSourceAction } from './types';
+	import type {
+		EmailFormatRule,
+		EmailFormatRuleDataSourceAction,
+		EmailFormatRuleDataSourceControl
+	} from './types';
 
 	type Props = {
 		rules: EmailFormatRule[];
@@ -13,7 +17,8 @@
 		canSave?: boolean;
 		onSave?: () => void;
 		onLinkDataSources?: (rule: EmailFormatRule) => void;
-		ruleDataSourceAction?: EmailFormatRuleDataSourceAction;
+		defaultDataSourceAction?: EmailFormatRuleDataSourceAction;
+		ruleDataSourceControls?: readonly EmailFormatRuleDataSourceControl[];
 		infoCard?: {
 			label: string;
 			content: InlineTextContent;
@@ -28,11 +33,16 @@
 		canSave = false,
 		onSave,
 		onLinkDataSources,
-		ruleDataSourceAction = { label: 'Link data sources' },
+		defaultDataSourceAction = { label: 'Link data' },
+		ruleDataSourceControls = [],
 		infoCard,
 		canEditRuleText = true,
 		canEditRuleList = true
 	}: Props = $props();
+
+	const ruleDataSourceControlsByRuleId = $derived(
+		new Map(ruleDataSourceControls.map((control) => [control.ruleId, control]))
+	);
 
 	function updateRule(ruleId: string, patch: Partial<EmailFormatRule>) {
 		if (!canEditRuleText) {
@@ -64,8 +74,16 @@
 		]);
 	}
 
+	function getRuleDataSourceAction(rule: EmailFormatRule): EmailFormatRuleDataSourceAction {
+		const control = ruleDataSourceControlsByRuleId.get(rule.id);
+
+		return control
+			? { label: control.actionLabel, disabled: control.disabled }
+			: defaultDataSourceAction;
+	}
+
 	function linkRuleDataSources(rule: EmailFormatRule) {
-		if (ruleDataSourceAction.disabled) {
+		if (getRuleDataSourceAction(rule).disabled) {
 			return;
 		}
 
@@ -91,6 +109,7 @@
 			<div class="space-y-3">
 				<div class="space-y-3.5">
 					{#each rules as rule (rule.id)}
+						{@const dataSourceAction = getRuleDataSourceAction(rule)}
 						<section class="overflow-hidden rounded-sm border border-stone-200/60 bg-white">
 							<div class="px-3 py-3">
 								<div class="flex items-start gap-2">
@@ -126,11 +145,11 @@
 								<div class="flex items-center border-t border-stone-100 bg-stone-50/70 px-3 py-2 md:justify-end">
 									<Button
 										variant="secondary"
-										class="inline-flex h-10 w-full items-center justify-center rounded-sm border border-stone-200 bg-white px-2.5 text-[0.72rem] font-medium text-stone-800 transition-colors hover:bg-stone-50 hover:text-stone-950 md:h-7 md:w-auto md:text-[0.7rem]"
-										disabled={ruleDataSourceAction.disabled}
+										class="h-10 w-full px-2.5 text-[0.72rem] md:h-7 md:w-auto md:text-[0.7rem]"
+										disabled={dataSourceAction.disabled}
 										onclick={() => linkRuleDataSources(rule)}
 									>
-										{ruleDataSourceAction.label}
+										{dataSourceAction.label}
 									</Button>
 								</div>
 							{/if}
@@ -155,7 +174,7 @@
 					<h2 class="text-[0.78rem] leading-tight font-medium text-stone-950">No rules yet</h2>
 
 					<p class="mt-2 text-[0.67rem] leading-relaxed text-stone-600">
-						Give details about how this email format should behave, when it should fire and what data sources it should use
+						Give details about how this email format should behave, when it should fire and what internal or external data sources it should use
 					</p>
 				</div>
 			</div>

@@ -1,4 +1,4 @@
-import type { Id } from '../../convex/_generated/dataModel';
+import type { Doc, Id } from '../../convex/_generated/dataModel';
 import type { MutationCtx } from '../../convex/_generated/server';
 import type { ViewerWorkspace } from '../auth/viewer';
 
@@ -164,4 +164,44 @@ export async function deleteExternalDataSourceRows(
 	for (const contact of contacts) {
 		await ctx.db.delete(contact._id);
 	}
+}
+
+export async function replaceLinkedinContactsExternalDataSource(
+	ctx: MutationCtx,
+	args: {
+		workspaceId: Id<'workspaces'>;
+		source: Doc<'externalDataSources'>;
+		contactsImport: NonNullable<LinkedinContactsImport>;
+		updatedAt: number;
+	}
+) {
+	if (args.source.kind !== 'linkedinContacts') {
+		throw new Error('This external data source cannot be replaced with LinkedIn contacts.');
+	}
+
+	const contactsSource = normalizeLinkedinContactsSource(args.contactsImport);
+
+	if (!contactsSource) {
+		throw new Error('LinkedIn contacts are required.');
+	}
+
+	await deleteExternalDataSourceRows(ctx, args.source._id);
+	await insertLinkedinContactsForExternalDataSource(ctx, {
+		workspaceId: args.workspaceId,
+		externalDataSourceId: args.source._id,
+		contactsSource,
+		createdAt: args.updatedAt
+	});
+	await ctx.db.patch(args.source._id, {
+		sourceFileName: contactsSource.fileName,
+		recordCount: contactsSource.contacts.length,
+		status: 'ready',
+		updatedAt: args.updatedAt
+	});
+
+	return {
+		sourceFileName: contactsSource.fileName,
+		recordCount: contactsSource.contacts.length,
+		updatedAt: args.updatedAt
+	};
 }

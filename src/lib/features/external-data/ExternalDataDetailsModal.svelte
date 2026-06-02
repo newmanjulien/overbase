@@ -5,12 +5,13 @@
 		FileUploadField,
 		FullHeightModalShell
 	} from '$lib/ui';
+	import EditableHeaderTitle from '$lib/app/chrome/shared/EditableHeaderTitle.svelte';
 	import type { Id } from '$convex/_generated/dataModel';
 	import type { ContactImport } from './linkedin-contacts-csv';
 	import {
-		linkedinContactsCsvAccept,
-		readLinkedinContactsCsvFile
+		linkedinContactsCsvAccept
 	} from './linkedin-contacts-upload';
+	import { LinkedinContactsUploadState } from './linkedin-contacts-upload-state.svelte';
 
 	export type ExternalDataDetails = {
 		id: Id<'externalDataSources'>;
@@ -24,13 +25,18 @@
 		source: ExternalDataDetails | null;
 		deleting?: boolean;
 		replacing?: boolean;
+		renaming?: boolean;
 		error?: string | null;
 		onClose: () => void;
 		onDelete: (sourceId: Id<'externalDataSources'>) => void | Promise<void>;
+		onRename: (
+			sourceId: Id<'externalDataSources'>,
+			name: string
+		) => void | Promise<void>;
 		onReplace: (
 			sourceId: Id<'externalDataSources'>,
 			contactsImport: ContactImport
-		) => void | Promise<void>;
+		) => boolean | Promise<boolean>;
 	};
 
 	let {
@@ -38,24 +44,20 @@
 		source,
 		deleting = false,
 		replacing = false,
+		renaming = false,
 		error = null,
 		onClose,
 		onDelete,
+		onRename,
 		onReplace
 	}: Props = $props();
 
-	let selectedContactCsvFile = $state<File | null>(null);
-	let replacementContactsImport = $state<ContactImport | null>(null);
-	let uploadErrorText = $state<string | null>(null);
-	let parsing = $state(false);
+	const contactsUpload = new LinkedinContactsUploadState({ clearImportOnSelect: true });
 	let syncedSourceId = $state<Id<'externalDataSources'> | null>(null);
-	const busy = $derived(deleting || replacing);
+	const busy = $derived(deleting || replacing || renaming);
 
 	function resetReplacementState() {
-		selectedContactCsvFile = null;
-		replacementContactsImport = null;
-		uploadErrorText = null;
-		parsing = false;
+		contactsUpload.reset();
 	}
 
 	$effect(() => {
@@ -70,19 +72,7 @@
 	});
 
 	async function selectReplacementFile(file: File) {
-		selectedContactCsvFile = file;
-		replacementContactsImport = null;
-		uploadErrorText = null;
-		parsing = true;
-
-		try {
-			replacementContactsImport = await readLinkedinContactsCsvFile(file);
-		} catch (error) {
-			uploadErrorText =
-				error instanceof Error ? error.message : 'Could not read this CSV.';
-		} finally {
-			parsing = false;
-		}
+		await contactsUpload.selectFile(file);
 	}
 
 	function deleteSource() {
@@ -93,13 +83,26 @@
 		void onDelete(source.id);
 	}
 
+	function renameSource(name: string) {
+		if (!source || busy) {
+			return;
+		}
+
+		void onRename(source.id, name);
+	}
+
 	async function replaceSource() {
-		if (!source || !replacementContactsImport || parsing || busy) {
+		if (!source || !contactsUpload.contactsImport || contactsUpload.parsing || busy) {
 			return;
 		}
 
 		try {
-			await onReplace(source.id, replacementContactsImport);
+			const replaced = await onReplace(source.id, contactsUpload.contactsImport);
+
+			if (!replaced) {
+				return;
+			}
+
 			resetReplacementState();
 		} catch {
 			// The page owns the visible action error.
@@ -114,6 +117,18 @@
 	placement="right"
 	{onClose}
 >
+	{#snippet titleContent()}
+		<EditableHeaderTitle
+			title={source?.name ?? 'External data'}
+			editable={Boolean(source) && !busy}
+			onTitleChange={renameSource}
+			class="max-w-full"
+			textClass="text-sm leading-tight font-medium text-stone-950"
+			inputClass="h-7 text-sm text-stone-950 tracking-normal"
+			buttonClass="size-6"
+		/>
+	{/snippet}
+
 	{#if source}
 		<div class="space-y-5 pt-1">
 			<div class="grid gap-3 text-[0.72rem]">
@@ -129,20 +144,20 @@
 
 			<div>
 				<FileUploadField
-					label="Replace LinkedIn export"
-					description="Upload a new Connections.csv file to replace this source"
-					accept={linkedinContactsCsvAccept}
-					disabled={parsing || busy}
-					selectedFile={selectedContactCsvFile}
-					errorText={uploadErrorText}
-					onFileSelected={selectReplacementFile}
-				/>
-				{#if replacementContactsImport}
-					<p class="mt-2 text-[0.68rem] leading-relaxed text-stone-500">
-						{replacementContactsImport.contacts.length} contacts ready from {replacementContactsImport.fileName}
-					</p>
-				{/if}
-			</div>
+						label="Replace LinkedIn export"
+						description="Upload a new Connections.csv file to replace this source"
+						accept={linkedinContactsCsvAccept}
+						disabled={contactsUpload.parsing || busy}
+						selectedFile={contactsUpload.selectedFile}
+						errorText={contactsUpload.errorText}
+						onFileSelected={selectReplacementFile}
+					/>
+					{#if contactsUpload.contactsImport}
+						<p class="mt-2 text-[0.68rem] leading-relaxed text-stone-500">
+							{contactsUpload.contactsImport.contacts.length} contacts ready from {contactsUpload.contactsImport.fileName}
+						</p>
+					{/if}
+				</div>
 
 			{#if error}
 				<p class="rounded-sm bg-red-50 px-3 py-2 text-[0.72rem] text-red-700">{error}</p>
@@ -159,13 +174,13 @@
 				onclick={deleteSource}
 			>
 				{deleting ? 'Deleting...' : 'Delete'}
-			</Button>
-			<Button
-				disabled={!source || !replacementContactsImport || parsing || busy}
-				onclick={replaceSource}
-			>
-				{parsing ? 'Reading...' : replacing ? 'Replacing...' : 'Replace file'}
-			</Button>
-		</div>
-	{/snippet}
+				</Button>
+				<Button
+					disabled={!source || !contactsUpload.contactsImport || contactsUpload.parsing || busy}
+					onclick={replaceSource}
+				>
+					{contactsUpload.parsing ? 'Reading...' : replacing ? 'Replacing...' : 'Replace file'}
+				</Button>
+			</div>
+		{/snippet}
 </FullHeightModalShell>

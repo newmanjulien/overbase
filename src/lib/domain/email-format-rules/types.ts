@@ -7,3 +7,5 @@ export type EmailFormatRuleDataSourceAction = {
 	label: string;
 	disabled?: boolean;
 };
+
+export type { EmailFormatRuleDataSourceControl } from '$shared/email-format-definitions';

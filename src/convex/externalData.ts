@@ -1,17 +1,19 @@
 import { requireViewerWorkspace, type ViewerWorkspace } from '../backend/auth/viewer';
 import {
 	deleteExternalDataSourceRows,
-	insertLinkedinContactsForExternalDataSource,
-	normalizeLinkedinContactsSource
+	replaceLinkedinContactsExternalDataSource
 } from '../backend/external-data/linkedin-contacts';
 import { getEmailFormatActivationState } from '../backend/email-formats/activation';
 import {
 	deleteExternalDataSourceInput,
+	renameExternalDataSourceInput,
 	replaceExternalDataSourceInput
 } from '../backend/validators/external-data';
-import type { Doc, Id } from './_generated/dataModel';
+import type { Id } from './_generated/dataModel';
 import type { MutationCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';
+
+const MAX_EXTERNAL_DATA_SOURCE_NAME_LENGTH = 120;
 
 function requireWorkspaceOwner({ user, workspace }: ViewerWorkspace) {
 	if (workspace.ownerUserId !== user._id) {
@@ -19,8 +21,12 @@ function requireWorkspaceOwner({ user, workspace }: ViewerWorkspace) {
 	}
 }
 
-function getCreatorDisplayName(creator: Doc<'users'> | null) {
-	return creator?.displayName?.trim() || 'Unknown user';
+function normalizeExternalDataSourceName(name: string) {
+	const normalized = name.trim();
+
+	return normalized.length > MAX_EXTERNAL_DATA_SOURCE_NAME_LENGTH
+		? normalized.slice(0, MAX_EXTERNAL_DATA_SOURCE_NAME_LENGTH).trim()
+		: normalized;
 }
 
 async function collectExternalDataSourceLinks(
@@ -87,39 +93,12 @@ export const listExternalDataSources = query({
 			.order('desc')
 			.collect();
 
-		return await Promise.all(
-			sources.map(async (source) => {
-				const [creator, links] = await Promise.all([
-					ctx.db.get(source.createdByUserId),
-					ctx.db
-						.query('emailFormatExternalDataLinks')
-						.withIndex('by_externalDataSource', (q) =>
-							q.eq('externalDataSourceId', source._id)
-						)
-						.collect()
-				]);
-
-				return {
-					id: source._id,
-					kind: source.kind,
-					name: source.name,
-					sourceFileName: source.sourceFileName,
-					recordCount: source.recordCount,
-					status: source.status,
-					importedAt: source.createdAt,
-					updatedAt: source.updatedAt,
-					creator: {
-						name: getCreatorDisplayName(creator),
-						avatarUrl: creator?.avatar?.url ?? ''
-					},
-					linkedFormatCount: new Set(
-						links
-							.filter((link) => link.workspaceId === workspace._id)
-							.map((link) => link.emailFormatId)
-					).size
-				};
-			})
-		);
+		return sources.map((source) => ({
+			id: source._id,
+			kind: source.kind,
+			name: source.name,
+			sourceFileName: source.sourceFileName
+		}));
 	}
 });
 
@@ -168,6 +147,37 @@ export const deleteExternalDataSource = mutation({
 	}
 });
 
+export const renameExternalDataSource = mutation({
+	args: renameExternalDataSourceInput,
+	handler: async (ctx, args) => {
+		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const { workspace } = viewerWorkspace;
+		requireWorkspaceOwner(viewerWorkspace);
+
+		const source = await ctx.db.get(args.externalDataSourceId);
+
+		if (!source || source.workspaceId !== workspace._id) {
+			throw new Error('External data source not found.');
+		}
+
+		const name = normalizeExternalDataSourceName(args.name);
+
+		if (!name) {
+			throw new Error('External data source name is required.');
+		}
+
+		const now = Date.now();
+
+		await ctx.db.patch(source._id, {
+			name,
+			updatedAt: now
+		});
+		await touchLinkedEmailFormats(ctx, workspace._id, source._id, now);
+
+		return { name };
+	}
+});
+
 export const replaceExternalDataSource = mutation({
 	args: replaceExternalDataSourceInput,
 	handler: async (ctx, args) => {
@@ -181,31 +191,16 @@ export const replaceExternalDataSource = mutation({
 			throw new Error('External data source not found.');
 		}
 
-		if (source.kind !== 'linkedinContacts') {
-			throw new Error('This external data source cannot be replaced with LinkedIn contacts.');
-		}
-
-		const contactsSource = normalizeLinkedinContactsSource(args.externalDataImport);
-
-		if (!contactsSource) {
-			throw new Error('LinkedIn contacts are required.');
-		}
-
 		const now = Date.now();
-
-		await deleteExternalDataSourceRows(ctx, source._id);
-		await insertLinkedinContactsForExternalDataSource(ctx, {
+		const result = await replaceLinkedinContactsExternalDataSource(ctx, {
 			workspaceId: workspace._id,
-			externalDataSourceId: source._id,
-			contactsSource,
-			createdAt: now
-		});
-		await ctx.db.patch(source._id, {
-			sourceFileName: contactsSource.fileName,
-			recordCount: contactsSource.contacts.length,
-			status: 'ready',
+			source,
+			contactsImport: args.externalDataImport,
 			updatedAt: now
 		});
+
 		await touchLinkedEmailFormats(ctx, workspace._id, source._id, now);
+
+		return result;
 	}
 });

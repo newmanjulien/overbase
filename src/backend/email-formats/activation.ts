@@ -1,10 +1,13 @@
 import type { Doc, Id } from '../../convex/_generated/dataModel';
 import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
 import {
-	getEmailFormatLinkedinContactsRequirement,
+	getEmailFormatActivationDataSourceRequirements,
+	getEmailFormatCreationDataSourceRequirement,
+	getEmailFormatDataSourceRequirementForRule,
 	getEmailFormatSpec,
 	type EmailFormatRule,
-	type EmailFormatRuleDataSourceAction,
+	type EmailFormatRuleDataSourceControl,
+	type EmailFormatDataSourceRequirement,
 	type EmailFormatSpec
 } from '../../shared/email-format-definitions';
 import {
@@ -102,31 +105,48 @@ export async function getEmailFormatActivationState(
 			recipientCount: format.recipientCount,
 			rules: format.rules,
 			requirements: spec.activationRequirements,
+			dataSourceRequirements: getEmailFormatActivationDataSourceRequirements(spec),
 			externalData
 		})
 	};
 }
 
-export function getRuleDataSourceAction(
+export function getRequiredDataSourceRequirementForRule(
 	spec: EmailFormatSpec,
-	externalData: EmailFormatActivationExternalDataState
-): EmailFormatRuleDataSourceAction {
-	const linkedinContactsRequirement = getEmailFormatLinkedinContactsRequirement(spec);
-
-	if (
-		linkedinContactsRequirement &&
-		externalData.linkedinContactsRuleIds.includes(linkedinContactsRequirement.ruleId)
-	) {
-		return { label: 'LinkedIn contacts added', disabled: true };
-	}
-
-	return spec.dataMode === 'public-data'
-		? spec.ruleDataSourceAction
-		: { label: 'Link data sources' };
+	ruleId: string
+) {
+	return getEmailFormatDataSourceRequirementForRule(spec, ruleId);
 }
 
-export function getRequiredLinkedinContactsRuleId(spec: EmailFormatSpec) {
-	return getEmailFormatLinkedinContactsRequirement(spec)?.ruleId ?? null;
+export function getCreationDataSourceRequirement(spec: EmailFormatSpec) {
+	return getEmailFormatCreationDataSourceRequirement(spec);
+}
+
+export function isDataSourceRequirementLinked(
+	requirement: EmailFormatDataSourceRequirement,
+	externalData: EmailFormatActivationExternalDataState
+) {
+	switch (requirement.kind) {
+		case 'linkedinContacts':
+			return externalData.linkedinContactsRuleIds.includes(requirement.ruleId);
+	}
+}
+
+export function getRuleDataSourceControls(
+	spec: EmailFormatSpec,
+	externalData: EmailFormatActivationExternalDataState
+): EmailFormatRuleDataSourceControl[] {
+	return spec.dataSourceRequirements.map((requirement) => {
+		const linked = isDataSourceRequirementLinked(requirement, externalData);
+
+		return {
+			ruleId: requirement.ruleId,
+			kind: requirement.kind,
+			attachMode: requirement.attachMode,
+			actionLabel: linked ? requirement.linkedLabel : requirement.actionLabel,
+			disabled: linked
+		};
+	});
 }
 
 export function getInitialRulesForEmailFormatSpec(spec: EmailFormatSpec): EmailFormatRule[] {
@@ -139,16 +159,16 @@ export function getLinkedinContactsCreateLinkForEmailFormatSpec(
 	spec: EmailFormatSpec,
 	externalDataImport: LinkedinContactsImport
 ): EmailFormatLinkedinContactsCreateLink | null {
-	const linkedinContactsRuleId = getRequiredLinkedinContactsRuleId(spec);
+	const requirement = getCreationDataSourceRequirement(spec);
 	const linkedinContactsSource = externalDataImport
 		? normalizeLinkedinContactsSource(externalDataImport)
 		: null;
 
-	if (externalDataImport && !linkedinContactsRuleId) {
+	if (externalDataImport && (!requirement || requirement.kind !== 'linkedinContacts')) {
 		throw new Error('This email format does not accept LinkedIn contacts.');
 	}
 
-	if (linkedinContactsRuleId && !linkedinContactsSource) {
+	if (requirement?.kind === 'linkedinContacts' && !linkedinContactsSource) {
 		throw new Error('LinkedIn contacts are required for this email format.');
 	}
 
@@ -156,16 +176,20 @@ export function getLinkedinContactsCreateLinkForEmailFormatSpec(
 		return null;
 	}
 
-	if (!linkedinContactsRuleId) {
+	if (!requirement) {
 		throw new Error('LinkedIn contacts rule not found.');
 	}
 
-	if (!spec.initialRules.some((rule) => rule.id === linkedinContactsRuleId)) {
+	if (requirement.attachMode !== 'upload-new') {
+		throw new Error('This email format cannot upload new LinkedIn contacts here.');
+	}
+
+	if (!spec.initialRules.some((rule) => rule.id === requirement.ruleId)) {
 		throw new Error('LinkedIn contacts rule not found.');
 	}
 
 	return {
-		ruleId: linkedinContactsRuleId,
+		ruleId: requirement.ruleId,
 		source: linkedinContactsSource
 	};
 }

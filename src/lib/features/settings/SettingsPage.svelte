@@ -196,7 +196,7 @@
 		<SettingsAvatarCard
 			title="User avatar"
 			description={["This is your personal avatar."]}
-			footerText="An avatar is optional but helps teammates recognize you."
+			footerText="An avatar is optional but helps team members recognize you."
 			ariaLabel="Upload user avatar"
 			uploading={uploadingUserAvatar}
 			errorText={userAvatarErrorText}

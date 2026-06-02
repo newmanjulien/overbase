@@ -15,18 +15,18 @@
 		onClose: () => void;
 	};
 
-	const dataSourceCategories = [
+	const internalDataCategories = [
 		{
 			icon: BuildingsIcon,
 			title: 'CRMs and ERPs',
 			description:
-				'Connect your CRM, ERP or any other system you use to run your operation'
+				'Connect your CRM, ERP or other operating systems'
 		},
 		{
 			icon: CalendarDotsIcon,
 			title: 'Email, calendar, etc.',
 			description:
-				'We can analyze emails, calendars, chat system like Slack or Teams or anywhere else you already work'
+				'Analyze email, calendars, Slack, Teams or other places your team already works'
 		},
 		{
 			icon: FilesIcon,
@@ -36,9 +36,9 @@
 		},
 		{
 			icon: StackSimpleIcon,
-			title: 'Any other data source',
+			title: 'Any other internal data source',
 			description:
-				'Connect the most disconnected data from the hardest to access places'
+				'Connect disconnected internal data wherever it lives'
 		}
 	];
 
@@ -49,19 +49,18 @@
 
 <FullHeightModalShell
 	{open}
-	title="Add data source"
-	subtitle="Connect your company's data sources to power your opportunities"
+	title="Add internal data source"
+	subtitle="Connect your company's internal data sources to power your opportunities"
 	placement="center"
 	{onClose}
 >
 	<div class="flex min-h-full flex-col justify-between gap-6 pt-1">
 		<div class="space-y-5">
 			<p class="text-[0.72rem] leading-relaxed text-stone-600">
-				Overbase's engineers will work with your IT team to bring together even your most
-				disconnected data
+				Overbase's engineers will work with your IT team to connect your internal data sources.
 			</p>
 
-			<TallModalFeatureGrid features={dataSourceCategories} />
+			<TallModalFeatureGrid features={internalDataCategories} />
 		</div>
 
 		<TallModalCallout text="Connect any of your internal data sources quickly and securely" />

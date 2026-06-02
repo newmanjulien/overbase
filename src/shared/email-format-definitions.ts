@@ -29,9 +29,14 @@ export type EmailFormatRuleDataSourceAction = {
 	disabled?: boolean;
 };
 
-export type EmailFormatExternalDataRequirement = {
+export type EmailFormatDataSourceRequirement = {
+	id: string;
 	kind: 'linkedinContacts';
 	ruleId: string;
+	requiredAt: 'creation' | 'activation';
+	attachMode: 'upload-new' | 'link-existing';
+	actionLabel: string;
+	linkedLabel: string;
 };
 
 export type EmailFormatActivationRequirement =
@@ -40,10 +45,6 @@ export type EmailFormatActivationRequirement =
 	  }
 	| {
 			kind: 'rules';
-	  }
-	| {
-			kind: 'externalData';
-			externalData: EmailFormatExternalDataRequirement;
 	  };
 
 export type EmailFormatVariantInitialRecipients = 'viewer' | 'none';
@@ -56,8 +57,7 @@ export type EmailFormatVariant = {
 	contentEditPolicy?: EmailFormatContentEditPolicy;
 	rulesEditPolicy?: EmailFormatRulesEditPolicy;
 	initialRules?: readonly EmailFormatRule[];
-	ruleDataSourceAction?: EmailFormatRuleDataSourceAction;
-	ruleDataSourceModal?: 'default' | 'reconnect-linkedin';
+	dataSourceRequirements?: readonly EmailFormatDataSourceRequirement[];
 	ruleInfoCard?: {
 		label: string;
 		content: EmailFormatInlineTextContent;
@@ -73,13 +73,20 @@ export type EmailFormatSpec = {
 	rulesEditPolicy: EmailFormatRulesEditPolicy;
 	initialRecipients: EmailFormatVariantInitialRecipients;
 	activationRequirements: readonly EmailFormatActivationRequirement[];
+	dataSourceRequirements: readonly EmailFormatDataSourceRequirement[];
 	initialRules: readonly EmailFormatRule[];
-	ruleDataSourceAction: EmailFormatRuleDataSourceAction;
-	ruleDataSourceModal: 'default' | 'reconnect-linkedin';
 	ruleInfoCard: {
 		label: string;
 		content: EmailFormatInlineTextContent;
 	} | null;
+};
+
+export type EmailFormatRuleDataSourceControl = {
+	ruleId: string;
+	kind: 'linkedinContacts';
+	attachMode: 'upload-new' | 'link-existing';
+	actionLabel: string;
+	disabled: boolean;
 };
 
 export type EmailFormatInlineTextContent = string | readonly EmailFormatInlineTextPart[];
@@ -161,6 +168,22 @@ const DEFAULT_ACTIVATION_REQUIREMENTS = [
 ] as const satisfies readonly EmailFormatActivationRequirement[];
 
 const LINKEDIN_CONTACTS_RULE_ID = 'only-rule';
+
+const RECONNECT_LINKEDIN_CONTACTS_CREATION_REQUIREMENT = {
+	id: 'linkedin-contacts',
+	kind: 'linkedinContacts',
+	ruleId: LINKEDIN_CONTACTS_RULE_ID,
+	requiredAt: 'creation',
+	attachMode: 'upload-new',
+	actionLabel: 'Add LinkedIn contacts',
+	linkedLabel: 'LinkedIn contacts added'
+} as const satisfies EmailFormatDataSourceRequirement;
+
+const RECONNECT_LINKEDIN_CONTACTS_ACTIVATION_REQUIREMENT = {
+	...RECONNECT_LINKEDIN_CONTACTS_CREATION_REQUIREMENT,
+	requiredAt: 'activation',
+	attachMode: 'link-existing'
+} as const satisfies EmailFormatDataSourceRequirement;
 
 export const reconnectLinkedinFormatVariables = [
 	{ id: 'assistant', label: 'Assistant' },
@@ -292,50 +315,40 @@ export const emailFormatDefinitionEntries = [
 				slug: 'personal',
 				label: 'Reconnect with contacts',
 				initialRecipients: 'viewer',
-				activationRequirements: [
-					...DEFAULT_ACTIVATION_REQUIREMENTS,
-					{
-						kind: 'externalData',
-						externalData: {
-							kind: 'linkedinContacts',
-							ruleId: LINKEDIN_CONTACTS_RULE_ID
-						}
-					}
-				],
+				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS,
+				dataSourceRequirements: [RECONNECT_LINKEDIN_CONTACTS_CREATION_REQUIREMENT],
 				initialRules: [
 					{
 						id: LINKEDIN_CONTACTS_RULE_ID,
 						text: 'Ask team members about their relationship with each person in their LinkedIn contacts. When you find someone worth reconnecting with, look for news or content that would make it easy'
 					}
-				],
-				ruleDataSourceAction: { label: 'Add LinkedIn contacts' },
-				ruleDataSourceModal: 'reconnect-linkedin'
+				]
 			},
 			{
 				slug: 'team',
 				label: 'Reconnect with contacts for team members',
 				initialRecipients: 'none',
 				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS,
+				dataSourceRequirements: [RECONNECT_LINKEDIN_CONTACTS_ACTIVATION_REQUIREMENT],
 				initialRules: [
 					{
 						id: LINKEDIN_CONTACTS_RULE_ID,
 						text: 'Ask team members about their relationship with each person in their LinkedIn contacts. When you find someone worth reconnecting with, look for news or content that would make it easy'
 					}
-				],
-				ruleDataSourceAction: { label: 'No data needed', disabled: true }
+				]
 			},
 			{
 				slug: 'senior-leadership',
 				label: 'Reconnect with contacts for senior leadership',
 				initialRecipients: 'none',
 				activationRequirements: DEFAULT_ACTIVATION_REQUIREMENTS,
+				dataSourceRequirements: [RECONNECT_LINKEDIN_CONTACTS_ACTIVATION_REQUIREMENT],
 				initialRules: [
 					{
 						id: LINKEDIN_CONTACTS_RULE_ID,
 						text: 'Ask team members about their relationship with each person in their LinkedIn contacts. When you find someone worth reconnecting with, look for news or content that would make it easy'
 					}
-				],
-				ruleDataSourceAction: { label: 'No data needed', disabled: true }
+				]
 			}
 		]
 	},
@@ -481,7 +494,7 @@ function validateEmailFormatDefinitionVariants(
 
 		validateEmailFormatVariantRules(issues, definition, variant);
 		validateEmailFormatVariantActivationRequirements(issues, definition, variant);
-		validateEmailFormatVariantDataSourceAction(issues, definition, variant);
+		validateEmailFormatVariantDataSourceRequirements(issues, definition, variant);
 	}
 }
 
@@ -540,16 +553,10 @@ function validateEmailFormatVariantActivationRequirements(
 	definition: EmailFormatDefinition,
 	variant: EmailFormatVariant
 ) {
-	const initialRuleIds = new Set((variant.initialRules ?? []).map((rule) => rule.id));
-
 	for (const requirement of variant.activationRequirements) {
 		const requirementKind = (requirement as { kind: string }).kind;
 
-		if (
-			requirementKind !== 'recipients' &&
-			requirementKind !== 'rules' &&
-			requirementKind !== 'externalData'
-		) {
+		if (requirementKind !== 'recipients' && requirementKind !== 'rules') {
 			issues.push({
 				definitionSlug: definition.slug,
 				variantSlug: variant.slug,
@@ -557,27 +564,62 @@ function validateEmailFormatVariantActivationRequirements(
 					requirementKind
 				)}".`
 			});
-			continue;
 		}
+	}
+}
 
-		if (requirement.kind !== 'externalData') {
-			continue;
-		}
+function validateEmailFormatVariantDataSourceRequirements(
+	issues: EmailFormatDefinitionValidationIssue[],
+	definition: EmailFormatDefinition,
+	variant: EmailFormatVariant
+) {
+	const initialRuleIds = new Set((variant.initialRules ?? []).map((rule) => rule.id));
+	const requirementIds = new Set<string>();
+	const requirementRuleIds = new Set<string>();
+	let creationRequirementCount = 0;
 
-		const externalDataKind = (requirement.externalData as { kind: string }).kind;
-
-		if (externalDataKind !== 'linkedinContacts') {
+	for (const requirement of variant.dataSourceRequirements ?? []) {
+		if (requirementIds.has(requirement.id)) {
 			issues.push({
 				definitionSlug: definition.slug,
 				variantSlug: variant.slug,
-				message: `Email format variant uses unknown external data requirement "${String(
-					externalDataKind
-				)}".`
+				message: `Duplicate data-source requirement id "${requirement.id}".`
 			});
-			continue;
+		}
+		requirementIds.add(requirement.id);
+
+		if (requirementRuleIds.has(requirement.ruleId)) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `Duplicate data-source requirement rule id "${requirement.ruleId}".`
+			});
+		}
+		requirementRuleIds.add(requirement.ruleId);
+
+		if (requirement.requiredAt === 'creation') {
+			creationRequirementCount += 1;
 		}
 
-		if (!requirement.externalData.ruleId.trim()) {
+		if (!requirement.id.trim()) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'Data-source requirements must define an id.'
+			});
+		}
+
+		if ((requirement as { kind: string }).kind !== 'linkedinContacts') {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: `Email format variant uses unknown data-source requirement "${String(
+					requirement.kind
+				)}".`
+			});
+		}
+
+		if (!requirement.ruleId.trim()) {
 			issues.push({
 				definitionSlug: definition.slug,
 				variantSlug: variant.slug,
@@ -586,67 +628,39 @@ function validateEmailFormatVariantActivationRequirements(
 			continue;
 		}
 
-		if (!initialRuleIds.has(requirement.externalData.ruleId)) {
+		if (!initialRuleIds.has(requirement.ruleId)) {
 			issues.push({
 				definitionSlug: definition.slug,
 				variantSlug: variant.slug,
-				message: `LinkedIn contacts requirement references missing initial rule "${requirement.externalData.ruleId}".`
+				message: `LinkedIn contacts requirement references missing initial rule "${requirement.ruleId}".`
+			});
+		}
+
+		if (
+			(requirement.requiredAt === 'creation' && requirement.attachMode !== 'upload-new') ||
+			(requirement.requiredAt === 'activation' && requirement.attachMode !== 'link-existing')
+		) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'Data-source requirement timing and attach mode are inconsistent.'
+			});
+		}
+
+		if (!requirement.actionLabel.trim() || !requirement.linkedLabel.trim()) {
+			issues.push({
+				definitionSlug: definition.slug,
+				variantSlug: variant.slug,
+				message: 'Data-source requirements must define action and linked labels.'
 			});
 		}
 	}
-}
 
-function validateEmailFormatVariantDataSourceAction(
-	issues: EmailFormatDefinitionValidationIssue[],
-	definition: EmailFormatDefinition,
-	variant: EmailFormatVariant
-) {
-	if (
-		variant.ruleDataSourceAction &&
-		!variant.ruleDataSourceAction.label.trim()
-	) {
+	if (creationRequirementCount > 1) {
 		issues.push({
 			definitionSlug: definition.slug,
 			variantSlug: variant.slug,
-			message: 'Rule data-source actions must define a label.'
-		});
-	}
-
-	if (
-		variant.ruleDataSourceModal &&
-		variant.ruleDataSourceModal !== 'default' &&
-		variant.ruleDataSourceModal !== 'reconnect-linkedin'
-	) {
-		issues.push({
-			definitionSlug: definition.slug,
-			variantSlug: variant.slug,
-			message: `Email format variant uses unknown rule data-source modal "${String(
-				variant.ruleDataSourceModal
-			)}".`
-		});
-	}
-
-	const requiresLinkedinContacts = variant.activationRequirements.some(
-		(requirement) =>
-			requirement.kind === 'externalData' &&
-			requirement.externalData.kind === 'linkedinContacts'
-	);
-
-	if (requiresLinkedinContacts && variant.ruleDataSourceModal !== 'reconnect-linkedin') {
-		issues.push({
-			definitionSlug: definition.slug,
-			variantSlug: variant.slug,
-			message:
-				'Variants with LinkedIn contacts requirements must use the LinkedIn contacts data-source modal.'
-		});
-	}
-
-	if (variant.ruleDataSourceModal === 'reconnect-linkedin' && !requiresLinkedinContacts) {
-		issues.push({
-			definitionSlug: definition.slug,
-			variantSlug: variant.slug,
-			message:
-				'The LinkedIn contacts data-source modal requires a LinkedIn contacts activation requirement.'
+			message: 'Email format variants can define at most one creation data-source requirement.'
 		});
 	}
 }
@@ -735,25 +749,32 @@ export function getEmailFormatSpec(
 		rulesEditPolicy: variant.rulesEditPolicy ?? definition.rulesEditPolicy,
 		initialRecipients: variant.initialRecipients,
 		activationRequirements: variant.activationRequirements,
+		dataSourceRequirements: variant.dataSourceRequirements ?? [],
 		initialRules: variant.initialRules ?? [],
-		ruleDataSourceAction:
-			variant.ruleDataSourceAction ?? { label: 'Link data sources' },
-		ruleDataSourceModal: variant.ruleDataSourceModal ?? 'default',
 		ruleInfoCard: variant.ruleInfoCard ?? definition.ruleInfoCard ?? null
 	};
 }
 
-export function getEmailFormatLinkedinContactsRequirement(
-	spec: Pick<EmailFormatSpec, 'activationRequirements'>
+export function getEmailFormatDataSourceRequirementForRule(
+	spec: Pick<EmailFormatSpec, 'dataSourceRequirements'>,
+	ruleId: string
 ) {
-	for (const requirement of spec.activationRequirements) {
-		if (
-			requirement.kind === 'externalData' &&
-			requirement.externalData.kind === 'linkedinContacts'
-		) {
-			return requirement.externalData;
-		}
-	}
+	return spec.dataSourceRequirements.find((requirement) => requirement.ruleId === ruleId) ?? null;
+}
 
-	return null;
+export function getEmailFormatCreationDataSourceRequirement(
+	spec: Pick<EmailFormatSpec, 'dataSourceRequirements'>
+) {
+	return (
+		spec.dataSourceRequirements.find((requirement) => requirement.requiredAt === 'creation') ??
+		null
+	);
+}
+
+export function getEmailFormatActivationDataSourceRequirements(
+	spec: Pick<EmailFormatSpec, 'dataSourceRequirements'>
+) {
+	return spec.dataSourceRequirements.filter(
+		(requirement) => requirement.requiredAt === 'activation'
+	);
 }

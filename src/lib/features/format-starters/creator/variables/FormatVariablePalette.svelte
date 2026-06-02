@@ -47,6 +47,6 @@
 	</div>
 
 	<InfoBar label="Tip:" class="mt-4 hidden md:block">
-		We're creating the format of the emails. Rules and data sources are added separately
+		We're creating the format of the emails. Rules and data are added separately
 	</InfoBar>
 </div>

@@ -106,6 +106,7 @@
 </script>
 
 <AuthEntryShell
+	accent="link"
 	onReturnButtonClick={step === 'code' ? showEmailStep : undefined}
 	returnButtonHref={currentReturnButtonHref}
 	showFooter={step === 'login'}

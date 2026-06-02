@@ -1,6 +1,6 @@
 import type {
 	EmailFormatActivationRequirement,
-	EmailFormatExternalDataRequirement
+	EmailFormatDataSourceRequirement
 } from './email-format-definitions';
 
 export type EmailFormatActivationMissingRequirement =
@@ -22,6 +22,7 @@ type EmailFormatActivationReadinessInput = {
 	recipientCount: number;
 	rules: readonly EmailFormatActivationRule[];
 	requirements: readonly EmailFormatActivationRequirement[];
+	dataSourceRequirements: readonly EmailFormatDataSourceRequirement[];
 	externalData: EmailFormatActivationExternalDataState;
 };
 
@@ -35,7 +36,7 @@ function hasSavedRule(rules: readonly EmailFormatActivationRule[]) {
 
 function hasExternalDataRequirement(
 	externalData: EmailFormatActivationExternalDataState,
-	requirement: EmailFormatExternalDataRequirement
+	requirement: EmailFormatDataSourceRequirement
 ) {
 	switch (requirement.kind) {
 		case 'linkedinContacts':
@@ -47,6 +48,7 @@ export function getEmailFormatActivationReadiness({
 	recipientCount,
 	rules,
 	requirements,
+	dataSourceRequirements,
 	externalData
 }: EmailFormatActivationReadinessInput): EmailFormatActivationReadiness {
 	const missingRequirements: EmailFormatActivationMissingRequirement[] = [];
@@ -60,10 +62,14 @@ export function getEmailFormatActivationReadiness({
 			missingRequirements.push('rules');
 		}
 
-		if (
-			requirement.kind === 'externalData' &&
-			!hasExternalDataRequirement(externalData, requirement.externalData)
-		) {
+	}
+
+	for (const requirement of dataSourceRequirements) {
+		if (requirement.requiredAt !== 'activation') {
+			continue;
+		}
+
+		if (!hasExternalDataRequirement(externalData, requirement)) {
 			missingRequirements.push('linkedinContacts');
 		}
 	}

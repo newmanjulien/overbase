@@ -22,7 +22,7 @@
 		people,
 		size = 20,
 		limit = 3,
-		altBase = 'Teammate',
+		altBase = 'Team member',
 		class: className = '',
 		avatarClass = 'border-2 border-white'
 	}: Props = $props();

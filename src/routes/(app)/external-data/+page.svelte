@@ -7,9 +7,9 @@
 		type ExternalDataDetails
 	} from '$lib/features/external-data/ExternalDataDetailsModal.svelte';
 	import type { ContactImport } from '$lib/features/external-data/linkedin-contacts-csv';
-	import DataSourceListRow, {
-		type DataSourceListItem
-	} from '$lib/features/data-sources/DataSourceListRow.svelte';
+	import ExternalDataListRow, {
+		type ExternalDataListItem
+	} from '$lib/features/external-data/ExternalDataListRow.svelte';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 
@@ -27,6 +27,7 @@
 	let actionError = $state<string | null>(null);
 	let deletingSourceId = $state<Id<'externalDataSources'> | null>(null);
 	let replacingSourceId = $state<Id<'externalDataSources'> | null>(null);
+	let renamingSourceId = $state<Id<'externalDataSources'> | null>(null);
 
 	const externalDataSources = $derived(externalDataQuery.data ?? []);
 	const typeFilterOptions: { id: ExternalDataTypeFilterId; label: string }[] = [
@@ -58,18 +59,18 @@
 		return source.kind === 'linkedinContacts' ? 'LinkedIn contacts' : 'External data';
 	}
 
-	function getExternalDataTypeFilterId(item: DataSourceListItem): ExternalDataTypeFilterId {
+	function getExternalDataTypeFilterId(item: ExternalDataListItem): ExternalDataTypeFilterId {
 		return item.type === 'LinkedIn contacts' ? 'linkedin-contacts' : 'all';
 	}
 
-	function matchesExternalDataFilters(item: DataSourceListItem) {
+	function matchesExternalDataFilters(item: ExternalDataListItem) {
 		const normalizedQuery = normalizeSearchText(searchQuery);
 
 		return (
 			(selectedTypeFilter === 'all' ||
 				getExternalDataTypeFilterId(item) === selectedTypeFilter) &&
 			(!normalizedQuery ||
-				[item.name, item.type, item.shared ? 'shared' : ''].some((value) =>
+				[item.name, item.type].some((value) =>
 					value.toLowerCase().includes(normalizedQuery)
 				))
 		);
@@ -89,21 +90,20 @@
 		};
 	}
 
-	function toExternalDataItem(source: ExternalDataSourceListRecord): DataSourceListItem {
+	function toExternalDataItem(source: ExternalDataSourceListRecord): ExternalDataListItem {
 		const details = toExternalDataDetails(source);
 
 		return {
 			id: source.id,
 			name: source.name,
 			type: details.type,
-			shared: false,
 			logoSrc: LINKEDIN_CONTACTS_LOGO_SRC,
 			onManage: () => openDetails(details)
 		};
 	}
 
 	function closeDetails() {
-		if (deletingSourceId || replacingSourceId) {
+		if (deletingSourceId || replacingSourceId || renamingSourceId) {
 			return;
 		}
 
@@ -112,7 +112,7 @@
 	}
 
 	async function deleteExternalDataSource(sourceId: Id<'externalDataSources'>) {
-		if (deletingSourceId || replacingSourceId) {
+		if (deletingSourceId || replacingSourceId || renamingSourceId) {
 			return;
 		}
 
@@ -132,19 +132,50 @@
 		}
 	}
 
+	async function renameExternalDataSource(
+		sourceId: Id<'externalDataSources'>,
+		name: string
+	) {
+		if (deletingSourceId || replacingSourceId || renamingSourceId) {
+			return;
+		}
+
+		actionError = null;
+		renamingSourceId = sourceId;
+
+		try {
+			const result = await client.mutation(api.externalData.renameExternalDataSource, {
+				externalDataSourceId: sourceId,
+				name
+			});
+
+			if (detailsSource?.id === sourceId) {
+				detailsSource = {
+					...detailsSource,
+					name: result.name
+				};
+			}
+		} catch (error) {
+			actionError =
+				error instanceof Error ? error.message : 'Could not rename external data source.';
+		} finally {
+			renamingSourceId = null;
+		}
+	}
+
 	async function replaceExternalDataSource(
 		sourceId: Id<'externalDataSources'>,
 		contactsImport: ContactImport
 	) {
-		if (deletingSourceId || replacingSourceId) {
-			return;
+		if (deletingSourceId || replacingSourceId || renamingSourceId) {
+			return false;
 		}
 
 		actionError = null;
 		replacingSourceId = sourceId;
 
 		try {
-			await client.mutation(api.externalData.replaceExternalDataSource, {
+			const result = await client.mutation(api.externalData.replaceExternalDataSource, {
 				externalDataSourceId: sourceId,
 				externalDataImport: {
 					kind: 'linkedinContacts',
@@ -156,13 +187,15 @@
 			if (detailsSource?.id === sourceId) {
 				detailsSource = {
 					...detailsSource,
-					sourceFileName: contactsImport.fileName
+					sourceFileName: result.sourceFileName
 				};
 			}
+
+			return true;
 		} catch (error) {
 			actionError =
 				error instanceof Error ? error.message : 'Could not replace external data source.';
-			throw error;
+			return false;
 		} finally {
 			replacingSourceId = null;
 		}
@@ -171,8 +204,8 @@
 
 <ListRoutePage
 	toolbar={{
-		searchPlaceholder: 'Search external data...',
-		searchAriaLabel: 'Search external data',
+		searchPlaceholder: 'Search external data sources...',
+		searchAriaLabel: 'Search external data sources',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
 		filter: {
@@ -191,28 +224,27 @@
 	empty={{
 		icon: APP_ROUTE_REGISTRY['external-data'].icon,
 		title: 'No external data found',
-		description: 'Connect external data to enrich your opportunities.',
+		description: 'Connect external data sources to enrich your opportunities.',
 		nextSteps:
-			'Overbase can pull from any external APIs or data sources you purchase. Connect external sources, then use them to power your opportunities',
-		learnMoreLabel: 'Learn more',
+			'Overbase can pull from external data sources you purchase. Connect external data sources, then use them to power your opportunities',
 		actionLabel: 'Add external data',
 		onAction: () => (modalOpen = true)
 	}}
 	hasItems={listState !== 'empty'}
 >
 	{#if listState === 'loading'}
-		<ListContentState kind="loading" message="Loading external data..." />
+		<ListContentState kind="loading" message="Loading external data sources..." />
 	{:else if listState === 'error'}
-		<ListContentState kind="error" message="Could not load external data." />
+		<ListContentState kind="error" message="Could not load external data sources." />
 	{:else if filteredExternalDataItems.length === 0}
-		<ListContentState kind="empty" message="No matching external data." />
+		<ListContentState kind="empty" message="No matching external data sources." />
 	{:else}
 		<ListRows
 			items={filteredExternalDataItems}
 			rowActionsAriaLabel="External data actions"
 		>
 			{#snippet rowCells(item)}
-				<DataSourceListRow {item} />
+				<ExternalDataListRow {item} />
 			{/snippet}
 		</ListRows>
 	{/if}
@@ -224,8 +256,10 @@
 	source={detailsSource}
 	deleting={deletingSourceId === detailsSource?.id}
 	replacing={replacingSourceId === detailsSource?.id}
+	renaming={renamingSourceId === detailsSource?.id}
 	error={actionError}
 	onClose={closeDetails}
 	onDelete={deleteExternalDataSource}
+	onRename={renameExternalDataSource}
 	onReplace={replaceExternalDataSource}
 />

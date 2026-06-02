@@ -2,16 +2,15 @@
 	import { Button } from '$lib/ui';
 	import type { ListRowItem } from '$lib/patterns/list-page';
 
-	export type DataSourceListItem = ListRowItem & {
+	export type ExternalDataListItem = ListRowItem & {
 		name: string;
 		type: string;
-		shared: boolean;
 		logoSrc: string;
 		onManage: () => void;
 	};
 
 	type Props = {
-		item: DataSourceListItem;
+		item: ExternalDataListItem;
 	};
 
 	let { item }: Props = $props();
@@ -30,13 +29,6 @@
 		<div class="min-w-0">
 			<div class="flex min-w-0 items-center gap-2">
 				<span class="truncate text-[0.7rem] font-medium text-stone-950">{item.name}</span>
-				{#if item.shared}
-					<span
-						class="shrink-0 rounded-full bg-positive-100 px-2 py-0.5 text-[0.68rem] leading-none text-positive-800"
-					>
-						Shared
-					</span>
-				{/if}
 			</div>
 			<span class="mt-0.5 block truncate text-[0.72rem] text-stone-500">{item.type}</span>
 		</div>

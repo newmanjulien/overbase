@@ -1,0 +1,42 @@
+<script lang="ts">
+	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
+	import { ListRoutePage } from '$lib/patterns/list-page';
+	import AddInternalDataModal from './AddInternalDataModal.svelte';
+
+	let modalOpen = $state(false);
+	let searchQuery = $state('');
+	let selectedTypeFilter = $state('all');
+
+	const typeFilterOptions = [{ id: 'all', label: 'All types' }];
+	const selectedTypeFilterLabel = $derived(
+		typeFilterOptions.find((option) => option.id === selectedTypeFilter)?.label ?? 'All types'
+	);
+</script>
+
+<ListRoutePage
+	toolbar={{
+		searchPlaceholder: 'Search internal data sources...',
+		searchAriaLabel: 'Search internal data sources',
+		searchValue: searchQuery,
+		onSearchValueChange: (value) => (searchQuery = value),
+		filter: {
+			label: selectedTypeFilterLabel,
+			selectedId: selectedTypeFilter,
+			options: typeFilterOptions,
+			onSelect: (optionId) => (selectedTypeFilter = optionId)
+		},
+		actionLabel: 'Add internal data',
+		onAction: () => (modalOpen = true)
+	}}
+	empty={{
+		icon: APP_ROUTE_REGISTRY['internal-data'].icon,
+		title: 'No internal data found',
+		description: 'Connect internal data sources to power your opportunities.',
+		nextSteps:
+			'Overbase can analyze any of your internal data sources. Add the internal data sources you want us to use to send you actionable opportunities or that you want to share with your ecosystem partners',
+		actionLabel: 'Add internal data',
+		onAction: () => (modalOpen = true)
+	}}
+/>
+
+<AddInternalDataModal open={modalOpen} onClose={() => (modalOpen = false)} />

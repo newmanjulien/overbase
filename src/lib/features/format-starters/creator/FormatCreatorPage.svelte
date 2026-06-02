@@ -27,7 +27,7 @@
 	import ReconnectLinkedinContactsModal from './reconnect-linkedin/ReconnectLinkedinContactsModal.svelte';
 	import type { ContactImport } from '$lib/features/external-data/linkedin-contacts-csv';
 	import {
-		getEmailFormatLinkedinContactsRequirement
+		getEmailFormatCreationDataSourceRequirement
 	} from '$shared/email-format-definitions';
 
 	type Props = {
@@ -43,7 +43,9 @@
 	const viewerUserId = $derived(viewerSession.viewer?.user._id ?? null);
 	const selectedFormatSpec = $derived(creator.selectedFormatSpec);
 	const titleEditable = $derived(Boolean(selectedFormatSpec?.contentEditPolicy.title));
-	const ruleDataSourceModal = $derived(selectedFormatSpec?.ruleDataSourceModal ?? 'default');
+	const creationDataSourceRequirement = $derived(
+		selectedFormatSpec ? getEmailFormatCreationDataSourceRequirement(selectedFormatSpec) : null
+	);
 	let isMobileCreator = $state(false);
 	let linkDataSourcesModalOpen = $state(false);
 	let creatingFormat = $state(false);
@@ -58,13 +60,24 @@
 				}
 			: null
 	);
-	const requiresLinkedinContacts = $derived(
-		selectedFormatSpec
-			? Boolean(getEmailFormatLinkedinContactsRequirement(selectedFormatSpec))
-			: false
+	const requiresLinkedinContactsBeforeCreate = $derived(
+		creationDataSourceRequirement?.kind === 'linkedinContacts'
+	);
+	const dataSourceControls = $derived(
+		creator.dataSourceControls
+			.filter((control) => control.ruleId === creationDataSourceRequirement?.ruleId)
+			.map((control) =>
+				linkedinContactsImport && creationDataSourceRequirement
+					? {
+							...control,
+							actionLabel: creationDataSourceRequirement.linkedLabel,
+							disabled: true
+						}
+					: control
+			)
 	);
 	const createFormatPrerequisiteHint = $derived(
-		requiresLinkedinContacts && !linkedinContactsImport
+		requiresLinkedinContactsBeforeCreate && !linkedinContactsImport
 			? {
 					text: 'Add your LinkedIn contacts to create this format',
 					actionLabel: 'Add contacts',
@@ -75,7 +88,7 @@
 	const createFormatDisabled = $derived(
 		creatingFormat ||
 			!creator.canCreateFormat ||
-			(requiresLinkedinContacts && !linkedinContactsImport)
+			(requiresLinkedinContactsBeforeCreate && !linkedinContactsImport)
 	);
 	const createFormatLabel = $derived(creatingFormat ? 'Creating...' : 'Create format');
 
@@ -136,7 +149,9 @@
 	}
 
 	function openLinkedinContactsModal() {
-		linkDataSourcesModalOpen = true;
+		if (creationDataSourceRequirement?.attachMode === 'upload-new') {
+			linkDataSourcesModalOpen = true;
+		}
 	}
 
 	function acceptLinkedinContactsImport(contactsImport: ContactImport) {
@@ -153,7 +168,7 @@
 			return;
 		}
 
-		if (requiresLinkedinContacts && !linkedinContactsImport) {
+		if (requiresLinkedinContactsBeforeCreate && !linkedinContactsImport) {
 			createFormatError = linkedinContactsRequiredError;
 			linkDataSourcesModalOpen = true;
 			return;
@@ -215,8 +230,10 @@
 					<EmailFormatRulePanel
 						rules={creator.rulesDraft}
 						onRulesChange={creator.updateRules}
-						onLinkDataSources={() => (linkDataSourcesModalOpen = true)}
-						ruleDataSourceAction={creator.ruleDataSourceAction ?? undefined}
+						onLinkDataSources={creationDataSourceRequirement
+							? openLinkedinContactsModal
+							: undefined}
+						ruleDataSourceControls={dataSourceControls}
 						infoCard={formatStarter.ruleInfoCard}
 						canEditRuleText={selectedFormatSpec?.rulesEditPolicy.text ?? false}
 						canEditRuleList={selectedFormatSpec?.rulesEditPolicy.list ?? false}
@@ -300,8 +317,10 @@
 							<EmailFormatRulePanel
 								rules={creator.rulesDraft}
 								onRulesChange={creator.updateRules}
-								onLinkDataSources={() => (linkDataSourcesModalOpen = true)}
-								ruleDataSourceAction={creator.ruleDataSourceAction ?? undefined}
+								onLinkDataSources={creationDataSourceRequirement
+									? openLinkedinContactsModal
+									: undefined}
+								ruleDataSourceControls={dataSourceControls}
 								infoCard={formatStarter.ruleInfoCard}
 								canEditRuleText={selectedFormatSpec?.rulesEditPolicy.text ?? false}
 								canEditRuleList={selectedFormatSpec?.rulesEditPolicy.list ?? false}
@@ -356,7 +375,7 @@
 	{/if}
 {/key}
 
-{#if ruleDataSourceModal === 'reconnect-linkedin'}
+{#if creationDataSourceRequirement?.attachMode === 'upload-new'}
 	<ReconnectLinkedinContactsModal
 		open={linkDataSourcesModalOpen}
 		contactsImport={linkedinContactsImport}

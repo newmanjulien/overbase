@@ -34,3 +34,8 @@ export const replaceExternalDataSourceInput = {
 	externalDataSourceId,
 	externalDataImport: linkedinContactsExternalDataImport
 };
+
+export const renameExternalDataSourceInput = {
+	externalDataSourceId,
+	name: v.string()
+};

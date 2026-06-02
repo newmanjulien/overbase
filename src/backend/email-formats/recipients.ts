@@ -65,7 +65,7 @@ async function validateRecipientRefs(
 		const teammate = await ctx.db.get(ref.teammateId);
 
 		if (!teammate || teammate.workspaceId !== viewerWorkspace.workspace._id) {
-			throw new Error('Recipient teammate is not in this workspace.');
+			throw new Error('Recipient team member is not in this workspace.');
 		}
 	}
 

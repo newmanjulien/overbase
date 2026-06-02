@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import {
+	externalDataSourceId,
 	externalDataImport,
 	linkedinContactsExternalDataImport
 } from './external-data';
@@ -60,6 +61,12 @@ export const addLinkedinContactsSourceToEmailFormatRuleInput = {
 	emailFormatId,
 	ruleId: v.string(),
 	externalDataImport: linkedinContactsExternalDataImport
+};
+
+export const linkExternalDataSourceToEmailFormatRuleInput = {
+	emailFormatId,
+	ruleId: v.string(),
+	externalDataSourceId
 };
 
 export const updateEmailFormatContentInput = {

@@ -22,8 +22,8 @@
 	}: Props = $props();
 </script>
 
-<ModalShell {open} title="Add teammates" onClose={onClose}>
-	<label for="teammate-emails" class="block text-xs text-stone-950">List emails separated by commas</label>
+<ModalShell {open} title="Add team members" onClose={onClose}>
+	<label for="teammate-emails" class="block text-xs text-stone-950">List team member emails separated by commas</label>
 	<textarea
 		id="teammate-emails"
 		{value}
@@ -38,7 +38,7 @@
 	{#snippet footer()}
 		<Button variant="secondary" disabled={isAdding} onclick={onClose}>Cancel</Button>
 		<Button disabled={isAdding} onclick={() => void onSubmit()}>
-			{isAdding ? 'Adding...' : 'Add teammates'}
+			{isAdding ? 'Adding...' : 'Add team members'}
 		</Button>
 	{/snippet}
 </ModalShell>
