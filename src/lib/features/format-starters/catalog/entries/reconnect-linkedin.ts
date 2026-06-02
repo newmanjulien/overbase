@@ -60,6 +60,14 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
   title: "Reconnect with contacts",
   description:
     "Find news that lets your team reconnect with their LinkedIn contacts",
+  sampleEmail: {
+    subject: "Worth reconnecting with Ajay",
+    paragraphs: [
+      "Hey Nicole,",
+      "Ajay Agrawal just started a new role at Mastercard, which looks like a useful reason to get back in touch.",
+      "His likely email and LinkedIn profile are below. I attached a short scorecard so we can decide whether he should be part of the next outreach list.",
+    ],
+  },
   details: {
     paragraphs: [
       "This is a simple email format that's designed to only use public data",

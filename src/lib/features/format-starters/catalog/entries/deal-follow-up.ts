@@ -15,6 +15,14 @@ export const dealFollowUpFormatStarter = defineFormatStarter({
 	formatDefinitionSlug: 'deal-follow-up',
 	title: 'Deal follow-up',
 	description: 'Follow up after a sales conversation with the right ask and attached deal tracker.',
+	sampleEmail: {
+		subject: 'Follow-up from today',
+		paragraphs: [
+			'Hi Priya,',
+			'Thanks again for walking through the expansion goals today. The main takeaway I captured is that the team wants a cleaner handoff before the next planning cycle.',
+			'I attached a short recap with the next step, the open commercial question, and the owner for each item.'
+		]
+	},
 	details: {
 		paragraphs: [
 			'Create a useful follow-up after discovery, proposal review, or procurement discussion.',

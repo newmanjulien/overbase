@@ -15,6 +15,14 @@ export const implementationPlanFormatStarter = defineFormatStarter({
 	formatDefinitionSlug: 'implementation-plan',
 	title: 'Implementation plan',
 	description: 'Start an implementation email with a seeded project plan attachment.',
+	sampleEmail: {
+		subject: 'Implementation kickoff plan',
+		paragraphs: [
+			'Hi Jordan,',
+			'Sharing the first implementation plan for the rollout. The initial milestone is ready, and the dependency list is short enough to review in one pass.',
+			'I attached the plan with owners, launch dates, and the success metric we should use for the first checkpoint.'
+		]
+	},
 	details: {
 		paragraphs: [
 			'Create a kickoff, migration, or remediation plan email for implementation work.',

@@ -101,6 +101,20 @@ function validateFormatStarterEntry(
 		});
 	}
 
+	if (!entry.sampleEmail.subject.trim()) {
+		issues.push({
+			formatStarterSlug: entry.slug,
+			message: 'Sample email must define a subject.'
+		});
+	}
+
+	if (entry.sampleEmail.paragraphs.some((paragraph) => !paragraph.trim())) {
+		issues.push({
+			formatStarterSlug: entry.slug,
+			message: 'Sample email paragraphs must not be blank.'
+		});
+	}
+
 	for (const startingPoint of entry.startingPoints) {
 		if (!variantSlugs.has(startingPoint.variantSlug)) {
 			issues.push({

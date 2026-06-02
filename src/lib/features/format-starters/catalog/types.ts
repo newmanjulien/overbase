@@ -16,12 +16,18 @@ export type FormatStartingPoint = {
 	emailContent: FormatEmailContent;
 };
 
+export type FormatStarterSampleEmail = {
+	subject: string;
+	paragraphs: readonly [string, ...string[]];
+};
+
 type FormatStarterBase = {
 	slug: string;
 	formatDefinitionSlug: string;
 	mode: EmailFormatDataMode;
 	title: string;
 	description: string;
+	sampleEmail: FormatStarterSampleEmail;
 	details: {
 		paragraphs: readonly [string, ...string[]];
 	};
@@ -52,5 +58,5 @@ export type FormatStarter =
 
 export type FormatStarterGalleryEntry = Pick<
 	FormatStarter,
-	'mode' | 'slug' | 'title' | 'description'
+	'mode' | 'slug' | 'title' | 'description' | 'sampleEmail'
 >;

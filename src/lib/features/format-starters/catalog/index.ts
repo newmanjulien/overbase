@@ -2,6 +2,7 @@ export { getFormatStarter, listFormatStarterGalleryEntries, listFormatStarters }
 export { resolveFormatStarterContent } from './resolve-content';
 export type {
 	FormatStartingPoint,
+	FormatStarterSampleEmail,
 	FormatStarterGalleryEntry,
 	FormatStarter
 } from './types';

@@ -15,6 +15,14 @@ export const clientUpdateFormatStarter = defineFormatStarter({
 	formatDefinitionSlug: 'client-update',
 	title: 'Client update',
 	description: 'Draft a client-facing update with the right level of detail and a seeded tracker.',
+	sampleEmail: {
+		subject: 'Weekly launch update',
+		paragraphs: [
+			'Hi Morgan,',
+			'Here is the latest update on the onboarding launch. The core setup is on track, and the remaining work is mostly around final stakeholder review.',
+			'I attached the tracker with owners, dates, and the few open items we should confirm before Friday.'
+		]
+	},
 	details: {
 		paragraphs: [
 			'Create a concise client update for status, decisions, or risk follow-up.',

@@ -2,25 +2,27 @@
 	import type { ClassValue } from 'clsx';
 	import ArrowUpRightIcon from 'phosphor-svelte/lib/ArrowUpRightIcon';
 	import FormatStarterEmailPreview from '$lib/features/format-starters/FormatStarterEmailPreview.svelte';
+	import type { FormatStarterSampleEmail } from '$lib/features/format-starters/catalog';
 	import { cn } from '$lib/ui/cn';
 
 	type Props = {
 		title: string;
 		description?: string;
+		sampleEmail: FormatStarterSampleEmail;
 		class?: ClassValue;
 	};
 
-	let { title, description, class: className }: Props = $props();
+	let { title, description, sampleEmail, class: className }: Props = $props();
 </script>
 
 <div
 	class={cn(
-		'starter-artwork-card relative w-full overflow-hidden rounded-sm border border-stone-200/60 bg-white',
+		'starter-artwork-card relative w-full overflow-hidden rounded-sm border border-stone-200/40 bg-white',
 		className
 	)}
 >
 	<div class="starter-artwork-card__document">
-		<FormatStarterEmailPreview />
+		<FormatStarterEmailPreview content={sampleEmail} />
 	</div>
 	<div class="starter-artwork-card__copy text-stone-950">
 		<div class="starter-artwork-card__title-row">

@@ -2,19 +2,21 @@
 	import type { ClassValue } from 'clsx';
 	import ArrowSquareOutIcon from 'phosphor-svelte/lib/ArrowSquareOutIcon';
 	import PrinterIcon from 'phosphor-svelte/lib/PrinterIcon';
+	import type { FormatStarterSampleEmail } from '$lib/features/format-starters/catalog';
 	import { cn } from '$lib/ui/cn';
 
 	type Props = {
+		content: FormatStarterSampleEmail;
 		class?: ClassValue;
 	};
 
-	let { class: className }: Props = $props();
+	let { content, class: className }: Props = $props();
 </script>
 
 <article class={cn('format-starter-email-preview', className)} aria-hidden="true">
 	<header class="format-starter-email-preview__header">
 		<img src="/logo.png" alt="" class="format-starter-email-preview__logo" draggable="false" />
-		<h2 class="format-starter-email-preview__title">Opportunity to help General Motors</h2>
+		<h2 class="format-starter-email-preview__title">{content.subject}</h2>
 		<div class="format-starter-email-preview__toolbar">
 			<span class="format-starter-email-preview__toolbar-icon">
 				<PrinterIcon size="100%" weight="regular" />
@@ -26,19 +28,9 @@
 	</header>
 
 	<div class="format-starter-email-preview__body">
-		<p>Hey Nicole,</p>
-		<p>
-			Robert Rosenberg is the lawyer from the Tax team who is tasked with building a relationship
-			with General Motors.
-		</p>
-		<p>
-			You might consider flagging to him that GM started searching for a new CFO. And we might want
-			to brainstorm a few recommendations our firm could make.
-		</p>
-		<p>
-			I also CCed the folks at Korn Ferry who are leading that search - they're the ones who
-			flagged this opportunity.
-		</p>
+		{#each content.paragraphs as paragraph, paragraphIndex (paragraphIndex)}
+			<p>{paragraph}</p>
+		{/each}
 	</div>
 </article>
 

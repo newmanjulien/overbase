@@ -41,5 +41,9 @@
 	{onfocus}
 	{onpointerenter}
 >
-	<FormatStarterArtworkCard title={formatStarter.title} description={formatStarter.description} />
+	<FormatStarterArtworkCard
+		title={formatStarter.title}
+		description={formatStarter.description}
+		sampleEmail={formatStarter.sampleEmail}
+	/>
 </a>

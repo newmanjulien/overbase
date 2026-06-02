@@ -33,11 +33,12 @@ function compareFormatStarterCatalogEntries(left: FormatStarter, right: FormatSt
 export function listFormatStarterGalleryEntries(): FormatStarterGalleryEntry[] {
 	return listFormatStarters()
 		.filter((formatStarter) => formatStarter.showInGallery)
-		.map(({ mode, slug, title, description }) => ({
+		.map(({ mode, slug, title, description, sampleEmail }) => ({
 			mode,
 			slug,
 			title,
-			description
+			description,
+			sampleEmail
 		}));
 }
 
