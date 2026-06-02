@@ -32,6 +32,7 @@
 	},
 	"dependencies": {
 		"@fontsource/newsreader": "^5.2.10",
+		"@fontsource/roboto": "^5.2.10",
 		"clsx": "^2.1.1",
 		"convex": "^1.37.0",
 		"convex-svelte": "^0.0.12",

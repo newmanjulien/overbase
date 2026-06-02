@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ClassValue } from 'clsx';
 	import ArrowUpRightIcon from 'phosphor-svelte/lib/ArrowUpRightIcon';
+	import FormatStarterEmailPreview from '$lib/features/format-starters/FormatStarterEmailPreview.svelte';
 	import { cn } from '$lib/ui/cn';
 
 	type Props = {
@@ -19,7 +20,7 @@
 	)}
 >
 	<div class="starter-artwork-card__document">
-		<img src="/artwork2.png" alt="" class="block w-full" loading="lazy" />
+		<FormatStarterEmailPreview />
 	</div>
 	<div class="starter-artwork-card__copy text-stone-950">
 		<div class="starter-artwork-card__title-row">
