@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 import { avatar } from '../backend/validators/avatars';
+import { createFormatGalleryCategoryId } from '../backend/validators/create-format-gallery';
 import {
 	externalDataSourceKind,
 	externalDataSourceStatus,
@@ -20,6 +21,7 @@ export default defineSchema({
 		displayName: v.optional(v.string()),
 		avatar: v.optional(avatar),
 		workspaceId: v.optional(v.id('workspaces')),
+		lastCreateFormatGalleryCategoryId: v.optional(createFormatGalleryCategoryId),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_clerkUserId', ['clerkUserId']),

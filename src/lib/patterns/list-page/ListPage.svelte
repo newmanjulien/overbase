@@ -19,7 +19,7 @@
 	}: Props = $props();
 </script>
 
-<div class={cn('mx-auto flex min-h-full w-full max-w-320 flex-col gap-3 pb-12', className)}>
+<div class={cn('mx-auto flex min-h-full w-full max-w-[100rem] flex-col gap-3 pb-12', className)}>
 	{@render toolbar?.()}
 
 	<section

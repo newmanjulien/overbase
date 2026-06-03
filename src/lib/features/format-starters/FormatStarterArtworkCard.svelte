@@ -20,13 +20,13 @@
 
 <div
 	class={cn(
-		'starter-artwork-card relative w-full overflow-hidden rounded-sm border border-stone-200/40 bg-white',
+		'starter-artwork-card relative w-full overflow-hidden rounded-md border border-stone-200/40 bg-white',
 		className
 	)}
 >
 	<DataSourceLogoStack
 		{dataSourceIds}
-		class="absolute right-[4%] top-[5.5%] z-10"
+		class="absolute right-[4%] top-[8.5%] z-10"
 	/>
 	<div class="starter-artwork-card__document">
 		<FormatStarterEmailPreview content={sampleEmail} />
@@ -39,7 +39,7 @@
 			</span>
 		</div>
 		{#if description}
-			<div class="mt-1 line-clamp-4 text-[0.5825rem] leading-[1.25] text-stone-500 md:text-[0.6625rem]">
+			<div class="mt-1 line-clamp-4 text-[0.725rem] leading-tight text-stone-500">
 				{description}
 			</div>
 		{/if}
@@ -63,7 +63,7 @@
 		box-shadow: 0 8px 14px rgb(28 25 23 / 7%);
 		transform: rotate(-4.5deg);
 		transform-origin: center;
-		transition: transform 130ms;
+		transition: transform 120ms;
 	}
 
 	:global(.format-starter-card:is(:hover, :focus-visible)) .starter-artwork-card__document {
@@ -72,7 +72,7 @@
 
 	.starter-artwork-card__copy {
 		position: absolute;
-		top: 6%;
+		top: 9%;
 		left: 5.5%;
 		max-width: calc(100% - 5.5% - 4.75rem);
 	}
@@ -82,7 +82,7 @@
 		max-width: 100%;
 		min-width: 0;
 		align-items: center;
-		font-size: 0.6175rem;
+		font-size: 0.7575rem;
 		font-weight: 500;
 		line-height: 1.08;
 	}
@@ -97,12 +97,7 @@
 
 	:global(.format-starter-card:is(:hover, :focus-visible)) .starter-artwork-card__title-icon {
 		visibility: visible;
-		transition-delay: 110ms;
+		transition-delay: 100ms;
 	}
 
-	@media (width >= 48rem) {
-		.starter-artwork-card__title-row {
-			font-size: 0.7575rem;
-		}
-	}
 </style>

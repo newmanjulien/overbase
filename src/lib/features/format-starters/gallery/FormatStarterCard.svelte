@@ -23,7 +23,7 @@
 	const link = $derived(createFormatLink(formatStarter.slug));
 	const cardClass = $derived(
 		cn(
-			'format-starter-card block w-full rounded-sm p-1.5 text-left outline-none transition-colors focus-visible:bg-stone-100/80 focus-visible:ring-2 focus-visible:ring-stone-300 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-60',
+			'format-starter-card block w-full rounded-md p-1.5 text-left outline-none transition-colors focus-visible:bg-stone-100/80 focus-visible:ring-2 focus-visible:ring-stone-300 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-60',
 			formatStarter.mode === 'public-data'
 				? 'bg-stone-50 hover:bg-white hover:ring-stone-300/90'
 				: 'bg-white hover:bg-stone-50'

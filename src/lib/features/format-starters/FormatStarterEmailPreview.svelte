@@ -70,7 +70,7 @@
 		right: 19%;
 		margin: 0;
 		overflow: hidden;
-		font-size: 3.22cqw;
+		font-size: 2.95cqw;
 		font-weight: 400;
 		letter-spacing: 0;
 		line-height: 1.08;
@@ -99,7 +99,7 @@
 		top: 18.85%;
 		right: 7.25%;
 		left: 13.75%;
-		font-size: 1.89cqw;
+		font-size: 1.62cqw;
 		font-weight: 400;
 		letter-spacing: 0;
 		line-height: 1.22;
@@ -110,6 +110,6 @@
 	}
 
 	.format-starter-email-preview__body p + p {
-		margin-top: 1.5cqw;
+		margin-top: 1.2cqw;
 	}
 </style>

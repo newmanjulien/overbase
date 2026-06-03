@@ -83,7 +83,7 @@
 					disabled={isCompletingOnboarding}
 					onclick={onOpenFormatStarter}
 				>
-					{isOpeningFormatStarter ? 'Opening...' : 'Let me explore the full service'}
+					{isOpeningFormatStarter ? 'Opening...' : 'Let me explore the full capabilities'}
 				</button>
 			</div>
 		</div>
