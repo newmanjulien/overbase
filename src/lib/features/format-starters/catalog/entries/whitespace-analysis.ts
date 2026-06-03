@@ -17,6 +17,19 @@ export const whitespaceAnalysisFormatStarter = defineFormatStarter({
   description: "Give brokers benchmarks for renewal conversations",
   dataSourceIds: ["calendar", "epic", "onedrive"],
   industryTags: ["insurance"],
+  variables: [
+    { id: "prospect_company", label: "Prospect company" },
+    { id: "buyer_name", label: "Buyer name" },
+    { id: "deal_owner", label: "Deal owner" },
+    { id: "procurement_owner", label: "Procurement owner" },
+    { id: "opportunity_name", label: "Opportunity name" },
+    { id: "deal_stage", label: "Deal stage" },
+    { id: "business_goal", label: "Business goal" },
+    { id: "proposal_link", label: "Proposal link" },
+    { id: "next_step", label: "Next step" },
+    { id: "next_step_date", label: "Next step date" },
+    { id: "commercial_question", label: "Commercial question" },
+  ],
   sampleEmail: {
     subject: "Report for Exterra",
     paragraphs: [

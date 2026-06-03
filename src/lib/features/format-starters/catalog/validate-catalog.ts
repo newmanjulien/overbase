@@ -101,6 +101,7 @@ function validateFormatStarterEntry(
 		'variable',
 		entry.variables.map((variable) => variable.id)
 	);
+	validateFormatStarterVariables(issues, entry);
 
 	const startingPointIds = new Set(entry.startingPoints.map((startingPoint) => startingPoint.id));
 	const variableIds = new Set(entry.variables.map((variable) => variable.id));
@@ -174,6 +175,34 @@ function validateFormatStarterEntry(
 
 function isFormatStarterDataMode(value: string): value is FormatStarter['mode'] {
 	return value === 'internal-data' || value === 'public-data';
+}
+
+function validateFormatStarterVariables(
+	issues: FormatStarterCatalogValidationIssue[],
+	entry: FormatStarter
+) {
+	if (entry.variables.length === 0) {
+		issues.push({
+			formatStarterSlug: entry.slug,
+			message: 'Format starters must define at least one variable.'
+		});
+	}
+
+	for (const variable of entry.variables) {
+		if (!variable.id.trim()) {
+			issues.push({
+				formatStarterSlug: entry.slug,
+				message: 'Format starter variables cannot use an empty id.'
+			});
+		}
+
+		if (!variable.label.trim()) {
+			issues.push({
+				formatStarterSlug: entry.slug,
+				message: `Format starter variable "${variable.id}" must define a label.`
+			});
+		}
+	}
 }
 
 function validateFormatStarterSelection(

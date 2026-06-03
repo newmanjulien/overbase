@@ -10,7 +10,8 @@ import {
 	emailFormatBodyBlock,
 	emailFormatRule,
 	emailFormatSpreadsheetAttachment,
-	emailFormatStatus
+	emailFormatStatus,
+	emailFormatVariableDefinition
 } from '../backend/validators/email-formats';
 
 export default defineSchema({
@@ -47,6 +48,7 @@ export default defineSchema({
 		formatDefinitionSlug: v.string(),
 		createdFromStarterSlug: v.string(),
 		variantSlug: v.string(),
+		variables: v.array(emailFormatVariableDefinition),
 		selectedAnswers: v.record(v.string(), v.string()),
 		status: emailFormatStatus,
 		lastActivatedAt: v.union(v.number(), v.null()),

@@ -17,6 +17,21 @@ export const callIntelligenceFormatStarter = defineFormatStarter({
   description: "Find opportunities to upsell from account management calls",
   dataSourceIds: ["gong", "salesforce", "calendar"],
   industryTags: ["consulting"],
+  variables: [
+    { id: "account_name", label: "Account name" },
+    { id: "account_owner", label: "Account owner" },
+    { id: "call_date", label: "Call date" },
+    { id: "call_topic", label: "Call topic" },
+    { id: "call_signal", label: "Call signal" },
+    { id: "call_timestamp", label: "Call timestamp" },
+    { id: "expansion_opportunity", label: "Expansion opportunity" },
+    { id: "retention_risk", label: "Retention risk" },
+    { id: "risk_owner", label: "Risk owner" },
+    { id: "stakeholder_name", label: "Stakeholder name" },
+    { id: "stakeholder_role", label: "Stakeholder role" },
+    { id: "recommended_follow_up", label: "Recommended follow-up" },
+    { id: "next_meeting_date", label: "Next meeting date" },
+  ],
   sampleEmail: {
     subject: "Chevron opportunity",
     paragraphs: [

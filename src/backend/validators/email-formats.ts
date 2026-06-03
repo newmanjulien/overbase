@@ -35,6 +35,11 @@ export const emailFormatRule = v.object({
 	text: v.string()
 });
 
+export const emailFormatVariableDefinition = v.object({
+	id: v.string(),
+	label: v.string()
+});
+
 export const emailFormatId = v.id('emailFormats');
 
 export const emailFormatRecipientRef = v.union(
@@ -46,6 +51,7 @@ export const emailFormatCreateFromStarterInput = {
 	formatDefinitionSlug: v.string(),
 	createdFromStarterSlug: v.string(),
 	variantSlug: v.string(),
+	variables: v.array(emailFormatVariableDefinition),
 	selectedAnswers: v.record(v.string(), v.string()),
 	title: v.string(),
 	to: v.array(v.string()),

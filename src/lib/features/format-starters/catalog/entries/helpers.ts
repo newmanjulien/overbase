@@ -17,10 +17,10 @@ import type {
 	PublicDataFormatStarter
 } from '../types';
 
-type InternalDataFormatStarterInput = Omit<InternalDataFormatStarter, 'mode' | 'variables'>;
+type InternalDataFormatStarterInput = Omit<InternalDataFormatStarter, 'mode'>;
 type PublicDataFormatStarterInput = Omit<
 	PublicDataFormatStarter,
-	'mode' | 'variables' | 'ruleInfoCard'
+	'mode' | 'ruleInfoCard'
 >;
 
 type FormatStarterInput = InternalDataFormatStarterInput | PublicDataFormatStarterInput;
@@ -49,7 +49,6 @@ export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
 		return {
 			...entry,
 			mode: definition.dataMode,
-			variables: definition.variables,
 			ruleInfoCard: initialSpec.ruleInfoCard
 		};
 	}
@@ -57,7 +56,6 @@ export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
 	return {
 		...entry,
 		mode: definition.dataMode,
-		variables: definition.variables
 	};
 }
 

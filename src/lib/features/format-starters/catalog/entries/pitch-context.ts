@@ -17,6 +17,22 @@ export const pitchContextFormatStarter = defineFormatStarter({
   description: "Give consultants the context they need to pitch clients",
   dataSourceIds: ["flowcase", "salesforce", "onedrive"],
   industryTags: ["consulting"],
+  variables: [
+    { id: "consultant_name", label: "Consultant name" },
+    { id: "client_company", label: "Client company" },
+    { id: "pitch_owner", label: "Pitch owner" },
+    { id: "prior_pitch_owner", label: "Prior pitch owner" },
+    { id: "prior_pitch_date", label: "Prior pitch date" },
+    { id: "proposal_topic", label: "Proposal topic" },
+    { id: "relevant_proposal", label: "Relevant proposal" },
+    { id: "source_material", label: "Source material" },
+    { id: "partner_firm", label: "Partner firm" },
+    { id: "competitor_context", label: "Competitor context" },
+    { id: "decision_maker", label: "Decision maker" },
+    { id: "meeting_date", label: "Meeting date" },
+    { id: "recommended_angle", label: "Recommended angle" },
+    { id: "follow_up_owner", label: "Follow-up owner" },
+  ],
   sampleEmail: {
     subject: "Context for JPMC pitch",
     paragraphs: [

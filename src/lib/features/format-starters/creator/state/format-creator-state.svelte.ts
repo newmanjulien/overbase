@@ -15,7 +15,8 @@ import {
 import type {
 	FormatInlineNode,
 	FormatSpreadsheetAttachment,
-	FormatStarterSelectionAnswers
+	FormatStarterSelectionAnswers,
+	FormatVariableDefinition
 } from '$lib/features/format-starters/domain';
 import type { EmailFormatRule } from '$lib/domain/email-format-rules';
 import { FormatContentEditorState } from './format-content-editor-state.svelte';
@@ -66,6 +67,7 @@ export type CreateEmailFormatFromStarterInput = {
 	formatDefinitionSlug: string;
 	createdFromStarterSlug: string;
 	variantSlug: string;
+	variables: FormatVariableDefinition[];
 	selectedAnswers: FormatStarterSelectionAnswers;
 	title: string;
 	to: string[];
@@ -260,6 +262,7 @@ export class FormatCreatorState {
 			formatDefinitionSlug: this.formatStarter.formatDefinitionSlug,
 			createdFromStarterSlug: this.formatStarter.slug,
 			variantSlug: this.creator.selectedVariantSlug,
+			variables: this.formatStarter.variables.map((variable) => ({ ...variable })),
 			selectedAnswers: { ...this.creator.selectedAnswers },
 			title: content.title,
 			to: [...content.to],

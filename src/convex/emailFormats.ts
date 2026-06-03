@@ -7,6 +7,7 @@ import {
 	normalizeEmailFormatContent,
 	normalizeEmailFormatRules,
 	normalizeEmailFormatTitle,
+	normalizeEmailFormatVariables,
 	normalizeSelectedAnswers,
 	toEditableEmailFormatContent
 } from '../backend/email-formats/content';
@@ -165,13 +166,17 @@ export const createEmailFormatFromStarter = mutation({
 		}
 
 		const createdFromStarterSlug = args.createdFromStarterSlug.trim();
+		const variables = normalizeEmailFormatVariables(args.variables);
 		const title = normalizeEmailFormatTitle(args.title);
-		const content = normalizeEmailFormatContent({
-			to: args.to,
-			cc: args.cc,
-			attachment: args.attachment,
-			body: args.body
-		});
+		const content = normalizeEmailFormatContent(
+			{
+				to: args.to,
+				cc: args.cc,
+				attachment: args.attachment,
+				body: args.body
+			},
+			variables
+		);
 		const now = Date.now();
 		const linkedinContactsLink = getLinkedinContactsCreateLinkForEmailFormatSpec(
 			formatSpec,
@@ -181,6 +186,10 @@ export const createEmailFormatFromStarter = mutation({
 
 		if (!createdFromStarterSlug) {
 			throw new Error('Format starter slug is required.');
+		}
+
+		if (variables.length === 0) {
+			throw new Error('Email format variables are required.');
 		}
 
 		if (!title) {
@@ -197,6 +206,7 @@ export const createEmailFormatFromStarter = mutation({
 			formatDefinitionSlug: formatDefinition.slug,
 			createdFromStarterSlug,
 			variantSlug: formatSpec.variantSlug,
+			variables,
 			selectedAnswers: normalizeSelectedAnswers(args.selectedAnswers),
 			status: 'paused',
 			lastActivatedAt: null,
@@ -346,7 +356,7 @@ export const getEmailFormatConfiguration = query({
 			formatDefinition: {
 				slug: formatSpec.definitionSlug,
 				dataMode: formatSpec.dataMode,
-				variables: formatSpec.variables,
+				variables: format.variables,
 				contentEditPolicy: formatSpec.contentEditPolicy,
 				rulesEditPolicy: formatSpec.rulesEditPolicy,
 				dataSourceActions: getRuleDataSourceActions(formatSpec, dataSourceLinkState),
@@ -572,18 +582,24 @@ export const updateEmailFormatContent = mutation({
 			);
 		}
 
-		const content = normalizeEmailFormatContent({
-			to: args.to,
-			cc: args.cc,
-			attachment: args.attachment,
-			body: args.body
-		});
-		const currentContent = normalizeEmailFormatContent({
-			to: format.to,
-			cc: format.cc,
-			attachment: format.attachment,
-			body: format.body
-		});
+		const content = normalizeEmailFormatContent(
+			{
+				to: args.to,
+				cc: args.cc,
+				attachment: args.attachment,
+				body: args.body
+			},
+			format.variables
+		);
+		const currentContent = normalizeEmailFormatContent(
+			{
+				to: format.to,
+				cc: format.cc,
+				attachment: format.attachment,
+				body: format.body
+			},
+			format.variables
+		);
 
 		assertLockedFieldUnchanged(
 			formatSpec.contentEditPolicy.to,

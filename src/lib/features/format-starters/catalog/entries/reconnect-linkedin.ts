@@ -61,6 +61,15 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
   description: "Find news that lets your team reconnect with LinkedIn contacts",
   dataSourceIds: ["linkedin"],
   industryTags: [],
+  variables: [
+    { id: "team_member", label: "Team member" },
+    { id: "assistant", label: "Assistant" },
+    { id: "senior_leader", label: "Senior leader" },
+    { id: "link", label: "Link" },
+    { id: "email", label: "Email" },
+    { id: "linkedin_url", label: "LinkedIn URL" },
+    { id: "yesno", label: "Yes/No" },
+  ],
   sampleEmail: {
     subject: "Reconnect with Ajay Agrawal",
     paragraphs: [

@@ -17,6 +17,19 @@ export const warmUpFormatStarter = defineFormatStarter({
   description: "Help lawyers warm up specific accounts",
   dataSourceIds: ["foundation", "salesforce"],
   industryTags: ["law"],
+  variables: [
+    { id: "client_name", label: "Client name" },
+    { id: "account_owner", label: "Account owner" },
+    { id: "project_name", label: "Project name" },
+    { id: "reporting_period", label: "Reporting period" },
+    { id: "current_status", label: "Current status" },
+    { id: "priority_update", label: "Priority update" },
+    { id: "decision_needed", label: "Decision needed" },
+    { id: "decision_due_date", label: "Decision due date" },
+    { id: "risk_summary", label: "Risk summary" },
+    { id: "risk_owner", label: "Risk owner" },
+    { id: "next_meeting_date", label: "Next meeting date" },
+  ],
   sampleEmail: {
     subject: "Opportunity to help General Motors",
     paragraphs: [

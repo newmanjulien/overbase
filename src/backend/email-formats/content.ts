@@ -1,4 +1,5 @@
 import { SPREADSHEET_CELL_MAX_LENGTH, cellKey, parseCellKey } from '../../shared/spreadsheets';
+import type { EmailFormatVariableDefinition } from '../../shared/email-format-definitions';
 import type { Doc } from '../../convex/_generated/dataModel';
 
 const MAX_TITLE_LENGTH = 120;
@@ -11,6 +12,7 @@ const MAX_VARIABLE_ID_LENGTH = 80;
 const MAX_RULES = 20;
 const MAX_RULE_ID_LENGTH = 80;
 const MAX_RULE_TEXT_LENGTH = 1_500;
+const MAX_VARIABLES = 80;
 const MAX_SELECTED_ANSWERS = 20;
 const MAX_SELECTED_ANSWER_ID_LENGTH = 80;
 
@@ -51,7 +53,36 @@ export function normalizeEmailFormatRecipients(recipients: string[]) {
 	];
 }
 
-function normalizeInlineNodes(nodes: EmailFormatInlineNode[], maxTextLength: number) {
+export function normalizeEmailFormatVariables(
+	variables: readonly EmailFormatVariableDefinition[]
+): EmailFormatVariableDefinition[] {
+	const seen = new Set<string>();
+	const normalized: EmailFormatVariableDefinition[] = [];
+
+	for (const variable of variables) {
+		if (normalized.length >= MAX_VARIABLES) {
+			break;
+		}
+
+		const id = clampEmailFormatText(variable.id, MAX_VARIABLE_ID_LENGTH);
+		const label = clampSingleLineText(variable.label, 80);
+
+		if (!id || !label || seen.has(id)) {
+			continue;
+		}
+
+		seen.add(id);
+		normalized.push({ id, label });
+	}
+
+	return normalized;
+}
+
+function normalizeInlineNodes(
+	nodes: EmailFormatInlineNode[],
+	maxTextLength: number,
+	allowedVariableIds: ReadonlySet<string>
+) {
 	const normalized: EmailFormatInlineNode[] = [];
 	let remainingTextLength = maxTextLength;
 
@@ -66,7 +97,11 @@ function normalizeInlineNodes(nodes: EmailFormatInlineNode[], maxTextLength: num
 			const variableId = clampEmailFormatText(node.variableId, MAX_VARIABLE_ID_LENGTH);
 			const tokenLength = `{${variableId}}`.length;
 
-			if (variableId && tokenLength <= remainingTextLength) {
+			if (
+				variableId &&
+				allowedVariableIds.has(variableId) &&
+				tokenLength <= remainingTextLength
+			) {
 				normalized.push({ type: 'variable', variableId });
 				remainingTextLength -= tokenLength;
 			}
@@ -91,18 +126,24 @@ function normalizeInlineNodes(nodes: EmailFormatInlineNode[], maxTextLength: num
 	return normalized;
 }
 
-export function normalizeEmailFormatBody(body: EmailFormatBody) {
+export function normalizeEmailFormatBody(
+	body: EmailFormatBody,
+	allowedVariableIds: ReadonlySet<string>
+) {
 	return body
 		.slice(0, MAX_BODY_BLOCKS)
 		.map((block) => ({
 			id: block.id.trim(),
 			type: 'paragraph' as const,
-			content: normalizeInlineNodes([...block.content], MAX_BODY_TEXT_LENGTH)
+			content: normalizeInlineNodes([...block.content], MAX_BODY_TEXT_LENGTH, allowedVariableIds)
 		}))
 		.filter((block) => block.id && block.content.length > 0);
 }
 
-export function normalizeEmailFormatAttachment(attachment: EmailFormatAttachment) {
+export function normalizeEmailFormatAttachment(
+	attachment: EmailFormatAttachment,
+	allowedVariableIds: ReadonlySet<string>
+) {
 	if (!attachment) {
 		return null;
 	}
@@ -117,7 +158,11 @@ export function normalizeEmailFormatAttachment(attachment: EmailFormatAttachment
 
 	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
 		const address = parseCellKey(key);
-		const normalizedCell = normalizeInlineNodes([...cell], SPREADSHEET_CELL_MAX_LENGTH);
+		const normalizedCell = normalizeInlineNodes(
+			[...cell],
+			SPREADSHEET_CELL_MAX_LENGTH,
+			allowedVariableIds
+		);
 
 		if (address && normalizedCell.length > 0) {
 			cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = normalizedCell;
@@ -130,12 +175,17 @@ export function normalizeEmailFormatAttachment(attachment: EmailFormatAttachment
 	};
 }
 
-export function normalizeEmailFormatContent(content: EmailFormatContentInput) {
+export function normalizeEmailFormatContent(
+	content: EmailFormatContentInput,
+	variables: readonly EmailFormatVariableDefinition[]
+) {
+	const allowedVariableIds = new Set(variables.map((variable) => variable.id));
+
 	return {
 		to: normalizeEmailFormatRecipients(content.to),
 		cc: normalizeEmailFormatRecipients(content.cc),
-		attachment: normalizeEmailFormatAttachment(content.attachment),
-		body: normalizeEmailFormatBody(content.body)
+		attachment: normalizeEmailFormatAttachment(content.attachment, allowedVariableIds),
+		body: normalizeEmailFormatBody(content.body, allowedVariableIds)
 	};
 }
 
