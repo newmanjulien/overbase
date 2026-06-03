@@ -57,7 +57,7 @@
 			class="rounded-sm border border-stone-200/70 bg-white"
 		/>
 	{:else}
-		<div class="format-starter-gallery grid grid-cols-1 gap-x-2 gap-y-1 sm:grid-cols-2 xl:grid-cols-3">
+		<div class="format-starter-gallery grid grid-cols-1 gap-x-2.5 gap-y-2 sm:grid-cols-2 xl:grid-cols-3">
 			{#each filteredFormatStarters as formatStarter (formatStarter.slug)}
 				<FormatStarterCard {formatStarter} />
 			{/each}
@@ -79,6 +79,6 @@
 	}
 
 	:global(.format-starter-gallery .starter-artwork-card) {
-		aspect-ratio: 2.32;
+		aspect-ratio: 2.2;
 	}
 </style>
