@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import AppGateError from '$lib/app/AppGateError.svelte';
 	import AppLoadingScreen from '$lib/app/AppLoadingScreen.svelte';
 	import AppShell from '$lib/app/AppShell.svelte';
-	import { AUTH_LINKS, resolveAuthHref } from '$lib/app/app-links';
+	import { AUTH_LINKS } from '$lib/app/app-links';
 	import { buildAuthEntryHref, resolveAuthReturnTo } from '$lib/auth/navigation';
 	import { createViewerSession, provideViewerSession } from '$lib/auth/viewer-session.svelte';
 	import type { Snippet } from 'svelte';
@@ -25,7 +26,7 @@
 
 	$effect(() => {
 		if (session.status === 'signedOut') {
-			void goto(resolveAuthHref(loginHref), { replaceState: true });
+			void goto(resolve(loginHref), { replaceState: true });
 		}
 	});
 </script>

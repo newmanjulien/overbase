@@ -11,8 +11,9 @@
 
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { AUTH_LINKS, resolveAppHref } from '$lib/app/app-links';
+	import { AUTH_LINKS } from '$lib/app/app-links';
 	import AppGateError from '$lib/app/AppGateError.svelte';
 	import AppLoadingScreen from '$lib/app/AppLoadingScreen.svelte';
 	import {
@@ -63,7 +64,7 @@
 
 	$effect(() => {
 		if (shouldRedirectSignedInAuthEntry) {
-			void goto(resolveAppHref(postAuthHref), { replaceState: true });
+			void goto(resolve(postAuthHref), { replaceState: true });
 		}
 	});
 </script>

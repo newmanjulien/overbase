@@ -1,14 +1,19 @@
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
-import {
-	builderArtifacts,
-	builderRunSetup
-} from '../backend/validators/builder-protocol';
-import { emailDraft } from '../backend/validators/email-drafts';
 import { avatar } from '../backend/validators/avatars';
-import { emailFormatRecipientRef } from '../backend/validators/recipients';
-
-export const messageRole = v.union(v.literal('user'), v.literal('assistant'));
+import { createFormatGalleryCategoryId } from '../backend/validators/create-format-gallery';
+import {
+	externalDataSourceKind,
+	externalDataSourceStatus,
+	linkedinContactFields
+} from '../backend/validators/external-data';
+import {
+	emailFormatBodyBlock,
+	emailFormatRule,
+	emailFormatSpreadsheetAttachment,
+	emailFormatStatus,
+	emailFormatVariableDefinition
+} from '../backend/validators/email-formats';
 
 export default defineSchema({
 	users: defineTable({
@@ -16,6 +21,7 @@ export default defineSchema({
 		displayName: v.optional(v.string()),
 		avatar: v.optional(avatar),
 		workspaceId: v.optional(v.id('workspaces')),
+		lastCreateFormatGalleryCategoryId: v.optional(createFormatGalleryCategoryId),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_clerkUserId', ['clerkUserId']),
@@ -28,92 +34,6 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_ownerUserId', ['ownerUserId']),
-	builderSessions: defineTable({
-		workspaceId: v.id('workspaces'),
-		appSlug: v.string(),
-		appTitle: v.string(),
-		startRequestId: v.optional(v.string()),
-		setup: builderRunSetup,
-		status: v.union(
-			v.literal('working'),
-			v.literal('waitingForUser'),
-			v.literal('ready'),
-			v.literal('failed')
-		),
-		appState: v.optional(
-			v.object({
-				version: v.number(),
-				value: v.any()
-			})
-		),
-		activeTurnJobId: v.optional(v.id('builderSessionJobs')),
-		activeBackgroundJobId: v.optional(v.id('builderSessionJobs')),
-		artifacts: builderArtifacts,
-		errorText: v.optional(v.string()),
-		createdAt: v.number(),
-		updatedAt: v.number(),
-		expiresAt: v.number()
-	})
-		.index('by_expiresAt', ['expiresAt'])
-		.index('by_workspace_app_startRequestId', ['workspaceId', 'appSlug', 'startRequestId']),
-	builderSessionMessages: defineTable({
-		sessionId: v.id('builderSessions'),
-		role: messageRole,
-		text: v.string(),
-		status: v.union(
-			v.literal('pending'),
-			v.literal('streaming'),
-			v.literal('complete'),
-			v.literal('failed')
-		),
-		jobId: v.optional(v.id('builderSessionJobs')),
-		errorText: v.optional(v.string()),
-		createdAt: v.number(),
-		updatedAt: v.optional(v.number())
-	}).index('by_session_createdAt', ['sessionId', 'createdAt']),
-	builderSessionJobs: defineTable({
-		sessionId: v.id('builderSessions'),
-		kind: v.union(
-			v.literal('startTurn'),
-			v.literal('continueTurn'),
-			v.literal('background')
-		),
-		status: v.union(
-			v.literal('pending'),
-			v.literal('running'),
-			v.literal('complete'),
-			v.literal('failed')
-		),
-		assistantMessageId: v.optional(v.id('builderSessionMessages')),
-		attempts: v.number(),
-		deadlineAt: v.number(),
-		errorText: v.optional(v.string()),
-		createdAt: v.number(),
-		updatedAt: v.number()
-	}).index('by_session_createdAt', ['sessionId', 'createdAt']),
-	emailFormats: defineTable({
-		workspaceId: v.id('workspaces'),
-		title: v.string(),
-		status: v.union(v.literal('paused'), v.literal('active')),
-		definition: v.object({
-			kind: v.literal('customEmail'),
-			builderAppSlug: v.string()
-		}),
-		emailDraft,
-		emailDraftVersion: v.number(),
-		rules: v.array(
-			v.object({
-				id: v.string(),
-				text: v.string()
-			})
-		),
-		recipientRefs: v.array(emailFormatRecipientRef),
-		createdByUserId: v.id('users'),
-		createdAt: v.number(),
-		updatedAt: v.number()
-	})
-		.index('by_workspace_createdAt', ['workspaceId', 'createdAt'])
-		.index('by_createdByUserId', ['createdByUserId']),
 	teammates: defineTable({
 		workspaceId: v.id('workspaces'),
 		email: v.string(),
@@ -124,32 +44,69 @@ export default defineSchema({
 	})
 		.index('by_workspace_email', ['workspaceId', 'email'])
 		.index('by_workspace_createdAt', ['workspaceId', 'createdAt']),
-	sentEmails: defineTable({
+	emailFormats: defineTable({
+		workspaceId: v.id('workspaces'),
+		creatorUserId: v.id('users'),
+		formatDefinitionSlug: v.string(),
+		createdFromStarterSlug: v.string(),
+		variantSlug: v.string(),
+		variables: v.array(emailFormatVariableDefinition),
+		selectedAnswers: v.record(v.string(), v.string()),
+		status: emailFormatStatus,
+		lastActivatedAt: v.union(v.number(), v.null()),
+		title: v.string(),
+		titleVersion: v.number(),
+		to: v.array(v.string()),
+		cc: v.array(v.string()),
+		attachment: v.union(emailFormatSpreadsheetAttachment, v.null()),
+		body: v.array(emailFormatBodyBlock),
+		emailContentVersion: v.number(),
+		recipientCount: v.number(),
+		rules: v.array(emailFormatRule),
+		rulesVersion: v.number(),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	}).index('by_workspace_createdAt', ['workspaceId', 'createdAt']),
+	emailFormatRecipients: defineTable({
 		workspaceId: v.id('workspaces'),
 		emailFormatId: v.id('emailFormats'),
-		sentAt: v.number(),
-		emailDraft,
+		recipient: v.union(
+			v.object({ kind: v.literal('user'), userId: v.id('users') }),
+			v.object({ kind: v.literal('teammate'), teammateId: v.id('teammates') })
+		),
 		createdAt: v.number()
 	})
-		.index('by_workspace_emailFormat_sentAt', [
-			'workspaceId',
-			'emailFormatId',
-			'sentAt'
-		])
-		.index('by_workspace_emailFormat_createdAt', [
-			'workspaceId',
-			'emailFormatId',
-			'createdAt'
-		]),
-	emailFeedback: defineTable({
+		.index('by_emailFormat', ['emailFormatId'])
+		.index('by_workspace_emailFormat', ['workspaceId', 'emailFormatId']),
+	externalDataSources: defineTable({
 		workspaceId: v.id('workspaces'),
-		emailFormatId: v.id('emailFormats'),
-		sentEmailId: v.id('sentEmails'),
-		likedText: v.string(),
-		improvementText: v.string(),
+		createdByUserId: v.id('users'),
+		kind: externalDataSourceKind,
+		name: v.string(),
+		sourceFileName: v.string(),
+		recordCount: v.number(),
+		status: externalDataSourceStatus,
 		createdAt: v.number(),
 		updatedAt: v.number()
 	})
+		.index('by_workspace_createdAt', ['workspaceId', 'createdAt'])
+		.index('by_workspace_kind_createdAt', ['workspaceId', 'kind', 'createdAt']),
+	externalDataSourceLinkedinContacts: defineTable({
+		workspaceId: v.id('workspaces'),
+		externalDataSourceId: v.id('externalDataSources'),
+		...linkedinContactFields,
+		createdAt: v.number()
+	})
+		.index('by_externalDataSource', ['externalDataSourceId'])
+		.index('by_workspace_externalDataSource', ['workspaceId', 'externalDataSourceId']),
+	emailFormatExternalDataLinks: defineTable({
+		workspaceId: v.id('workspaces'),
+		emailFormatId: v.id('emailFormats'),
+		ruleId: v.string(),
+		externalDataSourceId: v.id('externalDataSources'),
+		createdAt: v.number()
+	})
+		.index('by_emailFormat', ['emailFormatId'])
 		.index('by_workspace_emailFormat', ['workspaceId', 'emailFormatId'])
-		.index('by_workspace_sentEmail', ['workspaceId', 'sentEmailId'])
+		.index('by_externalDataSource', ['externalDataSourceId'])
 });

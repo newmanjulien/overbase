@@ -8,6 +8,7 @@
 	type Props = {
 		children: Snippet;
 		footer?: Snippet;
+		accent?: 'info' | 'link';
 		showFooter?: boolean;
 		onReturnButtonClick?: () => void;
 		returnButtonHref?: string;
@@ -18,6 +19,7 @@
 	let {
 		children,
 		footer,
+		accent = 'info',
 		showFooter = Boolean(footer),
 		onReturnButtonClick,
 		returnButtonHref,
@@ -36,6 +38,7 @@
 </script>
 
 <AuthPageShell
+	{accent}
 	{onReturnButtonClick}
 	{returnButtonHref}
 	{returnLabel}

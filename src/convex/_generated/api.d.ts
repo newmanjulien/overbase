@@ -9,15 +9,12 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as builder from "../builder.js";
-import type * as builderSessions from "../builderSessions.js";
 import type * as crons from "../crons.js";
-import type * as devSeed from "../devSeed.js";
 import type * as emailFormats from "../emailFormats.js";
+import type * as externalData from "../externalData.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as internal_auth from "../internal/auth.js";
-import type * as internal_builderSessions from "../internal/builderSessions.js";
 import type * as settings from "../settings.js";
 import type * as teammateIdentity from "../teammateIdentity.js";
 import type * as teammates from "../teammates.js";
@@ -30,15 +27,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  builder: typeof builder;
-  builderSessions: typeof builderSessions;
   crons: typeof crons;
-  devSeed: typeof devSeed;
   emailFormats: typeof emailFormats;
+  externalData: typeof externalData;
   health: typeof health;
   http: typeof http;
   "internal/auth": typeof internal_auth;
-  "internal/builderSessions": typeof internal_builderSessions;
   settings: typeof settings;
   teammateIdentity: typeof teammateIdentity;
   teammates: typeof teammates;

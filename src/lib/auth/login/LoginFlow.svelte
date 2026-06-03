@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
-	import { AUTH_LINKS, resolveAuthHref, type AppHref, type AuthEntryHref } from '$lib/app/app-links';
+	import { AUTH_LINKS, type AppHref, type AuthEntryHref } from '$lib/app/app-links';
 	import AuthCodeStep from '$lib/auth/components/AuthCodeStep.svelte';
 	import AuthEntryShell from '$lib/auth/components/AuthEntryShell.svelte';
 	import AuthHotkeyButton from '$lib/auth/components/AuthHotkeyButton.svelte';
@@ -105,6 +106,7 @@
 </script>
 
 <AuthEntryShell
+	accent="link"
 	onReturnButtonClick={step === 'code' ? showEmailStep : undefined}
 	returnButtonHref={currentReturnButtonHref}
 	showFooter={step === 'login'}
@@ -113,7 +115,7 @@
 		<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
 			Need an account?
 			<a
-				href={resolveAuthHref(joinHref)}
+				href={resolve(joinHref)}
 				class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
 			>
 				Join

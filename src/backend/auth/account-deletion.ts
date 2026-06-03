@@ -1,7 +1,5 @@
 import type { Doc, Id } from '../../convex/_generated/dataModel';
 import type { MutationCtx } from '../../convex/_generated/server';
-import { deleteBuilderSessionsForWorkspace } from '../builder-sessions/deletion';
-import { deleteEmailFormatRecordsForWorkspace } from '../email-formats/deletion';
 import { deleteUploadedAvatar } from '../profiles/avatars';
 
 async function deleteTeammateRecords(ctx: MutationCtx, workspaceId: Id<'workspaces'>) {
@@ -16,8 +14,6 @@ async function deleteTeammateRecords(ctx: MutationCtx, workspaceId: Id<'workspac
 }
 
 async function deleteWorkspaceRecords(ctx: MutationCtx, workspace: Doc<'workspaces'>) {
-	await deleteBuilderSessionsForWorkspace(ctx, workspace._id);
-	await deleteEmailFormatRecordsForWorkspace(ctx, workspace._id);
 	await deleteTeammateRecords(ctx, workspace._id);
 	await deleteUploadedAvatar(ctx, workspace.avatar);
 	await ctx.db.delete(workspace._id);

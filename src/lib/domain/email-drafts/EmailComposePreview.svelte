@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { EmailBodyBlock, EmailDraft } from '@overbase/builder-sdk/email';
+	import type { EmailBodyBlock, EmailDraft } from '$shared/email-drafts';
 	import EmailComposeDocument from '$lib/domain/email-drafts/EmailComposeDocument.svelte';
 	import { formatRecipients } from '$lib/domain/email-drafts/email-editable-draft';
 	import EmailAttachmentCard from '$lib/domain/email-drafts/EmailAttachmentCard.svelte';
@@ -51,16 +51,10 @@
 					{#each draft.body as block, blockIndex (`${block.type}:${blockIndex}`)}
 						{#if isParagraphBlock(block)}
 							<p class="whitespace-pre-wrap">{block.text}</p>
-						{:else if block.type === 'bullets'}
-							<ul class="list-disc space-y-1.5 pl-5">
-								{#each block.items as item, itemIndex (`${item}:${itemIndex}`)}
-									<li class="pl-1">{item}</li>
-								{/each}
-							</ul>
 						{:else if block.type === 'link'}
 							<p>
 								<span
-									class="cursor-default font-medium text-blue-600 underline decoration-blue-600/70 underline-offset-2"
+									class="cursor-default font-medium text-link-600 underline decoration-link-600/70 underline-offset-2"
 									title={block.href}
 								>
 									{block.label}

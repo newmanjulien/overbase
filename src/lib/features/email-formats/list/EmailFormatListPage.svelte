@@ -1,45 +1,74 @@
 <script lang="ts">
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
-	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { useAppConvexPreloader } from '$lib/app/app-convex-preloader.svelte';
 	import { APP_LINKS, emailFormatLink } from '$lib/app/app-links';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import {
-		ListContentState,
 		ListRoutePage,
-		SelectableList
+		SelectableList,
+		type EmptyListStateConfig,
+		type ListRouteStatus,
+		type NoResultsListStateConfig
 	} from '$lib/patterns/list-page';
 	import { InfoBar } from '$lib/ui';
+	import { useConvexClient, useQuery } from 'convex-svelte';
+	import { onDestroy } from 'svelte';
+	import EmailFormatActivationStatusBar from '../configure/EmailFormatActivationStatusBar.svelte';
+	import {
+		createTimedNotice,
+		getActivationSuccessMessage
+	} from '../configure/email-format-activation-notices.svelte';
 	import EmailFormatListRow, {
 		type EmailFormatListItem
 	} from './EmailFormatListRow.svelte';
 
+	type EmailFormatStatus = 'active' | 'paused';
+	type FormatStatusFilterId = 'all' | EmailFormatStatus;
+
+	const client = useConvexClient();
+	const appConvexPreloader = useAppConvexPreloader();
+	const formatsQuery = useQuery(api.emailFormats.listEmailFormats);
 	const dateFormatter = new Intl.DateTimeFormat(undefined, {
 		month: 'short',
 		day: 'numeric',
 		year: 'numeric'
 	});
-	const client = useConvexClient();
-	const formatsQuery = useQuery(api.emailFormats.listEmailFormats);
+	let updatingFormatIds = $state<Id<'emailFormats'>[]>([]);
 	let deletingFormatIds = $state<Id<'emailFormats'>[]>([]);
-	let pausingFormatIds = $state<Id<'emailFormats'>[]>([]);
 	let actionError = $state<string | null>(null);
+	const activationSuccessNotice = createTimedNotice();
 	let searchQuery = $state('');
-	let selectedStatusFilter = $state<'all' | EmailFormatListRecord['status']>('all');
+	let selectedStatusFilter = $state<FormatStatusFilterId>('all');
 	const formatItems = $derived((formatsQuery.data ?? []).map(toFormatItem));
 	const filteredFormatItems = $derived(formatItems.filter(matchesFormatFilters));
-	const listState = $derived(
+	const emptyListState = {
+		icon: APP_ROUTE_REGISTRY['email-formats'].icon,
+		title: 'No email formats found',
+		description: 'Create your first local email draft from a format.',
+		nextSteps: [
+			{ kind: 'link', text: 'Create', href: APP_LINKS.createFormats.pathname },
+			{
+				kind: 'text',
+				text: ' the format of the emails your team will receive'
+			}
+		],
+		learnMoreLabel: 'Learn more'
+	} satisfies EmptyListStateConfig;
+	const noResultsState = {
+		title: 'No matching email formats',
+		description: 'Try a different search term, creator, or status'
+	} satisfies NoResultsListStateConfig;
+	const listStatus = $derived<ListRouteStatus>(
 		formatsQuery.isLoading
 			? 'loading'
 			: formatsQuery.error
 				? 'error'
-				: formatItems.length === 0
-					? 'empty'
-					: 'ready'
+				: 'ready'
 	);
-
-	type EmailFormatListRecord = NonNullable<typeof formatsQuery.data>[number];
-	type FormatStatusFilterId = 'all' | EmailFormatListRecord['status'];
+	const totalRecords = $derived(formatItems.length);
+	const visibleRecords = $derived(filteredFormatItems.length);
+	const isQueryActive = $derived(Boolean(searchQuery.trim()) || selectedStatusFilter !== 'all');
 
 	const statusFilterOptions: { id: FormatStatusFilterId; label: string }[] = [
 		{ id: 'all', label: 'All email formats' },
@@ -50,6 +79,12 @@
 	const selectedStatusFilterLabel = $derived(
 		statusFilterOptions.find((option) => option.id === selectedStatusFilter)?.label ?? 'All email formats'
 	);
+
+	type EmailFormatListRecord = NonNullable<typeof formatsQuery.data>[number];
+
+	onDestroy(() => {
+		activationSuccessNotice.destroy();
+	});
 
 	function formatStatus(status: EmailFormatListRecord['status']) {
 		return status === 'active' ? 'Active' : 'Paused';
@@ -81,32 +116,68 @@
 		return status === 'active' ? 'text-stone-400' : 'text-red-300';
 	}
 
-	function isDeletingFormat(emailFormatId: Id<'emailFormats'>) {
-		return deletingFormatIds.includes(emailFormatId);
+	function isUpdatingFormat(formatId: Id<'emailFormats'>) {
+		return updatingFormatIds.includes(formatId);
 	}
 
-	function isPausingFormat(emailFormatId: Id<'emailFormats'>) {
-		return pausingFormatIds.includes(emailFormatId);
+	function isDeletingFormat(formatId: Id<'emailFormats'>) {
+		return deletingFormatIds.includes(formatId);
 	}
 
-	function getActiveFormatIds(emailFormatIds: Id<'emailFormats'>[]) {
-		const emailFormatIdSet = new Set(emailFormatIds);
-
-		return (formatsQuery.data ?? [])
-			.filter(
-				(format) => emailFormatIdSet.has(format.id) && format.status === 'active'
-			)
-			.map((format) => format.id);
+	function areAnyBusy(formatIds: string[]) {
+		return formatIds.some((formatId) =>
+			[...updatingFormatIds, ...deletingFormatIds].includes(formatId as Id<'emailFormats'>)
+		);
 	}
 
-	async function deleteFormats(emailFormatIds: Id<'emailFormats'>[]) {
-		const idsToDelete = emailFormatIds.filter((id) => !isDeletingFormat(id));
+	function showActivationSuccessNotice() {
+		activationSuccessNotice.show(getActivationSuccessMessage());
+	}
+
+	async function setFormatStatus(formatIds: Id<'emailFormats'>[], status: EmailFormatStatus) {
+		const idsToUpdate = formatIds.filter(
+			(formatId) => !isUpdatingFormat(formatId) && !isDeletingFormat(formatId)
+		);
+
+		if (idsToUpdate.length === 0) {
+			return;
+		}
+
+		actionError = null;
+		activationSuccessNotice.clear();
+		updatingFormatIds = [...updatingFormatIds, ...idsToUpdate];
+
+		try {
+			for (const emailFormatId of idsToUpdate) {
+				await client.mutation(api.emailFormats.setEmailFormatStatus, {
+					emailFormatId,
+					status
+				});
+			}
+			if (status === 'active') {
+				showActivationSuccessNotice();
+			}
+		} catch (error) {
+			actionError =
+				error instanceof Error
+					? error.message
+					: `Could not ${status === 'active' ? 'activate' : 'pause'} email format.`;
+		} finally {
+			updatingFormatIds = updatingFormatIds.filter((id) => !idsToUpdate.includes(id));
+		}
+	}
+
+	async function deleteFormats(formatIds: Id<'emailFormats'>[]) {
+		const idsToDelete = formatIds.filter(
+			(formatId) => !isDeletingFormat(formatId) && !isUpdatingFormat(formatId)
+		);
 
 		if (idsToDelete.length === 0) {
 			return;
 		}
 
 		actionError = null;
+		activationSuccessNotice.clear();
 		deletingFormatIds = [...deletingFormatIds, ...idsToDelete];
 
 		try {
@@ -114,52 +185,24 @@
 				emailFormatIds: idsToDelete
 			});
 		} catch (error) {
-			actionError = error instanceof Error ? error.message : 'Could not delete email formats.';
+			actionError = error instanceof Error ? error.message : 'Could not delete email format.';
 		} finally {
 			deletingFormatIds = deletingFormatIds.filter((id) => !idsToDelete.includes(id));
 		}
 	}
 
-	async function pauseFormats(emailFormatIds: Id<'emailFormats'>[]) {
-		const idsToPause = getActiveFormatIds(emailFormatIds).filter(
-			(id) => !isPausingFormat(id) && !isDeletingFormat(id)
-		);
-
-		if (idsToPause.length === 0) {
-			return;
-		}
-
-		actionError = null;
-		pausingFormatIds = [...pausingFormatIds, ...idsToPause];
-
-		try {
-			for (const emailFormatId of idsToPause) {
-				await client.mutation(api.emailFormats.setEmailFormatStatus, {
-					emailFormatId,
-					status: 'paused'
-				});
-			}
-		} catch (error) {
-			actionError = error instanceof Error ? error.message : 'Could not pause email formats.';
-		} finally {
-			pausingFormatIds = pausingFormatIds.filter((id) => !idsToPause.includes(id));
-		}
-	}
-
-	function selectedFormatsIncludeActive(selectedFormatIds: string[]) {
-		return getActiveFormatIds(selectedFormatIds as Id<'emailFormats'>[]).length > 0;
-	}
-
 	function toFormatItem(format: EmailFormatListRecord): EmailFormatListItem {
+		const isUpdating = isUpdatingFormat(format.id);
 		const isDeleting = isDeletingFormat(format.id);
-		const isPausing = isPausingFormat(format.id);
-		const actionsDisabled = isDeleting || isPausing;
+		const isBusy = isUpdating || isDeleting;
+		const activateDisabled = isBusy || !format.activation.canActivate;
 
 		return {
 			id: format.id,
 			title: format.title,
 			status: format.status,
 			href: emailFormatLink(format.id).pathname,
+			onPreload: () => appConvexPreloader?.preloadEmailFormatConfiguration(format.id),
 			selectAriaLabel: `Select ${format.title}`,
 			statusLabel: formatStatus(format.status),
 			statusLabelClass: getStatusLabelClass(format.status),
@@ -172,22 +215,22 @@
 			actions: [
 				format.status === 'active'
 					? {
-							label: isPausing ? 'Updating...' : 'Pause',
+							label: isUpdating ? 'Pausing...' : 'Pause',
 							ariaLabel: `Pause ${format.title}`,
-							disabled: actionsDisabled,
-							onSelect: () => pauseFormats([format.id])
+							disabled: isBusy,
+							onSelect: () => setFormatStatus([format.id], 'paused')
 						}
 					: {
-							label: 'Activate',
+							label: isUpdating ? 'Activating...' : 'Activate',
 							ariaLabel: `Activate ${format.title}`,
-							disabled: true,
-							onSelect: () => {}
+							disabled: activateDisabled,
+							onSelect: () => setFormatStatus([format.id], 'active')
 						},
 				{
 					label: isDeleting ? 'Deleting...' : 'Delete',
 					ariaLabel: `Delete ${format.title}`,
 					intent: 'destructive',
-					disabled: actionsDisabled,
+					disabled: isBusy,
 					onSelect: () => deleteFormats([format.id])
 				}
 			]
@@ -201,78 +244,70 @@
 		searchAriaLabel: 'Search email formats',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
-		filter: {
-			label: selectedStatusFilterLabel,
-			selectedId: selectedStatusFilter,
-			options: statusFilterOptions,
-			onSelect: setSelectedStatusFilter
-		}
-	}}
-	empty={{
-		icon: APP_ROUTE_REGISTRY["email-formats"].icon,
-		title: 'No email formats found',
-		description: 'Build your first email format with an email format builder.',
-		nextSteps: [
-			{ kind: 'link', text: 'Build', href: APP_LINKS.builders.pathname },
+		filters: [
 			{
-				kind: 'text',
-				text: ' your first email format using an email format builder, then fine tune, add teammates, and manage it here'
+				id: 'status',
+				label: selectedStatusFilterLabel,
+				selectedId: selectedStatusFilter,
+				options: statusFilterOptions,
+				onSelect: setSelectedStatusFilter
 			}
-		],
-		learnMoreLabel: 'Learn more'
+		]
 	}}
-	hasItems={listState !== 'empty'}
+	empty={emptyListState}
+	noResults={noResultsState}
+	status={listStatus}
+	{totalRecords}
+	{visibleRecords}
+	{isQueryActive}
+	loadingMessage="Loading email formats..."
+	errorMessage="Could not load email formats."
 >
-	{#if listState === 'loading'}
-		<ListContentState kind="loading" message="Loading email formats..." />
-	{:else if listState === 'error'}
-		<ListContentState kind="error" message="Could not load email formats." />
-	{:else if listState === 'ready'}
+	{#snippet contentHeader()}
 		{#if actionError}
 			<p class="border-b border-red-100 bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-5">
 				{actionError}
 			</p>
+		{:else if activationSuccessNotice.message}
+			<EmailFormatActivationStatusBar
+				message={activationSuccessNotice.message}
+				kind="success"
+				class="border-b"
+			/>
 		{/if}
-		{#if filteredFormatItems.length === 0}
-			<ListContentState kind="empty" message="No matching email formats." />
-		{:else}
-			<SelectableList
-				items={filteredFormatItems}
-			selectAllAriaLabel="Select all email formats"
-			selectedActionsAriaLabel="Selected email format actions"
-			selectedActions={[
-				{
-					label: pausingFormatIds.length > 0 ? 'Updating...' : 'Pause selected',
-					ariaLabel: 'Pause selected email formats',
-					disabled: (selectedFormatIds) =>
-						pausingFormatIds.length > 0 ||
-						!selectedFormatsIncludeActive(selectedFormatIds),
-					onSelect: (selectedFormatIds) =>
-						pauseFormats(selectedFormatIds as Id<'emailFormats'>[])
-				},
-				{
-					label: deletingFormatIds.length > 0 ? 'Deleting...' : 'Delete',
-					ariaLabel: 'Delete selected email formats',
-					intent: 'destructive',
-					disabled: deletingFormatIds.length > 0,
-					onSelect: (selectedFormatIds) =>
-						deleteFormats(selectedFormatIds as Id<'emailFormats'>[])
-				}
-			]}
-			rowActionsAriaLabel="Email format actions"
-		>
-			{#snippet rowCells(item)}
-				<EmailFormatListRow {item} />
-			{/snippet}
-			</SelectableList>
-		{/if}
-	{/if}
+	{/snippet}
+
+	<SelectableList
+		items={filteredFormatItems}
+		selectAllAriaLabel="Select all email formats"
+		selectedActionsAriaLabel="Selected email format actions"
+		selectedActions={[
+			{
+				label: 'Pause selected',
+				ariaLabel: 'Pause selected email formats',
+				disabled: areAnyBusy,
+				onSelect: (selectedFormatIds) =>
+					setFormatStatus(selectedFormatIds as Id<'emailFormats'>[], 'paused')
+			},
+			{
+				label: 'Delete',
+				ariaLabel: 'Delete selected email formats',
+				intent: 'destructive',
+				disabled: areAnyBusy,
+				onSelect: (selectedFormatIds) =>
+					deleteFormats(selectedFormatIds as Id<'emailFormats'>[])
+			}
+		]}
+		rowActionsAriaLabel="Email format actions"
+	>
+		{#snippet rowCells(item)}
+			<EmailFormatListRow {item} />
+		{/snippet}
+	</SelectableList>
 
 	{#snippet footer()}
-		{#if listState === 'ready'}
-			<InfoBar label="Next steps:">
-				Click an email format to set its rules and configure which teammates should receive it
-			</InfoBar>
-		{/if}
+		<InfoBar label="Next steps:">
+			Click an email format to set its rules and configure which team members should receive it
+		</InfoBar>
 	{/snippet}
 </ListRoutePage>

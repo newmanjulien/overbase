@@ -6,6 +6,7 @@ const ROUTE_TITLE_STATE_KEY = Symbol('route-title-state');
 
 export type RouteTitleState = {
 	title: string;
+	editable: boolean | null;
 	onTitleChange: ((title: string) => void | Promise<void>) | null;
 	actions: Snippet | null;
 	overflowActions: FloatingActionMenuAction[];

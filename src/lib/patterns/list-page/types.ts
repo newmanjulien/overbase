@@ -1,5 +1,5 @@
 import type { PhosphorIcon } from '$lib/ui/icons';
-import type { InlineTextContent } from '$lib/ui/inline-text';
+import type { NonLinkInlineTextContent } from '$lib/domain/inline-text';
 import type { AppHref } from '$lib/app/app-links';
 
 export type ListIcon = PhosphorIcon;
@@ -9,16 +9,17 @@ export type ListToolbarConfig = {
 	searchAriaLabel?: string;
 	searchValue?: string;
 	onSearchValueChange?: (value: string) => void;
-	filter?: ListFilterConfig;
+	filters?: readonly ListFilterConfig[];
 	actionLabel?: string;
 	onAction?: () => void;
 };
 
 export type ListFilterConfig = {
+	id: string;
 	label: string;
 	selectedId: string;
 	width?: 'default' | 'wide';
-	options: ListFilterOption[];
+	options: readonly ListFilterOption[];
 	onSelect: (optionId: string) => void;
 };
 
@@ -42,7 +43,7 @@ export type EmptyListNextStepsContent = string | readonly EmptyListNextStepsPart
 
 export type EmptyListStateConfig = {
 	title: string;
-	description: InlineTextContent;
+	description: NonLinkInlineTextContent;
 	nextSteps?: EmptyListNextStepsContent;
 	learnMoreLabel?: string;
 	actionLabel?: string;
@@ -52,9 +53,17 @@ export type EmptyListStateConfig = {
 	icon?: ListIcon;
 };
 
+export type NoResultsListStateConfig = {
+	title: string;
+	description: NonLinkInlineTextContent;
+};
+
+export type ListRouteStatus = 'loading' | 'error' | 'ready';
+
 export type ListRowItem = {
 	id: string;
 	href?: AppHref;
+	onPreload?: () => void;
 	actionsAriaLabel?: string;
 	actions?: ListRowItemAction[];
 };

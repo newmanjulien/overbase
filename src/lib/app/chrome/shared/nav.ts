@@ -14,6 +14,7 @@ export type NavRouteItem = {
 	kind: 'route';
 	id: NavRouteId;
 	label: string;
+	headerLabel: string;
 	pathname: NavPath;
 	icon: NavIcon;
 	hideOnMobile: boolean;
@@ -51,6 +52,7 @@ export const NAV_ROUTE_ITEMS: readonly NavRouteItem[] = (
 	kind: 'route' as const,
 	id,
 	label: route.navLabel,
+	headerLabel: route.headerLabel ?? route.navLabel,
 	pathname: route.pathname as NavPath,
 	icon: route.icon,
 	hideOnMobile: Boolean(route.hideOnMobile)

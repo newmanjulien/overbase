@@ -2,19 +2,17 @@
 
 - Never write or add tests
 - Don't try to use playwright
+- Don't add documentation
 
 - All data in the db can be nuked or reseeded
-- Don't cut corners
 - Destructive changes are fine
 - Backwards compatibility is not important
-- Maximally clean architecture matters
-- Patching things quickly is usually wrong
+
+- Patching things quickly is always wrong
+- Find and do the right thing instead
+
 - Intuitive mental model is important
 - Readable code is important
 
-- The builders are in separate apps
-- Check out src/builder-apps/README.md to understand how those separate apps work
-- There's a package at packages/builder-sdk
-- That package is supposed to be a public package
-- For now, I'm just hosting it locally in all the apps
-- But it needs to be identical in all apps
+- Find ways of writing less code
+- Find ways of deleting code

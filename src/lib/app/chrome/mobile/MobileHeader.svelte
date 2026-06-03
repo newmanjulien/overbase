@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import ListIcon from 'phosphor-svelte/lib/ListIcon';
 	import EditableHeaderTitle from '$lib/app/chrome/shared/EditableHeaderTitle.svelte';
 	import HomeLink from '$lib/app/chrome/shared/HomeLink.svelte';
@@ -9,9 +10,10 @@
 		title: string;
 		titleEditable?: boolean;
 		onTitleChange?: (title: string) => void;
+		actions?: Snippet | null;
 	};
 
-	let { title, titleEditable = false, onTitleChange }: Props = $props();
+	let { title, titleEditable = false, onTitleChange, actions = null }: Props = $props();
 	const shellState = useChromeShellState();
 </script>
 
@@ -29,7 +31,8 @@
 			{onTitleChange}
 		/>
 	</div>
-	<div class="flex w-12 justify-end">
+	<div class="flex min-w-12 justify-end gap-2">
+		{@render actions?.()}
 		<IconButton
 			aria-label="Toggle navigation menu"
 			variant="ghost"

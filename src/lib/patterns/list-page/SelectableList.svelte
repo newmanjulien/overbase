@@ -1,15 +1,14 @@
 <script lang="ts" generics="Item extends SelectableListItem">
-	import { goto } from '$app/navigation';
 	import type { Snippet } from 'svelte';
 	import CheckIcon from 'phosphor-svelte/lib/CheckIcon';
 	import MinusIcon from 'phosphor-svelte/lib/MinusIcon';
-	import { resolveAppHref } from '$lib/app/app-links';
 	import { cn } from '$lib/ui/cn';
 	import { FloatingActionMenu, type FloatingActionMenuAction } from '$lib/ui';
 	import type {
 		SelectableListItem,
 		SelectableListSelectedAction
 	} from '$lib/patterns/list-page/types';
+	import ListRowFrame from './ListRowFrame.svelte';
 
 	type Props = {
 		items: Item[];
@@ -56,6 +55,12 @@
 		}
 	});
 
+	$effect(() => {
+		if (openActionsItemId) {
+			selectedActionsOpen = false;
+		}
+	});
+
 	function isSelected(id: string) {
 		return selectedItemIdSet.has(id);
 	}
@@ -84,10 +89,6 @@
 		}));
 	}
 
-	function hasRowActions(item: Item) {
-		return Boolean(item.actions?.length);
-	}
-
 	function setSelectedActionsOpen(open: boolean) {
 		selectedActionsOpen = open;
 
@@ -96,37 +97,9 @@
 		}
 	}
 
-	function setRowActionsOpen(itemId: string, open: boolean) {
-		openActionsItemId = open ? itemId : null;
-
-		if (open) {
-			selectedActionsOpen = false;
-		}
-	}
-
-	function handleRowClick(item: Item, event: MouseEvent) {
-		if (!item.href) {
-			return;
-		}
-
-		const target = event.target;
-
-		if (target instanceof Element && target.closest('a, button, input, label')) {
-			return;
-		}
-
-		void goto(resolveAppHref(item.href));
-	}
-
-	function rowClass(item: Item) {
-		return cn(
-			'grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3.5 px-4 py-2.5 md:px-5',
-			item.href && 'cursor-pointer'
-		);
-	}
 </script>
 
-{#snippet itemCells(item: Item)}
+{#snippet itemSelector(item: Item)}
 	<label class="flex h-9 w-3.5 shrink-0 items-center">
 		<input
 			type="checkbox"
@@ -145,24 +118,8 @@
 			{#if isSelected(item.id)}
 				<CheckIcon size={10} weight="bold" />
 			{/if}
-		</span>
-	</label>
-
-	<div class={cn('min-w-0', !hasRowActions(item) && 'col-span-2')}>
-		{@render rowCells(item)}
-	</div>
-
-	{#if hasRowActions(item)}
-		<div class="flex h-9 items-center justify-self-end">
-			<FloatingActionMenu
-				id={`selectable-list-${item.id}-actions`}
-				ariaLabel={item.actionsAriaLabel ?? rowActionsAriaLabel}
-				actions={item.actions ?? []}
-				open={openActionsItemId === item.id}
-				onOpenChange={(open) => setRowActionsOpen(item.id, open)}
-			/>
-		</div>
-	{/if}
+			</span>
+		</label>
 {/snippet}
 
 <div class="bg-white">
@@ -208,17 +165,17 @@
 		</div>
 	</div>
 
-	<div role="list" class="divide-y divide-stone-200/70 bg-white">
-		{#each items as item (item.id)}
-			<!-- The nested content owns the real link; this preserves pointer row-click without making the row a fake interactive parent around checkbox/menu controls. -->
-			<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
-			<div
-				role="listitem"
-				class={rowClass(item)}
-				onclick={item.href ? (event) => handleRowClick(item, event) : undefined}
-			>
-				{@render itemCells(item)}
-			</div>
-		{/each}
+		<div role="list" class="divide-y divide-stone-200/70 bg-white">
+			{#each items as item (item.id)}
+				<ListRowFrame
+					{item}
+					{rowCells}
+					leading={itemSelector}
+					gridClass="grid min-h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3.5 px-4 py-2.5 md:px-5"
+					actionsIdPrefix="selectable-list"
+					{rowActionsAriaLabel}
+					bind:openActionsItemId
+				/>
+			{/each}
+		</div>
 	</div>
-</div>

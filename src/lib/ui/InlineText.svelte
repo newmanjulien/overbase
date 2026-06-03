@@ -1,12 +1,15 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { ClassValue } from 'clsx';
 	import { cn } from '$lib/ui/cn';
 	import FloatingTooltip from '$lib/ui/FloatingTooltip.svelte';
-	import type { InlineTextContent } from '$lib/ui/inline-text';
+	import { inlineLinkClass as baseInlineLinkClass } from '$lib/ui/link-styles';
+	import type { InlineTextContent } from '$lib/domain/inline-text';
 
 	type Props = {
 		content: InlineTextContent;
 		tooltipIdPrefix: string;
+		linkClass?: ClassValue;
 		tooltipPlacement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
 		tooltipTriggerClass?: ClassValue;
 	};
@@ -14,19 +17,35 @@
 	let {
 		content,
 		tooltipIdPrefix,
+		linkClass = '',
 		tooltipPlacement = 'bottom-start',
 		tooltipTriggerClass = ''
 	}: Props = $props();
 
 	const safeTooltipIdPrefix = $derived(tooltipIdPrefix.replace(/[^a-zA-Z0-9_-]/g, '-'));
+	const inlineLinkClass = $derived(cn(baseInlineLinkClass, linkClass));
 </script>
 
-{#if typeof content === 'string'}<span>{content}</span>{:else}{#each content as part, index (`${part.kind}:${index}`)}{#if part.kind === 'text'}<span>{part.text}</span>{:else}<FloatingTooltip
+{#if typeof content === 'string'}
+	<span>{content}</span>
+{:else}
+	{#each content as part, index (`${part.kind}:${index}`)}
+		{#if part.kind === 'text'}
+			<span>{part.text}</span>
+		{:else if part.kind === 'link'}
+			<a class={inlineLinkClass} href={resolve(part.href as '/')}>{part.label}</a>
+		{:else}
+			<FloatingTooltip
 				id={`${safeTooltipIdPrefix}-${index}`}
 				text={part.tooltipText}
 				ariaLabel={part.label}
 				placement={tooltipPlacement}
 				triggerClass={cn(tooltipTriggerClass)}
 			>
-				{#snippet trigger()}{part.label}{/snippet}
-			</FloatingTooltip>{/if}{/each}{/if}
+				{#snippet trigger()}
+					{part.label}
+				{/snippet}
+			</FloatingTooltip>
+		{/if}
+	{/each}
+{/if}

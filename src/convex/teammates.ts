@@ -117,7 +117,7 @@ export const updateTeammate = mutation({
 		const teammate = getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(teammateId));
 
 		if (!teammate) {
-			throw new Error('Teammate not found.');
+			throw new Error('Team member not found.');
 		}
 
 		const normalizedEmail = normalizeTeammateEmail(email);

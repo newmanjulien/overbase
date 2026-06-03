@@ -1,13 +1,14 @@
 import { APP_LINKS } from '$lib/app/app-links';
+import type { PageLoad } from './$types';
 
-export function load() {
+export const load: PageLoad = ({ params }) => {
 	return {
+		emailFormatId: params.emailFormatId,
 		headerTitle: 'Email format',
-		headerTitleEditable: true,
 		desktopBreadcrumbParent: {
-			label: 'My email formats',
+			label: 'My formats',
 			href: APP_LINKS.emailFormats.pathname
 		},
 		chromeMode: 'focused'
 	};
-}
+};

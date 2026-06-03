@@ -5,7 +5,7 @@ import {
 	type EmailBodyBlock,
 	type EmailDraft,
 	type EmailSpreadsheetAttachment
-} from '@overbase/builder-sdk/email';
+} from '$shared/email-drafts';
 
 export type EditableEmailDraft = {
 	toText: string;
@@ -27,7 +27,7 @@ export function toEditableEmailDraft(draft: EmailDraft): EditableEmailDraft {
 		attachment: draft.attachment
 			? {
 					filename: draft.attachment.filename,
-					cells: draft.attachment.cells.map((row) => [...row])
+					cellsByKey: { ...draft.attachment.cellsByKey }
 				}
 			: null,
 		bodyText: serializeEmailBodyText(draft.body)
@@ -83,10 +83,6 @@ function serializeEmailBodyText(body: EmailBodyBlock[]) {
 				return block.text;
 			}
 
-			if (block.type === 'bullets') {
-				return block.items.map((item) => `- ${item}`).join('\n');
-			}
-
 			return `${block.label}: ${block.href}`;
 		})
 		.join('\n\n');
@@ -118,7 +114,6 @@ function parseEmailBodyText(value: string): EmailBodyBlock[] {
 	const blocks: EmailBodyBlock[] = [];
 	const lines = value.replace(/\r\n/g, '\n').split('\n');
 	let paragraphLines: string[] = [];
-	let bulletItems: string[] = [];
 
 	function flushParagraph() {
 		const text = paragraphLines.join('\n').trim();
@@ -130,32 +125,13 @@ function parseEmailBodyText(value: string): EmailBodyBlock[] {
 		paragraphLines = [];
 	}
 
-	function flushBullets() {
-		if (bulletItems.length > 0) {
-			blocks.push({ type: 'bullets', items: bulletItems });
-		}
-
-		bulletItems = [];
-	}
-
 	for (const rawLine of lines) {
 		const line = rawLine.trim();
 
 		if (!line) {
 			flushParagraph();
-			flushBullets();
 			continue;
 		}
-
-		const bulletMatch = /^[-*]\s+(.+)$/.exec(line);
-
-		if (bulletMatch) {
-			flushParagraph();
-			bulletItems.push(bulletMatch[1].trim());
-			continue;
-		}
-
-		flushBullets();
 
 		const linkBlock = parseLinkLine(line);
 
@@ -169,7 +145,6 @@ function parseEmailBodyText(value: string): EmailBodyBlock[] {
 	}
 
 	flushParagraph();
-	flushBullets();
 
 	return blocks;
 }

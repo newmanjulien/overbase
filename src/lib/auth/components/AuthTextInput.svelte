@@ -53,7 +53,7 @@
 		{required}
 		aria-invalid={invalid}
 		class={cn(
-			'box-border h-10 w-full rounded-md border border-[#e2e3e6] bg-white px-3.5 text-sm leading-none text-[#202124] outline-none transition-[background-color,border-color,box-shadow,color] duration-150 placeholder:text-[#8f9297] focus:border-[#6bbdf8] focus:shadow-[0_0_0_0.5px_#6bbdf8]',
+			'box-border h-10 w-full rounded-md border border-[#e2e3e6] bg-white px-3.5 text-sm leading-none text-[#202124] outline-none transition-[background-color,border-color,box-shadow,color] duration-150 placeholder:text-[#8f9297] focus:border-[var(--auth-accent-400)] focus:shadow-[0_0_0_0.5px_var(--auth-accent-400)]',
 			invalid &&
 				'border-[#ffb8a8] bg-[#fff0ed] text-[#ff3a1e] placeholder:text-[#ff7b66] focus:border-[#ff9f8d] focus:shadow-[0_0_0_0.5px_#ff9f8d]'
 		)}

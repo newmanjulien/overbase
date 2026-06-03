@@ -2,13 +2,16 @@
 	import { ListRoutePage } from '$lib/patterns/list-page';
 	import { APP_LINKS } from '$lib/app/app-links';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
+
+	let searchQuery = $state('');
 </script>
 
 <ListRoutePage
 	toolbar={{
 		searchPlaceholder: 'Search partners...',
 		searchAriaLabel: 'Search partners',
-		filter: { label: 'All partners', selectedId: 'all', options: [{ id: 'all', label: 'All partners' }], onSelect: () => {} }
+		searchValue: searchQuery,
+		onSearchValueChange: (value) => (searchQuery = value)
 	}}
 	empty={{
 		icon: APP_ROUTE_REGISTRY['manage-partners'].icon,
@@ -23,4 +26,12 @@
 		],
 		learnMoreLabel: 'Learn more'
 	}}
+	noResults={{
+		title: 'No matching partners',
+		description: 'Try a different search term or partner filter'
+	}}
+	status="ready"
+	totalRecords={0}
+	visibleRecords={0}
+	isQueryActive={Boolean(searchQuery.trim())}
 />

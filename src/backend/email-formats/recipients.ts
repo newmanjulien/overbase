@@ -1,121 +1,117 @@
+import type { ViewerWorkspace } from '../auth/viewer';
 import type { Doc, Id } from '../../convex/_generated/dataModel';
 import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
-import { getTeammateDisplayName } from '../../convex/teammateIdentity';
-import type { ViewerIdentity } from '../../shared/viewer';
-import { requireViewerWorkspace, type ViewerWorkspace } from '../auth/viewer';
 
-export type EmailFormatRecipientRef =
-	| {
-			kind: 'user';
-			userId: Id<'users'>;
-	  }
-	| {
-			kind: 'teammate';
-			teammateId: Id<'teammates'>;
-	  };
+export type EmailFormatRecipientRef = Doc<'emailFormatRecipients'>['recipient'];
 
-export function getViewerUserDisplayName(
-	user: Pick<Doc<'users'>, 'displayName'>,
-	viewerIdentity: ViewerIdentity
-) {
-	return user.displayName?.trim() || viewerIdentity.email;
-}
-
-export function getUserDisplayName(user: Pick<Doc<'users'>, 'displayName'>) {
-	return user.displayName?.trim() || 'Unknown user';
-}
-
-export function getFormatRecipientKey(ref: EmailFormatRecipientRef) {
+function toRecipientKey(ref: EmailFormatRecipientRef) {
 	return ref.kind === 'user' ? `user:${ref.userId}` : `teammate:${ref.teammateId}`;
 }
 
-export function getDefaultEmailFormatRecipientRefs(userId: Id<'users'>): EmailFormatRecipientRef[] {
-	return [{ kind: 'user', userId }];
-}
+function dedupeRecipientRefs(refs: EmailFormatRecipientRef[]) {
+	const seenKeys = new Set<string>();
+	const dedupedRefs: EmailFormatRecipientRef[] = [];
 
-async function isWorkspaceUserRef(
-	ctx: QueryCtx | MutationCtx,
-	workspaceId: Id<'workspaces'>,
-	userId: Id<'users'>
-) {
-	const user = await ctx.db.get(userId);
+	for (const ref of refs) {
+		const key = toRecipientKey(ref);
 
-	return Boolean(user && user.workspaceId === workspaceId);
-}
-
-async function isWorkspaceTeammateRef(
-	ctx: QueryCtx | MutationCtx,
-	workspaceId: Id<'workspaces'>,
-	teammateId: Id<'teammates'>
-) {
-	const teammate = await ctx.db.get(teammateId);
-
-	return Boolean(teammate && teammate.workspaceId === workspaceId);
-}
-
-async function isValidRecipientRef(
-	ctx: QueryCtx | MutationCtx,
-	workspaceId: Id<'workspaces'>,
-	ref: EmailFormatRecipientRef
-) {
-	if (ref.kind === 'user') {
-		return await isWorkspaceUserRef(ctx, workspaceId, ref.userId);
+		if (!seenKeys.has(key)) {
+			seenKeys.add(key);
+			dedupedRefs.push(ref);
+		}
 	}
 
-	return await isWorkspaceTeammateRef(ctx, workspaceId, ref.teammateId);
+	return dedupedRefs;
 }
 
-export async function getFormatRecipients(
+export async function collectEmailFormatRecipientRows(
 	ctx: QueryCtx | MutationCtx,
-	viewerWorkspace?: ViewerWorkspace
+	workspaceId: Id<'workspaces'>,
+	emailFormatId: Id<'emailFormats'>
 ) {
-	const viewer = viewerWorkspace ?? (await requireViewerWorkspace(ctx));
-	const { user, workspace, identity } = viewer;
-	const dbTeammates = await ctx.db
-		.query('teammates')
-		.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
-		.order('desc')
+	return await ctx.db
+		.query('emailFormatRecipients')
+		.withIndex('by_workspace_emailFormat', (q) =>
+			q.eq('workspaceId', workspaceId).eq('emailFormatId', emailFormatId)
+		)
 		.collect();
-
-	return [
-		{
-			id: getFormatRecipientKey({ kind: 'user', userId: user._id }),
-			ref: { kind: 'user' as const, userId: user._id },
-			name: getViewerUserDisplayName(user, identity),
-			avatarUrl: user.avatar?.url ?? ''
-		},
-		...dbTeammates.map((teammate) => {
-			const ref = { kind: 'teammate' as const, teammateId: teammate._id };
-
-			return {
-				id: getFormatRecipientKey(ref),
-				ref,
-				name: getTeammateDisplayName(teammate),
-				avatarUrl: ''
-			};
-		})
-	];
 }
 
-export async function normalizeEmailFormatRecipientRefs(
-	ctx: QueryCtx | MutationCtx,
-	recipientRefs: EmailFormatRecipientRef[],
-	viewerWorkspace?: ViewerWorkspace
+export async function deleteEmailFormatRecipientRows(
+	ctx: MutationCtx,
+	workspaceId: Id<'workspaces'>,
+	emailFormatId: Id<'emailFormats'>
 ) {
-	const { user, workspace } = viewerWorkspace ?? (await requireViewerWorkspace(ctx));
-	const normalizedRefs: EmailFormatRecipientRef[] = [];
-	const seenKeys = new Set<string>();
+	for (const row of await collectEmailFormatRecipientRows(ctx, workspaceId, emailFormatId)) {
+		await ctx.db.delete(row._id);
+	}
+}
 
-	for (const ref of recipientRefs) {
-		const key = getFormatRecipientKey(ref);
+async function validateRecipientRefs(
+	ctx: MutationCtx,
+	viewerWorkspace: ViewerWorkspace,
+	refs: EmailFormatRecipientRef[]
+) {
+	const dedupedRefs = dedupeRecipientRefs(refs);
 
-		if (seenKeys.has(key) || !(await isValidRecipientRef(ctx, workspace._id, ref))) {
+	for (const ref of dedupedRefs) {
+		if (ref.kind === 'user') {
+			if (ref.userId !== viewerWorkspace.user._id) {
+				throw new Error('Recipient user is not in this workspace.');
+			}
 			continue;
 		}
 
-		seenKeys.add(key);
-		normalizedRefs.push(ref);
+		const teammate = await ctx.db.get(ref.teammateId);
+
+		if (!teammate || teammate.workspaceId !== viewerWorkspace.workspace._id) {
+			throw new Error('Recipient team member is not in this workspace.');
+		}
 	}
 
-	return normalizedRefs.length > 0 ? normalizedRefs : getDefaultEmailFormatRecipientRefs(user._id);
+	return dedupedRefs;
+}
+
+export async function insertEmailFormatRecipientRows(
+	ctx: MutationCtx,
+	viewerWorkspace: ViewerWorkspace,
+	emailFormatId: Id<'emailFormats'>,
+	refs: EmailFormatRecipientRef[],
+	updatedAt: number
+) {
+	const recipientRefs = await validateRecipientRefs(ctx, viewerWorkspace, refs);
+
+	for (const recipient of recipientRefs) {
+		await ctx.db.insert('emailFormatRecipients', {
+			workspaceId: viewerWorkspace.workspace._id,
+			emailFormatId,
+			recipient,
+			createdAt: updatedAt
+		});
+	}
+
+	await ctx.db.patch(emailFormatId, {
+		recipientCount: recipientRefs.length,
+		updatedAt
+	});
+
+	return recipientRefs;
+}
+
+export async function replaceEmailFormatRecipientRows(
+	ctx: MutationCtx,
+	viewerWorkspace: ViewerWorkspace,
+	emailFormatId: Id<'emailFormats'>,
+	refs: EmailFormatRecipientRef[],
+	updatedAt: number
+) {
+	await deleteEmailFormatRecipientRows(ctx, viewerWorkspace.workspace._id, emailFormatId);
+
+	return await insertEmailFormatRecipientRows(
+		ctx,
+		viewerWorkspace,
+		emailFormatId,
+		refs,
+		updatedAt
+	);
 }

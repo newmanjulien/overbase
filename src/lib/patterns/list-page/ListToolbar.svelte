@@ -10,7 +10,7 @@
 		searchAriaLabel?: string;
 		searchValue?: string;
 		onSearchValueChange?: (value: string) => void;
-		filter?: ListFilterConfig;
+		filters?: readonly ListFilterConfig[];
 		actionLabel?: string;
 		onAction?: () => void;
 		class?: string;
@@ -21,7 +21,7 @@
 		searchAriaLabel,
 		searchValue = '',
 		onSearchValueChange,
-		filter,
+		filters = [],
 		actionLabel,
 		onAction,
 		class: className = ''
@@ -46,9 +46,9 @@
 			searchPlaceholder ? 'hidden md:flex md:shrink-0' : 'flex w-full justify-end md:w-auto'
 		)}
 	>
-		{#if filter}
+		{#each filters as filter (filter.id)}
 			<ListFilterControl {filter} class="flex-1 md:flex-none" />
-		{/if}
+		{/each}
 
 		{#if actionLabel}
 			<ListActionButton label={actionLabel} class="flex-1 md:flex-none" onclick={onAction} />

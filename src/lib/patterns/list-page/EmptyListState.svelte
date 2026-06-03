@@ -5,12 +5,12 @@
 	import InlineText from '$lib/ui/InlineText.svelte';
 	import ListActionButton from '$lib/patterns/list-page/ListActionButton.svelte';
 	import FloatingTooltip from '$lib/ui/FloatingTooltip.svelte';
-	import type { InlineTextContent } from '$lib/ui/inline-text';
+	import type { NonLinkInlineTextContent } from '$lib/domain/inline-text';
 	import type { ListIcon } from '$lib/patterns/list-page/types';
 
 	type Props = {
 		title: string;
-		description: InlineTextContent;
+		description: NonLinkInlineTextContent;
 		learnMoreLabel?: string;
 		actionLabel?: string;
 		actionHelpText?: string;
@@ -62,7 +62,7 @@
 				{#if learnMoreLabel}
 					<button
 						type="button"
-						class="ml-1 inline-flex items-center gap-1 text-blue-400 hover:text-blue-500"
+						class="ml-1 inline-flex items-center gap-1 text-link-500 hover:text-link-600"
 					>
 						<span>{learnMoreLabel}</span>
 						<ArrowSquareOutIcon aria-hidden="true" size={12} weight="regular" />

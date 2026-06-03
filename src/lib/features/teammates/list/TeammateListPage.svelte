@@ -3,9 +3,11 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 	import {
-		ListContentState,
 		ListRoutePage,
-		SelectableList
+		SelectableList,
+		type EmptyListStateConfig,
+		type ListRouteStatus,
+		type NoResultsListStateConfig
 	} from '$lib/patterns/list-page';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import AddTeammatesModal from './AddTeammatesModal.svelte';
@@ -35,15 +37,31 @@
 		roleFilterOptions.find((option) => option.id === selectedRoleFilter)?.label ?? 'All roles'
 	);
 	const filteredTeammateItems = $derived(teammateItems.filter(matchesTeammateFilters));
-	const listState = $derived(
+	const emptyListState = {
+		icon: APP_ROUTE_REGISTRY.team.icon,
+		title: 'No team members found',
+		description: [
+			{ kind: 'text', text: 'Add team members so you can assign them to email formats' }
+		],
+		nextSteps:
+			'Team members are the people inside your organization who receive emails. Add team members here, then add them to the right email formats',
+		actionLabel: 'Add team members',
+		onAction: openModal
+	} satisfies EmptyListStateConfig;
+	const noResultsState = {
+		title: 'No matching team members',
+		description: 'Try a different search term, email, or role'
+	} satisfies NoResultsListStateConfig;
+	const listStatus = $derived<ListRouteStatus>(
 		teammatesQuery.isLoading
 			? 'loading'
 			: teammatesQuery.error
 				? 'error'
-				: teammateItems.length === 0
-					? 'empty'
-					: 'ready'
+				: 'ready'
 	);
+	const totalRecords = $derived(teammateItems.length);
+	const visibleRecords = $derived(filteredTeammateItems.length);
+	const isQueryActive = $derived(Boolean(searchQuery.trim()) || selectedRoleFilter !== 'all');
 
 	type TeammateRecord = NonNullable<typeof teammatesQuery.data>[number];
 
@@ -148,7 +166,7 @@
 			teammateEmails = '';
 			modalOpen = false;
 		} catch (error) {
-			modalError = error instanceof Error ? error.message : 'Could not add teammates.';
+			modalError = error instanceof Error ? error.message : 'Could not add team members.';
 		} finally {
 			isAddingTeammates = false;
 		}
@@ -198,7 +216,7 @@
 			});
 			closeTeammateEditor();
 		} catch (error) {
-			actionError = error instanceof Error ? error.message : 'Could not update teammate.';
+			actionError = error instanceof Error ? error.message : 'Could not update team member.';
 		} finally {
 			savingTeammateId = null;
 		}
@@ -219,7 +237,7 @@
 				teammateIds: idsToDelete
 			});
 		} catch (error) {
-			actionError = error instanceof Error ? error.message : 'Could not delete teammates.';
+			actionError = error instanceof Error ? error.message : 'Could not delete team members.';
 		} finally {
 			deletingTeammateIds = deletingTeammateIds.filter((id) => !idsToDelete.includes(id));
 		}
@@ -252,7 +270,7 @@
 			onEmailDraftChange: (email) => updateTeammateDraft({ email }),
 			onRoleDraftChange: (role) => updateTeammateDraft({ role }),
 			selectAriaLabel: `Select ${teammate.displayName}`,
-			actionsAriaLabel: 'Teammate actions',
+			actionsAriaLabel: 'Team member actions',
 			actions: isEditing
 				? undefined
 				: [
@@ -270,75 +288,60 @@
 
 <ListRoutePage
 	toolbar={{
-		searchPlaceholder: 'Search teammates...',
-		searchAriaLabel: 'Search teammates',
+		searchPlaceholder: 'Search team members...',
+		searchAriaLabel: 'Search team members',
 		searchValue: searchQuery,
 		onSearchValueChange: (value) => (searchQuery = value),
-		filter: {
-			label: selectedRoleFilterLabel,
-			selectedId: selectedRoleFilter,
-			width: 'wide',
-			options: roleFilterOptions,
-			onSelect: (optionId) => (selectedRoleFilter = optionId)
-		},
-		actionLabel: 'Add teammates',
-		onAction: openModal
-	}}
-	empty={{
-		icon: APP_ROUTE_REGISTRY.team.icon,
-		title: 'No teammates found',
-		description: [
-			{ kind: 'text', text: 'Add teammates and we ' },
+		filters: [
 			{
-				kind: 'tooltip',
-				label: "won't email them",
-				tooltipText:
-					"We won't email teammates after you add them. They'll only receive emails after you add them to an active email format"
-			},
-			{ kind: 'text', text: 'until you add them to active email formats' }
+				id: 'role',
+				label: selectedRoleFilterLabel,
+				selectedId: selectedRoleFilter,
+				width: 'wide',
+				options: roleFilterOptions,
+				onSelect: (optionId) => (selectedRoleFilter = optionId)
+			}
 		],
-		nextSteps:
-			'Teammates are the people inside your organization who receive emails. Add teammates here, then add them to the right email formats',
-		actionLabel: 'Add teammates',
+		actionLabel: 'Add team members',
 		onAction: openModal
 	}}
-	hasItems={listState !== 'empty'}
+	empty={emptyListState}
+	noResults={noResultsState}
+	status={listStatus}
+	{totalRecords}
+	{visibleRecords}
+	{isQueryActive}
+	loadingMessage="Loading team members..."
+	errorMessage="Could not load team members."
 >
-	{#if listState === 'loading'}
-		<ListContentState kind="loading" message="Loading teammates..." />
-	{:else if listState === 'error'}
-		<ListContentState kind="error" message="Could not load teammates." />
-	{:else if listState === 'ready'}
+	{#snippet contentHeader()}
 		{#if actionError}
 			<p class="border-b border-red-100 bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-5">
 				{actionError}
 			</p>
 		{/if}
-		{#if filteredTeammateItems.length === 0}
-			<ListContentState kind="empty" message="No matching teammates." />
-		{:else}
-			<SelectableList
-				items={filteredTeammateItems}
-			selectAllAriaLabel="Select all teammates"
-			selectedActionsAriaLabel="Selected teammate actions"
-			selectedActions={[
-				{
-					label: deletingTeammateIds.length > 0 ? 'Deleting...' : 'Delete',
-					ariaLabel: 'Delete selected teammates',
-					intent: 'destructive',
-					disabled: deletingTeammateIds.length > 0,
-					onSelect: (selectedTeammateIds) =>
-						deleteTeammates(selectedTeammateIds as Id<'teammates'>[])
-				}
-			]}
-			rowActionsAriaLabel="Teammate actions"
-		>
-			{#snippet rowCells(item)}
-				<TeammateListRow {item} />
-			{/snippet}
-			</SelectableList>
-		{/if}
-	{/if}
+	{/snippet}
+
+	<SelectableList
+		items={filteredTeammateItems}
+		selectAllAriaLabel="Select all team members"
+		selectedActionsAriaLabel="Selected team member actions"
+		selectedActions={[
+			{
+				label: deletingTeammateIds.length > 0 ? 'Deleting...' : 'Delete',
+				ariaLabel: 'Delete selected team members',
+				intent: 'destructive',
+				disabled: deletingTeammateIds.length > 0,
+				onSelect: (selectedTeammateIds) =>
+					deleteTeammates(selectedTeammateIds as Id<'teammates'>[])
+			}
+		]}
+		rowActionsAriaLabel="Team member actions"
+	>
+		{#snippet rowCells(item)}
+			<TeammateListRow {item} />
+		{/snippet}
+	</SelectableList>
 </ListRoutePage>
 
 <AddTeammatesModal

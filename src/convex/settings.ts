@@ -5,6 +5,7 @@ import {
 	deleteReplacedUploadedAvatar
 } from '../backend/profiles/avatars';
 import { requireViewerWorkspace } from '../backend/auth/viewer';
+import { createFormatGalleryCategoryId } from '../backend/validators/create-format-gallery';
 
 const MAX_NAME_LENGTH = 32;
 const MAX_FILE_NAME_LENGTH = 255;
@@ -66,6 +67,23 @@ export const updateWorkspaceName = mutation({
 		});
 
 		return { name: workspaceName };
+	}
+});
+
+export const updateCreateFormatGalleryCategoryPreference = mutation({
+	args: {
+		categoryId: createFormatGalleryCategoryId
+	},
+	handler: async (ctx, { categoryId }) => {
+		const { user } = await requireViewerWorkspace(ctx);
+		const now = Date.now();
+
+		await ctx.db.patch(user._id, {
+			lastCreateFormatGalleryCategoryId: categoryId,
+			updatedAt: now
+		});
+
+		return { categoryId };
 	}
 });
 

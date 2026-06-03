@@ -20,7 +20,7 @@
 	let panelMaxHeight = $state(240);
 
 	const widthClass = $derived(filter.width === 'wide' ? 'md:w-56' : 'md:w-44');
-	const menuId = $derived(`list-filter-${filter.label}`.replace(/[^a-zA-Z0-9_-]/g, '-'));
+	const menuId = $derived(`list-filter-${filter.id}`.replace(/[^a-zA-Z0-9_-]/g, '-'));
 	const panelStyle = $derived(
 		`top: ${panelTop}px; left: ${panelLeft}px; width: ${panelWidth}px; max-height: ${panelMaxHeight}px;`
 	);

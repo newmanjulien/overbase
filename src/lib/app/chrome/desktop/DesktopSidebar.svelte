@@ -18,10 +18,17 @@
 		currentPathname: string;
 		user: Doc<'users'>;
 		identity: ViewerIdentity;
+		showPublicDataCard: boolean;
 		class?: string;
 	};
 
-	let { currentPathname, user, identity, class: className = '' }: Props = $props();
+	let {
+		currentPathname,
+		user,
+		identity,
+		showPublicDataCard,
+		class: className = ''
+	}: Props = $props();
 
 	const shellState = useChromeShellState();
 	const activeRoute = $derived(getActiveNavRoute(currentPathname));
@@ -72,6 +79,7 @@
 			footerItems={NAV_FOOTER_ITEMS}
 			{currentPathname}
 			expanded={shellState.isSidebarExpanded}
+			{showPublicDataCard}
 			onRouteHover={(route) => {
 				hoveredRoute = route;
 			}}

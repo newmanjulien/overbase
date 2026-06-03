@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { goto, preloadData } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
 	import {
+		APP_DYNAMIC_ROUTE_IDS,
 		APP_LINKS,
 		AUTH_LINKS,
-		freshBuilderHref,
-		resolveAppHref,
-		resolveAuthHref,
 		type AppHref,
 		type AuthEntryHref
 	} from '$lib/app/app-links';
-	import type { BuilderAppRecord } from '$lib/features/builder/catalog';
 	import { useConvexClient } from 'convex-svelte';
-	import { SvelteMap } from 'svelte/reactivity';
 	import { useSignIn, useSignUp } from 'svelte-clerk';
 	import AuthButton from '$lib/auth/components/AuthButton.svelte';
 	import AuthCodeStep from '$lib/auth/components/AuthCodeStep.svelte';
@@ -21,13 +18,13 @@
 	import AuthTextInput from '$lib/auth/components/AuthTextInput.svelte';
 	import { createClerkEmailCodeAuthController, getClerkErrorCode } from '$lib/auth/email-code-auth';
 	import { buildAuthEntryHref } from '$lib/auth/navigation';
-	import JoinBuilderStep from './JoinBuilderStep.svelte';
+	import JoinFormatStarterStep from './JoinFormatStarterStep.svelte';
 	import JoinCompanyStep from './JoinCompanyStep.svelte';
 	import JoinPartnerStep from './JoinPartnerStep.svelte';
 	import JoinWelcomeStep from './JoinWelcomeStep.svelte';
-	import { loadOnboardingBuilders } from './onboarding-builders';
+	import { getJoinFormatStarterRecommendation } from './join-format-starter';
 
-	type JoinStep = 'welcome' | 'join' | 'code' | 'company' | 'partner' | 'builder';
+	type JoinStep = 'welcome' | 'join' | 'code' | 'company' | 'partner' | 'formatStarter';
 
 	type Props = {
 		returnTo?: AppHref;
@@ -71,16 +68,11 @@
 	});
 	let companyErrorText = $state<string | null>(null);
 	let isSavingCompany = $state(false);
-	let builderApps = $state<BuilderAppRecord[]>([]);
-	let isLoadingBuilders = $state(false);
-	let builderErrorText = $state<string | null>(null);
-	let hasStartedBuilderLoad = $state(false);
+	const joinFormatStarter = getJoinFormatStarterRecommendation();
 	let completionErrorText = $state<string | null>(null);
-	let completingAppSlug = $state<string | null>(null);
-	let isOpeningBuilder = $state(false);
-	let builderHomePreloadPromise: Promise<void> | null = null;
-	let builderLoadPromise: Promise<void> | null = null;
-	const builderRoutePreloadPromises = new SvelteMap<string, Promise<void>>();
+	let completingFormatStarterSlug = $state<string | null>(null);
+	let isOpeningFormatStarter = $state(false);
+	let formatStarterRoutePreloadPromise: Promise<void> | null = null;
 
 	const loginHref = $derived(
 		buildAuthEntryHref(AUTH_LINKS.login.pathname, {
@@ -119,7 +111,7 @@
 		return undefined;
 	});
 	const canContinue = $derived(email.trim().length > 0 && !isSubmittingEmail);
-	const isCompletingOnboarding = $derived(Boolean(completingAppSlug) || isOpeningBuilder);
+	const isCompletingOnboarding = $derived(Boolean(completingFormatStarterSlug) || isOpeningFormatStarter);
 
 	async function submitEmail() {
 		const normalizedEmail = email.trim().toLowerCase();
@@ -193,95 +185,50 @@
 		}
 	}
 
-	function preloadBuildersHome() {
-		if (builderHomePreloadPromise) {
-			return builderHomePreloadPromise;
+	function preloadFormatStarterRoute() {
+		if (formatStarterRoutePreloadPromise) {
+			return formatStarterRoutePreloadPromise;
 		}
 
-		builderHomePreloadPromise = preloadData(resolveAppHref(APP_LINKS.builders.pathname)).then(
+		formatStarterRoutePreloadPromise = preloadData(
+			resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, { formatStarterSlug: joinFormatStarter.slug })
+		).then(
 			() => undefined,
 			() => undefined
 		);
 
-		return builderHomePreloadPromise;
+		return formatStarterRoutePreloadPromise;
 	}
 
-	function preloadBuilderRoute(appSlug: string) {
-		const existingPreload = builderRoutePreloadPromises.get(appSlug);
-
-		if (existingPreload) {
-			return existingPreload;
-		}
-
-		const routePreload = preloadBuildersHome()
-			.then(() => preloadData(freshBuilderHref(appSlug)))
-			.then(
-				() => undefined,
-				() => undefined
-			);
-
-		builderRoutePreloadPromises.set(appSlug, routePreload);
-
-		return routePreload;
-	}
-
-	function preloadOnboardingBuilders() {
-		return loadBuilders();
-	}
-
-	async function loadBuilders() {
-		if (builderLoadPromise) {
-			return builderLoadPromise;
-		}
-
-		hasStartedBuilderLoad = true;
-		isLoadingBuilders = true;
-		builderErrorText = null;
-
-		builderLoadPromise = (async () => {
-			try {
-				builderApps = await loadOnboardingBuilders();
-			} catch (error) {
-				builderErrorText = error instanceof Error ? error.message : 'Unable to load builders.';
-				builderApps = [];
-			} finally {
-				isLoadingBuilders = false;
-				builderLoadPromise = null;
-			}
-		})();
-
-		return builderLoadPromise;
-	}
-
-	async function selectBuilder(appSlug: string) {
+	async function selectFormatStarter() {
 		if (isCompletingOnboarding) return;
 
 		completionErrorText = null;
-		completingAppSlug = appSlug;
+		completingFormatStarterSlug = joinFormatStarter.slug;
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(freshBuilderHref(appSlug));
+			await goto(resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, { formatStarterSlug: joinFormatStarter.slug }));
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
-			completingAppSlug = null;
+			completingFormatStarterSlug = null;
 		}
 	}
 
-	async function openBuilder() {
+	async function openFormatStarter() {
 		if (isCompletingOnboarding) return;
 
 		completionErrorText = null;
-		isOpeningBuilder = true;
+		isOpeningFormatStarter = true;
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(resolveAppHref(APP_LINKS.builders.pathname));
+			await goto(resolve(APP_LINKS.createFormats.pathname));
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
-			isOpeningBuilder = false;
+			isOpeningFormatStarter = false;
 		}
 	}
 
@@ -301,51 +248,36 @@
 	}
 
 	$effect(() => {
-		if (step === 'builder' && !hasStartedBuilderLoad) {
-			void preloadOnboardingBuilders();
-		}
-
 		if (step === 'partner') {
-			void preloadBuildersHome();
-			void preloadOnboardingBuilders();
+			void preloadFormatStarterRoute();
 		}
 	});
 </script>
 
-{#if step === 'builder'}
-	<JoinBuilderStep
-		apps={builderApps}
-		isLoading={isLoadingBuilders}
-		errorText={builderErrorText}
+{#if step === 'formatStarter'}
+	<JoinFormatStarterStep
+		formatStarter={joinFormatStarter}
 		completionErrorText={completionErrorText}
-		selectedAppSlug={completingAppSlug}
-		isOpeningBuilder={isOpeningBuilder}
-		onSelect={(appSlug) => {
-			void selectBuilder(appSlug);
-		}}
-		onPreload={(appSlug) => {
-			void preloadBuilderRoute(appSlug);
-		}}
-		onOpenBuilder={() => {
-			void openBuilder();
-		}}
-		onRetry={() => {
-			void loadBuilders();
-		}}
+		selectedFormatStarterSlug={completingFormatStarterSlug}
+		isOpeningFormatStarter={isOpeningFormatStarter}
+		onSelect={() => void selectFormatStarter()}
+		onPreload={() => void preloadFormatStarterRoute()}
+		onOpenFormatStarter={() => void openFormatStarter()}
 	/>
 {:else}
 	<AuthEntryShell
+		accent="link"
 		onReturnButtonClick={currentReturnButtonClick}
 		returnButtonHref={currentReturnButtonHref}
 		showFooter={step === 'join'}
 	>
 		{#snippet footer()}
 			<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
-				Already have an account?
-				<a
-					href={resolveAuthHref(loginHref)}
-					class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
-				>
+					Already have an account?
+					<a
+						href={resolve(loginHref)}
+						class="text-stone-500 underline underline-offset-2 transition-colors hover:text-[#202124]"
+					>
 					Log in
 				</a>
 			</p>
@@ -431,7 +363,7 @@
 				bind:name={partner.name}
 				bind:collaboration={partner.collaboration}
 				onContinue={() => {
-					step = 'builder';
+					step = 'formatStarter';
 				}}
 			/>
 		{/if}

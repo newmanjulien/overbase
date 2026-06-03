@@ -17,17 +17,17 @@ export type DynamicAppLink<Pathname extends `/${string}`, RouteId extends `/(app
 };
 
 export const APP_LINKS = {
-	builders: {
-		pathname: '/builders',
-		routeId: '/(app)/builders'
+	createFormats: {
+		pathname: '/create-formats',
+		routeId: '/(app)/create-formats'
 	},
 	emailFormats: {
 		pathname: '/email-formats',
 		routeId: '/(app)/email-formats'
 	},
-	dataSources: {
-		pathname: '/data-sources',
-		routeId: '/(app)/data-sources'
+	internalData: {
+		pathname: '/internal-data',
+		routeId: '/(app)/internal-data'
 	},
 	externalData: {
 		pathname: '/external-data',
@@ -71,78 +71,104 @@ export const AUTH_LINKS = {
 } as const satisfies Record<string, AuthEntryLink>;
 
 export const APP_DYNAMIC_ROUTE_IDS = {
-	builder: '/(app)/builders/[appSlug]',
+	createFormat: '/(app)/create-formats/[formatStarterSlug]',
 	emailFormat: '/(app)/email-formats/[emailFormatId]'
 } as const;
 
-export const DEFAULT_APP_LINK = APP_LINKS.builders;
+export const DEFAULT_APP_LINK = APP_LINKS.createFormats;
 
 export type AppLinkKey = keyof typeof APP_LINKS;
 export type AuthLinkKey = keyof typeof AUTH_LINKS;
 export type StaticAppPathname = (typeof APP_LINKS)[AppLinkKey]['pathname'];
 export type AuthEntryPathname = (typeof AUTH_LINKS)[AuthLinkKey]['pathname'];
-export type BuilderPathname = `/builders/${string}`;
-export type FreshBuilderHref = `${BuilderPathname}?fresh=1`;
+export type CreateFormatsPathname = `/create-formats/${string}`;
 export type EmailFormatPathname = `/email-formats/${string}`;
-export type AppPathname = StaticAppPathname | BuilderPathname | EmailFormatPathname;
-export type AppHref = AppPathname | FreshBuilderHref;
+export type AppPathname = StaticAppPathname | CreateFormatsPathname | EmailFormatPathname;
+export type AppHref = AppPathname;
 export type AuthEntryHref = AuthEntryPathname | `${AuthEntryPathname}?${string}`;
-export type BuilderViewportFallbackPathname =
+export type CreateFormatsModeFilterId = 'all' | 'internal-data' | 'public-data';
+export type CreateFormatsGalleryHref =
+	| typeof APP_LINKS.createFormats.pathname
+	| `${typeof APP_LINKS.createFormats.pathname}?${string}`;
+export type CreateFormatsViewportFallbackPathname =
 	| typeof APP_LINKS.emailFormats.pathname
-	| typeof APP_LINKS.builders.pathname;
+	| typeof APP_LINKS.createFormats.pathname;
 
-const STATIC_APP_PATHNAMES = new Set<string>(
-	Object.values(APP_LINKS).map((link) => link.pathname)
-);
+const STATIC_APP_PATHNAMES = new Set<string>(Object.values(APP_LINKS).map((link) => link.pathname));
 const resolveHref = resolve as (href: string) => string;
 
 function encodePathSegment(value: string) {
 	return encodeURIComponent(value);
 }
 
-export function builderPathname(appSlug: string): BuilderPathname {
-	return `/builders/${encodePathSegment(appSlug)}`;
+export function createFormatPathname(formatStarterSlug: string): CreateFormatsPathname {
+	return `/create-formats/${encodePathSegment(formatStarterSlug)}`;
 }
 
-export function builderLink(appSlug: string): DynamicAppLink<BuilderPathname, typeof APP_DYNAMIC_ROUTE_IDS.builder> {
+export function createFormatLink(
+	formatStarterSlug: string
+): DynamicAppLink<CreateFormatsPathname, typeof APP_DYNAMIC_ROUTE_IDS.createFormat> {
 	return {
-		pathname: builderPathname(appSlug),
-		routeId: APP_DYNAMIC_ROUTE_IDS.builder,
-		href: resolve(APP_DYNAMIC_ROUTE_IDS.builder, { appSlug }) as BuilderPathname
+		pathname: createFormatPathname(formatStarterSlug),
+		routeId: APP_DYNAMIC_ROUTE_IDS.createFormat,
+		href: resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, {
+			formatStarterSlug
+		}) as CreateFormatsPathname
 	};
 }
 
-export function freshBuilderLink(appSlug: string) {
-	const link = builderLink(appSlug);
-
-	return {
-		pathname: link.pathname,
-		routeId: link.routeId,
-		search: '?fresh=1' as const,
-		href: `${link.href}?fresh=1` as FreshBuilderHref
-	};
+export function normalizeCreateFormatsModeFilter(
+	value: string | null | undefined
+): CreateFormatsModeFilterId {
+	return value === 'internal-data' || value === 'public-data' ? value : 'all';
 }
 
-export function freshBuilderHref(appSlug: string): FreshBuilderHref {
-	return freshBuilderLink(appSlug).href;
+export function createFormatsGalleryHref({
+	mode = 'all',
+	industry = 'all'
+}: {
+	mode?: CreateFormatsModeFilterId;
+	industry?: string;
+} = {}): CreateFormatsGalleryHref {
+	const searchParams = new URLSearchParams();
+
+	if (mode !== 'all') {
+		searchParams.set('mode', mode);
+	}
+
+	if (industry !== 'all') {
+		searchParams.set('industry', industry);
+	}
+
+	const query = searchParams.toString();
+
+	if (!query) {
+		return APP_LINKS.createFormats.pathname;
+	}
+
+	return `${APP_LINKS.createFormats.pathname}?${query}`;
 }
 
 export function emailFormatPathname(emailFormatId: string): EmailFormatPathname {
 	return `/email-formats/${encodePathSegment(emailFormatId)}`;
 }
 
-export function emailFormatLink(emailFormatId: string): DynamicAppLink<EmailFormatPathname, typeof APP_DYNAMIC_ROUTE_IDS.emailFormat> {
+export function emailFormatLink(
+	emailFormatId: string
+): DynamicAppLink<EmailFormatPathname, typeof APP_DYNAMIC_ROUTE_IDS.emailFormat> {
 	return {
 		pathname: emailFormatPathname(emailFormatId),
 		routeId: APP_DYNAMIC_ROUTE_IDS.emailFormat,
-		href: resolve(APP_DYNAMIC_ROUTE_IDS.emailFormat, { emailFormatId }) as EmailFormatPathname
+		href: resolve(APP_DYNAMIC_ROUTE_IDS.emailFormat, {
+			emailFormatId
+		}) as EmailFormatPathname
 	};
 }
 
 export function isCanonicalAppPathname(pathname: string): pathname is AppPathname {
 	return (
 		STATIC_APP_PATHNAMES.has(pathname) ||
-		/^\/builders\/[^/?#]+$/.test(pathname) ||
+		/^\/create-formats\/[^/?#]+$/.test(pathname) ||
 		/^\/email-formats\/[^/?#]+$/.test(pathname)
 	);
 }
@@ -154,9 +180,7 @@ export function isCanonicalAppHref(value: string): value is AppHref {
 		return (
 			isCanonicalAppPathname(parsedHref.pathname) &&
 			parsedHref.hash === '' &&
-			(parsedHref.search === '' ||
-				(parsedHref.pathname.startsWith(`${APP_LINKS.builders.pathname}/`) &&
-					parsedHref.search === '?fresh=1'))
+			parsedHref.search === ''
 		);
 	} catch {
 		return false;
