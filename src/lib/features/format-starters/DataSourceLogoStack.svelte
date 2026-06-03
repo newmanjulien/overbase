@@ -3,7 +3,7 @@
 	import {
 		DATA_SOURCE_LOGO_REGISTRY,
 		type DataSourceId
-	} from '$lib/domain/data-sources';
+	} from '$lib/features/format-starters/data-sources';
 	import { cn } from '$lib/ui/cn';
 
 	type Props = {

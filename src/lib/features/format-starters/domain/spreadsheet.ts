@@ -12,7 +12,7 @@ import {
 	cellKey,
 	parseCellKey,
 	type SpreadsheetCellKey
-} from '$shared/spreadsheets';
+} from '$domain/spreadsheets';
 
 const FORMAT_ATTACHMENT_FILENAME_MAX_LENGTH = 160;
 const FORMAT_SPREADSHEET_ATTACHMENT_EXTENSION = 'xlsx';

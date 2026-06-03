@@ -1,14 +1,15 @@
 <script lang="ts">
-	import EmailAttachmentCard from '$lib/domain/email-drafts/EmailAttachmentCard.svelte';
-	import EmailComposeDocument from '$lib/domain/email-drafts/EmailComposeDocument.svelte';
+	import EmailComposeDocument from '$lib/features/email-formats/drafts/EmailComposeDocument.svelte';
 	import {
 		createDefaultFormatSpreadsheetAttachment,
 		normalizeFormatAttachmentName,
 		type FormatVariableDefinition
 	} from '$lib/features/format-starters/domain';
+	import FormatEmailAttachmentField from './FormatEmailAttachmentField.svelte';
 	import FormatEmailBodyEditor from './FormatEmailBodyEditor.svelte';
+	import FormatEmailRecipientField from './FormatEmailRecipientField.svelte';
 	import FormatSpreadsheetAttachmentEditor from './FormatSpreadsheetAttachmentEditor.svelte';
-	import type { EmailFormatContentEditPolicy } from '$shared/email-format-definitions';
+	import type { EmailFormatContentEditPolicy } from '$domain/email-formats';
 	import type { FormatContentEditorState } from '../state/format-content-editor-state.svelte';
 	import type { FormatVariableInsertionRequest } from '../state/format-creator-state.svelte';
 	import type { FormatVariableDragCoordinator } from '../variables/format-variable-drag-coordinator.svelte';
@@ -69,10 +70,6 @@
 	function removeAttachment() {
 		editor.removeAttachment((filename) => window.confirm(`Delete ${filename}?`));
 	}
-
-	function formatRecipients(recipients: readonly string[]) {
-		return recipients.join(', ');
-	}
 </script>
 
 <section
@@ -101,76 +98,45 @@
 			<div class="mx-auto flex min-h-full w-full max-w-[820px] flex-col">
 				<EmailComposeDocument>
 					{#snippet to()}
-						{#if !activeEditPolicy.to}
-							<p class="min-w-0 flex-1 truncate text-[0.79rem] text-stone-800">
-								{formatRecipients(editor.activeEmailContent.to)}
-							</p>
-						{:else}
-							<input
-								value={editor.toInputText}
-								aria-label="To recipients"
-								placeholder="Add recipients"
-								class="min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.79rem] text-stone-800 outline-none placeholder:text-stone-400"
-								onfocus={() => {
-									editor.isEditingTo = true;
-								}}
-								oninput={(event) => {
-									editor.setRecipientInput('to', event.currentTarget.value);
-								}}
-								onblur={(event) => editor.commitRecipientInput('to', event.currentTarget.value)}
-							/>
-						{/if}
+						<FormatEmailRecipientField
+							value={editor.toInputText}
+							readonlyValue={editor.activeEmailContent.to}
+							editable={activeEditPolicy.to}
+							ariaLabel="To recipients"
+							placeholder="Add recipients"
+							onFocus={() => {
+								editor.isEditingTo = true;
+							}}
+							onInput={(value) => editor.setRecipientInput('to', value)}
+							onCommit={(value) => editor.commitRecipientInput('to', value)}
+						/>
 					{/snippet}
 
 					{#snippet cc()}
-						{#if !activeEditPolicy.cc}
-							<p class="min-w-0 flex-1 truncate text-[0.79rem] text-stone-800">
-								{formatRecipients(editor.activeEmailContent.cc)}
-							</p>
-						{:else}
-							<input
-								value={editor.ccInputText}
-								aria-label="Cc recipients"
-								placeholder="Add Cc recipients"
-								class="min-w-0 flex-1 border-0 bg-transparent p-0 text-[0.79rem] text-stone-800 outline-none placeholder:text-stone-400"
-								onfocus={() => {
-									editor.isEditingCc = true;
-								}}
-								oninput={(event) => {
-									editor.setRecipientInput('cc', event.currentTarget.value);
-								}}
-								onblur={(event) => editor.commitRecipientInput('cc', event.currentTarget.value)}
-							/>
-						{/if}
+						<FormatEmailRecipientField
+							value={editor.ccInputText}
+							readonlyValue={editor.activeEmailContent.cc}
+							editable={activeEditPolicy.cc}
+							ariaLabel="Cc recipients"
+							placeholder="Add Cc recipients"
+							onFocus={() => {
+								editor.isEditingCc = true;
+							}}
+							onInput={(value) => editor.setRecipientInput('cc', value)}
+							onCommit={(value) => editor.commitRecipientInput('cc', value)}
+						/>
 					{/snippet}
 
 					{#snippet attachment()}
-						{#if editor.activeEmailContent.attachment}
-							<EmailAttachmentCard
-								filename={editor.activeEmailContent.attachment.filename}
-								removable={activeEditPolicy.attachment}
-								onOpen={editor.openAttachment}
-								onRemove={activeEditPolicy.attachment ? removeAttachment : undefined}
-							/>
-						{:else if !activeEditPolicy.attachment}
-							<p class="min-w-0 text-[0.79rem] text-stone-400">No attachment</p>
-						{:else}
-							<input
-								value={editor.attachmentInputText}
-								aria-label="Spreadsheet attachment"
-								placeholder="Attach a spreadsheet"
-								class="w-full min-w-0 border-0 bg-transparent p-0 text-[0.79rem] text-stone-800 outline-none placeholder:text-stone-400"
-								oninput={(event) => {
-									editor.updateAttachmentInput(event.currentTarget.value);
-								}}
-								onkeydown={(event) => {
-									if (event.key === 'Enter') {
-										event.preventDefault();
-										addAttachment();
-									}
-								}}
-							/>
-						{/if}
+						<FormatEmailAttachmentField
+							attachment={editor.activeEmailContent.attachment}
+							inputValue={editor.attachmentInputText}
+							editable={activeEditPolicy.attachment}
+							onInput={editor.updateAttachmentInput}
+							onAdd={addAttachment}
+							onOpen={editor.openAttachment}
+							onRemove={removeAttachment}
+						/>
 					{/snippet}
 
 					{#snippet body()}

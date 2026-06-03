@@ -1,6 +1,6 @@
 import { APP_LINKS } from '$lib/app/app-links';
 import { getFormatStarter } from '$lib/features/format-starters/catalog';
-import { getEmailFormatDefinition } from '$shared/email-format-definitions';
+import { getEmailFormatDefinition } from '$domain/email-formats';
 import type { PageServerLoad } from './$types';
 
 const FORMAT_STARTER_UNAVAILABLE_PAGE_DATA = {

@@ -4,7 +4,7 @@
 	import { cn } from '$lib/ui/cn';
 	import FloatingTooltip from '$lib/ui/FloatingTooltip.svelte';
 	import { inlineLinkClass as baseInlineLinkClass } from '$lib/ui/link-styles';
-	import type { InlineTextContent } from '$lib/domain/inline-text';
+	import type { InlineTextContent } from '$lib/ui/inline-text';
 
 	type Props = {
 		content: InlineTextContent;

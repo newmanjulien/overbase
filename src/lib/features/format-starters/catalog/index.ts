@@ -9,5 +9,6 @@ export type {
 	FormatStartingPoint,
 	FormatStarterSampleEmail,
 	FormatStarterGalleryEntry,
+	PublicDataFormatStarter,
 	FormatStarter
 } from './types';

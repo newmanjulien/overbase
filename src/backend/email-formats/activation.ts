@@ -4,15 +4,15 @@ import {
 	getEmailFormatSpec,
 	type EmailFormatRule,
 	type EmailFormatSpec
-} from '../../shared/email-format-definitions';
-import { getEmailFormatRuleDataSourceActions } from '../../shared/email-format-data-source-actions';
+} from '../../domain/email-formats';
+import { getEmailFormatRuleDataSourceActions } from '../../domain/email-formats/data-source-actions';
 import {
 	getEmailFormatActivationDataSourceRequirements,
 	getEmailFormatCreationDataSourceRequirement,
 	getEmailFormatDataSourceRequirementForRule
-} from '../../shared/email-format-data-source-requirements';
-import type { EmailFormatDataSourceLinkState } from '../../shared/email-format-data-source-link-state';
-import { getEmailFormatActivationReadiness } from '../../shared/email-format-activation';
+} from '../../domain/email-formats/data-source-requirements';
+import type { EmailFormatDataSourceLinkState } from '../../domain/email-formats/data-source-link-state';
+import { getEmailFormatActivationReadiness } from '../../domain/email-formats/activation';
 import {
 	normalizeLinkedinContactsSource,
 	type LinkedinContactsImport,

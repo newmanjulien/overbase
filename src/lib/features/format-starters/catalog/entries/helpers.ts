@@ -6,11 +6,11 @@ import {
 	type FormatSpreadsheetAttachment,
 	type FormatSpreadsheetCell
 } from '$lib/features/format-starters/domain';
-import { cellKey } from '$shared/spreadsheets';
+import { cellKey } from '$domain/spreadsheets';
 import {
 	getEmailFormatDefinition,
 	getEmailFormatSpec
-} from '$shared/email-format-definitions';
+} from '$domain/email-formats';
 import type {
 	FormatStarter,
 	InternalDataFormatStarter,

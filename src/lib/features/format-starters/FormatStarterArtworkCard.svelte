@@ -4,7 +4,7 @@
 	import FormatStarterEmailPreview from '$lib/features/format-starters/FormatStarterEmailPreview.svelte';
 	import DataSourceLogoStack from '$lib/features/format-starters/DataSourceLogoStack.svelte';
 	import type { FormatStarterSampleEmail } from '$lib/features/format-starters/catalog';
-	import type { DataSourceId } from '$lib/domain/data-sources';
+	import type { DataSourceId } from '$lib/features/format-starters/data-sources';
 	import { cn } from '$lib/ui/cn';
 
 	type Props = {

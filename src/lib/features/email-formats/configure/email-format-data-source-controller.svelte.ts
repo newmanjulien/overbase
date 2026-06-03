@@ -1,4 +1,4 @@
-import type { EmailFormatRuleDataSourceAction } from '$shared/email-format-data-source-actions';
+import type { EmailFormatRuleDataSourceAction } from '$domain/email-formats/data-source-actions';
 import type { EmailFormatRule } from './email-format-configure-types';
 
 export class EmailFormatDataSourceController {

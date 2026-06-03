@@ -6,19 +6,19 @@ import type { Id } from '$convex/_generated/dataModel';
 import {
 	getEmailFormatRuleDataSourceActions,
 	type EmailFormatRuleDataSourceAction
-} from '$shared/email-format-data-source-actions';
-import { createEmptyEmailFormatDataSourceLinkState } from '$shared/email-format-data-source-link-state';
+} from '$domain/email-formats/data-source-actions';
+import { createEmptyEmailFormatDataSourceLinkState } from '$domain/email-formats/data-source-link-state';
 import {
 	getEmailFormatSpec,
 	type EmailFormatSpec
-} from '$shared/email-format-definitions';
+} from '$domain/email-formats';
 import type {
 	FormatInlineNode,
 	FormatSpreadsheetAttachment,
 	FormatStarterSelectionAnswers,
 	FormatVariableDefinition
 } from '$lib/features/format-starters/domain';
-import type { EmailFormatRule } from '$lib/domain/email-format-rules';
+import type { EmailFormatRule } from '$lib/features/email-formats/rules';
 import { FormatContentEditorState } from './format-content-editor-state.svelte';
 
 export type FormatCreatorStep = 'starting-point-selection' | 'editor';

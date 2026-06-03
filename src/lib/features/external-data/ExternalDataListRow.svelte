@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/ui';
-	import type { ListRowItem } from '$lib/patterns/list-page';
+	import type { ListRowItem } from '$lib/layout/list';
 
 	export type ExternalDataListItem = ListRowItem & {
 		name: string;

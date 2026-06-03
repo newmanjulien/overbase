@@ -1,4 +1,4 @@
-import type { InlineTextContent } from '$lib/domain/inline-text';
+import type { InlineTextContent } from '$lib/ui/inline-text';
 
 export const FORMAT_STARTER_SELECTION_SKIPPED_ANSWER = '__skipped__';
 

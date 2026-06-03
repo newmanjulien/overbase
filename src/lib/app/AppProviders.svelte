@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { validatePublicAuthEnv } from '$lib/auth/auth-env';
-	import { setupAppConvex } from '$lib/backend/convex/setup.svelte';
+	import { setupAppConvex } from '$lib/app/app-convex.svelte';
 	import { ClerkProvider } from 'svelte-clerk';
 	import type { Snippet } from 'svelte';
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ListRoutePage } from '$lib/patterns/list-page';
+	import { ListRoutePage } from '$lib/layout/list';
 	import { APP_LINKS } from '$lib/app/app-links';
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
 
@@ -23,8 +23,7 @@
 				kind: 'text',
 				text: ' your ecosystem partners then control what data they can access in a granular and secure way'
 			}
-		],
-		learnMoreLabel: 'Learn more'
+		]
 	}}
 	noResults={{
 		title: 'No matching partners',

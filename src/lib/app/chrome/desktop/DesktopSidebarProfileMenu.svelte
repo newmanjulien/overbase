@@ -5,7 +5,7 @@
 	import { APP_LINKS } from '$lib/app/app-links';
 	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
 	import { cn } from '$lib/ui/cn';
-	import { PersonAvatar } from '$lib/domain/people';
+	import { PersonAvatar } from '$lib/entities/people';
 
 	type Profile = {
 		name: string;

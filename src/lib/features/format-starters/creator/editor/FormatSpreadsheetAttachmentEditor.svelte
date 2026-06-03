@@ -23,7 +23,7 @@
 	} from '../inline/format-inline-controller.svelte';
 	import type { FormatVariableInsertionRequest } from '../state/format-creator-state.svelte';
 	import type { FormatVariableDragCoordinator } from '../variables/format-variable-drag-coordinator.svelte';
-	import { cellKey, getSpreadsheetCell, updateSparseSpreadsheetCell } from '$shared/spreadsheets';
+	import { cellKey, getSpreadsheetCell, updateSparseSpreadsheetCell } from '$domain/spreadsheets';
 
 	type CellSurfaceParams = {
 		rowIndex: number;

@@ -4,8 +4,8 @@ import type {
 	EmailFormatContentEditPolicy,
 	EmailFormatInlineTextContent,
 	EmailFormatRulesEditPolicy
-} from '$shared/email-format-definitions';
-import type { EmailFormatRuleDataSourceAction } from '$shared/email-format-data-source-actions';
+} from '$domain/email-formats';
+import type { EmailFormatRuleDataSourceAction } from '$domain/email-formats/data-source-actions';
 import type { EmailFormatConfigureState } from './email-format-configure-state.svelte';
 import type {
 	EmailFormatConfigureLoadState,

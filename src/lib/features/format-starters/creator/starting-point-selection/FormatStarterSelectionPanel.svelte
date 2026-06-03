@@ -1,13 +1,12 @@
 <script lang="ts">
-	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
-	import { Button, HelpTooltip, InfoBar, InlineText } from '$lib/ui';
-	import { cn } from '$lib/ui/cn';
+	import { InfoBar, InlineText } from '$lib/ui';
 	import {
 		FORMAT_STARTER_SELECTION_SKIPPED_ANSWER,
 		type FormatStarterSelectionAnswers,
 		type GuidedStartingPointSelection
 	} from '$lib/features/format-starters/domain';
-	import FormatCreatorActionBar from '../layout/FormatCreatorActionBar.svelte';
+	import FormatStarterQuestionCard from './FormatStarterQuestionCard.svelte';
+	import FormatStarterSelectionActions from './FormatStarterSelectionActions.svelte';
 
 	type Props = {
 		startingPointSelection: GuidedStartingPointSelection;
@@ -87,6 +86,15 @@
 		onAnswersChange({ ...answers });
 		onSubmit({ ...answers });
 	}
+
+	function handlePrimaryAction() {
+		if (canGoNext) {
+			goNext();
+			return;
+		}
+
+		submitAnswers();
+	}
 </script>
 
 <section class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white">
@@ -98,81 +106,17 @@
 		</div>
 
 		{#if currentQuestion}
-			<div class="mt-6 rounded-sm border border-stone-100 bg-white p-4 md:mt-8 md:p-6">
-				<div class="flex items-start justify-between gap-4">
-					<div class="flex min-w-0 items-center gap-1.5">
-						<h2 class="min-w-0 text-[0.76rem] font-medium text-stone-950 md:text-[0.8rem]">
-							{currentQuestion.title}
-						</h2>
-						<HelpTooltip
-							id={`format-starting-point-selection-question-help-${currentQuestion.id}`}
-							text={currentQuestion.helpText ?? null}
-							ariaLabel="Question help"
-						/>
-					</div>
-
-					{#if startingPointSelection.questions.length > 1}
-						<div class="flex shrink-0 items-center gap-1 text-[0.72rem] text-stone-500">
-							<button
-								type="button"
-								aria-label="Previous question"
-								class={cn(
-									'grid size-5 place-items-center rounded-[6px] disabled:cursor-default disabled:hover:bg-transparent',
-									canGoPrevious ? 'text-stone-500 hover:bg-stone-100' : 'text-stone-300'
-								)}
-								disabled={!canGoPrevious}
-								onclick={goPrevious}
-							>
-								<span class="text-[1rem] leading-none">‹</span>
-							</button>
-							<span>{stepLabel}</span>
-							<button
-								type="button"
-								aria-label="Next question"
-								class={cn(
-									'grid size-5 place-items-center rounded-[6px] disabled:cursor-default disabled:hover:bg-transparent',
-									canGoNext ? 'text-stone-500 hover:bg-stone-100' : 'text-stone-300'
-								)}
-								disabled={!canGoNext}
-								onclick={goNext}
-							>
-								<span class="text-[1rem] leading-none">›</span>
-							</button>
-						</div>
-					{/if}
-				</div>
-
-				<form
-					class="mt-7"
-					onsubmit={(event) => {
-						event.preventDefault();
-					}}
-				>
-					<fieldset>
-						<legend class="sr-only">{currentQuestion.title}</legend>
-						<div class="divide-y divide-stone-100">
-							{#each currentQuestion.options as option (option.id)}
-								<label
-									class="flex min-h-11 cursor-pointer items-center gap-3 py-2 text-[0.76rem] text-stone-800 md:text-[0.8rem]"
-								>
-									<input
-										type="radio"
-										name={currentQuestion.id}
-										value={option.id}
-										checked={selectedAnswers[currentQuestion.id] === option.id}
-										onchange={() => selectOption(currentQuestion.id, option.id)}
-										class="peer sr-only"
-									/>
-									<span
-										class="size-4 rounded-full border border-stone-300 bg-white shadow-[inset_0_0_0_2px_white] peer-checked:border-stone-950 peer-checked:bg-stone-950"
-									></span>
-									<span>{option.label}</span>
-								</label>
-							{/each}
-						</div>
-					</fieldset>
-				</form>
-			</div>
+			<FormatStarterQuestionCard
+				question={currentQuestion}
+				{selectedAnswers}
+				{canGoPrevious}
+				{canGoNext}
+				{stepLabel}
+				showNavigation={startingPointSelection.questions.length > 1}
+				onSelectOption={selectOption}
+				onPrevious={goPrevious}
+				onNext={goNext}
+			/>
 			{#if startingPointSelection.infoBar}
 				<div class="mt-4 max-w-3xl">
 					<InfoBar label={startingPointSelection.infoBar.label}>
@@ -187,38 +131,13 @@
 	</div>
 
 	{#if currentQuestion}
-		<FormatCreatorActionBar>
-			{#snippet secondary()}
-				<Button
-					variant="secondary"
-					class="h-10 w-full border-transparent bg-transparent text-[0.74rem] text-stone-500 hover:bg-stone-50 md:h-8 md:w-auto md:border-stone-200/60 md:bg-white md:px-2.5 md:text-[0.74rem] md:text-stone-900"
-					onclick={skipRemaining}
-				>
-					{skipActionLabel}
-				</Button>
-			{/snippet}
-
-			{#snippet primary()}
-				<Button
-					variant="primary"
-					class="h-10 w-full gap-2 text-[0.8rem] md:h-8 md:w-auto md:gap-1.5 md:px-2.5 md:text-[0.74rem]"
-					disabled={!canGoNext && !currentQuestionHasSelectedAnswer}
-					onclick={() => {
-						if (canGoNext) {
-							goNext();
-						} else {
-							submitAnswers();
-						}
-					}}
-				>
-					<span>{primaryActionLabel}</span>
-					{#snippet trailing()}
-						{#if canGoNext}
-							<ArrowRightIcon size={15} weight="regular" />
-						{/if}
-					{/snippet}
-				</Button>
-			{/snippet}
-		</FormatCreatorActionBar>
+		<FormatStarterSelectionActions
+			{skipActionLabel}
+			{primaryActionLabel}
+			{canGoNext}
+			primaryDisabled={!canGoNext && !currentQuestionHasSelectedAnswer}
+			onSkip={skipRemaining}
+			onPrimary={handlePrimaryAction}
+		/>
 	{/if}
 </section>

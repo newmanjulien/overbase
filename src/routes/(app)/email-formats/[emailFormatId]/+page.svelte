@@ -11,7 +11,7 @@
 	import EmailFormatDeleteModal from '$lib/features/email-formats/configure/EmailFormatDeleteModal.svelte';
 	import EmailFormatHeaderActions from '$lib/features/email-formats/configure/EmailFormatHeaderActions.svelte';
 	import EmailFormatConfigureMobile from '$lib/features/email-formats/configure/EmailFormatConfigureMobile.svelte';
-	import { LinkDataSourcesModal } from '$lib/domain/email-format-rules';
+	import { LinkDataSourcesModal } from '$lib/features/email-formats/rules';
 	import {
 		createTimedNotice,
 		getActivationSuccessMessage
@@ -36,7 +36,7 @@
 	import {
 		getEmailFormatActivationMissingMessageFromError,
 		normalizeEmailFormatActivationMissingMessage
-	} from '$shared/email-format-activation';
+	} from '$domain/email-formats/activation';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();

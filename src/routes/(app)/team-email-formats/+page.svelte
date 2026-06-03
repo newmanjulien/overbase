@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { APP_ROUTE_REGISTRY } from '$lib/app/app-routes';
-	import { ListRoutePage } from '$lib/patterns/list-page';
+	import { ListRoutePage } from '$lib/layout/list';
 	import { InfoBar } from '$lib/ui';
 
 	let searchQuery = $state('');
@@ -16,8 +16,7 @@
 	empty={{
 		icon: APP_ROUTE_REGISTRY['team-email-formats'].icon,
 		title: 'No team email formats found',
-		description: 'Manage the email formats that your team created for themselves.',
-		learnMoreLabel: 'Learn more'
+		description: 'Manage the email formats that your team created for themselves.'
 	}}
 	noResults={{
 		title: 'No matching team email formats',

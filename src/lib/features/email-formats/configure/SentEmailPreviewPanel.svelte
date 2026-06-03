@@ -1,8 +1,8 @@
 <script lang="ts">
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import ArrowRightIcon from 'phosphor-svelte/lib/ArrowRightIcon';
-	import EmailAttachmentSpreadsheetPreview from '$lib/domain/email-drafts/EmailAttachmentSpreadsheetPreview.svelte';
-	import EmailComposePreview from '$lib/domain/email-drafts/EmailComposePreview.svelte';
+	import EmailAttachmentSpreadsheetPreview from '$lib/features/email-formats/drafts/EmailAttachmentSpreadsheetPreview.svelte';
+	import EmailComposePreview from '$lib/features/email-formats/drafts/EmailComposePreview.svelte';
 	import { IconButton } from '$lib/ui';
 	import type { SentEmail } from './email-format-configure-types';
 

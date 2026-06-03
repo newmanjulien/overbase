@@ -1,8 +1,8 @@
-import type { ViewerIdentity } from '../../shared/viewer';
+import type { ViewerIdentity } from '../../domain/viewer';
 import type { Doc, Id } from '../../convex/_generated/dataModel';
 import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
 
-export type { ViewerIdentity } from '../../shared/viewer';
+export type { ViewerIdentity } from '../../domain/viewer';
 
 export type ViewerWorkspace = {
 	user: Doc<'users'>;

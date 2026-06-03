@@ -2,13 +2,13 @@
 	import {
 		EmailFormatRulePanel,
 		LinkDataSourcesModal
-	} from '$lib/domain/email-format-rules';
+	} from '$lib/features/email-formats/rules';
 	import type { EmailFormatRule } from './email-format-configure-types';
 	import type {
 		EmailFormatInlineTextContent,
 		EmailFormatRulesEditPolicy
-	} from '$shared/email-format-definitions';
-	import type { EmailFormatRuleDataSourceAction } from '$shared/email-format-data-source-actions';
+	} from '$domain/email-formats';
+	import type { EmailFormatRuleDataSourceAction } from '$domain/email-formats/data-source-actions';
 	import SectionConflictActions from './SectionConflictActions.svelte';
 
 	const EDIT_ALL_RULE_FIELDS = {

@@ -47,7 +47,7 @@ import {
 	getEmailFormatDefinition,
 	getEmailFormatSpec,
 	type EmailFormatDefinition
-} from '../shared/email-format-definitions';
+} from '../domain/email-formats';
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';

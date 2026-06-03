@@ -1,10 +1,10 @@
 import type { Doc } from '$convex/_generated/dataModel';
-import type { ViewerIdentity } from '../../shared/viewer';
+import type { ViewerIdentity } from '$domain/viewer';
 import { getContext, setContext } from 'svelte';
 
 const CURRENT_WORKSPACE_CONTEXT_KEY = Symbol('current-workspace-context');
 
-export type { ViewerIdentity } from '../../shared/viewer';
+export type { ViewerIdentity } from '$domain/viewer';
 
 export type CurrentWorkspaceContext = {
 	user: Doc<'users'>;

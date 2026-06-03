@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Id } from '$convex/_generated/dataModel';
-	import { AvatarPersonPicker } from '$lib/domain/people';
+	import { AvatarPersonPicker } from '$lib/entities/people';
 	import { Button } from '$lib/ui';
 	import type {
 		EmailFormatRecipientPickerPerson,

@@ -6,7 +6,7 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			$convex: 'src/convex',
-			$shared: 'src/shared'
+			$domain: 'src/domain'
 		}
 	},
 	vitePlugin: {

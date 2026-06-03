@@ -1,14 +1,14 @@
-import type { EmailDraft } from '$shared/email-drafts';
+import type { EmailDraft } from '$lib/features/email-formats/drafts/email-drafts';
 import type { Id } from '$convex/_generated/dataModel';
-import type { EmailFormatRule } from '$lib/domain/email-format-rules';
+import type { EmailFormatRule } from '$lib/features/email-formats/rules';
 import type { FormatEmailContent } from '$lib/features/format-starters/domain';
 import type {
 	EmailFormatContentEditPolicy,
 	EmailFormatInlineTextContent,
 	EmailFormatRulesEditPolicy,
 	EmailFormatVariableDefinition
-} from '$shared/email-format-definitions';
-import type { EmailFormatRuleDataSourceAction } from '$shared/email-format-data-source-actions';
+} from '$domain/email-formats';
+import type { EmailFormatRuleDataSourceAction } from '$domain/email-formats/data-source-actions';
 
 export type EmailFormatRecipientRef =
 	| {

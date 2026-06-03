@@ -10,11 +10,11 @@ import {
   type FormatStarterGalleryEntry,
   type FormatStarterIndustryTagId,
 } from "$lib/features/format-starters/catalog";
-import type { CreateFormatGalleryCategoryId } from "$shared/create-format-gallery";
+import type { CreateFormatGalleryCategoryId } from "$domain/format-starters/gallery-categories";
 
 type CreateFormatsIndustryFilterId = "all" | FormatStarterIndustryTagId;
 
-export type { CreateFormatGalleryCategoryId } from "$shared/create-format-gallery";
+export type { CreateFormatGalleryCategoryId } from "$domain/format-starters/gallery-categories";
 
 export type CreateFormatGalleryCategory = {
   id: CreateFormatGalleryCategoryId;
@@ -35,7 +35,7 @@ export const CREATE_FORMAT_GALLERY_CATEGORIES = [
     industry: "all",
     infoBar: {
       label: "Tip:",
-      text: "These are for testing Overbase with public data - use the dropdown to get starters for your industry",
+      text: "These are for testing Overbase with public data - use the dropdown to see starters for your industry",
     },
   },
   ...FORMAT_STARTER_INDUSTRY_TAGS.map((tag) => ({

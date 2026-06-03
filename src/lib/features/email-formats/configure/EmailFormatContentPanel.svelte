@@ -3,7 +3,7 @@
 	import FormatEmailEditorPanel from '$lib/features/format-starters/creator/editor/FormatEmailEditorPanel.svelte';
 	import type { FormatContentEditorState } from '$lib/features/format-starters/creator/state/format-content-editor-state.svelte';
 	import type { FormatVariableDragCoordinator } from '$lib/features/format-starters/creator/variables/format-variable-drag-coordinator.svelte';
-	import type { EmailFormatContentEditPolicy } from '$shared/email-format-definitions';
+	import type { EmailFormatContentEditPolicy } from '$domain/email-formats';
 	import { Button } from '$lib/ui';
 	import SectionConflictActions from './SectionConflictActions.svelte';
 

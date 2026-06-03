@@ -1,5 +1,5 @@
-import { SPREADSHEET_CELL_MAX_LENGTH, cellKey, parseCellKey } from '../../shared/spreadsheets';
-import type { EmailFormatVariableDefinition } from '../../shared/email-format-definitions';
+import { SPREADSHEET_CELL_MAX_LENGTH, cellKey, parseCellKey } from '../../domain/spreadsheets';
+import type { EmailFormatVariableDefinition } from '../../domain/email-formats';
 import type { Doc } from '../../convex/_generated/dataModel';
 
 const MAX_TITLE_LENGTH = 120;

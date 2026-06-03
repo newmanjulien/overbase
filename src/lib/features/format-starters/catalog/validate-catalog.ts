@@ -3,9 +3,9 @@ import {
 	type FormatEmailContent,
 	type FormatInlineNode
 } from '$lib/features/format-starters/domain';
-import { isDataSourceId } from '$lib/domain/data-sources';
-import { hasInlineTextContent } from '$lib/domain/inline-text';
-import { getEmailFormatDefinition } from '$shared/email-format-definitions';
+import { isDataSourceId } from '$lib/features/format-starters/data-sources';
+import { hasInlineTextContent } from '$lib/ui/inline-text';
+import { getEmailFormatDefinition } from '$domain/email-formats';
 import type { FormatStarter } from './types';
 import { isFormatStarterIndustryTagId } from './industry-tags';
 

@@ -7,8 +7,8 @@ import type {
 import type {
 	EmailFormatDataMode,
 	EmailFormatInlineTextContent
-} from '$shared/email-format-definitions';
-import type { DataSourceId } from '$lib/domain/data-sources';
+} from '$domain/email-formats';
+import type { DataSourceId } from '$lib/features/format-starters/data-sources';
 import type { FormatStarterIndustryTagId } from './industry-tags';
 
 export type FormatStartingPoint = {

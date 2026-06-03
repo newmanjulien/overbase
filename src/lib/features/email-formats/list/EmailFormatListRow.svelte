@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { cn } from '$lib/ui/cn';
-	import type { SelectableListItem } from '$lib/patterns/list-page';
-	import { PersonAvatar } from '$lib/domain/people';
+	import type { SelectableListItem } from '$lib/layout/list';
+	import { PersonAvatar } from '$lib/entities/people';
 
 	export type EmailFormatListItem = SelectableListItem & {
 		title: string;
