@@ -12,20 +12,24 @@
 	type Props = {
 		id: string;
 		ariaLabel: string;
-		selectedId: Id;
+		selectedId?: Id | null;
 		options: readonly HeaderSelectMenuOption[];
 		onSelect: (id: Id) => void;
-		width?: 'sm' | 'md';
+		placeholder?: string;
+		width?: 'sm' | 'md' | 'full';
+		size?: 'compact' | 'form';
 		class?: string;
 	};
 
 	let {
 		id,
 		ariaLabel,
-		selectedId,
+		selectedId = null,
 		options,
 		onSelect,
+		placeholder = '',
 		width = 'sm',
+		size = 'compact',
 		class: className = ''
 	}: Props = $props();
 
@@ -37,8 +41,42 @@
 	let panelWidth = $state(128);
 	let panelMaxHeight = $state(240);
 
-	const widthClass = $derived(width === 'md' ? 'w-36' : 'w-32');
-	const selectedLabel = $derived(options.find((option) => option.id === selectedId)?.label ?? '');
+	const widthClass = $derived.by(() => {
+		if (width === 'full') return 'w-full';
+		return width === 'md' ? 'w-36' : 'w-32';
+	});
+	const sizeClass = $derived.by(() => {
+		if (size === 'form') {
+			return {
+				triggerHeight: 'h-10',
+				triggerText: 'text-sm',
+				triggerPadding: 'pr-3 pl-3.5',
+				caretIcon: 15,
+				optionHeight: 'h-10',
+				optionText: 'text-sm',
+				optionPadding: 'px-3.5',
+				checkSlot: 'size-4',
+				checkIcon: 14
+			};
+		}
+
+		return {
+			triggerHeight: 'h-7',
+			triggerText: 'text-[0.72rem]',
+			triggerPadding: 'pr-2 pl-2.5',
+			caretIcon: 13,
+			optionHeight: 'h-8',
+			optionText: 'text-[0.72rem]',
+			optionPadding: 'px-2.5',
+			checkSlot: 'size-3.5',
+			checkIcon: 12
+		};
+	});
+	const selectedOption = $derived(options.find((option) => option.id === selectedId));
+	const triggerLabel = $derived(selectedOption?.label ?? placeholder);
+	const triggerLabelClass = $derived(
+		selectedOption ? '' : size === 'form' ? 'text-[#8f9297]' : 'text-stone-500'
+	);
 	const menuId = $derived(`${id}-menu`.replace(/[^a-zA-Z0-9_-]/g, '-'));
 	const isDisabled = $derived(options.length === 0);
 	const panelStyle = $derived(
@@ -158,7 +196,7 @@
 	}
 </script>
 
-<span class={cn('inline-flex h-7 items-center', widthClass, className)}>
+<span class={cn('inline-flex items-center', sizeClass.triggerHeight, widthClass, className)}>
 	<button
 		bind:this={triggerElement}
 		{id}
@@ -169,10 +207,20 @@
 		aria-controls={open ? menuId : undefined}
 		disabled={isDisabled}
 		onclick={toggleOpen}
-		class="inline-flex h-7 w-full min-w-0 items-center justify-between gap-1.5 whitespace-nowrap rounded-sm border border-stone-200/70 bg-white py-0 pr-2 pl-2.5 text-left text-[0.72rem] font-normal text-stone-800 outline-none transition-colors hover:bg-stone-50 focus:border-stone-300 focus:ring-2 focus:ring-stone-200 disabled:cursor-default disabled:opacity-55 disabled:hover:bg-white"
+		class={cn(
+			'inline-flex w-full min-w-0 items-center justify-between gap-1.5 whitespace-nowrap rounded-sm border border-stone-200/70 bg-white py-0 text-left font-normal text-stone-800 outline-none transition-colors hover:bg-stone-50 focus:border-stone-300 focus:ring-2 focus:ring-stone-200 disabled:cursor-default disabled:opacity-55 disabled:hover:bg-white',
+			sizeClass.triggerHeight,
+			sizeClass.triggerText,
+			sizeClass.triggerPadding
+		)}
 	>
-		<span class="min-w-0 truncate">{selectedLabel}</span>
-		<CaretDownIcon aria-hidden="true" size={13} weight="regular" class="shrink-0 text-stone-500" />
+		<span class={cn('min-w-0 truncate', triggerLabelClass)}>{triggerLabel}</span>
+		<CaretDownIcon
+			aria-hidden="true"
+			size={sizeClass.caretIcon}
+			weight="regular"
+			class="shrink-0 text-stone-500"
+		/>
 	</button>
 
 	{#if open}
@@ -188,12 +236,22 @@
 					type="button"
 					role="menuitemradio"
 					aria-checked={option.id === selectedId}
-					class="flex h-8 w-full items-center gap-2 px-2.5 text-left text-[0.72rem] font-normal text-stone-700 transition-colors hover:bg-stone-50"
+					class={cn(
+						'flex w-full items-center gap-2 text-left font-normal text-stone-700 transition-colors hover:bg-stone-50',
+						sizeClass.optionHeight,
+						sizeClass.optionText,
+						sizeClass.optionPadding
+					)}
 					onclick={() => selectOption(option.id)}
 				>
-					<span class="flex size-3.5 shrink-0 items-center justify-center text-stone-950">
+					<span
+						class={cn(
+							'flex shrink-0 items-center justify-center text-stone-950',
+							sizeClass.checkSlot
+						)}
+					>
 						{#if option.id === selectedId}
-							<CheckIcon aria-hidden="true" size={12} weight="bold" />
+							<CheckIcon aria-hidden="true" size={sizeClass.checkIcon} weight="bold" />
 						{/if}
 					</span>
 					<span class="whitespace-nowrap">{option.label}</span>

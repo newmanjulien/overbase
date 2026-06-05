@@ -7,10 +7,6 @@ export type AppConvexPreloader = {
 	preloadEmailFormatConfiguration: (emailFormatId: Id<'emailFormats'>) => void;
 };
 
-export type AppConvexPreloaderRenderState = {
-	showPublicDataCard: boolean;
-};
-
 export function provideAppConvexPreloader(preloader: AppConvexPreloader) {
 	setContext(APP_CONVEX_PRELOADER_CONTEXT, preloader);
 }

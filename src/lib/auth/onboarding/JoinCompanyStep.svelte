@@ -2,10 +2,16 @@
 	import AuthButton from '$lib/auth/components/AuthButton.svelte';
 	import AuthStepFrame from '$lib/auth/components/AuthStepFrame.svelte';
 	import AuthTextInput from '$lib/auth/components/AuthTextInput.svelte';
+	import { HeaderSelectMenu } from '$lib/ui';
+	import {
+		COMPANY_INDUSTRY_OPTIONS,
+		UNSUPPORTED_COMPANY_INDUSTRY_ID,
+		isSupportedCompanyIndustry
+	} from '$domain/company-industries';
 
 	type Props = {
 		name: string;
-		website: string;
+		industry: string;
 		errorText: string | null;
 		isSubmitting: boolean;
 		onContinue: () => void;
@@ -13,13 +19,14 @@
 
 	let {
 		name = $bindable(),
-		website = $bindable(),
+		industry = $bindable(),
 		errorText,
 		isSubmitting,
 		onContinue
 	}: Props = $props();
+	const hasUnsupportedIndustry = $derived(industry === UNSUPPORTED_COMPANY_INDUSTRY_ID);
 	const canContinue = $derived(
-		name.trim().length > 0 && website.trim().length > 0 && !isSubmitting
+		name.trim().length > 0 && isSupportedCompanyIndustry(industry) && !isSubmitting
 	);
 </script>
 
@@ -40,17 +47,21 @@
 			required
 			autofocus
 		/>
-		<AuthTextInput
-			label="Your company's website"
-			bind:value={website}
-			type="url"
-			autocomplete="url"
-			inputmode="url"
-			required
+		<HeaderSelectMenu
+			id="join-company-industry"
+			ariaLabel="Select your company's industry"
+			placeholder="Your company's industry"
+			selectedId={industry || null}
+			options={COMPANY_INDUSTRY_OPTIONS}
+			onSelect={(selectedIndustry) => {
+				industry = selectedIndustry;
+			}}
+			width="full"
+			size="form"
 		/>
-		<p class="m-0 text-[13px] leading-5 text-[#8f9297]">
-			We use your website to understand your company without making you fill out a long profile
-		</p>
+		{#if hasUnsupportedIndustry}
+			<p class="m-0 text-sm leading-5 text-red-600">Overbase hasn't reached your industry yet</p>
+		{/if}
 		{#if errorText}
 			<p class="m-0 text-sm leading-5 text-red-600">{errorText}</p>
 		{/if}

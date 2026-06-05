@@ -9,6 +9,7 @@ import {
   spreadsheetCell as cell,
   spreadsheetVariable as sheetVariable,
 } from "./helpers";
+import type { FormatStarter } from "../types";
 
 export const callIntelligenceFormatStarter = defineFormatStarter({
   slug: "call-intelligence",
@@ -274,3 +275,10 @@ export const callIntelligenceFormatStarter = defineFormatStarter({
   modeSortOrder: 14,
   status: "active",
 });
+
+export const techConsultingCallIntelligenceFormatStarter = {
+  ...callIntelligenceFormatStarter,
+  slug: "tech-consulting-call-intelligence",
+  industryTags: ["tech-consulting"],
+  modeSortOrder: 24,
+} satisfies FormatStarter;

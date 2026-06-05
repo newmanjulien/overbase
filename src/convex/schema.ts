@@ -25,9 +25,13 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_clerkUserId', ['clerkUserId']),
+	deletedClerkUsers: defineTable({
+		clerkUserId: v.string(),
+		deletedAt: v.number()
+	}).index('by_clerkUserId', ['clerkUserId']),
 	workspaces: defineTable({
 		name: v.string(),
-		website: v.string(),
+		industry: v.string(),
 		avatar: v.optional(avatar),
 		ownerUserId: v.id('users'),
 		onboardingCompletedAt: v.optional(v.number()),

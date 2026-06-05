@@ -17,13 +17,18 @@
 	import AppGateError from '$lib/app/AppGateError.svelte';
 	import AppLoadingScreen from '$lib/app/AppLoadingScreen.svelte';
 	import {
+		buildAuthEntryHref,
 		resolveAuthEntryReturnHref,
 		resolveAuthExitHref,
 		resolveAuthReturnTo,
 		resolvePostAuthHref,
 		type AuthEntryPathname
 	} from '$lib/auth/navigation';
-	import { createViewerSession, provideViewerSession } from '$lib/auth/viewer-session.svelte';
+	import {
+		createViewerSession,
+		isViewerSessionOnboardingStatus,
+		provideViewerSession
+	} from '$lib/auth/viewer-session.svelte';
 
 	type Props = {
 		entry: AuthEntryPathname;
@@ -44,38 +49,68 @@
 	);
 	const entryReturnHref = $derived(resolveAuthEntryReturnHref(page.url));
 	const gateErrorText = $derived(session.error?.message ?? 'Unable to load your workspace.');
+	const joinHref = $derived(
+		buildAuthEntryHref(AUTH_LINKS.join.pathname, {
+			returnTo,
+			fromAuth: entry === AUTH_LINKS.join.pathname ? undefined : entry
+		})
+	);
+	const loginHref = $derived(
+		buildAuthEntryHref(AUTH_LINKS.login.pathname, {
+			returnTo
+		})
+	);
 	const flowContext = $derived<AuthEntryFlowContext>({
 		returnTo,
 		returnButtonHref,
 		entryReturnHref
 	});
 	const signedInNeedsWorkspaceOnboarding = $derived(
-		session.status === 'ready' &&
-			entry === AUTH_LINKS.join.pathname &&
-			Boolean(session.viewer) &&
-			!session.viewer?.workspace.onboardingCompletedAt
+		entry === AUTH_LINKS.join.pathname && isViewerSessionOnboardingStatus(session.status)
 	);
 	const shouldRenderSignedInOnboarding = $derived(
 		signedInNeedsWorkspaceOnboarding && Boolean(signedInOnboarding)
 	);
+	const shouldRedirectSignedInToJoin = $derived(
+		isViewerSessionOnboardingStatus(session.status) && entry !== AUTH_LINKS.join.pathname
+	);
 	const shouldRedirectSignedInAuthEntry = $derived(
-		session.status === 'ready' && Boolean(session.viewer) && !shouldRenderSignedInOnboarding
+		session.status === 'ready' && !shouldRenderSignedInOnboarding
 	);
 
 	$effect(() => {
+		if (session.status === 'deleted') {
+			if (!session.isSigningOutDeletedAccount) {
+				void session
+					.signOutDeletedAccount()
+					.then(() => {
+						if (entry !== AUTH_LINKS.login.pathname) {
+							void goto(resolve(loginHref), { replaceState: true });
+						}
+					})
+					.catch(() => undefined);
+			}
+			return;
+		}
+
+		if (shouldRedirectSignedInToJoin) {
+			void goto(resolve(joinHref), { replaceState: true });
+			return;
+		}
+
 		if (shouldRedirectSignedInAuthEntry) {
 			void goto(resolve(postAuthHref), { replaceState: true });
 		}
 	});
 </script>
 
-{#if shouldRedirectSignedInAuthEntry}
+{#if session.isSigningOutDeletedAccount || session.status === 'deleted' || shouldRedirectSignedInToJoin || shouldRedirectSignedInAuthEntry}
 	<AppLoadingScreen />
 {:else if shouldRenderSignedInOnboarding}
 	{#key authEntryKey}
 		{@render signedInOnboarding?.(flowContext)}
 	{/key}
-{:else if session.status === 'loading' || session.status === 'bootstrapping'}
+{:else if session.status === 'loading'}
 	<AppLoadingScreen />
 {:else if session.status === 'error'}
 	<AppGateError message={gateErrorText} onRetry={session.retry} />

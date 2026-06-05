@@ -7,7 +7,7 @@ import { isDataSourceId } from '$lib/features/format-starters/data-sources';
 import { hasInlineTextContent } from '$lib/ui/inline-text';
 import { getEmailFormatDefinition } from '$domain/email-formats';
 import type { FormatStarter } from './types';
-import { isFormatStarterIndustryTagId } from './industry-tags';
+import { FORMAT_STARTER_INDUSTRY_TAGS, isFormatStarterIndustryTagId } from './industry-tags';
 
 export type FormatStarterCatalogValidationIssue = {
 	formatStarterSlug?: string;
@@ -54,7 +54,29 @@ export function validateFormatStarterCatalog(
 		validateFormatStarterEntry(issues, entry);
 	}
 
+	validateSupportedIndustryCoverage(issues, entries);
+
 	return issues;
+}
+
+function validateSupportedIndustryCoverage(
+	issues: FormatStarterCatalogValidationIssue[],
+	entries: readonly FormatStarter[]
+) {
+	for (const industryTag of FORMAT_STARTER_INDUSTRY_TAGS) {
+		const hasVisibleStarter = entries.some(
+			(entry) =>
+				entry.mode !== 'public-data' &&
+				entry.showInGallery &&
+				entry.industryTags.includes(industryTag.id)
+		);
+
+		if (!hasVisibleStarter) {
+			issues.push({
+				message: `Supported industry "${industryTag.id}" must have at least one visible non-public-data format starter.`
+			});
+		}
+	}
 }
 
 function validateFormatStarterEntry(

@@ -7,7 +7,11 @@
 	import AppShell from '$lib/app/AppShell.svelte';
 	import { AUTH_LINKS } from '$lib/app/app-links';
 	import { buildAuthEntryHref, resolveAuthReturnTo } from '$lib/auth/navigation';
-	import { createViewerSession, provideViewerSession } from '$lib/auth/viewer-session.svelte';
+	import {
+		createViewerSession,
+		isViewerSessionOnboardingStatus,
+		provideViewerSession
+	} from '$lib/auth/viewer-session.svelte';
 	import type { Snippet } from 'svelte';
 
 	type Props = {
@@ -22,11 +26,33 @@
 			returnTo: resolveAuthReturnTo(page.url)
 		})
 	);
+	const joinHref = $derived(
+		buildAuthEntryHref(AUTH_LINKS.join.pathname, {
+			returnTo: resolveAuthReturnTo(page.url)
+		})
+	);
 	const gateErrorText = $derived(session.error?.message ?? 'Unable to load your workspace.');
 
 	$effect(() => {
+		if (session.status === 'deleted') {
+			if (!session.isSigningOutDeletedAccount) {
+				void session
+					.signOutDeletedAccount()
+					.then(() => {
+						void goto(resolve(loginHref), { replaceState: true });
+					})
+					.catch(() => undefined);
+			}
+			return;
+		}
+
 		if (session.status === 'signedOut') {
 			void goto(resolve(loginHref), { replaceState: true });
+			return;
+		}
+
+		if (isViewerSessionOnboardingStatus(session.status)) {
+			void goto(resolve(joinHref), { replaceState: true });
 		}
 	});
 </script>

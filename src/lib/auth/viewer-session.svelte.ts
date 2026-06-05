@@ -5,33 +5,22 @@ import { getContext, setContext } from 'svelte';
 import { useConvexClient, useQuery } from 'convex-svelte';
 import { useClerkContext } from 'svelte-clerk';
 
-export type ViewerSessionStatus = 'loading' | 'signedOut' | 'bootstrapping' | 'ready' | 'error';
+export type ViewerSessionStatus =
+	| 'loading'
+	| 'signedOut'
+	| 'deleted'
+	| 'needsOnboarding'
+	| 'onboardingIncomplete'
+	| 'ready'
+	| 'error';
+export type ViewerOnboardingSessionStatus = 'needsOnboarding' | 'onboardingIncomplete';
 type ClerkSessionState = 'loading' | 'signedOut' | 'signedIn';
 type ConvexAuthState = 'pending' | 'authenticated' | 'failed';
-type ViewerBootstrapState = 'missing' | 'bootstrapping' | 'ready' | 'error';
 
 export type ViewerWorkspace = {
 	user: Doc<'users'>;
 	workspace: Doc<'workspaces'>;
 	identity: ViewerIdentity;
-};
-
-type CurrentUserAndWorkspace = {
-	user: Doc<'users'>;
-	workspace: Doc<'workspaces'> | null;
-	identity: ViewerIdentity;
-} | null;
-
-type ViewerPayload = {
-	user?: Doc<'users'>;
-	workspace?: Doc<'workspaces'> | null;
-	identity?: Partial<ViewerIdentity> | null;
-};
-
-type LiveViewerResult = {
-	raw: CurrentUserAndWorkspace;
-	viewer: ViewerWorkspace | null;
-	error: Error | null;
 };
 
 const VIEWER_SESSION_CONTEXT = Symbol('viewer-session');
@@ -40,30 +29,10 @@ function getErrorMessage(error: unknown, fallback: string) {
 	return error instanceof Error ? error.message : fallback;
 }
 
-function getViewerIdentity(payload: ViewerPayload) {
-	const email = typeof payload.identity?.email === 'string' ? payload.identity.email.trim() : '';
-
-	if (!email) {
-		throw new Error("Viewer session is missing the user's email address.");
-	}
-
-	return { email };
-}
-
-function normalizeViewerWorkspace(payload: ViewerPayload | null | undefined): ViewerWorkspace | null {
-	if (!payload?.workspace) {
-		return null;
-	}
-
-	if (!payload.user) {
-		throw new Error('Viewer session is missing the user.');
-	}
-
-	return {
-		user: payload.user,
-		workspace: payload.workspace,
-		identity: getViewerIdentity(payload)
-	};
+export function isViewerSessionOnboardingStatus(
+	status: ViewerSessionStatus
+): status is ViewerOnboardingSessionStatus {
+	return status === 'needsOnboarding' || status === 'onboardingIncomplete';
 }
 
 export function createViewerSession() {
@@ -74,10 +43,9 @@ export function createViewerSession() {
 	let convexAuthState = $state<ConvexAuthState>('pending');
 	let tokenErrorText = $state<string | null>(null);
 	let convexAuthErrorText = $state<string | null>(null);
-	let bootstrappingUserId = $state<string | null>(null);
-	let bootstrapAttemptedUserId = $state<string | null>(null);
-	let bootstrapErrorText = $state<string | null>(null);
-	let ensuredViewer = $state<ViewerWorkspace | null>(null);
+	let deletedAccountSignOutErrorText = $state<string | null>(null);
+	let deletedAccountSignOutStarted = $state(false);
+	let isSigningOutDeletedAccount = $state(false);
 	const signedInUserId = $derived(clerk.auth.userId ?? null);
 	const clerkSessionState = $derived.by<ClerkSessionState>(() => {
 		if (!clerk.isLoaded) {
@@ -89,71 +57,31 @@ export function createViewerSession() {
 	const shouldLoadCurrentUser = $derived(
 		clerkSessionState === 'signedIn' && convexAuthState === 'authenticated'
 	);
-	const currentUserAndWorkspaceQuery = useQuery(api.auth.currentUserAndWorkspace, () =>
+	const viewerAccountStateQuery = useQuery(api.auth.viewerAccountState, () =>
 		shouldLoadCurrentUser ? {} : 'skip'
 	);
-	const liveViewerResult = $derived.by<LiveViewerResult>(() => {
-		const payload = currentUserAndWorkspaceQuery.data ?? null;
-
-		if (!payload) {
-			return {
-				raw: null,
-				viewer: null,
-				error: null
-			};
-		}
-
-		try {
-			return {
-				raw: payload,
-				viewer: normalizeViewerWorkspace(payload),
-				error: null
-			};
-		} catch (error) {
-			return {
-				raw: null,
-				viewer: null,
-				error: new Error(getErrorMessage(error, 'Viewer session is malformed.'))
-			};
-		}
-	});
-	const currentUserAndWorkspace = $derived<CurrentUserAndWorkspace>(liveViewerResult.raw);
-	const liveViewer = $derived<ViewerWorkspace | null>(liveViewerResult.viewer);
-	const liveViewerError = $derived<Error | null>(liveViewerResult.error);
+	const accountState = $derived(viewerAccountStateQuery.data ?? null);
 	const viewer = $derived.by<ViewerWorkspace | null>(() => {
-		if (liveViewer) {
-			return liveViewer;
+		const state = accountState;
+
+		if (!state || state.kind !== 'ready') {
+			return null;
 		}
 
-		return ensuredViewer;
+		return {
+			user: state.user,
+			workspace: state.workspace,
+			identity: state.identity
+		};
 	});
 	const error = $derived.by<Error | null>(() => {
-		const message =
-			tokenErrorText ??
-			convexAuthErrorText ??
-			liveViewerError?.message ??
-			bootstrapErrorText;
+		const message = tokenErrorText ?? convexAuthErrorText ?? deletedAccountSignOutErrorText;
 
 		if (message) {
 			return new Error(message);
 		}
 
-		return currentUserAndWorkspaceQuery.error ?? null;
-	});
-	const viewerBootstrapState = $derived.by<ViewerBootstrapState>(() => {
-		if (bootstrapErrorText || liveViewerError || currentUserAndWorkspaceQuery.error) {
-			return 'error';
-		}
-
-		if (viewer) {
-			return 'ready';
-		}
-
-		if (bootstrappingUserId) {
-			return 'bootstrapping';
-		}
-
-		return 'missing';
+		return viewerAccountStateQuery.error ?? null;
 	});
 	const status = $derived.by<ViewerSessionStatus>(() => {
 		if (clerkSessionState === 'loading') {
@@ -168,74 +96,59 @@ export function createViewerSession() {
 			return 'error';
 		}
 
-		if (viewerBootstrapState === 'error') {
+		if (deletedAccountSignOutErrorText || viewerAccountStateQuery.error) {
 			return 'error';
-		}
-
-		if (viewerBootstrapState === 'ready') {
-			return 'ready';
 		}
 
 		if (convexAuthState === 'pending') {
 			return 'loading';
 		}
 
-		if (currentUserAndWorkspaceQuery.isLoading) {
+		if (viewerAccountStateQuery.isLoading) {
 			return 'loading';
 		}
 
-		return 'bootstrapping';
+		return accountState?.kind ?? 'loading';
 	});
-
-	function resetBootstrapState() {
-		bootstrappingUserId = null;
-		bootstrapAttemptedUserId = null;
-		bootstrapErrorText = null;
-		ensuredViewer = null;
-	}
-
-	async function bootstrapCurrentUser(userId: string) {
-		if (bootstrappingUserId || bootstrapAttemptedUserId === userId) {
-			return;
-		}
-
-		bootstrappingUserId = userId;
-		bootstrapAttemptedUserId = userId;
-		bootstrapErrorText = null;
-
-		try {
-			const nextViewer = normalizeViewerWorkspace(
-				await client.mutation(api.auth.ensureViewerWorkspace, {})
-			);
-
-			if (!nextViewer) {
-				throw new Error('Workspace required.');
-			}
-
-			ensuredViewer = nextViewer;
-		} catch (error) {
-			bootstrapErrorText = getErrorMessage(error, 'Unable to create your workspace.');
-		} finally {
-			bootstrappingUserId = null;
-		}
-	}
 
 	function retry() {
 		tokenErrorText = null;
 		convexAuthErrorText = null;
+		deletedAccountSignOutErrorText = null;
+		deletedAccountSignOutStarted = false;
 		authRetryNonce += 1;
-		resetBootstrapState();
 	}
 
 	function reset() {
 		tokenErrorText = null;
 		convexAuthErrorText = null;
-		resetBootstrapState();
+		deletedAccountSignOutErrorText = null;
+		deletedAccountSignOutStarted = false;
 	}
 
 	async function signOut() {
 		reset();
 		await clerk.clerk?.signOut();
+	}
+
+	async function signOutDeletedAccount() {
+		if (isSigningOutDeletedAccount || deletedAccountSignOutStarted) {
+			return;
+		}
+
+		reset();
+		deletedAccountSignOutStarted = true;
+		isSigningOutDeletedAccount = true;
+
+		try {
+			await clerk.clerk?.signOut();
+		} catch (error) {
+			deletedAccountSignOutStarted = false;
+			deletedAccountSignOutErrorText = getErrorMessage(error, 'Unable to sign out deleted account.');
+			throw error;
+		} finally {
+			isSigningOutDeletedAccount = false;
+		}
 	}
 
 	$effect(() => {
@@ -297,34 +210,9 @@ export function createViewerSession() {
 	});
 
 	$effect(() => {
-		const userId = signedInUserId;
-
-		if (!userId) {
-			resetBootstrapState();
-			return;
+		if (status !== 'deleted' && !isSigningOutDeletedAccount) {
+			deletedAccountSignOutStarted = false;
 		}
-
-		if (bootstrapAttemptedUserId && bootstrapAttemptedUserId !== userId) {
-			resetBootstrapState();
-		}
-	});
-
-	$effect(() => {
-		const userId = signedInUserId;
-
-		if (
-			!userId ||
-			convexAuthState !== 'authenticated' ||
-			currentUserAndWorkspaceQuery.isLoading ||
-			liveViewerError ||
-			currentUserAndWorkspaceQuery.error ||
-			currentUserAndWorkspace?.workspace ||
-			ensuredViewer
-		) {
-			return;
-		}
-
-		void bootstrapCurrentUser(userId);
 	});
 
 	return {
@@ -337,18 +225,22 @@ export function createViewerSession() {
 		get signedInUserId() {
 			return signedInUserId;
 		},
-		get currentUserAndWorkspace() {
-			return currentUserAndWorkspace;
+		get accountState() {
+			return accountState;
 		},
 		get viewer() {
 			return viewer;
+		},
+		get isSigningOutDeletedAccount() {
+			return isSigningOutDeletedAccount;
 		},
 		get error() {
 			return error;
 		},
 		retry,
 		reset,
-		signOut
+		signOut,
+		signOutDeletedAccount
 	};
 }
 

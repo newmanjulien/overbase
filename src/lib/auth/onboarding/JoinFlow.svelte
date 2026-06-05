@@ -2,10 +2,11 @@
 	import { goto, preloadData } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { api } from '$convex/_generated/api';
+	import { SvelteMap } from 'svelte/reactivity';
 	import {
 		APP_DYNAMIC_ROUTE_IDS,
-		APP_LINKS,
 		AUTH_LINKS,
+		createFormatsGalleryHref,
 		type AppHref,
 		type AuthEntryHref
 	} from '$lib/app/app-links';
@@ -60,7 +61,7 @@
 	let isResendingCode = $state(false);
 	let company = $state({
 		name: '',
-		website: ''
+		industry: ''
 	});
 	let partner = $state({
 		name: '',
@@ -68,11 +69,11 @@
 	});
 	let companyErrorText = $state<string | null>(null);
 	let isSavingCompany = $state(false);
-	const joinFormatStarter = getJoinFormatStarterRecommendation();
+	const joinFormatStarter = $derived(getJoinFormatStarterRecommendation(company.industry));
 	let completionErrorText = $state<string | null>(null);
 	let completingFormatStarterSlug = $state<string | null>(null);
-	let isOpeningFormatStarter = $state(false);
-	let formatStarterRoutePreloadPromise: Promise<void> | null = null;
+	let isOpeningFormatStarterGallery = $state(false);
+	const formatStarterRoutePreloadPromises = new SvelteMap<string, Promise<void>>();
 
 	const loginHref = $derived(
 		buildAuthEntryHref(AUTH_LINKS.login.pathname, {
@@ -111,7 +112,9 @@
 		return undefined;
 	});
 	const canContinue = $derived(email.trim().length > 0 && !isSubmittingEmail);
-	const isCompletingOnboarding = $derived(Boolean(completingFormatStarterSlug) || isOpeningFormatStarter);
+	const isCompletingOnboarding = $derived(
+		Boolean(completingFormatStarterSlug) || isOpeningFormatStarterGallery
+	);
 
 	async function submitEmail() {
 		const normalizedEmail = email.trim().toLowerCase();
@@ -175,7 +178,7 @@
 		try {
 			await client.mutation(api.auth.saveOnboardingCompany, {
 				companyName: company.name,
-				companyWebsite: company.website
+				companyIndustry: company.industry
 			});
 			step = 'partner';
 		} catch (error) {
@@ -185,30 +188,34 @@
 		}
 	}
 
-	function preloadFormatStarterRoute() {
-		if (formatStarterRoutePreloadPromise) {
-			return formatStarterRoutePreloadPromise;
+	function preloadFormatStarterRoute(formatStarterSlug: string) {
+		const existingPreloadPromise = formatStarterRoutePreloadPromises.get(formatStarterSlug);
+
+		if (existingPreloadPromise) {
+			return existingPreloadPromise;
 		}
 
-		formatStarterRoutePreloadPromise = preloadData(
-			resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, { formatStarterSlug: joinFormatStarter.slug })
+		const preloadPromise = preloadData(
+			resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, { formatStarterSlug })
 		).then(
 			() => undefined,
 			() => undefined
 		);
 
-		return formatStarterRoutePreloadPromise;
+		formatStarterRoutePreloadPromises.set(formatStarterSlug, preloadPromise);
+
+		return preloadPromise;
 	}
 
-	async function selectFormatStarter() {
+	async function selectFormatStarter(formatStarterSlug: string) {
 		if (isCompletingOnboarding) return;
 
 		completionErrorText = null;
-		completingFormatStarterSlug = joinFormatStarter.slug;
+		completingFormatStarterSlug = formatStarterSlug;
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, { formatStarterSlug: joinFormatStarter.slug }));
+			await goto(resolve(APP_DYNAMIC_ROUTE_IDS.createFormat, { formatStarterSlug }));
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
@@ -216,19 +223,19 @@
 		}
 	}
 
-	async function openFormatStarter() {
+	async function openFormatStarterGallery() {
 		if (isCompletingOnboarding) return;
 
 		completionErrorText = null;
-		isOpeningFormatStarter = true;
+		isOpeningFormatStarterGallery = true;
 
 		try {
 			await client.mutation(api.auth.markOnboardingComplete, {});
-			await goto(resolve(APP_LINKS.createFormats.pathname));
+			await goto(resolve(createFormatsGalleryHref({ industry: company.industry })));
 		} catch (error) {
 			completionErrorText = authController.getErrorMessage(error);
 		} finally {
-			isOpeningFormatStarter = false;
+			isOpeningFormatStarterGallery = false;
 		}
 	}
 
@@ -248,22 +255,30 @@
 	}
 
 	$effect(() => {
-		if (step === 'partner') {
-			void preloadFormatStarterRoute();
+		if (step === 'formatStarter' && !joinFormatStarter) {
+			step = 'company';
+		}
+	});
+
+	$effect(() => {
+		if (step === 'partner' && joinFormatStarter) {
+			void preloadFormatStarterRoute(joinFormatStarter.slug);
 		}
 	});
 </script>
 
 {#if step === 'formatStarter'}
-	<JoinFormatStarterStep
-		formatStarter={joinFormatStarter}
-		completionErrorText={completionErrorText}
-		selectedFormatStarterSlug={completingFormatStarterSlug}
-		isOpeningFormatStarter={isOpeningFormatStarter}
-		onSelect={() => void selectFormatStarter()}
-		onPreload={() => void preloadFormatStarterRoute()}
-		onOpenFormatStarter={() => void openFormatStarter()}
-	/>
+	{#if joinFormatStarter}
+		<JoinFormatStarterStep
+			formatStarter={joinFormatStarter}
+			completionErrorText={completionErrorText}
+			isSelectingFormatStarter={Boolean(completingFormatStarterSlug)}
+			isOpeningFormatStarterGallery={isOpeningFormatStarterGallery}
+			onSelect={() => void selectFormatStarter(joinFormatStarter.slug)}
+			onPreload={() => void preloadFormatStarterRoute(joinFormatStarter.slug)}
+			onOpenFormatStarterGallery={() => void openFormatStarterGallery()}
+		/>
+	{/if}
 {:else}
 	<AuthEntryShell
 		accent="link"
@@ -351,7 +366,7 @@
 		{:else if step === 'company'}
 			<JoinCompanyStep
 				bind:name={company.name}
-				bind:website={company.website}
+				bind:industry={company.industry}
 				errorText={companyErrorText}
 				isSubmitting={isSavingCompany}
 				onContinue={() => {

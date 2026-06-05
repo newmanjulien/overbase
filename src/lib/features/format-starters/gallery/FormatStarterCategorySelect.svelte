@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
 	import { api } from '$convex/_generated/api';
 	import { createFormatsGalleryHref, type CreateFormatsGalleryHref } from '$lib/app/app-links';
 	import { useCurrentWorkspaceContext } from '$lib/app/current-workspace.svelte';
@@ -10,17 +9,21 @@
 	import {
 		CREATE_FORMAT_GALLERY_CATEGORIES,
 		createFormatGalleryCategoryHref,
-		getCreateFormatGalleryCategoryFromSearchParams,
+		getCreateFormatGalleryDropdownCategories,
+		type CreateFormatGalleryCategory,
 		type CreateFormatGalleryCategoryId
 	} from './create-format-gallery-categories';
 
+	type Props = {
+		selectedCategory: CreateFormatGalleryCategory;
+	};
+
+	let { selectedCategory }: Props = $props();
+
 	const client = useConvexClient();
 	const currentWorkspace = useCurrentWorkspaceContext();
-	const selectedCategory = $derived(
-		getCreateFormatGalleryCategoryFromSearchParams(
-			page.url.searchParams,
-			currentWorkspace.user.lastCreateFormatGalleryCategoryId
-		)
+	const dropdownCategories = $derived(
+		getCreateFormatGalleryDropdownCategories(currentWorkspace.workspace.industry)
 	);
 
 	function setSelectedCategory(categoryId: CreateFormatGalleryCategoryId) {
@@ -66,7 +69,7 @@
 	id="format-category"
 	ariaLabel="Select format category"
 	selectedId={selectedCategory.id}
-	options={CREATE_FORMAT_GALLERY_CATEGORIES}
+	options={dropdownCategories}
 	onSelect={setSelectedCategory}
 	width="md"
 />

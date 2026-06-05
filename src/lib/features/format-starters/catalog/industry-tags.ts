@@ -1,13 +1,15 @@
-export const FORMAT_STARTER_INDUSTRY_TAGS = [
-	{ id: 'law', label: 'Law' },
-	{ id: 'insurance', label: 'Insurance' },
-	{ id: 'consulting', label: 'Consulting' }
-] as const;
+import {
+	SUPPORTED_COMPANY_INDUSTRIES,
+	isSupportedCompanyIndustry,
+	type SupportedCompanyIndustryId
+} from '$domain/company-industries';
 
-export type FormatStarterIndustryTagId = (typeof FORMAT_STARTER_INDUSTRY_TAGS)[number]['id'];
+export const FORMAT_STARTER_INDUSTRY_TAGS = SUPPORTED_COMPANY_INDUSTRIES;
+
+export type FormatStarterIndustryTagId = SupportedCompanyIndustryId;
 
 export function isFormatStarterIndustryTagId(
 	value: string
 ): value is FormatStarterIndustryTagId {
-	return FORMAT_STARTER_INDUSTRY_TAGS.some((tag) => tag.id === value);
+	return isSupportedCompanyIndustry(value);
 }

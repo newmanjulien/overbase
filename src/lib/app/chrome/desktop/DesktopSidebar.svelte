@@ -18,7 +18,6 @@
 		currentPathname: string;
 		user: Doc<'users'>;
 		identity: ViewerIdentity;
-		showPublicDataCard: boolean;
 		class?: string;
 	};
 
@@ -26,7 +25,6 @@
 		currentPathname,
 		user,
 		identity,
-		showPublicDataCard,
 		class: className = ''
 	}: Props = $props();
 
@@ -79,7 +77,6 @@
 			footerItems={NAV_FOOTER_ITEMS}
 			{currentPathname}
 			expanded={shellState.isSidebarExpanded}
-			{showPublicDataCard}
 			onRouteHover={(route) => {
 				hoveredRoute = route;
 			}}

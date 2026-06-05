@@ -27,24 +27,35 @@ export type CreateFormatGalleryCategory = {
   };
 };
 
-export const CREATE_FORMAT_GALLERY_CATEGORIES = [
-  {
-    id: "public-data",
-    label: "Public data",
-    mode: "public-data",
-    industry: "all",
-    infoBar: {
-      label: "Tip:",
-      text: "These are for testing Overbase with public data - use the dropdown to see starters for your industry",
-    },
+const INDUSTRY_CATEGORY_INFO_BAR = {
+  label: "Next step:",
+  text: "Select a starter to design an email format your team will receive",
+};
+
+const DEFAULT_CREATE_FORMAT_GALLERY_CATEGORY_ID = "public-data";
+
+const PUBLIC_DATA_CREATE_FORMAT_GALLERY_CATEGORY = {
+  id: DEFAULT_CREATE_FORMAT_GALLERY_CATEGORY_ID,
+  label: "Public data",
+  mode: "public-data",
+  industry: "all",
+  infoBar: {
+    label: "Tip:",
+    text: "These are for testing Overbase with public data - use the dropdown to see starters for your industry",
   },
-  ...FORMAT_STARTER_INDUSTRY_TAGS.map((tag) => ({
-    id: tag.id,
-    label: tag.label,
-    mode: "all" as const,
-    industry: tag.id,
-    infoBar: getIndustryCategoryInfoBar(tag.id),
-  })),
+} satisfies CreateFormatGalleryCategory;
+
+const CREATE_FORMAT_GALLERY_INDUSTRY_CATEGORIES = FORMAT_STARTER_INDUSTRY_TAGS.map((tag) => ({
+  id: tag.id,
+  label: tag.label,
+  mode: "all" as const,
+  industry: tag.id,
+  infoBar: INDUSTRY_CATEGORY_INFO_BAR,
+})) satisfies readonly CreateFormatGalleryCategory[];
+
+export const CREATE_FORMAT_GALLERY_CATEGORIES = [
+  PUBLIC_DATA_CREATE_FORMAT_GALLERY_CATEGORY,
+  ...CREATE_FORMAT_GALLERY_INDUSTRY_CATEGORIES,
 ] satisfies readonly CreateFormatGalleryCategory[];
 
 export function getCreateFormatGalleryCategoryById(
@@ -55,6 +66,20 @@ export function getCreateFormatGalleryCategoryById(
       (category) => category.id === categoryId,
     ) ?? null
   );
+}
+
+export function getCreateFormatGalleryDropdownCategories(
+  workspaceIndustryId: string | null | undefined,
+): readonly CreateFormatGalleryCategory[] {
+  return [
+    ...CREATE_FORMAT_GALLERY_INDUSTRY_CATEGORIES.filter(
+      (category) => category.id === workspaceIndustryId,
+    ),
+    ...CREATE_FORMAT_GALLERY_INDUSTRY_CATEGORIES.filter(
+      (category) => category.id !== workspaceIndustryId,
+    ),
+    PUBLIC_DATA_CREATE_FORMAT_GALLERY_CATEGORY,
+  ];
 }
 
 export function getCreateFormatGalleryCategoryFromSearchParams(
@@ -77,12 +102,12 @@ export function getCreateFormatGalleryCategoryFromSearchParams(
     ) ?? null;
 
   if (selectedCategory || hasExplicitCategoryFilter) {
-    return selectedCategory ?? CREATE_FORMAT_GALLERY_CATEGORIES[0];
+    return selectedCategory ?? PUBLIC_DATA_CREATE_FORMAT_GALLERY_CATEGORY;
   }
 
   return (
     getCreateFormatGalleryCategoryById(fallbackCategoryId) ??
-    CREATE_FORMAT_GALLERY_CATEGORIES[0]
+    PUBLIC_DATA_CREATE_FORMAT_GALLERY_CATEGORY
   );
 }
 
@@ -117,24 +142,4 @@ function normalizeCreateFormatsIndustryFilter(
   value: string | null | undefined,
 ): CreateFormatsIndustryFilterId {
   return value && isFormatStarterIndustryTagId(value) ? value : "all";
-}
-
-function getIndustryCategoryInfoBar(industryTagId: FormatStarterIndustryTagId) {
-  switch (industryTagId) {
-    case "law":
-      return {
-        label: "Next step:",
-        text: "Select a starter to design an email format your team will receive",
-      };
-    case "insurance":
-      return {
-        label: "Next step:",
-        text: "Select a starter to design an email format your team will receive",
-      };
-    case "consulting":
-      return {
-        label: "Next step",
-        text: "Select a starter to design an email format your team will receive",
-      };
-  }
 }

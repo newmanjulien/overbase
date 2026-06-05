@@ -146,7 +146,6 @@
 </script>
 
 <AppConvexPreloader>
-	{#snippet children(preloader)}
 	<div class="h-dvh min-h-dvh overflow-hidden bg-stone-50">
 		<div
 			class="dashboard-surface flex h-full min-h-0 md:gap-(--dashboard-surface-gap)"
@@ -156,7 +155,6 @@
 				currentPathname={page.url.pathname}
 				user={currentWorkspace.user}
 				identity={currentWorkspace.identity}
-				showPublicDataCard={preloader.showPublicDataCard}
 				class="hidden md:flex"
 			/>
 
@@ -196,5 +194,4 @@
 			</main>
 		</div>
 	</div>
-	{/snippet}
 </AppConvexPreloader>

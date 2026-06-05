@@ -5,23 +5,25 @@
 	type Props = {
 		formatStarter: JoinFormatStarterRecommendation;
 		completionErrorText: string | null;
-		selectedFormatStarterSlug: string | null;
-		isOpeningFormatStarter: boolean;
+		isSelectingFormatStarter: boolean;
+		isOpeningFormatStarterGallery: boolean;
 		onSelect: () => void;
 		onPreload: () => void;
-		onOpenFormatStarter: () => void;
+		onOpenFormatStarterGallery: () => void;
 	};
 
 	let {
 		formatStarter,
 		completionErrorText,
-		selectedFormatStarterSlug,
-		isOpeningFormatStarter,
+		isSelectingFormatStarter,
+		isOpeningFormatStarterGallery,
 		onSelect,
 		onPreload,
-		onOpenFormatStarter
+		onOpenFormatStarterGallery
 	}: Props = $props();
-	const isCompletingOnboarding = $derived(Boolean(selectedFormatStarterSlug) || isOpeningFormatStarter);
+	const isCompletingOnboarding = $derived(
+		isSelectingFormatStarter || isOpeningFormatStarterGallery
+	);
 
 	function selectFormatStarter(event: MouseEvent) {
 		if (isCompletingOnboarding) {
@@ -55,23 +57,25 @@
 	class="flex min-h-dvh items-center justify-center overflow-auto bg-white px-6 py-16 text-[#202124]"
 	aria-label="Recommended format"
 >
-	<div class="w-full max-w-120 text-center">
+	<div class="w-full max-w-190 text-center">
 		<h1 class="mt-5 mb-0 text-[30px] leading-[1.08] font-medium text-[#08090a]">
-			Try Overbase with public data
+			Start with a format for your team
 		</h1>
 		<p class="mx-auto mt-4 max-w-sm text-sm leading-[1.45] text-[#686b73]">
-			See how Overbase works without sharing any of your internal data and with only public data
+			Choose a starter now, or open the full gallery and explore every format.
 		</p>
 
 		<div class="mt-10 flex justify-center">
-			<div class="w-full max-w-[19.6875rem]">
-				<FormatStarterCard
-					{formatStarter}
-					disabled={isCompletingOnboarding}
-					onpointerenter={preloadFormatStarter}
-					onfocus={preloadFormatStarter}
-					onclick={selectFormatStarter}
-				/>
+			<div class="w-full">
+				<div class="mx-auto grid max-w-92 grid-cols-1 gap-2.5">
+					<FormatStarterCard
+						{formatStarter}
+						disabled={isCompletingOnboarding}
+						onpointerenter={preloadFormatStarter}
+						onfocus={preloadFormatStarter}
+						onclick={selectFormatStarter}
+					/>
+				</div>
 				{#if completionErrorText}
 					<p class="mx-auto mt-5 max-w-75 text-sm leading-5 text-red-600">
 						{completionErrorText}
@@ -81,9 +85,9 @@
 					type="button"
 					class="mt-7 text-sm text-stone-400/50 underline underline-offset-2 transition hover:text-stone-400/70 focus-visible:rounded-sm focus-visible:outline-none focus-visible:shadow-[0_0_0_3px_rgb(120_113_108_/_20%)] disabled:cursor-not-allowed disabled:text-stone-300"
 					disabled={isCompletingOnboarding}
-					onclick={onOpenFormatStarter}
+					onclick={onOpenFormatStarterGallery}
 				>
-					{isOpeningFormatStarter ? 'Opening...' : 'Let me explore the full capabilities'}
+					{isOpeningFormatStarterGallery ? 'Opening...' : 'Let me explore the full capabilities'}
 				</button>
 			</div>
 		</div>

@@ -9,6 +9,7 @@ import {
   spreadsheetCell as cell,
   spreadsheetVariable as sheetVariable,
 } from "./helpers";
+import type { FormatStarter } from "../types";
 
 export const whitespaceAnalysisFormatStarter = defineFormatStarter({
   slug: "whitespace-analysis",
@@ -258,3 +259,10 @@ export const whitespaceAnalysisFormatStarter = defineFormatStarter({
   modeSortOrder: 20,
   status: "active",
 });
+
+export const financeWhitespaceAnalysisFormatStarter = {
+  ...whitespaceAnalysisFormatStarter,
+  slug: "finance-whitespace-analysis",
+  industryTags: ["finance"],
+  modeSortOrder: 22,
+} satisfies FormatStarter;

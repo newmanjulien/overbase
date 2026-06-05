@@ -17,11 +17,11 @@
 	let { data }: PageProps = $props();
 	const routeTitleState = useRouteTitleState();
 	const currentWorkspace = useCurrentWorkspaceContext();
+	const fallbackCategoryId = $derived(
+		currentWorkspace.user.lastCreateFormatGalleryCategoryId ?? currentWorkspace.workspace.industry
+	);
 	const selectedCategory = $derived(
-		getCreateFormatGalleryCategoryFromSearchParams(
-			page.url.searchParams,
-			currentWorkspace.user.lastCreateFormatGalleryCategoryId
-		)
+		getCreateFormatGalleryCategoryFromSearchParams(page.url.searchParams, fallbackCategoryId)
 	);
 	const filteredFormatStarters = $derived(
 		data.formatStarters.filter(matchesFormatStarterFilters)
@@ -45,7 +45,7 @@
 </script>
 
 {#snippet headerCategorySelect()}
-	<FormatStarterCategorySelect />
+	<FormatStarterCategorySelect {selectedCategory} />
 {/snippet}
 
 <section class="flex h-full min-h-full w-full px-4 py-6 md:px-8 md:py-8">

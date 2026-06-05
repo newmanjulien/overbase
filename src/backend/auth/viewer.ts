@@ -1,6 +1,7 @@
 import type { ViewerIdentity } from '../../domain/viewer';
 import type { Doc, Id } from '../../convex/_generated/dataModel';
 import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
+import { isSupportedCompanyIndustry } from '../../domain/company-industries';
 
 export type { ViewerIdentity } from '../../domain/viewer';
 
@@ -10,11 +11,22 @@ export type ViewerWorkspace = {
 	identity: ViewerIdentity;
 };
 
-export type CurrentUserAndWorkspace = {
-	user: Doc<'users'>;
-	workspace: Doc<'workspaces'> | null;
-	identity: ViewerIdentity;
-} | null;
+export type ViewerAccountState =
+	| { kind: 'signedOut' }
+	| { kind: 'deleted' }
+	| { kind: 'needsOnboarding'; identity: ViewerIdentity }
+	| {
+			kind: 'onboardingIncomplete';
+			user: Doc<'users'>;
+			workspace: Doc<'workspaces'>;
+			identity: ViewerIdentity;
+	  }
+	| {
+			kind: 'ready';
+			user: Doc<'users'>;
+			workspace: Doc<'workspaces'>;
+			identity: ViewerIdentity;
+	  };
 
 type ClerkIdentity = NonNullable<Awaited<ReturnType<QueryCtx['auth']['getUserIdentity']>>>;
 
@@ -71,6 +83,19 @@ async function getUserForClerkUserId(ctx: QueryCtx | MutationCtx, clerkUserId: s
 		.first();
 }
 
+async function getDeletedClerkUser(ctx: QueryCtx | MutationCtx, clerkUserId: string) {
+	return await ctx.db
+		.query('deletedClerkUsers')
+		.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', clerkUserId))
+		.first();
+}
+
+async function ensureClerkUserWasNotDeleted(ctx: QueryCtx | MutationCtx, clerkUserId: string) {
+	if (await getDeletedClerkUser(ctx, clerkUserId)) {
+		throw new Error('This account has been deleted.');
+	}
+}
+
 export async function getWorkspaceForUser(ctx: QueryCtx | MutationCtx, user: Doc<'users'>) {
 	if (!user.workspaceId) {
 		return null;
@@ -88,7 +113,7 @@ export async function getWorkspaceForUser(ctx: QueryCtx | MutationCtx, user: Doc
 async function createWorkspaceForUser(ctx: MutationCtx, user: Doc<'users'>, now: number) {
 	const workspaceId = await ctx.db.insert('workspaces', {
 		name: '',
-		website: '',
+		industry: '',
 		ownerUserId: user._id,
 		createdAt: now,
 		updatedAt: now
@@ -111,8 +136,15 @@ async function createWorkspaceForUser(ctx: MutationCtx, user: Doc<'users'>, now:
 	return { user: updatedUser, workspace };
 }
 
-export async function requireViewerWorkspace(ctx: QueryCtx | MutationCtx): Promise<ViewerWorkspace> {
+function hasCompletedWorkspaceProfile(workspace: Doc<'workspaces'>) {
+	return Boolean(workspace.name.trim()) && isSupportedCompanyIndustry(workspace.industry.trim());
+}
+
+async function requireInitializedViewerWorkspace(
+	ctx: QueryCtx | MutationCtx
+): Promise<ViewerWorkspace> {
 	const viewer = await requireSignedInClerkViewer(ctx);
+	await ensureClerkUserWasNotDeleted(ctx, viewer.clerkUserId);
 	const user = await getUserForClerkUserId(ctx, viewer.clerkUserId);
 
 	if (!user) {
@@ -126,6 +158,19 @@ export async function requireViewerWorkspace(ctx: QueryCtx | MutationCtx): Promi
 	}
 
 	return { user, workspace, identity: viewer.identity };
+}
+
+export async function requireViewerWorkspace(ctx: QueryCtx | MutationCtx): Promise<ViewerWorkspace> {
+	const viewerWorkspace = await requireInitializedViewerWorkspace(ctx);
+
+	if (
+		!viewerWorkspace.workspace.onboardingCompletedAt ||
+		!hasCompletedWorkspaceProfile(viewerWorkspace.workspace)
+	) {
+		throw new Error('Onboarding required.');
+	}
+
+	return viewerWorkspace;
 }
 
 export async function requireWorkspaceRecord<T extends { workspaceId: Id<'workspaces'> }>(
@@ -152,8 +197,9 @@ export function getViewerWorkspaceRecord<T extends { workspaceId: Id<'workspaces
 	return record;
 }
 
-export async function ensureViewerWorkspaceRecord(ctx: MutationCtx): Promise<ViewerWorkspace> {
+async function ensureOnboardingWorkspaceRecord(ctx: MutationCtx): Promise<ViewerWorkspace> {
 	const viewer = await requireSignedInClerkViewer(ctx);
+	await ensureClerkUserWasNotDeleted(ctx, viewer.clerkUserId);
 	const now = Date.now();
 	let user = await ctx.db
 		.query('users')
@@ -185,24 +231,25 @@ export async function saveOnboardingCompanyProfile(
 	ctx: MutationCtx,
 	{
 		companyName,
-		companyWebsite
+		companyIndustry
 	}: {
 		companyName: string;
-		companyWebsite: string;
+		companyIndustry: string;
 	}
 ): Promise<ViewerWorkspace> {
-	const viewerWorkspace = await requireViewerWorkspace(ctx);
-	const { workspace } = viewerWorkspace;
 	const name = companyName.trim();
-	const website = companyWebsite.trim();
+	const industry = companyIndustry.trim();
 
-	if (!name || !website) {
-		throw new Error('Company name and website are required.');
+	if (!name || !isSupportedCompanyIndustry(industry)) {
+		throw new Error('Company name and supported industry are required.');
 	}
+
+	const viewerWorkspace = await ensureOnboardingWorkspaceRecord(ctx);
+	const { workspace } = viewerWorkspace;
 
 	await ctx.db.patch(workspace._id, {
 		name,
-		website,
+		industry,
 		updatedAt: Date.now()
 	});
 
@@ -215,31 +262,43 @@ export async function saveOnboardingCompanyProfile(
 	return { ...viewerWorkspace, workspace: updatedWorkspace };
 }
 
-export async function getCurrentUserAndWorkspace(
-	ctx: QueryCtx | MutationCtx
-): Promise<CurrentUserAndWorkspace> {
+export async function getViewerAccountState(ctx: QueryCtx | MutationCtx): Promise<ViewerAccountState> {
 	const viewer = await getCurrentSignedInClerkViewer(ctx);
 
 	if (!viewer) {
-		return null;
+		return { kind: 'signedOut' };
+	}
+
+	if (await getDeletedClerkUser(ctx, viewer.clerkUserId)) {
+		return { kind: 'deleted' };
 	}
 
 	const user = await getUserForClerkUserId(ctx, viewer.clerkUserId);
 
 	if (!user) {
-		return null;
+		return { kind: 'needsOnboarding', identity: viewer.identity };
 	}
 
-	return {
-		user,
-		workspace: await getWorkspaceForUser(ctx, user),
-		identity: viewer.identity
-	};
+	const workspace = await getWorkspaceForUser(ctx, user);
+
+	if (!workspace) {
+		return { kind: 'needsOnboarding', identity: viewer.identity };
+	}
+
+	if (!workspace.onboardingCompletedAt || !hasCompletedWorkspaceProfile(workspace)) {
+		return { kind: 'onboardingIncomplete', user, workspace, identity: viewer.identity };
+	}
+
+	return { kind: 'ready', user, workspace, identity: viewer.identity };
 }
 
 export async function markWorkspaceOnboardingComplete(ctx: MutationCtx) {
-	const { workspace } = await requireViewerWorkspace(ctx);
+	const { workspace } = await requireInitializedViewerWorkspace(ctx);
 	const now = Date.now();
+
+	if (!hasCompletedWorkspaceProfile(workspace)) {
+		throw new Error('Company profile is required before onboarding can be completed.');
+	}
 
 	if (!workspace.onboardingCompletedAt) {
 		await ctx.db.patch(workspace._id, {

@@ -1,42 +1,49 @@
-import { getFormatStarter } from "$lib/features/format-starters/catalog";
-import type { FormatStarterGalleryEntry } from "$lib/features/format-starters/catalog";
+import {
+	isFormatStarterIndustryTagId,
+	listFormatStarterGalleryEntries,
+	type FormatStarterGalleryEntry
+} from '$lib/features/format-starters/catalog';
+import type { SupportedCompanyIndustryId } from '$domain/company-industries';
 
-const JOIN_FLOW_FORMAT_STARTER = {
-  formatStarterSlug: "reconnect-linkedin",
-  variantSlug: "personal",
-} as const;
+const JOIN_FORMAT_STARTER_BY_INDUSTRY = {
+	insurance: 'whitespace-analysis',
+	law: 'warm-up',
+	finance: 'finance-whitespace-analysis',
+	consulting: 'pitch-context',
+	'tech-consulting': 'tech-consulting-call-intelligence'
+} satisfies Record<SupportedCompanyIndustryId, string>;
 
 export type JoinFormatStarterRecommendation = FormatStarterGalleryEntry;
 
-export function getJoinFormatStarterRecommendation(): JoinFormatStarterRecommendation {
-  const formatStarter = getFormatStarter(
-    JOIN_FLOW_FORMAT_STARTER.formatStarterSlug,
-  );
+export function getJoinFormatStarterRecommendation(
+	industryId: string | null | undefined
+): JoinFormatStarterRecommendation | null {
+	if (!industryId || !isFormatStarterIndustryTagId(industryId)) {
+		return null;
+	}
 
-  if (!formatStarter) {
-    throw new Error(
-      `Join format starter "${JOIN_FLOW_FORMAT_STARTER.formatStarterSlug}" is not available.`,
-    );
-  }
+	const formatStarter = getJoinFormatStarter(JOIN_FORMAT_STARTER_BY_INDUSTRY[industryId]);
 
-  const startingPoint = formatStarter.startingPoints.find(
-    (entry) => entry.variantSlug === JOIN_FLOW_FORMAT_STARTER.variantSlug,
-  );
+	if (!formatStarter.industryTags.includes(industryId)) {
+		throw new Error(
+			`Join format starter "${formatStarter.slug}" is not tagged for industry "${industryId}".`
+		);
+	}
 
-  if (!startingPoint) {
-    throw new Error(
-      `Join format starter "${JOIN_FLOW_FORMAT_STARTER.formatStarterSlug}" does not define variant "${JOIN_FLOW_FORMAT_STARTER.variantSlug}".`,
-    );
-  }
+	return formatStarter;
+}
 
-  return {
-    mode: formatStarter.mode,
-    slug: formatStarter.slug,
-    title: "Try with only public data",
-    description:
-      "Try Overbase without sharing any of your internal data and with only public data",
-    dataSourceIds: formatStarter.dataSourceIds,
-    industryTags: formatStarter.industryTags,
-    sampleEmail: formatStarter.sampleEmail,
-  };
+function getJoinFormatStarter(formatStarterSlug: string) {
+	const galleryEntries = listFormatStarterGalleryEntries();
+	const formatStarter = galleryEntries.find((entry) => entry.slug === formatStarterSlug);
+
+	if (!formatStarter) {
+		throw new Error(`Join format starter "${formatStarterSlug}" is not available.`);
+	}
+
+	if (formatStarter.mode === 'public-data') {
+		throw new Error(`Join format starter "${formatStarterSlug}" cannot use public data.`);
+	}
+
+	return formatStarter;
 }

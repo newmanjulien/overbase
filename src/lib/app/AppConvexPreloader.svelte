@@ -1,16 +1,13 @@
 <script lang="ts">
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
-	import {
-		provideAppConvexPreloader,
-		type AppConvexPreloaderRenderState
-	} from '$lib/app/app-convex-preloader.svelte';
+	import { provideAppConvexPreloader } from '$lib/app/app-convex-preloader.svelte';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { onDestroy, type Snippet } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 
 	type Props = {
-		children: Snippet<[AppConvexPreloaderRenderState]>;
+		children: Snippet;
 	};
 
 	type WarmSubscription = {
@@ -23,12 +20,8 @@
 	let { children }: Props = $props();
 	const client = useConvexClient();
 	const emailFormatsQuery = useQuery(api.emailFormats.listEmailFormats);
-	const externalDataQuery = useQuery(api.externalData.listExternalDataSources, () => ({}));
 	const teammatesQuery = useQuery(api.teammates.listTeammates);
 	const detailWarmSubscriptions = new SvelteMap<string, WarmSubscription>();
-	const renderState = $derived<AppConvexPreloaderRenderState>({
-		showPublicDataCard: Boolean(externalDataQuery.data && externalDataQuery.data.length === 0)
-	});
 
 	function clearWarmSubscription(key: string) {
 		const warmSubscription = detailWarmSubscriptions.get(key);
@@ -70,7 +63,6 @@
 
 	$effect(() => {
 		void emailFormatsQuery.isLoading;
-		void externalDataQuery.isLoading;
 		void teammatesQuery.isLoading;
 	});
 
@@ -85,4 +77,4 @@
 	});
 </script>
 
-{@render children(renderState)}
+{@render children()}
