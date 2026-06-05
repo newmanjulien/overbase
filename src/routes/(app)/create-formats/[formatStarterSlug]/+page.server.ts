@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	return {
 		formatStarter,
-		headerTitle: formatStarter.title,
+		headerTitle: formatStarter.defaultPresentation.title,
 		headerTitleEditable: formatDefinition.contentEditPolicy.title,
 		chromeMode: 'focused',
 		desktopBreadcrumbParent: {

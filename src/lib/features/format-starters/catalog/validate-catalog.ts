@@ -1,7 +1,6 @@
-import {
-	isFormatStarterArtworkIconId,
-	type FormatEmailContent,
-	type FormatInlineNode
+import type {
+	FormatEmailContent,
+	FormatInlineNode
 } from '$lib/features/format-starters/domain';
 import { isDataSourceId } from '$lib/features/format-starters/data-sources';
 import { hasInlineTextContent } from '$lib/ui/inline-text';
@@ -155,10 +154,17 @@ function validateFormatStarterEntry(
 		}
 	}
 
-	if (!isFormatStarterArtworkIconId(entry.artwork.iconId)) {
+	if (!entry.defaultPresentation.title.trim()) {
 		issues.push({
 			formatStarterSlug: entry.slug,
-			message: `Artwork references unknown icon "${entry.artwork.iconId}".`
+			message: 'Default presentation must define a title.'
+		});
+	}
+
+	if (!entry.defaultPresentation.description.trim()) {
+		issues.push({
+			formatStarterSlug: entry.slug,
+			message: 'Default presentation must define a description.'
 		});
 	}
 

@@ -19,3 +19,7 @@ export type CompanyIndustryOptionId = (typeof COMPANY_INDUSTRY_OPTIONS)[number][
 export function isSupportedCompanyIndustry(value: string): value is SupportedCompanyIndustryId {
 	return SUPPORTED_COMPANY_INDUSTRIES.some((industry) => industry.id === value);
 }
+
+export function getCompanyIndustryLabel(value: string | null | undefined) {
+	return SUPPORTED_COMPANY_INDUSTRIES.find((industry) => industry.id === value)?.label ?? null;
+}

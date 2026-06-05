@@ -12,6 +12,7 @@
 	type Props = {
 		id: string;
 		ariaLabel: string;
+		ariaDescribedby?: string;
 		selectedId?: Id | null;
 		options: readonly HeaderSelectMenuOption[];
 		onSelect: (id: Id) => void;
@@ -24,6 +25,7 @@
 	let {
 		id,
 		ariaLabel,
+		ariaDescribedby,
 		selectedId = null,
 		options,
 		onSelect,
@@ -205,6 +207,7 @@
 		aria-haspopup="menu"
 		aria-expanded={open}
 		aria-controls={open ? menuId : undefined}
+		aria-describedby={ariaDescribedby}
 		disabled={isDisabled}
 		onclick={toggleOpen}
 		class={cn(

@@ -13,8 +13,10 @@ import {
 export const warmUpFormatStarter = defineFormatStarter({
   slug: "warm-up",
   formatDefinitionSlug: "warm-up",
-  title: "Warm up accounts",
-  description: "Help lawyers warm up specific accounts",
+  defaultPresentation: {
+    title: "Warm up accounts",
+    description: "Help lawyers warm up specific accounts",
+  },
   dataSourceIds: ["foundation", "salesforce"],
   industryTags: ["law"],
   variables: [
@@ -44,16 +46,6 @@ export const warmUpFormatStarter = defineFormatStarter({
       "Create a concise client update for status, decisions, or risk follow-up.",
       "The generated draft includes a spreadsheet attachment that can be edited locally.",
     ],
-  },
-  artwork: {
-    id: "warm-up-aqua",
-    iconId: "trend-up",
-    panel: {
-      backColor: "#DDFB93",
-      frontColor: "#9DE5F3",
-      iconCenterX: "60%",
-      iconCenterY: "46%",
-    },
   },
   startingPointSelection: {
     kind: "guided",

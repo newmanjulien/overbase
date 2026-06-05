@@ -1,4 +1,3 @@
-export * from './artwork';
 export * from './body';
 export * from './email-content';
 export * from './ids';

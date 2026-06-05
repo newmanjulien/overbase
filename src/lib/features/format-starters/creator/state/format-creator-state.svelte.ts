@@ -177,7 +177,7 @@ export class FormatCreatorState {
 	}
 
 	get title() {
-		return this.creator.editor?.activeEmailContent.title ?? this.formatStarter.title;
+		return this.creator.editor?.activeEmailContent.title ?? this.formatStarter.defaultPresentation.title;
 	}
 
 	get canCreateFormat() {

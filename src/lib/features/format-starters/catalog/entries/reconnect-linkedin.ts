@@ -57,8 +57,10 @@ const personalReconnectEmailContent = {
 export const reconnectLinkedinFormatStarter = defineFormatStarter({
   slug: "reconnect-linkedin",
   formatDefinitionSlug: "reconnect-linkedin",
-  title: "Reconnect with contacts",
-  description: "Find news that lets your team reconnect with LinkedIn contacts",
+  defaultPresentation: {
+    title: "Reconnect with contacts",
+    description: "Find news that lets your team reconnect with LinkedIn contacts",
+  },
   dataSourceIds: ["linkedin"],
   industryTags: [],
   variables: [
@@ -83,16 +85,6 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
       "This is a simple email format that's designed to only use public data",
       "We'll use each team member's public LinkedIn contacts then find news that lets them easily reconnect",
     ],
-  },
-  artwork: {
-    id: "reconnect-linkedin-mint",
-    iconId: "linkedin-logo",
-    panel: {
-      backColor: "#B7E4C7",
-      frontColor: "#E4F7D2",
-      iconCenterX: "58%",
-      iconCenterY: "47%",
-    },
   },
   startingPointSelection: {
     kind: "guided",

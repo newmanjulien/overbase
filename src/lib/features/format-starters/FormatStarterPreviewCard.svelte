@@ -7,37 +7,66 @@
 	import type { DataSourceId } from '$lib/features/format-starters/data-sources';
 	import { cn } from '$lib/ui/cn';
 
+	export type EmailPreviewFrame = 'standard' | 'zoomed';
+
 	type Props = {
 		title: string;
 		description?: string;
 		dataSourceIds?: readonly DataSourceId[];
 		sampleEmail: FormatStarterSampleEmail;
+		emailPreviewFrame?: EmailPreviewFrame;
+		showDataSources?: boolean;
 		class?: ClassValue;
 	};
 
-	let { title, description, dataSourceIds = [], sampleEmail, class: className }: Props = $props();
+	let {
+		title,
+		description,
+		dataSourceIds = [],
+		sampleEmail,
+		emailPreviewFrame = 'standard',
+		showDataSources = true,
+		class: className
+	}: Props = $props();
+	const visibleDataSourceIds = $derived(showDataSources ? dataSourceIds : []);
+	const hasVisibleDataSources = $derived(visibleDataSourceIds.length > 0);
 </script>
 
 <div
 	class={cn(
-		'starter-artwork-card relative w-full overflow-hidden rounded-md border border-stone-200/40 bg-white',
+		'format-starter-preview-card relative w-full overflow-hidden rounded-md border border-stone-200/40 bg-white',
 		className
 	)}
 >
-	<DataSourceLogoStack
-		{dataSourceIds}
-		class="absolute right-[4%] top-[8.5%] z-10"
-	/>
-	<div class="starter-artwork-card__document">
+	{#if hasVisibleDataSources}
+		<DataSourceLogoStack
+			dataSourceIds={visibleDataSourceIds}
+			class="absolute right-[4%] top-[8.5%] z-10"
+		/>
+	{/if}
+
+	<div
+		class={cn(
+			'format-starter-preview-card__document',
+			emailPreviewFrame === 'zoomed' && 'format-starter-preview-card__document--zoomed'
+		)}
+	>
 		<FormatStarterEmailPreview content={sampleEmail} />
 	</div>
-	<div class="starter-artwork-card__copy text-stone-950">
-		<div class="starter-artwork-card__title-row">
+
+	<div
+		class={cn(
+			'format-starter-preview-card__copy text-stone-950',
+			!hasVisibleDataSources && 'format-starter-preview-card__copy--full'
+		)}
+	>
+		<div class="format-starter-preview-card__title-row">
 			<span class="min-w-0 truncate">{title}</span>
-			<span class="starter-artwork-card__title-icon" aria-hidden="true">
+			<span class="format-starter-preview-card__title-icon" aria-hidden="true">
 				<ArrowUpRightIcon size={12} weight="regular" />
 			</span>
 		</div>
+
 		{#if description}
 			<div class="mt-1 line-clamp-4 text-[0.725rem] leading-tight text-stone-500">
 				{description}
@@ -47,11 +76,11 @@
 </div>
 
 <style>
-	.starter-artwork-card {
+	.format-starter-preview-card {
 		aspect-ratio: 1047 / 605;
 	}
 
-	.starter-artwork-card__document {
+	.format-starter-preview-card__document {
 		position: absolute;
 		top: calc(41.1% + 11px);
 		left: calc(4.7% + 17px);
@@ -66,18 +95,28 @@
 		transition: transform 120ms;
 	}
 
-	:global(.format-starter-card:is(:hover, :focus-visible)) .starter-artwork-card__document {
+	.format-starter-preview-card__document--zoomed {
+		top: calc(41.5% + 11px);
+		left: calc(4.7% + 24px);
+		width: 156%;
+	}
+
+	:global(.format-starter-card:is(:hover, :focus-visible)) .format-starter-preview-card__document {
 		transform: rotate(-2.5deg);
 	}
 
-	.starter-artwork-card__copy {
+	.format-starter-preview-card__copy {
 		position: absolute;
 		top: 9%;
 		left: 5.5%;
-		max-width: calc(100% - 5.5% - 4.75rem);
+		right: 4.75rem;
 	}
 
-	.starter-artwork-card__title-row {
+	.format-starter-preview-card__copy--full {
+		right: 5.5%;
+	}
+
+	.format-starter-preview-card__title-row {
 		display: flex;
 		max-width: 100%;
 		min-width: 0;
@@ -87,7 +126,7 @@
 		line-height: 1.08;
 	}
 
-	.starter-artwork-card__title-icon {
+	.format-starter-preview-card__title-icon {
 		flex-shrink: 0;
 		margin-left: 0.25rem;
 		transform: translateY(1px);
@@ -95,9 +134,8 @@
 		transition: visibility 0ms;
 	}
 
-	:global(.format-starter-card:is(:hover, :focus-visible)) .starter-artwork-card__title-icon {
+	:global(.format-starter-card:is(:hover, :focus-visible)) .format-starter-preview-card__title-icon {
 		visibility: visible;
 		transition-delay: 100ms;
 	}
-
 </style>

@@ -8,7 +8,9 @@ export type { FormatStarterIndustryTagId } from './industry-tags';
 export type {
 	FormatStartingPoint,
 	FormatStarterSampleEmail,
+	FormatStarterCardEntry,
 	FormatStarterGalleryEntry,
+	FormatStarterPresentation,
 	PublicDataFormatStarter,
 	FormatStarter
 } from './types';

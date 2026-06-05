@@ -4,7 +4,7 @@
 	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
 	import { useCurrentWorkspaceContext } from '$lib/app/current-workspace.svelte';
 	import type { FormatStarterGalleryEntry } from '$lib/features/format-starters/catalog';
-	import FormatStarterCard from '$lib/features/format-starters/gallery/FormatStarterCard.svelte';
+	import FormatStarterCard from '$lib/features/format-starters/FormatStarterCard.svelte';
 	import FormatStarterCategorySelect from '$lib/features/format-starters/gallery/FormatStarterCategorySelect.svelte';
 	import {
 		getCreateFormatGalleryCategoryFromSearchParams,
@@ -17,11 +17,11 @@
 	let { data }: PageProps = $props();
 	const routeTitleState = useRouteTitleState();
 	const currentWorkspace = useCurrentWorkspaceContext();
-	const fallbackCategoryId = $derived(
-		currentWorkspace.user.lastCreateFormatGalleryCategoryId ?? currentWorkspace.workspace.industry
-	);
 	const selectedCategory = $derived(
-		getCreateFormatGalleryCategoryFromSearchParams(page.url.searchParams, fallbackCategoryId)
+		getCreateFormatGalleryCategoryFromSearchParams(
+			page.url.searchParams,
+			currentWorkspace.workspace.industry
+		)
 	);
 	const filteredFormatStarters = $derived(
 		data.formatStarters.filter(matchesFormatStarterFilters)
@@ -87,7 +87,7 @@
 		padding-block: calc(0.375rem + 1px);
 	}
 
-	:global(.format-starter-gallery .starter-artwork-card) {
+	:global(.format-starter-gallery .format-starter-preview-card) {
 		aspect-ratio: 2.2;
 	}
 </style>

@@ -5,7 +5,7 @@ import {
 	deleteReplacedUploadedAvatar
 } from '../backend/profiles/avatars';
 import { requireViewerWorkspace } from '../backend/auth/viewer';
-import { createFormatGalleryCategoryId } from '../backend/validators/create-format-gallery';
+import { isSupportedCompanyIndustry } from '../domain/company-industries';
 
 const MAX_NAME_LENGTH = 32;
 const MAX_FILE_NAME_LENGTH = 255;
@@ -70,20 +70,25 @@ export const updateWorkspaceName = mutation({
 	}
 });
 
-export const updateCreateFormatGalleryCategoryPreference = mutation({
+export const updateWorkspaceIndustry = mutation({
 	args: {
-		categoryId: createFormatGalleryCategoryId
+		industry: v.string()
 	},
-	handler: async (ctx, { categoryId }) => {
-		const { user } = await requireViewerWorkspace(ctx);
+	handler: async (ctx, { industry }) => {
+		const { workspace } = await requireViewerWorkspace(ctx);
 		const now = Date.now();
+		const normalizedIndustry = industry.trim();
 
-		await ctx.db.patch(user._id, {
-			lastCreateFormatGalleryCategoryId: categoryId,
+		if (!isSupportedCompanyIndustry(normalizedIndustry)) {
+			throw new Error('Supported industry is required.');
+		}
+
+		await ctx.db.patch(workspace._id, {
+			industry: normalizedIndustry,
 			updatedAt: now
 		});
 
-		return { categoryId };
+		return { industry: normalizedIndustry };
 	}
 });
 

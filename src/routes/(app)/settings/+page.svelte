@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
+	import { SUPPORTED_COMPANY_INDUSTRIES } from '$domain/company-industries';
 	import { useCurrentWorkspaceContext } from '$lib/app/current-workspace.svelte';
 	import { CompanyAvatar, PersonAvatar } from '$lib/entities/people';
 	import { useConvexClient } from 'convex-svelte';
 	import SettingsAvatarCard from '$lib/features/settings/SettingsAvatarCard.svelte';
 	import SettingsDangerCard from '$lib/features/settings/SettingsDangerCard.svelte';
 	import SettingsReadonlyFieldCard from '$lib/features/settings/SettingsReadonlyFieldCard.svelte';
+	import SettingsSelectFieldCard from '$lib/features/settings/SettingsSelectFieldCard.svelte';
 	import SettingsTextFieldCard from '$lib/features/settings/SettingsTextFieldCard.svelte';
 
 	const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
@@ -20,16 +22,19 @@
 	const userEmail = $derived(currentWorkspace.identity.email);
 	const userAvatarUrl = $derived(currentWorkspace.user.avatar?.url ?? '');
 	const workspaceName = $derived(currentWorkspace.workspace.name);
+	const workspaceIndustry = $derived(currentWorkspace.workspace.industry);
 	const workspaceAvatarUrl = $derived(currentWorkspace.workspace.avatar?.url ?? '');
 	const avatarPreviewClass =
 		'border border-stone-200/70 bg-stone-100 text-xl text-stone-500';
 
 	let savingUserName = $state(false);
 	let savingWorkspaceName = $state(false);
+	let savingWorkspaceIndustry = $state(false);
 	let uploadingUserAvatar = $state(false);
 	let uploadingWorkspaceAvatar = $state(false);
 	let userNameErrorText = $state<string | null>(null);
 	let workspaceNameErrorText = $state<string | null>(null);
+	let workspaceIndustryErrorText = $state<string | null>(null);
 	let userAvatarErrorText = $state<string | null>(null);
 	let workspaceAvatarErrorText = $state<string | null>(null);
 
@@ -60,6 +65,19 @@
 			workspaceNameErrorText = getErrorMessage(error, 'Unable to save company name.');
 		} finally {
 			savingWorkspaceName = false;
+		}
+	}
+
+	async function saveWorkspaceIndustry(industry: string) {
+		savingWorkspaceIndustry = true;
+		workspaceIndustryErrorText = null;
+
+		try {
+			await client.mutation(api.settings.updateWorkspaceIndustry, { industry });
+		} catch (error) {
+			workspaceIndustryErrorText = getErrorMessage(error, 'Unable to save company industry.');
+		} finally {
+			savingWorkspaceIndustry = false;
 		}
 	}
 
@@ -191,6 +209,20 @@
 				saving={savingWorkspaceName}
 				errorText={workspaceNameErrorText}
 				onSave={saveWorkspaceName}
+			/>
+
+			<SettingsSelectFieldCard
+				title="Industry"
+				description="This controls the starter formats Overbase shows for your company."
+				fieldId="settings-company-industry"
+				label="Company industry"
+				value={workspaceIndustry}
+				options={SUPPORTED_COMPANY_INDUSTRIES}
+				placeholder="Company industry"
+				footerText="Changing this updates your default create-formats category."
+				saving={savingWorkspaceIndustry}
+				errorText={workspaceIndustryErrorText}
+				onSave={saveWorkspaceIndustry}
 			/>
 
 			<SettingsAvatarCard

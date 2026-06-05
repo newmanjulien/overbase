@@ -13,8 +13,10 @@ import {
 export const pitchContextFormatStarter = defineFormatStarter({
   slug: "pitch-context",
   formatDefinitionSlug: "pitch-context",
-  title: "Context for pitches",
-  description: "Give consultants the context they need to pitch clients",
+  defaultPresentation: {
+    title: "Context for pitches",
+    description: "Give consultants the context they need to pitch clients",
+  },
   dataSourceIds: ["flowcase", "salesforce", "onedrive"],
   industryTags: ["consulting"],
   variables: [
@@ -48,16 +50,6 @@ export const pitchContextFormatStarter = defineFormatStarter({
       "Create a pitch-context email with relevant prior proposals, relationship context, and recommended angles.",
       "The attachment organizes source material, reusable proof points, and open questions.",
     ],
-  },
-  artwork: {
-    id: "pitch-context-green",
-    iconId: "presentation-chart",
-    panel: {
-      backColor: "#B9FBC0",
-      frontColor: "#A3C4F3",
-      iconCenterX: "58%",
-      iconCenterY: "47%",
-    },
   },
   startingPointSelection: {
     kind: "guided",

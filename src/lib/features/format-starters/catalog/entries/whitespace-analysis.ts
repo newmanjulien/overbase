@@ -14,8 +14,10 @@ import type { FormatStarter } from "../types";
 export const whitespaceAnalysisFormatStarter = defineFormatStarter({
   slug: "whitespace-analysis",
   formatDefinitionSlug: "whitespace-analysis",
-  title: "Whitespace analysis",
-  description: "Give brokers benchmarks for renewal conversations",
+  defaultPresentation: {
+    title: "Whitespace analysis",
+    description: "Give brokers benchmarks for renewal conversations",
+  },
   dataSourceIds: ["calendar", "epic", "onedrive"],
   industryTags: ["insurance"],
   variables: [
@@ -45,16 +47,6 @@ export const whitespaceAnalysisFormatStarter = defineFormatStarter({
       "Create a useful follow-up after discovery, proposal review, or procurement discussion.",
       "The attachment captures next steps, open questions, and ownership.",
     ],
-  },
-  artwork: {
-    id: "whitespace-analysis-coral",
-    iconId: "handshake",
-    panel: {
-      backColor: "#FFD0C2",
-      frontColor: "#F8E27B",
-      iconCenterX: "58%",
-      iconCenterY: "48%",
-    },
   },
   startingPointSelection: {
     kind: "guided",

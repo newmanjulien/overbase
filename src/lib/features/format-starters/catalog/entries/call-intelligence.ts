@@ -14,8 +14,10 @@ import type { FormatStarter } from "../types";
 export const callIntelligenceFormatStarter = defineFormatStarter({
   slug: "call-intelligence",
   formatDefinitionSlug: "call-intelligence",
-  title: "Call intelligence",
-  description: "Find opportunities to upsell from account management calls",
+  defaultPresentation: {
+    title: "Call intelligence",
+    description: "Find opportunities to upsell from account management calls",
+  },
   dataSourceIds: ["gong", "salesforce", "calendar"],
   industryTags: ["consulting"],
   variables: [
@@ -46,16 +48,6 @@ export const callIntelligenceFormatStarter = defineFormatStarter({
       "Create a call-intelligence brief from account calls, CRM context, and upcoming meetings.",
       "The attachment organizes signals, timestamps, account owners, and recommended follow-up actions.",
     ],
-  },
-  artwork: {
-    id: "call-intelligence-blue",
-    iconId: "phone-call",
-    panel: {
-      backColor: "#B8E0FF",
-      frontColor: "#CDB4DB",
-      iconCenterX: "57%",
-      iconCenterY: "47%",
-    },
   },
   startingPointSelection: {
     kind: "guided",

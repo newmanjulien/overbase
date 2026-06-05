@@ -1,5 +1,4 @@
 import type {
-	FormatStarterArtwork,
 	FormatEmailContent,
 	FormatStarterSelection,
 	FormatVariableDefinition
@@ -23,19 +22,22 @@ export type FormatStarterSampleEmail = {
 	paragraphs: readonly [string, ...string[]];
 };
 
+export type FormatStarterPresentation = {
+	title: string;
+	description: string;
+};
+
 type FormatStarterBase = {
 	slug: string;
 	formatDefinitionSlug: string;
 	mode: EmailFormatDataMode;
-	title: string;
-	description: string;
+	defaultPresentation: FormatStarterPresentation;
 	dataSourceIds: readonly DataSourceId[];
 	industryTags: readonly FormatStarterIndustryTagId[];
 	sampleEmail: FormatStarterSampleEmail;
 	details: {
 		paragraphs: readonly [string, ...string[]];
 	};
-	artwork: FormatStarterArtwork;
 	variables: readonly FormatVariableDefinition[];
 	startingPoints: readonly FormatStartingPoint[];
 	startingPointSelection: FormatStarterSelection;
@@ -60,7 +62,10 @@ export type FormatStarter =
 	| InternalDataFormatStarter
 	| PublicDataFormatStarter;
 
-export type FormatStarterGalleryEntry = Pick<
+export type FormatStarterCardEntry = Pick<
 	FormatStarter,
-	'mode' | 'slug' | 'title' | 'description' | 'dataSourceIds' | 'industryTags' | 'sampleEmail'
->;
+	'mode' | 'slug' | 'dataSourceIds' | 'industryTags' | 'sampleEmail'
+> &
+	FormatStarterPresentation;
+
+export type FormatStarterGalleryEntry = FormatStarterCardEntry;

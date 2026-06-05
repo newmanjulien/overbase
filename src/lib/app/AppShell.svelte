@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { APP_CONFIG } from '$lib/app/app-config';
 	import AppConvexPreloader from '$lib/app/AppConvexPreloader.svelte';
+	import FirstEmailFormatPrompt from '$lib/app/FirstEmailFormatPrompt.svelte';
 	import {
 		provideCurrentWorkspaceContext,
 		type CurrentWorkspaceContext
@@ -187,6 +188,7 @@
 						<div class="h-full min-h-full min-w-0">
 							{#if canRenderRoute}
 								{@render routeChildren()}
+								<FirstEmailFormatPrompt />
 							{/if}
 						</div>
 					</div>

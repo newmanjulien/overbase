@@ -201,7 +201,7 @@
 			title: format.title,
 			status: format.status,
 			href: emailFormatLink(format.id).pathname,
-			onPreload: () => appConvexPreloader?.preloadEmailFormatConfiguration(format.id),
+			onPreload: () => appConvexPreloader.preloadEmailFormatConfiguration(format.id),
 			selectAriaLabel: `Select ${format.title}`,
 			statusLabel: formatStatus(format.status),
 			statusLabelClass: getStatusLabelClass(format.status),

@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { createFormatLink } from '$lib/app/app-links';
-	import FormatStarterArtworkCard from '$lib/features/format-starters/FormatStarterArtworkCard.svelte';
-	import type { FormatStarterGalleryEntry } from '$lib/features/format-starters/catalog';
+	import FormatStarterPreviewCard, {
+		type EmailPreviewFrame
+	} from '$lib/features/format-starters/FormatStarterPreviewCard.svelte';
+	import type { FormatStarterCardEntry } from '$lib/features/format-starters/catalog';
 	import { cn } from '$lib/ui/cn';
 
 	type Props = {
-		formatStarter: FormatStarterGalleryEntry;
+		formatStarter: FormatStarterCardEntry;
 		disabled?: boolean;
+		emailPreviewFrame?: EmailPreviewFrame;
+		showDataSources?: boolean;
 		onclick?: (event: MouseEvent) => void;
 		onfocus?: () => void;
 		onpointerenter?: () => void;
@@ -16,6 +20,8 @@
 	let {
 		formatStarter,
 		disabled = false,
+		emailPreviewFrame = 'standard',
+		showDataSources = true,
 		onclick,
 		onfocus,
 		onpointerenter
@@ -41,10 +47,12 @@
 	{onfocus}
 	{onpointerenter}
 >
-	<FormatStarterArtworkCard
+	<FormatStarterPreviewCard
 		title={formatStarter.title}
 		description={formatStarter.description}
 		dataSourceIds={formatStarter.dataSourceIds}
 		sampleEmail={formatStarter.sampleEmail}
+		{emailPreviewFrame}
+		{showDataSources}
 	/>
 </a>

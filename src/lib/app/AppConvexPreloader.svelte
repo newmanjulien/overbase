@@ -22,6 +22,8 @@
 	const emailFormatsQuery = useQuery(api.emailFormats.listEmailFormats);
 	const teammatesQuery = useQuery(api.teammates.listTeammates);
 	const detailWarmSubscriptions = new SvelteMap<string, WarmSubscription>();
+	const hasEmailFormats = $derived((emailFormatsQuery.data?.length ?? 0) > 0);
+	const emailFormatsReady = $derived(!emailFormatsQuery.isLoading && !emailFormatsQuery.error);
 
 	function clearWarmSubscription(key: string) {
 		const warmSubscription = detailWarmSubscriptions.get(key);
@@ -73,6 +75,12 @@
 	});
 
 	provideAppConvexPreloader({
+		get hasEmailFormats() {
+			return hasEmailFormats;
+		},
+		get emailFormatsReady() {
+			return emailFormatsReady;
+		},
 		preloadEmailFormatConfiguration
 	});
 </script>

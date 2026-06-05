@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FormatStarterCard from '$lib/features/format-starters/gallery/FormatStarterCard.svelte';
+	import FormatStarterCard from '$lib/features/format-starters/FormatStarterCard.svelte';
 	import type { JoinFormatStarterRecommendation } from './join-format-starter';
 
 	type Props = {
@@ -59,10 +59,10 @@
 >
 	<div class="w-full max-w-190 text-center">
 		<h1 class="mt-5 mb-0 text-[30px] leading-[1.08] font-medium text-[#08090a]">
-			Start with a format for your team
+			Receive opportunities by email
 		</h1>
 		<p class="mx-auto mt-4 max-w-sm text-sm leading-[1.45] text-[#686b73]">
-			Choose a starter now, or open the full gallery and explore every format.
+			Create a custom email format your team will receive with easy opportunities to grow revenue
 		</p>
 
 		<div class="mt-10 flex justify-center">
@@ -71,6 +71,8 @@
 					<FormatStarterCard
 						{formatStarter}
 						disabled={isCompletingOnboarding}
+						emailPreviewFrame="zoomed"
+						showDataSources={false}
 						onpointerenter={preloadFormatStarter}
 						onfocus={preloadFormatStarter}
 						onclick={selectFormatStarter}
@@ -87,7 +89,7 @@
 					disabled={isCompletingOnboarding}
 					onclick={onOpenFormatStarterGallery}
 				>
-					{isOpeningFormatStarterGallery ? 'Opening...' : 'Let me explore the full capabilities'}
+					{isOpeningFormatStarterGallery ? 'Opening...' : 'Let me explore the service'}
 				</button>
 			</div>
 		</div>

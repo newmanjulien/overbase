@@ -13,8 +13,10 @@ import {
 export const topOfMindFormatStarter = defineFormatStarter({
   slug: "top-of-mind",
   formatDefinitionSlug: "top-of-mind",
-  title: "Stay top of mind",
-  description: "Find high value reasons to reach out to clients",
+  defaultPresentation: {
+    title: "Stay top of mind",
+    description: "Find high value reasons to reach out to clients",
+  },
   dataSourceIds: ["bloomberg", "foundation"],
   industryTags: ["law"],
   variables: [
@@ -43,16 +45,6 @@ export const topOfMindFormatStarter = defineFormatStarter({
       "Each lawyer connect their list of contacts and you give us details on the precise type of matters clients hire them for",
       "Then we find and send timely opportunities for lawyers to reach out to their contacts",
     ],
-  },
-  artwork: {
-    id: "top-of-mind-violet",
-    iconId: "clipboard-text",
-    panel: {
-      backColor: "#D8C7FF",
-      frontColor: "#BFE9D2",
-      iconCenterX: "57%",
-      iconCenterY: "47%",
-    },
   },
   startingPointSelection: {
     kind: "guided",
