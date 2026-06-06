@@ -60,7 +60,7 @@
 				? onOpenLinkedinContactsModal
 				: undefined}
 			ruleDataSourceActions={dataSourceActions}
-			infoCard={formatStarter.ruleInfoCard}
+			infoCard={selectedFormatSpec?.ruleInfoCard ?? undefined}
 			canEditRuleText={selectedFormatSpec?.rulesEditPolicy.text ?? false}
 			canEditRuleList={selectedFormatSpec?.rulesEditPolicy.list ?? false}
 		/>

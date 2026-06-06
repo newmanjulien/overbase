@@ -3,10 +3,7 @@ import type {
 	FormatStarterSelection,
 	FormatVariableDefinition
 } from '$lib/features/format-starters/domain';
-import type {
-	EmailFormatDataMode,
-	EmailFormatInlineTextContent
-} from '$domain/email-formats';
+import type { EmailFormatDataMode } from '$domain/email-formats';
 import type { DataSourceId } from '$lib/features/format-starters/data-sources';
 import type { FormatStarterIndustryTagId } from './industry-tags';
 
@@ -27,7 +24,7 @@ export type FormatStarterPresentation = {
 	description: string;
 };
 
-type FormatStarterBase = {
+export type FormatStarterBase = {
 	slug: string;
 	formatDefinitionSlug: string;
 	mode: EmailFormatDataMode;
@@ -52,10 +49,6 @@ export type InternalDataFormatStarter = FormatStarterBase & {
 
 export type PublicDataFormatStarter = FormatStarterBase & {
 	mode: 'public-data';
-	ruleInfoCard: {
-		label: string;
-		content: EmailFormatInlineTextContent;
-	};
 };
 
 export type FormatStarter =

@@ -145,15 +145,6 @@ function validateFormatStarterEntry(
 		});
 	}
 
-	if (entry.mode === 'public-data') {
-		if (!entry.ruleInfoCard.label.trim() || !hasInlineTextContent(entry.ruleInfoCard.content)) {
-			issues.push({
-				formatStarterSlug: entry.slug,
-				message: 'Public-data format starters must define rule info-card copy.'
-			});
-		}
-	}
-
 	if (!entry.defaultPresentation.title.trim()) {
 		issues.push({
 			formatStarterSlug: entry.slug,

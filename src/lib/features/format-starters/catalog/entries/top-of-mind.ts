@@ -7,10 +7,9 @@ import {
   defineFormatStarter,
   seededSpreadsheetAttachment,
   spreadsheetCell as cell,
-  spreadsheetVariable as sheetVariable,
 } from "./helpers";
 
-export const topOfMindFormatStarter = defineFormatStarter({
+export const formatStarter = defineFormatStarter({
   slug: "top-of-mind",
   formatDefinitionSlug: "top-of-mind",
   defaultPresentation: {
@@ -156,16 +155,16 @@ export const topOfMindFormatStarter = defineFormatStarter({
         attachment: seededSpreadsheetAttachment("Migration plan.xlsx", [
           [cell("Scope"), cell("Dependency"), cell("Owner"), cell("Target")],
           [
-            cell(sheetVariable("migration_scope")),
-            cell(sheetVariable("dependency")),
-            cell(sheetVariable("integration_owner")),
-            cell(sheetVariable("target_launch_date")),
+            cell(variable("migration_scope")),
+            cell(variable("dependency")),
+            cell(variable("integration_owner")),
+            cell(variable("target_launch_date")),
           ],
           [
             cell("Validation"),
             cell("Sample data review"),
-            cell(sheetVariable("workstream_owner")),
-            cell(sheetVariable("success_metric")),
+            cell(variable("workstream_owner")),
+            cell(variable("success_metric")),
           ],
         ]),
         body: [
@@ -209,16 +208,16 @@ export const topOfMindFormatStarter = defineFormatStarter({
               cell("Review date"),
             ],
             [
-              cell(sheetVariable("dependency")),
-              cell(sheetVariable("risk_mitigation")),
-              cell(sheetVariable("workstream_owner")),
-              cell(sheetVariable("kickoff_date")),
+              cell(variable("dependency")),
+              cell(variable("risk_mitigation")),
+              cell(variable("workstream_owner")),
+              cell(variable("kickoff_date")),
             ],
             [
               cell("Launch readiness"),
-              cell(sheetVariable("success_metric")),
-              cell(sheetVariable("implementation_owner")),
-              cell(sheetVariable("target_launch_date")),
+              cell(variable("success_metric")),
+              cell(variable("implementation_owner")),
+              cell(variable("target_launch_date")),
             ],
           ],
         ),

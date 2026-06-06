@@ -7,11 +7,9 @@ import {
   defineFormatStarter,
   seededSpreadsheetAttachment,
   spreadsheetCell as cell,
-  spreadsheetVariable as sheetVariable,
 } from "./helpers";
-import type { FormatStarter } from "../types";
 
-export const whitespaceAnalysisFormatStarter = defineFormatStarter({
+export const formatStarter = defineFormatStarter({
   slug: "whitespace-analysis",
   formatDefinitionSlug: "whitespace-analysis",
   defaultPresentation: {
@@ -118,15 +116,15 @@ export const whitespaceAnalysisFormatStarter = defineFormatStarter({
           [cell("Topic"), cell("Detail"), cell("Owner"), cell("Date")],
           [
             cell("Business goal"),
-            cell(sheetVariable("business_goal")),
-            cell(sheetVariable("buyer_name")),
+            cell(variable("business_goal")),
+            cell(variable("buyer_name")),
             cell("Current"),
           ],
           [
             cell("Next step"),
-            cell(sheetVariable("next_step")),
-            cell(sheetVariable("deal_owner")),
-            cell(sheetVariable("next_step_date")),
+            cell(variable("next_step")),
+            cell(variable("deal_owner")),
+            cell(variable("next_step_date")),
           ],
         ]),
         body: [
@@ -168,14 +166,14 @@ export const whitespaceAnalysisFormatStarter = defineFormatStarter({
           [cell("Area"), cell("Status"), cell("Owner"), cell("Notes")],
           [
             cell("Proposal"),
-            cell(sheetVariable("proposal_link")),
-            cell(sheetVariable("deal_owner")),
+            cell(variable("proposal_link")),
+            cell(variable("deal_owner")),
             cell("Ready for review"),
           ],
           [
             cell("Open question"),
-            cell(sheetVariable("commercial_question")),
-            cell(sheetVariable("buyer_name")),
+            cell(variable("commercial_question")),
+            cell(variable("buyer_name")),
             cell("Needs response"),
           ],
         ]),
@@ -214,15 +212,15 @@ export const whitespaceAnalysisFormatStarter = defineFormatStarter({
           [cell("Item"), cell("Owner"), cell("Status"), cell("Question")],
           [
             cell("Commercial review"),
-            cell(sheetVariable("procurement_owner")),
+            cell(variable("procurement_owner")),
             cell("Open"),
-            cell(sheetVariable("commercial_question")),
+            cell(variable("commercial_question")),
           ],
           [
             cell("Next step"),
-            cell(sheetVariable("deal_owner")),
-            cell(sheetVariable("next_step_date")),
-            cell(sheetVariable("next_step")),
+            cell(variable("deal_owner")),
+            cell(variable("next_step_date")),
+            cell(variable("next_step")),
           ],
         ]),
         body: [
@@ -251,10 +249,3 @@ export const whitespaceAnalysisFormatStarter = defineFormatStarter({
   modeSortOrder: 20,
   status: "active",
 });
-
-export const financeWhitespaceAnalysisFormatStarter = {
-  ...whitespaceAnalysisFormatStarter,
-  slug: "finance-whitespace-analysis",
-  industryTags: ["finance"],
-  modeSortOrder: 22,
-} satisfies FormatStarter;

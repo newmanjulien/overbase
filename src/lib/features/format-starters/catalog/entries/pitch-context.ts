@@ -7,10 +7,9 @@ import {
   defineFormatStarter,
   seededSpreadsheetAttachment,
   spreadsheetCell as cell,
-  spreadsheetVariable as sheetVariable,
 } from "./helpers";
 
-export const pitchContextFormatStarter = defineFormatStarter({
+export const formatStarter = defineFormatStarter({
   slug: "pitch-context",
   formatDefinitionSlug: "pitch-context",
   defaultPresentation: {
@@ -125,16 +124,16 @@ export const pitchContextFormatStarter = defineFormatStarter({
             cell("Recommended use"),
           ],
           [
-            cell(sheetVariable("relevant_proposal")),
-            cell(sheetVariable("proposal_topic")),
-            cell(sheetVariable("prior_pitch_owner")),
-            cell(sheetVariable("recommended_angle")),
+            cell(variable("relevant_proposal")),
+            cell(variable("proposal_topic")),
+            cell(variable("prior_pitch_owner")),
+            cell(variable("recommended_angle")),
           ],
           [
-            cell(sheetVariable("source_material")),
-            cell(sheetVariable("client_company"), " context"),
-            cell(sheetVariable("pitch_owner")),
-            cell("Review before ", sheetVariable("meeting_date")),
+            cell(variable("source_material")),
+            cell(variable("client_company"), " context"),
+            cell(variable("pitch_owner")),
+            cell("Review before ", variable("meeting_date")),
           ],
         ]),
         body: [
@@ -178,16 +177,16 @@ export const pitchContextFormatStarter = defineFormatStarter({
             cell("Pitch angle"),
           ],
           [
-            cell(sheetVariable("client_company")),
-            cell(sheetVariable("partner_firm")),
-            cell(sheetVariable("source_material")),
-            cell(sheetVariable("competitor_context")),
+            cell(variable("client_company")),
+            cell(variable("partner_firm")),
+            cell(variable("source_material")),
+            cell(variable("competitor_context")),
           ],
           [
             cell("Prior proposal"),
-            cell(sheetVariable("relevant_proposal")),
-            cell(sheetVariable("prior_pitch_date")),
-            cell(sheetVariable("recommended_angle")),
+            cell(variable("relevant_proposal")),
+            cell(variable("prior_pitch_date")),
+            cell(variable("recommended_angle")),
           ],
         ]),
         body: [
@@ -229,16 +228,16 @@ export const pitchContextFormatStarter = defineFormatStarter({
             cell("Follow-up owner"),
           ],
           [
-            cell(sheetVariable("decision_maker")),
-            cell(sheetVariable("proposal_topic")),
-            cell(sheetVariable("relevant_proposal")),
-            cell(sheetVariable("follow_up_owner")),
+            cell(variable("decision_maker")),
+            cell(variable("proposal_topic")),
+            cell(variable("relevant_proposal")),
+            cell(variable("follow_up_owner")),
           ],
           [
             cell("Meeting date"),
-            cell(sheetVariable("meeting_date")),
-            cell(sheetVariable("source_material")),
-            cell(sheetVariable("pitch_owner")),
+            cell(variable("meeting_date")),
+            cell(variable("source_material")),
+            cell(variable("pitch_owner")),
           ],
         ]),
         body: [

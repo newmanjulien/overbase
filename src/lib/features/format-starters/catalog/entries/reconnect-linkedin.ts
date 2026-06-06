@@ -9,52 +9,7 @@ import {
   spreadsheetCell as cell,
 } from "./helpers";
 
-const teamMemberReconnectEmailContent = {
-  title: "Reconnect with contacts",
-  to: ["Team member"],
-  cc: ["You"],
-  attachment: seededSpreadsheetAttachment("Score 10 contacts.xlsx", [
-    [
-      cell("Worth reconnecting?"),
-      cell("Name"),
-      cell("Company"),
-      cell("Role"),
-      cell("LinkedIn profile"),
-    ],
-    [cell(variable("yesno"))],
-  ]),
-  body: [
-    paragraph("linkedin-greeting", [
-      text("Hey "),
-      variable("team_member"),
-      text(","),
-    ]),
-    paragraph("linkedin-signal", [
-      text("Ajay Agrawal just started a new role at Mastercard ("),
-      variable("link"),
-      text(")."),
-    ]),
-    paragraph("linkedin-contact-options", [
-      text("His likely email there is "),
-      variable("email"),
-      text(" or you might DM him at: "),
-      variable("linkedin_url"),
-    ]),
-    paragraph("linkedin-close", [
-      text(
-        "If you have two minutes, filling out the attached spreadsheet would help me find the best people to propose.",
-      ),
-    ]),
-  ],
-};
-
-const personalReconnectEmailContent = {
-  ...teamMemberReconnectEmailContent,
-  to: ["You"],
-  cc: [],
-};
-
-export const reconnectLinkedinFormatStarter = defineFormatStarter({
+export const formatStarter = defineFormatStarter({
   slug: "reconnect-linkedin",
   formatDefinitionSlug: "reconnect-linkedin",
   defaultPresentation: {
@@ -133,13 +88,87 @@ export const reconnectLinkedinFormatStarter = defineFormatStarter({
       id: "linkedin-reconnect",
       label: "Reconnect with contacts",
       variantSlug: "personal",
-      emailContent: personalReconnectEmailContent,
+      emailContent: {
+        title: "Reconnect with contacts",
+        to: ["You"],
+        cc: [],
+        attachment: seededSpreadsheetAttachment("Score 10 contacts.xlsx", [
+          [
+            cell("Worth reconnecting?"),
+            cell("Name"),
+            cell("Company"),
+            cell("Role"),
+            cell("LinkedIn profile"),
+          ],
+          [cell(variable("yesno"))],
+        ]),
+        body: [
+          paragraph("linkedin-greeting", [
+            text("Hey "),
+            variable("team_member"),
+            text(","),
+          ]),
+          paragraph("linkedin-signal", [
+            text("Ajay Agrawal just started a new role at Mastercard ("),
+            variable("link"),
+            text(")."),
+          ]),
+          paragraph("linkedin-contact-options", [
+            text("His likely email there is "),
+            variable("email"),
+            text(" or you might DM him at: "),
+            variable("linkedin_url"),
+          ]),
+          paragraph("linkedin-close", [
+            text(
+              "If you have two minutes, filling out the attached spreadsheet would help me find the best people to propose.",
+            ),
+          ]),
+        ],
+      },
     },
     {
       id: "linkedin-reconnect-team",
       label: "Reconnect with contacts for team members",
       variantSlug: "team",
-      emailContent: teamMemberReconnectEmailContent,
+      emailContent: {
+        title: "Reconnect with contacts",
+        to: ["Team member"],
+        cc: ["You"],
+        attachment: seededSpreadsheetAttachment("Score 10 contacts.xlsx", [
+          [
+            cell("Worth reconnecting?"),
+            cell("Name"),
+            cell("Company"),
+            cell("Role"),
+            cell("LinkedIn profile"),
+          ],
+          [cell(variable("yesno"))],
+        ]),
+        body: [
+          paragraph("linkedin-greeting", [
+            text("Hey "),
+            variable("team_member"),
+            text(","),
+          ]),
+          paragraph("linkedin-signal", [
+            text("Ajay Agrawal just started a new role at Mastercard ("),
+            variable("link"),
+            text(")."),
+          ]),
+          paragraph("linkedin-contact-options", [
+            text("His likely email there is "),
+            variable("email"),
+            text(" or you might DM him at: "),
+            variable("linkedin_url"),
+          ]),
+          paragraph("linkedin-close", [
+            text(
+              "If you have two minutes, filling out the attached spreadsheet would help me find the best people to propose.",
+            ),
+          ]),
+        ],
+      },
     },
     {
       id: "linkedin-reconnect-senior-leadership",

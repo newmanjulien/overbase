@@ -42,6 +42,7 @@
 	let panelLeft = $state(0);
 	let panelWidth = $state(128);
 	let panelMaxHeight = $state(240);
+	let activeOptionId = $state<Id | null>(null);
 
 	const widthClass = $derived.by(() => {
 		if (width === 'full') return 'w-full';
@@ -81,6 +82,9 @@
 	);
 	const menuId = $derived(`${id}-menu`.replace(/[^a-zA-Z0-9_-]/g, '-'));
 	const isDisabled = $derived(options.length === 0);
+	const activeOptionElementId = $derived(
+		activeOptionId ? `${menuId}-${activeOptionId}`.replace(/[^a-zA-Z0-9_-]/g, '-') : undefined
+	);
 	const panelStyle = $derived(
 		`top: ${panelTop}px; left: ${panelLeft}px; width: ${panelWidth}px; max-height: ${panelMaxHeight}px;`
 	);
@@ -102,6 +106,7 @@
 	$effect(() => {
 		if (open) {
 			void updatePanelPositionAfterRender();
+			void scrollActiveOptionIntoViewAfterRender();
 		}
 	});
 
@@ -110,7 +115,12 @@
 			return;
 		}
 
-		open = !open;
+		if (open) {
+			close();
+			return;
+		}
+
+		openMenu();
 	}
 
 	function close({ restoreFocus = false } = {}) {
@@ -119,10 +129,24 @@
 		}
 
 		open = false;
+		activeOptionId = null;
 
 		if (restoreFocus) {
 			triggerElement?.focus();
 		}
+	}
+
+	function openMenu() {
+		if (isDisabled) {
+			return;
+		}
+
+		activeOptionId = getInitialActiveOptionId();
+		open = true;
+	}
+
+	function getInitialActiveOptionId() {
+		return options.find((option) => option.id === selectedId)?.id ?? options[0]?.id ?? null;
 	}
 
 	function updatePanelPosition() {
@@ -162,6 +186,11 @@
 		updatePanelPosition();
 	}
 
+	async function scrollActiveOptionIntoViewAfterRender() {
+		await tick();
+		document.getElementById(activeOptionElementId ?? '')?.scrollIntoView({ block: 'nearest' });
+	}
+
 	function handleDocumentClick(event: MouseEvent) {
 		if (!open) {
 			return;
@@ -180,13 +209,83 @@
 		close();
 	}
 
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key !== 'Escape' || !open) {
+	function handleTriggerKeydown(event: KeyboardEvent) {
+		if (isDisabled) {
+			return;
+		}
+
+		if (isMenuKeyboardEvent(event)) {
+			event.stopPropagation();
+		}
+
+		if (!open) {
+			if (event.key === 'Enter' || event.key === ' ') {
+				event.preventDefault();
+				openMenu();
+			}
+
+			return;
+		}
+
+		handleOpenMenuKeydown(event);
+	}
+
+	function handleDocumentKeydown(event: KeyboardEvent) {
+		if (!open) {
+			return;
+		}
+
+		handleOpenMenuKeydown(event);
+	}
+
+	function handleOpenMenuKeydown(event: KeyboardEvent) {
+		if (!isMenuKeyboardEvent(event)) {
 			return;
 		}
 
 		event.preventDefault();
-		close({ restoreFocus: true });
+
+		if (event.key === 'Escape') {
+			close({ restoreFocus: true });
+			return;
+		}
+
+		if (event.key === 'Enter' || event.key === ' ') {
+			if (activeOptionId) {
+				selectOption(activeOptionId);
+			}
+
+			return;
+		}
+
+		moveActiveOption(event.key);
+	}
+
+	function isMenuKeyboardEvent(event: KeyboardEvent) {
+		return ['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter', ' ', 'Escape'].includes(event.key);
+	}
+
+	function moveActiveOption(key: string) {
+		if (options.length === 0) {
+			return;
+		}
+
+		const activeIndex = Math.max(
+			0,
+			options.findIndex((option) => option.id === activeOptionId)
+		);
+
+		if (key === 'Home') {
+			activeOptionId = options[0].id;
+		} else if (key === 'End') {
+			activeOptionId = options[options.length - 1].id;
+		} else if (key === 'ArrowDown') {
+			activeOptionId = options[(activeIndex + 1) % options.length].id;
+		} else if (key === 'ArrowUp') {
+			activeOptionId = options[(activeIndex - 1 + options.length) % options.length].id;
+		}
+
+		void scrollActiveOptionIntoViewAfterRender();
 	}
 
 	function selectOption(optionId: Id) {
@@ -210,6 +309,7 @@
 		aria-describedby={ariaDescribedby}
 		disabled={isDisabled}
 		onclick={toggleOpen}
+		onkeydown={handleTriggerKeydown}
 		class={cn(
 			'inline-flex w-full min-w-0 items-center justify-between gap-1.5 whitespace-nowrap rounded-sm border border-stone-200/70 bg-white py-0 text-left font-normal text-stone-800 outline-none transition-colors hover:bg-stone-50 focus:border-stone-300 focus:ring-2 focus:ring-stone-200 disabled:cursor-default disabled:opacity-55 disabled:hover:bg-white',
 			sizeClass.triggerHeight,
@@ -236,11 +336,13 @@
 		>
 			{#each options as option (option.id)}
 				<button
+					id={`${menuId}-${option.id}`.replace(/[^a-zA-Z0-9_-]/g, '-')}
 					type="button"
 					role="menuitemradio"
 					aria-checked={option.id === selectedId}
 					class={cn(
 						'flex w-full items-center gap-2 text-left font-normal text-stone-700 transition-colors hover:bg-stone-50',
+						option.id === activeOptionId && 'bg-stone-100 text-stone-950',
 						sizeClass.optionHeight,
 						sizeClass.optionText,
 						sizeClass.optionPadding
@@ -264,5 +366,5 @@
 	{/if}
 </span>
 
-<svelte:document onclick={handleDocumentClick} onkeydown={handleKeydown} />
+<svelte:document onclick={handleDocumentClick} onkeydown={handleDocumentKeydown} />
 <svelte:window onresize={updatePanelPosition} />

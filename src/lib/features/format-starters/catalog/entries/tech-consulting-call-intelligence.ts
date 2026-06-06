@@ -10,14 +10,14 @@ import {
 } from "./helpers";
 
 export const formatStarter = defineFormatStarter({
-  slug: "call-intelligence",
+  slug: "tech-consulting-call-intelligence",
   formatDefinitionSlug: "call-intelligence",
   defaultPresentation: {
     title: "Call intelligence",
     description: "Find opportunities to upsell from account management calls",
   },
   dataSourceIds: ["gong", "salesforce", "calendar"],
-  industryTags: ["consulting"],
+  industryTags: ["tech-consulting"],
   variables: [
     { id: "account_name", label: "Account name" },
     { id: "account_owner", label: "Account owner" },
@@ -262,6 +262,6 @@ export const formatStarter = defineFormatStarter({
     },
   ],
   showInGallery: true,
-  modeSortOrder: 14,
+  modeSortOrder: 24,
   status: "active",
 });
