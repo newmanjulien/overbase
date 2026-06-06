@@ -49,196 +49,84 @@ export const formatStarter = defineFormatStarter({
   startingPointSelection: {
     kind: "guided",
     intro:
-      "Shape the follow-up around the buying stage, recipient, and request.",
+      "Shape the whitespace analysis around the renewal opportunity.",
     questions: [
       {
-        id: "deal_stage",
-        title: "Where is the deal?",
+        id: "analysis_focus",
+        title: "What should the whitespace analysis focus on?",
         options: [
-          { id: "discovery", label: "Discovery" },
-          { id: "proposal", label: "Proposal review" },
-          { id: "procurement", label: "Procurement" },
-        ],
-      },
-      {
-        id: "recipient",
-        title: "Who are you following up with?",
-        options: [
-          { id: "champion", label: "Champion" },
-          { id: "committee", label: "Buying committee" },
-          { id: "procurement_team", label: "Procurement team" },
-        ],
-      },
-      {
-        id: "primary_ask",
-        title: "What is the main ask?",
-        options: [
-          { id: "confirm_next_step", label: "Confirm next step" },
-          { id: "review_proposal", label: "Review proposal" },
-          { id: "answer_question", label: "Answer open question" },
+          { id: "renewal_growth", label: "Renewal growth" },
+          { id: "coverage_gap", label: "Coverage gap" },
+          { id: "carrier_benchmark", label: "Carrier benchmark" },
         ],
       },
     ],
     rules: [
       {
-        id: "procurement-stage",
-        startingPointId: "procurement-follow-up",
-        answers: { deal_stage: "procurement" },
+        id: "renewal-growth",
+        startingPointId: "whitespace-analysis",
+        answers: { analysis_focus: "renewal_growth" },
       },
       {
-        id: "procurement-recipient",
-        startingPointId: "procurement-follow-up",
-        answers: { recipient: "procurement_team" },
+        id: "coverage-gap",
+        startingPointId: "whitespace-analysis",
+        answers: { analysis_focus: "coverage_gap" },
       },
       {
-        id: "proposal-ask",
-        startingPointId: "proposal-review",
-        answers: { primary_ask: "review_proposal" },
+        id: "carrier-benchmark",
+        startingPointId: "whitespace-analysis",
+        answers: { analysis_focus: "carrier_benchmark" },
       },
-      {
-        id: "proposal-committee",
-        startingPointId: "proposal-review",
-        answers: { deal_stage: "proposal", recipient: "committee" },
-      },
-      { id: "default", startingPointId: "conversation-recap", answers: {} },
+      { id: "default", startingPointId: "whitespace-analysis", answers: {} },
     ],
   },
   startingPoints: [
     {
-      id: "conversation-recap",
-      label: "Conversation recap",
+      id: "whitespace-analysis",
+      label: "Whitespace analysis",
       variantSlug: "default",
       emailContent: {
-        title: "Follow-up from our conversation",
+        title: "Whitespace analysis",
         to: ["Buyer"],
         cc: ["Deal team"],
-        attachment: seededSpreadsheetAttachment("Deal recap tracker.xlsx", [
-          [cell("Topic"), cell("Detail"), cell("Owner"), cell("Date")],
+        attachment: seededSpreadsheetAttachment("Whitespace analysis.xlsx", [
+          [cell("Opportunity"), cell("Benchmark"), cell("Owner"), cell("Next step")],
           [
-            cell("Business goal"),
-            cell(variable("business_goal")),
-            cell(variable("buyer_name")),
-            cell("Current"),
-          ],
-          [
-            cell("Next step"),
+            cell("New policies"),
+            cell("$400,000"),
+            cell(variable("deal_owner")),
             cell(variable("next_step")),
-            cell(variable("deal_owner")),
-            cell(variable("next_step_date")),
-          ],
-        ]),
-        body: [
-          paragraph("recap-greeting", [
-            text("Hi "),
-            variable("buyer_name"),
-            text(","),
-          ]),
-          paragraph("recap-summary", [
-            text("Thanks for discussing "),
-            variable("opportunity_name"),
-            text(" and the goal of "),
-            variable("business_goal"),
-            text(" for "),
-            variable("prospect_company"),
-            text("."),
-          ]),
-          paragraph("recap-stage", [
-            text("The deal is currently in "),
-            variable("deal_stage"),
-            text(", with "),
-            variable("next_step"),
-            text(" planned for "),
-            variable("next_step_date"),
-            text("."),
-          ]),
-        ],
-      },
-    },
-    {
-      id: "proposal-review",
-      label: "Proposal review",
-      variantSlug: "default",
-      emailContent: {
-        title: "Proposal follow-up",
-        to: ["Buying committee"],
-        cc: ["Deal team"],
-        attachment: seededSpreadsheetAttachment("Proposal review.xlsx", [
-          [cell("Area"), cell("Status"), cell("Owner"), cell("Notes")],
-          [
-            cell("Proposal"),
-            cell(variable("proposal_link")),
-            cell(variable("deal_owner")),
-            cell("Ready for review"),
           ],
           [
-            cell("Open question"),
-            cell(variable("commercial_question")),
-            cell(variable("buyer_name")),
-            cell("Needs response"),
-          ],
-        ]),
-        body: [
-          paragraph("proposal-greeting", [
-            text("Hi "),
-            variable("buyer_name"),
-            text(","),
-          ]),
-          paragraph("proposal-summary", [
-            text("Sharing the proposal for "),
-            variable("opportunity_name"),
-            text(": "),
-            variable("proposal_link"),
-            text("."),
-          ]),
-          paragraph("proposal-ask", [
-            text("Please review it before "),
-            variable("next_step_date"),
-            text(" so we can confirm "),
-            variable("next_step"),
-            text("."),
-          ]),
-        ],
-      },
-    },
-    {
-      id: "procurement-follow-up",
-      label: "Procurement follow-up",
-      variantSlug: "default",
-      emailContent: {
-        title: "Procurement follow-up",
-        to: ["Procurement"],
-        cc: ["Deal team"],
-        attachment: seededSpreadsheetAttachment("Procurement checklist.xlsx", [
-          [cell("Item"), cell("Owner"), cell("Status"), cell("Question")],
-          [
-            cell("Commercial review"),
+            cell("Carrier benchmark"),
+            cell("Allianz and Chubb"),
             cell(variable("procurement_owner")),
-            cell("Open"),
             cell(variable("commercial_question")),
-          ],
-          [
-            cell("Next step"),
-            cell(variable("deal_owner")),
-            cell(variable("next_step_date")),
-            cell(variable("next_step")),
           ],
         ]),
         body: [
-          paragraph("procurement-greeting", [
+          paragraph("whitespace-greeting", [
             text("Hi "),
             variable("buyer_name"),
             text(","),
           ]),
-          paragraph("procurement-summary", [
-            text("Following up on procurement for "),
+          paragraph("whitespace-summary", [
+            text("Attached is a whitespace analysis for "),
+            variable("opportunity_name"),
+            text(" at "),
             variable("prospect_company"),
-            text(". "),
-            variable("procurement_owner"),
-            text(" is the current owner on your side."),
+            text("."),
           ]),
-          paragraph("procurement-question", [
-            text("The open commercial question is: "),
-            variable("commercial_question"),
+          paragraph("whitespace-opportunity", [
+            text("We identified new policies worth $400,000 that can support "),
+            variable("business_goal"),
+            text("."),
+          ]),
+          paragraph("whitespace-next-step", [
+            text("The next step is "),
+            variable("next_step"),
+            text(" on "),
+            variable("next_step_date"),
             text("."),
           ]),
         ],

@@ -9,15 +9,26 @@
 
 	export type EmailPreviewFrame = 'standard' | 'zoomed';
 
-	type Props = {
+	type BaseProps = {
 		title: string;
 		description?: string;
 		dataSourceIds?: readonly DataSourceId[];
-		sampleEmail: FormatStarterSampleEmail;
 		emailPreviewFrame?: EmailPreviewFrame;
 		showDataSources?: boolean;
 		class?: ClassValue;
 	};
+
+	type Props = BaseProps &
+		(
+			| {
+					sampleEmail: FormatStarterSampleEmail;
+					showEmailPreview?: true;
+			  }
+			| {
+					sampleEmail?: FormatStarterSampleEmail;
+					showEmailPreview: false;
+			  }
+		);
 
 	let {
 		title,
@@ -25,16 +36,21 @@
 		dataSourceIds = [],
 		sampleEmail,
 		emailPreviewFrame = 'standard',
+		showEmailPreview = true,
 		showDataSources = true,
 		class: className
 	}: Props = $props();
 	const visibleDataSourceIds = $derived(showDataSources ? dataSourceIds : []);
 	const hasVisibleDataSources = $derived(visibleDataSourceIds.length > 0);
+	const visibleSampleEmail = $derived(showEmailPreview ? sampleEmail : undefined);
+	const hasEmailPreview = $derived(visibleSampleEmail !== undefined);
 </script>
 
 <div
 	class={cn(
 		'format-starter-preview-card relative w-full overflow-hidden rounded-md border border-stone-200/40 bg-white',
+		!hasEmailPreview && 'border-0',
+		!hasEmailPreview && 'format-starter-preview-card--without-email',
 		className
 	)}
 >
@@ -45,14 +61,16 @@
 		/>
 	{/if}
 
-	<div
-		class={cn(
-			'format-starter-preview-card__document',
-			emailPreviewFrame === 'zoomed' && 'format-starter-preview-card__document--zoomed'
-		)}
-	>
-		<FormatStarterEmailPreview content={sampleEmail} />
-	</div>
+	{#if visibleSampleEmail}
+		<div
+			class={cn(
+				'format-starter-preview-card__document',
+				emailPreviewFrame === 'zoomed' && 'format-starter-preview-card__document--zoomed'
+			)}
+		>
+			<FormatStarterEmailPreview content={visibleSampleEmail} />
+		</div>
+	{/if}
 
 	<div
 		class={cn(
@@ -78,6 +96,10 @@
 <style>
 	.format-starter-preview-card {
 		aspect-ratio: 1047 / 605;
+	}
+
+	.format-starter-preview-card--without-email {
+		aspect-ratio: 5;
 	}
 
 	.format-starter-preview-card__document {
@@ -109,7 +131,7 @@
 		position: absolute;
 		top: 9%;
 		left: 5.5%;
-		right: 4.75rem;
+		right: 5.5rem;
 	}
 
 	.format-starter-preview-card__copy--full {

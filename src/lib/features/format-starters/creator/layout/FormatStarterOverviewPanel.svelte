@@ -23,12 +23,12 @@
 
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-stone-50/50 text-stone-950">
 	<div class="flex min-h-0 flex-1 items-center justify-center px-5 py-10 md:px-8">
-		<article class="w-full max-w-72 rounded-sm bg-white p-4 text-stone-950 shadow-sm">
+		<article class="w-full max-w-66 rounded-sm bg-white px-2.5 pt-4.5 pb-2 text-stone-950 shadow-sm">
 			<FormatStarterPreviewCard
 				title={presentation.title}
 				description={presentation.description}
 				dataSourceIds={formatStarter.dataSourceIds}
-				sampleEmail={formatStarter.sampleEmail}
+				showEmailPreview={false}
 			/>
 
 			<div class="px-1 pt-4 pb-2 text-center">
