@@ -3,15 +3,14 @@ import {
   formatText as text,
   formatVariable as variable,
 } from "$lib/features/format-starters/domain";
+import type { FormatStarter } from "../types";
 import {
-  defineFormatStarter,
   seededSpreadsheetAttachment,
   spreadsheetCell as cell,
 } from "./helpers";
 
-export const formatStarter = defineFormatStarter({
+export const formatStarter = {
   slug: "warm-up",
-  formatDefinitionSlug: "warm-up",
   defaultPresentation: {
     title: "Warm up accounts",
     description: "Help lawyers warm up specific accounts",
@@ -109,7 +108,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "steady-progress",
       label: "Steady progress update",
-      variantSlug: "default",
       emailContent: {
         title: "Client update",
         to: ["Client team"],
@@ -162,7 +160,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "decision-request",
       label: "Decision request",
-      variantSlug: "default",
       emailContent: {
         title: "Decision needed",
         to: ["Client lead"],
@@ -208,7 +205,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "risk-escalation",
       label: "Risk escalation",
-      variantSlug: "default",
       emailContent: {
         title: "Risk update",
         to: ["Client sponsor"],
@@ -253,6 +249,6 @@ export const formatStarter = defineFormatStarter({
     },
   ],
   showInGallery: true,
-  modeSortOrder: 10,
+  sortOrder: 10,
   status: "active",
-});
+} satisfies FormatStarter;

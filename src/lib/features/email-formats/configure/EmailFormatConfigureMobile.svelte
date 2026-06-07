@@ -10,7 +10,6 @@
 	let {
 		actionError,
 		activationBlockerMessage,
-		activationBlockerActionLabel = null,
 		activationReadyMessage,
 		activationSuccessMessage,
 		isUpdatingStatus,
@@ -20,16 +19,13 @@
 		configureState,
 		dragCoordinator,
 		loadState,
-		dataSourceActions = [],
 		ruleInfoCard,
 		rulesEditPolicy,
 		onKeepMineContent,
 		onKeepMineRules,
 		onKeepMineTitle,
-		onLinkRuleDataSources,
 		onSaveContent,
 		onSaveRules,
-		onActivationBlockerAction,
 		onActivateFormat,
 		onUseLatestContent,
 		onUseLatestRules,
@@ -43,11 +39,9 @@
 		{actionError}
 		{configureState}
 		{activationBlockerMessage}
-		{activationBlockerActionLabel}
 		{activationReadyMessage}
 		{activationSuccessMessage}
 		{isUpdatingStatus}
-		{onActivationBlockerAction}
 		{onActivateFormat}
 		{onKeepMineTitle}
 		{onUseLatestTitle}
@@ -77,14 +71,12 @@
 				<EmailFormatRulesPanel
 					rules={configureState.rulesDraft}
 					editPolicy={rulesEditPolicy}
-					{dataSourceActions}
 					{ruleInfoCard}
 					canSave={configureState.canSaveRules}
 					conflict={configureState.rulesConflict}
 					isSaving={configureState.isSavingRules}
 					onRulesChange={configureState.updateRules}
 					onSave={() => void onSaveRules()}
-					onLinkDataSources={onLinkRuleDataSources}
 					onKeepMine={onKeepMineRules}
 					onUseLatest={onUseLatestRules}
 				/>

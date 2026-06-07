@@ -3,15 +3,14 @@ import {
   formatText as text,
   formatVariable as variable,
 } from "$lib/features/format-starters/domain";
+import type { FormatStarter } from "../types";
 import {
-  defineFormatStarter,
   seededSpreadsheetAttachment,
   spreadsheetCell as cell,
 } from "./helpers";
 
-export const formatStarter = defineFormatStarter({
+export const formatStarter = {
   slug: "finance-whitespace-analysis",
-  formatDefinitionSlug: "whitespace-analysis",
   defaultPresentation: {
     title: "Coverage whitespace",
     description: "Send bankers focused next-best-action ideas for covered accounts",
@@ -108,7 +107,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "refinancing-idea",
       label: "Refinancing idea",
-      variantSlug: "default",
       emailContent: {
         title: "Coverage whitespace idea",
         to: ["Coverage banker"],
@@ -161,7 +159,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "mandate-expansion",
       label: "Mandate expansion",
-      variantSlug: "default",
       emailContent: {
         title: "Mandate expansion opportunity",
         to: ["Coverage banker"],
@@ -207,7 +204,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "specialist-handoff",
       label: "Specialist handoff",
-      variantSlug: "default",
       emailContent: {
         title: "Product specialist handoff",
         to: ["Product specialist"],
@@ -253,6 +249,6 @@ export const formatStarter = defineFormatStarter({
     },
   ],
   showInGallery: true,
-  modeSortOrder: 22,
+  sortOrder: 22,
   status: "active",
-});
+} satisfies FormatStarter;

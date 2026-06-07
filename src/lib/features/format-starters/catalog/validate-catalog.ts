@@ -4,7 +4,6 @@ import type {
 } from '$lib/features/format-starters/domain';
 import { isDataSourceId } from '$lib/features/format-starters/data-sources';
 import { hasInlineTextContent } from '$lib/ui/inline-text';
-import { getEmailFormatDefinition } from '$domain/email-formats';
 import type { FormatStarter } from './types';
 import { FORMAT_STARTER_INDUSTRY_TAGS, isFormatStarterIndustryTagId } from './industry-tags';
 
@@ -18,17 +17,9 @@ export function validateFormatStarterCatalog(
 ): FormatStarterCatalogValidationIssue[] {
 	const issues: FormatStarterCatalogValidationIssue[] = [];
 	const formatStarterSlugs = new Set<string>();
-	const modeSortOrders = new Map<FormatStarter['mode'], Map<number, string>>();
+	const sortOrders = new Map<number, string>();
 
 	for (const entry of entries) {
-		if (!isFormatStarterDataMode(entry.mode)) {
-			issues.push({
-				formatStarterSlug: entry.slug,
-				message: 'Format starter mode must be "internal-data" or "public-data".'
-			});
-			continue;
-		}
-
 		if (formatStarterSlugs.has(entry.slug)) {
 			issues.push({
 				formatStarterSlug: entry.slug,
@@ -38,18 +29,16 @@ export function validateFormatStarterCatalog(
 
 		formatStarterSlugs.add(entry.slug);
 
-		const sortOrdersForMode = modeSortOrders.get(entry.mode) ?? new Map<number, string>();
-		const existingSortOrderSlug = sortOrdersForMode.get(entry.modeSortOrder);
+		const existingSortOrderSlug = sortOrders.get(entry.sortOrder);
 
 		if (existingSortOrderSlug) {
 			issues.push({
 				formatStarterSlug: entry.slug,
-				message: `Duplicate modeSortOrder "${entry.modeSortOrder}" for format starter mode "${entry.mode}" also used by format starter "${existingSortOrderSlug}".`
+				message: `Duplicate sortOrder "${entry.sortOrder}" also used by format starter "${existingSortOrderSlug}".`
 			});
 		}
 
-		sortOrdersForMode.set(entry.modeSortOrder, entry.slug);
-		modeSortOrders.set(entry.mode, sortOrdersForMode);
+		sortOrders.set(entry.sortOrder, entry.slug);
 		validateFormatStarterEntry(issues, entry);
 	}
 
@@ -65,14 +54,13 @@ function validateSupportedIndustryCoverage(
 	for (const industryTag of FORMAT_STARTER_INDUSTRY_TAGS) {
 		const hasVisibleStarter = entries.some(
 			(entry) =>
-				entry.mode !== 'public-data' &&
 				entry.showInGallery &&
 				entry.industryTags.includes(industryTag.id)
 		);
 
 		if (!hasVisibleStarter) {
 			issues.push({
-				message: `Supported industry "${industryTag.id}" must have at least one visible non-public-data format starter.`
+				message: `Supported industry "${industryTag.id}" must have at least one visible format starter.`
 			});
 		}
 	}
@@ -126,24 +114,8 @@ function validateFormatStarterEntry(
 
 	const startingPointIds = new Set(entry.startingPoints.map((startingPoint) => startingPoint.id));
 	const variableIds = new Set(entry.variables.map((variable) => variable.id));
-	const definition = getEmailFormatDefinition(entry.formatDefinitionSlug);
-	const variantSlugs: Set<string> = new Set(
-		definition?.variants.map((variant) => variant.slug) ?? []
-	);
 
 	validateFormatStarterSelection(issues, entry, startingPointIds);
-
-	if (!definition) {
-		issues.push({
-			formatStarterSlug: entry.slug,
-			message: `References unknown email format definition "${entry.formatDefinitionSlug}".`
-		});
-	} else if (entry.mode !== definition.dataMode) {
-		issues.push({
-			formatStarterSlug: entry.slug,
-			message: `Mode "${entry.mode}" does not match email format definition mode "${definition.dataMode}".`
-		});
-	}
 
 	if (!entry.defaultPresentation.title.trim()) {
 		issues.push({
@@ -174,13 +146,6 @@ function validateFormatStarterEntry(
 	}
 
 	for (const startingPoint of entry.startingPoints) {
-		if (!variantSlugs.has(startingPoint.variantSlug)) {
-			issues.push({
-				formatStarterSlug: entry.slug,
-				message: `Starting point "${startingPoint.id}" references unknown variant "${startingPoint.variantSlug}".`
-			});
-		}
-
 		for (const variableId of listEmailContentVariableIds(startingPoint.emailContent)) {
 			if (!variableIds.has(variableId)) {
 				issues.push({
@@ -190,10 +155,6 @@ function validateFormatStarterEntry(
 			}
 		}
 	}
-}
-
-function isFormatStarterDataMode(value: string): value is FormatStarter['mode'] {
-	return value === 'internal-data' || value === 'public-data';
 }
 
 function validateFormatStarterVariables(

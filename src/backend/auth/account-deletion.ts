@@ -13,34 +13,6 @@ async function deleteEmailFormatRecipientRecords(ctx: MutationCtx, workspaceId: 
 	}
 }
 
-async function deleteEmailFormatExternalDataLinkRecords(
-	ctx: MutationCtx,
-	workspaceId: Id<'workspaces'>
-) {
-	const links = await ctx.db
-		.query('emailFormatExternalDataLinks')
-		.withIndex('by_workspace_emailFormat', (q) => q.eq('workspaceId', workspaceId))
-		.collect();
-
-	for (const link of links) {
-		await ctx.db.delete(link._id);
-	}
-}
-
-async function deleteExternalDataSourceLinkedinContactRecords(
-	ctx: MutationCtx,
-	workspaceId: Id<'workspaces'>
-) {
-	const contacts = await ctx.db
-		.query('externalDataSourceLinkedinContacts')
-		.withIndex('by_workspace_externalDataSource', (q) => q.eq('workspaceId', workspaceId))
-		.collect();
-
-	for (const contact of contacts) {
-		await ctx.db.delete(contact._id);
-	}
-}
-
 async function deleteEmailFormatRecords(ctx: MutationCtx, workspaceId: Id<'workspaces'>) {
 	const emailFormats = await ctx.db
 		.query('emailFormats')
@@ -49,17 +21,6 @@ async function deleteEmailFormatRecords(ctx: MutationCtx, workspaceId: Id<'works
 
 	for (const emailFormat of emailFormats) {
 		await ctx.db.delete(emailFormat._id);
-	}
-}
-
-async function deleteExternalDataSourceRecords(ctx: MutationCtx, workspaceId: Id<'workspaces'>) {
-	const externalDataSources = await ctx.db
-		.query('externalDataSources')
-		.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspaceId))
-		.collect();
-
-	for (const externalDataSource of externalDataSources) {
-		await ctx.db.delete(externalDataSource._id);
 	}
 }
 
@@ -75,11 +36,8 @@ async function deleteTeammateRecords(ctx: MutationCtx, workspaceId: Id<'workspac
 }
 
 async function deleteWorkspaceRecords(ctx: MutationCtx, workspace: Doc<'workspaces'>) {
-	await deleteEmailFormatExternalDataLinkRecords(ctx, workspace._id);
 	await deleteEmailFormatRecipientRecords(ctx, workspace._id);
-	await deleteExternalDataSourceLinkedinContactRecords(ctx, workspace._id);
 	await deleteEmailFormatRecords(ctx, workspace._id);
-	await deleteExternalDataSourceRecords(ctx, workspace._id);
 	await deleteTeammateRecords(ctx, workspace._id);
 	await deleteUploadedAvatar(ctx, workspace.avatar);
 	await ctx.db.delete(workspace._id);

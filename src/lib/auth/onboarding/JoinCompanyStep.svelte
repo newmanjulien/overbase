@@ -2,7 +2,7 @@
 	import AuthButton from '$lib/auth/components/AuthButton.svelte';
 	import AuthStepFrame from '$lib/auth/components/AuthStepFrame.svelte';
 	import AuthTextInput from '$lib/auth/components/AuthTextInput.svelte';
-	import { HeaderSelectMenu } from '$lib/ui';
+	import { SelectMenu } from '$lib/ui';
 	import {
 		COMPANY_INDUSTRY_OPTIONS,
 		UNSUPPORTED_COMPANY_INDUSTRY_ID,
@@ -47,7 +47,7 @@
 			required
 			autofocus
 		/>
-		<HeaderSelectMenu
+		<SelectMenu
 			id="join-company-industry"
 			ariaLabel="Select your company's industry"
 			placeholder="Your company's industry"
@@ -57,7 +57,7 @@
 				industry = selectedIndustry;
 			}}
 			width="full"
-			size="form"
+			size="comfortable"
 		/>
 		{#if hasUnsupportedIndustry}
 			<p class="m-0 text-sm leading-5 text-red-600">Overbase hasn't reached your industry yet</p>

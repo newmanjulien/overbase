@@ -1,6 +1,5 @@
 import ArticleIcon from 'phosphor-svelte/lib/ArticleIcon';
 import BuildingIcon from 'phosphor-svelte/lib/BuildingIcon';
-import CloudIcon from 'phosphor-svelte/lib/CloudIcon';
 import FolderSimpleIcon from 'phosphor-svelte/lib/FolderSimpleIcon';
 import FoldersIcon from 'phosphor-svelte/lib/FoldersIcon';
 import HardDriveIcon from 'phosphor-svelte/lib/HardDriveIcon';
@@ -17,7 +16,6 @@ export const APP_ROUTE_IDS = [
 	'create-formats',
 	'email-formats',
 	'internal-data',
-	'external-data',
 	'team',
 	'team-email-formats',
 	'invite-partners',
@@ -65,12 +63,6 @@ export const APP_ROUTE_REGISTRY = {
 		headerLabel: 'Internal data sources',
 		icon: HardDriveIcon
 	},
-	'external-data': {
-		...APP_LINKS.externalData,
-		navLabel: 'External data',
-		headerLabel: 'External data sources',
-		icon: CloudIcon
-	},
 	team: {
 		...APP_LINKS.team,
 		navLabel: 'My team',
@@ -108,7 +100,7 @@ export const APP_NAV_SECTION_DEFINITIONS = [
 	{
 		id: 'main',
 		heading: 'Workspace',
-		routeIds: ['internal-data', 'external-data', 'team', 'team-email-formats'],
+		routeIds: ['internal-data', 'team', 'team-email-formats'],
 		desktopSectionClass: 'pt-6',
 		mobileSectionClass: 'pt-6',
 		showCollapsedDivider: true

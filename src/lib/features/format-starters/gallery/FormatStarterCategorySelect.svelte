@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { useCurrentWorkspaceContext } from '$lib/app/current-workspace.svelte';
-	import { HeaderSelectMenu } from '$lib/ui';
+	import { SelectMenu } from '$lib/ui';
 	import {
 		CREATE_FORMAT_GALLERY_CATEGORIES,
 		createFormatGalleryCategoryHref,
@@ -42,7 +42,7 @@
 	}
 </script>
 
-<HeaderSelectMenu
+<SelectMenu
 	id="format-category"
 	ariaLabel="Select format category"
 	selectedId={selectedCategory.id}

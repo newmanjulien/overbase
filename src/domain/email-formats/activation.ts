@@ -1,14 +1,8 @@
 import type { EmailFormatActivationRequirement } from './types';
-import type { EmailFormatDataSourceRequirement } from './data-source-requirements';
-import {
-	getUnsatisfiedEmailFormatDataSourceRequirements,
-	type EmailFormatDataSourceLinkState
-} from './data-source-link-state';
 
 export type EmailFormatActivationMissingRequirement =
 	| 'recipients'
 	| 'rules'
-	| 'linkedinContacts'
 	| 'dataSources';
 
 export type EmailFormatActivationRule = {
@@ -23,10 +17,9 @@ export type EmailFormatActivationReadiness = {
 
 type EmailFormatActivationReadinessInput = {
 	recipientCount: number;
+	linkedDataSourceCount: number;
 	rules: readonly EmailFormatActivationRule[];
 	requirements: readonly EmailFormatActivationRequirement[];
-	dataSourceRequirements: readonly EmailFormatDataSourceRequirement[];
-	dataSourceLinkState: EmailFormatDataSourceLinkState;
 };
 
 function hasSavedRule(rules: readonly EmailFormatActivationRule[]) {
@@ -35,10 +28,9 @@ function hasSavedRule(rules: readonly EmailFormatActivationRule[]) {
 
 export function getEmailFormatActivationReadiness({
 	recipientCount,
+	linkedDataSourceCount,
 	rules,
-	requirements,
-	dataSourceRequirements,
-	dataSourceLinkState
+	requirements
 }: EmailFormatActivationReadinessInput): EmailFormatActivationReadiness {
 	const missingRequirements: EmailFormatActivationMissingRequirement[] = [];
 
@@ -50,19 +42,10 @@ export function getEmailFormatActivationReadiness({
 		if (requirement.kind === 'rules' && !hasSavedRule(rules)) {
 			missingRequirements.push('rules');
 		}
-	}
 
-	if (dataSourceRequirements.length === 0) {
-		missingRequirements.push('dataSources');
-	}
-
-	for (const requirement of getUnsatisfiedEmailFormatDataSourceRequirements(
-		dataSourceRequirements,
-		dataSourceLinkState
-	)) {
-		missingRequirements.push(
-			requirement.kind === 'linkedinContacts' ? 'linkedinContacts' : 'dataSources'
-		);
+		if (requirement.kind === 'dataSources' && linkedDataSourceCount <= 0) {
+			missingRequirements.push('dataSources');
+		}
 	}
 
 	const uniqueMissingRequirements = [...new Set(missingRequirements)];
@@ -91,10 +74,6 @@ export function getEmailFormatActivationMissingMessage(
 		return 'Add and save at least one rule before activating this format';
 	}
 
-	if (missing.size === 1 && missing.has('linkedinContacts')) {
-		return 'Add LinkedIn contacts to activate this format';
-	}
-
 	if (missing.size === 1 && missing.has('dataSources')) {
 		return 'Link data sources before activating this format';
 	}
@@ -102,15 +81,10 @@ export function getEmailFormatActivationMissingMessage(
 	const labels = [
 		missing.has('recipients') ? 'at least one recipient' : null,
 		missing.has('rules') ? 'at least one saved rule' : null,
-		missing.has('linkedinContacts') ? 'LinkedIn contacts' : null,
 		missing.has('dataSources') ? 'one linked data source' : null
 	].filter((label): label is string => label !== null);
 
 	return `Add ${formatList(labels)} before activating this format`;
-}
-
-export function normalizeEmailFormatActivationMissingMessage(message: string | null) {
-	return message?.replace('linked data sources', 'one linked data source') ?? null;
 }
 
 export function getEmailFormatActivationMissingMessageFromError(error: unknown) {
@@ -118,7 +92,6 @@ export function getEmailFormatActivationMissingMessageFromError(error: unknown) 
 	const requirementKinds: EmailFormatActivationMissingRequirement[] = [
 		'recipients',
 		'rules',
-		'linkedinContacts',
 		'dataSources'
 	];
 	const activationMessages = getRequirementCombinations(requirementKinds)
@@ -127,7 +100,7 @@ export function getEmailFormatActivationMissingMessageFromError(error: unknown) 
 
 	return (
 		activationMessages.find((message) => errorMessage.includes(message)) ??
-		normalizeEmailFormatActivationMissingMessage(errorMessage)
+		errorMessage
 	);
 }
 

@@ -12,7 +12,7 @@ type JoinFormatStarterRecommendationConfig = Pick<
 
 const JOIN_FORMAT_STARTER_RECOMMENDATION_BY_INDUSTRY = {
 	insurance: {
-		slug: 'whitespace-analysis',
+		slug: 'renewal-upsell',
 		title: 'Propose new policies to existing clients',
 		description:
 			'Send a whitespace analysis report to brokers before each renewal conversation. This report lists additional policies this client should buy'
@@ -73,12 +73,7 @@ function getJoinFormatStarter(recommendation: JoinFormatStarterRecommendationCon
 		throw new Error(`Join format starter "${recommendation.slug}" is not available.`);
 	}
 
-	if (formatStarter.mode === 'public-data') {
-		throw new Error(`Join format starter "${recommendation.slug}" cannot use public data.`);
-	}
-
 	return {
-		mode: formatStarter.mode,
 		slug: formatStarter.slug,
 		title: recommendation.title,
 		description: recommendation.description,

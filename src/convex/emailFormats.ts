@@ -12,30 +12,21 @@ import {
 	toEditableEmailFormatContent
 } from '../backend/email-formats/content';
 import {
-	createLinkedinContactsExternalDataSource,
-	normalizeLinkedinContactsSource
-} from '../backend/external-data/linkedin-contacts';
-import {
 	collectEmailFormatRecipientRows,
 	deleteEmailFormatRecipientRows,
 	insertEmailFormatRecipientRows,
 	replaceEmailFormatRecipientRows
 } from '../backend/email-formats/recipients';
 import {
-	collectEmailFormatExternalDataLinks,
-	getRequiredDataSourceRequirementForRule,
+	EMAIL_FORMAT_CONTENT_EDIT_POLICY,
+	EMAIL_FORMAT_RULE_INFO_CARD,
+	EMAIL_FORMAT_RULES_EDIT_POLICY,
 	getEmailFormatActivationState,
-	getEmailFormatDataSourceLinkState,
-	getInitialRulesForEmailFormatSpec,
-	getLinkedinContactsCreateLinkForEmailFormatSpec,
-	getRuleDataSourceActions,
-	requireEmailFormatSpecForFormat
+	getInitialRules
 } from '../backend/email-formats/activation';
 import {
-	addLinkedinContactsSourceToEmailFormatRuleInput,
 	deleteEmailFormatsInput,
 	emailFormatCreateFromStarterInput,
-	linkExternalDataSourceToEmailFormatRuleInput,
 	emailFormatId,
 	setEmailFormatStatusInput,
 	updateEmailFormatContentInput,
@@ -43,11 +34,6 @@ import {
 	updateEmailFormatRulesInput,
 	updateEmailFormatTitleInput
 } from '../backend/validators/email-formats';
-import {
-	getEmailFormatDefinition,
-	getEmailFormatSpec,
-	type EmailFormatDefinition
-} from '../domain/email-formats';
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';
@@ -55,16 +41,6 @@ import { getTeammateDisplayName } from './teammateIdentity';
 
 function getCreatorDisplayName(creator: Doc<'users'> | null) {
 	return creator?.displayName?.trim() || 'Unknown user';
-}
-
-function requireEmailFormatDefinition(formatDefinitionSlug: string): EmailFormatDefinition {
-	const definition = getEmailFormatDefinition(formatDefinitionSlug.trim());
-
-	if (!definition) {
-		throw new Error('Email format definition not found.');
-	}
-
-	return definition;
 }
 
 function areJsonEqual(first: unknown, second: unknown) {
@@ -87,33 +63,6 @@ function versionedMutationResult<
 	} as { kind: Kind } & Record<Key, VersionedValue<Value>>;
 }
 
-function assertLockedFieldUnchanged(
-	fieldIsEditable: boolean,
-	fieldLabel: string,
-	currentValue: unknown,
-	nextValue: unknown
-) {
-	if (!fieldIsEditable && !areJsonEqual(currentValue, nextValue)) {
-		throw new Error(`${fieldLabel} is fixed for this email format.`);
-	}
-}
-
-function areRuleListsEqual(firstRules: { id: string }[], secondRules: { id: string }[]) {
-	return areJsonEqual(
-		firstRules.map((rule) => rule.id),
-		secondRules.map((rule) => rule.id)
-	);
-}
-
-function areRuleTextsEqual(
-	firstRules: { id: string; text: string }[],
-	secondRules: { id: string; text: string }[]
-) {
-	const firstTextById = new Map(firstRules.map((rule) => [rule.id, rule.text]));
-
-	return secondRules.every((rule) => firstTextById.get(rule.id) === rule.text);
-}
-
 async function getEmailFormatInViewerWorkspace(
 	ctx: QueryCtx | MutationCtx,
 	viewerWorkspace: ViewerWorkspace,
@@ -122,50 +71,13 @@ async function getEmailFormatInViewerWorkspace(
 	return getViewerWorkspaceRecord(viewerWorkspace, await ctx.db.get(emailFormatId));
 }
 
-async function insertEmailFormatExternalDataLink(
-	ctx: MutationCtx,
-	args: {
-		workspaceId: Id<'workspaces'>;
-		emailFormatId: Id<'emailFormats'>;
-		ruleId: string;
-		externalDataSourceId: Id<'externalDataSources'>;
-		createdAt: number;
-	}
-) {
-	await ctx.db.insert('emailFormatExternalDataLinks', args);
-}
-
-async function deleteEmailFormatExternalDataLinks(
-	ctx: MutationCtx,
-	workspaceId: Id<'workspaces'>,
-	emailFormatId: Id<'emailFormats'>
-) {
-	const links = await ctx.db
-		.query('emailFormatExternalDataLinks')
-		.withIndex('by_workspace_emailFormat', (q) =>
-			q.eq('workspaceId', workspaceId).eq('emailFormatId', emailFormatId)
-		)
-		.collect();
-
-	for (const link of links) {
-		await ctx.db.delete(link._id);
-	}
-}
-
 export const createEmailFormatFromStarter = mutation({
 	args: emailFormatCreateFromStarterInput,
 	handler: async (ctx, args) => {
 		const viewerWorkspace = await requireViewerWorkspace(ctx);
 		const { user, workspace } = viewerWorkspace;
-		const formatDefinition = requireEmailFormatDefinition(args.formatDefinitionSlug);
-		const variantSlug = args.variantSlug.trim();
-		const formatSpec = getEmailFormatSpec(formatDefinition.slug, variantSlug);
-
-		if (!formatSpec) {
-			throw new Error('Email format variant not found.');
-		}
-
-		const createdFromStarterSlug = args.createdFromStarterSlug.trim();
+		const formatStarterSlug = args.formatStarterSlug.trim();
+		const startingPointId = args.startingPointId.trim();
 		const variables = normalizeEmailFormatVariables(args.variables);
 		const title = normalizeEmailFormatTitle(args.title);
 		const content = normalizeEmailFormatContent(
@@ -178,14 +90,13 @@ export const createEmailFormatFromStarter = mutation({
 			variables
 		);
 		const now = Date.now();
-		const linkedinContactsLink = getLinkedinContactsCreateLinkForEmailFormatSpec(
-			formatSpec,
-			args.externalDataImport
-		);
-		const rules = getInitialRulesForEmailFormatSpec(formatSpec);
 
-		if (!createdFromStarterSlug) {
+		if (!formatStarterSlug) {
 			throw new Error('Format starter slug is required.');
+		}
+
+		if (!startingPointId) {
+			throw new Error('Format starting point is required.');
 		}
 
 		if (variables.length === 0) {
@@ -203,9 +114,8 @@ export const createEmailFormatFromStarter = mutation({
 		const emailFormatId = await ctx.db.insert('emailFormats', {
 			workspaceId: workspace._id,
 			creatorUserId: user._id,
-			formatDefinitionSlug: formatDefinition.slug,
-			createdFromStarterSlug,
-			variantSlug: formatSpec.variantSlug,
+			formatStarterSlug,
+			startingPointId,
 			variables,
 			selectedAnswers: normalizeSelectedAnswers(args.selectedAnswers),
 			status: 'paused',
@@ -218,34 +128,17 @@ export const createEmailFormatFromStarter = mutation({
 			body: content.body,
 			emailContentVersion: 1,
 			recipientCount: 0,
-			rules,
+			rules: getInitialRules(),
 			rulesVersion: 1,
 			createdAt: now,
 			updatedAt: now
 		});
 
-		if (linkedinContactsLink) {
-			const externalDataSourceId = await createLinkedinContactsExternalDataSource(
-				ctx,
-				viewerWorkspace,
-				linkedinContactsLink.source,
-				now
-			);
-
-			await insertEmailFormatExternalDataLink(ctx, {
-				workspaceId: workspace._id,
-				emailFormatId,
-				ruleId: linkedinContactsLink.ruleId,
-				externalDataSourceId,
-				createdAt: now
-			});
-		}
-
 		await insertEmailFormatRecipientRows(
 			ctx,
 			viewerWorkspace,
 			emailFormatId,
-			args.recipientRefs,
+			[],
 			now
 		);
 
@@ -266,11 +159,7 @@ export const listEmailFormats = query({
 		return await Promise.all(
 			formats.map(async (format) => {
 				const creator = await ctx.db.get(format.creatorUserId);
-				const activationState = await getEmailFormatActivationState(
-					ctx,
-					workspace._id,
-					format
-				);
+				const activationState = await getEmailFormatActivationState(format);
 
 				return {
 					id: format._id,
@@ -315,26 +204,13 @@ export const getEmailFormatConfiguration = query({
 				.order('desc')
 				.collect()
 		]);
-		const formatSpec = requireEmailFormatSpecForFormat(format);
-		const dataSourceLinkState = await getEmailFormatDataSourceLinkState(
-			ctx,
-			workspace._id,
-			format._id
-		);
-		const { readiness: activationReadiness } = await getEmailFormatActivationState(
-			ctx,
-			workspace._id,
-			format,
-			{ dataSourceLinkState }
-		);
+		const { readiness: activationReadiness } = await getEmailFormatActivationState(format);
 
 		return {
 			emailFormat: {
 				id: format._id,
-				formatDefinitionSlug: formatSpec.definitionSlug,
-				variantSlug: formatSpec.variantSlug,
-				createdFromStarterSlug: format.createdFromStarterSlug,
-				dataMode: formatSpec.dataMode,
+				formatStarterSlug: format.formatStarterSlug,
+				startingPointId: format.startingPointId,
 				status: format.status,
 				lastActivatedAt: format.lastActivatedAt,
 				title: {
@@ -353,14 +229,12 @@ export const getEmailFormatConfiguration = query({
 				activation: activationReadiness,
 				updatedAt: format.updatedAt
 			},
-			formatDefinition: {
-				slug: formatSpec.definitionSlug,
-				dataMode: formatSpec.dataMode,
+			formatConfig: {
+				slug: format.formatStarterSlug,
 				variables: format.variables,
-				contentEditPolicy: formatSpec.contentEditPolicy,
-				rulesEditPolicy: formatSpec.rulesEditPolicy,
-				dataSourceActions: getRuleDataSourceActions(formatSpec, dataSourceLinkState),
-				ruleInfoCard: formatSpec.ruleInfoCard
+				contentEditPolicy: EMAIL_FORMAT_CONTENT_EDIT_POLICY,
+				rulesEditPolicy: EMAIL_FORMAT_RULES_EDIT_POLICY,
+				ruleInfoCard: EMAIL_FORMAT_RULE_INFO_CARD
 			},
 			recipientPickerPeople: [
 				{
@@ -381,139 +255,6 @@ export const getEmailFormatConfiguration = query({
 	}
 });
 
-export const addLinkedinContactsSourceToEmailFormatRule = mutation({
-	args: addLinkedinContactsSourceToEmailFormatRuleInput,
-	handler: async (ctx, args) => {
-		const viewerWorkspace = await requireViewerWorkspace(ctx);
-		const { workspace } = viewerWorkspace;
-		const format = await getEmailFormatInViewerWorkspace(
-			ctx,
-			viewerWorkspace,
-			args.emailFormatId
-		);
-
-		if (!format) {
-			throw new Error('Email format not found.');
-		}
-
-		const formatSpec = requireEmailFormatSpecForFormat(format);
-		const requirement = getRequiredDataSourceRequirementForRule(formatSpec, args.ruleId);
-
-		if (
-			!requirement ||
-			requirement.kind !== 'linkedinContacts' ||
-			requirement.attachMode !== 'upload-new'
-		) {
-			throw new Error('This email format does not use LinkedIn contacts.');
-		}
-
-		if (!format.rules.some((rule) => rule.id === args.ruleId)) {
-			throw new Error('Email format rule not found.');
-		}
-
-		const existingLinks = await collectEmailFormatExternalDataLinks(
-			ctx,
-			workspace._id,
-			format._id
-		);
-
-		if (existingLinks.some((link) => link.ruleId === args.ruleId)) {
-			throw new Error('This rule already has linked external data.');
-		}
-
-		const now = Date.now();
-		const linkedinContactsSource = normalizeLinkedinContactsSource(args.externalDataImport);
-
-		if (!linkedinContactsSource) {
-			throw new Error('LinkedIn contacts are required.');
-		}
-
-		const externalDataSourceId = await createLinkedinContactsExternalDataSource(
-			ctx,
-			viewerWorkspace,
-			linkedinContactsSource,
-			now
-		);
-
-		await insertEmailFormatExternalDataLink(ctx, {
-			workspaceId: workspace._id,
-			emailFormatId: format._id,
-			ruleId: args.ruleId,
-			externalDataSourceId,
-			createdAt: now
-		});
-		await ctx.db.patch(format._id, { updatedAt: now });
-
-		return { externalDataSourceId };
-	}
-});
-
-export const linkExternalDataSourceToEmailFormatRule = mutation({
-	args: linkExternalDataSourceToEmailFormatRuleInput,
-	handler: async (ctx, args) => {
-		const viewerWorkspace = await requireViewerWorkspace(ctx);
-		const { workspace } = viewerWorkspace;
-		const format = await getEmailFormatInViewerWorkspace(
-			ctx,
-			viewerWorkspace,
-			args.emailFormatId
-		);
-
-		if (!format) {
-			throw new Error('Email format not found.');
-		}
-
-		const formatSpec = requireEmailFormatSpecForFormat(format);
-		const requirement = getRequiredDataSourceRequirementForRule(formatSpec, args.ruleId);
-
-		if (
-			!requirement ||
-			requirement.kind !== 'linkedinContacts' ||
-			requirement.attachMode !== 'link-existing'
-		) {
-			throw new Error('This email format rule does not require LinkedIn contacts.');
-		}
-
-		if (!format.rules.some((rule) => rule.id === args.ruleId)) {
-			throw new Error('Email format rule not found.');
-		}
-
-		const source = await ctx.db.get(args.externalDataSourceId);
-
-		if (
-			!source ||
-			source.workspaceId !== workspace._id ||
-			source.kind !== 'linkedinContacts' ||
-			source.status !== 'ready'
-		) {
-			throw new Error('LinkedIn contacts source not found.');
-		}
-
-		const existingLinks = await collectEmailFormatExternalDataLinks(
-			ctx,
-			workspace._id,
-			format._id
-		);
-
-		if (existingLinks.some((link) => link.ruleId === args.ruleId)) {
-			throw new Error('This rule already has linked external data.');
-		}
-
-		const now = Date.now();
-
-		await insertEmailFormatExternalDataLink(ctx, {
-			workspaceId: workspace._id,
-			emailFormatId: format._id,
-			ruleId: args.ruleId,
-			externalDataSourceId: source._id,
-			createdAt: now
-		});
-		await ctx.db.patch(format._id, { updatedAt: now });
-
-		return { externalDataSourceId: source._id };
-	}
-});
-
 export const updateEmailFormatTitle = mutation({
 	args: updateEmailFormatTitleInput,
 	handler: async (ctx, args) => {
@@ -526,12 +267,6 @@ export const updateEmailFormatTitle = mutation({
 
 		if (!format) {
 			throw new Error('Email format not found.');
-		}
-
-		const formatSpec = requireEmailFormatSpecForFormat(format);
-
-		if (!formatSpec.contentEditPolicy.title) {
-			throw new Error('Title is fixed for this email format.');
 		}
 
 		if (format.titleVersion !== args.baseTitleVersion) {
@@ -571,8 +306,6 @@ export const updateEmailFormatContent = mutation({
 			throw new Error('Email format not found.');
 		}
 
-		const formatSpec = requireEmailFormatSpecForFormat(format);
-
 		if (format.emailContentVersion !== args.baseEmailContentVersion) {
 			return versionedMutationResult(
 				'stale',
@@ -590,40 +323,6 @@ export const updateEmailFormatContent = mutation({
 				body: args.body
 			},
 			format.variables
-		);
-		const currentContent = normalizeEmailFormatContent(
-			{
-				to: format.to,
-				cc: format.cc,
-				attachment: format.attachment,
-				body: format.body
-			},
-			format.variables
-		);
-
-		assertLockedFieldUnchanged(
-			formatSpec.contentEditPolicy.to,
-			'Recipients',
-			currentContent.to,
-			content.to
-		);
-		assertLockedFieldUnchanged(
-			formatSpec.contentEditPolicy.cc,
-			'Cc recipients',
-			currentContent.cc,
-			content.cc
-		);
-		assertLockedFieldUnchanged(
-			formatSpec.contentEditPolicy.attachment,
-			'Attachment',
-			currentContent.attachment,
-			content.attachment
-		);
-		assertLockedFieldUnchanged(
-			formatSpec.contentEditPolicy.body,
-			'Body',
-			currentContent.body,
-			content.body
 		);
 
 		if (content.body.length === 0) {
@@ -660,28 +359,12 @@ export const updateEmailFormatRules = mutation({
 			throw new Error('Email format not found.');
 		}
 
-		const formatSpec = requireEmailFormatSpecForFormat(format);
-
 		if (format.rulesVersion !== args.baseRulesVersion) {
 			return versionedMutationResult('stale', 'rules', format.rules, format.rulesVersion);
 		}
 
 		const rules = normalizeEmailFormatRules(args.rules);
 		const currentRules = normalizeEmailFormatRules(format.rules);
-
-		if (
-			!formatSpec.rulesEditPolicy.list &&
-			!areRuleListsEqual(currentRules, rules)
-		) {
-			throw new Error('Rule list is fixed for this email format.');
-		}
-
-		if (
-			!formatSpec.rulesEditPolicy.text &&
-			!areRuleTextsEqual(currentRules, rules)
-		) {
-			throw new Error('Rule text is fixed for this email format.');
-		}
 
 		if (areJsonEqual(currentRules, rules)) {
 			return versionedMutationResult('saved', 'rules', currentRules, format.rulesVersion);
@@ -742,11 +425,7 @@ export const setEmailFormatStatus = mutation({
 		}
 
 		if (args.status === 'active') {
-			const { readiness } = await getEmailFormatActivationState(
-				ctx,
-				viewerWorkspace.workspace._id,
-				format
-			);
+			const { readiness } = await getEmailFormatActivationState(format);
 
 			if (!readiness.canActivate) {
 				throw new Error(readiness.message ?? 'Email format is not ready to activate.');
@@ -761,7 +440,11 @@ export const setEmailFormatStatus = mutation({
 			updatedAt: now
 		});
 
-		return { status: args.status, updatedAt: now };
+		return {
+			status: args.status,
+			lastActivatedAt: args.status === 'active' ? now : format.lastActivatedAt,
+			updatedAt: now
+		};
 	}
 });
 
@@ -769,21 +452,20 @@ export const deleteEmailFormats = mutation({
 	args: deleteEmailFormatsInput,
 	handler: async (ctx, args) => {
 		const viewerWorkspace = await requireViewerWorkspace(ctx);
+		const deletedIds: Id<'emailFormats'>[] = [];
 
-		for (const emailFormatId of new Set(args.emailFormatIds)) {
-			const format = await getEmailFormatInViewerWorkspace(
-				ctx,
-				viewerWorkspace,
-				emailFormatId
-			);
+		for (const emailFormatId of args.emailFormatIds) {
+			const format = await getEmailFormatInViewerWorkspace(ctx, viewerWorkspace, emailFormatId);
 
 			if (!format) {
-				throw new Error('Email format not found.');
+				continue;
 			}
 
-			await deleteEmailFormatRecipientRows(ctx, viewerWorkspace.workspace._id, emailFormatId);
-			await deleteEmailFormatExternalDataLinks(ctx, viewerWorkspace.workspace._id, emailFormatId);
-			await ctx.db.delete(emailFormatId);
+			await deleteEmailFormatRecipientRows(ctx, viewerWorkspace.workspace._id, format._id);
+			await ctx.db.delete(format._id);
+			deletedIds.push(format._id);
 		}
+
+		return { deletedIds };
 	}
 });

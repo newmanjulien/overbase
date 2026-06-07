@@ -5,7 +5,6 @@
 	import { onDestroy, onMount, untrack } from 'svelte';
 	import { APP_LINKS } from '$lib/app/app-links';
 	import { useRouteTitleState } from '$lib/app/chrome/shared/route-title.svelte';
-	import { useViewerSession } from '$lib/auth/viewer-session.svelte';
 	import SplitPane from '$lib/layout/split-pane/SplitPane.svelte';
 	import { Button } from '$lib/ui';
 	import { watchMediaQuery } from '$lib/ui/viewport';
@@ -14,20 +13,13 @@
 	import FormatStarterSelectionPanel from '$lib/features/format-starters/creator/starting-point-selection/FormatStarterSelectionPanel.svelte';
 	import { FormatVariableDragCoordinator } from '$lib/features/format-starters/creator/variables/format-variable-drag-coordinator.svelte';
 	import { FORMAT_CREATOR_SPLIT } from '$lib/features/format-starters/creator/layout/split-pane';
-	import ReconnectLinkedinContactsModal from '$lib/features/format-starters/creator/reconnect-linkedin/ReconnectLinkedinContactsModal.svelte';
-	import type { ContactImport } from '$lib/features/external-data/linkedin-contacts-csv';
-	import {
-		getEmailFormatCreationDataSourceRequirement
-	} from '$domain/email-formats/data-source-requirements';
 	import FormatCreatorDesktopPrimaryPanel from '$lib/features/format-starters/creator/layout/FormatCreatorDesktopPrimaryPanel.svelte';
 	import FormatCreatorDesktopSecondaryPanel from '$lib/features/format-starters/creator/layout/FormatCreatorDesktopSecondaryPanel.svelte';
 	import FormatCreatorMobileInternalData from '$lib/features/format-starters/creator/layout/FormatCreatorMobileInternalData.svelte';
-	import FormatCreatorMobilePublicData from '$lib/features/format-starters/creator/layout/FormatCreatorMobilePublicData.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	const client = useConvexClient();
-	const viewerSession = useViewerSession();
 	const routeTitleState = useRouteTitleState();
 	const formatStarter = $derived(data.formatStarter);
 	let creator = $state<FormatCreatorState | null>(
@@ -37,74 +29,18 @@
 		formatStarter && creator ? { formatStarter, creator } : null
 	);
 	const variableDragCoordinator = new FormatVariableDragCoordinator();
-	const viewerUserId = $derived(viewerSession.viewer?.user._id ?? null);
-	const selectedFormatSpec = $derived(creator?.selectedFormatSpec ?? null);
-	const titleEditable = $derived(Boolean(selectedFormatSpec?.contentEditPolicy.title));
-	const creationDataSourceRequirement = $derived(
-		selectedFormatSpec ? getEmailFormatCreationDataSourceRequirement(selectedFormatSpec) : null
-	);
-	const uploadNewCreationDataSourceRequirement = $derived(
-		creationDataSourceRequirement?.attachMode === 'upload-new'
-			? creationDataSourceRequirement
-			: null
-	);
 	let isMobileCreator = $state(false);
-	let linkDataSourcesModalOpen = $state(false);
 	let creatingFormat = $state(false);
 	let createFormatError = $state<string | null>(null);
 	let createFormatStateFormatStarterSlug = $state('');
-	let linkedinContactsImport = $state<ContactImport | null>(null);
-	const linkedinContactsAttachmentStatus = $derived(
-		linkedinContactsImport
-			? {
-					count: linkedinContactsImport.contacts.length,
-					fileName: linkedinContactsImport.fileName
-				}
-			: null
-	);
-	const requiresLinkedinContactsBeforeCreate = $derived(
-		Boolean(uploadNewCreationDataSourceRequirement)
-	);
-	const dataSourceActions = $derived(
-		(creator?.dataSourceActions ?? [])
-			.filter((action) => action.ruleId === uploadNewCreationDataSourceRequirement?.ruleId)
-			.map((action) =>
-				linkedinContactsImport && uploadNewCreationDataSourceRequirement
-					? {
-							...action,
-							label: uploadNewCreationDataSourceRequirement.linkedLabel,
-							disabled: true
-						}
-					: action
-			)
-	);
-	const createFormatPrerequisiteHint = $derived(
-		requiresLinkedinContactsBeforeCreate && !linkedinContactsImport
-			? {
-					text: 'Add your LinkedIn contacts to create this format',
-					actionLabel: 'Add contacts',
-					onAction: openLinkedinContactsModal
-				}
-			: null
-	);
-	const createFormatDisabled = $derived(
-		creatingFormat ||
-			!creator?.canCreateFormat ||
-			(requiresLinkedinContactsBeforeCreate && !linkedinContactsImport)
-	);
+	const createFormatDisabled = $derived(creatingFormat || !creator?.canCreateFormat);
 	const createFormatLabel = $derived(creatingFormat ? 'Creating...' : 'Create format');
 	const createActionProps = $derived({
 		createFormatDisabled,
 		createFormatLabel,
 		createFormatError,
-		createFormatPrerequisiteHint,
-		linkedinContactsAttachmentStatus,
-		onOpenLinkedinContactsModal: openLinkedinContactsModal,
 		onCreateEmailFormat: createEmailFormat
 	});
-
-	const linkedinContactsRequiredError =
-		'Upload your LinkedIn contacts CSV before creating this format.';
 
 	onMount(() => {
 		return watchMediaQuery(
@@ -142,7 +78,6 @@
 			createFormatStateFormatStarterSlug = formatStarter.slug;
 			creatingFormat = false;
 			createFormatError = null;
-			linkedinContactsImport = null;
 		}
 	});
 
@@ -162,14 +97,14 @@
 			routeTitleState.title = creator.title;
 		};
 
-		routeTitleState.editable = titleEditable;
-		routeTitleState.onTitleChange = titleEditable && creator ? updateTitle : null;
+		routeTitleState.editable = true;
+		routeTitleState.onTitleChange = creator ? updateTitle : null;
 
 		return () => {
 			if (routeTitleState.onTitleChange === updateTitle) {
 				routeTitleState.onTitleChange = null;
 			}
-			if (routeTitleState.editable === titleEditable) {
+			if (routeTitleState.editable === true) {
 				routeTitleState.editable = null;
 			}
 		};
@@ -190,45 +125,15 @@
 		return error instanceof Error ? error.message : 'Could not create email format.';
 	}
 
-	function openLinkedinContactsModal() {
-		if (uploadNewCreationDataSourceRequirement) {
-			linkDataSourcesModalOpen = true;
-		}
-	}
-
-	function acceptLinkedinContactsImport(contactsImport: ContactImport) {
-		linkedinContactsImport = contactsImport;
-		linkDataSourcesModalOpen = false;
-
-		if (createFormatError === linkedinContactsRequiredError) {
-			createFormatError = null;
-		}
-	}
-
 	async function createEmailFormat() {
 		if (creatingFormat || !creator) {
 			return;
 		}
 
-		if (requiresLinkedinContactsBeforeCreate && !linkedinContactsImport) {
-			createFormatError = linkedinContactsRequiredError;
-			linkDataSourcesModalOpen = true;
-			return;
-		}
-
-		const input = creator.createFormatInput({
-			viewerUserId,
-			externalDataImport: linkedinContactsImport
-				? {
-						kind: 'linkedinContacts',
-						fileName: linkedinContactsImport.fileName,
-						contacts: linkedinContactsImport.contacts
-					}
-				: null
-		});
+		const input = creator.createFormatInput();
 
 		if (!input) {
-			createFormatError = 'Could not create email format from the selected variant.';
+			createFormatError = 'Could not create email format from the selected starting point.';
 			return;
 		}
 
@@ -259,19 +164,7 @@
 							onAnswersChange={creator.updateAnswers}
 							onSubmit={creator.continueToEditor}
 						/>
-					{:else if creator.editor && formatStarter.mode === 'public-data'}
-						<FormatCreatorMobilePublicData
-							editor={creator.editor}
-							rules={creator.rulesDraft}
-							onRulesChange={creator.updateRules}
-							{formatStarter}
-							{selectedFormatSpec}
-							{variableDragCoordinator}
-							creationDataSourceRequirement={uploadNewCreationDataSourceRequirement}
-							{dataSourceActions}
-							{...createActionProps}
-						/>
-					{:else if creator.editor && formatStarter.mode === 'internal-data'}
+					{:else if creator.editor}
 						<FormatCreatorMobileInternalData
 							editor={creator.editor}
 							variablePickerOpen={creator.variablePickerOpen}
@@ -305,13 +198,8 @@
 								/>
 							{:else}
 								<FormatCreatorDesktopPrimaryPanel
-									rules={creator.rulesDraft}
-									onRulesChange={creator.updateRules}
 									{formatStarter}
-									{selectedFormatSpec}
 									{variableDragCoordinator}
-									creationDataSourceRequirement={uploadNewCreationDataSourceRequirement}
-									{dataSourceActions}
 									{...createActionProps}
 								/>
 							{/if}
@@ -328,7 +216,6 @@
 									step="editor"
 									editor={creator.editor}
 									{formatStarter}
-									{selectedFormatSpec}
 									{variableDragCoordinator}
 									onVariableInsertionRequestHandled={creator.clearVariableInsertionRequest}
 								/>
@@ -356,14 +243,3 @@
 		{/if}
 	</div>
 </section>
-
-{#if editorRoute}
-	{#if uploadNewCreationDataSourceRequirement}
-		<ReconnectLinkedinContactsModal
-			open={linkDataSourcesModalOpen}
-			contactsImport={linkedinContactsImport}
-			onClose={() => (linkDataSourcesModalOpen = false)}
-			onContactsImported={acceptLinkedinContactsImport}
-		/>
-	{/if}
-{/if}

@@ -11,7 +11,6 @@
 	import EmailFormatDeleteModal from '$lib/features/email-formats/configure/EmailFormatDeleteModal.svelte';
 	import EmailFormatHeaderActions from '$lib/features/email-formats/configure/EmailFormatHeaderActions.svelte';
 	import EmailFormatConfigureMobile from '$lib/features/email-formats/configure/EmailFormatConfigureMobile.svelte';
-	import { LinkDataSourcesModal } from '$lib/features/email-formats/rules';
 	import {
 		createTimedNotice,
 		getActivationSuccessMessage
@@ -20,7 +19,6 @@
 		createEmailFormatConfigureState,
 		type EmailFormatConfigureState
 	} from '$lib/features/email-formats/configure/email-format-configure-state.svelte';
-	import { EmailFormatDataSourceController } from '$lib/features/email-formats/configure/email-format-data-source-controller.svelte';
 	import type { EmailFormatConfigureSharedProps } from '$lib/features/email-formats/configure/email-format-configure-shared-props';
 	import type {
 		EmailFeedback,
@@ -28,15 +26,11 @@
 		EmailFormatContent,
 		EmailFormatConfigureLoadState,
 		EmailFormatConfigureView,
-		EmailFormatRule,
 		SentEmail
 	} from '$lib/features/email-formats/configure/email-format-configure-types';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { onDestroy, untrack } from 'svelte';
-	import {
-		getEmailFormatActivationMissingMessageFromError,
-		normalizeEmailFormatActivationMissingMessage
-	} from '$domain/email-formats/activation';
+	import { getEmailFormatActivationMissingMessageFromError } from '$domain/email-formats/activation';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -45,7 +39,6 @@
 	const routeTitleState = useRouteTitleState();
 	const emailFormatId = $derived(data.emailFormatId as Id<'emailFormats'>);
 	const configureState: EmailFormatConfigureState = createEmailFormatConfigureState();
-	const dataSourceController = new EmailFormatDataSourceController();
 	const dragCoordinator = new FormatVariableDragCoordinator();
 	const configureQuery = useQuery(api.emailFormats.getEmailFormatConfiguration, () => ({
 		emailFormatId
@@ -74,33 +67,18 @@
 	const recipientPickerPeople = $derived(configureQuery.data?.recipientPickerPeople ?? []);
 	const emailFormatStatus = $derived(configureQuery.data?.emailFormat.status ?? null);
 	const lastActivatedAt = $derived(configureQuery.data?.emailFormat.lastActivatedAt ?? null);
-	const formatDefinition = $derived(configureQuery.data?.formatDefinition ?? null);
-	const contentVariables = $derived(formatDefinition?.variables ?? []);
-	const contentEditPolicy = $derived(formatDefinition?.contentEditPolicy ?? null);
-	const rulesEditPolicy = $derived(formatDefinition?.rulesEditPolicy ?? null);
-	const dataSourceActions = $derived(formatDefinition?.dataSourceActions ?? []);
-	const hasPolicyBackedDataSourceActions = $derived(dataSourceActions.length > 0);
-	const ruleInfoCard = $derived(formatDefinition?.ruleInfoCard ?? null);
+	const formatConfig = $derived(configureQuery.data?.formatConfig ?? null);
+	const contentVariables = $derived(formatConfig?.variables ?? []);
+	const contentEditPolicy = $derived(formatConfig?.contentEditPolicy ?? null);
+	const rulesEditPolicy = $derived(formatConfig?.rulesEditPolicy ?? null);
+	const ruleInfoCard = $derived(formatConfig?.ruleInfoCard ?? null);
 	const titleEditable = $derived(Boolean(contentEditPolicy?.title));
 	const activationReadiness = $derived(
 		emailFormatStatus === 'paused'
 			? (configureQuery.data?.emailFormat.activation ?? null)
 			: null
 	);
-	const activationBlockerMessage = $derived(
-		normalizeEmailFormatActivationMissingMessage(activationReadiness?.message ?? null)
-	);
-	const activationNeedsLinkedinContacts = $derived(
-		Boolean(activationReadiness?.missingRequirements.includes('linkedinContacts'))
-	);
-	const activationDataSourceAction = $derived(
-		activationNeedsLinkedinContacts
-			? dataSourceController.getActivationBlockerAction(dataSourceActions)
-			: null
-	);
-	const activationBlockerActionLabel = $derived(
-		activationDataSourceAction?.label ?? null
-	);
+	const activationBlockerMessage = $derived(activationReadiness?.message ?? null);
 	const activationReadyMessage = $derived(
 		activationReadiness?.canActivate && lastActivatedAt === null
 			? "This format is ready. When you activate it, recipients will start receiving emails"
@@ -127,7 +105,6 @@
 	const configureSharedProps = $derived.by<EmailFormatConfigureSharedProps>(() => ({
 		actionError,
 		activationBlockerMessage,
-		activationBlockerActionLabel,
 		activationReadyMessage,
 		activationSuccessMessage: activationSuccessNotice.message,
 		isUpdatingStatus,
@@ -137,20 +114,13 @@
 		configureState,
 		dragCoordinator,
 		loadState,
-		dataSourceActions,
 		ruleInfoCard,
 		rulesEditPolicy,
 		onKeepMineContent: keepMineContent,
 		onKeepMineRules: keepMineRules,
 		onKeepMineTitle: keepMineTitle,
-		onLinkRuleDataSources: hasPolicyBackedDataSourceActions
-			? openRuleDataSources
-			: undefined,
 		onSaveContent: saveContent,
 		onSaveRules: saveRules,
-		onActivationBlockerAction: activationBlockerActionLabel
-			? openActivationLinkedinContacts
-			: undefined,
 		onActivateFormat: toggleStatus,
 		onUseLatestContent: useLatestContent,
 		onUseLatestRules: useLatestRules,
@@ -249,23 +219,6 @@
 
 		deleteModalOpen = false;
 		deleteError = null;
-	}
-
-	function openRuleDataSources(rule: EmailFormatRule) {
-		actionError = null;
-		dataSourceController.openRule(dataSourceActions, rule);
-	}
-
-	function openActivationLinkedinContacts() {
-		actionError = null;
-		dataSourceController.openActivationBlockerAction(
-			dataSourceActions,
-			configureState.savedRules
-		);
-	}
-
-	function closeLinkDataSourcesModal() {
-		dataSourceController.closeLinkExistingModal();
 	}
 
 	async function deleteEmailFormat() {
@@ -598,10 +551,3 @@
 />
 
 <EmailFormatConfigureMobile {...configureSharedProps} />
-
-{#if dataSourceController.linkExistingModalOpen}
-	<LinkDataSourcesModal
-		open={dataSourceController.linkExistingModalOpen}
-		onClose={closeLinkDataSourcesModal}
-	/>
-{/if}

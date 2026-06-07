@@ -5,17 +5,12 @@ import type {
 	EmailFormatInlineTextContent,
 	EmailFormatRulesEditPolicy
 } from '$domain/email-formats';
-import type { EmailFormatRuleDataSourceAction } from '$domain/email-formats/data-source-actions';
 import type { EmailFormatConfigureState } from './email-format-configure-state.svelte';
-import type {
-	EmailFormatConfigureLoadState,
-	EmailFormatRule
-} from './email-format-configure-types';
+import type { EmailFormatConfigureLoadState } from './email-format-configure-types';
 
 export type EmailFormatConfigureSharedProps = {
 	actionError: string | null;
 	activationBlockerMessage: string | null;
-	activationBlockerActionLabel?: string | null;
 	activationReadyMessage: string | null;
 	activationSuccessMessage: string | null;
 	isUpdatingStatus: boolean;
@@ -25,7 +20,6 @@ export type EmailFormatConfigureSharedProps = {
 	configureState: EmailFormatConfigureState;
 	dragCoordinator: FormatVariableDragCoordinator;
 	loadState: EmailFormatConfigureLoadState;
-	dataSourceActions?: readonly EmailFormatRuleDataSourceAction[];
 	ruleInfoCard: {
 		label: string;
 		content: EmailFormatInlineTextContent;
@@ -34,10 +28,8 @@ export type EmailFormatConfigureSharedProps = {
 	onKeepMineContent: () => void | Promise<void>;
 	onKeepMineRules: () => void | Promise<void>;
 	onKeepMineTitle: () => void | Promise<void>;
-	onLinkRuleDataSources?: (rule: EmailFormatRule) => void;
 	onSaveContent: () => Promise<void>;
 	onSaveRules: () => void | Promise<void>;
-	onActivationBlockerAction?: () => void | Promise<void>;
 	onActivateFormat: () => void | Promise<void>;
 	onUseLatestContent: () => void;
 	onUseLatestRules: () => void;

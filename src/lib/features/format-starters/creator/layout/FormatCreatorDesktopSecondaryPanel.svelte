@@ -1,7 +1,6 @@
 <script lang="ts">
 	import FormatEmailEditorPanel from '../editor/FormatEmailEditorPanel.svelte';
 	import FormatStarterOverviewPanel from './FormatStarterOverviewPanel.svelte';
-	import type { EmailFormatSpec } from '$domain/email-formats';
 	import type { FormatStarter } from '$lib/features/format-starters/catalog';
 	import type { FormatContentEditorState } from '../state/format-content-editor-state.svelte';
 	import type { FormatCreatorStep } from '../state/format-creator-state.svelte';
@@ -16,7 +15,6 @@
 				step: Extract<FormatCreatorStep, 'editor'>;
 				editor: FormatContentEditorState;
 				formatStarter: FormatStarter;
-				selectedFormatSpec: EmailFormatSpec | null;
 				variableDragCoordinator: FormatVariableDragCoordinator;
 				onVariableInsertionRequestHandled: (requestId: number) => void;
 		  };
@@ -39,7 +37,6 @@
 				editor={props.editor}
 				variables={props.formatStarter.variables}
 				dragCoordinator={props.variableDragCoordinator}
-				editPolicy={props.selectedFormatSpec?.contentEditPolicy}
 				onVariableInsertionRequestHandled={props.onVariableInsertionRequestHandled}
 			/>
 		</div>

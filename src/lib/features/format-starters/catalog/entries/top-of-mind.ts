@@ -3,15 +3,14 @@ import {
   formatText as text,
   formatVariable as variable,
 } from "$lib/features/format-starters/domain";
+import type { FormatStarter } from "../types";
 import {
-  defineFormatStarter,
   seededSpreadsheetAttachment,
   spreadsheetCell as cell,
 } from "./helpers";
 
-export const formatStarter = defineFormatStarter({
+export const formatStarter = {
   slug: "top-of-mind",
-  formatDefinitionSlug: "top-of-mind",
   defaultPresentation: {
     title: "Stay top of mind",
     description: "Find high value reasons to reach out to clients",
@@ -112,7 +111,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "kickoff-plan",
       label: "Kickoff plan",
-      variantSlug: "default",
       emailContent: {
         title: "Stay top of mind",
         to: ["Marketing manager"],
@@ -147,7 +145,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "migration-plan",
       label: "Migration plan",
-      variantSlug: "default",
       emailContent: {
         title: "Migration implementation plan",
         to: ["Implementation team"],
@@ -193,7 +190,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "risk-controlled-plan",
       label: "Risk-controlled plan",
-      variantSlug: "default",
       emailContent: {
         title: "Implementation risk plan",
         to: ["Implementation leads"],
@@ -246,6 +242,6 @@ export const formatStarter = defineFormatStarter({
     },
   ],
   showInGallery: true,
-  modeSortOrder: 30,
+  sortOrder: 30,
   status: "active",
-});
+} satisfies FormatStarter;

@@ -2,12 +2,8 @@ import { formatStarterEntries } from './entries';
 import type { FormatStarterGalleryEntry, FormatStarter } from './types';
 import { validateFormatStarterCatalog } from './validate-catalog';
 
-const formatStarterDataModeSortOrder = {
-	'internal-data': 0,
-	'public-data': 1
-} satisfies Record<FormatStarter['mode'], number>;
-
-const formatStarterCatalogValidationIssues = validateFormatStarterCatalog(formatStarterEntries);
+const formatStarterCatalog: readonly FormatStarter[] = formatStarterEntries;
+const formatStarterCatalogValidationIssues = validateFormatStarterCatalog(formatStarterCatalog);
 
 if (formatStarterCatalogValidationIssues.length > 0) {
 	throw new Error(
@@ -18,23 +14,19 @@ if (formatStarterCatalogValidationIssues.length > 0) {
 }
 
 export function listFormatStarters() {
-	return [...formatStarterEntries]
+	return [...formatStarterCatalog]
 		.filter((formatStarter) => formatStarter.status === 'active')
 		.sort(compareFormatStarterCatalogEntries);
 }
 
 function compareFormatStarterCatalogEntries(left: FormatStarter, right: FormatStarter) {
-	return (
-		formatStarterDataModeSortOrder[left.mode] - formatStarterDataModeSortOrder[right.mode] ||
-		left.modeSortOrder - right.modeSortOrder
-	);
+	return left.sortOrder - right.sortOrder;
 }
 
 export function listFormatStarterGalleryEntries(): FormatStarterGalleryEntry[] {
 	return listFormatStarters()
 		.filter((formatStarter) => formatStarter.showInGallery)
-		.map(({ mode, slug, defaultPresentation, dataSourceIds, industryTags, sampleEmail }) => ({
-			mode,
+		.map(({ slug, defaultPresentation, dataSourceIds, industryTags, sampleEmail }) => ({
 			slug,
 			...defaultPresentation,
 			dataSourceIds,
@@ -45,6 +37,6 @@ export function listFormatStarterGalleryEntries(): FormatStarterGalleryEntry[] {
 
 export function getFormatStarter(slug: string) {
 	return (
-		formatStarterEntries.find((formatStarter) => formatStarter.slug === slug && formatStarter.status === 'active') ?? null
+		formatStarterCatalog.find((formatStarter) => formatStarter.slug === slug && formatStarter.status === 'active') ?? null
 	);
 }

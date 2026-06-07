@@ -11,6 +11,5 @@ export type {
 	FormatStarterCardEntry,
 	FormatStarterGalleryEntry,
 	FormatStarterPresentation,
-	PublicDataFormatStarter,
 	FormatStarter
 } from './types';

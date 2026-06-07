@@ -29,8 +29,8 @@
 		class="pointer-events-auto fixed right-3 bottom-3 z-20 w-[calc(100vw-2rem)] max-w-48 rounded-sm border border-stone-200/50 bg-white px-3 py-2.5 shadow-[0_2px_6px_rgba(41,37,36,0.06)] md:right-4 md:bottom-4"
 		aria-label="Create first email format"
 	>
-		<p class="text-[0.6875rem] leading-3.5 font-normal text-stone-500">First step</p>
-		<p class="mt-1 text-xs leading-4 font-normal text-stone-800">
+		<p class="text-[0.6875rem] leading-3.5 text-stone-500">First step</p>
+		<p class="mt-1 text-xs font-medium leading-4 text-stone-800">
 			Create email formats designed for {workspaceIndustryLabel}
 		</p>
 		<a

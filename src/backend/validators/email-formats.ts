@@ -1,12 +1,6 @@
 import { v } from 'convex/values';
-import {
-	externalDataSourceId,
-	externalDataImport,
-	linkedinContactsExternalDataImport
-} from './external-data';
 
 export const emailFormatStatus = v.union(v.literal('active'), v.literal('paused'));
-export const emailFormatDataMode = v.union(v.literal('internal-data'), v.literal('public-data'));
 
 export const emailFormatInlineNode = v.union(
 	v.object({
@@ -48,31 +42,15 @@ export const emailFormatRecipientRef = v.union(
 );
 
 export const emailFormatCreateFromStarterInput = {
-	formatDefinitionSlug: v.string(),
-	createdFromStarterSlug: v.string(),
-	variantSlug: v.string(),
+	formatStarterSlug: v.string(),
+	startingPointId: v.string(),
 	variables: v.array(emailFormatVariableDefinition),
 	selectedAnswers: v.record(v.string(), v.string()),
 	title: v.string(),
 	to: v.array(v.string()),
 	cc: v.array(v.string()),
 	attachment: v.union(emailFormatSpreadsheetAttachment, v.null()),
-	body: v.array(emailFormatBodyBlock),
-	recipientRefs: v.array(emailFormatRecipientRef),
-	rules: v.array(emailFormatRule),
-	externalDataImport
-};
-
-export const addLinkedinContactsSourceToEmailFormatRuleInput = {
-	emailFormatId,
-	ruleId: v.string(),
-	externalDataImport: linkedinContactsExternalDataImport
-};
-
-export const linkExternalDataSourceToEmailFormatRuleInput = {
-	emailFormatId,
-	ruleId: v.string(),
-	externalDataSourceId
+	body: v.array(emailFormatBodyBlock)
 };
 
 export const updateEmailFormatContentInput = {

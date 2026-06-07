@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, HeaderSelectMenu } from '$lib/ui';
+	import { Button, SelectMenu } from '$lib/ui';
 	import SettingsCard from './SettingsCard.svelte';
 
 	type Option = {
@@ -73,7 +73,7 @@
 
 <SettingsCard {title} {description}>
 	<div class="mt-4 max-w-sm space-y-2">
-		<HeaderSelectMenu
+		<SelectMenu
 			id={fieldId}
 			ariaLabel={label}
 			ariaDescribedby={messageId}
@@ -86,7 +86,7 @@
 				hideServerError = true;
 			}}
 			width="full"
-			size="form"
+			size="standard"
 		/>
 		<p
 			id={messageId}

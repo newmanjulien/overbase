@@ -23,10 +23,6 @@ export const DATA_SOURCE_LOGO_REGISTRY = {
 		label: 'Gong',
 		logoSrc: '/logos/gong.png'
 	},
-	linkedin: {
-		label: 'LinkedIn',
-		logoSrc: '/logos/linkedin.png'
-	},
 	navatar: {
 		label: 'Navatar',
 		logoSrc: '/logos/navatar.png'

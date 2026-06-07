@@ -40,7 +40,6 @@
 		configureView,
 		feedbackViewState,
 		activationBlockerMessage,
-		activationBlockerActionLabel = null,
 		activationReadyMessage,
 		activationSuccessMessage,
 		isUpdatingStatus,
@@ -49,18 +48,15 @@
 		contentVariables,
 		dragCoordinator,
 		loadState,
-		dataSourceActions = [],
 		ruleInfoCard,
 		rulesEditPolicy,
 		onFeedbackChange,
 		onKeepMineContent,
 		onKeepMineRules,
 		onKeepMineTitle,
-		onLinkRuleDataSources,
 		onSaveContent,
 		onSaveFeedback,
 		onSaveRules,
-		onActivationBlockerAction,
 		onActivateFormat,
 		onShowNextSentEmail,
 		onShowPreviousSentEmail,
@@ -78,11 +74,9 @@
 			{deleteError}
 			{configureState}
 			{activationBlockerMessage}
-			{activationBlockerActionLabel}
 			{activationReadyMessage}
 			{activationSuccessMessage}
 			{isUpdatingStatus}
-			{onActivationBlockerAction}
 			{onActivateFormat}
 			{onKeepMineTitle}
 			{onUseLatestTitle}
@@ -135,14 +129,12 @@
 						<EmailFormatRulesPanel
 							rules={configureState.rulesDraft}
 							editPolicy={rulesEditPolicy}
-							{dataSourceActions}
 							{ruleInfoCard}
 							canSave={configureState.canSaveRules}
 							conflict={configureState.rulesConflict}
 							isSaving={configureState.isSavingRules}
 							onRulesChange={configureState.updateRules}
 							onSave={() => void onSaveRules()}
-							onLinkDataSources={onLinkRuleDataSources}
 							onKeepMine={onKeepMineRules}
 							onUseLatest={onUseLatestRules}
 						/>

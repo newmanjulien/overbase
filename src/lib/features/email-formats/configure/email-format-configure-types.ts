@@ -8,7 +8,6 @@ import type {
 	EmailFormatRulesEditPolicy,
 	EmailFormatVariableDefinition
 } from '$domain/email-formats';
-import type { EmailFormatRuleDataSourceAction } from '$domain/email-formats/data-source-actions';
 
 export type EmailFormatRecipientRef =
 	| {
@@ -33,13 +32,11 @@ export type EmailFormatRecipientPickerPerson = {
 export type { EmailFormatRule };
 export type EmailFormatContent = Omit<FormatEmailContent, 'title'>;
 
-export type EmailFormatDefinitionConfigure = {
+export type EmailFormatConfig = {
 	slug: string;
-	dataMode: 'internal-data' | 'public-data';
 	variables: readonly EmailFormatVariableDefinition[];
 	contentEditPolicy: EmailFormatContentEditPolicy;
 	rulesEditPolicy: EmailFormatRulesEditPolicy;
-	dataSourceActions: EmailFormatRuleDataSourceAction[];
 	ruleInfoCard: {
 		label: string;
 		content: EmailFormatInlineTextContent;

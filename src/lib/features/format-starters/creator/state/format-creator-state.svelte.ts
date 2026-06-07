@@ -2,23 +2,12 @@ import {
 	resolveFormatStarterContent,
 	type FormatStarter
 } from '$lib/features/format-starters/catalog';
-import type { Id } from '$convex/_generated/dataModel';
-import {
-	getEmailFormatRuleDataSourceActions,
-	type EmailFormatRuleDataSourceAction
-} from '$domain/email-formats/data-source-actions';
-import { createEmptyEmailFormatDataSourceLinkState } from '$domain/email-formats/data-source-link-state';
-import {
-	getEmailFormatSpec,
-	type EmailFormatSpec
-} from '$domain/email-formats';
 import type {
 	FormatInlineNode,
 	FormatSpreadsheetAttachment,
 	FormatStarterSelectionAnswers,
 	FormatVariableDefinition
 } from '$lib/features/format-starters/domain';
-import type { EmailFormatRule } from '$lib/features/email-formats/rules';
 import { FormatContentEditorState } from './format-content-editor-state.svelte';
 
 export type FormatCreatorStep = 'starting-point-selection' | 'editor';
@@ -33,40 +22,18 @@ export type FormatVariableInsertionRequest = {
 
 export type FormatCreatorSnapshot = {
 	activeFormatStarterSlug: string;
-	mode: FormatStarter['mode'];
 	step: FormatCreatorStep;
 	selectedAnswers: FormatStarterSelectionAnswers;
 	selectedStartingPointId: string | null;
-	selectedVariantSlug: string | null;
 	editor: FormatContentEditorState | null;
-} & (FormatCreatorVariableState | FormatCreatorRulesState);
-
-export type FormatCreatorVariableState = {
-	mode: 'internal-data';
 	pickerOpen: boolean;
 	insertionSequence: number;
 	insertionRequest: FormatVariableInsertionRequest | null;
 };
 
-export type FormatCreatorRulesState = {
-	mode: 'public-data';
-	rulesDraft: EmailFormatRule[];
-};
-
-export type CreateEmailFormatRecipientRef =
-	| {
-			kind: 'user';
-			userId: Id<'users'>;
-	  }
-	| {
-			kind: 'teammate';
-			teammateId: Id<'teammates'>;
-	  };
-
 export type CreateEmailFormatFromStarterInput = {
-	formatDefinitionSlug: string;
-	createdFromStarterSlug: string;
-	variantSlug: string;
+	formatStarterSlug: string;
+	startingPointId: string;
 	variables: FormatVariableDefinition[];
 	selectedAnswers: FormatStarterSelectionAnswers;
 	title: string;
@@ -81,38 +48,14 @@ export type CreateEmailFormatFromStarterInput = {
 		type: 'paragraph';
 		content: FormatInlineNode[];
 	}>;
-	recipientRefs: CreateEmailFormatRecipientRef[];
-	rules: EmailFormatRule[];
-	externalDataImport: {
-		kind: 'linkedinContacts';
-		fileName: string;
-		contacts: Array<{
-			firstName: string;
-			lastName: string;
-			fullName: string;
-			company: string;
-			position: string;
-			profileUrl: string;
-			email: string;
-			connectedOn: string;
-			sourceRowNumber: number;
-		}>;
-	} | null;
-};
-
-export type CreateFormatInputOptions = {
-	viewerUserId: Id<'users'> | null;
-	externalDataImport: CreateEmailFormatFromStarterInput['externalDataImport'];
 };
 
 export class FormatCreatorState {
 	private creator = $state<FormatCreatorSnapshot>({
 		activeFormatStarterSlug: '',
-		mode: 'internal-data',
 		step: 'starting-point-selection',
 		selectedAnswers: {},
 		selectedStartingPointId: null,
-		selectedVariantSlug: null,
 		editor: null,
 		pickerOpen: false,
 		insertionSequence: 0,
@@ -135,45 +78,16 @@ export class FormatCreatorState {
 		return this.creator.selectedStartingPointId;
 	}
 
-	get selectedVariantSlug() {
-		return this.creator.selectedVariantSlug;
-	}
-
 	get editor() {
 		return this.creator.editor;
 	}
 
 	get variablePickerOpen() {
-		return this.creator.mode === 'internal-data' ? this.creator.pickerOpen : false;
-	}
-
-	get rulesDraft() {
-		return this.creator.mode === 'public-data' ? this.creator.rulesDraft : [];
-	}
-
-	get selectedFormatSpec(): EmailFormatSpec | null {
-		const variantSlug = this.creator.selectedVariantSlug;
-
-		return variantSlug
-			? getEmailFormatSpec(this.formatStarter.formatDefinitionSlug, variantSlug)
-			: null;
-	}
-
-	get dataSourceActions(): EmailFormatRuleDataSourceAction[] {
-		if (this.creator.mode !== 'public-data' || this.formatStarter.mode !== 'public-data') {
-			return [];
-		}
-
-		return this.selectedFormatSpec
-			? getEmailFormatRuleDataSourceActions(
-					this.selectedFormatSpec.dataSourceRequirements,
-					createEmptyEmailFormatDataSourceLinkState()
-				)
-			: [];
+		return this.creator.pickerOpen;
 	}
 
 	get variableInsertionRequest() {
-		return this.creator.mode === 'internal-data' ? this.creator.insertionRequest : null;
+		return this.creator.insertionRequest;
 	}
 
 	get title() {
@@ -184,7 +98,7 @@ export class FormatCreatorState {
 		return (
 			this.creator.step === 'editor' &&
 			this.creator.editor !== null &&
-			this.selectedFormatSpec !== null
+			this.creator.selectedStartingPointId !== null
 		);
 	}
 
@@ -213,55 +127,28 @@ export class FormatCreatorState {
 
 		this.creator.editor = editorState.editor;
 		this.creator.selectedStartingPointId = editorState.startingPointId;
-		this.creator.selectedVariantSlug = editorState.variantSlug;
-		if (this.creator.mode === 'public-data' && this.formatStarter.mode === 'public-data') {
-			const selectedFormatSpec = this.selectedFormatSpec;
-			this.creator.rulesDraft = cloneRules(selectedFormatSpec?.initialRules ?? []);
-		}
 		this.creator.step = 'editor';
 	};
 
 	updateTitle = (nextTitle: string) => {
-		if (
-			this.formatStarter.mode === 'internal-data' &&
-			this.creator.step === 'editor' &&
-			this.creator.editor
-		) {
+		if (this.creator.step === 'editor' && this.creator.editor) {
 			this.creator.editor.updateTitle(nextTitle);
 		}
 	};
 
-	updateRules = (rules: EmailFormatRule[]) => {
-		if (this.creator.mode === 'public-data') {
-			this.creator.rulesDraft = cloneRules(rules);
-		}
-	};
-
-	createFormatInput = ({
-		viewerUserId,
-		externalDataImport
-	}: CreateFormatInputOptions): CreateEmailFormatFromStarterInput | null => {
+	createFormatInput = (): CreateEmailFormatFromStarterInput | null => {
 		const editor = this.creator.editor;
+		const startingPointId = this.creator.selectedStartingPointId;
 
-		if (!editor) {
-			return null;
-		}
-
-		if (!this.creator.selectedVariantSlug) {
+		if (!editor || !startingPointId) {
 			return null;
 		}
 
 		const content = editor.activeEmailContent;
-		const recipientRefs = this.createInitialRecipientRefs(viewerUserId);
-
-		if (!recipientRefs) {
-			return null;
-		}
 
 		return {
-			formatDefinitionSlug: this.formatStarter.formatDefinitionSlug,
-			createdFromStarterSlug: this.formatStarter.slug,
-			variantSlug: this.creator.selectedVariantSlug,
+			formatStarterSlug: this.formatStarter.slug,
+			startingPointId,
 			variables: this.formatStarter.variables.map((variable) => ({ ...variable })),
 			selectedAnswers: { ...this.creator.selectedAnswers },
 			title: content.title,
@@ -272,30 +159,19 @@ export class FormatCreatorState {
 				id: block.id,
 				type: block.type,
 				content: cloneInlineNodes(block.content)
-			})),
-			recipientRefs,
-			rules: this.creator.mode === 'public-data' ? cloneRules(this.creator.rulesDraft) : [],
-			externalDataImport
+			}))
 		};
 	};
 
 	openVariablePicker = () => {
-		if (this.creator.mode === 'internal-data') {
-			this.creator.pickerOpen = true;
-		}
+		this.creator.pickerOpen = true;
 	};
 
 	closeVariablePicker = () => {
-		if (this.creator.mode === 'internal-data') {
-			this.creator.pickerOpen = false;
-		}
+		this.creator.pickerOpen = false;
 	};
 
 	requestVariableInsertion = (variableId: string) => {
-		if (this.creator.mode !== 'internal-data') {
-			return;
-		}
-
 		this.creator.insertionSequence += 1;
 		this.creator.insertionRequest = {
 			id: this.creator.insertionSequence,
@@ -305,10 +181,7 @@ export class FormatCreatorState {
 	};
 
 	clearVariableInsertionRequest = (requestId: number) => {
-		if (
-			this.creator.mode === 'internal-data' &&
-			this.creator.insertionRequest?.id === requestId
-		) {
+		if (this.creator.insertionRequest?.id === requestId) {
 			this.creator.insertionRequest = null;
 		}
 	};
@@ -320,35 +193,12 @@ export class FormatCreatorState {
 				: null;
 		const editor = editorState?.editor ?? null;
 		const selectedStartingPointId = editorState?.startingPointId ?? null;
-		const selectedVariantSlug = editorState?.variantSlug ?? null;
-		const step = editor ? 'editor' : 'starting-point-selection';
-
-		if (this.formatStarter.mode === 'public-data') {
-			const initialRules = selectedVariantSlug
-				? (getEmailFormatSpec(this.formatStarter.formatDefinitionSlug, selectedVariantSlug)
-						?.initialRules ?? [])
-				: [];
-
-			this.creator = {
-				activeFormatStarterSlug: this.formatStarter.slug,
-				mode: 'public-data',
-				step,
-				selectedAnswers: {},
-				selectedStartingPointId,
-				selectedVariantSlug,
-				editor,
-				rulesDraft: cloneRules(initialRules)
-			};
-			return;
-		}
 
 		this.creator = {
 			activeFormatStarterSlug: this.formatStarter.slug,
-			mode: 'internal-data',
-			step,
+			step: editor ? 'editor' : 'starting-point-selection',
 			selectedAnswers: {},
 			selectedStartingPointId,
-			selectedVariantSlug,
 			editor,
 			pickerOpen: false,
 			insertionSequence: 0,
@@ -359,28 +209,14 @@ export class FormatCreatorState {
 	private createEditorState(answers: FormatStarterSelectionAnswers) {
 		const startingPoint = resolveFormatStarterContent(this.formatStarter, answers);
 
-		if (
-			!startingPoint ||
-			!getEmailFormatSpec(this.formatStarter.formatDefinitionSlug, startingPoint.variantSlug)
-		) {
+		if (!startingPoint) {
 			return null;
 		}
 
 		return {
 			editor: new FormatContentEditorState(startingPoint.emailContent),
-			startingPointId: startingPoint.id,
-			variantSlug: startingPoint.variantSlug
+			startingPointId: startingPoint.id
 		};
-	}
-
-	private createInitialRecipientRefs(
-		viewerUserId: Id<'users'> | null
-	): CreateEmailFormatRecipientRef[] | null {
-		if (this.selectedFormatSpec?.initialRecipients !== 'viewer') {
-			return [];
-		}
-
-		return viewerUserId ? [{ kind: 'user', userId: viewerUserId }] : null;
 	}
 
 	private getVariableInsertionTarget(): FormatVariableInsertionTarget {
@@ -390,10 +226,6 @@ export class FormatCreatorState {
 			? 'spreadsheet'
 			: 'body';
 	}
-}
-
-function cloneRules(rules: readonly EmailFormatRule[]) {
-	return rules.map((rule) => ({ ...rule }));
 }
 
 function cloneInlineNodes(nodes: readonly FormatInlineNode[]): FormatInlineNode[] {

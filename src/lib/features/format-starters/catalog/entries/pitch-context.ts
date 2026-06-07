@@ -3,15 +3,14 @@ import {
   formatText as text,
   formatVariable as variable,
 } from "$lib/features/format-starters/domain";
+import type { FormatStarter } from "../types";
 import {
-  defineFormatStarter,
   seededSpreadsheetAttachment,
   spreadsheetCell as cell,
 } from "./helpers";
 
-export const formatStarter = defineFormatStarter({
+export const formatStarter = {
   slug: "pitch-context",
-  formatDefinitionSlug: "pitch-context",
   defaultPresentation: {
     title: "Context for pitches",
     description: "Give consultants the context they need to pitch clients",
@@ -111,7 +110,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "proposal-context",
       label: "Proposal context",
-      variantSlug: "default",
       emailContent: {
         title: "Pitch context",
         to: ["Pitch owner"],
@@ -164,7 +162,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "competitor-context",
       label: "Competitor context",
-      variantSlug: "default",
       emailContent: {
         title: "Competitor pitch context",
         to: ["Pitch owner"],
@@ -215,7 +212,6 @@ export const formatStarter = defineFormatStarter({
     {
       id: "executive-context",
       label: "Executive context",
-      variantSlug: "default",
       emailContent: {
         title: "Executive pitch context",
         to: ["Partner"],
@@ -268,6 +264,6 @@ export const formatStarter = defineFormatStarter({
     },
   ],
   showInGallery: true,
-  modeSortOrder: 12,
+  sortOrder: 12,
   status: "active",
-});
+} satisfies FormatStarter;

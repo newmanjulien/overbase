@@ -6,28 +6,6 @@ import {
 	type FormatSpreadsheetCell
 } from '$lib/features/format-starters/domain';
 import { cellKey } from '$domain/spreadsheets';
-import { getEmailFormatDefinition } from '$domain/email-formats';
-import type {
-	FormatStarter,
-	FormatStarterBase
-} from '../types';
-
-type FormatStarterInput = Omit<FormatStarterBase, 'mode'>;
-
-export function defineFormatStarter(entry: FormatStarterInput): FormatStarter {
-	const definition = getEmailFormatDefinition(entry.formatDefinitionSlug);
-
-	if (!definition) {
-		throw new Error(
-			`Format starter "${entry.slug}" references missing format definition "${entry.formatDefinitionSlug}".`
-		);
-	}
-
-	return {
-		...entry,
-		mode: definition.dataMode
-	};
-}
 
 export function spreadsheetCell(
 	...nodes: readonly (string | FormatInlineNode)[]

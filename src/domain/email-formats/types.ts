@@ -1,7 +1,3 @@
-import type { EmailFormatDataSourceRequirement } from "./data-source-requirements";
-
-export type EmailFormatDataMode = "internal-data" | "public-data";
-
 export type EmailFormatVariableDefinition = {
   id: string;
   label: string;
@@ -18,7 +14,6 @@ export type EmailFormatContentEditPolicy = {
 export type EmailFormatRulesEditPolicy = {
   text: boolean;
   list: boolean;
-  dataSources: boolean;
 };
 
 export type EmailFormatRule = {
@@ -32,40 +27,10 @@ export type EmailFormatActivationRequirement =
     }
   | {
       kind: "rules";
+    }
+  | {
+      kind: "dataSources";
     };
-
-export type EmailFormatVariantInitialRecipients = "viewer" | "none";
-
-export type EmailFormatVariant = {
-  slug: string;
-  label: string;
-  initialRecipients: EmailFormatVariantInitialRecipients;
-  activationRequirements: readonly EmailFormatActivationRequirement[];
-  contentEditPolicy?: EmailFormatContentEditPolicy;
-  rulesEditPolicy?: EmailFormatRulesEditPolicy;
-  initialRules?: readonly EmailFormatRule[];
-  dataSourceRequirements: readonly EmailFormatDataSourceRequirement[];
-  ruleInfoCard?: {
-    label: string;
-    content: EmailFormatInlineTextContent;
-  };
-};
-
-export type EmailFormatSpec = {
-  definitionSlug: string;
-  variantSlug: string;
-  dataMode: EmailFormatDataMode;
-  contentEditPolicy: EmailFormatContentEditPolicy;
-  rulesEditPolicy: EmailFormatRulesEditPolicy;
-  initialRecipients: EmailFormatVariantInitialRecipients;
-  activationRequirements: readonly EmailFormatActivationRequirement[];
-  dataSourceRequirements: readonly EmailFormatDataSourceRequirement[];
-  initialRules: readonly EmailFormatRule[];
-  ruleInfoCard: {
-    label: string;
-    content: EmailFormatInlineTextContent;
-  } | null;
-};
 
 export type EmailFormatInlineTextContent =
   | string
@@ -81,28 +46,3 @@ export type EmailFormatInlineTextPart =
       label: string;
       href: `/${string}`;
     };
-
-export type EmailFormatDefinitionBase = {
-  slug: string;
-  dataMode: EmailFormatDataMode;
-  contentEditPolicy: EmailFormatContentEditPolicy;
-  rulesEditPolicy: EmailFormatRulesEditPolicy;
-  variants: readonly EmailFormatVariant[];
-  ruleInfoCard?: {
-    label: string;
-    content: EmailFormatInlineTextContent;
-  };
-};
-
-export type InternalDataEmailFormatDefinition = EmailFormatDefinitionBase & {
-  dataMode: "internal-data";
-};
-
-export type PublicDataEmailFormatDefinition = EmailFormatDefinitionBase & {
-  dataMode: "public-data";
-  ruleInfoCard: NonNullable<EmailFormatDefinitionBase["ruleInfoCard"]>;
-};
-
-export type EmailFormatDefinition =
-  | InternalDataEmailFormatDefinition
-  | PublicDataEmailFormatDefinition;

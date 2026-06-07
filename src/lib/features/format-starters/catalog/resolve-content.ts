@@ -79,7 +79,6 @@ function cloneFormatStartingPoint(
 	return {
 		id: startingPoint.id,
 		label: startingPoint.label,
-		variantSlug: startingPoint.variantSlug,
 		emailContent: cloneFormatEmailContent(startingPoint.emailContent)
 	};
 }

@@ -5,20 +5,13 @@
 	import { Button, IconButton, InfoBar, InlineText } from '$lib/ui';
 	import { cn } from '$lib/ui/cn';
 	import type { InlineTextContent } from '$lib/ui/inline-text';
-	import type {
-		EmailFormatRule,
-		EmailFormatRuleDataSourceAction,
-		EmailFormatRuleDataSourceButtonAction
-	} from './types';
+	import type { EmailFormatRule } from './types';
 
 	type Props = {
 		rules: EmailFormatRule[];
 		onRulesChange: (rules: EmailFormatRule[]) => void;
 		canSave?: boolean;
 		onSave?: () => void;
-		onLinkDataSources?: (rule: EmailFormatRule) => void;
-		defaultDataSourceAction?: EmailFormatRuleDataSourceButtonAction;
-		ruleDataSourceActions?: readonly EmailFormatRuleDataSourceAction[];
 		infoCard?: {
 			label: string;
 			content: InlineTextContent;
@@ -32,17 +25,10 @@
 		onRulesChange,
 		canSave = false,
 		onSave,
-		onLinkDataSources,
-		defaultDataSourceAction = { label: 'Link data source' },
-		ruleDataSourceActions = [],
 		infoCard,
 		canEditRuleText = true,
 		canEditRuleList = true
 	}: Props = $props();
-
-	const ruleDataSourceActionsByRuleId = $derived(
-		new Map(ruleDataSourceActions.map((action) => [action.ruleId, action]))
-	);
 
 	function updateRule(ruleId: string, patch: Partial<EmailFormatRule>) {
 		if (!canEditRuleText) {
@@ -74,21 +60,6 @@
 		]);
 	}
 
-	function getRuleDataSourceButtonAction(rule: EmailFormatRule): EmailFormatRuleDataSourceButtonAction {
-		const action = ruleDataSourceActionsByRuleId.get(rule.id);
-
-		return action
-			? { label: action.label, disabled: action.disabled }
-			: defaultDataSourceAction;
-	}
-
-	function linkRuleDataSources(rule: EmailFormatRule) {
-		if (getRuleDataSourceButtonAction(rule).disabled) {
-			return;
-		}
-
-		onLinkDataSources?.(rule);
-	}
 </script>
 
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-stone-50/50 text-stone-950">
@@ -109,7 +80,6 @@
 			<div class="space-y-3">
 				<div class="space-y-3.5">
 					{#each rules as rule (rule.id)}
-						{@const dataSourceAction = getRuleDataSourceButtonAction(rule)}
 						<section class="overflow-hidden rounded-sm border border-stone-200/60 bg-white">
 							<div class="px-3 py-3">
 								<div class="flex items-start gap-2">
@@ -141,18 +111,6 @@
 									{/if}
 								</div>
 							</div>
-							{#if onLinkDataSources}
-								<div class="flex items-center border-t border-stone-100 bg-stone-50/70 px-3 py-2 md:justify-end">
-									<Button
-										variant="secondary"
-										class="h-10 w-full px-2.5 text-[0.72rem] md:h-7 md:w-auto md:text-[0.7rem]"
-										disabled={dataSourceAction.disabled}
-										onclick={() => linkRuleDataSources(rule)}
-									>
-										{dataSourceAction.label}
-									</Button>
-								</div>
-							{/if}
 						</section>
 					{/each}
 				</div>
@@ -174,7 +132,7 @@
 					<h2 class="text-[0.78rem] leading-tight font-medium text-stone-950">No rules yet</h2>
 
 					<p class="mt-2 text-[0.67rem] leading-relaxed text-stone-600">
-						Give details about how this email format should behave, when it should fire and what internal or external data sources it should use
+						Give details about how this email format should behave, when it should fire and what data it should use
 					</p>
 				</div>
 			</div>

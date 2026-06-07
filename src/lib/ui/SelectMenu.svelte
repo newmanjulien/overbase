@@ -4,9 +4,68 @@
 	import CheckIcon from 'phosphor-svelte/lib/CheckIcon';
 	import { cn } from '$lib/ui/cn';
 
-	type HeaderSelectMenuOption = {
+	type SelectMenuOption = {
 		id: Id;
 		label: string;
+	};
+
+	type SelectMenuSize = 'compact' | 'standard' | 'comfortable';
+
+	const SELECT_MENU_SIZE_CLASS: Record<
+		SelectMenuSize,
+		{
+			triggerHeight: string;
+			triggerText: string;
+			triggerPadding: string;
+			triggerFocus: string;
+			placeholderText: string;
+			caretIcon: number;
+			optionHeight: string;
+			optionText: string;
+			optionPadding: string;
+			checkSlot: string;
+			checkIcon: number;
+		}
+	> = {
+		compact: {
+			triggerHeight: 'h-7',
+			triggerText: 'text-[0.72rem]',
+			triggerPadding: 'pr-2 pl-2.5',
+			triggerFocus: 'focus:ring-stone-200',
+			placeholderText: 'text-stone-500',
+			caretIcon: 13,
+			optionHeight: 'h-8',
+			optionText: 'text-[0.72rem]',
+			optionPadding: 'px-2.5',
+			checkSlot: 'size-3.5',
+			checkIcon: 12
+		},
+		standard: {
+			triggerHeight: 'h-8',
+			triggerText: 'text-[0.74rem]',
+			triggerPadding: 'px-2.5',
+			triggerFocus: 'focus:ring-stone-100',
+			placeholderText: 'text-stone-400',
+			caretIcon: 13,
+			optionHeight: 'h-8',
+			optionText: 'text-[0.74rem]',
+			optionPadding: 'px-2.5',
+			checkSlot: 'size-3.5',
+			checkIcon: 12
+		},
+		comfortable: {
+			triggerHeight: 'h-10',
+			triggerText: 'text-sm',
+			triggerPadding: 'pr-3 pl-3.5',
+			triggerFocus: 'focus:ring-stone-200',
+			placeholderText: 'text-[#8f9297]',
+			caretIcon: 15,
+			optionHeight: 'h-10',
+			optionText: 'text-sm',
+			optionPadding: 'px-3.5',
+			checkSlot: 'size-4',
+			checkIcon: 14
+		}
 	};
 
 	type Props = {
@@ -14,11 +73,11 @@
 		ariaLabel: string;
 		ariaDescribedby?: string;
 		selectedId?: Id | null;
-		options: readonly HeaderSelectMenuOption[];
+		options: readonly SelectMenuOption[];
 		onSelect: (id: Id) => void;
 		placeholder?: string;
 		width?: 'sm' | 'md' | 'full';
-		size?: 'compact' | 'form';
+		size?: SelectMenuSize;
 		class?: string;
 	};
 
@@ -48,38 +107,10 @@
 		if (width === 'full') return 'w-full';
 		return width === 'md' ? 'w-36' : 'w-32';
 	});
-	const sizeClass = $derived.by(() => {
-		if (size === 'form') {
-			return {
-				triggerHeight: 'h-10',
-				triggerText: 'text-sm',
-				triggerPadding: 'pr-3 pl-3.5',
-				caretIcon: 15,
-				optionHeight: 'h-10',
-				optionText: 'text-sm',
-				optionPadding: 'px-3.5',
-				checkSlot: 'size-4',
-				checkIcon: 14
-			};
-		}
-
-		return {
-			triggerHeight: 'h-7',
-			triggerText: 'text-[0.72rem]',
-			triggerPadding: 'pr-2 pl-2.5',
-			caretIcon: 13,
-			optionHeight: 'h-8',
-			optionText: 'text-[0.72rem]',
-			optionPadding: 'px-2.5',
-			checkSlot: 'size-3.5',
-			checkIcon: 12
-		};
-	});
+	const sizeClass = $derived(SELECT_MENU_SIZE_CLASS[size]);
 	const selectedOption = $derived(options.find((option) => option.id === selectedId));
 	const triggerLabel = $derived(selectedOption?.label ?? placeholder);
-	const triggerLabelClass = $derived(
-		selectedOption ? '' : size === 'form' ? 'text-[#8f9297]' : 'text-stone-500'
-	);
+	const triggerLabelClass = $derived(selectedOption ? '' : sizeClass.placeholderText);
 	const menuId = $derived(`${id}-menu`.replace(/[^a-zA-Z0-9_-]/g, '-'));
 	const isDisabled = $derived(options.length === 0);
 	const activeOptionElementId = $derived(
@@ -310,13 +341,14 @@
 		disabled={isDisabled}
 		onclick={toggleOpen}
 		onkeydown={handleTriggerKeydown}
-		class={cn(
-			'inline-flex w-full min-w-0 items-center justify-between gap-1.5 whitespace-nowrap rounded-sm border border-stone-200/70 bg-white py-0 text-left font-normal text-stone-800 outline-none transition-colors hover:bg-stone-50 focus:border-stone-300 focus:ring-2 focus:ring-stone-200 disabled:cursor-default disabled:opacity-55 disabled:hover:bg-white',
-			sizeClass.triggerHeight,
-			sizeClass.triggerText,
-			sizeClass.triggerPadding
-		)}
-	>
+			class={cn(
+				'inline-flex w-full min-w-0 items-center justify-between gap-1.5 whitespace-nowrap rounded-sm border border-stone-200/70 bg-white py-0 text-left font-normal text-stone-800 outline-none transition-colors hover:bg-stone-50 focus:border-stone-300 focus:ring-2 disabled:cursor-default disabled:opacity-55 disabled:hover:bg-white',
+				sizeClass.triggerHeight,
+				sizeClass.triggerText,
+				sizeClass.triggerPadding,
+				sizeClass.triggerFocus
+			)}
+		>
 		<span class={cn('min-w-0 truncate', triggerLabelClass)}>{triggerLabel}</span>
 		<CaretDownIcon
 			aria-hidden="true"

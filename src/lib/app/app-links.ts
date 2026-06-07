@@ -29,10 +29,6 @@ export const APP_LINKS = {
 		pathname: '/internal-data',
 		routeId: '/(app)/internal-data'
 	},
-	externalData: {
-		pathname: '/external-data',
-		routeId: '/(app)/external-data'
-	},
 	team: {
 		pathname: '/team',
 		routeId: '/(app)/team'
@@ -86,7 +82,6 @@ export type EmailFormatPathname = `/email-formats/${string}`;
 export type AppPathname = StaticAppPathname | CreateFormatsPathname | EmailFormatPathname;
 export type AppHref = AppPathname;
 export type AuthEntryHref = AuthEntryPathname | `${AuthEntryPathname}?${string}`;
-export type CreateFormatsModeFilterId = 'all' | 'internal-data' | 'public-data';
 export type CreateFormatsGalleryHref =
 	| typeof APP_LINKS.createFormats.pathname
 	| `${typeof APP_LINKS.createFormats.pathname}?${string}`;
@@ -117,24 +112,12 @@ export function createFormatLink(
 	};
 }
 
-export function normalizeCreateFormatsModeFilter(
-	value: string | null | undefined
-): CreateFormatsModeFilterId {
-	return value === 'internal-data' || value === 'public-data' ? value : 'all';
-}
-
 export function createFormatsGalleryHref({
-	mode = 'all',
 	industry = 'all'
 }: {
-	mode?: CreateFormatsModeFilterId;
 	industry?: string;
 } = {}): CreateFormatsGalleryHref {
 	const searchParams = new URLSearchParams();
-
-	if (mode !== 'all') {
-		searchParams.set('mode', mode);
-	}
 
 	if (industry !== 'all') {
 		searchParams.set('industry', industry);
