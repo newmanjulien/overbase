@@ -94,6 +94,10 @@
 		void updatePanelPositionAfterRender();
 	}
 
+	function handleMouseEnter() {
+		openTooltip();
+	}
+
 	function closeTooltip() {
 		clearCloseTimer();
 		isOpen = false;
@@ -105,6 +109,16 @@
 	}
 
 	function handleFocus() {
+		const activeElement = document.activeElement;
+
+		if (
+			!(activeElement instanceof HTMLElement) ||
+			!triggerElement?.contains(activeElement) ||
+			!activeElement.matches(':focus-visible')
+		) {
+			return;
+		}
+
 		openTooltip();
 	}
 
@@ -202,7 +216,7 @@
 	bind:this={triggerElement}
 	role="presentation"
 	class={cn('inline-flex items-center', className)}
-	onmouseenter={openTooltip}
+	onmouseenter={handleMouseEnter}
 	onmouseleave={scheduleCloseTooltip}
 	onfocusin={handleFocus}
 	onfocusout={handleBlur}
