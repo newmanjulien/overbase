@@ -73,6 +73,7 @@ export const formatStarter = {
       {
         id: "detail_level",
         title: "How much detail should the email include?",
+        helpText: "Dummy help text for choosing detail level.",
         options: [
           { id: "summary", label: "Short summary" },
           { id: "detailed", label: "Detailed context" },

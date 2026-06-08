@@ -11,6 +11,7 @@
 		publishLabel?: string;
 		publishError?: string | null;
 		onPublish?: () => void;
+		onRestart?: () => void;
 	};
 
 	let {
@@ -19,12 +20,13 @@
 		publishDisabled = true,
 		publishLabel = 'Create format',
 		publishError = null,
-		onPublish
+		onPublish,
+		onRestart
 	}: Props = $props();
 </script>
 
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white">
-	<FormatVariablePalette {variables} {dragCoordinator} />
+	<FormatVariablePalette {variables} {dragCoordinator} {onRestart} />
 	<FormatCreateActionBar
 		disabled={publishDisabled}
 		label={publishLabel}

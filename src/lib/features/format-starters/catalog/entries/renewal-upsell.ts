@@ -4,10 +4,7 @@ import {
   formatVariable as variable,
 } from "$lib/features/format-starters/domain";
 import type { FormatStarter } from "../types";
-import {
-  seededSpreadsheetAttachment,
-  spreadsheetCell as cell,
-} from "./helpers";
+import { seededSpreadsheetAttachment } from "./helpers";
 
 export const formatStarter = {
   slug: "renewal-upsell",
@@ -21,6 +18,7 @@ export const formatStarter = {
     { id: "broker_name", label: "Broker name" },
     { id: "existing_client", label: "Existing client" },
     { id: "premiums_amount", label: "Premiums amount" },
+    { id: "carrier_name", label: "Carrier name" },
   ],
   sampleEmail: {
     subject: "Report for Exterra",
@@ -45,58 +43,65 @@ export const formatStarter = {
       {
         id: "broker-policy-comfort",
         title:
-          "How comfortable is your average broker at talking about policies outside their wheelhouse?",
+          "How important is it to help brokers learn about policies they're less familiar with?",
+        helpText:
+          "Should we help brokers learn about policies outside their wheelhouse?",
         options: [
           {
-            id: "obscure-policy-comfortable",
-            label: "Can discuss even the most obscure policy",
+            id: "broker-education-very-important",
+            label: "Very important",
           },
           {
-            id: "adjacent-policy-comfortable",
-            label: "Can discuss policies adjacent to their area of expertise",
+            id: "broker-education-important",
+            label: "Important",
           },
           {
-            id: "limited-policy-bandwidth",
-            label: "Don't have bandwidth to be an expert in everything",
+            id: "broker-education-not-important",
+            label: "Not important",
           },
         ],
       },
       {
         id: "policy-recommendation-data",
-        title:
-          "What data do you want to use to find these policy opportunities?",
+        title: "What data do you want to use to find this whitespace?",
+        helpText:
+          "Overbase can use any and all data from your firm and from your ecosystem partners",
         options: [
           {
             id: "public-firm-carrier-data",
-            label:
-              "Public data, data from our firm and ideally some carrier benchmarks",
+            label: "Carrier benchmarks, data from our firm and public data",
           },
           {
             id: "public-firm-data",
-            label: "Public data and data from our firm",
+            label: "Data from our firm and public data",
           },
           {
             id: "firm-data-only",
-            label: "Only internal data from our firm",
+            label: "Only data from our firm",
           },
         ],
       },
     ],
     rules: [
       {
-        id: "obscure-policy-comfortable",
-        startingPointId: "renewal-upsell",
-        answers: { "broker-policy-comfort": "obscure-policy-comfortable" },
+        id: "public-firm-carrier-data",
+        startingPointId: "renewal-upsell-carrier-benchmarks",
+        answers: { "policy-recommendation-data": "public-firm-carrier-data" },
       },
       {
-        id: "adjacent-policy-comfortable",
+        id: "broker-education-very-important",
         startingPointId: "renewal-upsell",
-        answers: { "broker-policy-comfort": "adjacent-policy-comfortable" },
+        answers: { "broker-policy-comfort": "broker-education-very-important" },
       },
       {
-        id: "limited-policy-bandwidth",
+        id: "broker-education-important",
         startingPointId: "renewal-upsell",
-        answers: { "broker-policy-comfort": "limited-policy-bandwidth" },
+        answers: { "broker-policy-comfort": "broker-education-important" },
+      },
+      {
+        id: "broker-education-not-important",
+        startingPointId: "renewal-upsell",
+        answers: { "broker-policy-comfort": "broker-education-not-important" },
       },
       { id: "default", startingPointId: "renewal-upsell", answers: {} },
     ],
@@ -117,14 +122,54 @@ export const formatStarter = {
             text(","),
           ]),
           paragraph("renewal-summary", [
-            text("Attached is a report for the upcoming renewal with "),
+            text("A whitespace analysis for the "),
             variable("existing_client"),
-            text("."),
+            text(" renewal is attached."),
           ]),
           paragraph("renewal-opportunity", [
             text("We identified new policies worth "),
             variable("premiums_amount"),
-            text("."),
+            text(
+              " which you might propose at your renewal meeting next month.",
+            ),
+          ]),
+        ],
+      },
+    },
+    {
+      id: "renewal-upsell-carrier-benchmarks",
+      label: "Renewal upsell with carrier benchmarks",
+      emailContent: {
+        title: "Renewal upsell",
+        to: ["Broker"],
+        cc: ["Carrier contact"],
+        attachment: seededSpreadsheetAttachment("report.xlsx", []),
+        body: [
+          paragraph("renewal-greeting", [
+            text("Hi "),
+            variable("broker_name"),
+            text(","),
+          ]),
+          paragraph("renewal-summary", [
+            text("A whitespace analysis for the "),
+            variable("existing_client"),
+            text(" renewal is attached."),
+          ]),
+          paragraph("renewal-opportunity", [
+            text("We identified new policies worth "),
+            variable("premiums_amount"),
+            text(
+              " which you might propose at your renewal meeting next month.",
+            ),
+          ]),
+          paragraph("renewal-carrier-benchmarks", [
+            text(
+              "Each proposed policy has a benchmark which was calculated with data from ",
+            ),
+            variable("carrier_name"),
+            text(". The right person from "),
+            variable("carrier_name"),
+            text(" is CCed in case you have questions."),
           ]),
         ],
       },

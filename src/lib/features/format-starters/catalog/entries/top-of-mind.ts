@@ -52,6 +52,7 @@ export const formatStarter = {
       {
         id: "recipient",
         title: "Who should receive these opportunities?",
+        helpText: "Dummy help text for choosing the recipient.",
         options: [
           {
             id: "marketing",
@@ -67,6 +68,7 @@ export const formatStarter = {
       {
         id: "complexity",
         title: "How complex is the work?",
+        helpText: "Dummy help text for choosing complexity.",
         options: [
           { id: "simple", label: "Simple rollout" },
           { id: "multi_team", label: "Multi-team rollout" },
@@ -76,6 +78,7 @@ export const formatStarter = {
       {
         id: "ownership",
         title: "Who owns execution?",
+        helpText: "Dummy help text for choosing ownership.",
         options: [
           { id: "client_led", label: "Client-led" },
           { id: "joint", label: "Joint team" },

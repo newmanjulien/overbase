@@ -10,7 +10,7 @@ export type FormatStarterSelectionOption = {
 export type FormatStarterSelectionQuestion = {
 	id: string;
 	title: string;
-	helpText?: string;
+	helpText: string;
 	options: readonly FormatStarterSelectionOption[];
 };
 

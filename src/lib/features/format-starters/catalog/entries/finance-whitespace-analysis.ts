@@ -54,6 +54,7 @@ export const formatStarter = {
       {
         id: "coverage_situation",
         title: "What triggered the idea?",
+        helpText: "Dummy help text for choosing the coverage trigger.",
         options: [
           { id: "market_event", label: "Market event" },
           { id: "portfolio_gap", label: "Portfolio gap" },
@@ -63,6 +64,7 @@ export const formatStarter = {
       {
         id: "product_area",
         title: "Which team should act?",
+        helpText: "Dummy help text for choosing the acting team.",
         options: [
           { id: "dcm", label: "Debt capital markets" },
           { id: "mna", label: "M&A" },
@@ -72,6 +74,7 @@ export const formatStarter = {
       {
         id: "recipient",
         title: "Who needs the email?",
+        helpText: "Dummy help text for choosing the recipient.",
         options: [
           { id: "coverage_banker", label: "Coverage banker" },
           { id: "product_specialist", label: "Product specialist" },

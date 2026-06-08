@@ -23,7 +23,7 @@
 
 <aside class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-stone-50/50 text-stone-950">
 	<div class="flex min-h-0 flex-1 items-center justify-center px-5 py-10 md:px-8">
-		<article class="w-full max-w-66 rounded-sm bg-white px-2.5 pt-5 pb-3 text-stone-950 shadow-sm">
+		<article class="w-full max-w-66 rounded-md bg-white px-2.5 pt-5 pb-3 text-stone-950 shadow-sm">
 			<FormatStarterPreviewCard
 				title={presentation.title}
 				description={presentation.description}

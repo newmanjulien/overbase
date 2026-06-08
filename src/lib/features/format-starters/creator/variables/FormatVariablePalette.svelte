@@ -1,19 +1,93 @@
 <script lang="ts">
-	import { InfoBar } from '$lib/ui';
+	import { onMount } from 'svelte';
+	import { InfoBar, InfoBarAction } from '$lib/ui';
 	import {
 		formatFormatVariableLabel,
 		type FormatVariableDefinition
 	} from '$lib/features/format-starters/domain';
 	import type { FormatVariableDragCoordinator } from './format-variable-drag-coordinator.svelte';
 
+	const TIP_STORAGE_KEY = 'overbase-format-variable-tip-index';
+
+	type VariablePaletteTipPart =
+		| { kind: 'text'; text: string }
+		| { kind: 'link'; label: string; href: `/${string}` }
+		| { kind: 'button'; label: string; onclick: () => void };
+
+	type VariablePaletteTip = {
+		id: string;
+		content: readonly VariablePaletteTipPart[];
+	};
+
 	type Props = {
 		variables: readonly FormatVariableDefinition[];
 		dragCoordinator: FormatVariableDragCoordinator;
 		onVariableSelect?: (variableId: string) => void;
+		onRestart?: () => void;
 	};
 
-	let { variables, dragCoordinator, onVariableSelect }: Props = $props();
+	let { variables, dragCoordinator, onVariableSelect, onRestart }: Props = $props();
+	let activeTip = $state<VariablePaletteTip>(createVariablePaletteTips()[0]);
 	const isSelectable = $derived(Boolean(onVariableSelect));
+
+	onMount(() => {
+		activeTip = chooseNextTip();
+	});
+
+	function createVariablePaletteTips() {
+		const tips: VariablePaletteTip[] = [
+			{
+				id: 'format',
+				content: [
+					{
+						kind: 'text',
+						text: "You're only creating the email format here. Rules and data are added separately."
+					}
+				]
+			},
+			{
+				id: 'format-again',
+				content: [
+					{
+						kind: 'text',
+						text: "You're only creating the email format here. Rules and data are added separately."
+					}
+				]
+			}
+		];
+
+		if (onRestart) {
+			tips.push({
+				id: 'restart',
+				content: [
+					{ kind: 'button', label: 'Restart', onclick: onRestart },
+					{
+						kind: 'text',
+						text: ' the process and pick different answers to see other versions of this format.'
+					}
+				]
+			});
+		}
+
+		return tips;
+	}
+
+	function chooseNextTip() {
+		const tips = createVariablePaletteTips();
+
+		try {
+			const storedIndex = Number.parseInt(localStorage.getItem(TIP_STORAGE_KEY) ?? '0', 10);
+			const tipIndex = Number.isFinite(storedIndex) ? storedIndex : 0;
+			const nextTip = tips[tipIndex % tips.length];
+			localStorage.setItem(
+				TIP_STORAGE_KEY,
+				((tipIndex + 1) % tips.length).toString()
+			);
+			return nextTip;
+		} catch {
+			return tips[0];
+		}
+	}
 
 	function startDrag(event: DragEvent, variable: FormatVariableDefinition) {
 		dragCoordinator.startPaletteDrag(event, {
@@ -47,6 +121,18 @@
 	</div>
 
 	<InfoBar label="Tip:" class="mt-4 hidden md:block">
-		We're creating the format of the emails. Rules and data are added separately
+		{#each activeTip.content as part, index (`${activeTip.id}-${part.kind}-${index}`)}
+			{#if part.kind === 'text'}
+				<span>{part.text}</span>
+			{:else if part.kind === 'link'}
+				<InfoBarAction href={part.href}>
+					{part.label}
+				</InfoBarAction>
+			{:else}
+				<InfoBarAction onclick={part.onclick}>
+					{part.label}
+				</InfoBarAction>
+			{/if}
+		{/each}
 	</InfoBar>
 </div>

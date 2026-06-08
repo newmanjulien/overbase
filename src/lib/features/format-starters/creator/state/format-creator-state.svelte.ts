@@ -130,6 +130,10 @@ export class FormatCreatorState {
 		this.creator.step = 'editor';
 	};
 
+	restart = () => {
+		this.resetForFormatStarter();
+	};
+
 	updateTitle = (nextTitle: string) => {
 		if (this.creator.step === 'editor' && this.creator.editor) {
 			this.creator.editor.updateTitle(nextTitle);

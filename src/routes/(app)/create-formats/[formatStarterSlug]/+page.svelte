@@ -200,6 +200,7 @@
 								<FormatCreatorDesktopPrimaryPanel
 									{formatStarter}
 									{variableDragCoordinator}
+									onRestart={creator.restart}
 									{...createActionProps}
 								/>
 							{/if}

@@ -10,6 +10,7 @@
 		createFormatLabel: string;
 		createFormatError: string | null;
 		onCreateEmailFormat: () => void;
+		onRestart: () => void;
 	};
 
 	let {
@@ -18,7 +19,8 @@
 		createFormatDisabled,
 		createFormatLabel,
 		createFormatError,
-		onCreateEmailFormat
+		onCreateEmailFormat,
+		onRestart
 	}: Props = $props();
 </script>
 
@@ -29,4 +31,5 @@
 	publishLabel={createFormatLabel}
 	publishError={createFormatError}
 	onPublish={onCreateEmailFormat}
+	{onRestart}
 />

@@ -249,6 +249,13 @@ function validateFormatStarterSelection(
 	}
 
 	for (const question of startingPointSelection.questions) {
+		if (!question.helpText.trim()) {
+			issues.push({
+				formatStarterSlug: entry.slug,
+				message: `Question "${question.id}" must define help text.`
+			});
+		}
+
 		addDuplicateIdIssues(
 			issues,
 			entry.slug,

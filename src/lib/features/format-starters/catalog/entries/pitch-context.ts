@@ -57,6 +57,7 @@ export const formatStarter = {
       {
         id: "pitch_stage",
         title: "Where is the pitch?",
+        helpText: "Dummy help text for choosing the pitch stage.",
         options: [
           { id: "early_context", label: "Early context" },
           { id: "proposal_draft", label: "Proposal draft" },
@@ -66,6 +67,7 @@ export const formatStarter = {
       {
         id: "context_gap",
         title: "What context matters most?",
+        helpText: "Dummy help text for choosing the context gap.",
         options: [
           { id: "prior_work", label: "Prior work" },
           { id: "competitor", label: "Competitor view" },
@@ -75,6 +77,7 @@ export const formatStarter = {
       {
         id: "audience",
         title: "Who needs the context?",
+        helpText: "Dummy help text for choosing the audience.",
         options: [
           { id: "pitch_owner", label: "Pitch owner" },
           { id: "partner", label: "Partner" },

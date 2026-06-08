@@ -54,6 +54,7 @@ export const formatStarter = {
       {
         id: "signal_type",
         title: "What signal did the call surface?",
+        helpText: "Dummy help text for choosing the call signal.",
         options: [
           { id: "expansion", label: "Expansion" },
           { id: "risk", label: "Retention risk" },
@@ -63,6 +64,7 @@ export const formatStarter = {
       {
         id: "follow_up_style",
         title: "What follow-up is needed?",
+        helpText: "Dummy help text for choosing the follow-up.",
         options: [
           { id: "upsell", label: "Upsell angle" },
           { id: "save", label: "Save plan" },
@@ -72,6 +74,7 @@ export const formatStarter = {
       {
         id: "audience",
         title: "Who should receive it?",
+        helpText: "Dummy help text for choosing the recipient.",
         options: [
           { id: "account_owner", label: "Account owner" },
           { id: "partner", label: "Partner" },
