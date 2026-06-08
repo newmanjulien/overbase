@@ -6,6 +6,7 @@
 
 	type Props = {
 		'aria-label': string;
+		'aria-describedby'?: string;
 		variant?: ButtonVariant;
 		size?: ButtonSize;
 		type?: ButtonType;
@@ -18,6 +19,7 @@
 
 	let {
 		'aria-label': ariaLabel,
+		'aria-describedby': ariaDescribedBy,
 		variant = 'secondary',
 		size = 'icon-sm',
 		type = 'button',
@@ -37,6 +39,7 @@
 	{disabled}
 	{onclick}
 	aria-label={ariaLabel}
+	aria-describedby={ariaDescribedBy}
 	class={className}
 >
 	{@render children?.()}

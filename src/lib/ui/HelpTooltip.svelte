@@ -2,6 +2,7 @@
 	import type { ClassValue } from 'clsx';
 	import QuestionIcon from 'phosphor-svelte/lib/QuestionIcon';
 	import FloatingTooltip, { type FloatingTooltipPlacement } from './FloatingTooltip.svelte';
+	import { cn } from './cn';
 
 	type Props = {
 		id: string;
@@ -22,14 +23,15 @@
 	const helpText = $derived(text?.trim() ?? '');
 </script>
 
-<FloatingTooltip
-	{id}
-	text={helpText}
-	{ariaLabel}
-	{placement}
-	{triggerClass}
->
-	{#snippet trigger()}
-		<QuestionIcon size={14} weight="regular" />
+<FloatingTooltip {id} text={helpText} {placement}>
+	{#snippet trigger({ describedBy })}
+		<button
+			type="button"
+			class={cn(triggerClass)}
+			aria-label={ariaLabel}
+			aria-describedby={describedBy}
+		>
+			<QuestionIcon size={14} weight="regular" />
+		</button>
 	{/snippet}
 </FloatingTooltip>

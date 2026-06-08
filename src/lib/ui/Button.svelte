@@ -7,6 +7,7 @@
 
 	type Props = {
 		'aria-label'?: string;
+		'aria-describedby'?: string;
 		variant?: ButtonVariant;
 		size?: ButtonSize;
 		type?: ButtonType;
@@ -21,6 +22,7 @@
 
 	let {
 		'aria-label': ariaLabel,
+		'aria-describedby': ariaDescribedBy,
 		variant = 'primary',
 		size = 'sm',
 		type = 'button',
@@ -65,6 +67,7 @@
 		class={buttonClass}
 		href={resolve(href as '/')}
 		aria-label={ariaLabel}
+		aria-describedby={ariaDescribedBy}
 		aria-disabled={disabled || undefined}
 		data-disabled={disabled || undefined}
 		tabindex={disabled ? -1 : undefined}
@@ -79,6 +82,7 @@
 		{type}
 		class={buttonClass}
 		aria-label={ariaLabel}
+		aria-describedby={ariaDescribedBy}
 		data-disabled={disabled || undefined}
 		{disabled}
 		onclick={handleClick}

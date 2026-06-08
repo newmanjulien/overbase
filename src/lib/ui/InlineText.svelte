@@ -3,6 +3,7 @@
 	import type { ClassValue } from 'clsx';
 	import { cn } from '$lib/ui/cn';
 	import FloatingTooltip from '$lib/ui/FloatingTooltip.svelte';
+	import type { FloatingTooltipPlacement } from '$lib/ui/FloatingTooltip.svelte';
 	import { inlineLinkClass as baseInlineLinkClass } from '$lib/ui/link-styles';
 	import type { InlineTextContent } from '$lib/ui/inline-text';
 
@@ -10,7 +11,7 @@
 		content: InlineTextContent;
 		tooltipIdPrefix: string;
 		linkClass?: ClassValue;
-		tooltipPlacement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
+		tooltipPlacement?: FloatingTooltipPlacement;
 		tooltipTriggerClass?: ClassValue;
 	};
 
@@ -38,12 +39,17 @@
 			<FloatingTooltip
 				id={`${safeTooltipIdPrefix}-${index}`}
 				text={part.tooltipText}
-				ariaLabel={part.label}
 				placement={tooltipPlacement}
-				triggerClass={cn(tooltipTriggerClass)}
 			>
-				{#snippet trigger()}
-					{part.label}
+				{#snippet trigger({ describedBy })}
+					<button
+						type="button"
+						class={cn(tooltipTriggerClass)}
+						aria-label={part.label}
+						aria-describedby={describedBy}
+					>
+						{part.label}
+					</button>
 				{/snippet}
 			</FloatingTooltip>
 		{/if}

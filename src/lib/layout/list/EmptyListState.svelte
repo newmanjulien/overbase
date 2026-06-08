@@ -66,12 +66,17 @@
 							<FloatingTooltip
 								id={`empty-list-action-help-${actionLabel}`}
 								text={actionHelpTooltipText}
-								ariaLabel={actionHelpText}
 								placement="bottom-start"
-								triggerClass="inline text-[0.66rem] leading-relaxed text-stone-400 underline decoration-stone-200 underline-offset-3 transition-colors hover:text-stone-600 hover:decoration-stone-400 focus-visible:text-stone-700 focus-visible:decoration-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-300"
 							>
-								{#snippet trigger()}
-									{actionHelpText}
+								{#snippet trigger({ describedBy })}
+									<button
+										type="button"
+										class="inline text-[0.66rem] leading-relaxed text-stone-400 underline decoration-stone-200 underline-offset-3 transition-colors hover:text-stone-600 hover:decoration-stone-400 focus-visible:text-stone-700 focus-visible:decoration-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-300"
+										aria-label={actionHelpText}
+										aria-describedby={describedBy}
+									>
+										{actionHelpText}
+									</button>
 								{/snippet}
 							</FloatingTooltip>
 						</div>
