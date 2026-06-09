@@ -7,6 +7,15 @@ import {
 } from '$lib/features/format-starters/domain';
 import { cellKey } from '$domain/spreadsheets';
 
+type SeededSpreadsheetAttachmentOptions = {
+	greyRowIndexes?: readonly number[];
+	greyColumnIndexes?: readonly number[];
+	boldCells?: readonly {
+		rowIndex: number;
+		columnIndex: number;
+	}[];
+};
+
 export function spreadsheetCell(
 	...nodes: readonly (string | FormatInlineNode)[]
 ): FormatSpreadsheetCell {
@@ -15,7 +24,8 @@ export function spreadsheetCell(
 
 export function seededSpreadsheetAttachment(
 	filename: string,
-	rows: readonly (readonly FormatSpreadsheetCell[])[]
+	rows: readonly (readonly FormatSpreadsheetCell[])[],
+	options: SeededSpreadsheetAttachmentOptions = {}
 ): FormatSpreadsheetAttachment {
 	const attachment = normalizeFormatSpreadsheetAttachment({
 		filename,
@@ -23,7 +33,17 @@ export function seededSpreadsheetAttachment(
 			rows.flatMap((row, rowIndex) =>
 				row.map((cell, columnIndex) => [cellKey(rowIndex, columnIndex), cell])
 			)
-		)
+		),
+		formatting: {
+			greyRowIndexes: [...(options.greyRowIndexes ?? [])],
+			greyColumnIndexes: [...(options.greyColumnIndexes ?? [])],
+			boldCellsByKey: Object.fromEntries(
+				(options.boldCells ?? []).map((cell) => [
+					cellKey(cell.rowIndex, cell.columnIndex),
+					true
+				])
+			)
+		}
 	});
 
 	if (!attachment) {

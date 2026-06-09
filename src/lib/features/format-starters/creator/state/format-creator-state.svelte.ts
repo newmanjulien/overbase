@@ -8,6 +8,7 @@ import type {
 	FormatStarterSelectionAnswers,
 	FormatVariableDefinition
 } from '$lib/features/format-starters/domain';
+import { normalizeSpreadsheetFormatting } from '$domain/spreadsheets';
 import { FormatContentEditorState } from './format-content-editor-state.svelte';
 
 export type FormatCreatorStep = 'starting-point-selection' | 'editor';
@@ -42,6 +43,7 @@ export type CreateEmailFormatFromStarterInput = {
 	attachment: {
 		filename: string;
 		cellsByKey: Record<string, FormatInlineNode[]>;
+		formatting: FormatSpreadsheetAttachment['formatting'];
 	} | null;
 	body: Array<{
 		id: string;
@@ -255,7 +257,8 @@ function clonePublishAttachment(attachment: FormatSpreadsheetAttachment | null) 
 						key,
 						cloneInlineNodes(cell)
 					])
-				) as Record<string, FormatInlineNode[]>
+				) as Record<string, FormatInlineNode[]>,
+				formatting: normalizeSpreadsheetFormatting(attachment.formatting)
 			}
 		: null;
 }

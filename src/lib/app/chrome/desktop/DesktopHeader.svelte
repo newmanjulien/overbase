@@ -32,7 +32,7 @@
 	);
 </script>
 
-<header class="hidden h-11 items-center border-b border-stone-100 bg-white px-4 md:flex">
+<header class="hidden h-11 items-center border-b border-stone-100 bg-white pl-1 pr-4 md:flex">
 	<div class="flex min-w-0 flex-1 items-center">
 		<FloatingTooltip
 			id="desktop-sidebar-toggle-tooltip"

@@ -17,6 +17,20 @@ export type SpreadsheetCellAddress = {
 	rowIndex: number;
 	columnIndex: number;
 };
+export type SpreadsheetFormatting = {
+	greyRowIndexes: number[];
+	greyColumnIndexes: number[];
+	boldCellsByKey: Record<SpreadsheetCellKey, true>;
+};
+export type SpreadsheetFormattingInput = Partial<{
+	greyRowIndexes: readonly number[];
+	greyColumnIndexes: readonly number[];
+	boldCellsByKey: Partial<Record<string, boolean>>;
+}> | null | undefined;
+export type SpreadsheetCellFormatting = {
+	isGrey: boolean;
+	isBold: boolean;
+};
 
 export function cellKey(rowIndex: number, columnIndex: number): SpreadsheetCellKey {
 	return `${rowIndex}:${columnIndex}`;
@@ -72,4 +86,62 @@ export function updateSparseSpreadsheetCell<T>(
 	nextCellsByKey[key] = value;
 
 	return nextCellsByKey;
+}
+
+export function normalizeSpreadsheetFormatting(
+	formatting: SpreadsheetFormattingInput
+): SpreadsheetFormatting {
+	const greyRowIndexes = Array.from(
+		new Set((formatting?.greyRowIndexes ?? []).filter(isSpreadsheetRowInBounds))
+	).sort((first, second) => first - second);
+	const greyColumnIndexes = Array.from(
+		new Set((formatting?.greyColumnIndexes ?? []).filter(isSpreadsheetColumnInBounds))
+	).sort((first, second) => first - second);
+	const boldCellsByKey = Object.fromEntries(
+		Object.entries(formatting?.boldCellsByKey ?? {})
+			.map(([key, value]) => {
+				const address = value === true ? parseCellKey(key) : null;
+
+				return address ? [cellKey(address.rowIndex, address.columnIndex), true] : null;
+			})
+			.filter((entry): entry is [SpreadsheetCellKey, true] => entry !== null)
+	) as Record<SpreadsheetCellKey, true>;
+
+	return {
+		greyRowIndexes,
+		greyColumnIndexes,
+		boldCellsByKey
+	};
+}
+
+export function getSpreadsheetCellFormatting(
+	formatting: SpreadsheetFormatting,
+	rowIndex: number,
+	columnIndex: number
+): SpreadsheetCellFormatting {
+	const hasCustomGreyFormatting =
+		formatting.greyRowIndexes.length > 0 || formatting.greyColumnIndexes.length > 0;
+	const hasCustomBoldFormatting = Object.keys(formatting.boldCellsByKey).length > 0;
+
+	return {
+		isGrey: hasCustomGreyFormatting
+			? formatting.greyRowIndexes.includes(rowIndex) ||
+				formatting.greyColumnIndexes.includes(columnIndex)
+			: rowIndex === 0,
+		isBold: hasCustomBoldFormatting
+			? formatting.boldCellsByKey[cellKey(rowIndex, columnIndex)] === true
+			: rowIndex === 0
+	};
+}
+
+function isSpreadsheetRowInBounds(rowIndex: number) {
+	return Number.isInteger(rowIndex) && rowIndex >= 0 && rowIndex < SPREADSHEET_ROW_COUNT;
+}
+
+function isSpreadsheetColumnInBounds(columnIndex: number) {
+	return (
+		Number.isInteger(columnIndex) &&
+		columnIndex >= 0 &&
+		columnIndex < SPREADSHEET_COLUMN_COUNT
+	);
 }
