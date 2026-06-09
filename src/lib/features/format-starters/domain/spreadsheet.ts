@@ -10,7 +10,9 @@ import {
 	SPREADSHEET_COLUMN_LABELS,
 	SPREADSHEET_ROW_COUNT,
 	cellKey,
+	normalizeSpreadsheetFormatting,
 	parseCellKey,
+	type SpreadsheetFormatting,
 	type SpreadsheetCellKey
 } from '$domain/spreadsheets';
 
@@ -27,6 +29,7 @@ export type FormatSpreadsheetCell = readonly FormatInlineNode[];
 export type FormatSpreadsheetAttachment = {
 	filename: string;
 	cellsByKey: Record<SpreadsheetCellKey, FormatSpreadsheetCell>;
+	formatting: SpreadsheetFormatting;
 };
 
 export function normalizeFormatAttachmentName(value: string) {
@@ -48,7 +51,8 @@ export function createDefaultFormatSpreadsheetAttachment(
 ): FormatSpreadsheetAttachment {
 	return normalizeFormatSpreadsheetAttachment({
 		filename: filename ?? `Spreadsheet.${FORMAT_SPREADSHEET_ATTACHMENT_EXTENSION}`,
-		cellsByKey: {}
+		cellsByKey: {},
+		formatting: normalizeSpreadsheetFormatting(null)
 	})!;
 }
 
@@ -61,7 +65,8 @@ export function cloneFormatAttachment(attachment: FormatSpreadsheetAttachment | 
 						key,
 						cloneFormatInline(cell)
 					])
-				) as Record<SpreadsheetCellKey, FormatSpreadsheetCell>
+				) as Record<SpreadsheetCellKey, FormatSpreadsheetCell>,
+				formatting: normalizeSpreadsheetFormatting(attachment.formatting)
 			}
 		: null;
 }
@@ -97,7 +102,8 @@ export function normalizeFormatSpreadsheetAttachment(
 
 	return {
 		filename,
-		cellsByKey
+		cellsByKey,
+		formatting: normalizeSpreadsheetFormatting(attachment.formatting)
 	};
 }
 

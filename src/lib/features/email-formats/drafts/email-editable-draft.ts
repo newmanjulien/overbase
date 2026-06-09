@@ -6,6 +6,7 @@ import {
 	type EmailDraft,
 	type EmailSpreadsheetAttachment
 } from './email-drafts';
+import { normalizeSpreadsheetFormatting } from '$domain/spreadsheets';
 
 export type EditableEmailDraft = {
 	toText: string;
@@ -27,7 +28,8 @@ export function toEditableEmailDraft(draft: EmailDraft): EditableEmailDraft {
 		attachment: draft.attachment
 			? {
 					filename: draft.attachment.filename,
-					cellsByKey: { ...draft.attachment.cellsByKey }
+					cellsByKey: { ...draft.attachment.cellsByKey },
+					formatting: normalizeSpreadsheetFormatting(draft.attachment.formatting)
 				}
 			: null,
 		bodyText: serializeEmailBodyText(draft.body)

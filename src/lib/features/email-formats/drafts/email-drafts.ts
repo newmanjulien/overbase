@@ -4,7 +4,9 @@ import {
 	SPREADSHEET_COLUMN_LABELS,
 	SPREADSHEET_ROW_COUNT,
 	cellKey,
+	normalizeSpreadsheetFormatting,
 	parseCellKey,
+	type SpreadsheetFormatting,
 	type SpreadsheetCellKey
 } from '$domain/spreadsheets';
 
@@ -45,6 +47,7 @@ export type EmailBodyBlock = EmailParagraphBlock | EmailLinkBlock;
 export type EmailSpreadsheetAttachment = {
 	filename: string;
 	cellsByKey: Record<SpreadsheetCellKey, string>;
+	formatting: SpreadsheetFormatting;
 };
 
 export type EmailDraft = {
@@ -103,7 +106,8 @@ export function createDefaultEmailSpreadsheetAttachment(
 ): EmailSpreadsheetAttachment {
 	return {
 		filename,
-		cellsByKey: {}
+		cellsByKey: {},
+		formatting: normalizeSpreadsheetFormatting(null)
 	};
 }
 
@@ -137,7 +141,8 @@ export function normalizeEmailSpreadsheetAttachment(
 						: null;
 				})
 				.filter((entry): entry is [SpreadsheetCellKey, string] => entry !== null)
-		) as Record<SpreadsheetCellKey, string>
+		) as Record<SpreadsheetCellKey, string>,
+		formatting: normalizeSpreadsheetFormatting(attachment.formatting)
 	};
 }
 

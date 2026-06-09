@@ -5,7 +5,11 @@
 		normalizeEmailSpreadsheetCell,
 		type EmailSpreadsheetAttachment
 	} from './email-drafts';
-	import { getSpreadsheetCell, updateSparseSpreadsheetCell } from '$domain/spreadsheets';
+	import {
+		getSpreadsheetCellFormatting,
+		getSpreadsheetCell,
+		updateSparseSpreadsheetCell
+	} from '$domain/spreadsheets';
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
 	import { IconButton } from '$lib/ui';
 
@@ -129,12 +133,17 @@
 							{rowIndex + 1}
 						</th>
 						{#each SPREADSHEET_COLUMN_LABELS as column, cellIndex (column)}
+							{@const cellFormatting = getSpreadsheetCellFormatting(
+								attachment.formatting,
+								rowIndex,
+								cellIndex
+							)}
 							<td
 								class="h-8 overflow-hidden border-r border-b border-stone-200 px-2 text-ellipsis whitespace-nowrap"
-								class:bg-stone-50={rowIndex === 0}
-								class:font-medium={rowIndex === 0}
-								class:text-stone-900={rowIndex === 0}
-								class:text-stone-800={rowIndex !== 0}
+								class:bg-stone-50={cellFormatting.isGrey}
+								class:font-medium={cellFormatting.isBold}
+								class:text-stone-900={cellFormatting.isBold}
+								class:text-stone-800={!cellFormatting.isBold}
 							>
 								{#if editable}
 									<input
@@ -144,9 +153,9 @@
 										data-column={cellIndex}
 										{disabled}
 										class="block h-full w-full min-w-0 overflow-hidden border-0 bg-transparent p-0 text-[0.68rem] text-ellipsis whitespace-nowrap outline-none"
-										class:font-medium={rowIndex === 0}
-										class:text-stone-900={rowIndex === 0}
-										class:text-stone-800={rowIndex !== 0}
+										class:font-medium={cellFormatting.isBold}
+										class:text-stone-900={cellFormatting.isBold}
+										class:text-stone-800={!cellFormatting.isBold}
 										onkeydown={(event) => handleCellKeydown(event, rowIndex, cellIndex)}
 										oninput={(event) => updateCell(rowIndex, cellIndex, event.currentTarget.value)}
 									/>

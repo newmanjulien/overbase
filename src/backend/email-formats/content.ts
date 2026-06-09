@@ -1,4 +1,9 @@
-import { SPREADSHEET_CELL_MAX_LENGTH, cellKey, parseCellKey } from '../../domain/spreadsheets';
+import {
+	SPREADSHEET_CELL_MAX_LENGTH,
+	cellKey,
+	normalizeSpreadsheetFormatting,
+	parseCellKey
+} from '../../domain/spreadsheets';
 import type { EmailFormatVariableDefinition } from '../../domain/email-formats';
 import type { Doc } from '../../convex/_generated/dataModel';
 
@@ -171,7 +176,8 @@ export function normalizeEmailFormatAttachment(
 
 	return {
 		filename,
-		cellsByKey
+		cellsByKey,
+		formatting: normalizeSpreadsheetFormatting(attachment.formatting)
 	};
 }
 
@@ -201,7 +207,8 @@ export function toEditableEmailFormatContent(format: Doc<'emailFormats'>) {
 							key,
 							cell.map((node) => ({ ...node }))
 						])
-					)
+					),
+					formatting: normalizeSpreadsheetFormatting(format.attachment.formatting)
 				}
 			: null,
 		body: format.body.map((block) => ({

@@ -31,6 +31,7 @@
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { onDestroy, untrack } from 'svelte';
 	import { getEmailFormatActivationMissingMessageFromError } from '$domain/email-formats/activation';
+	import { normalizeSpreadsheetFormatting } from '$domain/spreadsheets';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -256,7 +257,8 @@
 								key,
 								cell.map((node) => ({ ...node }))
 							])
-						)
+						),
+						formatting: normalizeSpreadsheetFormatting(content.attachment.formatting)
 					}
 				: null,
 			body: content.body.map((block) => ({

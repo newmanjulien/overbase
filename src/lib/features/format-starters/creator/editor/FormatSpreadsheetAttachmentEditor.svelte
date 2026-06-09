@@ -23,7 +23,12 @@
 	} from '../inline/format-inline-controller.svelte';
 	import type { FormatVariableInsertionRequest } from '../state/format-creator-state.svelte';
 	import type { FormatVariableDragCoordinator } from '../variables/format-variable-drag-coordinator.svelte';
-	import { cellKey, getSpreadsheetCell, updateSparseSpreadsheetCell } from '$domain/spreadsheets';
+	import {
+		cellKey,
+		getSpreadsheetCellFormatting,
+		getSpreadsheetCell,
+		updateSparseSpreadsheetCell
+	} from '$domain/spreadsheets';
 
 	type CellSurfaceParams = {
 		rowIndex: number;
@@ -389,9 +394,14 @@
 							{rowIndex + 1}
 						</th>
 						{#each FORMAT_SPREADSHEET_COLUMN_LABELS as column, cellIndex (column)}
+							{@const cellFormatting = getSpreadsheetCellFormatting(
+								attachment.formatting,
+								rowIndex,
+								cellIndex
+							)}
 							<td
 								class="h-8 overflow-hidden border-r border-b border-stone-200 px-2 align-middle"
-								class:bg-stone-50={rowIndex === 0}
+								class:bg-stone-50={cellFormatting.isGrey}
 							>
 								<span
 									use:cellSurface={{
@@ -404,9 +414,9 @@
 									tabindex={disabled ? -1 : 0}
 									aria-label={`Row ${rowIndex + 1}, column ${cellIndex + 1}`}
 									class="format-spreadsheet-cell-surface"
-									class:font-medium={rowIndex === 0}
-									class:text-stone-900={rowIndex === 0}
-									class:text-stone-800={rowIndex !== 0}
+									class:font-medium={cellFormatting.isBold}
+									class:text-stone-900={cellFormatting.isBold}
+									class:text-stone-800={!cellFormatting.isBold}
 									oninput={controller.handleInput}
 									onpaste={controller.handlePaste}
 									onkeydown={(event) => handleCellKeydown(event, rowIndex, cellIndex)}

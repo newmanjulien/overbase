@@ -19,9 +19,16 @@ export const emailFormatBodyBlock = v.object({
 	content: v.array(emailFormatInlineNode)
 });
 
+export const emailFormatSpreadsheetFormatting = v.object({
+	greyRowIndexes: v.array(v.number()),
+	greyColumnIndexes: v.array(v.number()),
+	boldCellsByKey: v.record(v.string(), v.literal(true))
+});
+
 export const emailFormatSpreadsheetAttachment = v.object({
 	filename: v.string(),
-	cellsByKey: v.record(v.string(), v.array(emailFormatInlineNode))
+	cellsByKey: v.record(v.string(), v.array(emailFormatInlineNode)),
+	formatting: emailFormatSpreadsheetFormatting
 });
 
 export const emailFormatRule = v.object({
