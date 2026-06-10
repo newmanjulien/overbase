@@ -24,6 +24,8 @@ export type ViewerWorkspace = {
 };
 
 const VIEWER_SESSION_CONTEXT = Symbol('viewer-session');
+const CLERK_LOAD_TIMEOUT_MS = 10_000;
+const CONVEX_AUTH_TIMEOUT_MS = 10_000;
 
 function getErrorMessage(error: unknown, fallback: string) {
 	return error instanceof Error ? error.message : fallback;
@@ -41,6 +43,7 @@ export function createViewerSession() {
 	let authVersion = 0;
 	let authRetryNonce = $state(0);
 	let convexAuthState = $state<ConvexAuthState>('pending');
+	let clerkLoadErrorText = $state<string | null>(null);
 	let tokenErrorText = $state<string | null>(null);
 	let convexAuthErrorText = $state<string | null>(null);
 	let deletedAccountSignOutErrorText = $state<string | null>(null);
@@ -75,7 +78,11 @@ export function createViewerSession() {
 		};
 	});
 	const error = $derived.by<Error | null>(() => {
-		const message = tokenErrorText ?? convexAuthErrorText ?? deletedAccountSignOutErrorText;
+		const message =
+			clerkLoadErrorText ??
+			tokenErrorText ??
+			convexAuthErrorText ??
+			deletedAccountSignOutErrorText;
 
 		if (message) {
 			return new Error(message);
@@ -84,6 +91,10 @@ export function createViewerSession() {
 		return viewerAccountStateQuery.error ?? null;
 	});
 	const status = $derived.by<ViewerSessionStatus>(() => {
+		if (clerkLoadErrorText) {
+			return 'error';
+		}
+
 		if (clerkSessionState === 'loading') {
 			return 'loading';
 		}
@@ -112,6 +123,7 @@ export function createViewerSession() {
 	});
 
 	function retry() {
+		clerkLoadErrorText = null;
 		tokenErrorText = null;
 		convexAuthErrorText = null;
 		deletedAccountSignOutErrorText = null;
@@ -120,6 +132,7 @@ export function createViewerSession() {
 	}
 
 	function reset() {
+		clerkLoadErrorText = null;
 		tokenErrorText = null;
 		convexAuthErrorText = null;
 		deletedAccountSignOutErrorText = null;
@@ -152,10 +165,29 @@ export function createViewerSession() {
 	}
 
 	$effect(() => {
+		if (clerk.isLoaded) {
+			clerkLoadErrorText = null;
+			return;
+		}
+
+		const timeout = setTimeout(() => {
+			if (!clerk.isLoaded) {
+				clerkLoadErrorText =
+					'Unable to load Clerk. Check the Clerk publishable key and allowed origins.';
+			}
+		}, CLERK_LOAD_TIMEOUT_MS);
+
+		return () => {
+			clearTimeout(timeout);
+		};
+	});
+
+	$effect(() => {
 		const userId = signedInUserId;
 		const session = clerk.session;
 		const retryNonce = authRetryNonce;
 		const version = (authVersion += 1);
+		let authTimeout: ReturnType<typeof setTimeout> | null = null;
 
 		void retryNonce;
 		convexAuthState = 'pending';
@@ -172,8 +204,32 @@ export function createViewerSession() {
 		}
 
 		if (!session) {
-			return;
+			authTimeout = setTimeout(() => {
+				if (version !== authVersion) {
+					return;
+				}
+
+				convexAuthState = 'failed';
+				convexAuthErrorText =
+					'Clerk loaded a signed-in user without an active session. Sign out and sign in again.';
+			}, CONVEX_AUTH_TIMEOUT_MS);
+
+			return () => {
+				if (authTimeout) {
+					clearTimeout(authTimeout);
+				}
+			};
 		}
+
+		authTimeout = setTimeout(() => {
+			if (version !== authVersion || convexAuthState !== 'pending') {
+				return;
+			}
+
+			convexAuthState = 'failed';
+			convexAuthErrorText =
+				'Unable to authenticate with Convex. Check the Clerk JWT template named "convex".';
+		}, CONVEX_AUTH_TIMEOUT_MS);
 
 		client.setAuth(async () => {
 			let token: string | null;
@@ -199,6 +255,9 @@ export function createViewerSession() {
 			if (isAuthenticated) {
 				convexAuthState = 'authenticated';
 				convexAuthErrorText = null;
+				if (authTimeout) {
+					clearTimeout(authTimeout);
+				}
 				return;
 			}
 
@@ -206,7 +265,16 @@ export function createViewerSession() {
 			convexAuthErrorText =
 				tokenErrorText ??
 				'Unable to authenticate with Convex. Check the Clerk JWT template named "convex".';
+			if (authTimeout) {
+				clearTimeout(authTimeout);
+			}
 		});
+
+		return () => {
+			if (authTimeout) {
+				clearTimeout(authTimeout);
+			}
+		};
 	});
 
 	$effect(() => {

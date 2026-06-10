@@ -1,4 +1,5 @@
-const clerkJwtIssuerDomain = process.env.CLERK_JWT_ISSUER_DOMAIN;
+const clerkJwtIssuerDomain =
+	process.env.CLERK_JWT_ISSUER_DOMAIN ?? 'giving-foxhound-97.clerk.accounts.dev';
 
 if (!clerkJwtIssuerDomain) {
 	throw new Error('CLERK_JWT_ISSUER_DOMAIN is required for Convex Clerk auth.');
