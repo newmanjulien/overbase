@@ -24,6 +24,7 @@
 	let isAddingTeammates = $state(false);
 	let deletingTeammateIds = $state<Id<'teammates'>[]>([]);
 	let actionError = $state<string | null>(null);
+	let notificationWarning = $state<string | null>(null);
 	let editingTeammateId = $state<Id<'teammates'> | null>(null);
 	let savingTeammateId = $state<Id<'teammates'> | null>(null);
 	let searchQuery = $state('');
@@ -134,6 +135,7 @@
 
 	function openModal() {
 		modalError = null;
+		notificationWarning = null;
 		modalOpen = true;
 	}
 
@@ -151,20 +153,25 @@
 			return;
 		}
 
-		const result = parseTeammateEmailInput(teammateEmails);
+		const parsedInput = parseTeammateEmailInput(teammateEmails);
 
-		if (result.error) {
-			modalError = result.error;
+		if (parsedInput.error) {
+			modalError = parsedInput.error;
 			return;
 		}
 
 		modalError = null;
+		notificationWarning = null;
 		isAddingTeammates = true;
 
 		try {
-			await client.mutation(api.teammates.addTeammates, {
-				emails: result.emails
+			const addResult = await client.action(api.teammates.addTeammatesAndNotify, {
+				emails: parsedInput.emails
 			});
+			notificationWarning =
+				addResult.notificationFailedEmails.length > 0
+					? 'Team members were added, but some notification emails could not be sent.'
+					: null;
 			teammateEmails = '';
 			modalOpen = false;
 		} catch (error) {
@@ -320,6 +327,11 @@
 		{#if actionError}
 			<p class="border-b border-red-100 bg-red-50 px-4 py-2 text-[0.72rem] text-red-700 md:px-5">
 				{actionError}
+			</p>
+		{/if}
+		{#if notificationWarning}
+			<p class="border-b border-info-100 bg-info-50 px-4 py-2 text-[0.72rem] text-info-700 md:px-5">
+				{notificationWarning}
 			</p>
 		{/if}
 	{/snippet}

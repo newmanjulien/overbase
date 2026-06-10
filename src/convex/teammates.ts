@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
-import { mutation, query } from './_generated/server';
+import { internal } from './_generated/api';
+import { action, internalMutation, mutation, query } from './_generated/server';
 import {
 	getTeammateDisplayName,
 	normalizeTeammateEmail,
@@ -9,6 +10,18 @@ import {
 	TEAMMATE_EMAIL_SEPARATOR_REGEX
 } from './teammateIdentity';
 import { getViewerWorkspaceRecord, requireViewerWorkspace } from '../backend/auth/viewer';
+
+const LOOPS_TRANSACTIONAL_ENDPOINT = 'https://app.loops.so/api/v1/transactional';
+
+type AddTeammatesResult = {
+	insertedTeammates: {
+		id: Id<'teammates'>;
+		email: string;
+	}[];
+	skippedEmails: string[];
+	workspaceName: string;
+	inviterName: string;
+};
 
 function toTeammateResult(teammate: {
 	_id: Id<'teammates'>;
@@ -44,6 +57,52 @@ function parseEmails(input: string[]) {
 	return uniqueEmails;
 }
 
+function getLoopsConfig() {
+	const apiKey = process.env.LOOPS_API_KEY?.trim();
+	const transactionalId = process.env.LOOPS_TEAMMATE_ADDED_TRANSACTIONAL_ID?.trim();
+
+	if (!apiKey || !transactionalId) {
+		return null;
+	}
+
+	return { apiKey, transactionalId };
+}
+
+async function sendTeamMemberAddedEmail({
+	apiKey,
+	email,
+	inviterName,
+	transactionalId,
+	workspaceName
+}: {
+	apiKey: string;
+	email: string;
+	inviterName: string;
+	transactionalId: string;
+	workspaceName: string;
+}) {
+	const response = await fetch(LOOPS_TRANSACTIONAL_ENDPOINT, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			email,
+			transactionalId,
+			addToAudience: false,
+			dataVariables: {
+				inviterName,
+				workspaceName
+			}
+		})
+	});
+
+	if (!response.ok) {
+		throw new Error(`Loops rejected ${email}.`);
+	}
+}
+
 export const listTeammates = query({
 	args: {},
 	handler: async (ctx) => {
@@ -58,12 +117,12 @@ export const listTeammates = query({
 	}
 });
 
-export const addTeammates = mutation({
+export const insertTeammatesForNotification = internalMutation({
 	args: {
 		emails: v.array(v.string())
 	},
-	handler: async (ctx, { emails }) => {
-		const { workspace } = await requireViewerWorkspace(ctx);
+	handler: async (ctx, { emails }): Promise<AddTeammatesResult> => {
+		const { identity, user, workspace } = await requireViewerWorkspace(ctx);
 		const normalizedEmails = parseEmails(emails);
 
 		if (normalizedEmails.length === 0) {
@@ -71,7 +130,7 @@ export const addTeammates = mutation({
 		}
 
 		const now = Date.now();
-		const insertedIds = [];
+		const insertedTeammates = [];
 		const skippedEmails = [];
 
 		for (const email of normalizedEmails) {
@@ -85,21 +144,63 @@ export const addTeammates = mutation({
 				continue;
 			}
 
-			insertedIds.push(
-				await ctx.db.insert('teammates', {
-					email,
-					workspaceId: workspace._id,
-					name: '',
-					role: '',
-					createdAt: now,
-					updatedAt: now
-				})
-			);
+			const id = await ctx.db.insert('teammates', {
+				email,
+				workspaceId: workspace._id,
+				name: '',
+				role: '',
+				createdAt: now,
+				updatedAt: now
+			});
+
+			insertedTeammates.push({ id, email });
 		}
 
 		return {
-			insertedIds,
-			skippedEmails
+			insertedTeammates,
+			skippedEmails,
+			workspaceName: workspace.name,
+			inviterName: user.displayName?.trim() || identity.email
+		};
+	}
+});
+
+export const addTeammatesAndNotify = action({
+	args: {
+		emails: v.array(v.string())
+	},
+	handler: async (ctx, { emails }): Promise<AddTeammatesResult & { notificationFailedEmails: string[] }> => {
+		const result: AddTeammatesResult = await ctx.runMutation(
+			internal.teammates.insertTeammatesForNotification,
+			{ emails }
+		);
+		const loopsConfig = getLoopsConfig();
+		const notificationFailedEmails = [];
+
+		if (!loopsConfig) {
+			return {
+				...result,
+				notificationFailedEmails: result.insertedTeammates.map((teammate) => teammate.email)
+			};
+		}
+
+		for (const teammate of result.insertedTeammates) {
+			try {
+				await sendTeamMemberAddedEmail({
+					apiKey: loopsConfig.apiKey,
+					email: teammate.email,
+					inviterName: result.inviterName,
+					transactionalId: loopsConfig.transactionalId,
+					workspaceName: result.workspaceName
+				});
+			} catch {
+				notificationFailedEmails.push(teammate.email);
+			}
+		}
+
+		return {
+			...result,
+			notificationFailedEmails
 		};
 	}
 });
