@@ -171,9 +171,9 @@ export const formatStarter = {
             text(","),
           ]),
           paragraph("renewal-summary", [
-            text("A whitespace analysis for the "),
+            text("A whitespace analysis for "),
             variable("existing_client"),
-            text(" renewal is attached."),
+            text("'s renewal is attached."),
           ]),
           paragraph("renewal-opportunity", [
             text("We identified new policies worth "),
@@ -243,9 +243,9 @@ export const formatStarter = {
             text(","),
           ]),
           paragraph("renewal-summary", [
-            text("A whitespace analysis for the "),
+            text("A whitespace analysis for "),
             variable("existing_client"),
-            text(" renewal is attached."),
+            text("'s renewal is attached."),
           ]),
           paragraph("renewal-opportunity", [
             text("We identified new policies worth "),
