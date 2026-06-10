@@ -35,6 +35,7 @@
 		variables: readonly FormatVariableDefinition[];
 		dragCoordinator: FormatVariableDragCoordinator;
 		editPolicy?: EmailFormatContentEditPolicy;
+		spreadsheetAttachmentHelpText?: string | null;
 		readOnly?: boolean;
 		variableInsertionRequest?: FormatVariableInsertionRequest | null;
 		onVariableInsertionRequestHandled?: (requestId: number) => void;
@@ -45,6 +46,7 @@
 		variables,
 		dragCoordinator,
 		editPolicy = EDIT_ALL_CONTENT_FIELDS,
+		spreadsheetAttachmentHelpText = null,
 		readOnly = false,
 		variableInsertionRequest = null,
 		onVariableInsertionRequestHandled
@@ -88,6 +90,7 @@
 					{variables}
 					{dragCoordinator}
 					disabled={!activeEditPolicy.attachment}
+					{spreadsheetAttachmentHelpText}
 					variableInsertionRequest={spreadsheetInsertionRequest}
 					{onVariableInsertionRequestHandled}
 					onAttachmentChange={editor.setOpenAttachment}

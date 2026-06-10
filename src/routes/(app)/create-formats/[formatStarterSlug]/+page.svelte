@@ -167,6 +167,7 @@
 					{:else if creator.editor}
 						<FormatCreatorMobileInternalData
 							editor={creator.editor}
+							spreadsheetAttachmentHelpText={creator.selectedStartingPoint?.attachmentHelpText ?? null}
 							variablePickerOpen={creator.variablePickerOpen}
 							variableInsertionRequest={creator.variableInsertionRequest}
 							onVariableInsertionRequest={creator.requestVariableInsertion}
@@ -216,6 +217,7 @@
 								<FormatCreatorDesktopSecondaryPanel
 									step="editor"
 									editor={creator.editor}
+									spreadsheetAttachmentHelpText={creator.selectedStartingPoint?.attachmentHelpText ?? null}
 									{formatStarter}
 									{variableDragCoordinator}
 									onVariableInsertionRequestHandled={creator.clearVariableInsertionRequest}

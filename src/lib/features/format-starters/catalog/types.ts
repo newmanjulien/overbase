@@ -9,6 +9,7 @@ import type { FormatStarterIndustryTagId } from './industry-tags';
 export type FormatStartingPoint = {
 	id: string;
 	label: string;
+	attachmentHelpText?: string;
 	emailContent: FormatEmailContent;
 };
 

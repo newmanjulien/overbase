@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ArrowLeftIcon from 'phosphor-svelte/lib/ArrowLeftIcon';
-	import { IconButton } from '$lib/ui';
+	import { HelpTooltip, IconButton } from '$lib/ui';
 	import {
 		FORMAT_SPREADSHEET_COLUMN_COUNT,
 		FORMAT_SPREADSHEET_COLUMN_LABELS,
@@ -45,6 +45,7 @@
 		attachment: FormatSpreadsheetAttachment;
 		variables: readonly FormatVariableDefinition[];
 		disabled?: boolean;
+		spreadsheetAttachmentHelpText?: string | null;
 		dragCoordinator: FormatVariableDragCoordinator;
 		variableInsertionRequest?: FormatVariableInsertionRequest | null;
 		onVariableInsertionRequestHandled?: (requestId: number) => void;
@@ -62,6 +63,7 @@
 		attachment,
 		variables,
 		disabled = false,
+		spreadsheetAttachmentHelpText = null,
 		dragCoordinator,
 		variableInsertionRequest = null,
 		onVariableInsertionRequestHandled,
@@ -69,6 +71,11 @@
 		onAttachmentChange
 	}: Props = $props();
 	let spreadsheetRoot = $state<HTMLDivElement | null>(null);
+	const componentId = $props.id();
+	const spreadsheetAttachmentHelpTooltipId = `${componentId}-attachment-help`;
+	const normalizedSpreadsheetAttachmentHelpText = $derived(
+		spreadsheetAttachmentHelpText?.trim() ?? ''
+	);
 
 	const rowIndexes = Array.from({ length: FORMAT_SPREADSHEET_ROW_COUNT }, (_, index) => index);
 	const rowHeaderColumnWidth = 40;
@@ -355,7 +362,19 @@
 			XLS
 		</div>
 		<div class="min-w-0 flex-1">
-			<p class="truncate text-[0.79rem] font-medium text-stone-900">{attachment.filename}</p>
+			<div class="flex min-w-0 items-center gap-1.5">
+				<p class="min-w-0 truncate text-[0.79rem] font-medium text-stone-900">
+					{attachment.filename}
+				</p>
+				{#if normalizedSpreadsheetAttachmentHelpText}
+					<HelpTooltip
+						id={spreadsheetAttachmentHelpTooltipId}
+						text={normalizedSpreadsheetAttachmentHelpText}
+						placement="bottom"
+						triggerClass="grid size-5 shrink-0 place-items-center rounded-[6px] text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700 focus-visible:bg-stone-100 focus-visible:text-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-300"
+					/>
+				{/if}
+			</div>
 		</div>
 	</div>
 

@@ -148,6 +148,8 @@ export const formatStarter = {
     {
       id: "migration-plan",
       label: "Migration plan",
+      attachmentHelpText:
+        "Use this workbook to organize migration scope, dependencies, owners, and launch targets for the implementation team.",
       emailContent: {
         title: "Migration implementation plan",
         to: ["Implementation team"],
@@ -193,6 +195,8 @@ export const formatStarter = {
     {
       id: "risk-controlled-plan",
       label: "Risk-controlled plan",
+      attachmentHelpText:
+        "Use this workbook to review implementation risks, mitigations, owners, and readiness dates before launch.",
       emailContent: {
         title: "Implementation risk plan",
         to: ["Implementation leads"],

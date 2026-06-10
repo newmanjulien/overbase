@@ -22,6 +22,16 @@ export type SpreadsheetFormatting = {
 	greyColumnIndexes: number[];
 	boldCellsByKey: Record<SpreadsheetCellKey, true>;
 };
+export type SpreadsheetAttachment<CellValue> = {
+	filename: string;
+	cellsByKey: Record<SpreadsheetCellKey, CellValue>;
+	formatting: SpreadsheetFormatting;
+};
+export type SpreadsheetAttachmentInput<CellValue> = {
+	filename: string;
+	cellsByKey: Partial<Record<string, CellValue>>;
+	formatting: SpreadsheetFormattingInput;
+} | null | undefined;
 export type SpreadsheetFormattingInput = Partial<{
 	greyRowIndexes: readonly number[];
 	greyColumnIndexes: readonly number[];
@@ -31,6 +41,9 @@ export type SpreadsheetCellFormatting = {
 	isGrey: boolean;
 	isBold: boolean;
 };
+
+const SPREADSHEET_ATTACHMENT_FILENAME_MAX_LENGTH = 160;
+const SPREADSHEET_ATTACHMENT_EXTENSION = 'xlsx';
 
 export function cellKey(rowIndex: number, columnIndex: number): SpreadsheetCellKey {
 	return `${rowIndex}:${columnIndex}`;
@@ -86,6 +99,24 @@ export function updateSparseSpreadsheetCell<T>(
 	nextCellsByKey[key] = value;
 
 	return nextCellsByKey;
+}
+
+export function normalizeSpreadsheetAttachmentFilename(
+	value: string,
+	maxLength = SPREADSHEET_ATTACHMENT_FILENAME_MAX_LENGTH,
+	extension = SPREADSHEET_ATTACHMENT_EXTENSION
+) {
+	const withoutQueryOrHash = value.trim().split(/[?#]/)[0] ?? '';
+	const filename = withoutQueryOrHash.split(/[\\/]/).pop() ?? '';
+	const baseName = filename.replace(/\.[^.]+$/i, '');
+	const sanitizedBaseName = baseName
+		.replace(/[^a-zA-Z0-9 ._()-]+/g, '_')
+		.replace(/\s+/g, ' ')
+		.replace(/\.+$/g, '')
+		.trim();
+	const normalized = clampSingleLineText(sanitizedBaseName, maxLength);
+
+	return normalized ? `${normalized}.${extension}` : '';
 }
 
 export function normalizeSpreadsheetFormatting(
@@ -144,4 +175,10 @@ function isSpreadsheetColumnInBounds(columnIndex: number) {
 		columnIndex >= 0 &&
 		columnIndex < SPREADSHEET_COLUMN_COUNT
 	);
+}
+
+function clampSingleLineText(value: string, maxLength: number) {
+	const normalized = value.trim().replace(/\s+/g, ' ');
+
+	return normalized.length > maxLength ? normalized.slice(0, maxLength).trim() : normalized;
 }

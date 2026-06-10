@@ -4,7 +4,10 @@ import {
   formatVariable as variable,
 } from "$lib/features/format-starters/domain";
 import type { FormatStarter } from "../types";
-import { seededSpreadsheetAttachment } from "./helpers";
+import {
+  seededSpreadsheetAttachment,
+  spreadsheetCell as cell,
+} from "./helpers";
 
 export const formatStarter = {
   slug: "renewal-upsell",
@@ -19,6 +22,9 @@ export const formatStarter = {
     { id: "existing_client", label: "Existing client" },
     { id: "premiums_amount", label: "Premiums amount" },
     { id: "carrier_name", label: "Carrier name" },
+    { id: "current_policy", label: "Current policy" },
+    { id: "line_of_coverage", label: "Line of coverage" },
+    { id: "proposed_policy", label: "Proposed policy" },
   ],
   sampleEmail: {
     subject: "Report for Exterra",
@@ -110,11 +116,54 @@ export const formatStarter = {
     {
       id: "renewal-upsell",
       label: "Renewal upsell",
+      attachmentHelpText:
+        "This attached whitespace analysis would list all the client's current policies and the policies we believe the broker should propose to them",
       emailContent: {
         title: "Renewal upsell",
         to: ["Broker"],
         cc: [],
-        attachment: seededSpreadsheetAttachment("report.xlsx", []),
+        attachment: seededSpreadsheetAttachment(
+          "Whitespace analysis.xlsx",
+          [
+            [cell(variable("line_of_coverage"), " current")],
+            [
+              cell("Policies"),
+              cell(variable("current_policy")),
+              cell(variable("current_policy")),
+              cell(variable("current_policy")),
+              cell(variable("current_policy")),
+            ],
+            [cell("Limits")],
+            [cell("Premiums")],
+            [cell("Revenue")],
+            [],
+            [cell(variable("line_of_coverage"), " potential")],
+            [
+              cell("Additional policies"),
+              cell(variable("proposed_policy")),
+              cell(variable("proposed_policy")),
+              cell(variable("proposed_policy")),
+              cell(variable("proposed_policy")),
+            ],
+            [cell("Limits")],
+            [cell("Premiums")],
+            [cell("Revenue")],
+            [cell("Benchmark")],
+            [cell("Notes")],
+            [],
+          ],
+          {
+            greyColumnIndexes: [0],
+            boldCells: [
+              { rowIndex: 0, columnIndex: 0 },
+              { rowIndex: 6, columnIndex: 0 },
+              { rowIndex: 14, columnIndex: 0 },
+              { rowIndex: 20, columnIndex: 0 },
+              { rowIndex: 28, columnIndex: 0 },
+              { rowIndex: 34, columnIndex: 0 },
+            ],
+          },
+        ),
         body: [
           paragraph("renewal-greeting", [
             text("Hi "),
@@ -122,9 +171,9 @@ export const formatStarter = {
             text(","),
           ]),
           paragraph("renewal-summary", [
-            text("A whitespace analysis for the "),
+            text("A whitespace analysis for "),
             variable("existing_client"),
-            text(" renewal is attached."),
+            text("'s renewal is attached."),
           ]),
           paragraph("renewal-opportunity", [
             text("We identified new policies worth "),
@@ -139,11 +188,54 @@ export const formatStarter = {
     {
       id: "renewal-upsell-carrier-benchmarks",
       label: "Renewal upsell with carrier benchmarks",
+      attachmentHelpText:
+        "This attached whitespace analysis would list all the client's current policies and the policies we believe the broker should propose to them",
       emailContent: {
         title: "Renewal upsell",
         to: ["Broker"],
         cc: ["Carrier contact"],
-        attachment: seededSpreadsheetAttachment("report.xlsx", []),
+        attachment: seededSpreadsheetAttachment(
+          "Whitespace analysis.xlsx",
+          [
+            [cell(variable("line_of_coverage"), " current")],
+            [
+              cell("Policies"),
+              cell(variable("current_policy")),
+              cell(variable("current_policy")),
+              cell(variable("current_policy")),
+              cell(variable("current_policy")),
+            ],
+            [cell("Limits")],
+            [cell("Premiums")],
+            [cell("Revenue")],
+            [],
+            [cell(variable("line_of_coverage"), " potential")],
+            [
+              cell("Additional policies"),
+              cell(variable("proposed_policy")),
+              cell(variable("proposed_policy")),
+              cell(variable("proposed_policy")),
+              cell(variable("proposed_policy")),
+            ],
+            [cell("Limits")],
+            [cell("Premiums")],
+            [cell("Revenue")],
+            [cell("Benchmark")],
+            [cell("Notes")],
+            [],
+          ],
+          {
+            greyColumnIndexes: [0],
+            boldCells: [
+              { rowIndex: 0, columnIndex: 0 },
+              { rowIndex: 6, columnIndex: 0 },
+              { rowIndex: 14, columnIndex: 0 },
+              { rowIndex: 20, columnIndex: 0 },
+              { rowIndex: 28, columnIndex: 0 },
+              { rowIndex: 34, columnIndex: 0 },
+            ],
+          },
+        ),
         body: [
           paragraph("renewal-greeting", [
             text("Hi "),
@@ -151,9 +243,9 @@ export const formatStarter = {
             text(","),
           ]),
           paragraph("renewal-summary", [
-            text("A whitespace analysis for the "),
+            text("A whitespace analysis for "),
             variable("existing_client"),
-            text(" renewal is attached."),
+            text("'s renewal is attached."),
           ]),
           paragraph("renewal-opportunity", [
             text("We identified new policies worth "),

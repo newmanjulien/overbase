@@ -11,12 +11,11 @@ import {
 	SPREADSHEET_ROW_COUNT,
 	cellKey,
 	normalizeSpreadsheetFormatting,
+	normalizeSpreadsheetAttachmentFilename,
 	parseCellKey,
-	type SpreadsheetFormatting,
-	type SpreadsheetCellKey
+	type SpreadsheetAttachment
 } from '$domain/spreadsheets';
 
-const FORMAT_ATTACHMENT_FILENAME_MAX_LENGTH = 160;
 const FORMAT_SPREADSHEET_ATTACHMENT_EXTENSION = 'xlsx';
 
 export const FORMAT_SPREADSHEET_ROW_COUNT = SPREADSHEET_ROW_COUNT;
@@ -25,50 +24,50 @@ export const FORMAT_SPREADSHEET_CELL_MAX_LENGTH = SPREADSHEET_CELL_MAX_LENGTH;
 export const FORMAT_SPREADSHEET_COLUMN_LABELS = SPREADSHEET_COLUMN_LABELS;
 
 export type FormatSpreadsheetCell = readonly FormatInlineNode[];
-
-export type FormatSpreadsheetAttachment = {
-	filename: string;
-	cellsByKey: Record<SpreadsheetCellKey, FormatSpreadsheetCell>;
-	formatting: SpreadsheetFormatting;
-};
+export type FormatSpreadsheetAttachment = SpreadsheetAttachment<FormatSpreadsheetCell>;
 
 export function normalizeFormatAttachmentName(value: string) {
-	const withoutQueryOrHash = value.trim().split(/[?#]/)[0] ?? '';
-	const filename = withoutQueryOrHash.split(/[\\/]/).pop() ?? '';
-	const baseName = filename.replace(/\.[^.]+$/i, '');
-	const sanitizedBaseName = baseName
-		.replace(/[^a-zA-Z0-9 ._()-]+/g, '_')
-		.replace(/\s+/g, ' ')
-		.replace(/\.+$/g, '')
-		.trim();
-	const normalized = clampSingleLineText(sanitizedBaseName, FORMAT_ATTACHMENT_FILENAME_MAX_LENGTH);
-
-	return normalized ? `${normalized}.${FORMAT_SPREADSHEET_ATTACHMENT_EXTENSION}` : '';
+	return normalizeSpreadsheetAttachmentFilename(
+		value,
+		undefined,
+		FORMAT_SPREADSHEET_ATTACHMENT_EXTENSION
+	);
 }
 
 export function createDefaultFormatSpreadsheetAttachment(
 	filename?: string
 ): FormatSpreadsheetAttachment {
-	return normalizeFormatSpreadsheetAttachment({
-		filename: filename ?? `Spreadsheet.${FORMAT_SPREADSHEET_ATTACHMENT_EXTENSION}`,
+	return {
+		filename: normalizeFormatAttachmentName(
+			filename ?? `Spreadsheet.${FORMAT_SPREADSHEET_ATTACHMENT_EXTENSION}`
+		),
 		cellsByKey: {},
 		formatting: normalizeSpreadsheetFormatting(null)
-	})!;
+	};
 }
 
 export function cloneFormatAttachment(attachment: FormatSpreadsheetAttachment | null) {
-	return attachment
-		? {
-				filename: attachment.filename,
-				cellsByKey: Object.fromEntries(
-					Object.entries(attachment.cellsByKey).map(([key, cell]) => [
-						key,
-						cloneFormatInline(cell)
-					])
-				) as Record<SpreadsheetCellKey, FormatSpreadsheetCell>,
-				formatting: normalizeSpreadsheetFormatting(attachment.formatting)
-			}
-		: null;
+	if (!attachment) {
+		return null;
+	}
+
+	const cellsByKey: FormatSpreadsheetAttachment['cellsByKey'] = {};
+
+	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
+		const address = parseCellKey(key);
+
+		if (!address) {
+			continue;
+		}
+
+		cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = cloneFormatInline(cell);
+	}
+
+	return {
+		filename: attachment.filename,
+		cellsByKey,
+		formatting: normalizeSpreadsheetFormatting(attachment.formatting)
+	};
 }
 
 export function normalizeFormatSpreadsheetAttachment(
@@ -84,12 +83,12 @@ export function normalizeFormatSpreadsheetAttachment(
 		return null;
 	}
 
-	const cellsByKey: Record<SpreadsheetCellKey, FormatSpreadsheetCell> = {};
+	const cellsByKey: FormatSpreadsheetAttachment['cellsByKey'] = {};
 
 	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
 		const address = parseCellKey(key);
 
-		if (!address) {
+		if (!address || cell === undefined) {
 			continue;
 		}
 
@@ -142,10 +141,4 @@ export function normalizeFormatSpreadsheetCell(
 	}
 
 	return normalizeFormatInline(clamped);
-}
-
-function clampSingleLineText(value: string, maxLength: number) {
-	const normalized = value.trim().replace(/\s+/g, ' ');
-
-	return normalized.length > maxLength ? normalized.slice(0, maxLength).trim() : normalized;
 }

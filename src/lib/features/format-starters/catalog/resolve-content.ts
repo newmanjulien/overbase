@@ -79,6 +79,7 @@ function cloneFormatStartingPoint(
 	return {
 		id: startingPoint.id,
 		label: startingPoint.label,
+		attachmentHelpText: startingPoint.attachmentHelpText,
 		emailContent: cloneFormatEmailContent(startingPoint.emailContent)
 	};
 }

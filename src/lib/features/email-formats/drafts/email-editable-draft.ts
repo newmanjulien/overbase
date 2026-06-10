@@ -6,7 +6,7 @@ import {
 	type EmailDraft,
 	type EmailSpreadsheetAttachment
 } from './email-drafts';
-import { normalizeSpreadsheetFormatting } from '$domain/spreadsheets';
+import { cellKey, normalizeSpreadsheetFormatting, parseCellKey } from '$domain/spreadsheets';
 
 export type EditableEmailDraft = {
 	toText: string;
@@ -25,13 +25,7 @@ export function toEditableEmailDraft(draft: EmailDraft): EditableEmailDraft {
 		toText: formatRecipients(draft.to),
 		ccText: formatRecipients(draft.cc),
 		attachmentInputText: '',
-		attachment: draft.attachment
-			? {
-					filename: draft.attachment.filename,
-					cellsByKey: { ...draft.attachment.cellsByKey },
-					formatting: normalizeSpreadsheetFormatting(draft.attachment.formatting)
-				}
-			: null,
+		attachment: cloneEmailSpreadsheetAttachment(draft.attachment),
 		bodyText: serializeEmailBodyText(draft.body)
 	};
 }
@@ -76,6 +70,32 @@ function parseRecipients(value: string) {
 		.split(/[;,\n]/)
 		.map((recipient) => recipient.trim())
 		.filter(Boolean);
+}
+
+function cloneEmailSpreadsheetAttachment(
+	attachment: EmailSpreadsheetAttachment | null
+): EmailSpreadsheetAttachment | null {
+	if (!attachment) {
+		return null;
+	}
+
+	const cellsByKey: EmailSpreadsheetAttachment['cellsByKey'] = {};
+
+	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
+		const address = parseCellKey(key);
+
+		if (!address) {
+			continue;
+		}
+
+		cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = cell;
+	}
+
+	return {
+		filename: attachment.filename,
+		cellsByKey,
+		formatting: normalizeSpreadsheetFormatting(attachment.formatting)
+	};
 }
 
 function serializeEmailBodyText(body: EmailBodyBlock[]) {

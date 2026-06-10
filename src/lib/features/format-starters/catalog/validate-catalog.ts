@@ -146,6 +146,8 @@ function validateFormatStarterEntry(
 	}
 
 	for (const startingPoint of entry.startingPoints) {
+		validateStartingPointAttachmentHelpText(issues, entry, startingPoint);
+
 		for (const variableId of listEmailContentVariableIds(startingPoint.emailContent)) {
 			if (!variableIds.has(variableId)) {
 				issues.push({
@@ -154,6 +156,32 @@ function validateFormatStarterEntry(
 				});
 			}
 		}
+	}
+}
+
+function validateStartingPointAttachmentHelpText(
+	issues: FormatStarterCatalogValidationIssue[],
+	entry: FormatStarter,
+	startingPoint: FormatStarter['startingPoints'][number]
+) {
+	const helpText = startingPoint.attachmentHelpText;
+
+	if (startingPoint.emailContent.attachment) {
+		if (!helpText?.trim()) {
+			issues.push({
+				formatStarterSlug: entry.slug,
+				message: `Starting point "${startingPoint.id}" with an attachment must define attachment help text.`
+			});
+		}
+
+		return;
+	}
+
+	if (helpText !== undefined) {
+		issues.push({
+			formatStarterSlug: entry.slug,
+			message: `Starting point "${startingPoint.id}" without an attachment must not define attachment help text.`
+		});
 	}
 }
 

@@ -110,6 +110,8 @@ export const formatStarter = {
     {
       id: "expansion-brief",
       label: "Expansion brief",
+      attachmentHelpText:
+        "Use this workbook to connect call evidence to the expansion opportunity and recommended next step.",
       emailContent: {
         title: "Call expansion brief",
         to: ["Account owner"],
@@ -162,6 +164,8 @@ export const formatStarter = {
     {
       id: "risk-brief",
       label: "Retention risk brief",
+      attachmentHelpText:
+        "Use this workbook to organize retention risks from the call with the impacted topic, owner, and mitigation.",
       emailContent: {
         title: "Call retention risk brief",
         to: ["Account owner"],
@@ -211,6 +215,8 @@ export const formatStarter = {
     {
       id: "stakeholder-brief",
       label: "Stakeholder change brief",
+      attachmentHelpText:
+        "Use this workbook to review stakeholder roles, call signals, and follow-up actions from the conversation.",
       emailContent: {
         title: "Stakeholder call brief",
         to: ["Account owner"],
