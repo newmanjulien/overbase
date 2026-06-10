@@ -5,9 +5,9 @@ import {
 	SPREADSHEET_ROW_COUNT,
 	cellKey,
 	normalizeSpreadsheetFormatting,
+	normalizeSpreadsheetAttachmentFilename,
 	parseCellKey,
-	type SpreadsheetFormatting,
-	type SpreadsheetCellKey
+	type SpreadsheetAttachment
 } from '$domain/spreadsheets';
 
 export const EMAIL_DRAFT_LIMITS = {
@@ -44,11 +44,7 @@ export type EmailLinkBlock = {
 
 export type EmailBodyBlock = EmailParagraphBlock | EmailLinkBlock;
 
-export type EmailSpreadsheetAttachment = {
-	filename: string;
-	cellsByKey: Record<SpreadsheetCellKey, string>;
-	formatting: SpreadsheetFormatting;
-};
+export type EmailSpreadsheetAttachment = SpreadsheetAttachment<string>;
 
 export type EmailDraft = {
 	to: string[];
@@ -88,24 +84,18 @@ function normalizeRecipients(recipients: string[]) {
 }
 
 export function normalizeEmailAttachmentName(value: string) {
-	const withoutQueryOrHash = value.trim().split(/[?#]/)[0] ?? '';
-	const filename = withoutQueryOrHash.split(/[\\/]/).pop() ?? '';
-	const baseName = filename.replace(/\.[^.]+$/i, '');
-	const sanitizedBaseName = baseName
-		.replace(/[^a-zA-Z0-9 ._()-]+/g, '_')
-		.replace(/\s+/g, ' ')
-		.replace(/\.+$/g, '')
-		.trim();
-	const normalized = clampText(sanitizedBaseName, EMAIL_DRAFT_LIMITS.attachmentFilename);
-
-	return normalized ? `${normalized}.${EMAIL_ATTACHMENT_FORMAT.extension}` : '';
+	return normalizeSpreadsheetAttachmentFilename(
+		value,
+		EMAIL_DRAFT_LIMITS.attachmentFilename,
+		EMAIL_ATTACHMENT_FORMAT.extension
+	);
 }
 
 export function createDefaultEmailSpreadsheetAttachment(
 	filename = `Spreadsheet.${EMAIL_ATTACHMENT_FORMAT.extension}`
 ): EmailSpreadsheetAttachment {
 	return {
-		filename,
+		filename: normalizeEmailAttachmentName(filename),
 		cellsByKey: {},
 		formatting: normalizeSpreadsheetFormatting(null)
 	};
@@ -128,20 +118,25 @@ export function normalizeEmailSpreadsheetAttachment(
 		return null;
 	}
 
+	const cellsByKey: EmailSpreadsheetAttachment['cellsByKey'] = {};
+
+	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
+		const address = parseCellKey(key);
+
+		if (!address || cell === undefined) {
+			continue;
+		}
+
+		const normalizedCell = normalizeEmailSpreadsheetCell(cell);
+
+		if (normalizedCell.length > 0) {
+			cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = normalizedCell;
+		}
+	}
+
 	return {
 		filename,
-		cellsByKey: Object.fromEntries(
-			Object.entries(attachment.cellsByKey)
-				.map(([key, value]) => {
-					const address = parseCellKey(key);
-					const normalizedValue = normalizeEmailSpreadsheetCell(value);
-
-					return address && normalizedValue
-						? [cellKey(address.rowIndex, address.columnIndex), normalizedValue]
-						: null;
-				})
-				.filter((entry): entry is [SpreadsheetCellKey, string] => entry !== null)
-		) as Record<SpreadsheetCellKey, string>,
+		cellsByKey,
 		formatting: normalizeSpreadsheetFormatting(attachment.formatting)
 	};
 }

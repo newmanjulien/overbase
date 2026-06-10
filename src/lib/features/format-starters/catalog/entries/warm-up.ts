@@ -109,6 +109,8 @@ export const formatStarter = {
     {
       id: "steady-progress",
       label: "Steady progress update",
+      attachmentHelpText:
+        "Use this workbook to organize the current status, owner, and next checkpoint for each client update workstream.",
       emailContent: {
         title: "Client update",
         to: ["Client team"],
@@ -161,6 +163,8 @@ export const formatStarter = {
     {
       id: "decision-request",
       label: "Decision request",
+      attachmentHelpText:
+        "Use this workbook to review the decision, owner, due date, and impact before asking the client for direction.",
       emailContent: {
         title: "Decision needed",
         to: ["Client lead"],
@@ -206,6 +210,8 @@ export const formatStarter = {
     {
       id: "risk-escalation",
       label: "Risk escalation",
+      attachmentHelpText:
+        "Use this workbook to track the active risk, accountable owner, status, and mitigation plan for escalation.",
       emailContent: {
         title: "Risk update",
         to: ["Client sponsor"],

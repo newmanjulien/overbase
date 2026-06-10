@@ -14,6 +14,7 @@
 		| {
 				step: Extract<FormatCreatorStep, 'editor'>;
 				editor: FormatContentEditorState;
+				spreadsheetAttachmentHelpText?: string | null;
 				formatStarter: FormatStarter;
 				variableDragCoordinator: FormatVariableDragCoordinator;
 				onVariableInsertionRequestHandled: (requestId: number) => void;
@@ -37,6 +38,7 @@
 				editor={props.editor}
 				variables={props.formatStarter.variables}
 				dragCoordinator={props.variableDragCoordinator}
+				spreadsheetAttachmentHelpText={props.spreadsheetAttachmentHelpText ?? null}
 				onVariableInsertionRequestHandled={props.onVariableInsertionRequestHandled}
 			/>
 		</div>

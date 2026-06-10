@@ -31,8 +31,14 @@
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { onDestroy, untrack } from 'svelte';
 	import { getEmailFormatActivationMissingMessageFromError } from '$domain/email-formats/activation';
-	import { normalizeSpreadsheetFormatting } from '$domain/spreadsheets';
+	import { cellKey, normalizeSpreadsheetFormatting, parseCellKey } from '$domain/spreadsheets';
 	import type { PageProps } from './$types';
+
+	type EmailContentAttachmentInput = {
+		filename: string;
+		cellsByKey: Record<string, Array<EmailFormatContent['body'][number]['content'][number]>>;
+		formatting: NonNullable<EmailFormatContent['attachment']>['formatting'];
+	} | null;
 
 	let { data }: PageProps = $props();
 
@@ -249,23 +255,40 @@
 		return {
 			to: [...content.to],
 			cc: [...content.cc],
-			attachment: content.attachment
-				? {
-						filename: content.attachment.filename,
-						cellsByKey: Object.fromEntries(
-							Object.entries(content.attachment.cellsByKey).map(([key, cell]) => [
-								key,
-								cell.map((node) => ({ ...node }))
-							])
-						),
-						formatting: normalizeSpreadsheetFormatting(content.attachment.formatting)
-					}
-				: null,
+			attachment: cloneEmailContentAttachment(content.attachment),
 			body: content.body.map((block) => ({
 				id: block.id,
 				type: block.type,
 				content: block.content.map((node) => ({ ...node }))
 			}))
+		};
+	}
+
+	function cloneEmailContentAttachment(
+		attachment: EmailFormatContent['attachment']
+	): EmailContentAttachmentInput {
+		if (!attachment) {
+			return null;
+		}
+
+		const cellsByKey: NonNullable<EmailContentAttachmentInput>['cellsByKey'] = {};
+
+		for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
+			const address = parseCellKey(key);
+
+			if (!address) {
+				continue;
+			}
+
+			cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = cell.map((node) => ({
+				...node
+			}));
+		}
+
+		return {
+			filename: attachment.filename,
+			cellsByKey,
+			formatting: normalizeSpreadsheetFormatting(attachment.formatting)
 		};
 	}
 

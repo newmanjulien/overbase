@@ -110,6 +110,8 @@ export const formatStarter = {
     {
       id: "refinancing-idea",
       label: "Refinancing idea",
+      attachmentHelpText:
+        "Use this workbook to organize client triggers, comparable companies, supporting material, and the recommended financing idea.",
       emailContent: {
         title: "Coverage whitespace idea",
         to: ["Coverage banker"],
@@ -162,6 +164,8 @@ export const formatStarter = {
     {
       id: "mandate-expansion",
       label: "Mandate expansion",
+      attachmentHelpText:
+        "Use this workbook to review relationship context, whitespace gaps, next steps, and open questions for mandate expansion.",
       emailContent: {
         title: "Mandate expansion opportunity",
         to: ["Coverage banker"],
@@ -207,6 +211,8 @@ export const formatStarter = {
     {
       id: "specialist-handoff",
       label: "Specialist handoff",
+      attachmentHelpText:
+        "Use this workbook to package the client idea, relationship context, supporting material, and open question for the specialist.",
       emailContent: {
         title: "Product specialist handoff",
         to: ["Product specialist"],

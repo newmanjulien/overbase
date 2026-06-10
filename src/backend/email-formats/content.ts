@@ -163,13 +163,18 @@ export function normalizeEmailFormatAttachment(
 
 	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
 		const address = parseCellKey(key);
+
+		if (!address || cell === undefined) {
+			continue;
+		}
+
 		const normalizedCell = normalizeInlineNodes(
 			[...cell],
 			SPREADSHEET_CELL_MAX_LENGTH,
 			allowedVariableIds
 		);
 
-		if (address && normalizedCell.length > 0) {
+		if (normalizedCell.length > 0) {
 			cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = normalizedCell;
 		}
 	}
@@ -199,23 +204,40 @@ export function toEditableEmailFormatContent(format: Doc<'emailFormats'>) {
 	return {
 		to: [...format.to],
 		cc: [...format.cc],
-		attachment: format.attachment
-			? {
-					filename: format.attachment.filename,
-					cellsByKey: Object.fromEntries(
-						Object.entries(format.attachment.cellsByKey).map(([key, cell]) => [
-							key,
-							cell.map((node) => ({ ...node }))
-						])
-					),
-					formatting: normalizeSpreadsheetFormatting(format.attachment.formatting)
-				}
-			: null,
+		attachment: cloneEmailFormatAttachment(format.attachment),
 		body: format.body.map((block) => ({
 			id: block.id,
 			type: 'paragraph' as const,
 			content: block.content.map((node) => ({ ...node }))
 		}))
+	};
+}
+
+function cloneEmailFormatAttachment(
+	attachment: EmailFormatAttachment
+): EmailFormatAttachment {
+	if (!attachment) {
+		return null;
+	}
+
+	const cellsByKey: NonNullable<EmailFormatAttachment>['cellsByKey'] = {};
+
+	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
+		const address = parseCellKey(key);
+
+		if (!address) {
+			continue;
+		}
+
+		cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = cell.map((node) => ({
+			...node
+		}));
+	}
+
+	return {
+		filename: attachment.filename,
+		cellsByKey,
+		formatting: normalizeSpreadsheetFormatting(attachment.formatting)
 	};
 }
 

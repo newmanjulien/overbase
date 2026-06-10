@@ -1,14 +1,20 @@
 import {
 	resolveFormatStarterContent,
+	type FormatStartingPoint,
 	type FormatStarter
 } from '$lib/features/format-starters/catalog';
-import type {
-	FormatInlineNode,
-	FormatSpreadsheetAttachment,
-	FormatStarterSelectionAnswers,
-	FormatVariableDefinition
+import {
+	type FormatInlineNode,
+	type FormatSpreadsheetAttachment,
+	type FormatStarterSelectionAnswers,
+	type FormatVariableDefinition
 } from '$lib/features/format-starters/domain';
-import { normalizeSpreadsheetFormatting } from '$domain/spreadsheets';
+import {
+	cellKey,
+	normalizeSpreadsheetFormatting,
+	parseCellKey,
+	type SpreadsheetAttachment
+} from '$domain/spreadsheets';
 import { FormatContentEditorState } from './format-content-editor-state.svelte';
 
 export type FormatCreatorStep = 'starting-point-selection' | 'editor';
@@ -40,11 +46,7 @@ export type CreateEmailFormatFromStarterInput = {
 	title: string;
 	to: string[];
 	cc: string[];
-	attachment: {
-		filename: string;
-		cellsByKey: Record<string, FormatInlineNode[]>;
-		formatting: FormatSpreadsheetAttachment['formatting'];
-	} | null;
+	attachment: SpreadsheetAttachment<FormatInlineNode[]> | null;
 	body: Array<{
 		id: string;
 		type: 'paragraph';
@@ -78,6 +80,16 @@ export class FormatCreatorState {
 
 	get selectedStartingPointId() {
 		return this.creator.selectedStartingPointId;
+	}
+
+	get selectedStartingPoint(): FormatStartingPoint | null {
+		const selectedStartingPointId = this.creator.selectedStartingPointId;
+
+		return (
+			this.formatStarter.startingPoints.find(
+				(startingPoint) => startingPoint.id === selectedStartingPointId
+			) ?? null
+		);
 	}
 
 	get editor() {
@@ -249,16 +261,25 @@ function cloneInlineNodes(nodes: readonly FormatInlineNode[]): FormatInlineNode[
 }
 
 function clonePublishAttachment(attachment: FormatSpreadsheetAttachment | null) {
-	return attachment
-		? {
-				filename: attachment.filename,
-				cellsByKey: Object.fromEntries(
-					Object.entries(attachment.cellsByKey).map(([key, cell]) => [
-						key,
-						cloneInlineNodes(cell)
-					])
-				) as Record<string, FormatInlineNode[]>,
-				formatting: normalizeSpreadsheetFormatting(attachment.formatting)
-			}
-		: null;
+	if (!attachment) {
+		return null;
+	}
+
+	const cellsByKey: SpreadsheetAttachment<FormatInlineNode[]>['cellsByKey'] = {};
+
+	for (const [key, cell] of Object.entries(attachment.cellsByKey)) {
+		const address = parseCellKey(key);
+
+		if (!address) {
+			continue;
+		}
+
+		cellsByKey[cellKey(address.rowIndex, address.columnIndex)] = cloneInlineNodes(cell);
+	}
+
+	return {
+		filename: attachment.filename,
+		cellsByKey,
+		formatting: normalizeSpreadsheetFormatting(attachment.formatting)
+	};
 }

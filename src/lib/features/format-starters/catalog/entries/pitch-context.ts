@@ -113,6 +113,8 @@ export const formatStarter = {
     {
       id: "proposal-context",
       label: "Proposal context",
+      attachmentHelpText:
+        "Use this workbook to organize reusable proposal context, ownership, and recommended positioning for the pitch team.",
       emailContent: {
         title: "Pitch context",
         to: ["Pitch owner"],
@@ -165,6 +167,8 @@ export const formatStarter = {
     {
       id: "competitor-context",
       label: "Competitor context",
+      attachmentHelpText:
+        "Use this workbook to compare competitor context, source material, and pitch angles before shaping the proposal.",
       emailContent: {
         title: "Competitor pitch context",
         to: ["Pitch owner"],
@@ -215,6 +219,8 @@ export const formatStarter = {
     {
       id: "executive-context",
       label: "Executive context",
+      attachmentHelpText:
+        "Use this workbook to review decision-maker priorities, proof points, and follow-up owners for the executive meeting.",
       emailContent: {
         title: "Executive pitch context",
         to: ["Partner"],

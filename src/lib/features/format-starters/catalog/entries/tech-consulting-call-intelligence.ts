@@ -110,6 +110,8 @@ export const formatStarter = {
     {
       id: "expansion-brief",
       label: "Expansion brief",
+      attachmentHelpText:
+        "Use this workbook to map technical call signals to expansion opportunities, evidence, and the next client action.",
       emailContent: {
         title: "Call expansion brief",
         to: ["Account owner"],
@@ -162,6 +164,8 @@ export const formatStarter = {
     {
       id: "risk-brief",
       label: "Retention risk brief",
+      attachmentHelpText:
+        "Use this workbook to review technical retention risks, affected topics, owners, and mitigation follow-up from the call.",
       emailContent: {
         title: "Call retention risk brief",
         to: ["Account owner"],
@@ -211,6 +215,8 @@ export const formatStarter = {
     {
       id: "stakeholder-brief",
       label: "Stakeholder change brief",
+      attachmentHelpText:
+        "Use this workbook to organize stakeholder changes, roles, call evidence, and follow-up timing for the account team.",
       emailContent: {
         title: "Stakeholder call brief",
         to: ["Account owner"],

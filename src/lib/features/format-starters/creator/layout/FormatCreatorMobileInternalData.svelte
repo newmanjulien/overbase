@@ -10,6 +10,7 @@
 
 	type Props = {
 		editor: FormatContentEditorState;
+		spreadsheetAttachmentHelpText?: string | null;
 		variablePickerOpen: boolean;
 		variableInsertionRequest: FormatVariableInsertionRequest | null;
 		onVariableInsertionRequest: (variableId: string) => void;
@@ -26,6 +27,7 @@
 
 	let {
 		editor,
+		spreadsheetAttachmentHelpText = null,
 		variablePickerOpen,
 		variableInsertionRequest,
 		onVariableInsertionRequest,
@@ -52,6 +54,7 @@
 				{editor}
 				variables={formatStarter.variables}
 				dragCoordinator={variableDragCoordinator}
+				{spreadsheetAttachmentHelpText}
 				{variableInsertionRequest}
 				{onVariableInsertionRequestHandled}
 			/>
