@@ -10,11 +10,10 @@ import {
 } from '../backend/validators/email-formats';
 
 export default defineSchema({
-	users: defineTable({
+	admins: defineTable({
 		clerkUserId: v.string(),
 		displayName: v.optional(v.string()),
 		avatar: v.optional(avatar),
-		workspaceId: v.optional(v.id('workspaces')),
 		createdAt: v.number(),
 		updatedAt: v.number()
 	}).index('by_clerkUserId', ['clerkUserId']),
@@ -26,12 +25,12 @@ export default defineSchema({
 		name: v.string(),
 		industry: v.string(),
 		avatar: v.optional(avatar),
-		ownerUserId: v.id('users'),
+		adminId: v.id('admins'),
 		onboardingCompletedAt: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number()
-	}).index('by_ownerUserId', ['ownerUserId']),
-	teammates: defineTable({
+	}).index('by_adminId', ['adminId']),
+	teamMembers: defineTable({
 		workspaceId: v.id('workspaces'),
 		email: v.string(),
 		name: v.string(),
@@ -43,7 +42,7 @@ export default defineSchema({
 		.index('by_workspace_createdAt', ['workspaceId', 'createdAt']),
 	emailFormats: defineTable({
 		workspaceId: v.id('workspaces'),
-		creatorUserId: v.id('users'),
+		creatorAdminId: v.id('admins'),
 		formatStarterSlug: v.string(),
 		startingPointId: v.string(),
 		variables: v.array(emailFormatVariableDefinition),
@@ -67,8 +66,8 @@ export default defineSchema({
 		workspaceId: v.id('workspaces'),
 		emailFormatId: v.id('emailFormats'),
 		recipient: v.union(
-			v.object({ kind: v.literal('user'), userId: v.id('users') }),
-			v.object({ kind: v.literal('teammate'), teammateId: v.id('teammates') })
+			v.object({ kind: v.literal('admin'), adminId: v.id('admins') }),
+			v.object({ kind: v.literal('teamMember'), teamMemberId: v.id('teamMembers') })
 		),
 		createdAt: v.number()
 	})

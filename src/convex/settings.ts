@@ -34,16 +34,16 @@ function normalizeFileName(fileName: string | undefined) {
 	return normalizedFileName.slice(0, MAX_FILE_NAME_LENGTH);
 }
 
-export const updateUserName = mutation({
+export const updateAdminName = mutation({
 	args: {
 		displayName: v.string()
 	},
 	handler: async (ctx, { displayName }) => {
-		const { user } = await requireViewerWorkspace(ctx);
+		const { admin } = await requireViewerWorkspace(ctx);
 		const now = Date.now();
 		const name = normalizeName(displayName, 'Name');
 
-		await ctx.db.patch(user._id, {
+		await ctx.db.patch(admin._id, {
 			displayName: name,
 			updatedAt: now
 		});
@@ -101,13 +101,13 @@ export const generateAvatarUploadUrl = mutation({
 	}
 });
 
-export const saveUserAvatar = mutation({
+export const saveAdminAvatar = mutation({
 	args: {
 		storageId: v.id('_storage'),
 		fileName: v.optional(v.string())
 	},
 	handler: async (ctx, { storageId, fileName }) => {
-		const { user } = await requireViewerWorkspace(ctx);
+		const { admin } = await requireViewerWorkspace(ctx);
 		const avatarResult = await createUploadedAvatarOrDelete(
 			ctx,
 			storageId,
@@ -121,11 +121,11 @@ export const saveUserAvatar = mutation({
 
 		const { avatar } = avatarResult;
 
-		await ctx.db.patch(user._id, {
+		await ctx.db.patch(admin._id, {
 			avatar,
 			updatedAt: avatar.updatedAt
 		});
-		await deleteReplacedUploadedAvatar(ctx, user.avatar, storageId);
+		await deleteReplacedUploadedAvatar(ctx, admin.avatar, storageId);
 
 		return { ok: true, avatar };
 	}

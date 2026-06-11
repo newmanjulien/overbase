@@ -18,7 +18,7 @@ type ClerkSessionState = 'loading' | 'signedOut' | 'signedIn';
 type ConvexAuthState = 'pending' | 'authenticated' | 'failed';
 
 export type ViewerWorkspace = {
-	user: Doc<'users'>;
+	admin: Doc<'admins'>;
 	workspace: Doc<'workspaces'>;
 	identity: ViewerIdentity;
 };
@@ -46,19 +46,19 @@ export function createViewerSession() {
 	let deletedAccountSignOutErrorText = $state<string | null>(null);
 	let deletedAccountSignOutStarted = $state(false);
 	let isSigningOutDeletedAccount = $state(false);
-	const signedInUserId = $derived(clerk.auth.userId ?? null);
+	const signedInClerkUserId = $derived(clerk.auth.userId ?? null);
 	const clerkSessionState = $derived.by<ClerkSessionState>(() => {
 		if (!clerk.isLoaded) {
 			return 'loading';
 		}
 
-		return signedInUserId ? 'signedIn' : 'signedOut';
+		return signedInClerkUserId ? 'signedIn' : 'signedOut';
 	});
-	const shouldLoadCurrentUser = $derived(
+	const shouldLoadViewerAccountState = $derived(
 		clerkSessionState === 'signedIn' && convexAuthState === 'authenticated'
 	);
 	const viewerAccountStateQuery = useQuery(api.auth.viewerAccountState, () =>
-		shouldLoadCurrentUser ? {} : 'skip'
+		shouldLoadViewerAccountState ? {} : 'skip'
 	);
 	const accountState = $derived(viewerAccountStateQuery.data ?? null);
 	const viewer = $derived.by<ViewerWorkspace | null>(() => {
@@ -69,7 +69,7 @@ export function createViewerSession() {
 		}
 
 		return {
-			user: state.user,
+			admin: state.admin,
 			workspace: state.workspace,
 			identity: state.identity
 		};
@@ -152,7 +152,7 @@ export function createViewerSession() {
 	}
 
 	$effect(() => {
-		const userId = signedInUserId;
+		const clerkUserId = signedInClerkUserId;
 		const session = clerk.session;
 		const retryNonce = authRetryNonce;
 		const version = (authVersion += 1);
@@ -166,7 +166,7 @@ export function createViewerSession() {
 			return;
 		}
 
-		if (!userId) {
+		if (!clerkUserId) {
 			client.setAuth(async () => null);
 			return;
 		}
@@ -220,10 +220,10 @@ export function createViewerSession() {
 			return status;
 		},
 		get isSignedIn() {
-			return Boolean(signedInUserId);
+			return Boolean(signedInClerkUserId);
 		},
-		get signedInUserId() {
-			return signedInUserId;
+		get signedInClerkUserId() {
+			return signedInClerkUserId;
 		},
 		get accountState() {
 			return accountState;

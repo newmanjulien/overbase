@@ -15,43 +15,43 @@
 
 	const currentWorkspace = useCurrentWorkspaceContext();
 	const client = useConvexClient();
-	const userName = $derived(currentWorkspace.user.displayName ?? '');
-	const userDisplayLabel = $derived(
-		currentWorkspace.user.displayName || currentWorkspace.identity.email
+	const personalName = $derived(currentWorkspace.admin.displayName ?? '');
+	const personalDisplayLabel = $derived(
+		currentWorkspace.admin.displayName || currentWorkspace.identity.email
 	);
-	const userEmail = $derived(currentWorkspace.identity.email);
-	const userAvatarUrl = $derived(currentWorkspace.user.avatar?.url ?? '');
+	const signInEmail = $derived(currentWorkspace.identity.email);
+	const personalAvatarUrl = $derived(currentWorkspace.admin.avatar?.url ?? '');
 	const workspaceName = $derived(currentWorkspace.workspace.name);
 	const workspaceIndustry = $derived(currentWorkspace.workspace.industry);
 	const workspaceAvatarUrl = $derived(currentWorkspace.workspace.avatar?.url ?? '');
 	const avatarPreviewClass =
 		'border border-stone-200/70 bg-stone-100 text-xl text-stone-500';
 
-	let savingUserName = $state(false);
+	let savingPersonalName = $state(false);
 	let savingWorkspaceName = $state(false);
 	let savingWorkspaceIndustry = $state(false);
-	let uploadingUserAvatar = $state(false);
+	let uploadingPersonalAvatar = $state(false);
 	let uploadingWorkspaceAvatar = $state(false);
-	let userNameErrorText = $state<string | null>(null);
+	let personalNameErrorText = $state<string | null>(null);
 	let workspaceNameErrorText = $state<string | null>(null);
 	let workspaceIndustryErrorText = $state<string | null>(null);
-	let userAvatarErrorText = $state<string | null>(null);
+	let personalAvatarErrorText = $state<string | null>(null);
 	let workspaceAvatarErrorText = $state<string | null>(null);
 
 	function getErrorMessage(error: unknown, fallback: string) {
 		return error instanceof Error ? error.message : fallback;
 	}
 
-	async function saveUserName(displayName: string) {
-		savingUserName = true;
-		userNameErrorText = null;
+	async function savePersonalName(displayName: string) {
+		savingPersonalName = true;
+		personalNameErrorText = null;
 
 		try {
-			await client.mutation(api.settings.updateUserName, { displayName });
+			await client.mutation(api.settings.updateAdminName, { displayName });
 		} catch (error) {
-			userNameErrorText = getErrorMessage(error, 'Unable to save your name.');
+			personalNameErrorText = getErrorMessage(error, 'Unable to save your name.');
 		} finally {
-			savingUserName = false;
+			savingPersonalName = false;
 		}
 	}
 
@@ -114,33 +114,33 @@
 		return result.storageId;
 	}
 
-	async function saveUserAvatar(file: File) {
+	async function savePersonalAvatar(file: File) {
 		const validationErrorText = validateAvatarFile(file);
-		userAvatarErrorText = validationErrorText;
+		personalAvatarErrorText = validationErrorText;
 
 		if (validationErrorText) {
 			return;
 		}
 
-		uploadingUserAvatar = true;
+		uploadingPersonalAvatar = true;
 
 		try {
 			const storageId = await uploadAvatar(file);
-			const result = await client.mutation(api.settings.saveUserAvatar, {
+			const result = await client.mutation(api.settings.saveAdminAvatar, {
 				storageId,
 				fileName: file.name
 			});
 
 			if ('errorText' in result) {
-				userAvatarErrorText = result.errorText;
+				personalAvatarErrorText = result.errorText;
 				return;
 			}
 
-			userAvatarErrorText = null;
+			personalAvatarErrorText = null;
 		} catch (error) {
-			userAvatarErrorText = getErrorMessage(error, 'Unable to save user avatar.');
+			personalAvatarErrorText = getErrorMessage(error, 'Unable to save your avatar.');
 		} finally {
-			uploadingUserAvatar = false;
+			uploadingPersonalAvatar = false;
 		}
 	}
 
@@ -179,23 +179,23 @@
 	<div class="min-h-0 min-w-0 flex-1">
 		<div class="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-10 md:gap-7 md:pb-16">
 			<SettingsTextFieldCard
-				title="Name"
+				title="Your name"
 				description="This is your visible name in Overbase."
-				fieldId="settings-user-name"
-				label="User name"
-				value={userName}
+				fieldId="settings-personal-name"
+				label="Your name"
+				value={personalName}
 				footerText="Use 32 characters at maximum."
-				saving={savingUserName}
-				errorText={userNameErrorText}
-				onSave={saveUserName}
+				saving={savingPersonalName}
+				errorText={personalNameErrorText}
+				onSave={savePersonalName}
 			/>
 
 			<SettingsReadonlyFieldCard
-				title="Email"
-				description="This is the email address used to sign in to Overbase."
-				fieldId="settings-user-email"
+				title="Sign-in email"
+				description="This is the email address you use to sign in to Overbase."
+				fieldId="settings-sign-in-email"
 				label="Email address"
-				value={userEmail}
+				value={signInEmail}
 				footerText="Email is managed by your sign-in provider."
 			/>
 
@@ -226,19 +226,19 @@
 			/>
 
 			<SettingsAvatarCard
-				title="User avatar"
+				title="Your avatar"
 				description={["This is your personal avatar."]}
 				footerText="An avatar is optional but helps team members recognize you."
-				ariaLabel="Upload user avatar"
-				uploading={uploadingUserAvatar}
-				errorText={userAvatarErrorText}
-				onFileSelected={saveUserAvatar}
+				ariaLabel="Upload your avatar"
+				uploading={uploadingPersonalAvatar}
+				errorText={personalAvatarErrorText}
+				onFileSelected={savePersonalAvatar}
 			>
 				{#snippet preview()}
 					<PersonAvatar
-						person={{ name: userDisplayLabel, avatarUrl: userAvatarUrl }}
+						person={{ name: personalDisplayLabel, avatarUrl: personalAvatarUrl }}
 						size={68}
-						class={`${avatarPreviewClass} ${uploadingUserAvatar ? 'opacity-55' : ''}`}
+						class={`${avatarPreviewClass} ${uploadingPersonalAvatar ? 'opacity-55' : ''}`}
 					/>
 				{/snippet}
 			</SettingsAvatarCard>

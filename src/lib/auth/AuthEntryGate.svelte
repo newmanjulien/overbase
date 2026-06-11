@@ -39,7 +39,7 @@
 	let { entry, flow, signedInOnboarding }: Props = $props();
 	const session = createViewerSession();
 	provideViewerSession(session);
-	const authEntryKey = $derived(`${session.signedInUserId ?? 'signed-out'}:${entry}`);
+	const authEntryKey = $derived(`${session.signedInClerkUserId ?? 'signed-out'}:${entry}`);
 	const returnTo = $derived(resolveAuthReturnTo(page.url));
 	const postAuthHref = $derived(resolvePostAuthHref(page.url));
 	const returnButtonHref = $derived(

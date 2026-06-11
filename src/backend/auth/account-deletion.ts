@@ -24,55 +24,41 @@ async function deleteEmailFormatRecords(ctx: MutationCtx, workspaceId: Id<'works
 	}
 }
 
-async function deleteTeammateRecords(ctx: MutationCtx, workspaceId: Id<'workspaces'>) {
-	const teammates = await ctx.db
-		.query('teammates')
+async function deleteTeamMemberRecords(ctx: MutationCtx, workspaceId: Id<'workspaces'>) {
+	const teamMembers = await ctx.db
+		.query('teamMembers')
 		.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspaceId))
 		.collect();
 
-	for (const teammate of teammates) {
-		await ctx.db.delete(teammate._id);
+	for (const teamMember of teamMembers) {
+		await ctx.db.delete(teamMember._id);
 	}
 }
 
 async function deleteWorkspaceRecords(ctx: MutationCtx, workspace: Doc<'workspaces'>) {
 	await deleteEmailFormatRecipientRecords(ctx, workspace._id);
 	await deleteEmailFormatRecords(ctx, workspace._id);
-	await deleteTeammateRecords(ctx, workspace._id);
+	await deleteTeamMemberRecords(ctx, workspace._id);
 	await deleteUploadedAvatar(ctx, workspace.avatar);
 	await ctx.db.delete(workspace._id);
 }
 
-async function getOwnedWorkspaces(ctx: MutationCtx, user: Doc<'users'>) {
-	const workspaces = await ctx.db
+async function getAdminWorkspaces(ctx: MutationCtx, admin: Doc<'admins'>) {
+	return await ctx.db
 		.query('workspaces')
-		.withIndex('by_ownerUserId', (q) => q.eq('ownerUserId', user._id))
+		.withIndex('by_adminId', (q) => q.eq('adminId', admin._id))
 		.collect();
-
-	if (!user.workspaceId) {
-		return workspaces;
-	}
-
-	const linkedWorkspace = await ctx.db.get(user.workspaceId);
-
-	if (!linkedWorkspace || linkedWorkspace.ownerUserId !== user._id) {
-		return workspaces;
-	}
-
-	return workspaces.some((workspace) => workspace._id === linkedWorkspace._id)
-		? workspaces
-		: [...workspaces, linkedWorkspace];
 }
 
-async function deleteAccountRecords(ctx: MutationCtx, user: Doc<'users'>) {
-	const workspaces = await getOwnedWorkspaces(ctx, user);
+async function deleteAccountRecords(ctx: MutationCtx, admin: Doc<'admins'>) {
+	const workspaces = await getAdminWorkspaces(ctx, admin);
 
 	for (const workspace of workspaces) {
 		await deleteWorkspaceRecords(ctx, workspace);
 	}
 
-	await deleteUploadedAvatar(ctx, user.avatar);
-	await ctx.db.delete(user._id);
+	await deleteUploadedAvatar(ctx, admin.avatar);
+	await ctx.db.delete(admin._id);
 }
 
 async function recordDeletedClerkUser(ctx: MutationCtx, clerkUserId: string) {
@@ -94,16 +80,16 @@ async function recordDeletedClerkUser(ctx: MutationCtx, clerkUserId: string) {
 export async function deleteAccountForClerkUserId(ctx: MutationCtx, clerkUserId: string) {
 	await recordDeletedClerkUser(ctx, clerkUserId);
 
-	const user = await ctx.db
-		.query('users')
+	const admin = await ctx.db
+		.query('admins')
 		.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', clerkUserId))
 		.first();
 
-	if (!user) {
+	if (!admin) {
 		return { ok: true };
 	}
 
-	await deleteAccountRecords(ctx, user);
+	await deleteAccountRecords(ctx, admin);
 
 	return { ok: true };
 }

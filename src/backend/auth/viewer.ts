@@ -6,7 +6,7 @@ import { isSupportedCompanyIndustry } from '../../domain/company-industries';
 export type { ViewerIdentity } from '../../domain/viewer';
 
 export type ViewerWorkspace = {
-	user: Doc<'users'>;
+	admin: Doc<'admins'>;
 	workspace: Doc<'workspaces'>;
 	identity: ViewerIdentity;
 };
@@ -17,13 +17,13 @@ export type ViewerAccountState =
 	| { kind: 'needsOnboarding'; identity: ViewerIdentity }
 	| {
 			kind: 'onboardingIncomplete';
-			user: Doc<'users'>;
+			admin: Doc<'admins'>;
 			workspace: Doc<'workspaces'>;
 			identity: ViewerIdentity;
 	  }
 	| {
 			kind: 'ready';
-			user: Doc<'users'>;
+			admin: Doc<'admins'>;
 			workspace: Doc<'workspaces'>;
 			identity: ViewerIdentity;
 	  };
@@ -76,9 +76,9 @@ async function getCurrentSignedInClerkViewer(ctx: QueryCtx | MutationCtx) {
 	return getSignedInClerkViewer(identity);
 }
 
-async function getUserForClerkUserId(ctx: QueryCtx | MutationCtx, clerkUserId: string) {
+async function getAdminForClerkUserId(ctx: QueryCtx | MutationCtx, clerkUserId: string) {
 	return await ctx.db
-		.query('users')
+		.query('admins')
 		.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', clerkUserId))
 		.first();
 }
@@ -96,44 +96,29 @@ async function ensureClerkUserWasNotDeleted(ctx: QueryCtx | MutationCtx, clerkUs
 	}
 }
 
-export async function getWorkspaceForUser(ctx: QueryCtx | MutationCtx, user: Doc<'users'>) {
-	if (!user.workspaceId) {
-		return null;
-	}
-
-	const workspace = await ctx.db.get(user.workspaceId);
-
-	if (!workspace || workspace.ownerUserId !== user._id) {
-		return null;
-	}
-
-	return workspace;
+export async function getWorkspaceForAdmin(ctx: QueryCtx | MutationCtx, admin: Doc<'admins'>) {
+	return await ctx.db
+		.query('workspaces')
+		.withIndex('by_adminId', (q) => q.eq('adminId', admin._id))
+		.first();
 }
 
-async function createWorkspaceForUser(ctx: MutationCtx, user: Doc<'users'>, now: number) {
+async function createWorkspaceForAdmin(ctx: MutationCtx, admin: Doc<'admins'>, now: number) {
 	const workspaceId = await ctx.db.insert('workspaces', {
 		name: '',
 		industry: '',
-		ownerUserId: user._id,
+		adminId: admin._id,
 		createdAt: now,
 		updatedAt: now
 	});
 
-	await ctx.db.patch(user._id, {
-		workspaceId,
-		updatedAt: now
-	});
+	const workspace = await ctx.db.get(workspaceId);
 
-	const [updatedUser, workspace] = await Promise.all([
-		ctx.db.get(user._id),
-		ctx.db.get(workspaceId)
-	]);
-
-	if (!updatedUser || !workspace) {
+	if (!workspace) {
 		throw new Error('Unable to initialize workspace.');
 	}
 
-	return { user: updatedUser, workspace };
+	return { admin, workspace };
 }
 
 function hasCompletedWorkspaceProfile(workspace: Doc<'workspaces'>) {
@@ -145,19 +130,19 @@ async function requireInitializedViewerWorkspace(
 ): Promise<ViewerWorkspace> {
 	const viewer = await requireSignedInClerkViewer(ctx);
 	await ensureClerkUserWasNotDeleted(ctx, viewer.clerkUserId);
-	const user = await getUserForClerkUserId(ctx, viewer.clerkUserId);
+	const admin = await getAdminForClerkUserId(ctx, viewer.clerkUserId);
 
-	if (!user) {
-		throw new Error('User has not been initialized.');
+	if (!admin) {
+		throw new Error('Admin has not been initialized.');
 	}
 
-	const workspace = await getWorkspaceForUser(ctx, user);
+	const workspace = await getWorkspaceForAdmin(ctx, admin);
 
 	if (!workspace) {
 		throw new Error('Workspace required.');
 	}
 
-	return { user, workspace, identity: viewer.identity };
+	return { admin, workspace, identity: viewer.identity };
 }
 
 export async function requireViewerWorkspace(ctx: QueryCtx | MutationCtx): Promise<ViewerWorkspace> {
@@ -201,30 +186,30 @@ async function ensureOnboardingWorkspaceRecord(ctx: MutationCtx): Promise<Viewer
 	const viewer = await requireSignedInClerkViewer(ctx);
 	await ensureClerkUserWasNotDeleted(ctx, viewer.clerkUserId);
 	const now = Date.now();
-	let user = await ctx.db
-		.query('users')
+	let admin = await ctx.db
+		.query('admins')
 		.withIndex('by_clerkUserId', (q) => q.eq('clerkUserId', viewer.clerkUserId))
 		.first();
 
-	if (!user) {
-		const userId = await ctx.db.insert('users', {
+	if (!admin) {
+		const adminId = await ctx.db.insert('admins', {
 			clerkUserId: viewer.clerkUserId,
 			...(viewer.initialDisplayName ? { displayName: viewer.initialDisplayName } : {}),
 			createdAt: now,
 			updatedAt: now
 		});
-		user = await ctx.db.get(userId);
+		admin = await ctx.db.get(adminId);
 	}
 
-	if (!user) {
-		throw new Error('Unable to initialize user.');
+	if (!admin) {
+		throw new Error('Unable to initialize admin.');
 	}
 
-	const workspace = await getWorkspaceForUser(ctx, user);
+	const workspace = await getWorkspaceForAdmin(ctx, admin);
 
 	return workspace
-		? { user, workspace, identity: viewer.identity }
-		: { ...(await createWorkspaceForUser(ctx, user, now)), identity: viewer.identity };
+		? { admin, workspace, identity: viewer.identity }
+		: { ...(await createWorkspaceForAdmin(ctx, admin, now)), identity: viewer.identity };
 }
 
 export async function saveOnboardingCompanyProfile(
@@ -273,23 +258,23 @@ export async function getViewerAccountState(ctx: QueryCtx | MutationCtx): Promis
 		return { kind: 'deleted' };
 	}
 
-	const user = await getUserForClerkUserId(ctx, viewer.clerkUserId);
+	const admin = await getAdminForClerkUserId(ctx, viewer.clerkUserId);
 
-	if (!user) {
+	if (!admin) {
 		return { kind: 'needsOnboarding', identity: viewer.identity };
 	}
 
-	const workspace = await getWorkspaceForUser(ctx, user);
+	const workspace = await getWorkspaceForAdmin(ctx, admin);
 
 	if (!workspace) {
 		return { kind: 'needsOnboarding', identity: viewer.identity };
 	}
 
 	if (!workspace.onboardingCompletedAt || !hasCompletedWorkspaceProfile(workspace)) {
-		return { kind: 'onboardingIncomplete', user, workspace, identity: viewer.identity };
+		return { kind: 'onboardingIncomplete', admin, workspace, identity: viewer.identity };
 	}
 
-	return { kind: 'ready', user, workspace, identity: viewer.identity };
+	return { kind: 'ready', admin, workspace, identity: viewer.identity };
 }
 
 export async function markWorkspaceOnboardingComplete(ctx: MutationCtx) {

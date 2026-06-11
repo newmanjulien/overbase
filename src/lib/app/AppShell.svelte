@@ -31,15 +31,15 @@
 	type ChromeMode = NonNullable<App.PageData['chromeMode']>;
 	type ViewportState = 'unknown' | 'mobile' | 'desktop';
 
-	let { user, workspace, identity, children: routeChildren }: Props = $props();
+	let { admin, workspace, identity, children: routeChildren }: Props = $props();
 
 	function getChromeMode(chromeMode?: ChromeMode) {
 		return chromeMode ?? 'dashboard';
 	}
 
 	const currentWorkspace: CurrentWorkspaceContext = {
-		get user() {
-			return user;
+		get admin() {
+			return admin;
 		},
 		get workspace() {
 			return workspace;
@@ -154,7 +154,7 @@
 		>
 			<DesktopSidebar
 				currentPathname={page.url.pathname}
-				user={currentWorkspace.user}
+				admin={currentWorkspace.admin}
 				identity={currentWorkspace.identity}
 				class="hidden md:flex"
 			/>

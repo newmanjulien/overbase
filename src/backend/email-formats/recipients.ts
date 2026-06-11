@@ -5,7 +5,9 @@ import type { MutationCtx, QueryCtx } from '../../convex/_generated/server';
 export type EmailFormatRecipientRef = Doc<'emailFormatRecipients'>['recipient'];
 
 function toRecipientKey(ref: EmailFormatRecipientRef) {
-	return ref.kind === 'user' ? `user:${ref.userId}` : `teammate:${ref.teammateId}`;
+	return ref.kind === 'admin'
+		? `admin:${ref.adminId}`
+		: `teamMember:${ref.teamMemberId}`;
 }
 
 function dedupeRecipientRefs(refs: EmailFormatRecipientRef[]) {
@@ -55,16 +57,16 @@ async function validateRecipientRefs(
 	const dedupedRefs = dedupeRecipientRefs(refs);
 
 	for (const ref of dedupedRefs) {
-		if (ref.kind === 'user') {
-			if (ref.userId !== viewerWorkspace.user._id) {
-				throw new Error('Recipient user is not in this workspace.');
+		if (ref.kind === 'admin') {
+			if (ref.adminId !== viewerWorkspace.admin._id) {
+				throw new Error('Recipient admin is not in this workspace.');
 			}
 			continue;
 		}
 
-		const teammate = await ctx.db.get(ref.teammateId);
+		const teamMember = await ctx.db.get(ref.teamMemberId);
 
-		if (!teammate || teammate.workspaceId !== viewerWorkspace.workspace._id) {
+		if (!teamMember || teamMember.workspaceId !== viewerWorkspace.workspace._id) {
 			throw new Error('Recipient team member is not in this workspace.');
 		}
 	}

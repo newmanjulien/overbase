@@ -10,36 +10,36 @@
 		type NoResultsListStateConfig
 	} from '$lib/layout/list';
 	import { useConvexClient, useQuery } from 'convex-svelte';
-	import AddTeammatesModal from '$lib/features/teammates/list/AddTeammatesModal.svelte';
-	import TeammateListRow, {
-		type TeammateItem
-	} from '$lib/features/teammates/list/TeammateListRow.svelte';
-	import { parseTeammateEmailInput } from '$lib/features/teammates/list/teammate-email-input';
+	import AddTeamMembersModal from '$lib/features/team-members/list/AddTeamMembersModal.svelte';
+	import TeamMemberListRow, {
+		type TeamMemberItem
+	} from '$lib/features/team-members/list/TeamMemberListRow.svelte';
+	import { parseTeamMemberEmailInput } from '$lib/features/team-members/list/team-member-email-input';
 
 	const client = useConvexClient();
-	const teammatesQuery = useQuery(api.teammates.listTeammates);
+	const teamMembersQuery = useQuery(api.teamMembers.listTeamMembers);
 	let modalOpen = $state(false);
-	let teammateEmails = $state('');
+	let teamMemberEmails = $state('');
 	let modalError = $state<string | null>(null);
-	let isAddingTeammates = $state(false);
-	let deletingTeammateIds = $state<Id<'teammates'>[]>([]);
+	let isAddingTeamMembers = $state(false);
+	let deletingTeamMemberIds = $state<Id<'teamMembers'>[]>([]);
 	let actionError = $state<string | null>(null);
 	let notificationWarning = $state<string | null>(null);
-	let editingTeammateId = $state<Id<'teammates'> | null>(null);
-	let savingTeammateId = $state<Id<'teammates'> | null>(null);
+	let editingTeamMemberId = $state<Id<'teamMembers'> | null>(null);
+	let savingTeamMemberId = $state<Id<'teamMembers'> | null>(null);
 	let searchQuery = $state('');
 	let selectedRoleFilter = $state('all');
-	let teammateDraft = $state({
+	let teamMemberDraft = $state({
 		name: '',
 		email: '',
 		role: ''
 	});
-	const teammateItems = $derived((teammatesQuery.data ?? []).map(toTeammateItem));
-	const roleFilterOptions = $derived(getRoleFilterOptions(teammatesQuery.data ?? []));
+	const teamMemberItems = $derived((teamMembersQuery.data ?? []).map(toTeamMemberItem));
+	const roleFilterOptions = $derived(getRoleFilterOptions(teamMembersQuery.data ?? []));
 	const selectedRoleFilterLabel = $derived(
 		roleFilterOptions.find((option) => option.id === selectedRoleFilter)?.label ?? 'All roles'
 	);
-	const filteredTeammateItems = $derived(teammateItems.filter(matchesTeammateFilters));
+	const filteredTeamMemberItems = $derived(teamMemberItems.filter(matchesTeamMemberFilters));
 	const emptyListState = {
 		icon: APP_ROUTE_REGISTRY.team.icon,
 		title: 'No team members found',
@@ -56,17 +56,17 @@
 		description: 'Try a different search term, email, or role'
 	} satisfies NoResultsListStateConfig;
 	const listStatus = $derived<ListRouteStatus>(
-		teammatesQuery.isLoading
+		teamMembersQuery.isLoading
 			? 'loading'
-			: teammatesQuery.error
+			: teamMembersQuery.error
 				? 'error'
 				: 'ready'
 	);
-	const totalRecords = $derived(teammateItems.length);
-	const visibleRecords = $derived(filteredTeammateItems.length);
+	const totalRecords = $derived(teamMemberItems.length);
+	const visibleRecords = $derived(filteredTeamMemberItems.length);
 	const isQueryActive = $derived(Boolean(searchQuery.trim()) || selectedRoleFilter !== 'all');
 
-	type TeammateRecord = NonNullable<typeof teammatesQuery.data>[number];
+	type TeamMemberRecord = NonNullable<typeof teamMembersQuery.data>[number];
 
 	$effect(() => {
 		if (!roleFilterOptions.some((option) => option.id === selectedRoleFilter)) {
@@ -91,11 +91,11 @@
 		return roleKey ? `role:${roleKey}` : 'no-role';
 	}
 
-	function getRoleFilterOptions(teammates: TeammateRecord[]) {
+	function getRoleFilterOptions(teamMembers: TeamMemberRecord[]) {
 		const roles: { key: string; label: string }[] = [];
 
-		for (const teammate of teammates) {
-			const role = normalizeRole(teammate.role);
+		for (const teamMember of teamMembers) {
+			const role = normalizeRole(teamMember.role);
 			const roleKey = roleFilterKey(role);
 
 			if (roleKey && !roles.some((existingRole) => existingRole.key === roleKey)) {
@@ -108,7 +108,7 @@
 				firstRole.label.localeCompare(secondRole.label) ||
 				firstRole.key.localeCompare(secondRole.key)
 		);
-		const hasNoRole = teammates.some((teammate) => normalizeRole(teammate.role).length === 0);
+		const hasNoRole = teamMembers.some((teamMember) => normalizeRole(teamMember.role).length === 0);
 
 		return [
 			{ id: 'all', label: 'All roles' },
@@ -117,7 +117,7 @@
 		];
 	}
 
-	function matchesTeammateFilters(item: TeammateItem) {
+	function matchesTeamMemberFilters(item: TeamMemberItem) {
 		if (selectedRoleFilter !== 'all' && roleFilterId(item.role) !== selectedRoleFilter) {
 			return false;
 		}
@@ -140,7 +140,7 @@
 	}
 
 	function closeModal() {
-		if (isAddingTeammates) {
+		if (isAddingTeamMembers) {
 			return;
 		}
 
@@ -148,12 +148,12 @@
 		modalError = null;
 	}
 
-	async function addTeammates() {
-		if (isAddingTeammates) {
+	async function addTeamMembers() {
+		if (isAddingTeamMembers) {
 			return;
 		}
 
-		const parsedInput = parseTeammateEmailInput(teammateEmails);
+		const parsedInput = parseTeamMemberEmailInput(teamMemberEmails);
 
 		if (parsedInput.error) {
 			modalError = parsedInput.error;
@@ -162,133 +162,133 @@
 
 		modalError = null;
 		notificationWarning = null;
-		isAddingTeammates = true;
+		isAddingTeamMembers = true;
 
 		try {
-			const addResult = await client.action(api.teammates.addTeammatesAndNotify, {
+			const addResult = await client.action(api.teamMembers.addTeamMembersAndNotify, {
 				emails: parsedInput.emails
 			});
 			notificationWarning =
 				addResult.notificationFailedEmails.length > 0
 					? 'Team members were added, but some notification emails could not be sent.'
 					: null;
-			teammateEmails = '';
+			teamMemberEmails = '';
 			modalOpen = false;
 		} catch (error) {
 			modalError = error instanceof Error ? error.message : 'Could not add team members.';
 		} finally {
-			isAddingTeammates = false;
+			isAddingTeamMembers = false;
 		}
 	}
 
-	function isDeletingTeammate(teammateId: Id<'teammates'>) {
-		return deletingTeammateIds.includes(teammateId);
+	function isDeletingTeamMember(teamMemberId: Id<'teamMembers'>) {
+		return deletingTeamMemberIds.includes(teamMemberId);
 	}
 
-	function editTeammate(teammate: TeammateRecord) {
+	function editTeamMember(teamMember: TeamMemberRecord) {
 		actionError = null;
-		editingTeammateId = teammate.id;
-		teammateDraft = {
-			name: teammate.name,
-			email: teammate.email,
-			role: teammate.role
+		editingTeamMemberId = teamMember.id;
+		teamMemberDraft = {
+			name: teamMember.name,
+			email: teamMember.email,
+			role: teamMember.role
 		};
 	}
 
-	function closeTeammateEditor() {
-		editingTeammateId = null;
-		teammateDraft = {
+	function closeTeamMemberEditor() {
+		editingTeamMemberId = null;
+		teamMemberDraft = {
 			name: '',
 			email: '',
 			role: ''
 		};
 	}
 
-	function updateTeammateDraft(patch: Partial<typeof teammateDraft>) {
-		teammateDraft = { ...teammateDraft, ...patch };
+	function updateTeamMemberDraft(patch: Partial<typeof teamMemberDraft>) {
+		teamMemberDraft = { ...teamMemberDraft, ...patch };
 	}
 
-	async function saveTeammate(teammate: TeammateRecord) {
-		if (savingTeammateId) {
+	async function saveTeamMember(teamMember: TeamMemberRecord) {
+		if (savingTeamMemberId) {
 			return;
 		}
 
 		actionError = null;
-		savingTeammateId = teammate.id;
+		savingTeamMemberId = teamMember.id;
 
 		try {
-			await client.mutation(api.teammates.updateTeammate, {
-				teammateId: teammate.id,
-				name: teammateDraft.name,
-				email: teammateDraft.email,
-				role: teammateDraft.role
+			await client.mutation(api.teamMembers.updateTeamMember, {
+				teamMemberId: teamMember.id,
+				name: teamMemberDraft.name,
+				email: teamMemberDraft.email,
+				role: teamMemberDraft.role
 			});
-			closeTeammateEditor();
+			closeTeamMemberEditor();
 		} catch (error) {
 			actionError = error instanceof Error ? error.message : 'Could not update team member.';
 		} finally {
-			savingTeammateId = null;
+			savingTeamMemberId = null;
 		}
 	}
 
-	async function deleteTeammates(teammateIds: Id<'teammates'>[]) {
-		const idsToDelete = teammateIds.filter((id) => !isDeletingTeammate(id));
+	async function deleteTeamMembers(teamMemberIds: Id<'teamMembers'>[]) {
+		const idsToDelete = teamMemberIds.filter((id) => !isDeletingTeamMember(id));
 
 		if (idsToDelete.length === 0) {
 			return;
 		}
 
 		actionError = null;
-		deletingTeammateIds = [...deletingTeammateIds, ...idsToDelete];
+		deletingTeamMemberIds = [...deletingTeamMemberIds, ...idsToDelete];
 
 		try {
-			await client.mutation(api.teammates.deleteTeammates, {
-				teammateIds: idsToDelete
+			await client.mutation(api.teamMembers.deleteTeamMembers, {
+				teamMemberIds: idsToDelete
 			});
 		} catch (error) {
 			actionError = error instanceof Error ? error.message : 'Could not delete team members.';
 		} finally {
-			deletingTeammateIds = deletingTeammateIds.filter((id) => !idsToDelete.includes(id));
+			deletingTeamMemberIds = deletingTeamMemberIds.filter((id) => !idsToDelete.includes(id));
 		}
 	}
 
-	function toTeammateItem(teammate: TeammateRecord): TeammateItem {
-		const isDeleting = isDeletingTeammate(teammate.id);
-		const isEditing = editingTeammateId === teammate.id;
-		const isSaving = savingTeammateId === teammate.id;
+	function toTeamMemberItem(teamMember: TeamMemberRecord): TeamMemberItem {
+		const isDeleting = isDeletingTeamMember(teamMember.id);
+		const isEditing = editingTeamMemberId === teamMember.id;
+		const isSaving = savingTeamMemberId === teamMember.id;
 		const isBusy = isDeleting || isSaving;
 
 		return {
-			id: teammate.id,
-			email: teammate.email,
-			role: teammate.role,
-			displayName: teammate.displayName,
+			id: teamMember.id,
+			email: teamMember.email,
+			role: teamMember.role,
+			displayName: teamMember.displayName,
 			isEditing,
-			nameDraft: isEditing ? teammateDraft.name : '',
-			emailDraft: isEditing ? teammateDraft.email : teammate.email,
-			roleDraft: isEditing ? teammateDraft.role : teammate.role,
+			nameDraft: isEditing ? teamMemberDraft.name : '',
+			emailDraft: isEditing ? teamMemberDraft.email : teamMember.email,
+			roleDraft: isEditing ? teamMemberDraft.role : teamMember.role,
 			deleteLabel: isDeleting ? 'Deleting...' : 'Delete',
 			saveLabel: isSaving ? 'Saving...' : 'Save',
 			deleteDisabled: isBusy,
 			saveDisabled: isBusy,
-			onEdit: () => editTeammate(teammate),
-			onCancel: closeTeammateEditor,
-			onSave: () => saveTeammate(teammate),
-			onDelete: () => deleteTeammates([teammate.id]),
-			onNameDraftChange: (name) => updateTeammateDraft({ name }),
-			onEmailDraftChange: (email) => updateTeammateDraft({ email }),
-			onRoleDraftChange: (role) => updateTeammateDraft({ role }),
-			selectAriaLabel: `Select ${teammate.displayName}`,
+			onEdit: () => editTeamMember(teamMember),
+			onCancel: closeTeamMemberEditor,
+			onSave: () => saveTeamMember(teamMember),
+			onDelete: () => deleteTeamMembers([teamMember.id]),
+			onNameDraftChange: (name) => updateTeamMemberDraft({ name }),
+			onEmailDraftChange: (email) => updateTeamMemberDraft({ email }),
+			onRoleDraftChange: (role) => updateTeamMemberDraft({ role }),
+			selectAriaLabel: `Select ${teamMember.displayName}`,
 			actionsAriaLabel: 'Team member actions',
 			actions: isEditing
 				? undefined
 				: [
 						{
 							label: isDeleting ? 'Deleting...' : 'Delete',
-							ariaLabel: `Delete ${teammate.displayName}`,
+							ariaLabel: `Delete ${teamMember.displayName}`,
 							intent: 'destructive',
 							disabled: isDeleting,
-							onSelect: () => deleteTeammates([teammate.id])
+							onSelect: () => deleteTeamMembers([teamMember.id])
 						}
 					]
 		};
@@ -337,33 +337,33 @@
 	{/snippet}
 
 	<SelectableList
-		items={filteredTeammateItems}
+		items={filteredTeamMemberItems}
 		selectAllAriaLabel="Select all team members"
 		selectedActionsAriaLabel="Selected team member actions"
 		selectedActions={[
 			{
-				label: deletingTeammateIds.length > 0 ? 'Deleting...' : 'Delete',
+				label: deletingTeamMemberIds.length > 0 ? 'Deleting...' : 'Delete',
 				ariaLabel: 'Delete selected team members',
 				intent: 'destructive',
-				disabled: deletingTeammateIds.length > 0,
-				onSelect: (selectedTeammateIds) =>
-					deleteTeammates(selectedTeammateIds as Id<'teammates'>[])
+				disabled: deletingTeamMemberIds.length > 0,
+				onSelect: (selectedTeamMemberIds) =>
+					deleteTeamMembers(selectedTeamMemberIds as Id<'teamMembers'>[])
 			}
 		]}
 		rowActionsAriaLabel="Team member actions"
 	>
 		{#snippet rowCells(item)}
-			<TeammateListRow {item} />
+			<TeamMemberListRow {item} />
 		{/snippet}
 	</SelectableList>
 </ListRoutePage>
 
-<AddTeammatesModal
+<AddTeamMembersModal
 	error={modalError}
-	isAdding={isAddingTeammates}
+	isAdding={isAddingTeamMembers}
 	open={modalOpen}
-	value={teammateEmails}
+	value={teamMemberEmails}
 	onClose={closeModal}
-	onSubmit={addTeammates}
-	onValueChange={(value) => (teammateEmails = value)}
+	onSubmit={addTeamMembers}
+	onValueChange={(value) => (teamMemberEmails = value)}
 />

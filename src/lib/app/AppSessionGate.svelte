@@ -59,7 +59,7 @@
 
 {#if session.status === 'ready' && session.viewer}
 	<AppShell
-		user={session.viewer.user}
+		admin={session.viewer.admin}
 		workspace={session.viewer.workspace}
 		identity={session.viewer.identity}
 	>

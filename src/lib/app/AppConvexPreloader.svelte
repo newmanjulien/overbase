@@ -20,7 +20,7 @@
 	let { children }: Props = $props();
 	const client = useConvexClient();
 	const emailFormatsQuery = useQuery(api.emailFormats.listEmailFormats);
-	const teammatesQuery = useQuery(api.teammates.listTeammates);
+	const teamMembersQuery = useQuery(api.teamMembers.listTeamMembers);
 	const detailWarmSubscriptions = new SvelteMap<string, WarmSubscription>();
 	const hasEmailFormats = $derived((emailFormatsQuery.data?.length ?? 0) > 0);
 	const emailFormatsReady = $derived(!emailFormatsQuery.isLoading && !emailFormatsQuery.error);
@@ -65,7 +65,7 @@
 
 	$effect(() => {
 		void emailFormatsQuery.isLoading;
-		void teammatesQuery.isLoading;
+		void teamMembersQuery.isLoading;
 	});
 
 	onDestroy(() => {

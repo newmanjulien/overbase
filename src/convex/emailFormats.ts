@@ -37,10 +37,10 @@ import {
 import type { Doc, Id } from './_generated/dataModel';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import { mutation, query } from './_generated/server';
-import { getTeammateDisplayName } from './teammateIdentity';
+import { getTeamMemberDisplayName } from './teamMemberIdentity';
 
-function getCreatorDisplayName(creator: Doc<'users'> | null) {
-	return creator?.displayName?.trim() || 'Unknown user';
+function getCreatorDisplayName(creator: Doc<'admins'> | null) {
+	return creator?.displayName?.trim() || 'Unknown creator';
 }
 
 function areJsonEqual(first: unknown, second: unknown) {
@@ -75,7 +75,7 @@ export const createEmailFormatFromStarter = mutation({
 	args: emailFormatCreateFromStarterInput,
 	handler: async (ctx, args) => {
 		const viewerWorkspace = await requireViewerWorkspace(ctx);
-		const { user, workspace } = viewerWorkspace;
+		const { admin, workspace } = viewerWorkspace;
 		const formatStarterSlug = args.formatStarterSlug.trim();
 		const startingPointId = args.startingPointId.trim();
 		const variables = normalizeEmailFormatVariables(args.variables);
@@ -113,7 +113,7 @@ export const createEmailFormatFromStarter = mutation({
 
 		const emailFormatId = await ctx.db.insert('emailFormats', {
 			workspaceId: workspace._id,
-			creatorUserId: user._id,
+			creatorAdminId: admin._id,
 			formatStarterSlug,
 			startingPointId,
 			variables,
@@ -158,7 +158,7 @@ export const listEmailFormats = query({
 
 		return await Promise.all(
 			formats.map(async (format) => {
-				const creator = await ctx.db.get(format.creatorUserId);
+				const creator = await ctx.db.get(format.creatorAdminId);
 				const activationState = await getEmailFormatActivationState(format);
 
 				return {
@@ -185,7 +185,7 @@ export const getEmailFormatConfiguration = query({
 	},
 	handler: async (ctx, args) => {
 		const viewerWorkspace = await requireViewerWorkspace(ctx);
-		const { user, workspace, identity } = viewerWorkspace;
+		const { admin, workspace, identity } = viewerWorkspace;
 		const format = await getEmailFormatInViewerWorkspace(
 			ctx,
 			viewerWorkspace,
@@ -196,10 +196,10 @@ export const getEmailFormatConfiguration = query({
 			return null;
 		}
 
-		const [recipientRows, teammates] = await Promise.all([
+		const [recipientRows, teamMembers] = await Promise.all([
 			collectEmailFormatRecipientRows(ctx, workspace._id, format._id),
 			ctx.db
-				.query('teammates')
+				.query('teamMembers')
 				.withIndex('by_workspace_createdAt', (q) => q.eq('workspaceId', workspace._id))
 				.order('desc')
 				.collect()
@@ -238,13 +238,13 @@ export const getEmailFormatConfiguration = query({
 			},
 			recipientPickerPeople: [
 				{
-					id: `user:${user._id}`,
-					name: user.displayName?.trim() || identity.email,
-					avatarUrl: user.avatar?.url ?? ''
+					id: `admin:${admin._id}`,
+					name: admin.displayName?.trim() || identity.email,
+					avatarUrl: admin.avatar?.url ?? ''
 				},
-				...teammates.map((teammate) => ({
-					id: `teammate:${teammate._id}`,
-					name: getTeammateDisplayName(teammate),
+				...teamMembers.map((teamMember) => ({
+					id: `teamMember:${teamMember._id}`,
+					name: getTeamMemberDisplayName(teamMember),
 					avatarUrl: ''
 				}))
 			],

@@ -44,8 +44,8 @@ export const emailFormatVariableDefinition = v.object({
 export const emailFormatId = v.id('emailFormats');
 
 export const emailFormatRecipientRef = v.union(
-	v.object({ kind: v.literal('user'), userId: v.id('users') }),
-	v.object({ kind: v.literal('teammate'), teammateId: v.id('teammates') })
+	v.object({ kind: v.literal('admin'), adminId: v.id('admins') }),
+	v.object({ kind: v.literal('teamMember'), teamMemberId: v.id('teamMembers') })
 );
 
 export const emailFormatCreateFromStarterInput = {

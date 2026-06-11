@@ -11,16 +11,18 @@ import type {
 
 export type EmailFormatRecipientRef =
 	| {
-			kind: 'user';
-			userId: Id<'users'>;
+			kind: 'admin';
+			adminId: Id<'admins'>;
 	  }
 	| {
-			kind: 'teammate';
-			teammateId: Id<'teammates'>;
+			kind: 'teamMember';
+			teamMemberId: Id<'teamMembers'>;
 	  };
 
 export function getFormatRecipientKey(ref: EmailFormatRecipientRef) {
-	return ref.kind === 'user' ? `user:${ref.userId}` : `teammate:${ref.teammateId}`;
+	return ref.kind === 'admin'
+		? `admin:${ref.adminId}`
+		: `teamMember:${ref.teamMemberId}`;
 }
 
 export type EmailFormatRecipientPickerPerson = {

@@ -16,14 +16,14 @@
 
 	type Props = {
 		currentPathname: string;
-		user: Doc<'users'>;
+		admin: Doc<'admins'>;
 		identity: ViewerIdentity;
 		class?: string;
 	};
 
 	let {
 		currentPathname,
-		user,
+		admin,
 		identity,
 		class: className = ''
 	}: Props = $props();
@@ -31,8 +31,8 @@
 	const shellState = useChromeShellState();
 	const activeRoute = $derived(getActiveNavRoute(currentPathname));
 	const profile = $derived({
-		name: user.displayName || identity.email,
-		avatarUrl: user.avatar?.url ?? ''
+		name: admin.displayName || identity.email,
+		avatarUrl: admin.avatar?.url ?? ''
 	});
 	let hoveredRoute = $state<NavRouteItem | null>(null);
 

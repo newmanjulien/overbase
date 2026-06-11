@@ -7,13 +7,13 @@ const CURRENT_WORKSPACE_CONTEXT_KEY = Symbol('current-workspace-context');
 export type { ViewerIdentity } from '$domain/viewer';
 
 export type CurrentWorkspaceContext = {
-	user: Doc<'users'>;
+	admin: Doc<'admins'>;
 	workspace: Doc<'workspaces'>;
 	identity: ViewerIdentity;
 };
 
 export type CurrentWorkspaceStorageScope = {
-	userId: Doc<'users'>['_id'];
+	adminId: Doc<'admins'>['_id'];
 	workspaceId: Doc<'workspaces'>['_id'];
 };
 
@@ -32,11 +32,11 @@ export function useCurrentWorkspaceContext() {
 }
 
 export function getCurrentWorkspaceStorageScope({
-	user,
+	admin,
 	workspace
 }: CurrentWorkspaceContext): CurrentWorkspaceStorageScope {
 	return {
-		userId: user._id,
+		adminId: admin._id,
 		workspaceId: workspace._id
 	};
 }

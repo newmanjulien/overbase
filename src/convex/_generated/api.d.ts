@@ -15,8 +15,8 @@ import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as internal_auth from "../internal/auth.js";
 import type * as settings from "../settings.js";
-import type * as teammateIdentity from "../teammateIdentity.js";
-import type * as teammates from "../teammates.js";
+import type * as teamMemberIdentity from "../teamMemberIdentity.js";
+import type * as teamMembers from "../teamMembers.js";
 
 import type {
   ApiFromModules,
@@ -32,8 +32,8 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "internal/auth": typeof internal_auth;
   settings: typeof settings;
-  teammateIdentity: typeof teammateIdentity;
-  teammates: typeof teammates;
+  teamMemberIdentity: typeof teamMemberIdentity;
+  teamMembers: typeof teamMembers;
 }>;
 
 /**

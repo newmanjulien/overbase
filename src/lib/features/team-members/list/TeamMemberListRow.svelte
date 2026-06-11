@@ -3,7 +3,7 @@
 	import { Button } from '$lib/ui';
 	import type { SelectableListItem } from '$lib/layout/list';
 
-	export type TeammateItem = SelectableListItem & {
+	export type TeamMemberItem = SelectableListItem & {
 		email: string;
 		role: string;
 		displayName: string;
@@ -25,7 +25,7 @@
 	};
 
 	type Props = {
-		item: TeammateItem;
+		item: TeamMemberItem;
 	};
 
 	let { item }: Props = $props();

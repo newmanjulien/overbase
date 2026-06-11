@@ -50,12 +50,12 @@
 		const kind = personId.slice(0, separatorIndex);
 		const id = personId.slice(separatorIndex + 1);
 
-		if (kind === 'user' && id) {
-			return { kind, userId: id as Id<'users'> };
+		if (kind === 'admin' && id) {
+			return { kind, adminId: id as Id<'admins'> };
 		}
 
-		if (kind === 'teammate' && id) {
-			return { kind, teammateId: id as Id<'teammates'> };
+		if (kind === 'teamMember' && id) {
+			return { kind, teamMemberId: id as Id<'teamMembers'> };
 		}
 
 		return null;
