@@ -59,16 +59,19 @@
 
 <div class="flex min-h-0 flex-1 flex-col">
 	{#each sections as section, sectionIndex (section.id)}
-		<div class={cn('flex flex-col', expanded && section.desktopSectionClass)}>
-			{#if expanded}
-				<div class="mb-2" in:fly={{ x: -4, duration: 200 }}>
-					<p class="px-2 text-[11px] uppercase tracking-wide text-stone-400">{section.heading}</p>
-				</div>
-			{:else if shouldShowCollapsedDivider(sectionIndex)}
-				<div class="py-3">
+		<div class={cn('flex flex-col', section.desktopSectionClass)}>
+			<div class="mb-2 flex h-4 items-center overflow-hidden">
+				{#if expanded}
+					<p
+						class="px-2 text-[11px] leading-4 tracking-wide text-stone-400 uppercase"
+						in:fly={{ x: -4, duration: 200 }}
+					>
+						{section.heading}
+					</p>
+				{:else if shouldShowCollapsedDivider(sectionIndex)}
 					<span aria-hidden="true" class="mx-auto block h-px w-4 bg-stone-200/50"></span>
-				</div>
-			{/if}
+				{/if}
+			</div>
 
 			<ul class="flex flex-col gap-1.5">
 				{#each section.items as item (item.id)}

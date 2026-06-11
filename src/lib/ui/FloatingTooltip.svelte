@@ -40,6 +40,8 @@
 	let panelTop = $state(0);
 	let panelLeft = $state(0);
 	let panelWidth = $state<number | null>(null);
+	let lastInputMode: 'keyboard' | 'pointer' = 'pointer';
+	let suppressFocusOpenUntilInput = false;
 
 	const tooltipText = $derived(text?.trim() ?? '');
 	const tooltipId = $derived(id.replace(/[^a-zA-Z0-9_-]/g, '-'));
@@ -106,6 +108,11 @@
 	function scheduleCloseTooltip() {
 		clearCloseTimer();
 		closeTimer = setTimeout(closeTooltip, 80);
+	}
+
+	function handleDocumentPointerDown() {
+		lastInputMode = 'pointer';
+		suppressFocusOpenUntilInput = false;
 	}
 
 	function handleFocus() {
@@ -199,7 +206,10 @@
 		closeTooltip();
 	}
 
-	function handleKeydown(event: KeyboardEvent) {
+	function handleDocumentKeydown(event: KeyboardEvent) {
+		lastInputMode = 'keyboard';
+		suppressFocusOpenUntilInput = false;
+
 		if (event.key !== 'Escape' || !isOpen) {
 			return;
 		}
@@ -209,6 +219,17 @@
 		triggerElement
 			?.querySelector<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
 			?.focus();
+	}
+
+	function handleVisibilityChange() {
+		if (document.visibilityState === 'hidden') {
+			closeTooltipForWindowExit();
+		}
+	}
+
+	function closeTooltipForWindowExit() {
+		suppressFocusOpenUntilInput = true;
+		closeTooltip();
 	}
 </script>
 
@@ -242,5 +263,10 @@
 	{/if}
 </span>
 
-<svelte:document onclick={handleDocumentClick} onkeydown={handleKeydown} />
-<svelte:window onresize={updatePanelPosition} />
+<svelte:document
+	onclick={handleDocumentClick}
+	onkeydown={handleDocumentKeydown}
+	onpointerdown={handleDocumentPointerDown}
+	onvisibilitychange={handleVisibilityChange}
+/>
+<svelte:window onblur={closeTooltipForWindowExit} onresize={updatePanelPosition} />
